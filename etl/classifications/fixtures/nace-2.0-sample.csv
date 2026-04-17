@@ -1,0 +1,12 @@
+Order,Level,Code,Parent,Description
+1,1,K,,Financial and insurance activities
+2,2,64,K,Financial service activities except insurance and pension funding
+3,3,64.1,64,Monetary intermediation
+4,4,64.11,64.1,Central banking
+5,4,64.19,64.1,Other monetary intermediation
+6,3,64.2,64,Activities of holding companies
+7,4,64.20,64.2,Activities of holding companies
+8,1,O,,Public administration and defence
+9,2,84,O,Public administration and defence
+10,3,84.1,84,Administration of the State
+11,4,84.11,84.1,General public administration activities

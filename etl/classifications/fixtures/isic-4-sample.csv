@@ -1,0 +1,12 @@
+Code,Description,Parent
+K,Financial and insurance activities,
+64,"Financial service activities, except insurance and pension funding",K
+641,Monetary intermediation,64
+6411,Central banking,641
+6419,Other monetary intermediation,641
+642,Activities of holding companies,64
+6420,Activities of holding companies,642
+O,Public administration and defence,
+84,Public administration and defence; compulsory social security,O
+841,Administration of the State,84
+8411,General public administration activities,841
