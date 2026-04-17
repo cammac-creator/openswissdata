@@ -1,0 +1,41 @@
+scheme,code,level,parent,label_fr,label_de,label_it,label_en
+NOGA_2025,K,section,,Activités financières et d'assurance,Finanz- und Versicherungsdienstleistungen,Attività finanziarie e assicurative,
+NOGA_2025,64,division,K,"Activités des services financiers, hors assurance","Erbringung von Finanzdienstleistungen, ohne Versicherungen",Servizi finanziari (esclusi assicurazioni),
+NOGA_2025,641,group,64,Intermédiation monétaire,Zentralbanken und Kreditinstitute,Intermediazione monetaria,
+NOGA_2025,6411,class,641,Activités de banque centrale,Zentralbanken,Attività della banca centrale,
+NOGA_2025,6412,class,641,Autres intermédiations monétaires,Kreditinstitute (ohne Spezialkreditinstitute),Altre intermediazioni monetarie,
+NOGA_2025,642,group,64,Activités des sociétés holding,Holdinggesellschaften,Attività delle società di partecipazione,
+NOGA_2025,6420,class,642,Activités des sociétés holding,Holdinggesellschaften,Attività delle società di partecipazione,
+NOGA_2025,O,section,,Administration publique,Öffentliche Verwaltung,Amministrazione pubblica,
+NOGA_2025,84,division,O,Administration publique et défense,Öffentliche Verwaltung und Landesverteidigung,Amministrazione pubblica e difesa,
+NOGA_2025,841,group,84,Administration générale de l'Etat,Allgemeine öffentliche Verwaltung,Amministrazione generale dello Stato,
+NOGA_2025,8411,class,841,Administration générale de l'Etat,Allgemeine öffentliche Verwaltung des Staates,Amministrazione generale dello Stato,
+NOGA_2008,K,section,,Activités financières et d'assurance,Erbringung von Finanz- und Versicherungsdienstleistungen,Attività finanziarie e assicurative,
+NOGA_2008,64,division,K,"Activités des services financiers, hors assurance et caisses de retraite","Erbringung von Finanzdienstleistungen, ohne Versicherungen und Pensionskassen",Servizi finanziari (esclusi assicurazioni e fondi pensione),
+NOGA_2008,641,group,64,Intermédiation monétaire,Zentralbanken und Kreditinstitute,Intermediazione monetaria,
+NOGA_2008,6411,class,641,Activités de banque centrale,Zentralbanken,Attività della banca centrale,
+NOGA_2008,6419,class,641,Autres intermédiations monétaires spécialisées,Andere Spezialkreditinstitute,Altre intermediazioni monetarie specializzate,
+NOGA_2008,8411,class,841,Administration générale de l'Etat,Allgemeine öffentliche Verwaltung des Staates,Amministrazione generale dello Stato,
+NACE_2.1,K,section,,,,,Financial and insurance activities
+NACE_2.1,64,division,K,,,,Financial service activities except insurance and pension funding
+NACE_2.1,641,group,64,,,,Monetary intermediation
+NACE_2.1,6411,class,641,,,,Central banking
+NACE_2.1,6412,class,641,,,,Other monetary intermediation
+NACE_2.1,642,group,64,,,,Activities of holding companies
+NACE_2.1,6420,class,642,,,,Activities of holding companies
+NACE_2.1,84,division,O,,,,Public administration and defence
+NACE_2.1,8411,class,841,,,,General public administration activities
+NACE_2.0,K,section,,,,,Financial and insurance activities
+NACE_2.0,64,division,K,,,,Financial service activities except insurance and pension funding
+NACE_2.0,641,group,64,,,,Monetary intermediation
+NACE_2.0,6411,class,641,,,,Central banking
+NACE_2.0,6419,class,641,,,,Other monetary intermediation
+NACE_2.0,8411,class,841,,,,General public administration activities
+ISIC_4,K,section,,,,,Financial and insurance activities
+ISIC_4,64,division,K,,,,"Financial service activities, except insurance and pension funding"
+ISIC_4,641,group,64,,,,Monetary intermediation
+ISIC_4,6411,class,641,,,,Central banking
+ISIC_4,6419,class,641,,,,Other monetary intermediation
+ISIC_4,6420,class,642,,,,Activities of holding companies
+ISIC_4,84,division,O,,,,Public administration and defence
+ISIC_4,8411,class,841,,,,General public administration activities
