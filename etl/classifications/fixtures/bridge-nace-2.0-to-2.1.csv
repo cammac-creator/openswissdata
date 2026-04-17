@@ -1,0 +1,6 @@
+NACE_2_0,NACE_2_1,Type
+64.11,64.11,exact
+64.19,64.12,partial
+64.19,64.19,partial
+64.20,64.20,exact
+84.11,84.11,exact

@@ -69,6 +69,22 @@ O,Public administration and defence,
 8411,General public administration activities,841
 `;
 
+const NACE_20_TO_21_CSV = `NACE_2_0,NACE_2_1,Type
+64.11,64.11,exact
+64.19,64.12,partial
+64.19,64.19,partial
+64.20,64.20,exact
+84.11,84.11,exact
+`;
+
+const NACE_21_TO_ISIC_4_CSV = `NACE_2_1,ISIC_4,Type
+64.11,6411,exact
+64.12,6419,partial
+64.19,6419,partial
+64.20,6420,exact
+84.11,8411,exact
+`;
+
 async function main() {
   const outDir = __dirname;
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
@@ -89,6 +105,10 @@ async function main() {
   console.log("Wrote nace-2.1-sample.csv");
   writeFileSync(join(outDir, "isic-4-sample.csv"), ISIC_4_CSV, "utf8");
   console.log("Wrote isic-4-sample.csv");
+  writeFileSync(join(outDir, "bridge-nace-2.0-to-2.1.csv"), NACE_20_TO_21_CSV, "utf8");
+  console.log("Wrote bridge-nace-2.0-to-2.1.csv");
+  writeFileSync(join(outDir, "bridge-nace-2.1-to-isic-4.csv"), NACE_21_TO_ISIC_4_CSV, "utf8");
+  console.log("Wrote bridge-nace-2.1-to-isic-4.csv");
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
