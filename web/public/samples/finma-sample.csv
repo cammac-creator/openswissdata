@@ -1,0 +1,16 @@
+entity_type,name,uid,canton,address,licence_date,status,licence_type,source_list
+bank,UBS Switzerland AG,CHE-101.329.561,ZH,"Bahnhofstrasse 45, 8001 Zürich",2014-06-15,active,bank,finma-banks
+bank,Credit Suisse (Schweiz) AG,CHE-277.408.569,ZH,"Paradeplatz 8, 8001 Zürich",2016-12-01,active,bank,finma-banks
+bank,Zürcher Kantonalbank,CHE-105.958.547,ZH,"Bahnhofstrasse 9, 8001 Zürich",1870-01-01,active,cantonal bank,finma-banks
+bank,PostFinance AG,CHE-114.583.453,BE,"Mingerstrasse 20, 3030 Bern",2013-06-26,active,bank,finma-banks
+bank,Raiffeisen Schweiz Genossenschaft,CHE-109.836.898,SG,"Raiffeisenplatz, 9001 St. Gallen",1902-01-01,active,bank,finma-banks
+payment_institution,Sygnum Bank AG,CHE-387.648.322,ZH,"Uetlibergstrasse 134a, 8045 Zürich",2019-08-27,,bank,finma-psp
+payment_institution,Yapeal AG,CHE-467.089.214,ZH,"Bahnhofstrasse 23, 8001 Zürich",2020-03-12,,fintech licence,finma-psp
+payment_institution,Neon Switzerland AG,CHE-329.521.167,ZH,"Zwingliplatz 4, 8001 Zürich",2021-09-01,,fintech licence,finma-psp
+payment_institution,Revolut Bank UAB (ZH Branch),CHE-444.112.987,ZH,"Europaallee 41, 8004 Zürich",2022-01-10,,branch,finma-psp
+insurance,Zurich Insurance Company Ltd,CHE-105.824.036,ZH,"Mythenquai 2, 8002 Zürich",1872-01-01,active,,finma-insurance
+insurance,Swiss Life AG,CHE-105.992.623,ZH,"General-Guisan-Quai 40, 8022 Zürich",1857-10-01,active,,finma-insurance
+insurance,AXA Schweiz AG,CHE-105.812.519,AG,"General-Guisan-Strasse 40, 8400 Winterthur",1875-01-01,active,,finma-insurance
+insurance,Die Mobiliar,CHE-105.938.445,BE,"Bundesgasse 35, 3011 Bern",1826-01-01,active,,finma-insurance
+asset_manager_individual,Pictet Asset Management SA,CHE-105.855.108,GE,"Route des Acacias 60, 1211 Genève",2020-01-15,,,finma-asset-manager-individual
+asset_manager_individual,Swissquote Bank SA,CHE-105.944.283,VD,"Chemin de la Crétaux 33, 1196 Gland",2018-04-01,,,finma-asset-manager-individual
