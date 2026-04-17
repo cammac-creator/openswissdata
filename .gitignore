@@ -9,3 +9,5 @@ dist/
 data/
 .DS_Store
 permissions-emails/
+coverage/
+*.log
