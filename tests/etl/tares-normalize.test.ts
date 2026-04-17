@@ -50,5 +50,33 @@ describe("tares normalize", () => {
       ]);
       expect(map["84000000"]?.parent).toBe(null);
     });
+
+    it("links a full 8-digit code to its 6-digit subheading parent when present", () => {
+      const map = buildHierarchyMap([
+        { hs8: "84000000" },
+        { hs8: "84820000" },
+        { hs8: "84821000" },
+        { hs8: "84821001" },
+      ]);
+      expect(map["84821001"]?.parent).toBe("84821000");
+      expect(map["84821000"]?.children).toContain("84821001");
+    });
+
+    it("falls back to heading parent when 6-digit subheading is absent", () => {
+      const map = buildHierarchyMap([
+        { hs8: "84000000" },
+        { hs8: "84820000" },
+        { hs8: "84821001" },   // no 84821000 parent
+      ]);
+      expect(map["84821001"]?.parent).toBe("84820000");
+    });
+
+    it("falls back to chapter when no intermediate parent exists", () => {
+      const map = buildHierarchyMap([
+        { hs8: "84000000" },
+        { hs8: "84821001" },
+      ]);
+      expect(map["84821001"]?.parent).toBe("84000000");
+    });
   });
 });

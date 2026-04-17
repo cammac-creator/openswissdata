@@ -37,15 +37,12 @@ export function buildHierarchyMap(rows: Pick<TaresRow, "hs8">[]): Record<string,
 }
 
 function resolveParent(code: string, existing: Record<string, HierarchyNode>): string | null {
-  if (/^.{2}000000$/.test(code)) return null;
-  const candidates: string[] = [];
-  if (/^.{4}0000$/.test(code) || /^.{6}00$/.test(code) === false) {
-    candidates.push(code.slice(0, 6) + "00");
-  }
-  if (/^.{4}0000$/.test(code) || /^.{4}....$/.test(code)) {
-    candidates.push(code.slice(0, 4) + "0000");
-  }
-  candidates.push(code.slice(0, 2) + "000000");
+  if (/^.{2}000000$/.test(code)) return null; // chapter is root
+  const candidates = [
+    code.slice(0, 6) + "00",       // subheading parent (most specific)
+    code.slice(0, 4) + "0000",     // heading parent
+    code.slice(0, 2) + "000000",   // chapter parent (fallback)
+  ];
   for (const parent of candidates) {
     if (parent !== code && existing[parent]) return parent;
   }
