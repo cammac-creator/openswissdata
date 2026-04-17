@@ -16,8 +16,8 @@
     "etl:tares": "tsx etl/tares/release.ts",
     "etl:classifications": "tsx etl/classifications/release.ts",
     "etl:finma": "tsx etl/finma/release.ts",
-    "web:dev": "cd web && astro dev",
-    "web:build": "cd web && astro build"
+    "web:dev": "cd web && npx astro dev",
+    "web:build": "cd web && npx astro build"
   },
   "dependencies": {
     "hono": "^4.6.0",
