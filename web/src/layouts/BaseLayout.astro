@@ -17,6 +17,9 @@ const { title, description = "Normalized Swiss government datasets." } = Astro.p
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {Astro.url.hostname === "www.openswissdata.com" && (
+      <script is:inline defer data-domain="openswissdata.com" src="https://plausible.io/js/script.js"></script>
+    )}
   </head>
   <body class="bg-white text-slate-900 font-sans antialiased">
     <Header />
