@@ -1,4 +1,5 @@
-import { readFile, utils } from "xlsx";
+import XLSX from "xlsx";
+const { readFile, utils } = XLSX;
 import type { FinmaEntity, FinmaSource } from "./types.js";
 import { unifyRow } from "./unify-schema.js";
 
