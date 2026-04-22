@@ -6,24 +6,85 @@ import Footer from "../components/Footer.astro";
 interface Props {
   title: string;
   description?: string;
+  image?: string;
 }
 
-const { title, description = "Normalized Swiss government datasets." } = Astro.props;
+const { title, description = "Datasets officiels suisses normalisés — TARES (douanes), classifications NOGA/NACE/ISIC, registre FINMA. Format JSON, Parquet, SQL.", image = "/og-default.png" } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 ---
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(image, Astro.site).toString()} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
     {Astro.url.hostname === "www.openswissdata.com" && (
       <script is:inline defer data-domain="openswissdata.com" src="https://plausible.io/js/script.js"></script>
     )}
   </head>
-  <body class="bg-white text-slate-900 font-sans antialiased">
+  <body>
     <Header />
     <main><slot /></main>
     <Footer />
+
+    <script is:inline>
+      // Nav scroll state
+      const navEl = document.querySelector('nav.fixed-nav');
+      if (navEl) {
+        const onScroll = () => navEl.classList.toggle('scrolled', window.scrollY > 8);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      }
+
+      // Reveal on scroll
+      const reveals = document.querySelectorAll('.reveal');
+      if ('IntersectionObserver' in window && reveals.length) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+        reveals.forEach(el => io.observe(el));
+      } else {
+        reveals.forEach(el => el.classList.add('visible'));
+      }
+
+      // Smooth scroll
+      document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+          const id = a.getAttribute('href');
+          if (id && id.length > 1) {
+            const target = document.querySelector(id);
+            if (target) {
+              e.preventDefault();
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              history.pushState(null, '', id);
+            }
+          }
+        });
+      });
+    </script>
   </body>
 </html>

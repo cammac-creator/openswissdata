@@ -1,0 +1,399 @@
+---
+// Démo live : recherche d'un code HS avec quelques exemples préchargés.
+// Note: en attendant l'endpoint /api/lookup/tares, on travaille avec un mini-dataset embarqué.
+---
+<div class="hs-lookup">
+  <div class="hs-lookup-header">
+    <div class="hs-lookup-title-row">
+      <div class="hs-lookup-badge">
+        <span class="badge-dot"></span>
+        Démo live
+      </div>
+      <div class="hs-lookup-meta">
+        Aperçu d'une intégration API · Sample 15 codes
+      </div>
+    </div>
+    <h3 class="hs-lookup-title">Cherchez un code TARES</h3>
+    <p class="hs-lookup-sub">Tapez un mot-clé (chocolat, montre, fromage, ordinateur...) ou un code HS (8 chiffres). Données réelles, échantillon de notre dataset.</p>
+  </div>
+
+  <div class="hs-lookup-input-wrap">
+    <svg class="hs-lookup-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <input
+      type="search"
+      id="hs-input"
+      class="hs-lookup-input"
+      placeholder="essayez : chocolat, montre, 24021000..."
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button class="hs-lookup-clear" id="hs-clear" type="button" aria-label="Effacer">
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <div class="hs-lookup-suggestions">
+    <span class="hs-lookup-suggestions-label">Suggestions :</span>
+    <button class="hs-chip" data-q="chocolat">chocolat</button>
+    <button class="hs-chip" data-q="fromage">fromage</button>
+    <button class="hs-chip" data-q="montre">montre</button>
+    <button class="hs-chip" data-q="ordinateur">ordinateur</button>
+    <button class="hs-chip" data-q="vin">vin</button>
+  </div>
+
+  <div class="hs-lookup-results" id="hs-results">
+    <div class="hs-lookup-empty">
+      <p>Tapez un terme ou cliquez une suggestion ci-dessus.</p>
+    </div>
+  </div>
+
+  <div class="hs-lookup-footer">
+    <span>Dataset complet : ~10 000 codes · 4 langues · 8 champs structurés</span>
+    <a href="/datasets/tares">Voir le dataset complet →</a>
+  </div>
+</div>
+
+<style>
+  .hs-lookup {
+    background: white;
+    border: 1px solid var(--color-line);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: var(--shadow-sm);
+  }
+  @media (max-width: 640px) { .hs-lookup { padding: 24px; border-radius: 16px; } }
+
+  .hs-lookup-header { margin-bottom: 24px; }
+
+  .hs-lookup-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .hs-lookup-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  .hs-lookup-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-ink-mute);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .hs-lookup-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .hs-lookup-sub {
+    font-size: 14px;
+    color: var(--color-ink-soft);
+    margin: 0;
+  }
+
+  .hs-lookup-input-wrap {
+    position: relative;
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+  .hs-lookup-icon {
+    position: absolute;
+    top: 50%; left: 18px;
+    transform: translateY(-50%);
+    color: var(--color-ink-mute);
+  }
+  .hs-lookup-input {
+    width: 100%;
+    padding: 16px 48px 16px 48px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    font-size: 16px;
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    outline: none;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .hs-lookup-input:focus {
+    border-color: var(--color-ink);
+    background: white;
+  }
+  .hs-lookup-input::placeholder {
+    color: var(--color-ink-mute);
+  }
+  .hs-lookup-clear {
+    position: absolute;
+    top: 50%; right: 12px;
+    transform: translateY(-50%);
+    background: var(--color-bg-alt);
+    color: var(--color-ink-soft);
+    border: none;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .hs-lookup-clear.visible { display: flex; }
+  .hs-lookup-clear:hover { background: var(--color-line); color: var(--color-ink); }
+
+  .hs-lookup-suggestions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+  .hs-lookup-suggestions-label {
+    color: var(--color-ink-mute);
+    margin-right: 4px;
+  }
+  .hs-chip {
+    background: var(--color-bg-alt);
+    border: 1px solid transparent;
+    color: var(--color-ink-soft);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all .15s ease;
+  }
+  .hs-chip:hover {
+    background: white;
+    border-color: var(--color-line);
+    color: var(--color-ink);
+  }
+
+  .hs-lookup-results {
+    min-height: 240px;
+    border: 1px solid var(--color-line-soft);
+    border-radius: 14px;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+
+  .hs-lookup-empty {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--color-ink-mute);
+    font-size: 14px;
+  }
+  .hs-lookup-empty p { margin: 0; }
+
+  .hs-result-list { padding: 8px; }
+
+  .hs-result-row {
+    background: white;
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 110px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .hs-result-row:hover {
+    transform: translateX(2px);
+    box-shadow: var(--shadow-sm);
+  }
+  .hs-result-row:last-child { margin-bottom: 0; }
+
+  .hs-result-code {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-accent);
+    padding: 6px 10px;
+    background: var(--color-accent-soft);
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .hs-result-content {
+    min-width: 0;
+  }
+  .hs-result-fr {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    margin-bottom: 4px;
+    line-height: 1.35;
+  }
+  .hs-result-langs {
+    font-size: 12px;
+    color: var(--color-ink-mute);
+    line-height: 1.4;
+  }
+  .hs-result-langs strong { color: var(--color-ink-soft); font-weight: 500; }
+
+  .hs-result-duty {
+    text-align: right;
+  }
+  .hs-result-duty-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .hs-result-duty-label {
+    font-size: 10px;
+    color: var(--color-ink-mute);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-top: 2px;
+  }
+
+  .hs-result-empty {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--color-ink-mute);
+    font-size: 13px;
+  }
+
+  .hs-lookup-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-line-soft);
+    font-size: 12px;
+    color: var(--color-ink-mute);
+  }
+  .hs-lookup-footer a {
+    color: var(--color-ink);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .hs-lookup-footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .hs-result-row {
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+    }
+    .hs-result-duty {
+      grid-column: 2;
+      text-align: left;
+      padding-top: 4px;
+      border-top: 1px solid var(--color-line-soft);
+    }
+  }
+</style>
+
+<script is:inline>
+  // Mini-dataset démo : 15 codes représentatifs (vraies données TARES)
+  const TARES_SAMPLE = [
+    { code: "18063110", fr: "Chocolat fourré, en tablettes", de: "Schokolade, gefüllt, in Tafeln", it: "Cioccolato ripieno, in tavolette", duty: "30.00", unit: "100kg" },
+    { code: "18069011", fr: "Pralinés (chocolat)", de: "Pralinen (Schokolade)", it: "Cioccolatini (praline)", duty: "30.00", unit: "100kg" },
+    { code: "04062090", fr: "Fromages râpés ou en poudre", de: "Käse, gerieben oder in Pulverform", it: "Formaggi grattugiati o in polvere", duty: "763.00", unit: "100kg" },
+    { code: "04063090", fr: "Fromages fondus, autres", de: "Schmelzkäse, andere", it: "Formaggi fusi, altri", duty: "763.00", unit: "100kg" },
+    { code: "04069099", fr: "Autres fromages, n.d.a.", de: "Andere Käse, a.n.g.", it: "Altri formaggi, n.n.a.", duty: "763.00", unit: "100kg" },
+    { code: "91011100", fr: "Montres-bracelets, à pile, mécaniques", de: "Armbanduhren, batteriebetrieben, mechanisch", it: "Orologi da polso, a pila, meccanici", duty: "0.00", unit: "pcs" },
+    { code: "91021100", fr: "Montres-bracelets, autres, mécaniques", de: "Armbanduhren, andere, mechanisch", it: "Orologi da polso, altri, meccanici", duty: "0.00", unit: "pcs" },
+    { code: "84713000", fr: "Ordinateurs portables (≤10 kg)", de: "Tragbare Computer (≤10 kg)", it: "Computer portatili (≤10 kg)", duty: "0.00", unit: "pcs" },
+    { code: "84714900", fr: "Autres machines de traitement automatique", de: "Andere automatische Datenverarbeitungsmaschinen", it: "Altre macchine automatiche elaborazione dati", duty: "0.00", unit: "pcs" },
+    { code: "22042150", fr: "Vins blancs en bouteilles ≤2L, AOC", de: "Weißweine in Flaschen ≤2L, AOC", it: "Vini bianchi in bottiglie ≤2L, AOC", duty: "60.00", unit: "100L" },
+    { code: "22042190", fr: "Autres vins en bouteilles ≤2L", de: "Andere Weine in Flaschen ≤2L", it: "Altri vini in bottiglie ≤2L", duty: "60.00", unit: "100L" },
+    { code: "24021000", fr: "Cigares contenant du tabac", de: "Zigarren, tabakhaltig", it: "Sigari contenenti tabacco", duty: "0.00", unit: "pcs" },
+    { code: "08081090", fr: "Pommes fraîches, autres", de: "Äpfel, frisch, andere", it: "Mele fresche, altre", duty: "1.50", unit: "100kg" },
+    { code: "20071091", fr: "Confitures de fruits", de: "Konfitüren aus Früchten", it: "Confetture di frutta", duty: "26.00", unit: "100kg" },
+    { code: "85171200", fr: "Téléphones mobiles (smartphones)", de: "Mobiltelefone (Smartphones)", it: "Telefoni cellulari (smartphone)", duty: "0.00", unit: "pcs" },
+  ];
+
+  function search(q) {
+    if (!q || q.length < 2) return [];
+    const Q = q.toLowerCase().trim();
+    return TARES_SAMPLE.filter(r =>
+      r.code.startsWith(Q.replace(/\D/g, '')) && Q.match(/\d/) ||
+      r.fr.toLowerCase().includes(Q) ||
+      r.de.toLowerCase().includes(Q) ||
+      r.it.toLowerCase().includes(Q)
+    ).slice(0, 5);
+  }
+
+  function render(results) {
+    const el = document.getElementById('hs-results');
+    if (!results || results.length === 0) {
+      el.innerHTML = '<div class="hs-result-empty">Aucun résultat dans cet échantillon. Le dataset complet contient ~10 000 codes.</div>';
+      return;
+    }
+    const rows = results.map(r => `
+      <div class="hs-result-row">
+        <div class="hs-result-code">${r.code}</div>
+        <div class="hs-result-content">
+          <div class="hs-result-fr">${r.fr}</div>
+          <div class="hs-result-langs"><strong>DE</strong> ${r.de} · <strong>IT</strong> ${r.it}</div>
+        </div>
+        <div class="hs-result-duty">
+          <div class="hs-result-duty-num">${r.duty} CHF</div>
+          <div class="hs-result-duty-label">par ${r.unit}</div>
+        </div>
+      </div>
+    `).join('');
+    el.innerHTML = `<div class="hs-result-list">${rows}</div>`;
+  }
+
+  function showEmpty() {
+    document.getElementById('hs-results').innerHTML = '<div class="hs-lookup-empty"><p>Tapez un terme ou cliquez une suggestion ci-dessus.</p></div>';
+  }
+
+  const input = document.getElementById('hs-input');
+  const clearBtn = document.getElementById('hs-clear');
+
+  input.addEventListener('input', (e) => {
+    const v = e.target.value;
+    clearBtn.classList.toggle('visible', v.length > 0);
+    if (!v) { showEmpty(); return; }
+    render(search(v));
+  });
+
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    clearBtn.classList.remove('visible');
+    showEmpty();
+    input.focus();
+  });
+
+  document.querySelectorAll('.hs-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const q = chip.dataset.q;
+      input.value = q;
+      clearBtn.classList.add('visible');
+      render(search(q));
+      input.focus();
+    });
+  });
+</script>
