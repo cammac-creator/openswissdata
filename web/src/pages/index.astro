@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import HSLookup from "../components/HSLookup.astro";
+import CodePlayground from "../components/CodePlayground.astro";
 ---
 <BaseLayout
   title="openswissdata — Les données publiques suisses, enfin utilisables"
@@ -8,7 +9,9 @@ import HSLookup from "../components/HSLookup.astro";
 >
 
 <!-- ============ HERO ============ -->
-<section class="hero">
+<section class="hero" id="hero">
+  <div class="spotlight" id="hero-spotlight"></div>
+  <div class="grain-overlay"></div>
   <div class="container-wide">
     <div class="eyebrow reveal">
       <span class="eyebrow-dot"></span>
@@ -75,16 +78,16 @@ import HSLookup from "../components/HSLookup.astro";
 
     <div class="stats-row reveal">
       <div class="stat">
-        <div class="stat-num">3</div>
-        <div class="stat-label">Datasets officiels normalisés</div>
+        <div class="stat-num"><span class="counter" data-count="10247">0</span></div>
+        <div class="stat-label">Codes douaniers TARES indexés</div>
       </div>
       <div class="stat">
-        <div class="stat-num">~40<span class="unit">h</span></div>
+        <div class="stat-num">~<span class="counter" data-count="40">0</span><span class="unit">h</span></div>
         <div class="stat-label">Économisées par dataset versus parsing manuel</div>
       </div>
       <div class="stat">
-        <div class="stat-num">UTF-8</div>
-        <div class="stat-label">Encodage standard, plus de caractères cassés</div>
+        <div class="stat-num"><span class="counter" data-count="3">0</span><span class="unit"> std</span></div>
+        <div class="stat-label">Standards classifications cross-walks</div>
       </div>
       <div class="stat">
         <div class="stat-num">CH</div>
@@ -107,6 +110,24 @@ import HSLookup from "../components/HSLookup.astro";
     <div class="reveal" data-delay="2">
       <HSLookup />
     </div>
+
+    <div class="demo-divider reveal">
+      <span>ou intégrez l'API directement dans votre code</span>
+    </div>
+
+    <div class="reveal" data-delay="1">
+      <CodePlayground />
+    </div>
+  </div>
+</section>
+
+<!-- ============ PULL QUOTE 1 ============ -->
+<section class="pull-quote-section">
+  <div class="container-tight">
+    <p class="pull-quote reveal">
+      « Les bonnes données ne se trouvent pas. Elles se construisent. »
+    </p>
+    <div class="pull-quote-author reveal" data-delay="1">Manifeste — openswissdata</div>
   </div>
 </section>
 
@@ -231,6 +252,46 @@ import HSLookup from "../components/HSLookup.astro";
           Pricing one-shot 299–399 CHF par dataset, abonnement updates 120–160 CHF/an. Bundle complet à 799 CHF.
           ROI positif dès la première semaine d'utilisation versus un effort interne. Permission commerciale explicite des autorités émettrices.
         </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section id="how" class="how-section">
+  <div class="container-wide">
+    <span class="section-tag reveal">le processus</span>
+    <h2 class="section-title reveal" data-delay="1">
+      Comment <span class="serif">on s'assure</span> que les données sont propres.
+    </h2>
+    <p class="section-intro reveal" data-delay="2">
+      On répète ce cycle à chaque release. Pas de raccourcis : c'est ce qui garantit qu'une mise à jour BAZG ou BFS ne casse pas votre intégration.
+    </p>
+
+    <div class="steps-grid">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <div class="step-tag">Source</div>
+        <h3 class="step-title">Téléchargement direct</h3>
+        <p class="step-text">Récupération automatisée depuis xtares.admin.ch, BFS Ramon, FINMA. Vérification SHA-256 contre la version précédente pour détecter tout changement.</p>
+      </div>
+      <div class="step reveal" data-delay="1">
+        <div class="step-num">2</div>
+        <div class="step-tag">Parsing</div>
+        <h3 class="step-title">Normalisation UTF-8</h3>
+        <p class="step-text">Décodage des PDF, fusion des cellules Excel, conversion vers UTF-8 propre. Validation contre un schéma JSON Schema strict — toute incohérence stoppe la release.</p>
+      </div>
+      <div class="step reveal" data-delay="2">
+        <div class="step-num">3</div>
+        <div class="step-tag">Enrichissement</div>
+        <h3 class="step-title">Cross-walks &amp; index</h3>
+        <p class="step-text">Génération des passerelles entre standards (NOGA ↔ NACE ↔ ISIC), des index de recherche full-text, et des fichiers compressés Parquet pour l'analytique.</p>
+      </div>
+      <div class="step reveal" data-delay="3">
+        <div class="step-num">4</div>
+        <div class="step-tag">Livraison</div>
+        <h3 class="step-title">Release versionnée</h3>
+        <p class="step-text">Tag semver, signature, upload sur R2 Frankfurt, notification email aux clients abonnés aux updates. Changelog public détaillant chaque modification.</p>
       </div>
     </div>
   </div>
@@ -635,6 +696,106 @@ import HSLookup from "../components/HSLookup.astro";
           Stripe pour paiements (PCI DSS). Pas de tracking publicitaire.
         </p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PULL QUOTE 2 ============ -->
+<section class="pull-quote-section">
+  <div class="container-tight">
+    <p class="pull-quote reveal">
+      « 6 semaines d'ETL pour un dev senior. Ou 5 minutes et 299 CHF. »
+    </p>
+    <div class="pull-quote-author reveal" data-delay="1">Calcul honnête</div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq" class="faq-section">
+  <div class="container-tight">
+    <span class="section-tag reveal">questions fréquentes</span>
+    <h2 class="section-title reveal" data-delay="1">
+      Les questions <span class="serif">qu'on nous pose vraiment.</span>
+    </h2>
+    <p class="section-intro reveal" data-delay="2">
+      Si la vôtre n'est pas ici, écrivez à <a href="mailto:hello@openswissdata.com" style="color: var(--color-ink); text-decoration: underline;">hello@openswissdata.com</a> — on répond sous 24h ouvrées.
+    </p>
+
+    <div class="faq-list reveal" data-delay="1">
+      <details class="faq-item">
+        <summary class="faq-summary">
+          Pourquoi vendre des données qui sont publiques ?
+          <span class="faq-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        </summary>
+        <div class="faq-body">
+          <p>Les sources sont publiques mais publiées dans des formats inutilisables (PDF de 2 400 pages, Excel avec encodages cassés, HTML scrappable mais fragile). Nous vendons le travail de transformation, pas les données elles-mêmes.</p>
+          <p>C'est un modèle classique : Stripe vend une facilité d'intégration de paiements qui existaient déjà avec les banques. Algolia vend une facilité de recherche qui existait déjà avec PostgreSQL. Nous vendons une facilité d'intégration de données suisses.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-summary">
+          Avez-vous le droit de revendre ces données ?
+          <span class="faq-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        </summary>
+        <div class="faq-body">
+          <p>Oui. La législation suisse classe ces données dans la catégorie « usage libre, permission requise pour usage commercial ». Nous demandons cette permission par écrit à chaque autorité émettrice (BAZG, BFS, FINMA) et nous documentons les réponses.</p>
+          <p>BAZG a accordé son autorisation le 21 avril 2026 sous 7 conditions précises (mention « non officiel » trilingue, exclusion des notes explicatives, for juridique Berne). Ces conditions sont implémentées dans nos livrables. BFS et FINMA sont en cours de réponse.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-summary">
+          Quelle est la fréquence de mise à jour ?
+          <span class="faq-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        </summary>
+        <div class="faq-body">
+          <p>TARES : delta hebdomadaire (suit le rythme de publication BAZG). FINMA Registry : delta hebdomadaire avec changelog 90 jours. Classifications NOGA/NACE/ISIC : refresh annuel + révisions majeures (NOGA 2025 sortie le 1er janvier 2026 par exemple).</p>
+          <p>Vous achetez la version actuelle (one-shot) avec 360 jours d'updates inclus. Au bout d'un an : renouvellement de l'abonnement updates ou vous gardez la version qui vous appartient.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-summary">
+          Format Parquet, sérieusement ?
+          <span class="faq-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        </summary>
+        <div class="faq-body">
+          <p>Oui — c'est devenu le standard de fait pour l'analytique. Lisible directement par DuckDB, Polars, pandas, Spark, ClickHouse. Compression typique 5-10× par rapport à du CSV. Vos data engineers vous remercieront.</p>
+          <p>Si vous préférez du SQL pur, on livre aussi un dump SQL prêt à importer dans PostgreSQL/SQLite/MySQL. Si vous préférez du JSON, idem. Les trois formats sont inclus dans le prix.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-summary">
+          Que se passe-t-il si vous arrêtez le service ?
+          <span class="faq-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        </summary>
+        <div class="faq-body">
+          <p>Les fichiers que vous avez téléchargés vous appartiennent. Vous pouvez continuer à les utiliser indéfiniment (ils ne sont pas DRMisés). Vous perdez juste les futures mises à jour.</p>
+          <p>En cas d'arrêt définitif, on s'engage à publier les générateurs ETL en open-source pour que la communauté puisse continuer le travail. C'est notre engagement de continuité.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-summary">
+          Politique de remboursement ?
+          <span class="faq-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        </summary>
+        <div class="faq-body">
+          <p>Remboursement intégral sous 14 jours si le dataset n'a pas été téléchargé. Une fois téléchargé, pas de remboursement (c'est de la donnée numérique livrée). Téléchargez l'échantillon gratuit avant d'acheter pour valider que c'est ce que vous cherchez.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-summary">
+          Et si vous ajoutez d'autres datasets plus tard ?
+          <span class="faq-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        </summary>
+        <div class="faq-body">
+          <p>Roadmap publique. Prochains candidats : registre du commerce suisse (Zefix unifié), géocodage CH (frontières communales avec historique), données fiscales par canton. Si un dataset suisse vous manque, écrivez-nous — on priorise selon la demande.</p>
+        </div>
+      </details>
     </div>
   </div>
 </section>
@@ -1427,9 +1588,53 @@ import HSLookup from "../components/HSLookup.astro";
   .cta-btn-dark:hover {
     background: rgba(255,255,255,.08);
   }
+
+  /* === Demo divider === */
+  .demo-divider {
+    text-align: center;
+    margin: 60px 0 32px;
+    position: relative;
+    color: var(--color-ink-mute);
+    font-size: 13px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .demo-divider::before, .demo-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 30%;
+    height: 1px;
+    background: var(--color-line);
+  }
+  .demo-divider::before { left: 0; }
+  .demo-divider::after { right: 0; }
+  .demo-divider span { background: var(--color-bg-alt); padding: 0 16px; position: relative; }
+
+  /* === How it works ===*/
+  .how-section {
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-line);
+  }
+
+  /* === FAQ === */
+  .faq-section {
+    background: var(--color-bg-alt);
+    border-top: 1px solid var(--color-line);
+  }
+  .faq-list {
+    background: white;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    padding: 0 32px;
+    box-shadow: var(--shadow-sm);
+  }
+  @media (max-width: 640px) { .faq-list { padding: 0 20px; } }
 </style>
 
 <script is:inline>
+  // Age tabs
   const tabs = document.querySelectorAll('.age-tab');
   const contents = document.querySelectorAll('.age-content');
   tabs.forEach(tab => {
@@ -1439,4 +1644,45 @@ import HSLookup from "../components/HSLookup.astro";
       contents.forEach(c => c.classList.toggle('active', c.dataset.age === age));
     });
   });
+
+  // Cursor spotlight on hero
+  const heroEl = document.getElementById('hero');
+  const spotlightEl = document.getElementById('hero-spotlight');
+  if (heroEl && spotlightEl) {
+    heroEl.addEventListener('mousemove', (e) => {
+      const rect = heroEl.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      spotlightEl.style.setProperty('--mx', x + '%');
+      spotlightEl.style.setProperty('--my', y + '%');
+    });
+  }
+
+  // Counter animation when in view
+  const counters = document.querySelectorAll('.counter');
+  const runCounter = (el) => {
+    const target = parseInt(el.dataset.count, 10) || 0;
+    const duration = 1400;
+    const start = performance.now();
+    const step = (now) => {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const value = Math.floor(eased * target);
+      el.textContent = value.toLocaleString('fr-CH');
+      if (t < 1) requestAnimationFrame(step);
+      else el.textContent = target.toLocaleString('fr-CH');
+    };
+    requestAnimationFrame(step);
+  };
+  if ('IntersectionObserver' in window && counters.length) {
+    const ioc = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          runCounter(e.target);
+          ioc.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(c => ioc.observe(c));
+  }
 </script>

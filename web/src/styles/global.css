@@ -237,3 +237,183 @@ nav.fixed-nav {
   transition: border-color .3s ease, background .3s ease;
 }
 nav.fixed-nav.scrolled { border-bottom-color: var(--color-line); }
+
+/* === Hero grain === */
+.grain-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: .35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.4'/></svg>");
+}
+
+/* === Spotlight === */
+.spotlight {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 30%), rgba(220,31,45,.08), transparent 60%);
+  transition: background .3s ease;
+}
+
+/* === Pull quote === */
+.pull-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.2;
+  color: var(--color-ink);
+  text-align: center;
+  max-width: 24ch;
+  margin: 0 auto;
+  letter-spacing: -.015em;
+}
+.pull-quote::before, .pull-quote::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--color-line);
+  margin: 28px auto;
+}
+.pull-quote-author {
+  text-align: center;
+  margin-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--color-ink-mute);
+}
+
+.pull-quote-section {
+  background: var(--color-bg);
+  padding: 80px 0 !important;
+}
+
+/* === Counter === */
+.counter {
+  font-variant-numeric: tabular-nums;
+}
+
+/* === FAQ accordion === */
+.faq-item {
+  border-bottom: 1px solid var(--color-line);
+}
+.faq-item:last-child { border-bottom: none; }
+.faq-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 28px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-ink);
+  transition: color .15s ease;
+}
+.faq-summary::-webkit-details-marker { display: none; }
+.faq-summary:hover { color: var(--color-accent); }
+.faq-icon {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--color-bg-alt);
+  display: grid;
+  place-items: center;
+  transition: transform .25s ease, background .15s ease;
+}
+.faq-icon svg { width: 14px; height: 14px; }
+details[open] .faq-icon {
+  transform: rotate(45deg);
+  background: var(--color-ink);
+  color: white;
+}
+.faq-body {
+  padding: 0 0 28px;
+  color: var(--color-ink-soft);
+  font-size: 16px;
+  line-height: 1.65;
+  max-width: 70ch;
+}
+.faq-body p + p { margin-top: 12px; }
+details[open] .faq-body {
+  animation: faqOpen .35s ease;
+}
+@keyframes faqOpen {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === How it works steps === */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative;
+}
+@media (max-width: 880px) { .steps-grid { grid-template-columns: 1fr; } }
+
+.step {
+  position: relative;
+  padding: 0 24px 0 0;
+}
+.step + .step::before {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: -24px;
+  right: 50%;
+  height: 1px;
+  border-top: 1px dashed var(--color-line);
+}
+@media (max-width: 880px) {
+  .step + .step::before {
+    top: -24px; left: 22px; right: auto; bottom: 50%;
+    width: 1px; height: auto;
+    border-top: none;
+    border-left: 1px dashed var(--color-line);
+  }
+  .step { padding: 24px 0 0 0; }
+}
+
+.step-num {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid var(--color-line);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-style: italic;
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  box-shadow: 0 0 0 6px var(--color-bg);
+  position: relative;
+  z-index: 1;
+}
+.step-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: -.01em;
+}
+.step-text {
+  font-size: 14px;
+  color: var(--color-ink-soft);
+  line-height: 1.55;
+  margin: 0;
+}
+.step-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--color-accent);
+  margin-bottom: 8px;
+}
+
