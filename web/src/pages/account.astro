@@ -1,0 +1,194 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout title="Your datasets — openswissdata">
+  <section class="max-w-3xl mx-auto px-6 py-16">
+
+    <div id="banner" class="hidden mb-6 rounded-lg px-4 py-3 text-sm" role="status" aria-live="polite"></div>
+
+    <!-- Login view -->
+    <div id="login-view" class="hidden">
+      <h1 class="text-3xl font-bold mb-2">Sign in</h1>
+      <p class="text-slate-600 mb-6">Enter your email — we'll send you a magic link valid for 15 minutes.</p>
+      <form id="login-form" class="flex flex-col gap-3 max-w-md">
+        <input
+          type="email"
+          name="email"
+          required
+          autocomplete="email"
+          placeholder="you@company.com"
+          class="px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        />
+        <button
+          type="submit"
+          class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium transition-colors"
+        >Send magic link</button>
+      </form>
+      <p id="login-msg" class="mt-4 text-sm text-slate-600"></p>
+    </div>
+
+    <!-- Dashboard view -->
+    <div id="dashboard-view" class="hidden">
+      <div class="flex items-baseline justify-between flex-wrap gap-3 mb-6">
+        <div>
+          <h1 class="text-3xl font-bold">Your datasets</h1>
+          <p class="text-sm text-slate-500 mt-1" id="dashboard-email"></p>
+        </div>
+        <button id="logout-btn" class="text-sm text-slate-500 hover:text-slate-800 underline">Log out</button>
+      </div>
+      <ul id="datasets-list" class="space-y-3"></ul>
+      <p id="empty-state" class="hidden text-slate-500 text-sm mt-6">
+        You don't have any dataset purchases yet. <a href="/bundle" class="text-indigo-600 hover:underline">Browse the bundle</a>.
+      </p>
+    </div>
+
+    <div id="loading-view" class="text-slate-500 text-sm">Loading…</div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const qs = new URLSearchParams(window.location.search);
+      const authStatus = qs.get("auth");
+      const banner = document.getElementById("banner");
+      if (authStatus === "ok") {
+        banner.textContent = "Signed in successfully.";
+        banner.className = "mb-6 rounded-lg px-4 py-3 text-sm bg-emerald-50 border border-emerald-200 text-emerald-900";
+        banner.classList.remove("hidden");
+      } else if (authStatus === "invalid") {
+        banner.textContent = "That link is not valid. Please request a new one.";
+        banner.className = "mb-6 rounded-lg px-4 py-3 text-sm bg-rose-50 border border-rose-200 text-rose-900";
+        banner.classList.remove("hidden");
+      } else if (authStatus === "expired") {
+        banner.textContent = "That link has expired. Please request a new one.";
+        banner.className = "mb-6 rounded-lg px-4 py-3 text-sm bg-amber-50 border border-amber-200 text-amber-900";
+        banner.classList.remove("hidden");
+      }
+
+      const loadingEl = document.getElementById("loading-view");
+      const loginEl = document.getElementById("login-view");
+      const dashEl = document.getElementById("dashboard-view");
+      const listEl = document.getElementById("datasets-list");
+      const emptyEl = document.getElementById("empty-state");
+      const emailLabelEl = document.getElementById("dashboard-email");
+
+      function showLogin() {
+        loadingEl.classList.add("hidden");
+        dashEl.classList.add("hidden");
+        loginEl.classList.remove("hidden");
+      }
+
+      function showDashboard(customer, datasets) {
+        loadingEl.classList.add("hidden");
+        loginEl.classList.add("hidden");
+        dashEl.classList.remove("hidden");
+        emailLabelEl.textContent = customer ? customer.email : "";
+        listEl.innerHTML = "";
+        if (!datasets || datasets.length === 0) {
+          emptyEl.classList.remove("hidden");
+          return;
+        }
+        emptyEl.classList.add("hidden");
+        for (const d of datasets) {
+          const li = document.createElement("li");
+          li.className = "flex items-center justify-between gap-4 p-4 border border-slate-200 rounded-lg hover:border-slate-300 transition-colors";
+
+          const infoDiv = document.createElement("div");
+          infoDiv.className = "min-w-0";
+          const nameEl = document.createElement("div");
+          nameEl.className = "font-semibold text-slate-900 truncate";
+          nameEl.textContent = d.name;
+          const metaEl = document.createElement("div");
+          metaEl.className = "text-xs text-slate-500 mt-0.5";
+          const vers = d.current_version ? ("v" + d.current_version) : "no version yet";
+          let meta = vers;
+          if (d.updates_until) {
+            const until = new Date(d.updates_until).toLocaleDateString();
+            meta += " · updates until " + until;
+          }
+          metaEl.textContent = meta;
+          infoDiv.appendChild(nameEl);
+          infoDiv.appendChild(metaEl);
+
+          const btn = document.createElement("button");
+          btn.className = "shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium transition-colors";
+          btn.textContent = "Download";
+          btn.setAttribute("data-id", d.id);
+          btn.addEventListener("click", async function () {
+            btn.disabled = true;
+            btn.textContent = "Preparing…";
+            try {
+              const r = await fetch("/api/account/download-request", {
+                method: "POST",
+                credentials: "include",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ dataset_id: d.id }),
+              });
+              if (!r.ok) {
+                const err = await r.json().catch(function () { return {}; });
+                throw new Error(err.error || ("HTTP " + r.status));
+              }
+              const body = await r.json();
+              window.location.href = body.download_url;
+            } catch (e) {
+              btn.disabled = false;
+              btn.textContent = "Retry";
+              alert("Download failed: " + (e && e.message ? e.message : String(e)));
+            }
+          });
+
+          li.appendChild(infoDiv);
+          li.appendChild(btn);
+          listEl.appendChild(li);
+        }
+      }
+
+      async function load() {
+        try {
+          const meRes = await fetch("/api/account", { credentials: "include" });
+          if (meRes.status === 401) { showLogin(); return; }
+          if (!meRes.ok) throw new Error("HTTP " + meRes.status);
+          const meBody = await meRes.json();
+          const dsRes = await fetch("/api/account/datasets", { credentials: "include" });
+          const dsBody = dsRes.ok ? await dsRes.json() : { datasets: [] };
+          showDashboard(meBody.customer, dsBody.datasets);
+        } catch (e) {
+          loadingEl.textContent = "Failed to load account. Please refresh.";
+        }
+      }
+
+      document.getElementById("login-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const email = String(fd.get("email") || "").trim();
+        if (!email) return;
+        const msgEl = document.getElementById("login-msg");
+        msgEl.textContent = "Sending…";
+        try {
+          const r = await fetch("/api/auth/magic-link", {
+            method: "POST",
+            credentials: "include",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ email: email }),
+          });
+          if (r.ok) {
+            msgEl.textContent = "Check your inbox — the link is valid for 15 minutes.";
+            msgEl.className = "mt-4 text-sm text-emerald-700";
+          } else {
+            msgEl.textContent = "Something went wrong. Please try again.";
+            msgEl.className = "mt-4 text-sm text-rose-700";
+          }
+        } catch (err) {
+          msgEl.textContent = "Network error. Please try again.";
+          msgEl.className = "mt-4 text-sm text-rose-700";
+        }
+      });
+
+      document.getElementById("logout-btn").addEventListener("click", async function () {
+        await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+        window.location.href = "/account";
+      });
+
+      load();
+    })();
+  </script>
+</BaseLayout>
