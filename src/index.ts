@@ -3,6 +3,7 @@ import { serve } from "@hono/node-server";
 import { healthRoute } from "./routes/health.js";
 import { adminRoute } from "./routes/admin.js";
 import { checkoutRoute } from "./routes/checkout.js";
+import { stripeWebhookRoute } from "./routes/stripe-webhook.js";
 import { loadEnv } from "./env.js";
 
 export function createApp() {
@@ -10,6 +11,7 @@ export function createApp() {
   app.route("/api/health", healthRoute);
   app.route("/api/admin", adminRoute);
   app.route("/api/checkout", checkoutRoute);
+  app.route("/api/webhook/stripe", stripeWebhookRoute);
   return app;
 }
 
