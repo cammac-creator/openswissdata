@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>openswissdata — Les données officielles suisses, enfin utilisables</title>
+<meta name="description" content="openswissdata transforme les données publiques suisses (douanes, classifications économiques, registre FINMA) en formats propres, prêts à l'emploi pour les entreprises.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAF7;
+    --bg-alt: #F4F3EE;
+    --bg-dark: #0F1115;
+    --ink: #0F1115;
+    --ink-soft: #4A4D55;
+    --ink-mute: #8A8D95;
+    --line: #E8E6DF;
+    --line-soft: #F0EEE8;
+    --accent: #DC1F2D;
+    --accent-soft: #FCE8EA;
+    --gold: #C8A05A;
+    --teal: #1F6E6B;
+    --shadow-sm: 0 1px 2px rgba(15,17,21,.04), 0 0 0 1px rgba(15,17,21,.04);
+    --shadow-md: 0 4px 16px rgba(15,17,21,.06), 0 0 0 1px rgba(15,17,21,.04);
+    --shadow-lg: 0 24px 48px -12px rgba(15,17,21,.18), 0 0 0 1px rgba(15,17,21,.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  ::selection { background: var(--ink); color: var(--bg); }
+
+  /* ===== Layout ===== */
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+  .container-narrow {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ===== Nav ===== */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    background: rgba(250, 250, 247, 0.78);
+    border-bottom: 1px solid transparent;
+    transition: border-color .3s ease, background .3s ease;
+  }
+  nav.scrolled { border-bottom-color: var(--line); }
+  nav .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -.01em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: var(--ink);
+    color: var(--bg);
+    display: grid;
+    place-items: center;
+    font-family: 'Instrument Serif', serif;
+    font-size: 18px;
+    font-style: italic;
+    transform: rotate(-4deg);
+  }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-weight: 500;
+    transition: color .15s ease;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  @media (max-width: 720px) { .nav-links { display: none; } }
+
+  /* ===== Hero ===== */
+  .hero {
+    padding: 160px 0 100px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    width: 800px; height: 800px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(220,31,45,.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 32px;
+  }
+  .eyebrow-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px var(--accent-soft); }
+    50% { box-shadow: 0 0 0 6px rgba(220,31,45,.04); }
+  }
+
+  h1 {
+    font-size: clamp(40px, 6vw, 76px);
+    line-height: 1.02;
+    letter-spacing: -.035em;
+    font-weight: 700;
+    margin-bottom: 28px;
+    max-width: 14ch;
+  }
+  h1 .serif {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .lede {
+    font-size: clamp(18px, 2vw, 22px);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin-bottom: 40px;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 80px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 22px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 15px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px -4px rgba(15,17,21,.2);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn-secondary:hover {
+    background: var(--bg-alt);
+  }
+  .btn-arrow {
+    width: 16px; height: 16px;
+    transition: transform .2s ease;
+  }
+  .btn:hover .btn-arrow { transform: translateX(3px); }
+
+  /* Hero illustration */
+  .hero-illu {
+    position: relative;
+    margin-top: 40px;
+    height: 420px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #1A1D24 0%, #0F1115 100%);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+  .hero-illu-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  }
+  .data-flow {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    padding: 0 60px;
+    gap: 40px;
+  }
+  @media (max-width: 720px) {
+    .data-flow { padding: 0 20px; gap: 12px; }
+    .hero-illu { height: 320px; }
+  }
+  .data-source, .data-target {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .data-card {
+    background: rgba(255,255,255,.04);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: rgba(255,255,255,.92);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: floatIn .6s ease backwards;
+  }
+  .data-card-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,.4);
+    background: rgba(255,255,255,.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .data-card-bad {
+    color: rgba(255,255,255,.5);
+    text-decoration: line-through;
+    text-decoration-color: rgba(255,99,99,.6);
+  }
+  .data-card-good {
+    border-color: rgba(220,31,45,.4);
+    background: rgba(220,31,45,.08);
+  }
+  .data-card:nth-child(1) { animation-delay: .2s; }
+  .data-card:nth-child(2) { animation-delay: .35s; }
+  .data-card:nth-child(3) { animation-delay: .5s; }
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .data-pipe {
+    position: relative;
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .pipe-svg {
+    width: 100%;
+    height: 280px;
+  }
+  .pipe-core {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--accent);
+    color: white;
+    padding: 14px 22px;
+    border-radius: 14px;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    box-shadow: 0 0 40px rgba(220,31,45,.4), 0 0 0 8px rgba(220,31,45,.1);
+    animation: corePulse 3s ease-in-out infinite;
+  }
+  @keyframes corePulse {
+    0%, 100% { box-shadow: 0 0 40px rgba(220,31,45,.4), 0 0 0 8px rgba(220,31,45,.1); }
+    50% { box-shadow: 0 0 60px rgba(220,31,45,.6), 0 0 0 14px rgba(220,31,45,.05); }
+  }
+
+  /* ===== Sections ===== */
+  section {
+    padding: 100px 0;
+  }
+  .section-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h2 {
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.08;
+    letter-spacing: -.025em;
+    font-weight: 700;
+    margin-bottom: 20px;
+    max-width: 18ch;
+  }
+  h2 .serif {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+  h3 {
+    font-size: 22px;
+    line-height: 1.25;
+    letter-spacing: -.015em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .section-intro {
+    font-size: 19px;
+    color: var(--ink-soft);
+    max-width: 60ch;
+    line-height: 1.55;
+    margin-bottom: 64px;
+  }
+
+  /* ===== Story (Le problème) ===== */
+  .story {
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+  }
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  @media (max-width: 880px) { .story-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  .scenario {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 36px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .scenario-label {
+    position: absolute;
+    top: -12px;
+    left: 28px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .scenario p {
+    color: var(--ink-soft);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  .scenario p + p { margin-top: 14px; }
+  .scenario .hero-quote {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 20px;
+  }
+
+  /* Frustration illustration */
+  .frustration-illu {
+    aspect-ratio: 1/1;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #FCE8EA 0%, #F4F3EE 100%);
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .messy-data {
+    position: relative;
+    width: 80%;
+    height: 80%;
+  }
+  .messy-doc {
+    position: absolute;
+    width: 140px;
+    height: 180px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px;
+    box-shadow: var(--shadow-md);
+    transition: transform .3s ease;
+  }
+  .messy-doc::before {
+    content: '';
+    position: absolute;
+    top: 14px; left: 14px; right: 14px;
+    height: 6px;
+    background: var(--ink);
+    border-radius: 2px;
+    opacity: .8;
+  }
+  .messy-doc::after {
+    content: 'PDF';
+    position: absolute;
+    bottom: 12px;
+    left: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--ink-mute);
+    background: var(--bg-alt);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .messy-doc-1 { top: 10%; left: 10%; transform: rotate(-8deg); }
+  .messy-doc-2 { top: 20%; right: 5%; transform: rotate(6deg); background: #FFF8E8; }
+  .messy-doc-3 { bottom: 8%; left: 30%; transform: rotate(-3deg); }
+  .messy-doc:hover { transform: scale(1.05) rotate(0deg); z-index: 10; }
+  .messy-lines {
+    position: absolute;
+    height: 2px;
+    background: rgba(15,17,21,.1);
+    border-radius: 1px;
+  }
+  .messy-doc .messy-lines:nth-of-type(1) { top: 38px; left: 14px; right: 14px; }
+  .messy-doc .messy-lines:nth-of-type(2) { top: 54px; left: 14px; right: 30%; }
+  .messy-doc .messy-lines:nth-of-type(3) { top: 70px; left: 14px; right: 14px; }
+  .messy-doc .messy-lines:nth-of-type(4) { top: 86px; left: 14px; right: 20%; }
+
+  /* ===== Solution (kid-friendly) ===== */
+  .explain {
+    background: var(--bg-alt);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .explain-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 56px;
+    box-shadow: var(--shadow-sm);
+  }
+  @media (max-width: 720px) { .explain-card { padding: 32px; } }
+  .explain-card h3 {
+    font-size: 26px;
+    margin-bottom: 18px;
+  }
+  .explain-card p {
+    color: var(--ink-soft);
+    font-size: 17px;
+    line-height: 1.65;
+  }
+  .explain-card p + p { margin-top: 16px; }
+  .age-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .age-tab {
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--bg-alt);
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .age-tab.active {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .age-tab:not(.active):hover { border-color: var(--line); }
+  .age-content { display: none; }
+  .age-content.active { display: block; animation: fadeIn .3s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Datasets ===== */
+  .datasets {
+    background: var(--bg);
+  }
+  .dataset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 880px) { .dataset-grid { grid-template-columns: 1fr; } }
+
+  .dataset {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 32px;
+    transition: transform .3s ease, box-shadow .3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .dataset:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+  .dataset::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .3s ease;
+  }
+  .dataset:hover::before { transform: scaleX(1); }
+  .dataset-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--bg-alt);
+    display: grid;
+    place-items: center;
+    margin-bottom: 24px;
+  }
+  .dataset h3 { margin-bottom: 8px; }
+  .dataset-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .dataset p {
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+  .dataset-stats {
+    display: flex;
+    gap: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .dataset-stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .dataset-stat-num {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 16px;
+  }
+  .dataset-stat-label { color: var(--ink-mute); font-size: 12px; }
+
+  /* ===== Comparison ===== */
+  .compare {
+    background: var(--bg-dark);
+    color: var(--bg);
+  }
+  .compare h2 { color: var(--bg); }
+  .compare .section-tag { color: rgba(255,255,255,.5); }
+  .compare .section-intro { color: rgba(255,255,255,.7); }
+
+  .compare-table {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 20px;
+    overflow: hidden;
+    overflow-x: auto;
+  }
+  .compare-table table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+  }
+  .compare-table th,
+  .compare-table td {
+    padding: 20px 24px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .compare-table thead th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: rgba(255,255,255,.5);
+    font-weight: 500;
+    background: rgba(255,255,255,.02);
+  }
+  .compare-table tbody th {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,.85);
+    width: 30%;
+  }
+  .compare-table .cell-name {
+    font-weight: 600;
+    color: white;
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+  .compare-table .cell-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,.5);
+  }
+  .compare-table .col-osd {
+    background: linear-gradient(180deg, rgba(220,31,45,.08) 0%, rgba(220,31,45,.02) 100%);
+    border-left: 1px solid rgba(220,31,45,.2);
+    border-right: 1px solid rgba(220,31,45,.2);
+  }
+  .compare-table .col-osd .cell-name {
+    color: #FFB8BD;
+  }
+  .compare-table tbody tr:hover {
+    background: rgba(255,255,255,.02);
+  }
+  .check { color: #6EE7B7; font-size: 18px; line-height: 1; }
+  .cross { color: rgba(255,255,255,.25); font-size: 18px; line-height: 1; }
+  .partial { color: #FCD34D; font-size: 13px; font-style: italic; }
+
+  /* ===== Pricing ===== */
+  .pricing {
+    background: var(--bg);
+  }
+  .price-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 1080px) { .price-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .price-grid { grid-template-columns: 1fr; } }
+
+  .price-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all .25s ease;
+    position: relative;
+  }
+  .price-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-2px);
+  }
+  .price-card.featured {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .price-card.featured:hover { transform: translateY(-2px); }
+  .price-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .price-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .price-card.featured .price-name { color: rgba(255,255,255,.6); }
+  .price-amount {
+    font-family: 'Instrument Serif', serif;
+    font-size: 44px;
+    font-weight: 400;
+    line-height: 1;
+    margin: 16px 0 4px;
+    letter-spacing: -.02em;
+  }
+  .price-currency {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink-mute);
+    margin-left: 4px;
+  }
+  .price-card.featured .price-currency { color: rgba(255,255,255,.5); }
+  .price-period {
+    font-size: 12px;
+    color: var(--ink-mute);
+    margin-bottom: 24px;
+  }
+  .price-card.featured .price-period { color: rgba(255,255,255,.5); }
+  .price-list {
+    list-style: none;
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+  .price-list li {
+    padding: 6px 0;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .price-card.featured .price-list li { color: rgba(255,255,255,.7); }
+  .price-list li::before {
+    content: '—';
+    color: var(--ink-mute);
+    flex-shrink: 0;
+  }
+
+  /* ===== Audience ===== */
+  .audience {
+    background: var(--bg-alt);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .persona-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 880px) { .persona-grid { grid-template-columns: 1fr; } }
+
+  .persona {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 32px;
+    transition: transform .25s ease;
+  }
+  .persona:hover { transform: translateY(-3px); }
+  .persona-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #FCE8EA 0%, #F4F3EE 100%);
+  }
+  .persona-role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+  }
+  .persona h3 {
+    font-size: 19px;
+    margin-bottom: 10px;
+  }
+  .persona p {
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.55;
+    margin-bottom: 16px;
+  }
+  .persona-quote {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink);
+    padding: 14px 16px;
+    background: var(--bg-alt);
+    border-radius: 10px;
+    line-height: 1.4;
+  }
+
+  /* ===== Trust ===== */
+  .trust {
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+  }
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+  @media (max-width: 720px) { .trust-grid { grid-template-columns: 1fr; } }
+  .trust-card {
+    padding: 32px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: white;
+  }
+  .trust-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .trust-tag {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .trust-tag.green {
+    background: #E5F5F1;
+    color: var(--teal);
+  }
+  .trust-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .trust-card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  .trust-card p {
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ===== Founder ===== */
+  .founder {
+    background: var(--bg-alt);
+    border-top: 1px solid var(--line);
+  }
+  .founder-card {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .founder-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ink) 0%, #2A2D35 100%);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    font-style: italic;
+    margin: 0 auto 24px;
+    box-shadow: var(--shadow-md);
+  }
+  .founder-quote {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    line-height: 1.35;
+    color: var(--ink);
+    font-style: italic;
+    margin-bottom: 20px;
+  }
+  .founder-name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .founder-bio {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  /* ===== CTA ===== */
+  .cta {
+    background: var(--ink);
+    color: var(--bg);
+    text-align: center;
+  }
+  .cta h2 {
+    color: var(--bg);
+    margin: 0 auto 20px;
+  }
+  .cta p {
+    color: rgba(255,255,255,.7);
+    font-size: 18px;
+    max-width: 50ch;
+    margin: 0 auto 36px;
+  }
+  .cta .btn-primary {
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  /* ===== Footer ===== */
+  footer {
+    padding: 48px 0;
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+  footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  footer p {
+    font-size: 13px;
+    color: var(--ink-mute);
+  }
+  .disclaimer {
+    margin-top: 32px;
+    padding: 20px;
+    background: var(--bg-alt);
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .disclaimer strong { color: var(--ink-soft); }
+
+  /* ===== Reveal animations ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity .8s cubic-bezier(.2,.6,.2,1), transform .8s cubic-bezier(.2,.6,.2,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal[data-delay="1"] { transition-delay: .1s; }
+  .reveal[data-delay="2"] { transition-delay: .2s; }
+  .reveal[data-delay="3"] { transition-delay: .3s; }
+
+  /* ===== Tooltip stat ===== */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-top: 64px;
+    padding-top: 48px;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 720px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+  .stat {
+    text-align: left;
+  }
+  .stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 8px;
+    letter-spacing: -.02em;
+  }
+  .stat-num .unit {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    color: var(--ink-mute);
+    margin-left: 2px;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="container">
+    <a href="#" class="logo">
+      <span class="logo-mark">o</span>
+      <span>openswissdata</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#problem">Le problème</a></li>
+      <li><a href="#solution">La solution</a></li>
+      <li><a href="#datasets">Datasets</a></li>
+      <li><a href="#compare">Concurrence</a></li>
+      <li><a href="#pricing">Tarifs</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="eyebrow-dot"></span>
+      Lancement printemps 2026 · Données officielles suisses
+    </div>
+    <h1>
+      Les données publiques suisses,<br>
+      <span class="serif">enfin utilisables.</span>
+    </h1>
+    <p class="lede">
+      L'État suisse publie des données précieuses — douanes, classifications économiques, registres financiers.
+      Mais elles sortent en PDF, formats désuets, encodages cassés.
+      <strong>openswissdata</strong> les transforme en formats propres, prêts à brancher dans n'importe quel logiciel.
+    </p>
+    <div class="hero-cta">
+      <a href="#datasets" class="btn btn-primary">
+        Voir les datasets
+        <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#problem" class="btn btn-secondary">Comprendre le problème</a>
+    </div>
+
+    <div class="hero-illu reveal">
+      <div class="hero-illu-grid"></div>
+      <div class="data-flow">
+        <div class="data-source">
+          <div class="data-card data-card-bad">
+            <span class="data-card-tag">PDF</span>
+            <span>Tarif douanier 2 400 pages</span>
+          </div>
+          <div class="data-card data-card-bad">
+            <span class="data-card-tag">XLS</span>
+            <span>NOGA 2025 — encodage cassé</span>
+          </div>
+          <div class="data-card data-card-bad">
+            <span class="data-card-tag">HTML</span>
+            <span>Registre FINMA × 10 listes</span>
+          </div>
+        </div>
+        <div class="data-pipe">
+          <svg class="pipe-svg" viewBox="0 0 200 280" fill="none" preserveAspectRatio="none">
+            <path d="M0 60 Q 100 60, 100 140 Q 100 220, 200 220" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="4 4"/>
+            <path d="M0 100 Q 100 100, 100 140 Q 100 180, 200 180" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="4 4"/>
+            <path d="M0 140 L 200 140" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="4 4"/>
+          </svg>
+          <div class="pipe-core">openswissdata</div>
+        </div>
+        <div class="data-target">
+          <div class="data-card data-card-good">
+            <span class="data-card-tag">JSON</span>
+            <span>Propre · UTF-8 · validé</span>
+          </div>
+          <div class="data-card data-card-good">
+            <span class="data-card-tag">PARQUET</span>
+            <span>Optimisé analytics</span>
+          </div>
+          <div class="data-card data-card-good">
+            <span class="data-card-tag">SQL</span>
+            <span>Versionné · cross-walks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row reveal">
+      <div class="stat">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Datasets officiels normalisés au lancement</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">~40<span class="unit">h</span></div>
+        <div class="stat-label">Économisées par dataset versus parsing manuel</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">UTF-8</div>
+        <div class="stat-label">Encodage standard, plus de caractères cassés</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">CH</div>
+        <div class="stat-label">Hébergement Suisse-EU, conforme nFADP</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ STORY / PROBLEM ============ -->
+<section id="problem" class="story">
+  <div class="container">
+    <span class="section-tag reveal">01 — Le problème</span>
+    <h2 class="reveal" data-delay="1">
+      Les données existent.<br>
+      <span class="serif">Personne ne peut les utiliser.</span>
+    </h2>
+    <p class="section-intro reveal" data-delay="2">
+      L'État suisse publie des centaines de jeux de données ouverts. C'est une excellente nouvelle.
+      Le problème : ils sont publiés tels qu'ils existent en interne — souvent en PDF, parfois en Excel avec des cellules fusionnées,
+      souvent dans des encodages des années 90. Pour une équipe technique, importer ces données dans un produit prend des semaines.
+    </p>
+
+    <div class="story-grid">
+      <div class="frustration-illu reveal">
+        <div class="messy-data">
+          <div class="messy-doc messy-doc-1">
+            <div class="messy-lines"></div>
+            <div class="messy-lines"></div>
+            <div class="messy-lines"></div>
+            <div class="messy-lines"></div>
+          </div>
+          <div class="messy-doc messy-doc-2">
+            <div class="messy-lines"></div>
+            <div class="messy-lines"></div>
+            <div class="messy-lines"></div>
+            <div class="messy-lines"></div>
+          </div>
+          <div class="messy-doc messy-doc-3">
+            <div class="messy-lines"></div>
+            <div class="messy-lines"></div>
+            <div class="messy-lines"></div>
+            <div class="messy-lines"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scenario reveal" data-delay="1">
+        <span class="scenario-label">SCÉNARIO RÉEL</span>
+        <p class="hero-quote">
+          « On a essayé d'intégrer le tarif douanier suisse dans notre ERP. Ça nous a pris six semaines, et on n'est toujours pas sûrs que les chapitres soient à jour. »
+        </p>
+        <p>
+          C'est ce qu'on entend chez les éditeurs de logiciels logistiques, les compliance officers, les data teams des assureurs.
+          Les données officielles existent — mais entre exister et être utilisables, il y a un gouffre.
+        </p>
+        <p>
+          Ce gouffre, c'est : décoder du PDF, normaliser des encodages cassés, écrire des cross-walks entre standards (NOGA suisse vs NACE européen vs ISIC mondial),
+          versionner pour suivre les mises à jour, vérifier que rien n'a cassé entre deux releases.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOLUTION (kid-friendly) ============ -->
+<section id="solution" class="explain">
+  <div class="container">
+    <span class="section-tag reveal">02 — Notre solution, expliquée à tout âge</span>
+    <h2 class="reveal" data-delay="1">
+      <span class="serif">Une seule chose,</span> bien faite.
+    </h2>
+    <p class="section-intro reveal" data-delay="2">
+      On télécharge les données depuis les sources officielles. On les nettoie, on les normalise, on les enrichit avec des passerelles entre standards.
+      On les livre en formats modernes, avec une licence claire et un suivi des mises à jour. Voilà l'idée. Le détail dépend de qui pose la question.
+    </p>
+
+    <div class="explain-card reveal" data-delay="1">
+      <div class="age-tabs">
+        <button class="age-tab active" data-age="kid">Pour un enfant</button>
+        <button class="age-tab" data-age="parent">Pour mes parents</button>
+        <button class="age-tab" data-age="pro">Pour un pro de la tech</button>
+        <button class="age-tab" data-age="exec">Pour un dirigeant</button>
+      </div>
+
+      <div class="age-content active" data-age="kid">
+        <h3>Imagine une grande bibliothèque qui range mal ses livres.</h3>
+        <p>
+          La Suisse a une bibliothèque géante de livres très importants : sur les marchandises qui passent les douanes, sur les métiers, sur les banques.
+          Mais les livres sont rangés n'importe comment. Certains sont écrits dans une langue bizarre. D'autres ont les pages collées.
+        </p>
+        <p>
+          Notre travail, c'est d'aller chercher ces livres, de les nettoyer, de les recopier proprement, et de les ranger dans un ordre simple.
+          Comme ça, les gens qui en ont besoin peuvent les lire en deux minutes au lieu de deux mois.
+        </p>
+      </div>
+
+      <div class="age-content" data-age="parent">
+        <h3>L'État publie des chiffres importants. Mal présentés.</h3>
+        <p>
+          Quand l'administration publie des données — par exemple la liste de tous les codes douaniers, ou la classification officielle des secteurs d'activité —
+          elle les met en ligne dans des formats vieux et compliqués (souvent en PDF de plusieurs centaines de pages).
+        </p>
+        <p>
+          Les entreprises qui ont besoin de ces données — des banques, des assureurs, des éditeurs de logiciels — perdent des semaines à essayer de les exploiter.
+          Notre service fait ce travail une seule fois, proprement, et le revend aux entreprises qui en ont besoin. C'est moins cher pour elles, et de bien meilleure qualité.
+        </p>
+      </div>
+
+      <div class="age-content" data-age="pro">
+        <h3>Datasets officiels suisses normalisés en JSON / Parquet / SQL.</h3>
+        <p>
+          On parse les sources publiques (TARES, NOGA, NACE, FINMA Registry), on normalise en UTF-8, on enrichit avec des cross-walks multi-standards,
+          on versionne sémantiquement (semver), on signe les releases. Livraison via R2 signed URLs, accès one-shot ou abonnement updates yearly.
+        </p>
+        <p>
+          Backend Hono + SQLite, paiements Stripe, hébergement Railway EU/Frankfurt. Webhooks Stripe pour provisionnement automatique. Compliance nFADP & permissions commerciales explicites des autorités émettrices (BAZG ✅, BFS et FINMA en cours).
+        </p>
+      </div>
+
+      <div class="age-content" data-age="exec">
+        <h3>Réduire le coût d'intégration des données réglementaires suisses.</h3>
+        <p>
+          Vos équipes data passent du temps à faire de l'ETL sur des sources publiques mal formatées. Ce travail ne crée aucun avantage compétitif —
+          il vous met juste au niveau zéro. openswissdata externalise ce coût pour le mutualiser entre tous nos clients.
+        </p>
+        <p>
+          Pricing one-shot 299–399 CHF par dataset, abonnement updates 120–160 CHF/an. Bundle complet à 799 CHF.
+          ROI positif dès la première semaine d'utilisation versus un effort interne. Permission commerciale explicite des autorités émettrices.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DATASETS ============ -->
+<section id="datasets" class="datasets">
+  <div class="container">
+    <span class="section-tag reveal">03 — Ce qu'on livre</span>
+    <h2 class="reveal" data-delay="1">
+      Trois datasets <span class="serif">qui valent leur poids en heures gagnées.</span>
+    </h2>
+    <p class="section-intro reveal" data-delay="2">
+      Chaque dataset est livré en JSON, Parquet et SQL, avec un schéma documenté et un changelog versionné.
+      Vous achetez la version actuelle (one-shot), ou vous vous abonnez aux mises à jour annuelles.
+    </p>
+
+    <div class="dataset-grid">
+      <div class="dataset reveal">
+        <div class="dataset-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="4" y="6" width="20" height="16" rx="2" stroke="#0F1115" stroke-width="1.5"/>
+            <path d="M4 11h20" stroke="#0F1115" stroke-width="1.5"/>
+            <path d="M9 6V4M19 6V4" stroke="#0F1115" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="14" cy="16" r="2" fill="#DC1F2D"/>
+          </svg>
+        </div>
+        <div class="dataset-meta">TARES · BAZG ✅ permission accordée</div>
+        <h3>Tarif douanier suisse</h3>
+        <p>
+          L'intégralité du tarif douanier suisse normalisé : codes HS à 8 chiffres, taux, unités, restrictions, accords commerciaux.
+          Trilingue DE/FR/IT. Mises à jour trimestrielles.
+        </p>
+        <div class="dataset-stats">
+          <div class="dataset-stat">
+            <span class="dataset-stat-num">~10K</span>
+            <span class="dataset-stat-label">Codes tarifaires</span>
+          </div>
+          <div class="dataset-stat">
+            <span class="dataset-stat-num">3</span>
+            <span class="dataset-stat-label">Langues officielles</span>
+          </div>
+          <div class="dataset-stat">
+            <span class="dataset-stat-num">299<span style="font-size: 11px; color: var(--ink-mute);"> CHF</span></span>
+            <span class="dataset-stat-label">Prix one-shot</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dataset reveal" data-delay="1">
+        <div class="dataset-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="#0F1115" stroke-width="1.5"/>
+            <rect x="16" y="4" width="8" height="8" rx="1.5" stroke="#0F1115" stroke-width="1.5"/>
+            <rect x="4" y="16" width="8" height="8" rx="1.5" stroke="#0F1115" stroke-width="1.5"/>
+            <rect x="16" y="16" width="8" height="8" rx="1.5" stroke="#DC1F2D" stroke-width="1.5"/>
+            <path d="M12 8h4M8 12v4M16 20h-4M20 16v-4" stroke="#0F1115" stroke-width="1.5" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+        <div class="dataset-meta">NOGA + NACE + ISIC · BFS en attente</div>
+        <h3>Classifications économiques</h3>
+        <p>
+          NOGA 2025 (suisse) + NACE Rev. 2.1 (européenne) + ISIC Rev. 4 (mondiale).
+          Avec les passerelles bidirectionnelles entre les trois standards. Idéal pour reporting multi-juridictions.
+        </p>
+        <div class="dataset-stats">
+          <div class="dataset-stat">
+            <span class="dataset-stat-num">~3K</span>
+            <span class="dataset-stat-label">Codes par standard</span>
+          </div>
+          <div class="dataset-stat">
+            <span class="dataset-stat-num">3</span>
+            <span class="dataset-stat-label">Standards alignés</span>
+          </div>
+          <div class="dataset-stat">
+            <span class="dataset-stat-num">399<span style="font-size: 11px; color: var(--ink-mute);"> CHF</span></span>
+            <span class="dataset-stat-label">Prix one-shot</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dataset reveal" data-delay="2">
+        <div class="dataset-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 4L24 9V15C24 19.5 19.5 23 14 24C8.5 23 4 19.5 4 15V9L14 4Z" stroke="#0F1115" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="14" cy="14" r="3" fill="#DC1F2D"/>
+          </svg>
+        </div>
+        <div class="dataset-meta">FINMA Registry · FINMA en attente</div>
+        <h3>Registre FINMA unifié</h3>
+        <p>
+          Les 10 listes publiques d'autorisations FINMA (banques, assureurs, gestionnaires, etc.) consolidées en un seul registre indexé.
+          Plus besoin de scraper 10 pages web différentes.
+        </p>
+        <div class="dataset-stats">
+          <div class="dataset-stat">
+            <span class="dataset-stat-num">~5K</span>
+            <span class="dataset-stat-label">Entités enregistrées</span>
+          </div>
+          <div class="dataset-stat">
+            <span class="dataset-stat-num">10</span>
+            <span class="dataset-stat-label">Catégories unifiées</span>
+          </div>
+          <div class="dataset-stat">
+            <span class="dataset-stat-num">299<span style="font-size: 11px; color: var(--ink-mute);"> CHF</span></span>
+            <span class="dataset-stat-label">Prix one-shot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPARAISON ============ -->
+<section id="compare" class="compare">
+  <div class="container">
+    <span class="section-tag reveal">04 — La concurrence</span>
+    <h2 class="reveal" data-delay="1">
+      Ce que font les autres,<br>
+      <span class="serif">et ce que personne ne fait.</span>
+    </h2>
+    <p class="section-intro reveal" data-delay="2">
+      Plusieurs acteurs servent ce marché de manière partielle.
+      Soit ils livrent les données brutes (avec tous les défauts d'origine), soit ils vendent un service sur mesure très cher,
+      soit ils couvrent un seul standard. Personne ne fait l'intersection des trois.
+    </p>
+
+    <div class="compare-table reveal" data-delay="1">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>
+              <div class="cell-name">opendata.swiss</div>
+              <div class="cell-sub">Portail officiel</div>
+            </th>
+            <th>
+              <div class="cell-name">SwissFirms / Moneyhouse</div>
+              <div class="cell-sub">Annuaires d'entreprises</div>
+            </th>
+            <th>
+              <div class="cell-name">Conseil sur mesure</div>
+              <div class="cell-sub">Cabinets data type Deloitte</div>
+            </th>
+            <th class="col-osd">
+              <div class="cell-name">openswissdata</div>
+              <div class="cell-sub">Datasets normalisés</div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Données prêtes à l'emploi</th>
+            <td><span class="cross">—</span> données brutes</td>
+            <td><span class="partial">partiel</span> annuaires uniquement</td>
+            <td><span class="check">✓</span></td>
+            <td class="col-osd"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <th>Cross-walks multi-standards</th>
+            <td><span class="cross">—</span></td>
+            <td><span class="cross">—</span></td>
+            <td><span class="partial">à la demande</span></td>
+            <td class="col-osd"><span class="check">✓</span> NOGA ↔ NACE ↔ ISIC</td>
+          </tr>
+          <tr>
+            <th>Versionnage sémantique</th>
+            <td><span class="cross">—</span></td>
+            <td><span class="cross">—</span></td>
+            <td><span class="cross">—</span> livraison ponctuelle</td>
+            <td class="col-osd"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <th>Formats modernes (JSON / Parquet)</th>
+            <td><span class="cross">—</span> PDF / Excel</td>
+            <td><span class="partial">CSV uniquement</span></td>
+            <td><span class="check">✓</span></td>
+            <td class="col-osd"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <th>Prix d'entrée</th>
+            <td>Gratuit (mais inutilisable)</td>
+            <td>Dès 2 000 CHF/an</td>
+            <td>10 000 – 50 000 CHF/projet</td>
+            <td class="col-osd"><span style="color: #FFB8BD; font-weight: 600;">299 CHF one-shot</span></td>
+          </tr>
+          <tr>
+            <th>Permission commerciale explicite</th>
+            <td><span class="check">✓</span> sources</td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td class="col-osd"><span class="check">✓</span> BAZG, BFS, FINMA</td>
+          </tr>
+          <tr>
+            <th>Hébergement Suisse / EU</th>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="partial">variable</span></td>
+            <td class="col-osd"><span class="check">✓</span> EU Frankfurt</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AUDIENCE ============ -->
+<section class="audience">
+  <div class="container">
+    <span class="section-tag reveal">05 — Pour qui</span>
+    <h2 class="reveal" data-delay="1">
+      Trois clientèles, <span class="serif">trois douleurs concrètes.</span>
+    </h2>
+    <p class="section-intro reveal" data-delay="2">
+      On ne vend pas à tout le monde. On vend à trois types de personnes très précis qui ont actuellement un problème quotidien avec les données publiques suisses.
+    </p>
+
+    <div class="persona-grid">
+      <div class="persona reveal">
+        <div class="persona-avatar">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="3" y="4" width="16" height="14" rx="2" stroke="#DC1F2D" stroke-width="1.5"/>
+            <path d="M7 8h8M7 11h8M7 14h5" stroke="#DC1F2D" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="persona-role">Data Engineer</div>
+        <h3>Marc, équipe data d'un assureur</h3>
+        <p>
+          Doit alimenter le datawarehouse avec les codes NOGA pour le reporting réglementaire trimestriel.
+          Chaque mise à jour BFS lui prend deux jours de retraitement manuel.
+        </p>
+        <p class="persona-quote">
+          « Je veux un fichier propre, pas un PDF de 400 pages à parser le dimanche soir. »
+        </p>
+      </div>
+
+      <div class="persona reveal" data-delay="1">
+        <div class="persona-avatar">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M11 3L19 7V11C19 15 15.5 18.5 11 19C6.5 18.5 3 15 3 11V7L11 3Z" stroke="#DC1F2D" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M8 11l2 2 4-4" stroke="#DC1F2D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="persona-role">Compliance Officer</div>
+        <h3>Stéphanie, FinTech genevoise</h3>
+        <p>
+          Doit vérifier hebdomadairement si ses contreparties sont bien autorisées par la FINMA.
+          Aujourd'hui, elle scrape 10 pages web différentes — fragile et coûteux à maintenir.
+        </p>
+        <p class="persona-quote">
+          « Un seul endpoint qui dit oui ou non. C'est tout ce que je veux. »
+        </p>
+      </div>
+
+      <div class="persona reveal" data-delay="2">
+        <div class="persona-avatar">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="3" y="3" width="16" height="16" rx="2" stroke="#DC1F2D" stroke-width="1.5"/>
+            <path d="M3 9h16M9 3v16" stroke="#DC1F2D" stroke-width="1.5"/>
+            <circle cx="14" cy="14" r="2" fill="#DC1F2D"/>
+          </svg>
+        </div>
+        <div class="persona-role">Éditeur ERP / SaaS</div>
+        <h3>Patrick, CTO d'un éditeur logistique</h3>
+        <p>
+          Vend un ERP à des PME suisses qui exportent. Doit intégrer le tarif douanier dans son module facturation.
+          Sans openswissdata, c'est un sprint de 6 semaines tous les six mois.
+        </p>
+        <p class="persona-quote">
+          « Je préfère payer pour de la qualité que payer mes devs à parser du PDF. »
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section id="pricing" class="pricing">
+  <div class="container">
+    <span class="section-tag reveal">06 — Tarifs</span>
+    <h2 class="reveal" data-delay="1">
+      Pas d'abonnement caché. <span class="serif">Pas de devis.</span>
+    </h2>
+    <p class="section-intro reveal" data-delay="2">
+      Deux modes : achetez la version actuelle d'un dataset (one-shot), ou abonnez-vous aux mises à jour annuelles.
+      Tous les prix sont en francs suisses, hors TVA.
+    </p>
+
+    <div class="price-grid">
+      <div class="price-card reveal">
+        <div class="price-name">TARES</div>
+        <div class="price-amount">299<span class="price-currency">CHF</span></div>
+        <div class="price-period">One-shot · version actuelle</div>
+        <ul class="price-list">
+          <li>Tarif douanier complet</li>
+          <li>Trilingue DE/FR/IT</li>
+          <li>JSON / Parquet / SQL</li>
+          <li>Updates : +120 CHF/an</li>
+        </ul>
+      </div>
+
+      <div class="price-card reveal" data-delay="1">
+        <div class="price-name">CLASSIFICATIONS</div>
+        <div class="price-amount">399<span class="price-currency">CHF</span></div>
+        <div class="price-period">One-shot · version actuelle</div>
+        <ul class="price-list">
+          <li>NOGA + NACE + ISIC</li>
+          <li>Cross-walks bidirectionnels</li>
+          <li>JSON / Parquet / SQL</li>
+          <li>Updates : +160 CHF/an</li>
+        </ul>
+      </div>
+
+      <div class="price-card reveal" data-delay="2">
+        <div class="price-name">FINMA REGISTRY</div>
+        <div class="price-amount">299<span class="price-currency">CHF</span></div>
+        <div class="price-period">One-shot · version actuelle</div>
+        <ul class="price-list">
+          <li>10 listes consolidées</li>
+          <li>Index unifié</li>
+          <li>JSON / Parquet / SQL</li>
+          <li>Updates : +120 CHF/an</li>
+        </ul>
+      </div>
+
+      <div class="price-card featured reveal" data-delay="3">
+        <div class="price-badge">Le plus populaire</div>
+        <div class="price-name">BUNDLE COMPLET</div>
+        <div class="price-amount">799<span class="price-currency">CHF</span></div>
+        <div class="price-period">Les 3 datasets · économie 200 CHF</div>
+        <ul class="price-list">
+          <li>TARES + Classifications + FINMA</li>
+          <li>Tous formats inclus</li>
+          <li>Mise à jour groupée disponible</li>
+          <li>Support email prioritaire</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRUST ============ -->
+<section class="trust">
+  <div class="container">
+    <span class="section-tag reveal">07 — Légalité & confiance</span>
+    <h2 class="reveal" data-delay="1">
+      <span class="serif">Permission écrite</span> des autorités.
+    </h2>
+    <p class="section-intro reveal" data-delay="2">
+      La législation suisse classe certaines données publiques en « usage libre, permission requise pour usage commercial ».
+      Nous demandons cette permission explicitement à chaque autorité émettrice et nous la documentons.
+    </p>
+
+    <div class="trust-grid">
+      <div class="trust-card reveal">
+        <div class="trust-meta">
+          <span class="trust-tag green">Accordé</span>
+          <span class="trust-date">2026-04-21</span>
+        </div>
+        <h3>BAZG — Tarif douanier (TARES)</h3>
+        <p>
+          Permission accordée par M. Michael Beer, Chef Tarifgrundlagen, sous 7 conditions précises (mention « non officiel » trilingue, exclusion des Erläuterungen, for juridique Berne pour litiges TARES, etc.).
+          Ces conditions sont implémentées dans nos livrables.
+        </p>
+      </div>
+
+      <div class="trust-card reveal" data-delay="1">
+        <div class="trust-meta">
+          <span class="trust-tag">En cours</span>
+          <span class="trust-date">2026-04-17</span>
+        </div>
+        <h3>BFS — Classifications (NOGA)</h3>
+        <p>
+          Demande envoyée à l'Office fédéral de la statistique pour le dataset NOGA 2025 et les passerelles vers NACE/ISIC.
+          Réponse attendue. Relance prévue le 24 avril.
+        </p>
+      </div>
+
+      <div class="trust-card reveal">
+        <div class="trust-meta">
+          <span class="trust-tag">En cours</span>
+          <span class="trust-date">2026-04-17</span>
+        </div>
+        <h3>FINMA — Registre des entités autorisées</h3>
+        <p>
+          Demande envoyée à l'Autorité fédérale de surveillance des marchés financiers pour la consolidation des 10 listes publiques d'autorisation.
+          Réponse attendue. Relance prévue le 24 avril.
+        </p>
+      </div>
+
+      <div class="trust-card reveal" data-delay="1">
+        <div class="trust-meta">
+          <span class="trust-tag green">Conforme</span>
+          <span class="trust-date">2026</span>
+        </div>
+        <h3>nFADP & RGPD</h3>
+        <p>
+          Hébergement EU/Frankfurt (Cloudflare R2 + Railway). Aucune donnée client transférée hors EU.
+          Stripe pour paiements (PCI DSS). Pas de tracking publicitaire.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOUNDER ============ -->
+<section class="founder">
+  <div class="container-narrow">
+    <div class="founder-card">
+      <div class="founder-avatar">a</div>
+      <p class="founder-quote">
+        « J'ai créé openswissdata parce que j'ai vécu le problème de l'autre côté.
+        Sur mon précédent projet, IBANforge, j'ai passé des semaines à essayer d'exploiter des sources publiques suisses.
+        Aujourd'hui, je veux que d'autres gagnent ce temps-là. »
+      </p>
+      <div class="founder-name">Alain Martin</div>
+      <div class="founder-bio">Fondateur · Suisse · Aussi derrière <a href="https://ibanforge.com" style="color: var(--ink); text-decoration: underline;">IBANforge.com</a> (validation IBAN/BIC pour PSP)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta">
+  <div class="container-narrow">
+    <h2 class="reveal">
+      Voir les datasets <span class="serif">en détail.</span>
+    </h2>
+    <p class="reveal" data-delay="1">
+      Documentation, schémas, exemples gratuits. Pas de carte demandée pour explorer.
+    </p>
+    <a href="https://www.openswissdata.com" class="btn btn-primary reveal" data-delay="2">
+      openswissdata.com
+      <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="logo">
+      <span class="logo-mark">o</span>
+      <span>openswissdata</span>
+    </div>
+    <p>© 2026 · Service indépendant · Suisse / EU</p>
+  </div>
+  <div class="container">
+    <div class="disclaimer">
+      <strong>Note légale.</strong> openswissdata propose des produits dérivés des données publiques officielles suisses, livrés avec permission commerciale explicite des autorités émettrices (BAZG, BFS, FINMA — voir section dédiée pour le statut détaillé).
+      Ces produits sont des reformulations à des fins d'utilisation par des entreprises. Ils ne remplacent pas les publications officielles ; en cas de divergence, les sources originales font foi.
+      For juridique : Berne, Suisse, pour les datasets TARES (selon condition BAZG).
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Nav scroll state
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 8);
+  }, { passive: true });
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  reveals.forEach(el => io.observe(el));
+
+  // Age tabs
+  const tabs = document.querySelectorAll('.age-tab');
+  const contents = document.querySelectorAll('.age-content');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const age = tab.dataset.age;
+      tabs.forEach(t => t.classList.toggle('active', t === tab));
+      contents.forEach(c => c.classList.toggle('active', c.dataset.age === age));
+    });
+  });
+
+  // Smooth scroll for anchors
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
