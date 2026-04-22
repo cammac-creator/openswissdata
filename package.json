@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed": "tsx src/db/seed.ts",
+    "db:seed": "node --env-file=.env --import tsx/esm src/db/seed.ts",
     "etl:tares": "tsx etl/tares/release.ts",
     "etl:classifications": "tsx etl/classifications/release.ts",
     "etl:finma": "tsx etl/finma/release.ts",
