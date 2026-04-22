@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://openswissdata.com/schemas/tares/v1",
+  "title": "TARES Dataset",
+  "description": "Swiss customs tariff codes (HS8) normalized",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["hs8", "hs6", "chapter", "heading", "designation_fr", "designation_de", "designation_it", "unit_stat", "valid_from", "source_url"],
+    "properties": {
+      "hs8": { "type": "string", "pattern": "^[0-9]{8}$" },
+      "hs6": { "type": "string", "pattern": "^[0-9]{6}$" },
+      "chapter": { "type": "integer", "minimum": 1, "maximum": 99 },
+      "heading": { "type": "string" },
+      "designation_fr": { "type": "string" },
+      "designation_de": { "type": "string" },
+      "designation_it": { "type": "string" },
+      "designation_en": { "type": "string" },
+      "unit_stat": { "type": "string" },
+      "duty_mfn_chf_per_100kg": { "type": ["number", "null"] },
+      "preferential_regimes": {
+        "type": "object",
+        "additionalProperties": { "oneOf": [{ "type": "number" }, { "const": "free" }] }
+      },
+      "restrictions_codes": { "type": "array", "items": { "type": "string" } },
+      "valid_from": { "type": "string", "format": "date" },
+      "source_url": { "type": "string", "format": "uri" }
+    }
+  }
+}

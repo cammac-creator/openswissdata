@@ -1,0 +1,37 @@
+{
+  "name": "@openswissdata/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for openswissdata.com datasets",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["openswissdata", "swiss", "customs", "tares", "noga", "nace", "isic", "finma"],
+  "author": "Alain Martin",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openswissdata/openswissdata-sdk-ts.git"
+  },
+  "homepage": "https://openswissdata.com",
+  "dependencies": {
+    "csv-parse": "^5.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "@types/node": "^22.9.0"
+  },
+  "engines": { "node": ">=18" }
+}

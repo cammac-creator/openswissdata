@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://openswissdata.com/schemas/classifications/v1",
+  "title": "Swiss Economic Classifications Bundle",
+  "description": "Normalized NOGA 2008/2025 + NACE Rev 2/2.1 + ISIC Rev 4 with 5-way cross-walks",
+  "definitions": {
+    "NomenclatureRow": {
+      "type": "object",
+      "required": ["scheme", "code", "level"],
+      "properties": {
+        "scheme": { "enum": ["NOGA_2008", "NOGA_2025", "NACE_2.0", "NACE_2.1", "ISIC_4"] },
+        "code": { "type": "string" },
+        "level": { "enum": ["section", "division", "group", "class", "subclass"] },
+        "parent": { "type": ["string", "null"] },
+        "label_fr": { "type": "string" },
+        "label_de": { "type": "string" },
+        "label_it": { "type": "string" },
+        "label_en": { "type": "string" }
+      }
+    },
+    "CrossWalkRow": {
+      "type": "object",
+      "required": ["mapping_type"],
+      "properties": {
+        "noga_2008": { "type": ["string", "null"] },
+        "noga_2025": { "type": ["string", "null"] },
+        "nace_2_0": { "type": ["string", "null"] },
+        "nace_2_1": { "type": ["string", "null"] },
+        "isic_4": { "type": ["string", "null"] },
+        "mapping_type": { "enum": ["exact", "partial", "aggregated", "derived"] },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}
