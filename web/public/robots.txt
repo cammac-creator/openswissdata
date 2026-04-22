@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /account
+Disallow: /api/
+
+Sitemap: https://www.openswissdata.com/sitemap-index.xml

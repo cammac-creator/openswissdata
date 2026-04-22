@@ -1,0 +1,37 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map(post => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<BaseLayout
+  title={`${post.data.title} — openswissdata.com`}
+  description={post.data.description}
+>
+  <article class="max-w-3xl mx-auto px-6 py-16 prose prose-slate">
+    <nav class="text-sm text-slate-500 mb-4 not-prose">
+      <a href="/" class="hover:underline">Home</a> · <a href="/blog" class="hover:underline">Blog</a> · <span>{post.data.title}</span>
+    </nav>
+    <h1 class="text-4xl font-bold mb-2 not-prose">{post.data.title}</h1>
+    <p class="text-sm text-slate-500 mb-8 not-prose">
+      Published {post.data.publishedAt.toISOString().slice(0, 10)}
+      {post.data.updatedAt && ` · Updated ${post.data.updatedAt.toISOString().slice(0, 10)}`}
+    </p>
+    <Content />
+
+    <hr class="my-12">
+    <footer class="not-prose text-sm text-slate-600">
+      <p class="mb-2">Written by Alain Martin · Solo founder of openswissdata.com</p>
+      <p>Also check: <a href="/bundle" class="text-indigo-600 hover:underline">openswissdata.com/bundle</a></p>
+    </footer>
+  </article>
+</BaseLayout>
