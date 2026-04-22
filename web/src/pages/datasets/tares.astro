@@ -12,6 +12,14 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=tares";
       <a href="/" class="hover:underline">Home</a> · <a href="/bundle" class="hover:underline">All datasets</a> · <span>TARES</span>
     </nav>
 
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm">
+      <p class="font-semibold text-amber-900 mb-2">&#9888; Non-officiel · Nicht-offiziell · Non-official</p>
+      <p class="text-amber-900">
+        Seules les publications officielles de la Chancellerie fédérale et du BAZG font foi.
+        Source autoritative : <a href="https://xtares.admin.ch/" target="_blank" rel="noopener" class="underline">xtares.admin.ch</a>.
+      </p>
+    </div>
+
     <div class="flex items-baseline justify-between flex-wrap gap-4 mb-2">
       <h1 class="text-4xl font-bold">TARES — Swiss Customs Tariff</h1>
       <div class="text-3xl font-bold text-indigo-600">CHF 299</div>
@@ -80,5 +88,9 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=tares";
       </a>
       <p class="text-xs text-slate-500 mt-3">Secure checkout via Stripe · Instant download by email · 14-day refund if not downloaded</p>
     </div>
+
+    <p class="mt-8 text-xs text-slate-500">
+      TARES-specific terms: governing law Swiss, jurisdiction Bern. See full license terms in the bundle LICENSE.txt.
+    </p>
   </section>
 </BaseLayout>

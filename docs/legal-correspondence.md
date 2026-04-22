@@ -28,13 +28,13 @@ Répondu par Michael Beer, Chef Tarifgrundlagen, BAZG Zolltarif und Tarifgrundla
 
 **Actions de mise en conformité à planifier :**
 
-- [ ] Ajouter la mention DE/FR/EN « Non-officiel » dans le README du bundle TARES (modifier `etl/tares/bundle.ts` : constantes `DATASET_LICENSE` et `readme`).
-- [ ] Ajouter un bandeau visuel « Non-officiel · Source autoritative : xtares.admin.ch » en haut de `web/src/pages/datasets/tares.astro`.
-- [ ] Mettre à jour `LICENSE.txt` spécifiquement pour TARES avec la clause de non-officialité + for juridique Berne (distinct des autres datasets dont le for reste canton d'Alain).
-- [ ] Fixtures actuelles vérifiées : `sample-5-rows.json` ne contient que code/désignation/droit/régime/restrictions, pas de notes explicatives → ✅ conforme.
-- [ ] Pour le scraping réel futur (Task 2.4), **exclure explicitement** les colonnes notes explicatives (« Erläuterungen ») et décisions de classification (« Entscheide ») de l'ingestion.
-- [ ] Ajouter dans CGV une section spécifique TARES avec for Berne.
-- [ ] Vérifier que `source_url` pointe sur la fiche HS8 spécifique (ex. `https://xtares.admin.ch/tares/control/searchSimpleTarifNumber?number=84820010`) et pas sur la racine du site.
+- [x] Ajouter la mention DE/FR/EN « Non-officiel » dans le README du bundle TARES (modifier `etl/tares/bundle.ts` : constantes `DATASET_LICENSE` et `readme`). *(fait 2026-04-16)*
+- [x] Ajouter un bandeau visuel « Non-officiel · Source autoritative : xtares.admin.ch » en haut de `web/src/pages/datasets/tares.astro`. *(fait 2026-04-16)*
+- [x] Mettre à jour `LICENSE.txt` spécifiquement pour TARES avec la clause de non-officialité + for juridique Berne (distinct des autres datasets dont le for reste canton d'Alain). *(fait 2026-04-16 — `DATASET_LICENSE` dans `etl/tares/bundle.ts` remplacé par version TARES-spécifique avec for Berne)*
+- [x] Fixtures actuelles vérifiées : `sample-5-rows.json` ne contient que code/désignation/droit/régime/restrictions, pas de notes explicatives → ✅ conforme.
+- [x] Pour le scraping réel futur (Task 2.4), **exclure explicitement** les colonnes notes explicatives (« Erläuterungen ») et décisions de classification (« Entscheide ») de l'ingestion. *(fait 2026-04-16 — guard `assertNoForbiddenFields()` dans `etl/tares/normalize.ts` + commentaire FORBIDDEN dans `etl/tares/types.ts`)*
+- [ ] Ajouter dans CGV une section spécifique TARES avec for Berne. *(pending — Task 2.5)*
+- [ ] Vérifier que `source_url` pointe sur la fiche HS8 spécifique (ex. `https://xtares.admin.ch/tares/control/searchSimpleTarifNumber?number=84820010`) et pas sur la racine du site. *(pending — Task 2.4 scraping)*
 
 ## Réponse FINMA — en attente
 

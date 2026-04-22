@@ -50,38 +50,56 @@ const TARES_JSON_SCHEMA = {
   },
 };
 
-const DATASET_LICENSE = `openswissdata.com — Dataset License v1.0
+const DATASET_LICENSE = `openswissdata.com — TARES Dataset License v1.0
 
 Copyright © 2026 Alain Martin · openswissdata.com
+
+═══════════════════════════════════════════════════════════════════
+OFFICIAL NOTICE — NON-OFFICIAL PUBLICATION / NICHT-OFFIZIELL / PUBLICATION NON OFFICIELLE
+═══════════════════════════════════════════════════════════════════
+
+DE: Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.
+
+FR: Ceci n'est pas une publication officielle. Seules les publications de la Chancellerie fédérale et de l'Office fédéral de la douane et de la sécurité des frontières BAZG font foi.
+
+EN: This is not an official publication. Only the publications of the Federal Chancellery and the Federal Office for Customs and Border Security (FOCBS) are authoritative.
+
+═══════════════════════════════════════════════════════════════════
+LICENSE
+═══════════════════════════════════════════════════════════════════
 
 This dataset is licensed, not sold.
 
 PERMITTED USES:
 - Commercial use within your organization
-- Derivation and transformation for internal projects
+- Derivation and transformation of FORM (format, encoding, indexing) ONLY
 - Integration into your products or services (without redistributing the raw dataset)
 
 PROHIBITED USES:
+- Modification of the data CONTENT (tariff codes, duties, preferential regimes, designations must not be altered)
 - Public redistribution of the dataset or substantial portions thereof
 - Resale of the dataset in original or modified form
-- Republishing on public data marketplaces (Kaggle, data.world, etc.)
+- Use of "Gebrauchszolltarif", "Tares", or similar denominations in a way that suggests this is an official BAZG publication
+- Redistribution of BAZG Erläuterungen (explanatory notes) or Entscheide (classification decisions) — these are excluded from this dataset by design
+- Use of BAZG logos, headers, or official branding
 
 ATTRIBUTION:
-Attribution is appreciated but not required. Suggested:
-"Data provided by openswissdata.com (source: BAZG / Federal Office for Customs and Border Security)"
+Mandatory attribution in any derived product: the disclaimer above (DE/FR/EN) must be displayed verbatim, and users should be directed to https://xtares.admin.ch/ as the authoritative source.
 
 WARRANTY:
-Provided "AS IS" without warranty. Data is normalized from official Swiss
-government sources. openswissdata.com is not responsible for errors in
-the underlying official sources.
+The Federal Office for Customs and Border Security (BAZG) provides NO warranty, NO support, and NO interpretation assistance for this data. Errors arising from the use of this dataset or its derivatives cannot be invoked against customs clearance, duty collection, or criminal proceedings.
+openswissdata.com provides this dataset AS-IS with no warranty of accuracy or fitness for purpose.
 
 LIABILITY:
-Liability capped at the purchase price of this dataset.
+Liability capped at the purchase price of this dataset. No liability for indirect, consequential, or incidental damages.
 
 GOVERNING LAW:
-Swiss law. For: canton of Alain Martin.
+Swiss law. Jurisdiction: Bern (for TARES-related disputes specifically, per BAZG requirement 2026-04-21).
 
-Contact: alain@openswissdata.com
+TERMINATION:
+License terminates automatically upon breach of any prohibited use.
+
+Contact: alain@openswissdata.com · Source: https://xtares.admin.ch/
 `;
 
 export interface BundleResult {
@@ -90,6 +108,7 @@ export interface BundleResult {
   sizeBytes: number;
   version: string;
   rowCount: number;
+  lastUpdatedAt: string; // ISO timestamp for BAZG traceability
 }
 
 export async function buildBundle(rows: TaresRow[], version: string, outDir: string): Promise<BundleResult> {
@@ -134,9 +153,22 @@ export async function buildBundle(rows: TaresRow[], version: string, outDir: str
   writeJson(TARES_JSON_SCHEMA, join(workDir, "schema.json"));
 
   // README
+  const lastUpdatedAt = new Date().toISOString();
   const readme = `# TARES Dataset — version ${version}
 
-Normalized Swiss customs tariff codes (HS8), derived from xtares.admin.ch.
+═══════════════════════════════════════════════════════════════════
+🇩🇪 **Dies ist keine offizielle Veröffentlichung.** Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.
+
+🇫🇷 **Ceci n'est pas une publication officielle.** Seules les publications de la Chancellerie fédérale et de l'Office fédéral de la douane et de la sécurité des frontières BAZG font foi.
+
+🇬🇧 **This is not an official publication.** Only the publications of the Federal Chancellery and the Federal Office for Customs and Border Security (FOCBS) are authoritative.
+
+Authoritative source: https://xtares.admin.ch/
+═══════════════════════════════════════════════════════════════════
+
+Last updated: ${lastUpdatedAt}
+
+Normalized (form only) Swiss customs tariff codes (HS8). Values are preserved verbatim from the authoritative source.
 
 ## Files
 
@@ -157,7 +189,7 @@ https://www.bazg.admin.ch/
 
 - Rows: ${rows.length}
 - Version: ${version}
-- Generated: ${new Date().toISOString()}
+- Generated: ${lastUpdatedAt}
 `;
   writeFileSync(join(workDir, "README.md"), readme, "utf8");
 
@@ -193,5 +225,5 @@ https://www.bazg.admin.ch/
   // Clean workDir to save space
   rmSync(workDir, { recursive: true, force: true });
 
-  return { zipPath, sha256, sizeBytes, version, rowCount: rows.length };
+  return { zipPath, sha256, sizeBytes, version, rowCount: rows.length, lastUpdatedAt };
 }

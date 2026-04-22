@@ -1,5 +1,36 @@
 import type { TaresRow, HierarchyNode } from "./types.js";
 
+const FORBIDDEN_FIELD_PATTERNS = [
+  /erl(?:[aä]|ae)ut/i, // Erläuterungen (ä, a, or ae ASCII transliteration)
+  /entscheid/i,       // Entscheide
+  /explan/i,          // explanatory notes (EN)
+  /ruling/i,          // classification rulings (EN)
+  /commentaire/i,     // commentaires (FR)
+  /décision/i,        // décisions (FR, if accented)
+  /decision/i,        // decisions (FR, unaccented)
+];
+
+/**
+ * Defensive: validate that an ingested row does NOT contain any BAZG-restricted
+ * field (Erläuterungen/Entscheide). Returns the list of violating field names,
+ * or [] if the row is compliant. MUST be called by future scrapers (Task 2.4)
+ * after parsing, before adding to the output set.
+ *
+ * BAZG approval 2026-04-21 condition 3 prohibits redistribution of these fields.
+ */
+export function assertNoForbiddenFields(row: Record<string, unknown>): string[] {
+  const violations: string[] = [];
+  for (const key of Object.keys(row)) {
+    for (const pattern of FORBIDDEN_FIELD_PATTERNS) {
+      if (pattern.test(key)) {
+        violations.push(key);
+        break;
+      }
+    }
+  }
+  return violations;
+}
+
 /**
  * Pads an HS code to 8 digits (TARES CH canonical form).
  * Strips non-digits, right-pads with zeros, truncates at 8.

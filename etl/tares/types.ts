@@ -1,3 +1,14 @@
+/**
+ * TARES row — compliant with BAZG commercial redistribution conditions
+ * (approved 2026-04-21, see docs/legal-correspondence.md).
+ *
+ * FORBIDDEN fields (MUST NEVER be added to this interface):
+ * - Erläuterungen (explanatory notes)
+ * - Entscheide (classification decisions / rulings)
+ *
+ * Any scraper populating TaresRow MUST call assertNoForbiddenFields()
+ * from normalize.ts before emitting rows.
+ */
 export interface TaresRow {
   hs8: string;              // '84821000'
   hs6: string;              // '848200' (international)

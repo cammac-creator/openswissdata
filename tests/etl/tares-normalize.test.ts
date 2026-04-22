@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeHsCode, buildHierarchyMap } from "../../etl/tares/normalize.js";
+import { normalizeHsCode, buildHierarchyMap, assertNoForbiddenFields } from "../../etl/tares/normalize.js";
 
 describe("tares normalize", () => {
   describe("normalizeHsCode", () => {
@@ -77,6 +77,27 @@ describe("tares normalize", () => {
         { hs8: "84821001" },
       ]);
       expect(map["84821001"]?.parent).toBe("84000000");
+    });
+  });
+
+  describe("assertNoForbiddenFields", () => {
+    it("returns empty array for compliant row", () => {
+      expect(assertNoForbiddenFields({ hs8: "1", designation_fr: "x" })).toEqual([]);
+    });
+    it("flags Erläuterungen field", () => {
+      const v = assertNoForbiddenFields({ hs8: "1", erlauterungen: "banned" });
+      expect(v).toContain("erlauterungen");
+    });
+    it("flags Entscheide field", () => {
+      const v = assertNoForbiddenFields({ hs8: "1", entscheide: "banned" });
+      expect(v).toContain("entscheide");
+    });
+    it("flags English equivalents", () => {
+      expect(assertNoForbiddenFields({ explanatory_note: "x" })).toContain("explanatory_note");
+      expect(assertNoForbiddenFields({ classification_ruling: "x" })).toContain("classification_ruling");
+    });
+    it("is case-insensitive", () => {
+      expect(assertNoForbiddenFields({ Erlaeuterungen: "x" })).toContain("Erlaeuterungen");
     });
   });
 });

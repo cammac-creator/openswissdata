@@ -61,4 +61,29 @@ describe("buildBundle — TARES", () => {
 
     rmSync(workDir2, { recursive: true, force: true });
   });
+
+  it("includes the mandatory BAZG non-official disclaimer in README and LICENSE", async () => {
+    const rows = ingestFromFixture(fixturePath);
+    const result = await buildBundle(rows, "2026.04.22", workDir);
+
+    const ext = join(workDir, "verify");
+    execSync(`unzip -o "${result.zipPath}" -d "${ext}"`);
+
+    const readme = readFileSync(join(ext, "README.md"), "utf8");
+    const license = readFileSync(join(ext, "LICENSE.txt"), "utf8");
+
+    // DE disclaimer
+    expect(readme).toMatch(/keine offizielle Veröffentlichung/);
+    expect(license).toMatch(/keine offizielle Veröffentlichung/);
+    // FR disclaimer
+    expect(readme).toMatch(/pas une publication officielle/);
+    expect(license).toMatch(/pas une publication officielle/);
+    // EN disclaimer
+    expect(readme).toMatch(/not an official publication/);
+    expect(license).toMatch(/not an official publication/);
+    // Bern jurisdiction
+    expect(license).toMatch(/Bern/);
+    // Forbidden content exclusion statement
+    expect(license).toMatch(/Erläuterungen/);
+  });
 });
