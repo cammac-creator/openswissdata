@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { getDb } from "../lib/db.js";
+import { seedDatasets } from "../db/seed.js";
 
 export const adminRoute = new Hono();
 
@@ -11,6 +12,15 @@ const ReleaseSchema = z.object({
   sha256: z.string().length(64).regex(/^[0-9a-f]{64}$/i),
   size_bytes: z.number().int().positive(),
   changelog: z.string().default(""),
+});
+
+adminRoute.post("/seed", async (c) => {
+  const secret = c.req.header("x-admin-secret");
+  if (!secret || secret !== process.env.ADMIN_SECRET) {
+    return c.json({ error: "unauthorized" }, 401);
+  }
+  const result = seedDatasets();
+  return c.json({ ok: true, ...result });
 });
 
 adminRoute.post("/release", async (c) => {
