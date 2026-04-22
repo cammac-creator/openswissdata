@@ -12,7 +12,8 @@ Dernière mise à jour : **2026-04-22** (chantier infra TERMINÉ ✅)
 | Railway | Projet créé, service `api`, volume `/data` 1GB, 18 vars set, deploy live |
 | DNS + SSL | `https://www.openswissdata.com/api/health` répond `{"status":"ok","version":"0.1.0"}` |
 | Stripe | 4 produits + 7 prix créés en mode TEST, webhook `we_1TP409Rj...` actif sur prod, 9 vars sur Railway |
-| Validation finale | Health 200 ✅, webhook enabled ✅, 18 vars Railway ✅ |
+| Resend | Domaine `openswissdata.com` vérifié 2026-04-22 (DKIM + SPF + MX), API key dans `.env`, smoke test reçu ✅ |
+| Validation finale | Health 200 ✅, webhook enabled ✅, 18+ vars Railway, Resend smoke test envoyé ✅ |
 
 ## 📦 Stripe — IDs créés (test mode, 2026-04-22)
 
@@ -44,9 +45,10 @@ Dernière mise à jour : **2026-04-22** (chantier infra TERMINÉ ✅)
 ### Sprint applicatif (à venir)
 1. **Implémenter `/api/webhook/stripe`** — handler Hono qui valide signature + provisionne accès dataset après `checkout.session.completed`.
 2. **Implémenter Checkout Sessions** — endpoint `/api/checkout/:slug` qui crée une session Stripe pour un price ID.
-3. **Resend** : récupérer `RESEND_API_KEY` + créer domaine `openswissdata.com` dans Resend + sync sur Railway.
-4. **Landing Astro** : page d'accueil + pages produits (3 datasets + bundle).
-5. **TARES sprint** : implémenter les 7 conditions BAZG (disclaimers DE/FR/EN, exclusion `Erläuterungen`, for Berne, etc.) — détails dans `docs/legal-correspondence.md`.
+3. **Sync `RESEND_API_KEY` sur Railway** — petit reste, faire après `railway login` (token expiré).
+4. **Implémenter envois transactionnels** — receipt après paiement, lien de téléchargement, etc. (via Resend, FROM `hello@openswissdata.com`).
+5. **Landing Astro** : page d'accueil + pages produits (3 datasets + bundle).
+6. **TARES sprint** : implémenter les 7 conditions BAZG (disclaimers DE/FR/EN, exclusion `Erläuterungen`, for Berne, etc.) — détails dans `docs/legal-correspondence.md`.
 
 ### Décisions différées
 - **Root nu `openswissdata.com`** : abandonné (Infomaniak ne supporte pas CNAME-on-root). Pour le restaurer, migrer DNS vers Cloudflare (~20 min). Pas urgent, `www.` suffit.
@@ -60,6 +62,7 @@ Dernière mise à jour : **2026-04-22** (chantier infra TERMINÉ ✅)
 - **Stripe dashboard test** : https://dashboard.stripe.com/test/dashboard
 - **Stripe webhook logs** : https://dashboard.stripe.com/test/webhooks/we_1TP409RjI7CCvCPSk3BC0LYv
 - **Cloudflare R2 tokens** : https://dash.cloudflare.com/7d7d5b8193bb985ef0b3ea12995fbfe0/r2/api-tokens
+- **Resend dashboard** : https://resend.com/domains/c53d10b4-f552-4ad4-bbed-89670c59a14e
 - **Infomaniak DNS** : https://manager.infomaniak.com → openswissdata.com → Zone DNS
 
 ## Bugs / pièges connus
