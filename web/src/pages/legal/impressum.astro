@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+<BaseLayout
+  title="Impressum — openswissdata.com"
+  description="Mentions légales et informations éditoriales conformes LCD."
+>
+  <section class="max-w-3xl mx-auto px-6 py-16 prose prose-slate">
+    <nav class="text-sm text-slate-500 mb-4 not-prose">
+      <a href="/" class="hover:underline">Accueil</a> · <span>Impressum</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold mb-6">Impressum / Mentions légales</h1>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Éditeur</h2>
+    <p>
+      <strong>Alain Martin</strong><br>
+      Raison individuelle<br>
+      Suisse<br>
+      Email : <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>
+    </p>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Responsable du contenu</h2>
+    <p>Alain Martin</p>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Hébergement</h2>
+    <p>Railway (Frankfurt, Europe)<br>
+    Cloudflare R2 (Frankfurt, Europe) pour les fichiers de Datasets</p>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Statut</h2>
+    <p>Raison individuelle non inscrite au registre du commerce (sous le seuil obligatoire CHF 100'000).</p>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Protection des droits</h2>
+    <p>L'ensemble du code source, des pages web et de la mise en forme du site openswissdata.com est protégé par le droit d'auteur. Toute reproduction sans autorisation écrite est interdite.</p>
+    <p>Les données brutes des Datasets proviennent de sources officielles suisses (BFS, BAZG, FINMA, Eurostat, UN Statistics). La donnée brute elle-même n'est pas protégée par le droit d'auteur en Suisse (opendata.swiss ToU). Notre valeur ajoutée (schéma, normalisation, cross-walks, versionnage) est protégée.</p>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Liens</h2>
+    <ul class="list-disc pl-6">
+      <li><a href="/legal/cgv" class="text-indigo-600 hover:underline">Conditions Générales de Vente</a></li>
+      <li><a href="/legal/privacy" class="text-indigo-600 hover:underline">Politique de confidentialité</a></li>
+    </ul>
+  </section>
+</BaseLayout>

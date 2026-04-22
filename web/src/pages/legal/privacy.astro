@@ -1,0 +1,81 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+<BaseLayout
+  title="Politique de confidentialité — openswissdata.com"
+  description="Politique de confidentialité conforme nLPD + RGPD pour openswissdata.com."
+>
+  <section class="max-w-3xl mx-auto px-6 py-16 prose prose-slate">
+    <nav class="text-sm text-slate-500 mb-4 not-prose">
+      <a href="/" class="hover:underline">Accueil</a> · <span>Politique de confidentialité</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold mb-2">Politique de confidentialité</h1>
+    <p class="text-sm text-slate-500 mb-8">Version 1.0 · Dernière mise à jour : 2026-04-22 · Conforme nLPD (Suisse) + RGPD (UE)</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">1. Responsable du traitement</h2>
+    <p>Alain Martin, raison individuelle, Suisse · contact@openswissdata.com</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">2. Données collectées</h2>
+    <p>Nous collectons uniquement :</p>
+    <ul class="list-disc pl-6">
+      <li>Votre <strong>adresse email</strong>, fournie lors de l'achat d'un Dataset et pour la connexion à l'espace client.</li>
+      <li>Votre <strong>identifiant de paiement Stripe</strong> (stripe_customer_id), pour lier vos commandes.</li>
+      <li>L'<strong>historique de vos commandes</strong> (date, montant, Datasets achetés).</li>
+    </ul>
+    <p>Nous ne collectons <strong>jamais</strong> de mots de passe (authentification par lien magique), de données bancaires (gérées par Stripe), ni de données de navigation fines.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">3. Finalités</h2>
+    <ul class="list-disc pl-6">
+      <li>Exécution du contrat d'achat (livraison du Dataset)</li>
+      <li>Gestion de l'espace client (connexion, téléchargements)</li>
+      <li>Notifications de mises à jour des Datasets que vous avez achetés</li>
+      <li>Conservation des preuves comptables (obligation CH : 10 ans)</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">4. Sous-traitants</h2>
+    <p>Les données transitent par les sous-traitants suivants, tous liés par contrat à des obligations de confidentialité équivalentes aux nôtres :</p>
+    <table class="w-full text-sm border border-slate-300 my-4 not-prose">
+      <thead class="bg-slate-50">
+        <tr><th class="text-left px-3 py-2 border-b border-slate-300">Sous-traitant</th><th class="text-left px-3 py-2 border-b border-slate-300">Finalité</th><th class="text-left px-3 py-2 border-b border-slate-300">Hébergement</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="px-3 py-2">Stripe</td><td class="px-3 py-2">Traitement des paiements</td><td class="px-3 py-2">Irlande (UE)</td></tr>
+        <tr><td class="px-3 py-2">Resend</td><td class="px-3 py-2">Envoi transactionnel d'emails</td><td class="px-3 py-2">États-Unis (clauses contractuelles types)</td></tr>
+        <tr><td class="px-3 py-2">Railway</td><td class="px-3 py-2">Hébergement de l'application</td><td class="px-3 py-2">Europe (Frankfurt)</td></tr>
+        <tr><td class="px-3 py-2">Cloudflare R2</td><td class="px-3 py-2">Stockage des Datasets</td><td class="px-3 py-2">Europe (Frankfurt)</td></tr>
+        <tr><td class="px-3 py-2">Plausible Analytics</td><td class="px-3 py-2">Statistiques anonymes (sans cookies)</td><td class="px-3 py-2">Allemagne (UE)</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">5. Durée de conservation</h2>
+    <ul class="list-disc pl-6">
+      <li>Email + compte client : tant que le compte est actif, ou 10 ans après le dernier achat (obligation comptable CH).</li>
+      <li>Sessions de connexion : 30 jours maximum, renouvelables à chaque connexion.</li>
+      <li>Tokens de téléchargement : 48 heures.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">6. Vos droits (nLPD art. 25 + RGPD art. 15-22)</h2>
+    <p>Vous pouvez à tout moment :</p>
+    <ul class="list-disc pl-6">
+      <li>Accéder à vos données (depuis votre espace client ou sur demande)</li>
+      <li>Demander rectification ou suppression de votre compte</li>
+      <li>Exporter vos données (droit à la portabilité)</li>
+      <li>Vous opposer à un traitement</li>
+    </ul>
+    <p>Pour exercer ces droits : <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">7. Transferts internationaux</h2>
+    <p>Les données sont principalement stockées en Europe (Frankfurt pour Railway et R2). Resend est basé aux États-Unis ; le transfert est encadré par les clauses contractuelles types de la Commission européenne.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">8. Cookies et traceurs</h2>
+    <p>Nous utilisons uniquement un cookie technique (<code>osd_session</code>) strictement nécessaire à la connexion de l'espace client. Aucun cookie publicitaire ou de suivi tiers n'est posé. Plausible Analytics fonctionne sans cookies.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">9. Préposé fédéral à la protection des données (PFPDT)</h2>
+    <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir le PFPDT : <a href="https://www.edoeb.admin.ch/" target="_blank" rel="noopener" class="text-indigo-600 hover:underline">edoeb.admin.ch</a>.</p>
+
+    <p class="mt-12 text-xs text-slate-400 border-t border-slate-200 pt-4">
+      Ce document est un premier brouillon produit automatiquement. Il sera revu par un conseil juridique avant mise en vente commerciale à grande échelle.
+    </p>
+  </section>
+</BaseLayout>

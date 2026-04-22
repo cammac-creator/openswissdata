@@ -5,6 +5,91 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+describe("POST /api/admin/seed", () => {
+  let tmp: string;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "osd-seed-adm-"));
+    process.env.DATABASE_PATH = join(tmp, "t.sqlite");
+    process.env.ADMIN_SECRET = "test-secret-1234567890";
+    process.env.STRIPE_PRICE_TARES = "price_test_tares";
+    process.env.STRIPE_PRICE_TARES_UPDATES = "price_test_tares_up";
+    process.env.STRIPE_PRICE_CLASSIFICATIONS = "price_test_class";
+    process.env.STRIPE_PRICE_CLASSIFICATIONS_UPDATES = "price_test_class_up";
+    process.env.STRIPE_PRICE_FINMA = "price_test_finma";
+    process.env.STRIPE_PRICE_FINMA_UPDATES = "price_test_finma_up";
+    process.env.STRIPE_PRICE_BUNDLE = "price_test_bundle";
+  });
+
+  afterEach(() => {
+    closeDb();
+    rmSync(tmp, { recursive: true, force: true });
+    delete process.env.DATABASE_PATH;
+    delete process.env.ADMIN_SECRET;
+    for (const k of [
+      "STRIPE_PRICE_TARES",
+      "STRIPE_PRICE_TARES_UPDATES",
+      "STRIPE_PRICE_CLASSIFICATIONS",
+      "STRIPE_PRICE_CLASSIFICATIONS_UPDATES",
+      "STRIPE_PRICE_FINMA",
+      "STRIPE_PRICE_FINMA_UPDATES",
+      "STRIPE_PRICE_BUNDLE",
+    ]) {
+      delete process.env[k];
+    }
+  });
+
+  it("returns 401 when admin secret is missing", async () => {
+    const app = createApp();
+    const res = await app.request("/api/admin/seed", { method: "POST" });
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 401 when admin secret is wrong", async () => {
+    const app = createApp();
+    const res = await app.request("/api/admin/seed", {
+      method: "POST",
+      headers: { "x-admin-secret": "wrong-secret-value" },
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it("inserts 3 datasets on empty DB", async () => {
+    const app = createApp();
+    const res = await app.request("/api/admin/seed", {
+      method: "POST",
+      headers: { "x-admin-secret": "test-secret-1234567890" },
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.inserted).toEqual(
+      expect.arrayContaining(["tares", "classifications", "finma"])
+    );
+    expect(body.updated).toEqual([]);
+    const db = getDb();
+    const count = (
+      db.prepare("SELECT COUNT(*) as n FROM datasets").get() as { n: number }
+    ).n;
+    expect(count).toBe(3);
+  });
+
+  it("is idempotent — second call returns only updated", async () => {
+    const app = createApp();
+    await app.request("/api/admin/seed", {
+      method: "POST",
+      headers: { "x-admin-secret": "test-secret-1234567890" },
+    });
+    const res2 = await app.request("/api/admin/seed", {
+      method: "POST",
+      headers: { "x-admin-secret": "test-secret-1234567890" },
+    });
+    expect(res2.status).toBe(200);
+    const body2 = await res2.json();
+    expect(body2.inserted).toEqual([]);
+    expect(body2.updated.length).toBe(3);
+  });
+});
+
 describe("POST /api/admin/release", () => {
   let tmp: string;
 

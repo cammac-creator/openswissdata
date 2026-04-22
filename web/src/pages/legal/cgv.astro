@@ -1,0 +1,72 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+<BaseLayout
+  title="Conditions Générales de Vente — openswissdata.com"
+  description="Conditions générales de vente pour les datasets openswissdata.com (CGV trilingue FR)."
+>
+  <section class="max-w-3xl mx-auto px-6 py-16 prose prose-slate">
+    <nav class="text-sm text-slate-500 mb-4 not-prose">
+      <a href="/" class="hover:underline">Accueil</a> · <span>Conditions Générales de Vente</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold mb-2">Conditions Générales de Vente</h1>
+    <p class="text-sm text-slate-500 mb-8">Version 1.0 · Dernière mise à jour : 2026-04-22</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">1. Éditeur et objet</h2>
+    <p>openswissdata.com est édité par Alain Martin, raison individuelle, Suisse (ci-après « l'Éditeur »). Le site propose à la vente, sous forme de licences numériques, des datasets dérivés de sources officielles suisses (ci-après « les Datasets »).</p>
+    <p>Les présentes Conditions Générales de Vente (« CGV ») régissent toute commande passée par un client (« l'Acheteur ») sur openswissdata.com.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">2. Nature de la licence</h2>
+    <p>L'achat d'un Dataset confère à l'Acheteur une licence <strong>non-exclusive, non-transférable, perpétuelle sur la version téléchargée</strong>, à des fins commerciales internes à son organisation.</p>
+    <ul class="list-disc pl-6">
+      <li>L'Acheteur peut utiliser, transformer et intégrer le Dataset dans ses produits ou services internes.</li>
+      <li>L'Acheteur <strong>ne peut pas</strong> redistribuer publiquement le Dataset, le revendre, ni le publier sur des plateformes tierces (Kaggle, data.world, marketplaces, etc.).</li>
+      <li>L'Acheteur <strong>ne peut pas</strong> altérer le contenu des données (valeurs, codes, désignations). Seule la forme (format, encodage, indexation) peut être modifiée.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">3. Mises à jour (updates)</h2>
+    <p>Tout achat d'un Dataset inclut <strong>360 jours d'accès aux versions ultérieures</strong> (« updates ») à compter de la date d'achat. Passé ce délai, l'Acheteur peut souscrire à un abonnement de renouvellement annuel (tarif indiqué sur chaque page produit, typiquement 40 % du prix d'achat initial).</p>
+    <p>L'Éditeur s'efforce de publier des mises à jour selon la cadence indiquée sur la page produit. Aucune garantie de fréquence exacte n'est donnée.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">4. Prix et paiement</h2>
+    <p>Les prix sont affichés en francs suisses (CHF), hors TVA le cas échéant. Le paiement est traité par Stripe (cartes de crédit, Apple Pay, Google Pay). Les informations bancaires transitent uniquement via Stripe et ne sont jamais stockées par l'Éditeur.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">5. Livraison</h2>
+    <p>Après paiement validé, l'Acheteur reçoit sous 5 minutes un email contenant un lien de téléchargement signé valable 48 heures. Un accès permanent à ses Datasets est également disponible via l'espace client (<a href="/account" class="text-indigo-600 hover:underline">/account</a>, connexion par lien magique).</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">6. Droit de rétractation et remboursement</h2>
+    <p>Conformément au droit suisse (LCD art. 1), l'Acheteur dispose d'un délai de 14 jours pour demander le remboursement de son achat, <strong>à condition de ne pas avoir téléchargé le Dataset</strong>. Le téléchargement du ZIP constitue un acte de consommation explicite qui renonce à ce droit.</p>
+    <p>Les demandes de remboursement se font par email à contact@openswissdata.com.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">7. Limitation de responsabilité</h2>
+    <p>Les Datasets sont fournis « en l'état » (AS-IS). L'Éditeur normalise et met en forme les données issues de sources officielles, mais <strong>ne garantit ni l'exactitude ni l'exhaustivité</strong> du contenu, qui reste celui des sources d'origine.</p>
+    <p>La responsabilité de l'Éditeur est strictement limitée au <strong>montant de la commande</strong>. Aucune responsabilité n'est acceptée pour dommages indirects, perte de profit, ou conséquences de décisions prises sur la base des Datasets.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">8. Conditions spécifiques au Dataset TARES</h2>
+    <p>Conformément à l'accord de l'Office fédéral de la douane et de la sécurité des frontières (BAZG) du 21 avril 2026 :</p>
+    <ul class="list-disc pl-6">
+      <li>Le Dataset TARES est une <strong>publication non officielle</strong>. Seules les publications de la Chancellerie fédérale et du BAZG font foi.</li>
+      <li>La mention <em>« Dies ist keine offizielle Veröffentlichung »</em> est obligatoire et figure dans le README et le LICENSE.txt du bundle.</li>
+      <li>Le BAZG ne fournit aucune garantie ni support sur l'interprétation des données.</li>
+      <li><strong>For juridique pour tout litige relatif au Dataset TARES : tribunaux de Berne.</strong></li>
+      <li>Les « Erläuterungen » (notes explicatives) et « Entscheide » (décisions de classification) du BAZG sont expressément exclus du Dataset.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">9. Protection des données</h2>
+    <p>Les données personnelles collectées (email uniquement) sont traitées conformément à la Politique de confidentialité disponible à <a href="/legal/privacy" class="text-indigo-600 hover:underline">/legal/privacy</a>.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">10. Modification des CGV</h2>
+    <p>L'Éditeur se réserve le droit de modifier les présentes CGV à tout moment. Les Acheteurs ayant un achat en cours seront notifiés par email de tout changement substantiel. L'utilisation continue du service vaut acceptation des nouvelles CGV.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">11. Droit applicable et for juridique</h2>
+    <p>Les présentes CGV sont soumises au <strong>droit suisse</strong>. Sauf pour les litiges relatifs au Dataset TARES (for Berne, voir section 8), tout litige relève de la juridiction compétente du lieu de résidence de l'Éditeur en Suisse.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">12. Contact</h2>
+    <p>Pour toute question relative aux présentes CGV : <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a></p>
+
+    <p class="mt-12 text-xs text-slate-400 border-t border-slate-200 pt-4">
+      Ce document est un premier brouillon produit automatiquement. Il sera revu par un conseil juridique avant mise en vente commerciale à grande échelle.
+    </p>
+  </section>
+</BaseLayout>
