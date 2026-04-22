@@ -6,7 +6,9 @@ coverage
 .env.*
 !.env.example
 
-web
+web/node_modules
+web/.astro
+web/dist
 permissions-emails
 docs
 tests
