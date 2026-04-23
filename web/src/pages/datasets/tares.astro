@@ -114,46 +114,6 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=tares";
       </div>
     </section>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">Faire <span class="serif">en interne</span> ?</h2>
-      <p class="ds-section-intro">
-        Construire un scraper TARES, ce n'est pas le problème — vos devs le font en quelques heures avec un bon outillage IA.
-        Ce qui coûte vraiment, c'est ce qui suit : la maintenance, la conformité légale, et la stabilité de schéma sur la durée.
-      </p>
-
-      <div class="ds-bullets">
-        <div class="ds-bullet">
-          <div class="ds-bullet-num">↻</div>
-          <div>
-            <strong>Maintenance hebdomadaire.</strong> Le tarif douanier suisse change chaque semaine. La structure HTML de xtares.admin.ch peut changer sans préavis. Compter 4 à 8 heures par mois de patch en moyenne, plus le risque qu'un changement silencieux passe inaperçu pendant des semaines.
-          </div>
-        </div>
-        <div class="ds-bullet">
-          <div class="ds-bullet-num">§</div>
-          <div>
-            <strong>Permission commerciale BAZG.</strong> L'usage commercial nécessite une autorisation écrite de l'Administration fédérale des douanes — démarche non-triviale, conditions précises (7 dans notre cas : disclaimer trilingue, exclusion des Erläuterungen, for juridique Berne, etc.). Nous l'avons déjà obtenue.
-          </div>
-        </div>
-        <div class="ds-bullet">
-          <div class="ds-bullet-num">≡</div>
-          <div>
-            <strong>Stabilité du schéma.</strong> Notre schéma est figé en semver. Une release majeure ne casse jamais l'intégration en place. Vos pipelines internes ne reflètent pas cette stabilité — chaque update peut casser des hypothèses implicites.
-          </div>
-        </div>
-      </div>
-
-      <div class="ds-roi-box">
-        <div>
-          <div class="ds-roi-label">Le vrai calcul</div>
-          <h3 class="ds-roi-head">Le scraper, vous l'écrivez en 2 heures. Le maintenir 3 ans, c'est plusieurs jours par an de travail récurrent — sans valeur ajoutée pour vos clients.</h3>
-          <p class="ds-roi-body">Vous achetez l'absence de maintenance et la permission commerciale déjà obtenue. Vos devs travaillent sur ce qui différencie votre produit.</p>
-        </div>
-        <div>
-          <div class="ds-roi-price">299<span class="ds-roi-price-unit">CHF</span></div>
-        </div>
-      </div>
-    </section>
-
     <div class="ds-cta">
       <a href={STRIPE_CHECKOUT_URL} class="ds-cta-btn">
         Acheter TARES — 299 CHF

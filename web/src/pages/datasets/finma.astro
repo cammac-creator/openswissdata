@@ -134,45 +134,6 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=finma";
       </div>
     </section>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">Faire <span class="serif">en interne</span> ?</h2>
-      <p class="ds-section-intro">
-        Scraper une liste FINMA, c'est faisable. Maintenir 10 scrapers indépendants qui ont chacun leur format et changent sans préavis — c'est une autre histoire. Et ce n'est qu'une partie du travail.
-      </p>
-
-      <div class="ds-bullets">
-        <div class="ds-bullet">
-          <div class="ds-bullet-num">10</div>
-          <div>
-            <strong>10 sources indépendantes.</strong> Chaque liste FINMA (banques, assurances, PSPs, fund managers, etc.) a sa propre structure HTML, ses propres champs, son propre rythme de mise à jour. Pas d'API officielle. Le scraper unifié casse en moyenne 1 à 2 fois par mois selon notre expérience.
-          </div>
-        </div>
-        <div class="ds-bullet">
-          <div class="ds-bullet-num">+</div>
-          <div>
-            <strong>Enrichissement UID + LEI.</strong> Sans ça, vous avez juste des noms d'entités. Pour rendre le dataset jointable avec vos systèmes (KYC, accounting, screening), il faut résoudre l'UID suisse depuis Zefix et le LEI depuis GLEIF. Travail manuel ou intégration de deux APIs supplémentaires à maintenir.
-          </div>
-        </div>
-        <div class="ds-bullet">
-          <div class="ds-bullet-num">§</div>
-          <div>
-            <strong>Permission FINMA.</strong> Démarche écrite en cours pour autoriser l'usage commercial des registres FINMA. Une fois obtenue, elle s'applique à tous nos clients.
-          </div>
-        </div>
-      </div>
-
-      <div class="ds-roi-box">
-        <div>
-          <div class="ds-roi-label">Le vrai calcul</div>
-          <h3 class="ds-roi-head">Scraper, c'est 2 jours. Maintenir 10 scrapers + enrichir UID/LEI + suivre les changements de structure : plusieurs jours par mois, en continu.</h3>
-          <p class="ds-roi-body">Et chaque interruption de votre scraper = compliance officer aveugle pendant ce temps. Notre service, c'est zéro maintenance pour vous, et un dataset déjà jointable.</p>
-        </div>
-        <div>
-          <div class="ds-roi-price">299<span class="ds-roi-price-unit">CHF</span></div>
-        </div>
-      </div>
-    </section>
-
     <div class="ds-cta">
       <a href={STRIPE_CHECKOUT_URL} class="ds-cta-btn">
         Acheter FINMA Registry — 299 CHF
