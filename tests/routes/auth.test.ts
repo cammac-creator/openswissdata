@@ -11,6 +11,7 @@ vi.mock("../../src/lib/email.js", () => ({
 
 import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
+import { magicLinkRateMap } from "../../src/routes/auth.js";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -27,12 +28,65 @@ describe("auth routes", () => {
     db.prepare("INSERT INTO customers (email, created_at) VALUES (?, ?)").run("alice@example.com", Date.now());
     closeDb();
     sendMagicLinkMock.mockClear();
+    // Clear rate-limit map between tests so requests don't bleed across test cases
+    magicLinkRateMap.clear();
   });
   afterEach(() => {
     closeDb();
     rmSync(tmp, { recursive: true, force: true });
     delete process.env.DATABASE_PATH;
     delete process.env.BASE_URL;
+  });
+
+  describe("POST /api/auth/magic-link — rate limiting (H3)", () => {
+    it("H3: returns 429 on second request from same IP within 10 seconds", async () => {
+      const app = createApp();
+      // First request — should succeed
+      const r1 = await app.request("/api/auth/magic-link", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": "1.2.3.4",
+        },
+        body: JSON.stringify({ email: "alice@example.com" }),
+      });
+      expect(r1.status).toBe(200);
+
+      // Second request from same IP within 10s — should be rate limited
+      const r2 = await app.request("/api/auth/magic-link", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": "1.2.3.4",
+        },
+        body: JSON.stringify({ email: "alice@example.com" }),
+      });
+      expect(r2.status).toBe(429);
+    });
+
+    it("H3: different IPs are not rate-limited by each other", async () => {
+      const app = createApp();
+      const r1 = await app.request("/api/auth/magic-link", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": "10.0.0.1",
+        },
+        body: JSON.stringify({ email: "alice@example.com" }),
+      });
+      expect(r1.status).toBe(200);
+
+      // Different IP — should not be rate limited
+      const r2 = await app.request("/api/auth/magic-link", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": "10.0.0.2",
+        },
+        body: JSON.stringify({ email: "alice@example.com" }),
+      });
+      expect(r2.status).toBe(200);
+    });
   });
 
   describe("POST /api/auth/magic-link", () => {

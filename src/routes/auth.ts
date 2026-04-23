@@ -9,11 +9,37 @@ export const authRoute = new Hono();
 const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;      // 15 min
 const SESSION_TTL_MS = 30 * 24 * 3600 * 1000;  // 30 days
 
+// H3: per-IP rate limit for magic-link endpoint.
+// Map<ip, lastRequestTimestamp>. Capped at 10 000 entries (oldest evicted first).
+const RATE_LIMIT_WINDOW_MS = 10_000; // 10 seconds between requests per IP
+const RATE_LIMIT_MAX_ENTRIES = 10_000;
+export const magicLinkRateMap = new Map<string, number>();
+
+function getRateLimitIp(c: { req: { header: (name: string) => string | undefined } }): string {
+  const xff = c.req.header("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  return "unknown";
+}
+
 function isProd(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
 authRoute.post("/magic-link", async (c) => {
+  // H3: per-IP rate limit
+  const ip = getRateLimitIp(c);
+  const lastRequest = magicLinkRateMap.get(ip);
+  const now = Date.now();
+  if (lastRequest !== undefined && now - lastRequest < RATE_LIMIT_WINDOW_MS) {
+    return c.json({ error: "too_many_requests" }, 429);
+  }
+  // Evict oldest entries if at capacity
+  if (magicLinkRateMap.size >= RATE_LIMIT_MAX_ENTRIES) {
+    const oldest = magicLinkRateMap.keys().next().value;
+    if (oldest !== undefined) magicLinkRateMap.delete(oldest);
+  }
+  magicLinkRateMap.set(ip, now);
+
   let parsed;
   try {
     parsed = z.object({ email: z.string().email() }).parse(await c.req.json());
