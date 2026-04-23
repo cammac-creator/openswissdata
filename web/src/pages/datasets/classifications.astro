@@ -126,17 +126,38 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=classifications";
     </section>
 
     <section class="ds-section reveal">
-      <h2 class="ds-section-title">Pourquoi le <span class="serif">bundle</span> plutôt que séparément ?</h2>
+      <h2 class="ds-section-title">Faire les <span class="serif">cross-walks</span> en interne ?</h2>
       <p class="ds-section-intro">
-        Les cross-walks sont la vraie valeur. Acheter NOGA + NACE + ISIC séparément depuis les sources publiques et construire la table de pont vous-même : 40 à 80 heures d'ETL.
-        À 120 CHF de l'heure d'ingénieur, ça fait 4 800 à 9 600 CHF.
+        Récupérer chacun des 5 standards individuellement est trivial — ils sont publics et bien documentés.
+        Le défi commence quand vous voulez les <strong>aligner entre eux</strong> avec rigueur. C'est un travail de statisticien, pas de développeur, et il n'est jamais terminé.
       </p>
+
+      <div class="ds-bullets">
+        <div class="ds-bullet">
+          <div class="ds-bullet-num">↔</div>
+          <div>
+            <strong>Cross-walks 5-way.</strong> Mapper NOGA 2008 ↔ NOGA 2025 ↔ NACE Rev 2 ↔ NACE Rev 2.1 ↔ ISIC Rev 4, c'est ~3 000 codes × 5 standards × cas particuliers (fusions, scissions, recodifications). Travail de plusieurs jours par un statisticien qui connaît les nomenclatures.
+          </div>
+        </div>
+        <div class="ds-bullet">
+          <div class="ds-bullet-num">↻</div>
+          <div>
+            <strong>Maintenance des révisions.</strong> NOGA passe en 2025 (déjà fait), prochaine révision prévue 2030. NACE Rev 3 en discussion à Eurostat. À chaque révision, il faut refaire les mappings — sans erreur, parce que vos rapports réglementaires en dépendent.
+          </div>
+        </div>
+        <div class="ds-bullet">
+          <div class="ds-bullet-num">§</div>
+          <div>
+            <strong>Permission BFS.</strong> L'usage commercial des données NOGA nécessite l'autorisation écrite de l'Office fédéral de la statistique. Démarche en cours de notre côté.
+          </div>
+        </div>
+      </div>
 
       <div class="ds-roi-box">
         <div>
-          <div class="ds-roi-label">Calcul honnête</div>
-          <h3 class="ds-roi-head">4 800 – 9 600 CHF de cross-walks à construire. Ou 399 CHF, déjà testés.</h3>
-          <p class="ds-roi-body">Surtout, vous achetez la maintenance : à chaque révision (NOGA 2025 → 2030, NACE Rev 2.1 → 3.0...), nous re-mappons gratuitement pour les abonnés updates.</p>
+          <div class="ds-roi-label">Le vrai calcul</div>
+          <h3 class="ds-roi-head">Récupérer les standards : facile. Construire et maintenir les cross-walks 5-way : 1 à 2 jours/an de travail spécialisé, à vie.</h3>
+          <p class="ds-roi-body">À chaque révision (NOGA 2025 → 2030, NACE Rev 2.1 → 3.0…), nous re-mappons pour tous les abonnés updates. Vos équipes restent focalisées sur votre métier.</p>
         </div>
         <div>
           <div class="ds-roi-price">399<span class="ds-roi-price-unit">CHF</span></div>

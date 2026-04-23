@@ -619,6 +619,44 @@ details[open] .faq-body {
   line-height: 1.55;
 }
 
+.ds-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 32px 0;
+}
+.ds-bullet {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 18px;
+  align-items: start;
+  background: white;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  padding: 18px 22px;
+}
+.ds-bullet-num {
+  width: 36px; height: 36px;
+  background: var(--color-bg-alt);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-style: italic;
+  color: var(--color-accent);
+  font-weight: 400;
+}
+.ds-bullet > div:last-child {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+}
+.ds-bullet > div:last-child strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
 .ds-roi-box {
   background: var(--color-ink);
   color: var(--color-bg);

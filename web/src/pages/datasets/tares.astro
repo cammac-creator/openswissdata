@@ -115,17 +115,38 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=tares";
     </section>
 
     <section class="ds-section reveal">
-      <h2 class="ds-section-title">Pourquoi pas <span class="serif">scraper</span> xtares.admin.ch ?</h2>
+      <h2 class="ds-section-title">Faire <span class="serif">en interne</span> ?</h2>
       <p class="ds-section-intro">
-        Vous pouvez. Comptez 20 à 40 heures d'ETL à chaque release, à se battre contre des tables non machine-readable, des UTF-8 cassés, et des hiérarchies inconsistantes.
-        À 120 CHF de l'heure d'ingénieur senior, ça fait 2 400 à 4 800 CHF — par mise à jour. Et ça reste fragile.
+        Construire un scraper TARES, ce n'est pas le problème — vos devs le font en quelques heures avec un bon outillage IA.
+        Ce qui coûte vraiment, c'est ce qui suit : la maintenance, la conformité légale, et la stabilité de schéma sur la durée.
       </p>
+
+      <div class="ds-bullets">
+        <div class="ds-bullet">
+          <div class="ds-bullet-num">↻</div>
+          <div>
+            <strong>Maintenance hebdomadaire.</strong> Le tarif douanier suisse change chaque semaine. La structure HTML de xtares.admin.ch peut changer sans préavis. Compter 4 à 8 heures par mois de patch en moyenne, plus le risque qu'un changement silencieux passe inaperçu pendant des semaines.
+          </div>
+        </div>
+        <div class="ds-bullet">
+          <div class="ds-bullet-num">§</div>
+          <div>
+            <strong>Permission commerciale BAZG.</strong> L'usage commercial nécessite une autorisation écrite de l'Administration fédérale des douanes — démarche non-triviale, conditions précises (7 dans notre cas : disclaimer trilingue, exclusion des Erläuterungen, for juridique Berne, etc.). Nous l'avons déjà obtenue.
+          </div>
+        </div>
+        <div class="ds-bullet">
+          <div class="ds-bullet-num">≡</div>
+          <div>
+            <strong>Stabilité du schéma.</strong> Notre schéma est figé en semver. Une release majeure ne casse jamais l'intégration en place. Vos pipelines internes ne reflètent pas cette stabilité — chaque update peut casser des hypothèses implicites.
+          </div>
+        </div>
+      </div>
 
       <div class="ds-roi-box">
         <div>
-          <div class="ds-roi-label">Calcul honnête</div>
-          <h3 class="ds-roi-head">2 400 – 4 800 CHF d'ETL interne. Ou 299 CHF, prêt à charger en cinq minutes.</h3>
-          <p class="ds-roi-body">Vous achetez du temps de cerveau pour vos équipes. Elles peuvent travailler sur des choses qui différencient votre produit, plutôt que sur du parsing PDF dominical.</p>
+          <div class="ds-roi-label">Le vrai calcul</div>
+          <h3 class="ds-roi-head">Le scraper, vous l'écrivez en 2 heures. Le maintenir 3 ans, c'est plusieurs jours par an de travail récurrent — sans valeur ajoutée pour vos clients.</h3>
+          <p class="ds-roi-body">Vous achetez l'absence de maintenance et la permission commerciale déjà obtenue. Vos devs travaillent sur ce qui différencie votre produit.</p>
         </div>
         <div>
           <div class="ds-roi-price">299<span class="ds-roi-price-unit">CHF</span></div>
