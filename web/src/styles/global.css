@@ -1082,6 +1082,11 @@ details[open] .faq-body {
   border-top: 1px solid var(--color-line);
   margin-top: 56px;
 }
+.ds-cta-form {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+}
 .ds-cta-btn {
   display: inline-flex;
   align-items: center;
@@ -1089,16 +1094,23 @@ details[open] .faq-body {
   background: var(--color-accent);
   color: white;
   padding: 18px 36px;
+  border: none;
   border-radius: 14px;
   font-size: 17px;
   font-weight: 600;
+  font-family: inherit;
   text-decoration: none;
+  cursor: pointer;
   box-shadow: 0 10px 30px -8px rgba(220,31,45,.45);
   transition: transform .15s ease, box-shadow .15s ease;
 }
 .ds-cta-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 40px -8px rgba(220,31,45,.55);
+}
+.ds-cta-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
 }
 .ds-cta-sub {
   font-size: 12px;

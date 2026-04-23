@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=bundle";
 ---
 <BaseLayout
   title="Bundle complet — TARES + Classifications + FINMA | openswissdata"
@@ -125,10 +124,13 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=bundle";
     </section>
 
     <div class="ds-cta">
-      <a href={STRIPE_CHECKOUT_URL} class="ds-cta-btn">
-        Acheter le bundle complet — 799 CHF
-        <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
+      <form method="POST" action="/api/checkout/start" class="ds-cta-form">
+        <input type="hidden" name="dataset_ids" value="bundle" />
+        <button type="submit" class="ds-cta-btn">
+          Acheter le bundle complet — 799 CHF
+          <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </form>
       <p class="ds-cta-sub">Paiement sécurisé Stripe · 3 téléchargements immédiats par email · Remboursement 14 jours si aucun téléchargé · Support email prioritaire inclus</p>
     </div>
   </div>
