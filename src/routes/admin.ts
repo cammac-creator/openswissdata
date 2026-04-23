@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getDb } from "../lib/db.js";
 import { seedDatasets } from "../db/seed.js";
+import { constantTimeEqual } from "../lib/tokens.js";
 
 export const adminRoute = new Hono();
 
@@ -16,7 +17,7 @@ const ReleaseSchema = z.object({
 
 adminRoute.post("/seed", async (c) => {
   const secret = c.req.header("x-admin-secret");
-  if (!secret || secret !== process.env.ADMIN_SECRET) {
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) {
     return c.json({ error: "unauthorized" }, 401);
   }
   const result = seedDatasets();
@@ -25,7 +26,7 @@ adminRoute.post("/seed", async (c) => {
 
 adminRoute.post("/release", async (c) => {
   const secret = c.req.header("x-admin-secret");
-  if (!secret || secret !== process.env.ADMIN_SECRET) {
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) {
     return c.json({ error: "unauthorized" }, 401);
   }
 

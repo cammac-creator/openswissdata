@@ -33,3 +33,19 @@ export function tokensEqual(a: string, b: string): boolean {
   if (bufA.length !== bufB.length) return false;
   return timingSafeEqual(bufA, bufB);
 }
+
+/**
+ * Generic constant-time string equality for arbitrary secrets (e.g. admin
+ * tokens, webhook secrets) that don't necessarily match the base64url-43
+ * token format enforced by `tokensEqual`.
+ *
+ * Returns false immediately when lengths differ (which leaks length, but
+ * length is typically public from the Zod schema minimum), and does a
+ * byte-level `timingSafeEqual` otherwise.
+ */
+export function constantTimeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, "utf8");
+  const bufB = Buffer.from(b, "utf8");
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}

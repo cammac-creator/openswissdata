@@ -222,4 +222,38 @@ describe("POST /api/admin/release", () => {
     expect(res.status).toBeGreaterThanOrEqual(400);
     expect(res.status).toBeLessThan(500);
   });
+
+  // C3: constant-time comparison — a secret with correct prefix but wrong suffix must be rejected
+  it("C3: rejects a secret that shares a prefix but differs in final characters", async () => {
+    const app = createApp();
+    // ADMIN_SECRET is "test-secret-1234567890" — attacker guesses "test-secret-123456789X"
+    const almostRight = "test-secret-123456789X";
+    const res = await app.request("/api/admin/release", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-admin-secret": almostRight,
+      },
+      body: JSON.stringify({
+        dataset_id: "tares",
+        version: "2026.04.17",
+        r2_key: "tares/x.zip",
+        sha256: "a".repeat(64),
+        size_bytes: 100,
+        changelog: "",
+      }),
+    });
+    expect(res.status).toBe(401);
+  });
+
+  // C3: same for /seed endpoint
+  it("C3: rejects a same-prefix wrong-suffix secret on /seed", async () => {
+    const app = createApp();
+    const almostRight = "test-secret-1234567890X"; // one extra char — also should fail
+    const res = await app.request("/api/admin/seed", {
+      method: "POST",
+      headers: { "x-admin-secret": almostRight },
+    });
+    expect(res.status).toBe(401);
+  });
 });
