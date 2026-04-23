@@ -51,7 +51,7 @@
   </div>
 
   <div class="hs-lookup-footer">
-    <span>Dataset complet : ~5 000 entités · 10 catégories · UID + LEI enrichis · diff hebdomadaire</span>
+    <span>Dataset complet : 2 911 entités FINMA · 13 catégories d'autorisation · UID + ville + type DE/FR/IT/EN · refresh quotidien</span>
     <a href="/datasets/finma">Voir le dataset complet →</a>
   </div>
 </div>
@@ -99,7 +99,7 @@
   function fnRender(results) {
     const el = document.getElementById('fn-results');
     if (!results || results.length === 0) {
-      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + FINMA_SAMPLE.length + ' entités. Le dataset complet en contient ~5 000, sur 10 catégories d\'autorisation.</div>';
+      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + FINMA_SAMPLE.length + ' entités. Le dataset complet en contient 2 911, sur 13 catégories d\'autorisation officielles FINMA.</div>';
       return;
     }
     const rows = results.map(r => `

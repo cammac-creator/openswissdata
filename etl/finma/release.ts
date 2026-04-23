@@ -1,4 +1,4 @@
-import { ingestOneSource } from "./ingest.js";
+import { ingestOneSource, ingestFromFinmaCsv } from "./ingest.js";
 import { FINMA_SOURCES } from "./sources.js";
 import { buildBundle } from "./bundle.js";
 import { uploadZip } from "../../src/lib/r2.js";
@@ -41,19 +41,23 @@ export async function runRelease(
 
   console.log(`[release-finma] version ${version} targeting ${baseUrl}`);
 
-  if (!useFixture) {
-    throw new Error("Real ingestion from FINMA URLs not yet implemented. Use USE_FIXTURE=1.");
-  }
-
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 
-  const entities: FinmaEntity[] = [];
-  for (const f of FIXTURE_MAP) {
-    const source = FINMA_SOURCES.find((s) => s.entity_type === f.entity_type);
-    if (!source) throw new Error(`No FINMA source config for entity_type=${f.entity_type}`);
-    const rows = ingestOneSource(f.path, source);
-    entities.push(...rows);
-    console.log(`[release-finma] ${f.entity_type}: ${rows.length} rows`);
+  let entities: FinmaEntity[] = [];
+  if (useFixture) {
+    for (const f of FIXTURE_MAP) {
+      const source = FINMA_SOURCES.find((s) => s.entity_type === f.entity_type);
+      if (!source) throw new Error(`No FINMA source config for entity_type=${f.entity_type}`);
+      const rows = ingestOneSource(f.path, source);
+      entities.push(...rows);
+      console.log(`[release-finma] ${f.entity_type}: ${rows.length} rows`);
+    }
+  } else {
+    const cacheDir = join(outDir, "finma-cache");
+    console.log(`[release-finma] ingesting from FINMA uid.csv (cache=${cacheDir})...`);
+    const result = await ingestFromFinmaCsv({ cacheDir });
+    entities = result.entities;
+    console.log(`[release-finma] ingested ${entities.length} entities. unmapped types: ${JSON.stringify(result.stats.unmappedTypes)}`);
   }
   console.log(`[release-finma] total ${entities.length} entities`);
 

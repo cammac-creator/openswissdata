@@ -51,7 +51,7 @@
   </div>
 
   <div class="hs-lookup-footer">
-    <span>Dataset complet : ~3 000 codes par standard · 5 standards alignés · 4 langues</span>
+    <span>Dataset complet : 1 047 codes NACE Rev 2 (24 langues UE) + 1 047 NOGA 2008 + 766 codes ISIC Rev 4 (FR/EN/ES) + 1 025 cross-walks</span>
     <a href="/bundle">Voir le bundle complet →</a>
   </div>
 </div>
@@ -92,7 +92,7 @@
   function clRender(results) {
     const el = document.getElementById('cl-results');
     if (!results || results.length === 0) {
-      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + NOGA_SAMPLE.length + ' codes. Le dataset complet en contient ~3 000 par standard, alignés sur 5 nomenclatures.</div>';
+      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + NOGA_SAMPLE.length + ' codes. Le dataset complet contient ~3 100 codes (NACE Rev 2 + NOGA 2008 + ISIC Rev 4) avec 1 025 cross-walks.</div>';
       return;
     }
     const rows = results.map(r => `

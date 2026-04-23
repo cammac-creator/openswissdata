@@ -2,6 +2,7 @@ import { parseNogaXlsx } from "./ingest-noga.js";
 import { parseNaceCsv } from "./ingest-nace.js";
 import { parseIsicCsv } from "./ingest-isic.js";
 import { buildCrossWalks } from "./crosswalks.js";
+import { ingestRealClassifications } from "./ingest-real.js";
 import { buildBundle } from "./bundle.js";
 import { uploadZip } from "../../src/lib/r2.js";
 import { mkdirSync, existsSync } from "node:fs";
@@ -36,28 +37,33 @@ export async function runRelease(
 
   console.log(`[release-classifications] version ${version} targeting ${baseUrl}`);
 
-  if (!useFixture) {
-    throw new Error("Real ingestion from upstream sources not yet implemented. Use USE_FIXTURE=1.");
-  }
-
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 
-  const fixDir = "./etl/classifications/fixtures";
+  let rows: NomenclatureRow[];
+  let crossWalks;
 
-  const noga2025 = parseNogaXlsx(join(fixDir, "noga-2025-sample.xlsx"), "NOGA_2025");
-  const noga2008 = parseNogaXlsx(join(fixDir, "noga-2008-sample.xlsx"), "NOGA_2008");
-  const nace20 = parseNaceCsv(join(fixDir, "nace-2.0-sample.csv"), "NACE_2.0");
-  const nace21 = parseNaceCsv(join(fixDir, "nace-2.1-sample.csv"), "NACE_2.1");
-  const isic4 = parseIsicCsv(join(fixDir, "isic-4-sample.csv"));
-
-  const rows: NomenclatureRow[] = [...noga2008, ...noga2025, ...nace20, ...nace21, ...isic4];
-  console.log(`[release-classifications] ingested ${rows.length} rows across 5 schemes`);
-
-  const crossWalks = buildCrossWalks(rows, {
-    nace20to21Path: join(fixDir, "bridge-nace-2.0-to-2.1.csv"),
-    nace21toIsic4Path: join(fixDir, "bridge-nace-2.1-to-isic-4.csv"),
-  });
-  console.log(`[release-classifications] built ${crossWalks.length} cross-walks`);
+  if (useFixture) {
+    const fixDir = "./etl/classifications/fixtures";
+    const noga2025 = parseNogaXlsx(join(fixDir, "noga-2025-sample.xlsx"), "NOGA_2025");
+    const noga2008 = parseNogaXlsx(join(fixDir, "noga-2008-sample.xlsx"), "NOGA_2008");
+    const nace20 = parseNaceCsv(join(fixDir, "nace-2.0-sample.csv"), "NACE_2.0");
+    const nace21 = parseNaceCsv(join(fixDir, "nace-2.1-sample.csv"), "NACE_2.1");
+    const isic4 = parseIsicCsv(join(fixDir, "isic-4-sample.csv"));
+    rows = [...noga2008, ...noga2025, ...nace20, ...nace21, ...isic4];
+    console.log(`[release-classifications] ingested ${rows.length} rows from fixtures (5 schemes)`);
+    crossWalks = buildCrossWalks(rows, {
+      nace20to21Path: join(fixDir, "bridge-nace-2.0-to-2.1.csv"),
+      nace21toIsic4Path: join(fixDir, "bridge-nace-2.1-to-isic-4.csv"),
+    });
+    console.log(`[release-classifications] built ${crossWalks.length} cross-walks (fixtures)`);
+  } else {
+    const cacheDir = join(outDir, "classifications-cache");
+    console.log(`[release-classifications] ingesting from real sources (cache=${cacheDir})...`);
+    const result = await ingestRealClassifications({ cacheDir });
+    rows = result.rows;
+    crossWalks = result.crossWalks;
+    console.log(`[release-classifications] ingested ${rows.length} rows. stats=${JSON.stringify(result.stats)}`);
+  }
 
   const bundle = await buildBundle({ rows, crossWalks }, version, outDir);
   console.log(
