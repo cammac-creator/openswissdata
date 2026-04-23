@@ -14,7 +14,7 @@
       </div>
     </div>
     <h3 class="hs-lookup-title">Cherchez un code TARES</h3>
-    <p class="hs-lookup-sub">Tapez un mot-clé (chocolat, lait, montre, ordinateur, vélo...) ou un code HS (8 chiffres). Échantillon réel de 40 codes ; le dataset complet en contient ~10 247.</p>
+    <p class="hs-lookup-sub">Tapez un mot-clé (chocolat, lait, montre, ordinateur, vélo...) ou un code HS (8 chiffres). Échantillon réel de 40 codes ; le dataset complet en contient ~7 500 actuels (issus directement des XLSX officiels BAZG).</p>
   </div>
 
   <div class="hs-lookup-input-wrap">
@@ -131,7 +131,7 @@
   function render(results) {
     const el = document.getElementById('hs-results');
     if (!results || results.length === 0) {
-      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + TARES_SAMPLE.length + ' codes représentatifs. Le dataset complet TARES en contient ~10 247 — vous y trouverez tout ce qui passe les douanes suisses.</div>';
+      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + TARES_SAMPLE.length + ' codes représentatifs. Le dataset complet TARES en contient ~7 500 — vous y trouverez tout ce qui passe les douanes suisses.</div>';
       return;
     }
     const rows = results.map(r => `

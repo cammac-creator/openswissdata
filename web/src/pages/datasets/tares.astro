@@ -4,7 +4,7 @@ import HSLookup from "../../components/HSLookup.astro";
 ---
 <BaseLayout
   title="TARES — Tarif douanier suisse normalisé | openswissdata"
-  description="Tarif douanier suisse complet : ~10 247 codes HS8 trilingues DE/FR/IT, droits de douane, accords préférentiels (UE/AELE/UK), restrictions. JSON / Parquet / SQL. 299 CHF one-shot."
+  description="Tarif douanier suisse complet : ~7 500 codes HS8 actuels, désignations DE/FR/IT/EN, droits MFN, 30+ régimes préférentiels (UE/AELE/UK/Chine/Japon…), codes ZCO d'allègement. JSON / Parquet / SQL. 299 CHF one-shot."
 >
 <section class="ds-container">
   <div class="container-tight">
@@ -26,8 +26,8 @@ import HSLookup from "../../components/HSLookup.astro";
           TARES — <span class="serif">le tarif douanier suisse</span>, propre.
         </h1>
         <p class="ds-hero-lede reveal" data-delay="2">
-          L'intégralité du tarif douanier suisse normalisé : ~10 247 codes HS à 8 chiffres, désignations trilingues DE/FR/IT,
-          droits MFN, accords préférentiels (UE/AELE/UK/CN), restrictions. Mises à jour hebdomadaires.
+          L'intégralité du tarif douanier suisse normalisé : ~7 500 codes HS à 8 chiffres actuels, désignations en 4 langues (DE/FR/IT/EN),
+          droits MFN avec valeur + unité (par 100 kg, par pièce, par hl…), jusqu'à 30+ régimes préférentiels par code (UE, AELE, UK, Chine, Japon, Corée…). Mises à jour hebdomadaires depuis les XLSX officiels BAZG.
         </p>
       </div>
       <div class="ds-price-box reveal" data-delay="2">
@@ -74,10 +74,12 @@ import HSLookup from "../../components/HSLookup.astro";
             <tr><td class="mono">designation_fr</td><td class="dim">string</td><td>Roulements à billes, à contact radial</td></tr>
             <tr><td class="mono">designation_de</td><td class="dim">string</td><td>Kugellager, mit radialer Berührung</td></tr>
             <tr><td class="mono">designation_it</td><td class="dim">string</td><td>Cuscinetti a sfere, contatto radiale</td></tr>
-            <tr><td class="mono">unit_stat</td><td class="dim">string</td><td class="mono">kg</td></tr>
-            <tr><td class="mono">duty_mfn_chf_per_100kg</td><td class="dim">number</td><td class="mono">0.00</td></tr>
-            <tr><td class="mono">preferential_regimes</td><td class="dim">object</td><td class="mono" is:raw>{"eu":"free","efta":"free"}</td></tr>
-            <tr><td class="mono">restrictions_codes</td><td class="dim">string[]</td><td class="mono">["REACH"]</td></tr>
+            <tr><td class="mono">unit_stat</td><td class="dim">string</td><td>per 100 kg gross</td></tr>
+            <tr><td class="mono">duty_mfn_value</td><td class="dim">number</td><td class="mono">0.00</td></tr>
+            <tr><td class="mono">duty_mfn_unit</td><td class="dim">string</td><td>par 100 kg brut</td></tr>
+            <tr><td class="mono">duty_mfn_currency</td><td class="dim">string</td><td class="mono">CHF</td></tr>
+            <tr><td class="mono">preferential_regimes</td><td class="dim">object</td><td class="mono" is:raw>{"eu":"free","efta":"free","japon":"free"}</td></tr>
+            <tr><td class="mono">customs_relief_codes</td><td class="dim">string[]</td><td class="mono">["01"]</td></tr>
           </tbody>
         </table>
       </div>
