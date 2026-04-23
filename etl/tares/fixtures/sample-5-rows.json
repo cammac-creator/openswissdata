@@ -8,12 +8,14 @@
     "designation_de": "Kugellager, mit radialer Berührung",
     "designation_it": "Cuscinetti a sfere a contatto radiale",
     "designation_en": "Ball bearings with radial contact",
-    "unit_stat": "kg",
-    "duty_mfn_chf_per_100kg": 0,
+    "unit_stat": "par 100 kg brut",
+    "duty_mfn_value": 0,
+    "duty_mfn_unit": "par 100 kg brut",
+    "duty_mfn_currency": "CHF",
     "preferential_regimes": { "eu": "free", "efta": "free", "uk": "free" },
     "restrictions_codes": [],
     "valid_from": "2025-01-01",
-    "source_url": "https://xtares.admin.ch/tares/"
+    "source_url": "https://xtares.admin.ch/tares/control/searchSimpleTarifNumber?number=84820010"
   },
   {
     "hs8": "39031100",
@@ -24,12 +26,14 @@
     "designation_de": "Polystyrol, expandierbar, in Primärformen",
     "designation_it": "Polistirene espansibile, in forme primarie",
     "designation_en": "Expandable polystyrene, in primary forms",
-    "unit_stat": "kg",
-    "duty_mfn_chf_per_100kg": 8.5,
+    "unit_stat": "par 100 kg brut",
+    "duty_mfn_value": 8.5,
+    "duty_mfn_unit": "par 100 kg brut",
+    "duty_mfn_currency": "CHF",
     "preferential_regimes": { "eu": "free", "efta": "free" },
-    "restrictions_codes": ["REACH"],
+    "restrictions_codes": [],
     "valid_from": "2025-01-01",
-    "source_url": "https://xtares.admin.ch/tares/"
+    "source_url": "https://xtares.admin.ch/tares/control/searchSimpleTarifNumber?number=39031100"
   },
   {
     "hs8": "22030001",
@@ -40,12 +44,14 @@
     "designation_de": "Bier in Flaschen",
     "designation_it": "Birra in bottiglie",
     "designation_en": "Beer in bottles",
-    "unit_stat": "hl",
-    "duty_mfn_chf_per_100kg": 24.75,
+    "unit_stat": "par hl",
+    "duty_mfn_value": 24.75,
+    "duty_mfn_unit": "par hl",
+    "duty_mfn_currency": "CHF",
     "preferential_regimes": { "eu": 12.4, "efta": "free" },
-    "restrictions_codes": ["ALCOHOL_TAX"],
+    "restrictions_codes": [],
     "valid_from": "2025-01-01",
-    "source_url": "https://xtares.admin.ch/tares/"
+    "source_url": "https://xtares.admin.ch/tares/control/searchSimpleTarifNumber?number=22030001"
   },
   {
     "hs8": "64041100",
@@ -56,12 +62,14 @@
     "designation_de": "Sportschuhe mit Laufsohlen aus Kautschuk oder Kunststoff",
     "designation_it": "Calzature sportive con suole in gomma o plastica",
     "designation_en": "Sports footwear with rubber or plastic outer soles",
-    "unit_stat": "paar",
-    "duty_mfn_chf_per_100kg": 58,
-    "preferential_regimes": { "eu": "free", "efta": "free", "cn": 37.7 },
+    "unit_stat": "par 1 paire",
+    "duty_mfn_value": 0.58,
+    "duty_mfn_unit": "par 1 paire",
+    "duty_mfn_currency": "CHF",
+    "preferential_regimes": { "eu": "free", "efta": "free", "cn": 0.377 },
     "restrictions_codes": [],
     "valid_from": "2025-01-01",
-    "source_url": "https://xtares.admin.ch/tares/"
+    "source_url": "https://xtares.admin.ch/tares/control/searchSimpleTarifNumber?number=64041100"
   },
   {
     "hs8": "90181300",
@@ -72,11 +80,13 @@
     "designation_de": "Kernspintomographen (MRT)",
     "designation_it": "Apparecchi di risonanza magnetica (RMN)",
     "designation_en": "Magnetic resonance imaging apparatus (MRI)",
-    "unit_stat": "stk",
-    "duty_mfn_chf_per_100kg": 0,
+    "unit_stat": "par 1 pièce(s)",
+    "duty_mfn_value": 0,
+    "duty_mfn_unit": "par 1 pièce(s)",
+    "duty_mfn_currency": "CHF",
     "preferential_regimes": { "eu": "free", "efta": "free" },
-    "restrictions_codes": ["MEDICAL_DEVICE"],
+    "restrictions_codes": [],
     "valid_from": "2025-01-01",
-    "source_url": "https://xtares.admin.ch/tares/"
+    "source_url": "https://xtares.admin.ch/tares/control/searchSimpleTarifNumber?number=90181300"
   }
 ]

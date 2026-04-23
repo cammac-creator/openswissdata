@@ -17,12 +17,15 @@
       "designation_it": { "type": "string" },
       "designation_en": { "type": "string" },
       "unit_stat": { "type": "string" },
-      "duty_mfn_chf_per_100kg": { "type": ["number", "null"] },
+      "duty_mfn_value": { "type": ["number", "null"] },
+      "duty_mfn_unit": { "type": ["string", "null"] },
+      "duty_mfn_currency": { "type": ["string", "null"] },
       "preferential_regimes": {
         "type": "object",
         "additionalProperties": { "oneOf": [{ "type": "number" }, { "const": "free" }] }
       },
       "restrictions_codes": { "type": "array", "items": { "type": "string" } },
+      "customs_relief_codes": { "type": "array", "items": { "type": "string" } },
       "valid_from": { "type": "string", "format": "date" },
       "source_url": { "type": "string", "format": "uri" }
     }

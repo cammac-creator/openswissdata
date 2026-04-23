@@ -85,9 +85,14 @@ describe("etl/tares/release orchestration", () => {
     await expect(runRelease({ useFixture: true, version: "2026.04.22", outDir: tmp })).rejects.toThrow("ADMIN_SECRET");
   });
 
-  it("throws if USE_FIXTURE=0 and no real scraper", async () => {
+  it("real ingest path tries to download BAZG XLSX (cache miss → fetch attempted)", async () => {
+    // useFixture=false should now route to ingestFromBazg() which calls
+    // downloadAllSources() — proves the orchestrator no longer throws "not implemented".
+    // We mock fetch to fail explicitly, so the test asserts the real ingest path
+    // is wired (and fails for a different, observable reason).
+    fetchMock.mockResolvedValueOnce({ ok: false, status: 503, body: null, text: async () => "" });
     const { runRelease } = await import("../../etl/tares/release.js");
-    await expect(runRelease({ useFixture: false, version: "2026.04.22", outDir: tmp })).rejects.toThrow("Task 2.4");
+    await expect(runRelease({ useFixture: false, version: "2026.04.22", outDir: tmp })).rejects.toThrow(/Failed to download/);
   });
 
   it("propagates admin endpoint HTTP errors", async () => {

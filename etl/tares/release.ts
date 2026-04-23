@@ -1,7 +1,8 @@
-import { ingestFromFixture } from "./ingest.js";
+import { ingestFromFixture, ingestFromBazg } from "./ingest.js";
 import { buildBundle } from "./bundle.js";
 import { uploadZip } from "../../src/lib/r2.js";
 import { mkdirSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
 function todayVersion(): string {
   const d = new Date();
@@ -40,7 +41,11 @@ export async function runRelease(
     rows = ingestFromFixture(fixturePath);
     console.log(`[release] ingested ${rows.length} rows from fixture ${fixturePath}`);
   } else {
-    throw new Error("Real scraping not implemented yet (Task 2.4). Use USE_FIXTURE=1 for now.");
+    const cacheDir = join(outDir, "bazg-cache");
+    console.log(`[release] ingesting from BAZG XLSX (cache=${cacheDir})...`);
+    const result = await ingestFromBazg({ cacheDir });
+    rows = result.rows;
+    console.log(`[release] ingested ${rows.length} rows from BAZG. stats=${JSON.stringify(result.stats)}`);
   }
 
   // 2. Build bundle
