@@ -3,87 +3,155 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=classifications";
 ---
 <BaseLayout
-  title="Classifications Bundle — NOGA + NACE + ISIC | openswissdata"
-  description="5 economic activity classifications (NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4) with 5-way cross-walks, 4 languages, in CSV/JSON/Parquet/SQL. 399 CHF one-shot."
+  title="Classifications économiques NOGA + NACE + ISIC | openswissdata"
+  description="5 classifications d'activités économiques unifiées : NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Cross-walks bidirectionnels, 4 langues. JSON / Parquet / SQL. 399 CHF one-shot."
 >
-  <section class="max-w-4xl mx-auto px-6 py-16">
-    <nav class="text-sm text-slate-500 mb-4">
-      <a href="/" class="hover:underline">Home</a> · <a href="/bundle" class="hover:underline">All datasets</a> · <span>Classifications</span>
+<section class="ds-container">
+  <div class="container-tight">
+    <nav class="ds-breadcrumb">
+      <a href="/">accueil</a>
+      <span class="sep">·</span>
+      <a href="/bundle">datasets</a>
+      <span class="sep">·</span>
+      <span class="current">Classifications</span>
     </nav>
 
-    <div class="flex items-baseline justify-between flex-wrap gap-4 mb-2">
-      <h1 class="text-4xl font-bold">Swiss Economic Classifications Bundle</h1>
-      <div class="text-3xl font-bold text-indigo-600">CHF 399</div>
-    </div>
-
-    <p class="text-lg text-slate-600 mb-8">
-      Five economic activity classifications unified: NOGA 2008, NOGA 2025, NACE Rev 2, NACE Rev 2.1, ISIC Rev 4. Plus 5-way cross-walks anchored on NOGA 2025 classes. FR/DE/IT/EN labels. One-shot purchase, 360 days of updates included.
-    </p>
-
-    <div class="grid md:grid-cols-2 gap-4 mb-10 text-sm">
-      <div class="border border-slate-200 rounded-lg p-4">
-        <div class="font-semibold mb-1 text-slate-900">What's inside</div>
-        <div class="text-slate-600">5 nomenclatures + cross-walks · 4 languages · CSV, JSON, Parquet, SQL · ~8-12 MB total</div>
+    <div class="ds-hero">
+      <div>
+        <span class="ds-badge amber reveal">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 3v2.5L6.5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          BFS · permission demandée 2026-04-17
+        </span>
+        <h1 class="ds-hero-title reveal" data-delay="1">
+          Classifications — <span class="serif">NOGA, NACE, ISIC</span> alignés.
+        </h1>
+        <p class="ds-hero-lede reveal" data-delay="2">
+          Cinq nomenclatures unifiées (NOGA 2008, NOGA 2025, NACE Rev 2, NACE Rev 2.1, ISIC Rev 4) avec leurs cross-walks bidirectionnels.
+          Désignations FR/DE/IT/EN. Idéal pour reporting multi-juridictions et continuité time-series.
+        </p>
       </div>
-      <div class="border border-slate-200 rounded-lg p-4">
-        <div class="font-semibold mb-1 text-slate-900">Updates</div>
-        <div class="text-slate-600">Annual refresh + major revisions · 360 days included · renewal CHF 160/year</div>
+      <div class="ds-price-box reveal" data-delay="2">
+        <div class="ds-price-box-label">One-shot</div>
+        <div class="ds-price-box-amount">399<span class="ds-price-box-currency">CHF</span></div>
+        <div class="ds-price-box-renew">+160 CHF/an mises à jour (optionnel)</div>
       </div>
     </div>
 
-    <h2 class="text-2xl font-semibold mb-3">5 nomenclatures in one bundle</h2>
-    <div class="overflow-x-auto mb-8">
-      <table class="min-w-full text-sm border border-slate-200 rounded-lg">
-        <thead class="bg-slate-50">
-          <tr class="text-left">
-            <th class="px-4 py-2 border-b border-slate-200">Standard</th>
-            <th class="px-4 py-2 border-b border-slate-200">Scope</th>
-            <th class="px-4 py-2 border-b border-slate-200">Publisher</th>
-            <th class="px-4 py-2 border-b border-slate-200">Languages</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="px-4 py-2 font-semibold">NOGA 2008</td><td class="px-4 py-2 text-slate-600">Swiss economic activities</td><td class="px-4 py-2 text-slate-600">BFS</td><td class="px-4 py-2 font-mono text-xs">FR/DE/IT</td></tr>
-          <tr><td class="px-4 py-2 font-semibold">NOGA 2025</td><td class="px-4 py-2 text-slate-600">Swiss economic activities (latest, Jan 2025)</td><td class="px-4 py-2 text-slate-600">BFS</td><td class="px-4 py-2 font-mono text-xs">FR/DE/IT/EN</td></tr>
-          <tr><td class="px-4 py-2 font-semibold">NACE Rev 2</td><td class="px-4 py-2 text-slate-600">EU economic activities</td><td class="px-4 py-2 text-slate-600">Eurostat Ramon</td><td class="px-4 py-2 font-mono text-xs">EN</td></tr>
-          <tr><td class="px-4 py-2 font-semibold">NACE Rev 2.1</td><td class="px-4 py-2 text-slate-600">EU economic activities (latest)</td><td class="px-4 py-2 text-slate-600">Eurostat Ramon</td><td class="px-4 py-2 font-mono text-xs">EN</td></tr>
-          <tr><td class="px-4 py-2 font-semibold">ISIC Rev 4</td><td class="px-4 py-2 text-slate-600">International economic activities</td><td class="px-4 py-2 text-slate-600">UN Statistics</td><td class="px-4 py-2 font-mono text-xs">EN</td></tr>
-        </tbody>
-      </table>
+    <div class="ds-meta-grid">
+      <div class="ds-meta-card reveal">
+        <div class="ds-meta-label">Contenu</div>
+        <div class="ds-meta-value">5 nomenclatures + cross-walks 5-way · 4 langues · CSV, JSON, Parquet, SQL · ~8-12 MB total</div>
+      </div>
+      <div class="ds-meta-card reveal" data-delay="1">
+        <div class="ds-meta-label">Mises à jour</div>
+        <div class="ds-meta-value">Refresh annuel + révisions majeures · 360 jours inclus · renouvellement 160 CHF/an</div>
+      </div>
     </div>
 
-    <h2 class="text-2xl font-semibold mb-3">5-way cross-walks</h2>
-    <p class="text-slate-700 mb-4">
-      One canonical table links every classification. Example: Swiss company classified as NOGA 2025 <code class="bg-slate-100 px-1 rounded text-sm">64.11</code> → NACE Rev 2.1 <code class="bg-slate-100 px-1 rounded text-sm">64.11</code> → NACE Rev 2.0 <code class="bg-slate-100 px-1 rounded text-sm">64.11</code> → NOGA 2008 <code class="bg-slate-100 px-1 rounded text-sm">64.11</code> → ISIC Rev 4 <code class="bg-slate-100 px-1 rounded text-sm">6411</code> (central banking).
-    </p>
-
-    <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mb-10">
-      <h3 class="font-semibold mb-2">Free sample — 50 rows across all 5 schemes + 20 cross-walks</h3>
-      <p class="text-sm text-slate-600 mb-3">Try before you buy. Curated preview covering Finance + Public Administration sectors.</p>
-      <a href="/samples/classifications-sample.csv" download class="text-indigo-600 font-medium hover:underline">↓ Download classifications-sample.csv</a>
-    </div>
-
-    <h2 class="text-2xl font-semibold mb-3">Who is this for?</h2>
-    <ul class="list-disc pl-6 space-y-2 text-slate-700 mb-8">
-      <li><strong>Data teams at Swiss banks &amp; insurers</strong> — sectoral reporting, credit risk by activity</li>
-      <li><strong>ERP &amp; CRM integrators</strong> — code mapping in Bexio, SAP, Salesforce deployments</li>
-      <li><strong>Swiss subsidiaries of EU groups</strong> — consolidation with parent company's NACE reporting</li>
-      <li><strong>Economic consultants &amp; researchers</strong> — time-series continuity across NOGA revisions</li>
-    </ul>
-
-    <h2 class="text-2xl font-semibold mb-3">Why the bundle instead of each separately?</h2>
-    <p class="text-slate-700 mb-8">
-      The cross-walks are the key value. Buying NOGA + NACE + ISIC separately from public sources and building the bridge table yourself takes 40-80 hours of ETL work. At CHF 120/hour of engineering time that's CHF 4 800 - 9 600. <strong>CHF 399 for the complete, maintained bundle.</strong>
-    </p>
-
-    <div class="border-t border-slate-200 pt-10 mt-10 text-center">
-      <a href={STRIPE_CHECKOUT_URL} class="inline-block px-10 py-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold transition-colors">
-        Buy Classifications Bundle — CHF 399
-      </a>
-      <p class="text-xs text-slate-500 mt-3">Secure checkout via Stripe · Instant download by email · 14-day refund if not downloaded</p>
-      <p class="text-sm text-slate-600 mt-6">
-        Or get all 3 datasets (TARES + Classifications + FINMA) in the <a href="/bundle" class="text-indigo-600 hover:underline font-medium">full bundle for CHF 799</a> and save CHF 200.
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">Cinq <span class="serif">standards</span> dans un seul bundle</h2>
+      <p class="ds-section-intro">
+        Tous les standards sont normalisés au même format de table, avec les mêmes champs (code, label_fr/de/it/en, parent, niveau).
+        Vous pouvez switcher de l'un à l'autre via une seule jointure SQL.
       </p>
+
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr><th>Standard</th><th>Périmètre</th><th>Émetteur</th><th>Langues</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>NOGA 2008</strong></td><td class="dim">Activités économiques suisses (héritage)</td><td class="dim">BFS</td><td class="mono">FR/DE/IT</td></tr>
+            <tr><td><strong>NOGA 2025</strong></td><td class="dim">Activités économiques suisses (actuel, janvier 2026)</td><td class="dim">BFS</td><td class="mono">FR/DE/IT/EN</td></tr>
+            <tr><td><strong>NACE Rev 2</strong></td><td class="dim">Activités économiques européennes</td><td class="dim">Eurostat</td><td class="mono">EN</td></tr>
+            <tr><td><strong>NACE Rev 2.1</strong></td><td class="dim">Activités économiques européennes (révision)</td><td class="dim">Eurostat</td><td class="mono">EN</td></tr>
+            <tr><td><strong>ISIC Rev 4</strong></td><td class="dim">Activités économiques mondiales (UN)</td><td class="dim">UN Statistics</td><td class="mono">EN</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">Cross-walks <span class="serif">5-way</span></h2>
+      <p class="ds-section-intro">
+        Une table canonique relie chaque code à son équivalent dans les autres standards.
+        Exemple : une banque suisse classée <code class="mono" style="background: var(--color-bg-alt); padding: 2px 6px; border-radius: 4px;">NOGA 2025 64.11</code> se mappe en :
+      </p>
+
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr><th>Standard</th><th>Code</th><th>Désignation</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>NOGA 2025</strong></td><td class="mono">64.11</td><td class="dim">Activités de banque centrale</td></tr>
+            <tr><td>NOGA 2008</td><td class="mono">64.11</td><td class="dim">Activités de banque centrale</td></tr>
+            <tr><td>NACE Rev 2.1</td><td class="mono">64.11</td><td class="dim">Central banking</td></tr>
+            <tr><td>NACE Rev 2</td><td class="mono">64.11</td><td class="dim">Central banking</td></tr>
+            <tr><td>ISIC Rev 4</td><td class="mono">6411</td><td class="dim">Central banking</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="ds-sample reveal">
+      <h3>Échantillon gratuit — 50 lignes + 20 cross-walks</h3>
+      <p>Aperçu curé sur les secteurs Finance + Administration publique. Contient les 5 standards et les passerelles entre eux.</p>
+      <a href="/samples/classifications-sample.csv" download class="ds-sample-dl">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 7l4 4 4-4M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Télécharger classifications-sample.csv
+      </a>
     </div>
-  </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">À <span class="serif">qui</span> ça s'adresse</h2>
+      <div class="ds-audience-grid">
+        <div class="ds-audience-item">
+          <strong>Équipes data des banques &amp; assureurs CH</strong>
+          <span>Reporting sectoriel, risque crédit par activité, fichier ESG par secteur réglementaire.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Intégrateurs ERP &amp; CRM</strong>
+          <span>Mapping de codes dans Bexio, SAP, Salesforce — clients et fournisseurs catégorisés correctement.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Filiales suisses de groupes UE</strong>
+          <span>Consolidation avec le reporting NACE de la maison-mère sans retraitement manuel.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Consultants &amp; chercheurs économiques</strong>
+          <span>Continuité time-series à travers les révisions NOGA. Études sectorielles comparatives.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">Pourquoi le <span class="serif">bundle</span> plutôt que séparément ?</h2>
+      <p class="ds-section-intro">
+        Les cross-walks sont la vraie valeur. Acheter NOGA + NACE + ISIC séparément depuis les sources publiques et construire la table de pont vous-même : 40 à 80 heures d'ETL.
+        À 120 CHF de l'heure d'ingénieur, ça fait 4 800 à 9 600 CHF.
+      </p>
+
+      <div class="ds-roi-box">
+        <div>
+          <div class="ds-roi-label">Calcul honnête</div>
+          <h3 class="ds-roi-head">4 800 – 9 600 CHF de cross-walks à construire. Ou 399 CHF, déjà testés.</h3>
+          <p class="ds-roi-body">Surtout, vous achetez la maintenance : à chaque révision (NOGA 2025 → 2030, NACE Rev 2.1 → 3.0...), nous re-mappons gratuitement pour les abonnés updates.</p>
+        </div>
+        <div>
+          <div class="ds-roi-price">399<span class="ds-roi-price-unit">CHF</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="ds-cta">
+      <a href={STRIPE_CHECKOUT_URL} class="ds-cta-btn">
+        Acheter Classifications — 399 CHF
+        <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <p class="ds-cta-sub">Paiement sécurisé Stripe · Téléchargement immédiat par email · Remboursement 14 jours si non téléchargé</p>
+      <p class="ds-cta-alt">Ou prenez le <a href="/bundle">bundle complet (TARES + Classifications + FINMA) à 799 CHF</a> et économisez 200 CHF.</p>
+    </div>
+  </div>
+</section>
 </BaseLayout>

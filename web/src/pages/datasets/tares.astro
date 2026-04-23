@@ -1,96 +1,146 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-// Placeholder — will be replaced with real Stripe Checkout URL once Task 1.6 + 4.4 are complete.
 const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=tares";
 ---
 <BaseLayout
-  title="TARES Dataset — Swiss Customs Tariff (HS8) | openswissdata"
-  description="Normalized Swiss customs tariff codes (HS8) in CSV, JSON, Parquet, SQL. ~6 000 codes with FR/DE/IT/EN designations, duties, preferential regimes. 299 CHF one-shot."
+  title="TARES — Tarif douanier suisse normalisé | openswissdata"
+  description="Tarif douanier suisse complet : ~10 247 codes HS8 trilingues DE/FR/IT, droits de douane, accords préférentiels (UE/AELE/UK), restrictions. JSON / Parquet / SQL. 299 CHF one-shot."
 >
-  <section class="max-w-4xl mx-auto px-6 py-16">
-    <nav class="text-sm text-slate-500 mb-4">
-      <a href="/" class="hover:underline">Home</a> · <a href="/bundle" class="hover:underline">All datasets</a> · <span>TARES</span>
+<section class="ds-container">
+  <div class="container-tight">
+    <nav class="ds-breadcrumb">
+      <a href="/">accueil</a>
+      <span class="sep">·</span>
+      <a href="/bundle">datasets</a>
+      <span class="sep">·</span>
+      <span class="current">TARES</span>
     </nav>
 
-    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm">
-      <p class="font-semibold text-amber-900 mb-2">&#9888; Non-officiel · Nicht-offiziell · Non-official</p>
-      <p class="text-amber-900">
+    <div class="ds-hero">
+      <div>
+        <span class="ds-badge green reveal">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          BAZG · permission accordée 2026-04-21
+        </span>
+        <h1 class="ds-hero-title reveal" data-delay="1">
+          TARES — <span class="serif">le tarif douanier suisse</span>, propre.
+        </h1>
+        <p class="ds-hero-lede reveal" data-delay="2">
+          L'intégralité du tarif douanier suisse normalisé : ~10 247 codes HS à 8 chiffres, désignations trilingues DE/FR/IT,
+          droits MFN, accords préférentiels (UE/AELE/UK/CN), restrictions. Mises à jour hebdomadaires.
+        </p>
+      </div>
+      <div class="ds-price-box reveal" data-delay="2">
+        <div class="ds-price-box-label">One-shot</div>
+        <div class="ds-price-box-amount">299<span class="ds-price-box-currency">CHF</span></div>
+        <div class="ds-price-box-renew">+120 CHF/an mises à jour (optionnel)</div>
+      </div>
+    </div>
+
+    <div class="ds-disclaimer reveal">
+      <p><strong>⚠ Non-officiel · Nicht-offiziell · Non-official</strong></p>
+      <p>
         Seules les publications officielles de la Chancellerie fédérale et du BAZG font foi.
-        Source autoritative : <a href="https://xtares.admin.ch/" target="_blank" rel="noopener" class="underline">xtares.admin.ch</a>.
+        Source autoritative : <a href="https://xtares.admin.ch/" target="_blank" rel="noopener">xtares.admin.ch</a>.
+        For juridique pour litiges TARES : Berne, Suisse.
       </p>
     </div>
 
-    <div class="flex items-baseline justify-between flex-wrap gap-4 mb-2">
-      <h1 class="text-4xl font-bold">TARES — Swiss Customs Tariff</h1>
-      <div class="text-3xl font-bold text-indigo-600">CHF 299</div>
-    </div>
-
-    <p class="text-lg text-slate-600 mb-8">
-      ~6 000 HS8 codes with FR/DE/IT/EN designations, MFN duties, preferential regimes (EU/EFTA/UK/CN), and cross-walks to international HS6. Weekly delta updates. One-shot purchase, 360 days of updates included.
-    </p>
-
-    <div class="grid md:grid-cols-2 gap-4 mb-10 text-sm">
-      <div class="border border-slate-200 rounded-lg p-4">
-        <div class="font-semibold mb-1 text-slate-900">Formats included</div>
-        <div class="text-slate-600">CSV · JSON · Parquet · SQL · JSON Schema · README · SHA-256 checksums · License</div>
+    <div class="ds-meta-grid">
+      <div class="ds-meta-card reveal">
+        <div class="ds-meta-label">Formats inclus</div>
+        <div class="ds-meta-value">CSV · JSON · Parquet · SQL · JSON Schema · README · checksums SHA-256 · LICENSE</div>
       </div>
-      <div class="border border-slate-200 rounded-lg p-4">
-        <div class="font-semibold mb-1 text-slate-900">Updates</div>
-        <div class="text-slate-600">Weekly delta since BAZG updates · 360 days included · renewal CHF 120/year</div>
+      <div class="ds-meta-card reveal" data-delay="1">
+        <div class="ds-meta-label">Mises à jour</div>
+        <div class="ds-meta-value">Delta hebdomadaire suivant les publications BAZG · 360 jours inclus · renouvellement 120 CHF/an</div>
       </div>
     </div>
 
-    <h2 class="text-2xl font-semibold mb-3">What's in the dataset</h2>
-    <div class="overflow-x-auto mb-8">
-      <table class="min-w-full text-sm border border-slate-200 rounded-lg">
-        <thead class="bg-slate-50">
-          <tr class="text-left">
-            <th class="px-4 py-2 border-b border-slate-200">Field</th>
-            <th class="px-4 py-2 border-b border-slate-200">Type</th>
-            <th class="px-4 py-2 border-b border-slate-200">Example</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="px-4 py-2 font-mono">hs8</td><td class="px-4 py-2 text-slate-600">string (8 digits)</td><td class="px-4 py-2 font-mono">84820010</td></tr>
-          <tr><td class="px-4 py-2 font-mono">hs6</td><td class="px-4 py-2 text-slate-600">string (6 digits)</td><td class="px-4 py-2 font-mono">848200</td></tr>
-          <tr><td class="px-4 py-2 font-mono">designation_fr</td><td class="px-4 py-2 text-slate-600">string</td><td class="px-4 py-2">Roulements à billes, à contact radial</td></tr>
-          <tr><td class="px-4 py-2 font-mono">designation_de</td><td class="px-4 py-2 text-slate-600">string</td><td class="px-4 py-2">Kugellager, mit radialer Berührung</td></tr>
-          <tr><td class="px-4 py-2 font-mono">unit_stat</td><td class="px-4 py-2 text-slate-600">string</td><td class="px-4 py-2 font-mono">kg</td></tr>
-          <tr><td class="px-4 py-2 font-mono">duty_mfn_chf_per_100kg</td><td class="px-4 py-2 text-slate-600">number</td><td class="px-4 py-2 font-mono">0</td></tr>
-          <tr><td class="px-4 py-2 font-mono">preferential_regimes</td><td class="px-4 py-2 text-slate-600">object</td><td class="px-4 py-2 font-mono">&#123;"eu":"free","efta":"free"&#125;</td></tr>
-          <tr><td class="px-4 py-2 font-mono">restrictions_codes</td><td class="px-4 py-2 text-slate-600">string[]</td><td class="px-4 py-2 font-mono">["REACH"]</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">Le <span class="serif">schéma</span> en un coup d'œil</h2>
+      <p class="ds-section-intro">
+        Chaque ligne représente un code HS à 8 chiffres avec ses désignations multilingues, droits applicables et accords préférentiels.
+      </p>
 
-    <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mb-10">
-      <h3 class="font-semibold mb-2">Free sample — 100 rows (CSV)</h3>
-      <p class="text-sm text-slate-600 mb-3">Try before you buy. 100-row curated preview with diverse chapters.</p>
-      <a href="/samples/tares-sample.csv" download class="text-indigo-600 font-medium hover:underline">↓ Download tares-sample.csv</a>
-    </div>
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr><th>Champ</th><th>Type</th><th>Exemple</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">hs8</td><td class="dim">string (8 digits)</td><td class="mono">84820010</td></tr>
+            <tr><td class="mono">hs6</td><td class="dim">string (6 digits)</td><td class="mono">848200</td></tr>
+            <tr><td class="mono">designation_fr</td><td class="dim">string</td><td>Roulements à billes, à contact radial</td></tr>
+            <tr><td class="mono">designation_de</td><td class="dim">string</td><td>Kugellager, mit radialer Berührung</td></tr>
+            <tr><td class="mono">designation_it</td><td class="dim">string</td><td>Cuscinetti a sfere, contatto radiale</td></tr>
+            <tr><td class="mono">unit_stat</td><td class="dim">string</td><td class="mono">kg</td></tr>
+            <tr><td class="mono">duty_mfn_chf_per_100kg</td><td class="dim">number</td><td class="mono">0.00</td></tr>
+            <tr><td class="mono">preferential_regimes</td><td class="dim">object</td><td class="mono" is:raw>{"eu":"free","efta":"free"}</td></tr>
+            <tr><td class="mono">restrictions_codes</td><td class="dim">string[]</td><td class="mono">["REACH"]</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-    <h2 class="text-2xl font-semibold mb-3">Who is this for?</h2>
-    <ul class="list-disc pl-6 space-y-2 text-slate-700 mb-8">
-      <li><strong>Customs brokers &amp; declarants</strong> — classify imports/exports CH-EU consistently</li>
-      <li><strong>ERP customs modules</strong> — SAP GTS, Descartes, Thomson Reuters ONESOURCE integrations</li>
-      <li><strong>E-commerce cross-border</strong> — CH-EU DDP/DAP HS8 resolution at checkout</li>
-      <li><strong>Data teams</strong> — Swiss tariff reference tables for analytics &amp; reporting</li>
-    </ul>
-
-    <h2 class="text-2xl font-semibold mb-3">Why not just scrape xtares.admin.ch?</h2>
-    <p class="text-slate-700 mb-8">
-      You can. It'll take you 20-40 hours of ETL work every time, fighting non-machine-readable tables, broken UTF-8, and inconsistent hierarchies. At CHF 120/hour of engineering time that's CHF 2 400 - 4 800. <strong>CHF 299 is the better choice.</strong>
-    </p>
-
-    <div class="border-t border-slate-200 pt-10 mt-10 text-center">
-      <a href={STRIPE_CHECKOUT_URL} class="inline-block px-10 py-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold transition-colors">
-        Buy TARES — CHF 299
+    <div class="ds-sample reveal">
+      <h3>Échantillon gratuit — 100 lignes (CSV)</h3>
+      <p>Aperçu curé couvrant des chapitres variés (alimentaire, mécanique, électronique, textile). Pour valider que le format vous convient avant achat.</p>
+      <a href="/samples/tares-sample.csv" download class="ds-sample-dl">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 7l4 4 4-4M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Télécharger tares-sample.csv
       </a>
-      <p class="text-xs text-slate-500 mt-3">Secure checkout via Stripe · Instant download by email · 14-day refund if not downloaded</p>
     </div>
 
-    <p class="mt-8 text-xs text-slate-500">
-      TARES-specific terms: governing law Swiss, jurisdiction Bern. See full license terms in the bundle LICENSE.txt.
-    </p>
-  </section>
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">À <span class="serif">qui</span> ça s'adresse</h2>
+      <div class="ds-audience-grid">
+        <div class="ds-audience-item">
+          <strong>Courtiers en douane &amp; déclarants</strong>
+          <span>Classifier les imports/exports CH-UE de manière cohérente et auditable.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Modules ERP douaniers</strong>
+          <span>Intégrations SAP GTS, Descartes, Thomson Reuters ONESOURCE pour les filiales suisses.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>E-commerce cross-border</strong>
+          <span>Résolution HS8 au checkout pour DDP/DAP CH-UE — pas de blocage en douane.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Équipes data &amp; finance</strong>
+          <span>Tables de référence pour analytics, reporting fiscal, contrôle des coûts d'import.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">Pourquoi pas <span class="serif">scraper</span> xtares.admin.ch ?</h2>
+      <p class="ds-section-intro">
+        Vous pouvez. Comptez 20 à 40 heures d'ETL à chaque release, à se battre contre des tables non machine-readable, des UTF-8 cassés, et des hiérarchies inconsistantes.
+        À 120 CHF de l'heure d'ingénieur senior, ça fait 2 400 à 4 800 CHF — par mise à jour. Et ça reste fragile.
+      </p>
+
+      <div class="ds-roi-box">
+        <div>
+          <div class="ds-roi-label">Calcul honnête</div>
+          <h3 class="ds-roi-head">2 400 – 4 800 CHF d'ETL interne. Ou 299 CHF, prêt à charger en cinq minutes.</h3>
+          <p class="ds-roi-body">Vous achetez du temps de cerveau pour vos équipes. Elles peuvent travailler sur des choses qui différencient votre produit, plutôt que sur du parsing PDF dominical.</p>
+        </div>
+        <div>
+          <div class="ds-roi-price">299<span class="ds-roi-price-unit">CHF</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="ds-cta">
+      <a href={STRIPE_CHECKOUT_URL} class="ds-cta-btn">
+        Acheter TARES — 299 CHF
+        <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <p class="ds-cta-sub">Paiement sécurisé Stripe · Téléchargement immédiat par email · Remboursement 14 jours si non téléchargé</p>
+      <p class="ds-cta-alt">Ou prenez le <a href="/bundle">bundle complet (TARES + Classifications + FINMA) à 799 CHF</a> et économisez 200 CHF.</p>
+    </div>
+  </div>
+</section>
 </BaseLayout>
