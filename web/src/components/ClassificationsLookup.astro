@@ -1,0 +1,211 @@
+---
+// Démo NOGA 2025 + cross-walks vers NOGA 2008, NACE Rev 2, ISIC Rev 4
+---
+<div class="hs-lookup">
+  <div class="hs-lookup-header">
+    <div class="hs-lookup-title-row">
+      <div class="hs-lookup-badge">
+        <span class="badge-dot"></span>
+        Démo live
+      </div>
+      <div class="hs-lookup-meta">
+        20 codes NOGA 2025 + cross-walks réels
+      </div>
+    </div>
+    <h3 class="hs-lookup-title">Cherchez un code NOGA</h3>
+    <p class="hs-lookup-sub">Tapez une activité (banque, restaurant, conseil, transport...) ou un code NOGA. Vous verrez son équivalent dans NOGA 2008, NACE Rev 2 et ISIC Rev 4.</p>
+  </div>
+
+  <div class="hs-lookup-input-wrap">
+    <svg class="hs-lookup-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <input
+      type="search"
+      id="cl-input"
+      class="hs-lookup-input"
+      placeholder="essayez : banque, restaurant, conseil, 64.11..."
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button class="hs-lookup-clear" id="cl-clear" type="button" aria-label="Effacer">
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <div class="hs-lookup-suggestions">
+    <span class="hs-lookup-suggestions-label">Suggestions :</span>
+    <button class="cl-chip" data-q="banque">banque</button>
+    <button class="cl-chip" data-q="restaurant">restaurant</button>
+    <button class="cl-chip" data-q="conseil">conseil</button>
+    <button class="cl-chip" data-q="transport">transport</button>
+    <button class="cl-chip" data-q="logiciel">logiciel</button>
+    <button class="cl-chip" data-q="assurance">assurance</button>
+  </div>
+
+  <div class="hs-lookup-results" id="cl-results">
+    <div class="hs-lookup-empty">
+      <p>Tapez un terme ou cliquez une suggestion ci-dessus.</p>
+    </div>
+  </div>
+
+  <div class="hs-lookup-footer">
+    <span>Dataset complet : ~3 000 codes par standard · 5 standards alignés · 4 langues</span>
+    <a href="/bundle">Voir le bundle complet →</a>
+  </div>
+</div>
+
+<script is:inline>
+  const NOGA_SAMPLE = [
+    { noga25: "64.11", noga08: "64.11", nace: "64.11", isic: "6411", fr: "Activités de banque centrale" },
+    { noga25: "64.19", noga08: "64.19", nace: "64.19", isic: "6419", fr: "Autres intermédiations monétaires (banques commerciales)" },
+    { noga25: "65.11", noga08: "65.11", nace: "65.11", isic: "6511", fr: "Assurance-vie" },
+    { noga25: "65.12", noga08: "65.12", nace: "65.12", isic: "6512", fr: "Assurance autre que vie (dommages, santé)" },
+    { noga25: "66.12", noga08: "66.12", nace: "66.12", isic: "6612", fr: "Courtage de valeurs mobilières et marchandises" },
+    { noga25: "56.10", noga08: "56.10", nace: "56.10", isic: "5610", fr: "Restaurants et services de restauration mobile" },
+    { noga25: "55.10", noga08: "55.10", nace: "55.10", isic: "5510", fr: "Hôtels et hébergements similaires" },
+    { noga25: "62.01", noga08: "62.01", nace: "62.01", isic: "6201", fr: "Programmation informatique (édition de logiciels)" },
+    { noga25: "62.02", noga08: "62.02", nace: "62.02", isic: "6202", fr: "Conseil informatique et activités connexes" },
+    { noga25: "63.11", noga08: "63.11", nace: "63.11", isic: "6311", fr: "Traitement de données, hébergement (cloud)" },
+    { noga25: "70.22", noga08: "70.22", nace: "70.22", isic: "7020", fr: "Conseil pour les affaires et autres conseils de gestion" },
+    { noga25: "69.10", noga08: "69.10", nace: "69.10", isic: "6910", fr: "Activités juridiques (avocats, notaires)" },
+    { noga25: "69.20", noga08: "69.20", nace: "69.20", isic: "6920", fr: "Activités comptables, audit, conseil fiscal" },
+    { noga25: "49.41", noga08: "49.41", nace: "49.41", isic: "4923", fr: "Transports routiers de fret" },
+    { noga25: "47.11", noga08: "47.11", nace: "47.11", isic: "4711", fr: "Commerce de détail en magasin non spécialisé (alimentation)" },
+    { noga25: "47.91", noga08: "47.91", nace: "47.91", isic: "4791", fr: "Vente à distance (e-commerce)" },
+    { noga25: "86.10", noga08: "86.10", nace: "86.10", isic: "8610", fr: "Activités hospitalières" },
+    { noga25: "85.42", noga08: "85.42", nace: "85.42", isic: "8530", fr: "Enseignement supérieur" },
+    { noga25: "41.20", noga08: "41.20", nace: "41.20", isic: "4100", fr: "Construction de bâtiments résidentiels et non résidentiels" },
+    { noga25: "10.51", noga08: "10.51", nace: "10.51", isic: "1050", fr: "Exploitation de laiteries et fabrication de fromages" },
+  ];
+
+  function clSearch(q) {
+    if (!q || q.length < 2) return [];
+    const Q = q.toLowerCase().trim();
+    return NOGA_SAMPLE.filter(r =>
+      r.noga25.startsWith(Q.replace(/[^0-9.]/g, '')) && Q.match(/\d/) ||
+      r.fr.toLowerCase().includes(Q)
+    ).slice(0, 5);
+  }
+
+  function clRender(results) {
+    const el = document.getElementById('cl-results');
+    if (!results || results.length === 0) {
+      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + NOGA_SAMPLE.length + ' codes. Le dataset complet en contient ~3 000 par standard, alignés sur 5 nomenclatures.</div>';
+      return;
+    }
+    const rows = results.map(r => `
+      <div class="cl-result-row">
+        <div class="cl-result-head">
+          <div class="cl-result-fr">${r.fr}</div>
+        </div>
+        <div class="cl-result-walks">
+          <div class="cl-walk"><span class="cl-walk-label">NOGA 2025</span><span class="cl-walk-code primary">${r.noga25}</span></div>
+          <div class="cl-walk"><span class="cl-walk-label">NOGA 2008</span><span class="cl-walk-code">${r.noga08}</span></div>
+          <div class="cl-walk"><span class="cl-walk-label">NACE Rev 2</span><span class="cl-walk-code">${r.nace}</span></div>
+          <div class="cl-walk"><span class="cl-walk-label">ISIC Rev 4</span><span class="cl-walk-code">${r.isic}</span></div>
+        </div>
+      </div>
+    `).join('');
+    el.innerHTML = '<div class="hs-result-list">' + rows + '</div>';
+  }
+
+  function clShowEmpty() {
+    document.getElementById('cl-results').innerHTML = '<div class="hs-lookup-empty"><p>Tapez un terme ou cliquez une suggestion ci-dessus.</p></div>';
+  }
+
+  const clInput = document.getElementById('cl-input');
+  const clClear = document.getElementById('cl-clear');
+
+  clInput.addEventListener('input', (e) => {
+    const v = e.target.value;
+    clClear.classList.toggle('visible', v.length > 0);
+    if (!v) { clShowEmpty(); return; }
+    clRender(clSearch(v));
+  });
+
+  clClear.addEventListener('click', () => {
+    clInput.value = '';
+    clClear.classList.remove('visible');
+    clShowEmpty();
+    clInput.focus();
+  });
+
+  document.querySelectorAll('.cl-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const q = chip.dataset.q;
+      clInput.value = q;
+      clClear.classList.add('visible');
+      clRender(clSearch(q));
+      clInput.focus();
+    });
+  });
+</script>
+
+<style>
+  .cl-chip {
+    background: var(--color-bg-alt);
+    border: 1px solid transparent;
+    color: var(--color-ink-soft);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all .15s ease;
+  }
+  .cl-chip:hover {
+    background: white;
+    border-color: var(--color-line);
+    color: var(--color-ink);
+  }
+
+  .cl-result-row {
+    background: white;
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 8px;
+  }
+  .cl-result-head {
+    margin-bottom: 14px;
+  }
+  .cl-result-fr {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    line-height: 1.4;
+  }
+  .cl-result-walks {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 600px) {
+    .cl-result-walks { grid-template-columns: repeat(2, 1fr); }
+  }
+  .cl-walk {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 10px;
+    background: var(--color-bg-alt);
+    border-radius: 6px;
+  }
+  .cl-walk-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--color-ink-mute);
+  }
+  .cl-walk-code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-ink-soft);
+  }
+  .cl-walk-code.primary { color: var(--color-accent); }
+</style>

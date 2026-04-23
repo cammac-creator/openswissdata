@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import FinmaLookup from "../../components/FinmaLookup.astro";
 const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=finma";
 ---
 <BaseLayout
@@ -101,6 +102,12 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=finma";
           </tbody>
         </table>
       </div>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">Essayez <span class="serif">en vrai</span></h2>
+      <p class="ds-section-intro">Cherchez une institution suisse et voyez immédiatement son type FINMA, son UID et son LEI.</p>
+      <FinmaLookup />
     </section>
 
     <div class="ds-sample reveal">

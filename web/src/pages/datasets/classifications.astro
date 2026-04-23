@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import ClassificationsLookup from "../../components/ClassificationsLookup.astro";
 const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=classifications";
 ---
 <BaseLayout
@@ -92,6 +93,12 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=classifications";
           </tbody>
         </table>
       </div>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">Essayez <span class="serif">en vrai</span></h2>
+      <p class="ds-section-intro">Cherchez une activité économique et voyez instantanément son code dans les 5 standards.</p>
+      <ClassificationsLookup />
     </section>
 
     <div class="ds-sample reveal">

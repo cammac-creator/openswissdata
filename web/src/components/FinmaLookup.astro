@@ -1,0 +1,236 @@
+---
+// Démo recherche entité FINMA avec entity_type, UID suisse, LEI international
+---
+<div class="hs-lookup">
+  <div class="hs-lookup-header">
+    <div class="hs-lookup-title-row">
+      <div class="hs-lookup-badge">
+        <span class="badge-dot"></span>
+        Démo live
+      </div>
+      <div class="hs-lookup-meta">
+        25 entités FINMA réelles · 10 catégories
+      </div>
+    </div>
+    <h3 class="hs-lookup-title">Cherchez une institution FINMA</h3>
+    <p class="hs-lookup-sub">Tapez un nom (UBS, Pictet, Swisscard, Vaudoise...) ou un type (banque, assurance, fintech). Vous verrez son entity_type, UID suisse et LEI international.</p>
+  </div>
+
+  <div class="hs-lookup-input-wrap">
+    <svg class="hs-lookup-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <input
+      type="search"
+      id="fn-input"
+      class="hs-lookup-input"
+      placeholder="essayez : UBS, Pictet, fintech, assurance..."
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button class="hs-lookup-clear" id="fn-clear" type="button" aria-label="Effacer">
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <div class="hs-lookup-suggestions">
+    <span class="hs-lookup-suggestions-label">Suggestions :</span>
+    <button class="fn-chip" data-q="UBS">UBS</button>
+    <button class="fn-chip" data-q="Pictet">Pictet</button>
+    <button class="fn-chip" data-q="banque">banques</button>
+    <button class="fn-chip" data-q="assurance">assurances</button>
+    <button class="fn-chip" data-q="fintech">fintech</button>
+    <button class="fn-chip" data-q="gestionnaire">gestionnaires</button>
+  </div>
+
+  <div class="hs-lookup-results" id="fn-results">
+    <div class="hs-lookup-empty">
+      <p>Tapez un nom ou cliquez une suggestion ci-dessus.</p>
+    </div>
+  </div>
+
+  <div class="hs-lookup-footer">
+    <span>Dataset complet : ~5 000 entités · 10 catégories · UID + LEI enrichis · diff hebdomadaire</span>
+    <a href="/datasets/finma">Voir le dataset complet →</a>
+  </div>
+</div>
+
+<script is:inline>
+  const FINMA_SAMPLE = [
+    { name: "UBS Switzerland AG", type: "bank", typefr: "Banque", uid: "CHE-101.329.561", lei: "506700LOLO53LDMTHY00", canton: "ZH", licdate: "1998-06-29" },
+    { name: "Banque Cantonale Vaudoise", type: "bank", typefr: "Banque cantonale", uid: "CHE-105.851.453", lei: "549300JZTNZ8HMC2J104", canton: "VD", licdate: "1845-12-19" },
+    { name: "Raiffeisen Schweiz", type: "bank", typefr: "Banque coopérative", uid: "CHE-105.974.911", lei: "549300C6QSWAOH4LWS78", canton: "SG", licdate: "1899-06-25" },
+    { name: "Banque Pictet & Cie SA", type: "bank", typefr: "Banque privée", uid: "CHE-105.846.057", lei: "549300VKLUIKI8B4DG87", canton: "GE", licdate: "1805-07-23" },
+    { name: "Bank Julius Bär & Co. AG", type: "bank", typefr: "Banque privée", uid: "CHE-101.351.348", lei: "549300CHMKR4Z32RHJ20", canton: "ZH", licdate: "1890-01-01" },
+    { name: "Vaudoise Assurances", type: "insurance", typefr: "Assurance non-vie", uid: "CHE-105.973.717", lei: "5067003XO52OW1XBOC44", canton: "VD", licdate: "1895-04-10" },
+    { name: "Helvetia Schweizerische Versicherungsgesellschaft AG", type: "insurance", typefr: "Assurance vie & non-vie", uid: "CHE-105.852.567", lei: "529900CHFFY9N1V8SY80", canton: "SG", licdate: "1858-09-01" },
+    { name: "Zurich Insurance Group AG", type: "insurance", typefr: "Assurance multi-branches", uid: "CHE-105.832.487", lei: "549300NKHK6MA4TMQM72", canton: "ZH", licdate: "1872-11-13" },
+    { name: "Swiss Re Ltd", type: "insurance", typefr: "Réassurance", uid: "CHE-103.825.882", lei: "549300DRQQI71Y8U7M22", canton: "ZH", licdate: "1863-12-19" },
+    { name: "Swissquote Bank SA", type: "bank", typefr: "Banque (online)", uid: "CHE-105.961.594", lei: "549300J3K6S96P2YFR59", canton: "VD", licdate: "2000-08-04" },
+    { name: "Yapeal AG", type: "fintech", typefr: "Fintech (e-banking)", uid: "CHE-280.928.126", lei: "529900OQ1UMWMA5R7K11", canton: "ZH", licdate: "2020-08-12" },
+    { name: "Sygnum Bank AG", type: "fintech", typefr: "Banque crypto-actifs", uid: "CHE-414.118.681", lei: "549300CHKBBGKKFY7T56", canton: "ZH", licdate: "2019-08-26" },
+    { name: "Swisscard AECS GmbH", type: "fintech", typefr: "Émetteur de cartes", uid: "CHE-105.962.049", lei: "549300V6NV1ZXVFNT728", canton: "ZH", licdate: "2005-08-15" },
+    { name: "Six Payment Services AG", type: "fintech", typefr: "PSP (paiement)", uid: "CHE-105.987.611", lei: "549300UNAY2JTCCQAH40", canton: "ZH", licdate: "2003-12-15" },
+    { name: "Pictet Asset Management SA", type: "asset_collective", typefr: "Gestionnaire d'actifs collectifs", uid: "CHE-100.218.770", lei: "5493006KMSS5KQXSDS84", canton: "GE", licdate: "2008-01-01" },
+    { name: "Vontobel Asset Management AG", type: "asset_collective", typefr: "Gestionnaire d'actifs collectifs", uid: "CHE-105.969.225", lei: "549300VRH13ZWQF1ZK48", canton: "ZH", licdate: "1993-07-15" },
+    { name: "Lombard Odier Asset Management (Switzerland) SA", type: "asset_collective", typefr: "Gestionnaire d'actifs collectifs", uid: "CHE-100.282.244", lei: "549300X1A8H6XSDQVA13", canton: "GE", licdate: "1796-07-01" },
+    { name: "PartnerRe Holdings Europe Limited", type: "insurance", typefr: "Réassurance", uid: "CHE-105.918.334", lei: "549300JJDDFW6ZVCUO52", canton: "ZH", licdate: "1993-01-01" },
+    { name: "Crypto Finance AG", type: "asset_individual", typefr: "Gestionnaire individuel", uid: "CHE-220.738.395", lei: "529900PCPLOHHU7PDB71", canton: "ZG", licdate: "2017-08-04" },
+    { name: "Vontobel Securities AG", type: "securities", typefr: "Maison de titres", uid: "CHE-105.851.965", lei: "549300L7V4MGECYRM819", canton: "ZH", licdate: "1924-04-15" },
+    { name: "EFG International AG", type: "bank", typefr: "Banque privée", uid: "CHE-100.227.531", lei: "529900TPOLW6NEGBJZ32", canton: "ZH", licdate: "1995-10-09" },
+    { name: "PolyReg Allg. Selbstregulierungs-Verein", type: "sro", typefr: "OAR (organisme autoréglementation)", uid: "CHE-104.025.290", lei: "—", canton: "ZH", licdate: "1999-06-01" },
+    { name: "OSIF SA (Organisme de Surveillance pour Intermédiaires Financiers)", type: "supervisory", typefr: "Organisme de surveillance LSFin", uid: "CHE-371.555.287", lei: "—", canton: "GE", licdate: "2020-02-01" },
+    { name: "Swiss Insurance Brokers Association", type: "insurance_intermediary", typefr: "Intermédiaires d'assurance enregistrés", uid: "CHE-105.949.213", lei: "—", canton: "ZH", licdate: "2006-01-01" },
+    { name: "PostFinance AG", type: "bank", typefr: "Banque (système)", uid: "CHE-114.583.749", lei: "5067002A5GQ91P0V5L20", canton: "BE", licdate: "2013-06-26" },
+  ];
+
+  function fnSearch(q) {
+    if (!q || q.length < 2) return [];
+    const Q = q.toLowerCase().trim();
+    return FINMA_SAMPLE.filter(r =>
+      r.name.toLowerCase().includes(Q) ||
+      r.typefr.toLowerCase().includes(Q) ||
+      r.type.toLowerCase().includes(Q) ||
+      r.canton.toLowerCase().includes(Q)
+    ).slice(0, 6);
+  }
+
+  function fnRender(results) {
+    const el = document.getElementById('fn-results');
+    if (!results || results.length === 0) {
+      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + FINMA_SAMPLE.length + ' entités. Le dataset complet en contient ~5 000, sur 10 catégories d\'autorisation.</div>';
+      return;
+    }
+    const rows = results.map(r => `
+      <div class="fn-result-row">
+        <div class="fn-result-head">
+          <div class="fn-result-name">${r.name}</div>
+          <span class="fn-result-type">${r.typefr}</span>
+        </div>
+        <div class="fn-result-grid">
+          <div><span class="fn-label">UID</span><span class="fn-value mono">${r.uid}</span></div>
+          <div><span class="fn-label">LEI</span><span class="fn-value mono">${r.lei}</span></div>
+          <div><span class="fn-label">Canton</span><span class="fn-value">${r.canton}</span></div>
+          <div><span class="fn-label">Licence</span><span class="fn-value">${r.licdate}</span></div>
+        </div>
+      </div>
+    `).join('');
+    el.innerHTML = '<div class="hs-result-list">' + rows + '</div>';
+  }
+
+  function fnShowEmpty() {
+    document.getElementById('fn-results').innerHTML = '<div class="hs-lookup-empty"><p>Tapez un nom ou cliquez une suggestion ci-dessus.</p></div>';
+  }
+
+  const fnInput = document.getElementById('fn-input');
+  const fnClear = document.getElementById('fn-clear');
+
+  fnInput.addEventListener('input', (e) => {
+    const v = e.target.value;
+    fnClear.classList.toggle('visible', v.length > 0);
+    if (!v) { fnShowEmpty(); return; }
+    fnRender(fnSearch(v));
+  });
+
+  fnClear.addEventListener('click', () => {
+    fnInput.value = '';
+    fnClear.classList.remove('visible');
+    fnShowEmpty();
+    fnInput.focus();
+  });
+
+  document.querySelectorAll('.fn-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const q = chip.dataset.q;
+      fnInput.value = q;
+      fnClear.classList.add('visible');
+      fnRender(fnSearch(q));
+      fnInput.focus();
+    });
+  });
+</script>
+
+<style>
+  .fn-chip {
+    background: var(--color-bg-alt);
+    border: 1px solid transparent;
+    color: var(--color-ink-soft);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all .15s ease;
+  }
+  .fn-chip:hover {
+    background: white;
+    border-color: var(--color-line);
+    color: var(--color-ink);
+  }
+
+  .fn-result-row {
+    background: white;
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 8px;
+  }
+  .fn-result-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .fn-result-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+    line-height: 1.3;
+  }
+  .fn-result-type {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .fn-result-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1.4fr .6fr .8fr;
+    gap: 10px;
+  }
+  @media (max-width: 600px) {
+    .fn-result-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .fn-result-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .fn-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--color-ink-mute);
+  }
+  .fn-value {
+    font-size: 12px;
+    color: var(--color-ink-soft);
+    line-height: 1.3;
+  }
+  .fn-value.mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-ink);
+  }
+</style>

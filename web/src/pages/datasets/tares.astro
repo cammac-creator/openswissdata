@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import HSLookup from "../../components/HSLookup.astro";
 const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=tares";
 ---
 <BaseLayout
@@ -81,6 +82,12 @@ const STRIPE_CHECKOUT_URL = "/api/checkout/session?dataset=tares";
           </tbody>
         </table>
       </div>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">Essayez <span class="serif">en vrai</span></h2>
+      <p class="ds-section-intro">Cherchez un produit ou un code HS et voyez le résultat — exactement comme votre ERP le ferait via notre API.</p>
+      <HSLookup />
     </section>
 
     <div class="ds-sample reveal">
