@@ -68,8 +68,9 @@ async function buildSession(
     if (!session.url) return { ok: false, status: 502, error: "stripe_no_session_url" };
     return { ok: true, url: session.url, session_id: session.id };
   } catch (err) {
+    // H4: log full error server-side, never expose Stripe internals to clients
     console.error("[checkout] stripe error:", err);
-    return { ok: false, status: 502, error: `stripe_error:${String(err)}` };
+    return { ok: false, status: 502, error: "checkout_failed" };
   }
 }
 
@@ -78,8 +79,9 @@ checkoutRoute.post("/session", async (c) => {
   let parsed;
   try {
     parsed = CheckoutSchema.parse(await c.req.json());
-  } catch (err) {
-    return c.json({ error: "invalid_body", details: String(err) }, 400);
+  } catch {
+    // H4: don't expose Zod validation internals to clients
+    return c.json({ error: "invalid_body" }, 400);
   }
   const result = await buildSession(parsed.dataset_ids, parsed.email);
   if (!result.ok) {
@@ -95,8 +97,9 @@ checkoutRoute.post("/session", async (c) => {
     if (result.error === "bundle_price_not_configured") {
       return c.json({ error: result.error }, 500);
     }
-    if (result.error.startsWith("stripe_error:")) {
-      return c.json({ error: "stripe_error", details: result.error.slice("stripe_error:".length) }, 502);
+    if (result.error === "checkout_failed" || result.error.startsWith("stripe_error:")) {
+      // H4: return a generic error without Stripe internals
+      return c.json({ error: "checkout_failed" }, 502);
     }
     return c.json({ error: result.error }, result.status as ContentfulStatusCode);
   }
@@ -129,6 +132,10 @@ checkoutRoute.post("/start", async (c) => {
 
   const result = await buildSession(dataset_ids, email);
   if (!result.ok) {
+    // H4: redirect to error page instead of leaking internal error strings
+    if (result.status >= 500 || result.error === "checkout_failed" || result.error.startsWith("stripe_error:")) {
+      return c.redirect(`${(process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "")}/bundle?checkout=error`, 303);
+    }
     return c.text(result.error, result.status as ContentfulStatusCode);
   }
   return c.redirect(result.url, 303);

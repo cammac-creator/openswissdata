@@ -154,6 +154,40 @@ describe("POST /api/checkout/session", () => {
     const call = sessionCreateMock.mock.calls[0][0];
     expect(call.customer_email).toBeUndefined();
   });
+
+  // H4: Stripe error must not leak internals to the client
+  it("H4: Stripe error response contains only {error: 'checkout_failed'} — no Stripe internals", async () => {
+    sessionCreateMock.mockRejectedValueOnce(new Error("rate limited by stripe raised by: api.stripe.com"));
+    const app = createApp();
+    const res = await app.request("/api/checkout/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ dataset_ids: ["tares"], email: "x@y.com" }),
+    });
+    expect(res.status).toBe(502);
+    const body = await res.json() as Record<string, unknown>;
+    expect(body.error).toBe("checkout_failed");
+    // Must NOT contain any Stripe internals
+    const bodyStr = JSON.stringify(body);
+    expect(bodyStr).not.toContain("rate limited");
+    expect(bodyStr).not.toContain("stripe.com");
+    expect(bodyStr).not.toContain("raised by");
+    expect(Object.keys(body)).toEqual(["error"]); // only 'error' key
+  });
+
+  // H4: Zod validation error must not expose schema internals
+  it("H4: Zod validation error returns {error: 'invalid_body'} without details", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ dataset_ids: [] }), // Zod: min(1) violation
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json() as Record<string, unknown>;
+    expect(body.error).toBe("invalid_body");
+    expect(body.details).toBeUndefined(); // no schema leak
+  });
 });
 
 describe("POST /api/checkout/start (form-encoded → 303 redirect)", () => {
@@ -252,5 +286,22 @@ describe("POST /api/checkout/start (form-encoded → 303 redirect)", () => {
     expect(res.status).toBe(400);
     const text = await res.text();
     expect(text).toContain("bundle_cannot_be_combined");
+  });
+
+  // H4: Stripe error on /start must redirect to error page, not render raw error text
+  it("H4: Stripe error on /start redirects to /bundle?checkout=error instead of leaking internals", async () => {
+    sessionCreateMock.mockRejectedValueOnce(new Error("stripe internal: api key invalid raised by api.stripe.com"));
+    const app = createApp();
+    const res = await app.request("/api/checkout/start", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "dataset_ids=tares",
+    });
+    // Should redirect to error page, NOT return a text body with Stripe internals
+    expect(res.status).toBe(303);
+    const location = res.headers.get("location") ?? "";
+    expect(location).toContain("checkout=error");
+    expect(location).not.toContain("stripe");
+    expect(location).not.toContain("raised by");
   });
 });
