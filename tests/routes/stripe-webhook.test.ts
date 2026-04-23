@@ -223,4 +223,44 @@ describe("POST /api/webhook/stripe", () => {
     const body = await res.json();
     expect(body.ignored).toBe("customer.created");
   });
+
+  // H2: if a dataset has no current_version (simulating a partial dataset setup),
+  // the webhook must abort BEFORE inserting any order or entitlement rows.
+  it("H2: aborts with no order/entitlement when a dataset has no current_version", async () => {
+    const db = getDb();
+    // Remove current_version from 'finma' — simulates a missing version for 2nd dataset in bundle
+    db.prepare("UPDATE datasets SET current_version = NULL WHERE id = 'finma'").run();
+    closeDb();
+
+    constructEventAsyncMock.mockResolvedValueOnce({
+      type: "checkout.session.completed",
+      data: {
+        object: {
+          id: "cs_test_tx_abort",
+          customer_email: "tx-test@example.com",
+          payment_intent: "pi_tx",
+          amount_total: 79900,
+          // bundle expands to tares + classifications + finma; finma has no version
+          metadata: { dataset_ids: "bundle" },
+        },
+      },
+    });
+
+    const app = createApp();
+    const res = await app.request("/api/webhook/stripe", {
+      method: "POST",
+      headers: { "content-type": "application/json", "stripe-signature": "ok" },
+      body: "{}",
+    });
+
+    // Should return 500 (not 200) because we abort before committing
+    expect(res.status).toBe(500);
+
+    // Crucially: no order and no entitlements must exist
+    const db2 = getDb();
+    const orders = db2.prepare("SELECT * FROM orders WHERE stripe_session_id = ?").all("cs_test_tx_abort");
+    expect(orders).toHaveLength(0);
+    const ents = db2.prepare("SELECT * FROM entitlements").all();
+    expect(ents).toHaveLength(0);
+  });
 });

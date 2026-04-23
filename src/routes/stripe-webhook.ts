@@ -64,64 +64,88 @@ stripeWebhookRoute.post("/", async (c) => {
     return c.json({ received: true, idempotent: true, order_id: existing.id });
   }
 
-  // Insert order
-  const orderInfo = db.prepare(`
-    INSERT INTO orders (customer_id, stripe_session_id, stripe_payment_intent, amount_chf, items_json, status, created_at)
-    VALUES (?, ?, ?, ?, ?, 'paid', ?)
-  `).run(
-    customerId,
-    session.id,
-    (session.payment_intent as string | null) ?? null,
-    session.amount_total ?? 0,
-    JSON.stringify(datasetIds),
-    now
-  );
-  const orderId = Number(orderInfo.lastInsertRowid);
-
   // Expand bundle to 3 datasets
   const resolvedDatasets = Array.from(new Set(
     datasetIds.flatMap(id => id === "bundle" ? ["tares", "classifications", "finma"] : [id])
   ));
 
-  // Create entitlements + send emails
-  const updatesUntil = now + ENTITLEMENT_DAYS * 24 * 3600 * 1000;
-  const entStmt = db.prepare(`
-    INSERT INTO entitlements (customer_id, dataset_id, order_id, updates_until, created_at)
-    VALUES (?, ?, ?, ?, ?)
-    ON CONFLICT(customer_id, dataset_id) DO UPDATE SET
-      updates_until = MAX(updates_until, excluded.updates_until),
-      order_id = excluded.order_id
-  `);
-
   const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const updatesUntil = now + ENTITLEMENT_DAYS * 24 * 3600 * 1000;
+
+  // H2: Pre-resolve dataset+version rows before opening the transaction so any
+  // missing row causes an early abort — BEFORE any DB write happens.
+  type EmailPayload = { datasetId: string; datasetName: string; r2Key: string; version: string };
+  const emailPayloads: EmailPayload[] = [];
 
   for (const datasetId of resolvedDatasets) {
-    try {
-      entStmt.run(customerId, datasetId, orderId, updatesUntil, now);
-      const dataset = db.prepare("SELECT name, current_version FROM datasets WHERE id = ?").get(datasetId) as { name: string; current_version: string | null } | undefined;
-      if (!dataset || !dataset.current_version) {
-        console.warn(`[webhook] dataset ${datasetId} has no current_version — skipping download email`);
-        continue;
-      }
-      const version = db.prepare("SELECT r2_key FROM versions WHERE dataset_id = ? AND version = ?").get(datasetId, dataset.current_version) as { r2_key: string } | undefined;
-      if (!version) {
-        console.warn(`[webhook] no version row for ${datasetId}@${dataset.current_version}`);
-        continue;
-      }
+    const dataset = db.prepare("SELECT name, current_version FROM datasets WHERE id = ?")
+      .get(datasetId) as { name: string; current_version: string | null } | undefined;
+    if (!dataset?.current_version) {
+      console.warn(`[webhook] dataset ${datasetId} has no current_version — aborting tx`);
+      return c.json({ error: "dataset_missing_version", dataset_id: datasetId }, 500);
+    }
+    const versionRow = db.prepare("SELECT r2_key FROM versions WHERE dataset_id = ? AND version = ?")
+      .get(datasetId, dataset.current_version) as { r2_key: string } | undefined;
+    if (!versionRow) {
+      console.warn(`[webhook] no version row for ${datasetId}@${dataset.current_version} — aborting tx`);
+      return c.json({ error: "version_row_missing", dataset_id: datasetId }, 500);
+    }
+    emailPayloads.push({ datasetId, datasetName: dataset.name, r2Key: versionRow.r2_key, version: dataset.current_version });
+  }
 
-      const downloadUrl = await signedDownloadUrl(version.r2_key, 48 * 3600);
+  // H2: Wrap order + ALL entitlement inserts in one atomic transaction.
+  // better-sqlite3 transactions are synchronous — emails are sent outside.
+  const insertOrderAndEntitlements = db.transaction(() => {
+    const orderInfo = db.prepare(`
+      INSERT INTO orders (customer_id, stripe_session_id, stripe_payment_intent, amount_chf, items_json, status, created_at)
+      VALUES (?, ?, ?, ?, ?, 'paid', ?)
+    `).run(
+      customerId,
+      session.id,
+      (session.payment_intent as string | null) ?? null,
+      session.amount_total ?? 0,
+      JSON.stringify(datasetIds),
+      now
+    );
+    const txOrderId = Number(orderInfo.lastInsertRowid);
+
+    const entStmt = db.prepare(`
+      INSERT INTO entitlements (customer_id, dataset_id, order_id, updates_until, created_at)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(customer_id, dataset_id) DO UPDATE SET
+        updates_until = MAX(updates_until, excluded.updates_until),
+        order_id = excluded.order_id
+    `);
+    for (const { datasetId } of emailPayloads) {
+      entStmt.run(customerId, datasetId, txOrderId, updatesUntil, now);
+    }
+    return txOrderId;
+  });
+
+  let orderId: number;
+  try {
+    orderId = insertOrderAndEntitlements();
+  } catch (err) {
+    console.error("[webhook] transaction failed — rolling back:", err);
+    return c.json({ error: "db_transaction_failed" }, 500);
+  }
+
+  // Send emails outside the transaction (async — transaction is already committed)
+  for (const { datasetId, datasetName, r2Key, version } of emailPayloads) {
+    try {
+      const downloadUrl = await signedDownloadUrl(r2Key, 48 * 3600);
       const emailResult = await sendDownloadEmail({
         to: email,
-        datasetName: dataset.name,
+        datasetName,
         downloadUrl,
         accountUrl: `${baseUrl}/account`,
-        version: dataset.current_version,
+        version,
       });
       if (!emailResult.sent) {
         console.warn(`[webhook] download email for ${datasetId} not sent: ${emailResult.reason}`);
       }
     } catch (err) {
-      console.error(`[webhook] entitlement/email failed for ${datasetId}:`, err);
+      console.error(`[webhook] email failed for ${datasetId}:`, err);
     }
   }
 
