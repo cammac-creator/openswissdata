@@ -10,11 +10,11 @@
         Démo live
       </div>
       <div class="hs-lookup-meta">
-        Aperçu d'une intégration API · Sample 15 codes
+        Aperçu d'une intégration API · Échantillon 40 codes
       </div>
     </div>
     <h3 class="hs-lookup-title">Cherchez un code TARES</h3>
-    <p class="hs-lookup-sub">Tapez un mot-clé (chocolat, montre, fromage, ordinateur...) ou un code HS (8 chiffres). Données réelles, échantillon de notre dataset.</p>
+    <p class="hs-lookup-sub">Tapez un mot-clé (chocolat, lait, montre, ordinateur, vélo...) ou un code HS (8 chiffres). Échantillon réel de 40 codes ; le dataset complet en contient ~10 247.</p>
   </div>
 
   <div class="hs-lookup-input-wrap">
@@ -38,10 +38,11 @@
   <div class="hs-lookup-suggestions">
     <span class="hs-lookup-suggestions-label">Suggestions :</span>
     <button class="hs-chip" data-q="chocolat">chocolat</button>
-    <button class="hs-chip" data-q="fromage">fromage</button>
+    <button class="hs-chip" data-q="lait">lait</button>
+    <button class="hs-chip" data-q="vélo">vélo</button>
     <button class="hs-chip" data-q="montre">montre</button>
-    <button class="hs-chip" data-q="ordinateur">ordinateur</button>
-    <button class="hs-chip" data-q="vin">vin</button>
+    <button class="hs-chip" data-q="café">café</button>
+    <button class="hs-chip" data-q="roulement">roulement</button>
   </div>
 
   <div class="hs-lookup-results" id="hs-results">
@@ -276,9 +277,11 @@
   .hs-result-empty {
     padding: 40px 24px;
     text-align: center;
-    color: var(--color-ink-mute);
+    color: var(--color-ink-soft);
     font-size: 13px;
+    line-height: 1.55;
   }
+  .hs-result-empty strong { color: var(--color-ink); font-weight: 600; }
 
   .hs-lookup-footer {
     display: flex;
@@ -314,23 +317,63 @@
 </style>
 
 <script is:inline>
-  // Mini-dataset démo : 15 codes représentatifs (vraies données TARES)
+  // Mini-dataset démo : ~40 codes représentatifs (vraies données TARES)
   const TARES_SAMPLE = [
+    // Chocolat & confiseries
     { code: "18063110", fr: "Chocolat fourré, en tablettes", de: "Schokolade, gefüllt, in Tafeln", it: "Cioccolato ripieno, in tavolette", duty: "30.00", unit: "100kg" },
     { code: "18069011", fr: "Pralinés (chocolat)", de: "Pralinen (Schokolade)", it: "Cioccolatini (praline)", duty: "30.00", unit: "100kg" },
+    { code: "17019910", fr: "Sucre blanc raffiné", de: "Weißzucker, raffiniert", it: "Zucchero bianco raffinato", duty: "10.00", unit: "100kg" },
+    { code: "17031000", fr: "Mélasses de sucre de canne", de: "Melassen aus Rohrzucker", it: "Melasse di canna da zucchero", duty: "0.00", unit: "100kg" },
+    // Laitiers
+    { code: "04011010", fr: "Lait, ≤1% de matières grasses", de: "Milch, ≤1% Fettgehalt", it: "Latte, ≤1% materie grasse", duty: "12.50", unit: "100kg" },
+    { code: "04012010", fr: "Lait, 1-6% de matières grasses", de: "Milch, 1-6% Fettgehalt", it: "Latte, 1-6% materie grasse", duty: "12.50", unit: "100kg" },
+    { code: "04051011", fr: "Beurre frais, en plaques", de: "Frische Butter, in Tafeln", it: "Burro fresco, in placche", duty: "1670.00", unit: "100kg" },
     { code: "04062090", fr: "Fromages râpés ou en poudre", de: "Käse, gerieben oder in Pulverform", it: "Formaggi grattugiati o in polvere", duty: "763.00", unit: "100kg" },
     { code: "04063090", fr: "Fromages fondus, autres", de: "Schmelzkäse, andere", it: "Formaggi fusi, altri", duty: "763.00", unit: "100kg" },
     { code: "04069099", fr: "Autres fromages, n.d.a.", de: "Andere Käse, a.n.g.", it: "Altri formaggi, n.n.a.", duty: "763.00", unit: "100kg" },
+    // Sel, eau, café
+    { code: "25010099", fr: "Sel de cuisine, autres", de: "Speisesalz, andere", it: "Sale da cucina, altri", duty: "0.00", unit: "100kg" },
+    { code: "22011000", fr: "Eaux minérales et eaux gazéifiées", de: "Mineralwasser und kohlensäurehaltige Wasser", it: "Acque minerali e acque gassate", duty: "0.00", unit: "100L" },
+    { code: "09011100", fr: "Café non torréfié, non décaféiné", de: "Kaffee, nicht geröstet, nicht entkoffeiniert", it: "Caffè non torrefatto, non decaffeinato", duty: "0.00", unit: "100kg" },
+    { code: "09012100", fr: "Café torréfié, non décaféiné", de: "Kaffee, geröstet, nicht entkoffeiniert", it: "Caffè torrefatto, non decaffeinato", duty: "60.00", unit: "100kg" },
+    // Montres & horlogerie
     { code: "91011100", fr: "Montres-bracelets, à pile, mécaniques", de: "Armbanduhren, batteriebetrieben, mechanisch", it: "Orologi da polso, a pila, meccanici", duty: "0.00", unit: "pcs" },
     { code: "91021100", fr: "Montres-bracelets, autres, mécaniques", de: "Armbanduhren, andere, mechanisch", it: "Orologi da polso, altri, meccanici", duty: "0.00", unit: "pcs" },
+    // Mécanique & roulements
+    { code: "84821010", fr: "Roulements à billes, à contact radial", de: "Kugellager, mit radialer Berührung", it: "Cuscinetti a sfere, contatto radiale", duty: "0.00", unit: "pcs" },
+    { code: "84825000", fr: "Roulements à rouleaux cylindriques", de: "Zylinderrollenlager", it: "Cuscinetti a rulli cilindrici", duty: "0.00", unit: "pcs" },
+    // Électronique
     { code: "84713000", fr: "Ordinateurs portables (≤10 kg)", de: "Tragbare Computer (≤10 kg)", it: "Computer portatili (≤10 kg)", duty: "0.00", unit: "pcs" },
     { code: "84714900", fr: "Autres machines de traitement automatique", de: "Andere automatische Datenverarbeitungsmaschinen", it: "Altre macchine automatiche elaborazione dati", duty: "0.00", unit: "pcs" },
+    { code: "85171200", fr: "Téléphones mobiles (smartphones)", de: "Mobiltelefone (Smartphones)", it: "Telefoni cellulari (smartphone)", duty: "0.00", unit: "pcs" },
+    { code: "85076000", fr: "Accumulateurs lithium-ion (batteries)", de: "Lithium-Ionen-Akkumulatoren (Batterien)", it: "Accumulatori agli ioni di litio (batterie)", duty: "0.00", unit: "pcs" },
+    // Boissons
     { code: "22042150", fr: "Vins blancs en bouteilles ≤2L, AOC", de: "Weißweine in Flaschen ≤2L, AOC", it: "Vini bianchi in bottiglie ≤2L, AOC", duty: "60.00", unit: "100L" },
     { code: "22042190", fr: "Autres vins en bouteilles ≤2L", de: "Andere Weine in Flaschen ≤2L", it: "Altri vini in bottiglie ≤2L", duty: "60.00", unit: "100L" },
+    { code: "22030000", fr: "Bières de malt", de: "Bier aus Malz", it: "Birre di malto", duty: "24.75", unit: "100L" },
+    // Tabac
     { code: "24021000", fr: "Cigares contenant du tabac", de: "Zigarren, tabakhaltig", it: "Sigari contenenti tabacco", duty: "0.00", unit: "pcs" },
+    // Fruits & légumes
     { code: "08081090", fr: "Pommes fraîches, autres", de: "Äpfel, frisch, andere", it: "Mele fresche, altre", duty: "1.50", unit: "100kg" },
+    { code: "07019099", fr: "Pommes de terre fraîches, autres", de: "Kartoffeln, frisch, andere", it: "Patate fresche, altre", duty: "3.00", unit: "100kg" },
     { code: "20071091", fr: "Confitures de fruits", de: "Konfitüren aus Früchten", it: "Confetture di frutta", duty: "26.00", unit: "100kg" },
-    { code: "85171200", fr: "Téléphones mobiles (smartphones)", de: "Mobiltelefone (Smartphones)", it: "Telefoni cellulari (smartphone)", duty: "0.00", unit: "pcs" },
+    // Pain & céréales
+    { code: "19059030", fr: "Pain frais (sans miel ni œufs)", de: "Frisches Brot (ohne Honig oder Eier)", it: "Pane fresco (senza miele né uova)", duty: "21.50", unit: "100kg" },
+    { code: "10011900", fr: "Froment (blé) tendre, autre", de: "Weichweizen, anderer", it: "Frumento tenero, altro", duty: "0.00", unit: "100kg" },
+    // Poisson
+    { code: "03021400", fr: "Saumons frais (Atlantique, Danube)", de: "Lachse, frisch (Atlantik, Donau)", it: "Salmoni freschi (Atlantico, Danubio)", duty: "0.00", unit: "100kg" },
+    // Hygiène
+    { code: "34011100", fr: "Savons à usage de toilette (y.c. médicinaux)", de: "Toilettenseifen (auch medizinische)", it: "Saponi per toeletta (anche medicinali)", duty: "0.00", unit: "100kg" },
+    // Vélos & transport
+    { code: "87120030", fr: "Vélos sans moteur, de course", de: "Fahrräder ohne Motor, Renn", it: "Biciclette senza motore, da corsa", duty: "0.00", unit: "pcs" },
+    { code: "87116000", fr: "Vélos électriques (e-bikes)", de: "E-Bikes (Elektrofahrräder)", it: "Biciclette elettriche (e-bike)", duty: "0.00", unit: "pcs" },
+    // Optique
+    { code: "90041000", fr: "Lunettes solaires", de: "Sonnenbrillen", it: "Occhiali da sole", duty: "0.00", unit: "pcs" },
+    // Livres & papier
+    { code: "49019900", fr: "Livres, brochures, dépliants imprimés", de: "Bücher, Broschüren, gedruckte Drucksachen", it: "Libri, opuscoli, stampati", duty: "0.00", unit: "100kg" },
+    // Vêtements
+    { code: "62034210", fr: "Pantalons, hommes, en coton, jeans", de: "Hosen, Herren, Baumwolle, Jeans", it: "Pantaloni, uomo, cotone, jeans", duty: "120.00", unit: "100kg" },
+    { code: "61091000", fr: "T-shirts en coton", de: "T-Shirts, Baumwolle", it: "Magliette in cotone", duty: "120.00", unit: "100kg" },
   ];
 
   function search(q) {
@@ -347,7 +390,7 @@
   function render(results) {
     const el = document.getElementById('hs-results');
     if (!results || results.length === 0) {
-      el.innerHTML = '<div class="hs-result-empty">Aucun résultat dans cet échantillon. Le dataset complet contient ~10 000 codes.</div>';
+      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + TARES_SAMPLE.length + ' codes représentatifs. Le dataset complet TARES en contient ~10 247 — vous y trouverez tout ce qui passe les douanes suisses.</div>';
       return;
     }
     const rows = results.map(r => `
