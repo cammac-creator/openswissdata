@@ -110,5 +110,26 @@ describe("lib/r2", () => {
         /R2 credentials missing/
       );
     });
+
+    // commit 8eaf942 — force named ZIP download via Content-Disposition
+    it("passes ResponseContentDisposition with filename derived from key last segment", async () => {
+      await signedDownloadUrl("tares/2026.04.22/tares.zip");
+      const [, cmd] = getSignedUrlMock.mock.calls[0];
+      expect(cmd.__type).toBe("GetObjectCommand");
+      expect(cmd.input.ResponseContentDisposition).toBe('attachment; filename="tares.zip"');
+    });
+
+    it("uses the bare filename when key has no path separator", async () => {
+      await signedDownloadUrl("tares.zip");
+      const [, cmd] = getSignedUrlMock.mock.calls[0];
+      expect(cmd.input.ResponseContentDisposition).toBe('attachment; filename="tares.zip"');
+    });
+
+    it("uses the last non-empty segment even when key ends with a slash", async () => {
+      // filter(Boolean) removes trailing empty strings, so "tares/2026.04.22/" → pop() = "2026.04.22"
+      await signedDownloadUrl("tares/2026.04.22/");
+      const [, cmd] = getSignedUrlMock.mock.calls[0];
+      expect(cmd.input.ResponseContentDisposition).toBe('attachment; filename="2026.04.22"');
+    });
   });
 });

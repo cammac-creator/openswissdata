@@ -241,4 +241,16 @@ describe("POST /api/checkout/start (form-encoded → 303 redirect)", () => {
     });
     expect(res.status).toBe(400);
   });
+
+  it("rejects bundle combined with individual dataset via form with 400", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/start", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "dataset_ids=bundle%2Ctares",  // "bundle,tares"
+    });
+    expect(res.status).toBe(400);
+    const text = await res.text();
+    expect(text).toContain("bundle_cannot_be_combined");
+  });
 });
