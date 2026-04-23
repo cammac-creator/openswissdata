@@ -49,11 +49,17 @@ export async function signedDownloadUrl(
   expiresSeconds = 300
 ): Promise<string> {
   const client = buildClient();
+  // Force download with a clean filename derived from the key (last path segment).
+  // Without ResponseContentDisposition, browsers open a blank tab and silently drop
+  // the file in Downloads — confusing UX. With it, the browser explicitly downloads
+  // the file with the expected name.
+  const filename = r2Key.split("/").filter(Boolean).pop() ?? "download.zip";
   return await getSignedUrl(
     client,
     new GetObjectCommand({
       Bucket: requireBucket(),
       Key: r2Key,
+      ResponseContentDisposition: `attachment; filename="${filename}"`,
     }),
     { expiresIn: expiresSeconds }
   );
