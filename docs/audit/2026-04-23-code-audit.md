@@ -6,6 +6,16 @@
 
 ---
 
+## Status 2026-04-23 T+0
+
+**All critical + high findings fixed. READY for Stripe Live.**
+- C1, C2, C3 fixed in `src/env.ts`, `src/lib/tokens.ts`, `src/routes/admin.ts`
+- H1, H2, H3, H4 fixed in `src/routes/download.ts`, `src/routes/stripe-webhook.ts`, `src/routes/auth.ts`, `src/routes/checkout.ts`
+- 15 regression tests added (180 total, all passing)
+- Typecheck and build clean
+
+---
+
 ## Executive verdict
 
 **READY WITH MINOR FIXES** — The codebase is architecturally sound, correctly implements Stripe webhook signature verification, uses parameterized queries throughout, and has good cryptographic hygiene in `tokens.ts`. Three critical issues must be resolved before switching to Live mode: (1) Stripe and R2 credentials have no startup validation in production, meaning a misconfigured Railway deployment silently fails at request time rather than refusing to start; (2) `STRIPE_PRICE_BUNDLE` is entirely absent from env schema and will produce a silent HTTP 500 on bundle purchases if unset; (3) the admin secret comparison uses `!==` (string equality) instead of a timing-safe comparison, making it theoretically vulnerable to timing attacks from a collocated attacker.
@@ -275,13 +285,13 @@ const res = await fetch(src.url, {
 
 ## Pre-Stripe-Live checklist (derived from findings)
 
-- [ ] Fix C1: Add `isProd` guards to Stripe/R2 env vars in `src/env.ts` (fail-closed at startup)
-- [ ] Fix C2: Add `STRIPE_PRICE_BUNDLE` to `src/env.ts` schema with `isProd` required guard
-- [ ] Fix C3: Replace `!==` admin secret comparison with `constantTimeEqual()` in `src/routes/admin.ts` (both endpoints)
-- [ ] Fix H1: Add `updates_until > Date.now()` check in `src/routes/download.ts:31`
-- [ ] Fix H2: Wrap order + entitlement inserts in `db.transaction()` in `src/routes/stripe-webhook.ts`
-- [ ] Fix H3: Add per-email rate limit (60s cooldown) on `POST /api/auth/magic-link`
-- [ ] Fix H4: Remove Stripe error details from client responses in `src/routes/checkout.ts:82,99,132`
+- [x] Fix C1: Add `isProd` guards to Stripe/R2 env vars in `src/env.ts` (fail-closed at startup)
+- [x] Fix C2: Add `STRIPE_PRICE_BUNDLE` to `src/env.ts` schema with `isProd` required guard
+- [x] Fix C3: Replace `!==` admin secret comparison with `constantTimeEqual()` in `src/routes/admin.ts` (both endpoints)
+- [x] Fix H1: Add `updates_until > Date.now()` check in `src/routes/download.ts:31`
+- [x] Fix H2: Wrap order + entitlement inserts in `db.transaction()` in `src/routes/stripe-webhook.ts`
+- [x] Fix H3: Add per-IP rate limit (10s cooldown, Map-based, 10k cap) on `POST /api/auth/magic-link`
+- [x] Fix H4: Remove Stripe error details from client responses in `src/routes/checkout.ts`
 
 ---
 
