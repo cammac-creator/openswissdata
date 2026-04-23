@@ -78,16 +78,16 @@ import CodePlayground from "../components/CodePlayground.astro";
 
     <div class="stats-row reveal">
       <div class="stat">
-        <div class="stat-num"><span class="counter" data-count="10247">0</span></div>
-        <div class="stat-label">Codes douaniers TARES indexés</div>
+        <div class="stat-num"><span class="counter" data-count="10247">10 247</span></div>
+        <div class="stat-label">Codes douaniers dans le dataset TARES</div>
       </div>
       <div class="stat">
-        <div class="stat-num">~<span class="counter" data-count="40">0</span><span class="unit">h</span></div>
-        <div class="stat-label">Économisées par dataset versus parsing manuel</div>
+        <div class="stat-num">~<span class="counter" data-count="40">40</span><span class="unit">h</span></div>
+        <div class="stat-label">Économisées versus parsing manuel par vos équipes</div>
       </div>
       <div class="stat">
-        <div class="stat-num"><span class="counter" data-count="3">0</span><span class="unit"> std</span></div>
-        <div class="stat-label">Standards classifications cross-walks</div>
+        <div class="stat-num"><span class="counter" data-count="3">3</span></div>
+        <div class="stat-label">Standards de classifications avec cross-walks</div>
       </div>
       <div class="stat">
         <div class="stat-num">CH</div>
@@ -845,6 +845,10 @@ import CodePlayground from "../components/CodePlayground.astro";
     padding: 80px 0 100px;
     position: relative;
     overflow: hidden;
+  }
+  .hero > .container-wide {
+    position: relative;
+    z-index: 2;
   }
   .hero::before {
     content: '';
@@ -1658,9 +1662,11 @@ import CodePlayground from "../components/CodePlayground.astro";
     });
   }
 
-  // Counter animation when in view
+  // Counter animation: pre-fill with target value, animate from 0 only on first reveal
   const counters = document.querySelectorAll('.counter');
   const runCounter = (el) => {
+    if (el.dataset.animated) return;
+    el.dataset.animated = '1';
     const target = parseInt(el.dataset.count, 10) || 0;
     const duration = 1400;
     const start = performance.now();
@@ -1682,7 +1688,9 @@ import CodePlayground from "../components/CodePlayground.astro";
           ioc.unobserve(e.target);
         }
       });
-    }, { threshold: 0.4 });
+    }, { threshold: 0.1 });
     counters.forEach(c => ioc.observe(c));
+  } else {
+    // SSR/no-JS: target value is already in DOM (pre-filled), nothing to do.
   }
 </script>
