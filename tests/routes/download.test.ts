@@ -118,4 +118,39 @@ describe("download routes", () => {
     const res = await app.request(`/api/download/short`);
     expect(res.status).toBe(400);
   });
+
+  // H1: expired entitlement (updates_until < now) must return 403 subscription_expired
+  it("H1: POST /api/account/download-request returns 403 when updates_until is in the past", async () => {
+    const db = getDb();
+    // Overwrite the entitlement with an expired updates_until
+    db.prepare("UPDATE entitlements SET updates_until = ? WHERE customer_id = ? AND dataset_id = ?")
+      .run(Date.now() - 1000, custId, "tares");
+    closeDb();
+
+    const app = createApp();
+    const res = await app.request("/api/account/download-request", {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: `osd_session=${token}` },
+      body: JSON.stringify({ dataset_id: "tares" }),
+    });
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toBe("subscription_expired");
+  });
+
+  // H1: null updates_until (perpetual entitlement) must still allow download
+  it("H1: POST /api/account/download-request succeeds when updates_until is null (perpetual)", async () => {
+    const db = getDb();
+    db.prepare("UPDATE entitlements SET updates_until = NULL WHERE customer_id = ? AND dataset_id = ?")
+      .run(custId, "tares");
+    closeDb();
+
+    const app = createApp();
+    const res = await app.request("/api/account/download-request", {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: `osd_session=${token}` },
+      body: JSON.stringify({ dataset_id: "tares" }),
+    });
+    expect(res.status).toBe(200);
+  });
 });

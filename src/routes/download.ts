@@ -27,8 +27,12 @@ downloadRoute.post("/account/download-request", requireAuth, async (c) => {
   const db = getDb();
 
   const ent = db.prepare("SELECT updates_until FROM entitlements WHERE customer_id = ? AND dataset_id = ?")
-    .get(customerId, parsed.dataset_id) as { updates_until: number } | undefined;
+    .get(customerId, parsed.dataset_id) as { updates_until: number | null } | undefined;
   if (!ent) return c.json({ error: "no_entitlement" }, 403);
+  // H1: enforce updates_until — expired customers must renew before downloading
+  if (ent.updates_until !== null && ent.updates_until < Date.now()) {
+    return c.json({ error: "subscription_expired" }, 403);
+  }
 
   const dataset = db.prepare("SELECT current_version FROM datasets WHERE id = ?").get(parsed.dataset_id) as { current_version: string | null } | undefined;
   if (!dataset?.current_version) return c.json({ error: "no_version" }, 404);
