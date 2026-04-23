@@ -142,4 +142,103 @@ describe("POST /api/checkout/session", () => {
     });
     expect(res.status).toBe(502);
   });
+
+  it("accepts JSON body without email (Stripe will collect it)", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ dataset_ids: ["tares"] }),
+    });
+    expect(res.status).toBe(200);
+    const call = sessionCreateMock.mock.calls[0][0];
+    expect(call.customer_email).toBeUndefined();
+  });
+});
+
+describe("POST /api/checkout/start (form-encoded → 303 redirect)", () => {
+  let tmp: string;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "osd-start-"));
+    process.env.DATABASE_PATH = join(tmp, "t.sqlite");
+    process.env.BASE_URL = "https://www.openswissdata.com";
+    process.env.STRIPE_PRICE_BUNDLE = "price_test_bundle";
+    process.env.NODE_ENV = "test";
+    const db = getDb();
+    const now = Date.now();
+    db.prepare("INSERT INTO datasets (id, name, slug, price_chf, stripe_price_id, created_at) VALUES (?, ?, ?, ?, ?, ?)")
+      .run("tares", "TARES", "tares", 29900, "price_test_tares", now);
+    db.prepare("INSERT INTO datasets (id, name, slug, price_chf, stripe_price_id, created_at) VALUES (?, ?, ?, ?, ?, ?)")
+      .run("finma", "FINMA", "finma", 29900, "price_test_finma", now);
+    closeDb();
+    sessionCreateMock.mockResolvedValue({ id: "cs_test_xyz", url: "https://checkout.stripe.com/pay/cs_test_xyz" });
+  });
+
+  afterEach(() => {
+    closeDb();
+    rmSync(tmp, { recursive: true, force: true });
+    delete process.env.DATABASE_PATH;
+    delete process.env.STRIPE_PRICE_BUNDLE;
+    sessionCreateMock.mockReset();
+  });
+
+  it("redirects (303) to Stripe Checkout URL for a single dataset", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/start", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "dataset_ids=tares",
+    });
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toBe("https://checkout.stripe.com/pay/cs_test_xyz");
+    const call = sessionCreateMock.mock.calls[0][0];
+    expect(call.line_items).toEqual([{ price: "price_test_tares", quantity: 1 }]);
+    expect(call.customer_email).toBeUndefined();
+    expect(call.metadata.dataset_ids).toBe("tares");
+  });
+
+  it("redirects for bundle", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/start", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "dataset_ids=bundle",
+    });
+    expect(res.status).toBe(303);
+    const call = sessionCreateMock.mock.calls[0][0];
+    expect(call.line_items).toEqual([{ price: "price_test_bundle", quantity: 1 }]);
+  });
+
+  it("forwards optional email when provided via form", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/start", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "dataset_ids=tares&email=test%40example.com",
+    });
+    expect(res.status).toBe(303);
+    const call = sessionCreateMock.mock.calls[0][0];
+    expect(call.customer_email).toBe("test@example.com");
+  });
+
+  it("rejects invalid dataset_id with 400", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/start", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "dataset_ids=pokemon",
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects missing dataset_ids with 400", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/start", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "",
+    });
+    expect(res.status).toBe(400);
+  });
 });
