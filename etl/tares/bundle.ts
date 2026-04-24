@@ -58,7 +58,7 @@ const TARES_JSON_SCHEMA = {
 
 const DATASET_LICENSE = `openswissdata.com — TARES Dataset License v1.0
 
-Copyright © 2026 Alain Martin · openswissdata.com
+Copyright © 2026 Claude-Alain Martin · openswissdata.com
 
 ═══════════════════════════════════════════════════════════════════
 OFFICIAL NOTICE — NON-OFFICIAL PUBLICATION / NICHT-OFFIZIELL / PUBLICATION NON OFFICIELLE
@@ -105,7 +105,7 @@ Swiss law. Jurisdiction: Bern (for TARES-related disputes specifically, per BAZG
 TERMINATION:
 License terminates automatically upon breach of any prohibited use.
 
-Contact: alain@openswissdata.com · Source: https://xtares.admin.ch/
+Contact: contact@openswissdata.com · Source: https://xtares.admin.ch/
 `;
 
 export interface BundleResult {

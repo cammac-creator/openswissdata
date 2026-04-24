@@ -27,7 +27,7 @@ const FINMA_PARQUET_SCHEMA = new parquet.ParquetSchema({
 
 const DATASET_LICENSE = `openswissdata.com — Dataset License v1.0
 
-Copyright © 2026 Alain Martin · openswissdata.com
+Copyright © 2026 Claude-Alain Martin · openswissdata.com
 
 This dataset is licensed, not sold.
 
@@ -53,9 +53,9 @@ LIABILITY:
 Liability capped at the purchase price of this dataset.
 
 GOVERNING LAW:
-Swiss law. For: canton of Alain Martin.
+Swiss law. For: Vaud, Switzerland (1045 Ogens).
 
-Contact: alain@openswissdata.com
+Contact: contact@openswissdata.com
 `;
 
 export interface FinmaBundleInput {

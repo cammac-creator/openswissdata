@@ -9,7 +9,7 @@
 
 ## Scraping policy (for Task 2.4)
 
-- User-Agent: `openswissdata/0.1 (+contact:alain@openswissdata.com)`
+- User-Agent: `openswissdata/0.1 (+contact:contact@openswissdata.com)`
 - Rate limit: 1 request per second, sequential only
 - Persist raw HTML to `data/tares/raw/` for crash recovery
 - License: raw data not copyrighted in Switzerland (opendata.swiss ToU)
