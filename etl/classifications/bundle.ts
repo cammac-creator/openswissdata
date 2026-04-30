@@ -3,9 +3,10 @@ import { join } from "node:path";
 import archiver from "archiver";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
-import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
+import { writeCsv, writeJson, writeSqlInserts, writeSqlInsertsChunked, writeParquet } from "../shared/formats.js";
 import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
 import type { NomenclatureRow, CrossWalkRow, NomenclatureScheme } from "./types.js";
+import type { IngestStatentResult } from "./ingest-statent.js";
 
 const NOMENCLATURE_PARQUET_SCHEMA = new parquet.ParquetSchema({
   scheme: { type: "UTF8" },
@@ -26,6 +27,26 @@ const CROSSWALK_PARQUET_SCHEMA = new parquet.ParquetSchema({
   isic_4: { type: "UTF8", optional: true },
   mapping_type: { type: "UTF8" },
   notes: { type: "UTF8", optional: true },
+});
+
+const STATENT_CANTON_DIVISION_SCHEMA = new parquet.ParquetSchema({
+  year: { type: "INT32", compression: "GZIP" },
+  canton_bfs_id: { type: "INT32", compression: "GZIP" },
+  canton_label: { type: "UTF8", compression: "GZIP" },
+  noga_division: { type: "UTF8", compression: "GZIP" },
+  noga_division_label: { type: "UTF8", compression: "GZIP" },
+  observation_unit: { type: "UTF8", compression: "GZIP" },
+  value: { type: "DOUBLE", optional: true, compression: "GZIP" },
+});
+
+const STATENT_COMMUNE_SECTOR_SCHEMA = new parquet.ParquetSchema({
+  year: { type: "INT32", compression: "GZIP" },
+  commune_bfs_id: { type: "INT32", compression: "GZIP" },
+  commune_label: { type: "UTF8", compression: "GZIP" },
+  sector: { type: "UTF8", compression: "GZIP" },
+  sector_label: { type: "UTF8", compression: "GZIP" },
+  observation_unit: { type: "UTF8", compression: "GZIP" },
+  value: { type: "DOUBLE", optional: true, compression: "GZIP" },
 });
 
 const DATASET_LICENSE = `openswissdata.com — Dataset License v1.0
@@ -64,6 +85,8 @@ Contact: contact@openswissdata.com
 export interface ClassificationsBundleInput {
   rows: NomenclatureRow[];
   crossWalks: CrossWalkRow[];
+  /** Optional Pro tier add-on: STATENT (BFS structural establishments + FTE). */
+  statent?: IngestStatentResult;
 }
 
 export interface ClassificationsBundleResult {
@@ -73,6 +96,7 @@ export interface ClassificationsBundleResult {
   version: string;
   nomenclatureCount: Record<NomenclatureScheme, number>;
   crossWalkCount: number;
+  statentRowCount?: { canton_division: number; commune_sector: number };
 }
 
 function nomenclatureToCsvRow(r: NomenclatureRow): Record<string, unknown> {
@@ -179,6 +203,77 @@ export async function buildBundle(
     join(workDir, "crosswalks.parquet"),
   );
 
+  // STATENT (Pro tier — establishments + FTE × dimensions × year)
+  const statentFiles: string[] = [];
+  if (input.statent) {
+    const cd = input.statent.cantonDivision.map((r) => ({
+      year: r.year,
+      canton_bfs_id: r.canton_bfs_id,
+      canton_label: r.canton_label,
+      noga_division: r.noga_division,
+      noga_division_label: r.noga_division_label,
+      observation_unit: r.observation_unit,
+      value: r.value,
+    }));
+    const cs = input.statent.communeSector.map((r) => ({
+      year: r.year,
+      commune_bfs_id: r.commune_bfs_id,
+      commune_label: r.commune_label,
+      sector: r.sector,
+      sector_label: r.sector_label,
+      observation_unit: r.observation_unit,
+      value: r.value,
+    }));
+
+    writeCsv(
+      cd.map((r) => ({ ...r, value: r.value === null ? "" : r.value })),
+      join(workDir, "statent_canton_division.csv"),
+    );
+    writeCsv(
+      cs.map((r) => ({ ...r, value: r.value === null ? "" : r.value })),
+      join(workDir, "statent_commune_sector.csv"),
+    );
+    statentFiles.push("statent_canton_division.csv", "statent_commune_sector.csv");
+
+    // Parquet — efficient for the long-form tables.
+    await writeParquet(
+      cd.map((r) => ({ ...r, value: r.value ?? undefined })) as unknown as Record<string, unknown>[],
+      STATENT_CANTON_DIVISION_SCHEMA,
+      join(workDir, "statent_canton_division.parquet"),
+    );
+    await writeParquet(
+      cs.map((r) => ({ ...r, value: r.value ?? undefined })) as unknown as Record<string, unknown>[],
+      STATENT_COMMUNE_SECTOR_SCHEMA,
+      join(workDir, "statent_commune_sector.parquet"),
+    );
+    statentFiles.push("statent_canton_division.parquet", "statent_commune_sector.parquet");
+
+    // SQL — chunk INSERTs to keep the file usable on most clients.
+    writeSqlInsertsChunked(
+      "statent_canton_division",
+      cd.map((r) => ({ ...r, value: r.value ?? null })),
+      join(workDir, "statent_canton_division.sql"),
+      1000,
+    );
+    writeSqlInsertsChunked(
+      "statent_commune_sector",
+      cs.map((r) => ({ ...r, value: r.value ?? null })),
+      join(workDir, "statent_commune_sector.sql"),
+      1000,
+    );
+    statentFiles.push("statent_canton_division.sql", "statent_commune_sector.sql");
+
+    // Per-bundle source manifest for STATENT.
+    writeJson(
+      {
+        source: input.statent.source,
+        stats: input.statent.stats,
+      },
+      join(workDir, "statent_source.json"),
+    );
+    statentFiles.push("statent_source.json");
+  }
+
   // JSON Schema (one schema file documenting both nomenclature + crosswalk row shapes)
   const schema = {
     $schema: "http://json-schema.org/draft-07/schema#",
@@ -217,6 +312,52 @@ export async function buildBundle(
   writeJson(schema, join(workDir, "schema.json"));
 
   // README
+  const statentSection = input.statent
+    ? `
+
+### STATENT (Pro tier — establishments + FTE)
+
+This bundle includes data from the Swiss BFS Statistique structurelle des
+entreprises (STATENT), exposed via the BFS PX-Web JSON-stat2 API:
+
+- \`statent_canton_division.{csv,parquet,sql}\` — **${input.statent.cantonDivision.length}** rows.
+  Year × Canton (BFS ID 1..26) × NOGA division (2-digit) × Observation unit
+  (establishments, employment {total/female/male}, FTE {total/female/male}).
+  Years ingested: ${input.statent.stats.years_ingested.join(", ") || "(none)"}.
+- \`statent_commune_sector.{csv,parquet,sql}\` — **${input.statent.communeSector.length}** rows.
+  Year × Commune (BFS ID) × Sector (total/primary/secondary/tertiary) × Observation unit.
+  Same year coverage.
+- \`statent_source.json\` — source metadata, license, fetch stats.
+
+#### Joining STATENT with the classifications
+
+- The \`noga_division\` column is a 2-digit NOGA code that joins to the \`code\`
+  column of \`noga_2008\` / \`noga_2025\` / \`nace_2_0\` / \`nace_2_1\` at \`level=division\`.
+- \`commune_bfs_id\` is the official Federal commune identifier; the same key
+  appears in any BFS commune master list (e.g. STAT-TAB px-d-00).
+- Cells suppressed for statistical confidentiality (1–4 establishments) are
+  serialized as \`null\` (Parquet) / empty CSV cell / SQL NULL. Total suppressed:
+  ${input.statent.stats.suppressed_cells}.
+
+#### Scope and confidentiality (important)
+
+BFS does **not** publish a commune × full-NOGA-class table publicly because
+cells with 1–4 establishments would breach the statistical confidentiality
+mandate. The two slices above are the finest public granularity STATENT exposes.
+For finer joins, BFS offers a contractual data agreement (statent@bfs.admin.ch).
+
+#### License — STATENT (terms_by_ask)
+
+STATENT is published under the **terms_by_ask** designation on opendata.swiss:
+free for non-commercial use; **commercial redistribution requires written
+authorisation from BFS**. The Classifications Pro tier is sold commercially —
+ensure a BFS waiver is on file before redistributing this bundle.
+
+Source URL: https://opendata.swiss/fr/dataset/betriebszahlung-unternehmensstatistik-arbeitsstatten
+Attribution: "OFS — Statistique structurelle des entreprises (STATENT)"
+`
+    : "";
+
   const readme = `# Swiss Economic Classifications Bundle — version ${version}
 
 Normalized economic activity classifications for Swiss and international reporting:
@@ -227,6 +368,7 @@ Normalized economic activity classifications for Swiss and international reporti
 - **NACE Rev 2.1** — ${nomenclatureCount["NACE_2.1"]} rows
 - **ISIC Rev 4** — ${nomenclatureCount["ISIC_4"]} rows
 - **Cross-walks** — ${input.crossWalks.length} mappings (5-way NOGA↔NACE↔ISIC)
+${input.statent ? `- **STATENT (Pro)** — ${input.statent.cantonDivision.length + input.statent.communeSector.length} rows (${input.statent.stats.years_ingested.length} years)` : ""}
 
 ## Files
 
@@ -244,7 +386,7 @@ Normalized economic activity classifications for Swiss and international reporti
 
 ### Cross-walks
 
-- \`crosswalks.{csv,json,sql,parquet}\` — one row per NOGA 2025 class linking to the 4 other standards
+- \`crosswalks.{csv,json,sql,parquet}\` — one row per NOGA 2025 class linking to the 4 other standards${statentSection}
 
 ### Metadata
 
@@ -259,6 +401,7 @@ Normalized economic activity classifications for Swiss and international reporti
 - **NOGA** — Federal Statistical Office (BFS/OFS), Switzerland. https://www.bfs.admin.ch/bfs/en/home/statistics/industry-services/nomenclatures/noga.html
 - **NACE** — Eurostat Ramon. https://ec.europa.eu/eurostat/ramon/
 - **ISIC** — United Nations Statistics Division. https://unstats.un.org/unsd/classifications/Econ/isic
+${input.statent ? "- **STATENT** — BFS PX-Web JSON-stat2 API (px-x-0602010000_101 + _102). https://www.pxweb.bfs.admin.ch/" : ""}
 
 ## Mapping principle
 
@@ -271,6 +414,7 @@ Normalized economic activity classifications for Swiss and international reporti
 
 - Bundle version: ${version}
 - Generated: ${new Date().toISOString()}
+- Tier: ${input.statent ? "Classifications Pro (with STATENT)" : "Classifications Standard"}
 `;
   writeFileSync(join(workDir, "README.md"), readme, "utf8");
   writeFileSync(join(workDir, "LICENSE.txt"), DATASET_LICENSE, "utf8");
@@ -298,6 +442,7 @@ Normalized economic activity classifications for Swiss and international reporti
     "crosswalks.sql",
     "crosswalks.parquet",
     "schema.json",
+    ...statentFiles,
   ];
   const checksums =
     dataFiles
@@ -352,5 +497,18 @@ Normalized economic activity classifications for Swiss and international reporti
 
   rmSync(workDir, { recursive: true, force: true });
 
-  return { zipPath, sha256, sizeBytes, version, nomenclatureCount, crossWalkCount: input.crossWalks.length };
+  return {
+    zipPath,
+    sha256,
+    sizeBytes,
+    version,
+    nomenclatureCount,
+    crossWalkCount: input.crossWalks.length,
+    statentRowCount: input.statent
+      ? {
+          canton_division: input.statent.cantonDivision.length,
+          commune_sector: input.statent.communeSector.length,
+        }
+      : undefined,
+  };
 }
