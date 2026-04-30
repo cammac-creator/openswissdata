@@ -41,7 +41,7 @@
 | Q2 | **Ajouter EN labels NOGA 2025** (déjà mentionné dans roadmap C1) | Permet positionnement international | 0.5 j |
 | Q3 | **Ajouter FINMA Warnings list** (~2 180 entités) au pack FINMA via [finma.ch/api/search/getresult](https://www.finma.ch/en/finma-public/warnungen/warning-list/) | Différenciation immédiate vs OpenSanctions, +flag `is_warning_listed` | 1 j |
 | Q4 | **Manifest légal signé** dans chaque ZIP : `provenance.json` Ed25519 + n° permission BAZG + hash source + timestamp RFC-3161 | Le moat juridique en 1 jour | 0.5 j |
-| Q5 | **Repricing immédiat** : TARES 299→499, Classifications 399→499, FINMA 299→399 (Basic), Bundle 799→999 | Capture valeur sans nouveau dev | 1 h (Stripe) |
+| ~~Q5~~ | ~~**Repricing immédiat**~~ → **REPORTÉ APRÈS PHASE 1** (décision Alain 2026-04-29) : appliquer +25-67% sans avoir livré les enrichissements (embeddings, STATENT, FINMA Warnings, etc.) ferme la conversion. À redéclencher quand Phase 1 livrée. | Capture valeur après dev | 1 h (Stripe) |
 | Q6 | **Page `/legal/provenance`** qui explique le moat juridique : permission BAZG + LCD art. 5 + audit trail signé | Argumentaire vente compliance | 0.5 j |
 
 **Total Phase 0 :** ~4-5 jours de dev, repricing immédiat.
@@ -211,7 +211,7 @@ Aujourd'hui, OSD vend uniquement via openswissdata.com. C'est insuffisant. Plan 
 
 | Semaine | Phase | Livrables |
 |---|---|---|
-| **S1 (mai 2026)** | Phase 0 quick wins | NOGA 2025 + NACE 2.1 réels, EN labels, FINMA Warnings, manifest signé Ed25519, repricing Stripe |
+| **S1 (mai 2026)** | Phase 0 quick wins | NOGA 2025 + NACE 2.1 réels, EN labels, FINMA Warnings, manifest signé Ed25519, page /legal/provenance (Q5 repricing reporté après Phase 1) |
 | **S2-S3** | Phase 1 TARES | T1 embeddings + T2 changelog + T3 TARIC + T4 WCO |
 | **S4** | Phase 1 Classifications | C1 NOGA 2025 + C2 STATENT + C3 embeddings |
 | **S5** | Phase 1 Classifications + Phase 1 FINMA | C4 cross-walks + F2 Zefix sync (start) |
