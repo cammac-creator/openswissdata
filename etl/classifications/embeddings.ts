@@ -141,25 +141,6 @@ export async function generateNogaEmbeddings(
   const rows = allRows.filter((r) => r.scheme === "NOGA_2025");
   log(`[noga-embeddings] ${rows.length} NOGA 2025 rows (out of ${allRows.length} total)`);
 
-  // Lazy import: @xenova/transformers is a heavyweight dependency we only need
-  // at ETL time, never at server runtime. Importing it eagerly would slow down
-  // every tsx invocation in the repo.
-  // @ts-expect-error — package exports CJS named exports without bundled types
-  const { pipeline, env } = await import("@xenova/transformers");
-  // @ts-expect-error — env shape exposed by transformers.js at runtime
-  env.allowRemoteModels = true;
-  // @ts-expect-error — env shape exposed by transformers.js at runtime
-  env.allowLocalModels = true;
-
-  log(`[noga-embeddings] loading model ${NOGA_EMBEDDING_MODEL}...`);
-  // `feature-extraction` returns the last hidden state; we ask for mean-pooling
-  // + L2 normalisation so the output is directly comparable with cosine.
-  // @ts-expect-error — pipeline() typing relaxed in @xenova/transformers v2
-  const extractor = await pipeline("feature-extraction", NOGA_EMBEDDING_MODEL, {
-    quantized: true, // quantised ONNX is ~4x faster on CPU and quality is fine for our use case
-  });
-  log(`[noga-embeddings] model loaded`);
-
   const cache = (opts.noCache ? null : loadCache(cachePath)) ?? {
     model: NOGA_EMBEDDING_MODEL,
     model_version: NOGA_EMBEDDING_MODEL_VERSION,
@@ -185,8 +166,29 @@ export async function generateNogaEmbeddings(
   log(`[noga-embeddings] ${cachedCount} cached, ${todo.length} to compute (target ${totalExpected})`);
 
   if (todo.length === 0) {
-    log(`[noga-embeddings] all embeddings cached, skipping inference`);
+    // Skip the heavyweight model load entirely when everything is cached.
+    log(`[noga-embeddings] all embeddings cached, skipping inference (no model load)`);
   } else {
+    // Lazy import: @xenova/transformers is a heavyweight dependency we only need
+    // at ETL time, never at server runtime. Importing it eagerly would slow down
+    // every tsx invocation in the repo. We also keep it INSIDE the inference branch
+    // so warm-cache runs (and tests that prime the cache) don't pay the model load.
+    // @ts-expect-error — package exports CJS named exports without bundled types
+    const { pipeline, env } = await import("@xenova/transformers");
+    // @ts-expect-error — env shape exposed by transformers.js at runtime
+    env.allowRemoteModels = true;
+    // @ts-expect-error — env shape exposed by transformers.js at runtime
+    env.allowLocalModels = true;
+
+    log(`[noga-embeddings] loading model ${NOGA_EMBEDDING_MODEL}...`);
+    // `feature-extraction` returns the last hidden state; we ask for mean-pooling
+    // + L2 normalisation so the output is directly comparable with cosine.
+    // @ts-expect-error — pipeline() typing relaxed in @xenova/transformers v2
+    const extractor = await pipeline("feature-extraction", NOGA_EMBEDDING_MODEL, {
+      quantized: true, // quantised ONNX is ~4x faster on CPU and quality is fine for our use case
+    });
+    log(`[noga-embeddings] model loaded`);
+
     const startedAt = Date.now();
     let processed = 0;
     let lastFlush = Date.now();
