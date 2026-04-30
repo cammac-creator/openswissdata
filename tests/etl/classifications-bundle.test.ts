@@ -4,6 +4,14 @@ import { parseNogaXlsx } from "../../etl/classifications/ingest-noga.js";
 import { parseNaceCsv } from "../../etl/classifications/ingest-nace.js";
 import { parseIsicCsv } from "../../etl/classifications/ingest-isic.js";
 import { buildCrossWalks } from "../../etl/classifications/crosswalks.js";
+import {
+  NOGA_EMBEDDING_DIMENSIONS,
+  NOGA_EMBEDDING_MODEL,
+  NOGA_EMBEDDING_MODEL_VERSION,
+  type NogaEmbedding,
+} from "../../etl/classifications/embeddings.js";
+import type { IngestNaicsResult } from "../../etl/classifications/naics-crosswalk.js";
+import type { NaceEnLabelRow } from "../../etl/classifications/nace-en-labels.js";
 import { mkdtempSync, rmSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -91,5 +99,123 @@ describe("classifications buildBundle", () => {
     }
 
     rmSync(workDir2, { recursive: true, force: true });
+  });
+
+  it("includes Pro tier artefacts when naics + naceEnLabels + multilingual embeddings are provided", async () => {
+    const noga2025 = parseNogaXlsx(join(fixtureDir, "noga-2025-sample.xlsx"), "NOGA_2025");
+    const nace21 = parseNaceCsv(join(fixtureDir, "nace-2.1-sample.csv"), "NACE_2.1");
+    const allRows = [...noga2025, ...nace21];
+
+    const fakeVector = (seed: number): number[] => {
+      const v: number[] = [];
+      let sum = 0;
+      for (let i = 0; i < NOGA_EMBEDDING_DIMENSIONS; i++) {
+        const x = Math.sin((seed + 1) * (i + 1) * 0.001);
+        v.push(x);
+        sum += x * x;
+      }
+      const norm = Math.sqrt(sum);
+      return v.map((x) => x / norm);
+    };
+
+    const embeddings: NogaEmbedding[] = [];
+    let s = 0;
+    for (const lang of ["fr", "de", "it", "en"] as const) {
+      for (const r of noga2025.slice(0, 2)) {
+        embeddings.push({
+          code: r.code,
+          lang,
+          description: `${lang} desc ${r.code}`,
+          embedding: fakeVector(s++),
+          model: NOGA_EMBEDDING_MODEL,
+          model_version: NOGA_EMBEDDING_MODEL_VERSION,
+        });
+      }
+    }
+
+    const naics: IngestNaicsResult = {
+      rows: [
+        {
+          naics_2022: "111110",
+          naics_2022_title: "Soybean farming",
+          isic_4: "0111",
+          isic_4_title: "Cereals",
+          nace_2_1: "0111",
+          noga_2025: "0111",
+          mapping_type: "exact",
+          notes: null,
+        },
+      ],
+      source: {
+        url: "https://www.census.gov/naics/concordances/2022_NAICS_to_ISIC_Rev_4.xlsx",
+        fetched_at: new Date().toISOString(),
+        sheet_name: "NAICS 22 to ISIC 4 technical",
+        license: "Public Domain (US Government Work)",
+        attribution: "U.S. Census Bureau — 2022 NAICS to ISIC Rev 4 concordance",
+      },
+      stats: {
+        raw_links: 1,
+        emitted_rows: 1,
+        exact: 1,
+        partial: 0,
+        naics_unique: 1,
+        isic_unique: 1,
+        fetch_seconds: 0.1,
+      },
+    };
+
+    const naceEnLabels: NaceEnLabelRow[] = [
+      { code: "K", level: "section", parent: null, label_en: "Financial and insurance activities" },
+      { code: "6411", level: "class", parent: "641", label_en: "Central banking" },
+    ];
+
+    const result = await buildBundle(
+      { rows: allRows, crossWalks: [], embeddings, naics, naceEnLabels },
+      "2026.04.30.test-pro",
+      workDir,
+      { withTimestamp: false },
+    );
+
+    expect(result.embeddingCount).toBe(8);
+    expect(result.embeddingCountByLang).toEqual({ fr: 2, de: 2, it: 2, en: 2 });
+    expect(result.naicsCrosswalkCount).toBe(1);
+    expect(result.naceEnLabelCount).toBe(2);
+
+    const contents = execSync(`unzip -l "${result.zipPath}"`, { encoding: "utf8" });
+    for (const f of [
+      "noga_2025_embeddings_fr.parquet",
+      "noga_2025_embeddings_de.parquet",
+      "noga_2025_embeddings_it.parquet",
+      "noga_2025_embeddings_en.parquet",
+      "naics_nace_crosswalk.csv",
+      "naics_nace_crosswalk.parquet",
+      "naics_source.json",
+      "nace_2_1_en_labels.csv",
+      "nace_2_1_en_labels.parquet",
+    ]) {
+      expect(contents).toContain(f);
+    }
+
+    // STATENT files MUST NOT be present in the Pro tier bundle (license blocked).
+    expect(contents).not.toContain("statent_");
+  });
+
+  it("omits Pro tier artefacts in the standard tier (no naics, no embeddings, no naceEnLabels)", async () => {
+    const nace21 = parseNaceCsv(join(fixtureDir, "nace-2.1-sample.csv"), "NACE_2.1");
+    const result = await buildBundle(
+      { rows: nace21, crossWalks: [] },
+      "2026.04.30.test-std-pro",
+      workDir,
+      { withTimestamp: false },
+    );
+    expect(result.embeddingCount).toBeUndefined();
+    expect(result.embeddingCountByLang).toBeUndefined();
+    expect(result.naicsCrosswalkCount).toBeUndefined();
+    expect(result.naceEnLabelCount).toBeUndefined();
+
+    const contents = execSync(`unzip -l "${result.zipPath}"`, { encoding: "utf8" });
+    expect(contents).not.toContain("naics_");
+    expect(contents).not.toContain("nace_2_1_en_labels");
+    expect(contents).not.toContain("noga_2025_embeddings_");
   });
 });

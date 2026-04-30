@@ -3,7 +3,6 @@ import { parseNaceCsv } from "./ingest-nace.js";
 import { parseIsicCsv } from "./ingest-isic.js";
 import { buildCrossWalks } from "./crosswalks.js";
 import { ingestRealClassifications } from "./ingest-real.js";
-import { ingestStatent, type IngestStatentResult } from "./ingest-statent.js";
 import { buildBundle } from "./bundle.js";
 import {
   generateNogaEmbeddings,
@@ -11,6 +10,9 @@ import {
   NOGA_EMBEDDING_MODEL,
   type NogaEmbedding,
 } from "./embeddings.js";
+import { generateMultilingualNogaEmbeddings } from "./embeddings-multilingual.js";
+import { ingestNaicsCrosswalk, type IngestNaicsResult } from "./naics-crosswalk.js";
+import { extractNaceEnLabels, type NaceEnLabelRow } from "./nace-en-labels.js";
 import { uploadZip } from "../../src/lib/r2.js";
 import { mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -78,36 +80,64 @@ export async function runRelease(
     console.log(`[release-classifications] ingested ${rows.length} rows. stats=${JSON.stringify(result.stats)}`);
   }
 
-  // Optional Pro tier add-on: STATENT (BFS structural establishments + FTE).
-  let statent: IngestStatentResult | undefined;
-  if (tier === "pro" && !useFixture) {
-    const cacheDir = join(outDir, "classifications-cache");
-    console.log("[release-classifications] tier=pro — ingesting STATENT (BFS PX-Web)...");
-    statent = await ingestStatent({ cacheDir });
-    console.log(
-      `[release-classifications] STATENT ingested: canton×division=${statent.stats.canton_division_rows}, commune×sector=${statent.stats.commune_sector_rows}, suppressed=${statent.stats.suppressed_cells}, fetch=${statent.stats.fetch_seconds.toFixed(1)}s`,
-    );
-  }
+  // STATENT removed from Pro tier 2026-04-30 — license `terms_by_ask` was not
+  // obtained from BFS (commercial redistribution would require a written waiver).
+  // The historical ingest-statent.ts + bundle.ts STATENT branch are kept for
+  // bit-identical reproduction of legacy ZIPs but are no longer wired in here.
 
-  // Optional Pro tier add-on: pre-computed NOGA 2025 embeddings (Phase 1 / C3).
-  // Powers the `classifyText` free-text → top-3 NOGA codes feature on the buyer side.
+  // Pro tier add-on #1: pre-computed NOGA 2025 multilingual embeddings.
+  // FR is reused from the existing cache (no recompute). DE/IT/EN are generated
+  // into per-language caches. Powers the `classifyText` free-text → top-K NOGA
+  // codes feature on the buyer side for compliance officers in DE/IT/EN UIs.
   // Skippable via `SKIP_EMBEDDINGS=1` for fast iteration; production releases ship them.
   let embeddings: NogaEmbedding[] | undefined;
   if (tier === "pro" && process.env.SKIP_EMBEDDINGS !== "1") {
-    const cachePath = join(outDir, "embeddings-cache-fr.json");
+    const cachePathFr = join(outDir, "embeddings-cache-fr.json");
     console.log(
-      `[release-classifications] tier=pro — generating NOGA embeddings (model=${NOGA_EMBEDDING_MODEL}, ${NOGA_EMBEDDING_DIMENSIONS}d, lang=fr, cache=${cachePath})...`,
+      `[release-classifications] tier=pro — generating multilingual NOGA embeddings (model=${NOGA_EMBEDDING_MODEL}, ${NOGA_EMBEDDING_DIMENSIONS}d, langs=fr+de+it+en, caches=${outDir}/embeddings-cache-{lang}.json)...`,
     );
     const t0 = Date.now();
-    embeddings = await generateNogaEmbeddings(rows, { cachePath });
+    // FR — reuse the existing cache (already shipped in v1).
+    const fr = await generateNogaEmbeddings(rows, { cachePath: cachePathFr });
+    // DE / IT / EN — generated under their own per-language caches.
+    const multi = await generateMultilingualNogaEmbeddings(rows, {
+      cacheDir: outDir,
+      langs: ["de", "it", "en"],
+    });
+    embeddings = [...fr, ...multi.byLang.de, ...multi.byLang.it, ...multi.byLang.en];
     console.log(
-      `[release-classifications] generated ${embeddings.length} embeddings in ${((Date.now() - t0) / 1000).toFixed(1)}s`,
+      `[release-classifications] generated ${embeddings.length} embeddings (fr=${fr.length}, de=${multi.byLang.de.length}, it=${multi.byLang.it.length}, en=${multi.byLang.en.length}) in ${((Date.now() - t0) / 1000).toFixed(1)}s`,
     );
   } else if (tier === "pro") {
     console.log("[release-classifications] SKIP_EMBEDDINGS=1 — skipping NOGA embeddings generation");
   }
 
-  const bundle = await buildBundle({ rows, crossWalks, statent, embeddings }, version, outDir);
+  // Pro tier add-on #2: NAICS 2022 ↔ ISIC ↔ NACE/NOGA cross-walk (US Census Bureau, Public Domain).
+  let naics: IngestNaicsResult | undefined;
+  if (tier === "pro" && !useFixture) {
+    const cacheDir = join(outDir, "naics-cache");
+    console.log("[release-classifications] tier=pro — ingesting NAICS 2022 ↔ ISIC concordance (US Census)...");
+    naics = await ingestNaicsCrosswalk({ rows, cacheDir });
+    console.log(
+      `[release-classifications] NAICS ingested: ${naics.stats.emitted_rows} rows (exact=${naics.stats.exact}, partial=${naics.stats.partial}), ${naics.stats.naics_unique} unique NAICS, fetch=${naics.stats.fetch_seconds.toFixed(1)}s`,
+    );
+  }
+
+  // Pro tier add-on #3: NACE Rev 2.1 official EN labels (Eurostat re-use policy).
+  let naceEnLabels: NaceEnLabelRow[] | undefined;
+  if (tier === "pro") {
+    const result = extractNaceEnLabels(rows);
+    naceEnLabels = result.rows;
+    console.log(
+      `[release-classifications] NACE 2.1 EN labels extracted: ${result.stats.total} rows (${result.stats.with_label} with label, ${result.stats.missing_label} empty)`,
+    );
+  }
+
+  const bundle = await buildBundle(
+    { rows, crossWalks, embeddings, naics, naceEnLabels },
+    version,
+    outDir,
+  );
   console.log(
     `[release-classifications] bundle sha256 ${bundle.sha256.slice(0, 12)}..., ${(bundle.sizeBytes / 1024).toFixed(1)} KB`
   );
@@ -130,9 +160,10 @@ export async function runRelease(
       r2_key,
       sha256: bundle.sha256,
       size_bytes: bundle.sizeBytes,
-      changelog: statent
-        ? `Classifications v${version} (Pro) — ${rows.length} rows, ${crossWalks.length} cross-walks, STATENT canton×division=${statent.stats.canton_division_rows} + commune×sector=${statent.stats.commune_sector_rows}`
-        : `Classifications v${version} — ${rows.length} rows, ${crossWalks.length} cross-walks`,
+      changelog:
+        tier === "pro"
+          ? `Classifications v${version} (Pro) — ${rows.length} rows, ${crossWalks.length} cross-walks, embeddings=${embeddings?.length ?? 0} (4 langs), NAICS-NACE cross-walk=${naics?.rows.length ?? 0}, NACE EN labels=${naceEnLabels?.length ?? 0}`
+          : `Classifications v${version} — ${rows.length} rows, ${crossWalks.length} cross-walks`,
     }),
   });
 
