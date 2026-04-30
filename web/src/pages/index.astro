@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import HeroTrace from "../components/HeroTrace.astro";
 import Terminal from "../components/Terminal.astro";
 import InstallBar from "../components/InstallBar.astro";
 import TrustStrip from "../components/TrustStrip.astro";
@@ -63,14 +62,24 @@ import Quote from "../components/Quote.astro";
           <span style="opacity:.4">·</span>
           <span><strong>For :</strong> Berne</span>
         </div>
+
+        <div class="v4-hero-chain reveal-v4" data-delay="5" aria-label="Chaîne de provenance cryptographique">
+          <div class="v4-chain-node" data-step="1"><span class="dot"></span><strong>BAZG</strong></div>
+          <div class="v4-chain-link" data-step="1"></div>
+          <div class="v4-chain-node" data-step="2">SHA-256</div>
+          <div class="v4-chain-link" data-step="2"></div>
+          <div class="v4-chain-node" data-step="3">Ed25519</div>
+          <div class="v4-chain-link" data-step="3"></div>
+          <div class="v4-chain-node" data-step="4">RFC-3161</div>
+          <div class="v4-chain-link" data-step="4"></div>
+          <div class="v4-chain-node" data-step="5"><span class="dot"></span><strong>Verified</strong></div>
+        </div>
       </div>
 
       <div class="reveal-v4" data-delay="2">
         <Terminal title="~/erp-integration — zsh" />
       </div>
     </div>
-
-    <HeroTrace />
   </div>
 </section>
 
