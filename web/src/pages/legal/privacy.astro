@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const lastUpdated = new Date().toISOString().split("T")[0];
 ---
 <BaseLayout
   title="Politique de confidentialité — openswissdata.com"
@@ -11,7 +13,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     </nav>
 
     <h1 class="text-3xl font-bold mb-2">Politique de confidentialité</h1>
-    <p class="text-sm text-slate-500 mb-8">Version 1.0 · Dernière mise à jour : 2026-04-22 · Conforme nLPD (Suisse) + RGPD (UE)</p>
+    <p class="text-sm text-slate-500 mb-8">Version 1.1 · Dernière mise à jour : {lastUpdated} · Conforme nLPD (Suisse) + RGPD (UE)</p>
 
     <h2 class="text-2xl font-semibold mt-8 mb-3">1. Responsable du traitement</h2>
     <p>Claude-Alain Martin, raison individuelle, Rue de l'Église 23, 1045 Ogens, Suisse · contact@openswissdata.com</p>
@@ -24,6 +26,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       <li>L'<strong>historique de vos commandes</strong> (date, montant, Datasets achetés).</li>
     </ul>
     <p>Nous ne collectons <strong>jamais</strong> de mots de passe (authentification par lien magique), de données bancaires (gérées par Stripe), ni de données de navigation fines.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">2bis. Prospection commerciale</h2>
+    <p>Pour notre activité de prospection commerciale B2B, voir notre politique dédiée : <a href="/legal/sdr-policy" class="text-indigo-600 hover:underline">/legal/sdr-policy</a>.</p>
 
     <h2 class="text-2xl font-semibold mt-8 mb-3">3. Finalités</h2>
     <ul class="list-disc pl-6">
@@ -66,16 +71,12 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     <p>Pour exercer ces droits : <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>.</p>
 
     <h2 class="text-2xl font-semibold mt-8 mb-3">7. Transferts internationaux</h2>
-    <p>Les données sont principalement stockées en Europe (Frankfurt pour Railway et R2). Resend est basé aux États-Unis ; le transfert est encadré par les clauses contractuelles types de la Commission européenne.</p>
+    <p>Les données sont principalement stockées en Europe (Frankfurt pour Railway et R2). Resend est basé aux États-Unis ; le transfert est encadré par les <strong>Clauses Contractuelles Types (SCC) 2021/914/UE</strong> de la Commission européenne pour le transfert vers Resend (États-Unis).</p>
 
     <h2 class="text-2xl font-semibold mt-8 mb-3">8. Cookies et traceurs</h2>
     <p>Nous utilisons uniquement un cookie technique (<code>osd_session</code>) strictement nécessaire à la connexion de l'espace client. Aucun cookie publicitaire ou de suivi tiers n'est posé. Plausible Analytics fonctionne sans cookies.</p>
 
     <h2 class="text-2xl font-semibold mt-8 mb-3">9. Préposé fédéral à la protection des données (PFPDT)</h2>
     <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir le PFPDT : <a href="https://www.edoeb.admin.ch/" target="_blank" rel="noopener" class="text-indigo-600 hover:underline">edoeb.admin.ch</a>.</p>
-
-    <p class="mt-12 text-xs text-slate-400 border-t border-slate-200 pt-4">
-      Ce document est un premier brouillon produit automatiquement. Il sera revu par un conseil juridique avant mise en vente commerciale à grande échelle.
-    </p>
   </section>
 </BaseLayout>

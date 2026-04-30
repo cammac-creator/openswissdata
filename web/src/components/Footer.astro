@@ -39,13 +39,18 @@ const year = new Date().getFullYear();
           <a href="/legal/privacy">Confidentialité</a>
           <a href="/legal/provenance">Provenance &amp; signature</a>
           <a href="/legal/sdr-policy">Politique prospection</a>
+          <a href="/compliance">Sources &amp; compliance</a>
           <a href="/legal/impressum">Impressum</a>
         </div>
       </div>
     </div>
 
+    <div class="footer-affiliation">
+      openswissdata.com est un service privé indépendant. Non affilié à opendata.swiss, BAZG, BFS, FINMA.
+    </div>
+
     <div class="footer-disclaimer">
-      <strong>Avertissement.</strong> openswissdata propose des produits dérivés des données publiques officielles suisses, livrés avec permission commerciale explicite des autorités émettrices (BAZG, BFS, FINMA — voir page d'accueil pour le statut détaillé). Ces produits sont des reformulations à des fins d'utilisation par des entreprises. Ils ne remplacent pas les publications officielles ; en cas de divergence, les sources originales font foi. For juridique : Berne, Suisse, pour les datasets TARES (selon condition BAZG).
+      <strong>Avertissement.</strong> openswissdata propose des produits dérivés des données publiques officielles suisses. Le dataset TARES est livré avec permission commerciale écrite du BAZG (référence BAZG-PERMISSION-2026-04-21-MICHAEL-BEER). Les datasets Classifications et FINMA sont republiés avec valeur ajoutée de normalisation, sous procédure publique de takedown sous 24 heures sur demande d'autorité source. Ces produits sont des reformulations à des fins d'utilisation par des entreprises. Ils ne remplacent pas les publications officielles ; en cas de divergence, les sources originales font foi. For juridique : Berne, Suisse, pour les datasets TARES (selon condition BAZG).
     </div>
 
     <div class="footer-bottom">
@@ -140,6 +145,15 @@ const year = new Date().getFullYear();
     transition: color .15s ease;
   }
   .footer-cols a:hover { color: var(--color-ink); }
+
+  .footer-affiliation {
+    padding: 12px 0 16px;
+    font-size: 12px;
+    color: var(--color-ink-mute);
+    line-height: 1.55;
+    font-style: italic;
+    border-top: 1px solid var(--color-line);
+  }
 
   .footer-disclaimer {
     padding: 20px 0;
