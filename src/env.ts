@@ -34,6 +34,8 @@ const EnvSchema = z.object({
   R2_SECRET_ACCESS_KEY: prodRequired(z.string().min(1)),
   R2_BUCKET: prodRequired(z.string().min(1)),
   R2_PUBLIC_URL: z.string().optional(),
+  // MCP server — optional (missing token = auth disabled, suitable for dev)
+  MCP_BEARER_TOKEN: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

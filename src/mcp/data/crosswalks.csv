@@ -1,0 +1,2178 @@
+noga_2008,noga_2025,nace_2_0,nace_2_1,isic_4,mapping_type,notes
+03,01,03,01,01,exact,
+01,01,01,01,01,exact,
+012,011,012,011,011,exact,
+011,011,011,011,011,exact,
+0111,0111,0111,0111,0111,exact,
+,011100,,,,derived,CH-specific subclass — no NACE counterpart
+0112,0112,0112,0112,0112,exact,
+,011200,,,,derived,CH-specific subclass — no NACE counterpart
+0119,0113,0119,0113,0113,exact,
+0128,0113,0128,0113,0113,exact,
+0113,0113,0113,0113,0113,exact,
+,011300,,,,derived,CH-specific subclass — no NACE counterpart
+0114,0114,0114,0114,0114,exact,
+,011400,,,,derived,CH-specific subclass — no NACE counterpart
+0115,0115,0115,0115,0115,exact,
+,011500,,,,derived,CH-specific subclass — no NACE counterpart
+0116,0116,0116,0116,0116,exact,
+,011600,,,,derived,CH-specific subclass — no NACE counterpart
+0119,0119,0119,0119,0119,exact,
+,011900,,,,derived,CH-specific subclass — no NACE counterpart
+012,012,012,012,012,exact,
+0121,0121,0121,0121,0121,exact,
+,012101,,,,derived,CH-specific subclass — no NACE counterpart
+,012102,,,,derived,CH-specific subclass — no NACE counterpart
+0122,0122,0122,0122,0122,exact,
+,012200,,,,derived,CH-specific subclass — no NACE counterpart
+0123,0123,0123,0123,0123,exact,
+,012300,,,,derived,CH-specific subclass — no NACE counterpart
+0124,0124,0124,0124,0124,exact,
+,012400,,,,derived,CH-specific subclass — no NACE counterpart
+0125,0125,0125,0125,0125,exact,
+,012500,,,,derived,CH-specific subclass — no NACE counterpart
+0126,0126,0126,0126,0126,exact,
+,012600,,,,derived,CH-specific subclass — no NACE counterpart
+0127,0127,0127,0127,0127,exact,
+,012700,,,,derived,CH-specific subclass — no NACE counterpart
+0128,0128,0128,0128,0128,exact,
+,012800,,,,derived,CH-specific subclass — no NACE counterpart
+0129,0129,0129,0129,0129,exact,
+,012900,,,,derived,CH-specific subclass — no NACE counterpart
+013,013,013,013,013,exact,
+0130,0130,0130,0130,0130,exact,
+,013000,,,,derived,CH-specific subclass — no NACE counterpart
+032,014,032,014,014,exact,
+016,014,016,014,014,exact,
+014,014,014,014,014,exact,
+0142,0141,0142,0141,0141,exact,
+0141,0141,0141,0141,0141,exact,
+,014100,,,,derived,CH-specific subclass — no NACE counterpart
+0142,0142,0142,0142,0142,exact,
+,014200,,,,derived,CH-specific subclass — no NACE counterpart
+0143,0143,0143,0143,0143,exact,
+,014300,,,,derived,CH-specific subclass — no NACE counterpart
+0144,0144,0144,0144,0144,exact,
+,014400,,,,derived,CH-specific subclass — no NACE counterpart
+0145,0145,0145,0145,0145,exact,
+,014500,,,,derived,CH-specific subclass — no NACE counterpart
+0146,0146,0146,0146,0146,exact,
+,014600,,,,derived,CH-specific subclass — no NACE counterpart
+0162,0147,0162,0147,,partial,
+0147,0147,0147,0147,,partial,
+,014700,,,,derived,CH-specific subclass — no NACE counterpart
+0322,0148,0322,0148,,partial,
+,014800,,,,derived,CH-specific subclass — no NACE counterpart
+015,015,015,015,015,exact,
+0150,0150,0150,0150,0150,exact,
+,015000,,,,derived,CH-specific subclass — no NACE counterpart
+016,016,016,016,016,exact,
+0161,0161,0161,0161,0161,exact,
+,016100,,,,derived,CH-specific subclass — no NACE counterpart
+0162,0162,0162,0162,0162,exact,
+,016200,,,,derived,CH-specific subclass — no NACE counterpart
+0163,0163,0163,0163,0163,exact,
+,016300,,,,derived,CH-specific subclass — no NACE counterpart
+017,017,017,017,017,exact,
+0170,0170,0170,0170,0170,exact,
+,017000,,,,derived,CH-specific subclass — no NACE counterpart
+02,02,02,02,02,exact,
+021,021,021,021,021,exact,
+0210,0210,0210,0210,0210,exact,
+,021000,,,,derived,CH-specific subclass — no NACE counterpart
+022,022,022,022,022,exact,
+0220,0220,0220,0220,0220,exact,
+,022000,,,,derived,CH-specific subclass — no NACE counterpart
+023,023,023,023,023,exact,
+0230,0230,0230,0230,0230,exact,
+,023000,,,,derived,CH-specific subclass — no NACE counterpart
+024,024,024,024,024,exact,
+0240,0240,0240,0240,0240,exact,
+,024000,,,,derived,CH-specific subclass — no NACE counterpart
+03,03,03,03,03,exact,
+33,03,33,03,03,exact,
+031,031,031,031,031,exact,
+0311,0311,0311,0311,0311,exact,
+,031100,,,,derived,CH-specific subclass — no NACE counterpart
+0312,0312,0312,0312,0312,exact,
+,031200,,,,derived,CH-specific subclass — no NACE counterpart
+032,032,032,032,032,exact,
+0321,0321,0321,0321,0321,exact,
+,032100,,,,derived,CH-specific subclass — no NACE counterpart
+0322,0322,0322,0322,0322,exact,
+,032200,,,,derived,CH-specific subclass — no NACE counterpart
+031,033,031,033,,partial,
+331,033,331,033,,partial,
+032,033,032,033,,partial,
+0322,0330,0322,0330,,partial,
+3311,0330,3311,0330,,partial,
+0312,0330,0312,0330,,partial,
+0321,0330,0321,0330,,partial,
+0311,0330,0311,0330,,partial,
+,033000,,,,derived,CH-specific subclass — no NACE counterpart
+05,05,05,05,05,exact,
+051,051,051,051,051,exact,
+0510,0510,0510,0510,0510,exact,
+,051000,,,,derived,CH-specific subclass — no NACE counterpart
+052,052,052,052,052,exact,
+0520,0520,0520,0520,0520,exact,
+,052000,,,,derived,CH-specific subclass — no NACE counterpart
+06,06,06,06,06,exact,
+061,061,061,061,061,exact,
+0610,0610,0610,0610,0610,exact,
+,061000,,,,derived,CH-specific subclass — no NACE counterpart
+062,062,062,062,062,exact,
+0620,0620,0620,0620,0620,exact,
+,062000,,,,derived,CH-specific subclass — no NACE counterpart
+07,07,07,07,07,exact,
+071,071,071,071,071,exact,
+0710,0710,0710,0710,0710,exact,
+,071000,,,,derived,CH-specific subclass — no NACE counterpart
+072,072,072,072,072,exact,
+0721,0721,0721,0721,0721,exact,
+,072100,,,,derived,CH-specific subclass — no NACE counterpart
+0729,0729,0729,0729,0729,exact,
+,072900,,,,derived,CH-specific subclass — no NACE counterpart
+08,08,08,08,08,exact,
+081,081,081,081,081,exact,
+0811,0811,0811,0811,,partial,
+,081100,,,,derived,CH-specific subclass — no NACE counterpart
+0812,0812,0812,0812,,partial,
+,081200,,,,derived,CH-specific subclass — no NACE counterpart
+089,089,089,089,089,exact,
+0891,0891,0891,0891,0891,exact,
+,089100,,,,derived,CH-specific subclass — no NACE counterpart
+0892,0892,0892,0892,0892,exact,
+,089200,,,,derived,CH-specific subclass — no NACE counterpart
+0893,0893,0893,0893,0893,exact,
+,089300,,,,derived,CH-specific subclass — no NACE counterpart
+0899,0899,0899,0899,0899,exact,
+,089900,,,,derived,CH-specific subclass — no NACE counterpart
+09,09,09,09,09,exact,
+091,091,091,091,091,exact,
+0910,0910,0910,0910,0910,exact,
+,091000,,,,derived,CH-specific subclass — no NACE counterpart
+099,099,099,099,099,exact,
+0990,0990,0990,0990,0990,exact,
+,099000,,,,derived,CH-specific subclass — no NACE counterpart
+10,10,10,10,10,exact,
+101,101,101,101,101,exact,
+1011,1011,1011,1011,,partial,
+,101100,,,,derived,CH-specific subclass — no NACE counterpart
+1012,1012,1012,1012,,partial,
+,101200,,,,derived,CH-specific subclass — no NACE counterpart
+1013,1013,1013,1013,,partial,
+,101300,,,,derived,CH-specific subclass — no NACE counterpart
+102,102,102,102,102,exact,
+1020,1020,1020,1020,1020,exact,
+,102000,,,,derived,CH-specific subclass — no NACE counterpart
+103,103,103,103,103,exact,
+1031,1031,1031,1031,,partial,
+,103100,,,,derived,CH-specific subclass — no NACE counterpart
+1032,1032,1032,1032,,partial,
+,103200,,,,derived,CH-specific subclass — no NACE counterpart
+1039,1039,1039,1039,,partial,
+,103900,,,,derived,CH-specific subclass — no NACE counterpart
+104,104,104,104,104,exact,
+1041,1041,1041,1041,,partial,
+,104100,,,,derived,CH-specific subclass — no NACE counterpart
+1042,1042,1042,1042,,partial,
+,104200,,,,derived,CH-specific subclass — no NACE counterpart
+105,105,105,105,105,exact,
+1051,1051,1051,1051,,partial,
+,105101,,,,derived,CH-specific subclass — no NACE counterpart
+,105102,,,,derived,CH-specific subclass — no NACE counterpart
+,105103,,,,derived,CH-specific subclass — no NACE counterpart
+1052,1052,1052,1052,,partial,
+,105200,,,,derived,CH-specific subclass — no NACE counterpart
+108,106,108,106,106,exact,
+106,106,106,106,106,exact,
+1086,1061,1086,1061,1061,exact,
+1061,1061,1061,1061,1061,exact,
+,106100,,,,derived,CH-specific subclass — no NACE counterpart
+1086,1062,1086,1062,1062,exact,
+1062,1062,1062,1062,1062,exact,
+,106200,,,,derived,CH-specific subclass — no NACE counterpart
+108,107,108,107,107,exact,
+107,107,107,107,107,exact,
+1086,1071,1086,1071,1071,exact,
+1071,1071,1071,1071,1071,exact,
+,107100,,,,derived,CH-specific subclass — no NACE counterpart
+1086,1072,1086,1072,1072,exact,
+1072,1072,1072,1072,1072,exact,
+,107200,,,,derived,CH-specific subclass — no NACE counterpart
+1086,1073,1086,1073,1073,exact,
+1073,1073,1073,1073,1073,exact,
+,107300,,,,derived,CH-specific subclass — no NACE counterpart
+108,108,108,108,108,exact,
+1081,1081,1081,1081,,partial,
+,108100,,,,derived,CH-specific subclass — no NACE counterpart
+1082,1082,1082,1082,,partial,
+,108201,,,,derived,CH-specific subclass — no NACE counterpart
+,108202,,,,derived,CH-specific subclass — no NACE counterpart
+1083,1083,1083,1083,,partial,
+,108300,,,,derived,CH-specific subclass — no NACE counterpart
+1084,1084,1084,1084,,partial,
+,108400,,,,derived,CH-specific subclass — no NACE counterpart
+1085,1085,1085,1085,,partial,
+,108500,,,,derived,CH-specific subclass — no NACE counterpart
+1086,1086,1086,1086,,partial,
+,108600,,,,derived,CH-specific subclass — no NACE counterpart
+1089,1089,1089,1089,,partial,
+,108900,,,,derived,CH-specific subclass — no NACE counterpart
+109,109,109,109,,partial,
+1091,1091,1091,1091,,partial,
+,109100,,,,derived,CH-specific subclass — no NACE counterpart
+1092,1092,1092,1092,,partial,
+,109200,,,,derived,CH-specific subclass — no NACE counterpart
+10,11,10,11,11,exact,
+11,11,11,11,11,exact,
+108,110,108,110,110,exact,
+110,110,110,110,110,exact,
+1101,1101,1101,1101,1101,exact,
+,110100,,,,derived,CH-specific subclass — no NACE counterpart
+1102,1102,1102,1102,1102,exact,
+,110200,,,,derived,CH-specific subclass — no NACE counterpart
+1103,1103,1103,1103,1103,exact,
+,110300,,,,derived,CH-specific subclass — no NACE counterpart
+1104,1104,1104,1104,1104,exact,
+,110400,,,,derived,CH-specific subclass — no NACE counterpart
+1105,1105,1105,1105,,partial,
+,110500,,,,derived,CH-specific subclass — no NACE counterpart
+1106,1106,1106,1106,,partial,
+,110600,,,,derived,CH-specific subclass — no NACE counterpart
+1089,1107,1089,1107,,partial,
+1107,1107,1107,1107,,partial,
+,110700,,,,derived,CH-specific subclass — no NACE counterpart
+12,12,12,12,12,exact,
+120,120,120,120,120,exact,
+1200,1200,1200,1200,1200,exact,
+,120000,,,,derived,CH-specific subclass — no NACE counterpart
+13,13,13,13,13,exact,
+18,13,18,13,13,exact,
+131,131,131,131,131,exact,
+1310,1310,1310,1310,,partial,
+,131001,,,,derived,CH-specific subclass — no NACE counterpart
+,131002,,,,derived,CH-specific subclass — no NACE counterpart
+,131003,,,,derived,CH-specific subclass — no NACE counterpart
+,131004,,,,derived,CH-specific subclass — no NACE counterpart
+132,132,132,132,,partial,
+1320,1320,1320,1320,,partial,
+,132001,,,,derived,CH-specific subclass — no NACE counterpart
+,132002,,,,derived,CH-specific subclass — no NACE counterpart
+,132003,,,,derived,CH-specific subclass — no NACE counterpart
+181,133,181,133,,partial,
+133,133,133,133,,partial,
+1812,1330,1812,1330,,partial,
+1330,1330,1330,1330,,partial,
+,133000,,,,derived,CH-specific subclass — no NACE counterpart
+132,139,132,139,139,exact,
+139,139,139,139,139,exact,
+1391,1391,1391,1391,1391,exact,
+,139100,,,,derived,CH-specific subclass — no NACE counterpart
+1392,1392,1392,1392,1392,exact,
+,139201,,,,derived,CH-specific subclass — no NACE counterpart
+,139202,,,,derived,CH-specific subclass — no NACE counterpart
+1393,1393,1393,1393,1393,exact,
+,139300,,,,derived,CH-specific subclass — no NACE counterpart
+1394,1394,1394,1394,1394,exact,
+,139400,,,,derived,CH-specific subclass — no NACE counterpart
+1395,1395,1395,1395,,partial,
+,139500,,,,derived,CH-specific subclass — no NACE counterpart
+1320,1396,1320,1396,,partial,
+1392,1396,1392,1396,,partial,
+1396,1396,1396,1396,,partial,
+,139600,,,,derived,CH-specific subclass — no NACE counterpart
+1399,1399,1399,1399,1399,exact,
+,139901,,,,derived,CH-specific subclass — no NACE counterpart
+,139902,,,,derived,CH-specific subclass — no NACE counterpart
+,139909,,,,derived,CH-specific subclass — no NACE counterpart
+14,14,14,14,14,exact,
+141,141,141,141,141,exact,
+,1410,,1410,1410,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,141001,,,,derived,CH-specific subclass — no NACE counterpart
+,141002,,,,derived,CH-specific subclass — no NACE counterpart
+141,142,141,142,142,exact,
+142,142,142,142,142,exact,
+,1421,,1421,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,142101,,,,derived,CH-specific subclass — no NACE counterpart
+,142102,,,,derived,CH-specific subclass — no NACE counterpart
+,142103,,,,derived,CH-specific subclass — no NACE counterpart
+,1422,,1422,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,142201,,,,derived,CH-specific subclass — no NACE counterpart
+,142202,,,,derived,CH-specific subclass — no NACE counterpart
+,142203,,,,derived,CH-specific subclass — no NACE counterpart
+,1423,,1423,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,142300,,,,derived,CH-specific subclass — no NACE counterpart
+,1424,,1424,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,142401,,,,derived,CH-specific subclass — no NACE counterpart
+,142402,,,,derived,CH-specific subclass — no NACE counterpart
+,1429,,1429,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,142900,,,,derived,CH-specific subclass — no NACE counterpart
+22,15,22,15,15,exact,
+16,15,16,15,15,exact,
+15,15,15,15,15,exact,
+151,151,151,151,151,exact,
+1511,1511,1511,1511,1511,exact,
+,151100,,,,derived,CH-specific subclass — no NACE counterpart
+1512,1512,1512,1512,1512,exact,
+,151200,,,,derived,CH-specific subclass — no NACE counterpart
+222,152,222,152,152,exact,
+162,152,162,152,152,exact,
+221,152,221,152,152,exact,
+152,152,152,152,152,exact,
+1520,1520,1520,1520,1520,exact,
+,152000,,,,derived,CH-specific subclass — no NACE counterpart
+16,16,16,16,16,exact,
+161,161,161,161,161,exact,
+,1611,,1611,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,161100,,,,derived,CH-specific subclass — no NACE counterpart
+,1612,,1612,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,161200,,,,derived,CH-specific subclass — no NACE counterpart
+162,162,162,162,162,exact,
+1621,1621,1621,1621,1621,exact,
+,162100,,,,derived,CH-specific subclass — no NACE counterpart
+1622,1622,1622,1622,1622,exact,
+,162200,,,,derived,CH-specific subclass — no NACE counterpart
+1623,1623,1623,1623,1623,exact,
+,162300,,,,derived,CH-specific subclass — no NACE counterpart
+1624,1624,1624,1624,,partial,
+,162400,,,,derived,CH-specific subclass — no NACE counterpart
+1623,1625,1623,1625,,partial,
+,162500,,,,derived,CH-specific subclass — no NACE counterpart
+,1626,,1626,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,162600,,,,derived,CH-specific subclass — no NACE counterpart
+1621,1627,1621,1627,,partial,
+1623,1627,1623,1627,,partial,
+1622,1627,1622,1627,,partial,
+1624,1627,1624,1627,,partial,
+,162700,,,,derived,CH-specific subclass — no NACE counterpart
+,1628,,1628,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,162800,,,,derived,CH-specific subclass — no NACE counterpart
+17,17,17,17,17,exact,
+171,171,171,171,,partial,
+1711,1711,1711,1711,,partial,
+,171100,,,,derived,CH-specific subclass — no NACE counterpart
+1712,1712,1712,1712,,partial,
+,171200,,,,derived,CH-specific subclass — no NACE counterpart
+172,172,172,172,,partial,
+1721,1721,1721,1721,,partial,
+,172100,,,,derived,CH-specific subclass — no NACE counterpart
+1722,1722,1722,1722,,partial,
+,172200,,,,derived,CH-specific subclass — no NACE counterpart
+1723,1723,1723,1723,,partial,
+,172300,,,,derived,CH-specific subclass — no NACE counterpart
+1724,1724,1724,1724,,partial,
+,172400,,,,derived,CH-specific subclass — no NACE counterpart
+,1725,,1725,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,172500,,,,derived,CH-specific subclass — no NACE counterpart
+82,18,82,18,18,exact,
+74,18,74,18,18,exact,
+18,18,18,18,18,exact,
+742,181,742,181,181,exact,
+821,181,821,181,181,exact,
+181,181,181,181,181,exact,
+1811,1811,1811,1811,1811,exact,
+,181100,,,,derived,CH-specific subclass — no NACE counterpart
+7420,1812,7420,1812,1812,exact,
+1812,1812,1812,1812,1812,exact,
+,181201,,,,derived,CH-specific subclass — no NACE counterpart
+,181209,,,,derived,CH-specific subclass — no NACE counterpart
+1813,1813,1813,1813,,partial,
+,181300,,,,derived,CH-specific subclass — no NACE counterpart
+1814,1814,1814,1814,,partial,
+,181400,,,,derived,CH-specific subclass — no NACE counterpart
+182,182,182,182,182,exact,
+1820,1820,1820,1820,1820,exact,
+,182000,,,,derived,CH-specific subclass — no NACE counterpart
+19,19,19,19,19,exact,
+191,191,191,191,191,exact,
+1910,1910,1910,1910,1910,exact,
+,191000,,,,derived,CH-specific subclass — no NACE counterpart
+192,192,192,192,192,exact,
+1920,1920,1920,1920,1920,exact,
+,192000,,,,derived,CH-specific subclass — no NACE counterpart
+38,20,38,20,20,exact,
+20,20,20,20,20,exact,
+383,201,383,201,201,exact,
+201,201,201,201,201,exact,
+2011,2011,2011,2011,2011,exact,
+,201100,,,,derived,CH-specific subclass — no NACE counterpart
+2012,2012,2012,2012,2012,exact,
+,201200,,,,derived,CH-specific subclass — no NACE counterpart
+2013,2013,2013,2013,2013,exact,
+,201300,,,,derived,CH-specific subclass — no NACE counterpart
+2014,2014,2014,2014,,partial,
+2011,2014,2011,2014,,partial,
+,201400,,,,derived,CH-specific subclass — no NACE counterpart
+2015,2015,2015,2015,,partial,
+,201500,,,,derived,CH-specific subclass — no NACE counterpart
+3832,2016,3832,2016,,partial,
+2016,2016,2016,2016,,partial,
+,201600,,,,derived,CH-specific subclass — no NACE counterpart
+2017,2017,2017,2017,,partial,
+,201700,,,,derived,CH-specific subclass — no NACE counterpart
+202,202,202,202,202,exact,
+2020,2020,2020,2020,,partial,
+,202000,,,,derived,CH-specific subclass — no NACE counterpart
+203,203,203,203,203,exact,
+2030,2030,2030,2030,2030,exact,
+,203000,,,,derived,CH-specific subclass — no NACE counterpart
+204,204,204,204,,partial,
+2041,2041,2041,2041,,partial,
+,204100,,,,derived,CH-specific subclass — no NACE counterpart
+2042,2042,2042,2042,,partial,
+,204200,,,,derived,CH-specific subclass — no NACE counterpart
+201,205,201,205,,partial,
+205,205,205,205,,partial,
+2014,2051,2014,2051,,partial,
+2059,2051,2059,2051,,partial,
+,205100,,,,derived,CH-specific subclass — no NACE counterpart
+2059,2059,2059,2059,,partial,
+2051,2059,2051,2059,,partial,
+,205900,,,,derived,CH-specific subclass — no NACE counterpart
+206,206,206,206,,partial,
+2060,2060,2060,2060,,partial,
+,206000,,,,derived,CH-specific subclass — no NACE counterpart
+21,21,21,21,21,exact,
+211,211,211,211,,partial,
+2110,2110,2110,2110,,partial,
+,211000,,,,derived,CH-specific subclass — no NACE counterpart
+212,212,212,212,,partial,
+2120,2120,2120,2120,,partial,
+,212000,,,,derived,CH-specific subclass — no NACE counterpart
+22,22,22,22,22,exact,
+221,221,221,221,221,exact,
+2211,2211,2211,2211,2211,exact,
+,221100,,,,derived,CH-specific subclass — no NACE counterpart
+,2212,,2212,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,221200,,,,derived,CH-specific subclass — no NACE counterpart
+222,222,222,222,222,exact,
+2221,2221,2221,2221,,partial,
+,222100,,,,derived,CH-specific subclass — no NACE counterpart
+2222,2222,2222,2222,,partial,
+,222200,,,,derived,CH-specific subclass — no NACE counterpart
+2223,2223,2223,2223,,partial,
+,222300,,,,derived,CH-specific subclass — no NACE counterpart
+2223,2224,2223,2224,,partial,
+,222400,,,,derived,CH-specific subclass — no NACE counterpart
+2223,2225,2223,2225,,partial,
+2221,2225,2221,2225,,partial,
+2222,2225,2222,2225,,partial,
+,222500,,,,derived,CH-specific subclass — no NACE counterpart
+,2226,,2226,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,222600,,,,derived,CH-specific subclass — no NACE counterpart
+22,23,22,23,23,exact,
+23,23,23,23,23,exact,
+13,23,13,23,23,exact,
+231,231,231,231,231,exact,
+2311,2311,2311,2311,,partial,
+,231100,,,,derived,CH-specific subclass — no NACE counterpart
+2312,2312,2312,2312,,partial,
+,231200,,,,derived,CH-specific subclass — no NACE counterpart
+2313,2313,2313,2313,,partial,
+,231300,,,,derived,CH-specific subclass — no NACE counterpart
+2314,2314,2314,2314,,partial,
+,231400,,,,derived,CH-specific subclass — no NACE counterpart
+,2315,,2315,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,231500,,,,derived,CH-specific subclass — no NACE counterpart
+232,232,232,232,,partial,
+2320,2320,2320,2320,,partial,
+,232000,,,,derived,CH-specific subclass — no NACE counterpart
+233,233,233,233,,partial,
+2331,2331,2331,2331,,partial,
+,233100,,,,derived,CH-specific subclass — no NACE counterpart
+2332,2332,2332,2332,,partial,
+,233200,,,,derived,CH-specific subclass — no NACE counterpart
+234,234,234,234,,partial,
+2341,2341,2341,2341,,partial,
+,234100,,,,derived,CH-specific subclass — no NACE counterpart
+2342,2342,2342,2342,,partial,
+,234200,,,,derived,CH-specific subclass — no NACE counterpart
+2343,2343,2343,2343,,partial,
+,234300,,,,derived,CH-specific subclass — no NACE counterpart
+2344,2344,2344,2344,,partial,
+,234400,,,,derived,CH-specific subclass — no NACE counterpart
+,2345,,2345,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,234500,,,,derived,CH-specific subclass — no NACE counterpart
+235,235,235,235,,partial,
+2351,2351,2351,2351,,partial,
+,235100,,,,derived,CH-specific subclass — no NACE counterpart
+2352,2352,2352,2352,,partial,
+,235200,,,,derived,CH-specific subclass — no NACE counterpart
+222,236,222,236,,partial,
+236,236,236,236,,partial,
+2361,2361,2361,2361,,partial,
+,236100,,,,derived,CH-specific subclass — no NACE counterpart
+2362,2362,2362,2362,,partial,
+,236200,,,,derived,CH-specific subclass — no NACE counterpart
+2363,2363,2363,2363,,partial,
+,236300,,,,derived,CH-specific subclass — no NACE counterpart
+2364,2364,2364,2364,,partial,
+,236400,,,,derived,CH-specific subclass — no NACE counterpart
+2365,2365,2365,2365,,partial,
+,236500,,,,derived,CH-specific subclass — no NACE counterpart
+2223,2366,2223,2366,,partial,
+,236600,,,,derived,CH-specific subclass — no NACE counterpart
+237,237,237,237,,partial,
+2370,2370,2370,2370,,partial,
+,237001,,,,derived,CH-specific subclass — no NACE counterpart
+,237002,,,,derived,CH-specific subclass — no NACE counterpart
+132,239,132,239,239,exact,
+239,239,239,239,239,exact,
+2391,2391,2391,2391,2391,exact,
+,239100,,,,derived,CH-specific subclass — no NACE counterpart
+1320,2399,1320,2399,2399,exact,
+2399,2399,2399,2399,2399,exact,
+,239900,,,,derived,CH-specific subclass — no NACE counterpart
+24,24,24,24,24,exact,
+241,241,241,241,241,exact,
+2410,2410,2410,2410,2410,exact,
+,241000,,,,derived,CH-specific subclass — no NACE counterpart
+242,242,242,242,242,exact,
+2420,2420,2420,2420,2420,exact,
+,242000,,,,derived,CH-specific subclass — no NACE counterpart
+243,243,243,243,243,exact,
+2431,2431,2431,2431,2431,exact,
+,243100,,,,derived,CH-specific subclass — no NACE counterpart
+2432,2432,2432,2432,2432,exact,
+,243200,,,,derived,CH-specific subclass — no NACE counterpart
+2433,2433,2433,2433,,partial,
+,243300,,,,derived,CH-specific subclass — no NACE counterpart
+2434,2434,2434,2434,,partial,
+,243400,,,,derived,CH-specific subclass — no NACE counterpart
+244,244,244,244,,partial,
+2441,2441,2441,2441,,partial,
+,244100,,,,derived,CH-specific subclass — no NACE counterpart
+2442,2442,2442,2442,,partial,
+,244200,,,,derived,CH-specific subclass — no NACE counterpart
+2443,2443,2443,2443,,partial,
+,244300,,,,derived,CH-specific subclass — no NACE counterpart
+2444,2444,2444,2444,,partial,
+,244400,,,,derived,CH-specific subclass — no NACE counterpart
+2445,2445,2445,2445,,partial,
+,244500,,,,derived,CH-specific subclass — no NACE counterpart
+2446,2446,2446,2446,,partial,
+,244600,,,,derived,CH-specific subclass — no NACE counterpart
+245,245,245,245,,partial,
+2451,2451,2451,2451,,partial,
+,245100,,,,derived,CH-specific subclass — no NACE counterpart
+2452,2452,2452,2452,,partial,
+,245200,,,,derived,CH-specific subclass — no NACE counterpart
+2453,2453,2453,2453,,partial,
+,245300,,,,derived,CH-specific subclass — no NACE counterpart
+2453,2454,2453,2454,,partial,
+2454,2454,2454,2454,,partial,
+,245400,,,,derived,CH-specific subclass — no NACE counterpart
+25,25,25,25,25,exact,
+251,251,251,251,251,exact,
+2511,2511,2511,2511,2511,exact,
+,251100,,,,derived,CH-specific subclass — no NACE counterpart
+2512,2512,2512,2512,2512,exact,
+,251200,,,,derived,CH-specific subclass — no NACE counterpart
+252,252,252,252,252,exact,
+253,252,253,252,252,exact,
+2521,2521,2521,2521,,partial,
+2530,2521,2530,2521,,partial,
+,252100,,,,derived,CH-specific subclass — no NACE counterpart
+,2522,,2522,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,252200,,,,derived,CH-specific subclass — no NACE counterpart
+254,253,254,253,,partial,
+2540,2530,2540,2530,,partial,
+,253000,,,,derived,CH-specific subclass — no NACE counterpart
+255,254,255,254,,partial,
+,2540,,2540,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,254000,,,,derived,CH-specific subclass — no NACE counterpart
+256,255,256,255,,partial,
+2561,2551,2561,2551,,partial,
+,255100,,,,derived,CH-specific subclass — no NACE counterpart
+2561,2552,2561,2552,,partial,
+,255200,,,,derived,CH-specific subclass — no NACE counterpart
+2561,2553,2561,2553,,partial,
+2562,2553,2562,2553,,partial,
+,255301,,,,derived,CH-specific subclass — no NACE counterpart
+,255302,,,,derived,CH-specific subclass — no NACE counterpart
+,256,,256,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,2561,,2561,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,256100,,,,derived,CH-specific subclass — no NACE counterpart
+,2562,,2562,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,256200,,,,derived,CH-specific subclass — no NACE counterpart
+,2563,,2563,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,256300,,,,derived,CH-specific subclass — no NACE counterpart
+259,259,259,259,259,exact,
+2591,2591,2591,2591,2591,exact,
+,259100,,,,derived,CH-specific subclass — no NACE counterpart
+2592,2592,2592,2592,2592,exact,
+,259200,,,,derived,CH-specific subclass — no NACE counterpart
+2593,2593,2593,2593,2593,exact,
+,259300,,,,derived,CH-specific subclass — no NACE counterpart
+2594,2594,2594,2594,,partial,
+,259400,,,,derived,CH-specific subclass — no NACE counterpart
+2599,2599,2599,2599,2599,exact,
+,259900,,,,derived,CH-specific subclass — no NACE counterpart
+28,26,28,26,26,exact,
+32,26,32,26,26,exact,
+26,26,26,26,26,exact,
+261,261,261,261,261,exact,
+2611,2611,2611,2611,,partial,
+,261100,,,,derived,CH-specific subclass — no NACE counterpart
+2612,2612,2612,2612,,partial,
+,261200,,,,derived,CH-specific subclass — no NACE counterpart
+282,262,282,262,262,exact,
+262,262,262,262,262,exact,
+2823,2620,2823,2620,2620,exact,
+2620,2620,2620,2620,2620,exact,
+,262000,,,,derived,CH-specific subclass — no NACE counterpart
+263,263,263,263,263,exact,
+2630,2630,2630,2630,2630,exact,
+,263000,,,,derived,CH-specific subclass — no NACE counterpart
+262,264,262,264,264,exact,
+264,264,264,264,264,exact,
+2620,2640,2620,2640,2640,exact,
+2640,2640,2640,2640,2640,exact,
+,264000,,,,derived,CH-specific subclass — no NACE counterpart
+263,265,263,265,265,exact,
+265,265,265,265,265,exact,
+2630,2651,2630,2651,2651,exact,
+2651,2651,2651,2651,2651,exact,
+,265100,,,,derived,CH-specific subclass — no NACE counterpart
+2652,2652,2652,2652,2652,exact,
+,265201,,,,derived,CH-specific subclass — no NACE counterpart
+,265202,,,,derived,CH-specific subclass — no NACE counterpart
+,265203,,,,derived,CH-specific subclass — no NACE counterpart
+,265204,,,,derived,CH-specific subclass — no NACE counterpart
+,265205,,,,derived,CH-specific subclass — no NACE counterpart
+325,266,325,266,266,exact,
+266,266,266,266,266,exact,
+3250,2660,3250,2660,2660,exact,
+2660,2660,2660,2660,2660,exact,
+,266000,,,,derived,CH-specific subclass — no NACE counterpart
+267,267,267,267,267,exact,
+2670,2670,2670,2670,2670,exact,
+,267000,,,,derived,CH-specific subclass — no NACE counterpart
+28,27,28,27,27,exact,
+27,27,27,27,27,exact,
+279,271,279,271,271,exact,
+271,271,271,271,271,exact,
+2790,2711,2790,2711,,partial,
+2712,2711,2712,2711,,partial,
+2711,2711,2711,2711,,partial,
+,271100,,,,derived,CH-specific subclass — no NACE counterpart
+2712,2712,2712,2712,,partial,
+,271200,,,,derived,CH-specific subclass — no NACE counterpart
+272,272,272,272,272,exact,
+2720,2720,2720,2720,2720,exact,
+,272000,,,,derived,CH-specific subclass — no NACE counterpart
+273,273,273,273,273,exact,
+2731,2731,2731,2731,2731,exact,
+,273100,,,,derived,CH-specific subclass — no NACE counterpart
+2732,2732,2732,2732,2732,exact,
+,273200,,,,derived,CH-specific subclass — no NACE counterpart
+2733,2733,2733,2733,2733,exact,
+,273300,,,,derived,CH-specific subclass — no NACE counterpart
+274,274,274,274,274,exact,
+2740,2740,2740,2740,2740,exact,
+,274000,,,,derived,CH-specific subclass — no NACE counterpart
+275,275,275,275,275,exact,
+2751,2751,2751,2751,,partial,
+,275100,,,,derived,CH-specific subclass — no NACE counterpart
+2752,2752,2752,2752,,partial,
+,275200,,,,derived,CH-specific subclass — no NACE counterpart
+284,279,284,279,279,exact,
+279,279,279,279,279,exact,
+2790,2790,2790,2790,2790,exact,
+,279000,,,,derived,CH-specific subclass — no NACE counterpart
+28,28,28,28,28,exact,
+25,28,25,28,28,exact,
+281,281,281,281,281,exact,
+2811,2811,2811,2811,2811,exact,
+,281100,,,,derived,CH-specific subclass — no NACE counterpart
+2812,2812,2812,2812,2812,exact,
+,281200,,,,derived,CH-specific subclass — no NACE counterpart
+2813,2813,2813,2813,2813,exact,
+,281300,,,,derived,CH-specific subclass — no NACE counterpart
+2814,2814,2814,2814,2814,exact,
+,281400,,,,derived,CH-specific subclass — no NACE counterpart
+2815,2815,2815,2815,2815,exact,
+,281500,,,,derived,CH-specific subclass — no NACE counterpart
+252,282,252,282,282,exact,
+282,282,282,282,282,exact,
+2521,2821,2521,2821,2821,exact,
+2821,2821,2821,2821,2821,exact,
+,282100,,,,derived,CH-specific subclass — no NACE counterpart
+2822,2822,2822,2822,2822,exact,
+,282200,,,,derived,CH-specific subclass — no NACE counterpart
+2823,2823,2823,2823,2823,exact,
+,282300,,,,derived,CH-specific subclass — no NACE counterpart
+2824,2824,2824,2824,2824,exact,
+,282400,,,,derived,CH-specific subclass — no NACE counterpart
+2825,2825,2825,2825,2825,exact,
+2821,2825,2821,2825,2825,exact,
+,282500,,,,derived,CH-specific subclass — no NACE counterpart
+2829,2829,2829,2829,2829,exact,
+,282900,,,,derived,CH-specific subclass — no NACE counterpart
+289,283,289,283,,partial,
+283,283,283,283,,partial,
+2830,2830,2830,2830,,partial,
+2892,2830,2892,2830,,partial,
+,283000,,,,derived,CH-specific subclass — no NACE counterpart
+284,284,284,284,,partial,
+2841,2841,2841,2841,,partial,
+,284100,,,,derived,CH-specific subclass — no NACE counterpart
+,2842,,2842,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,284200,,,,derived,CH-specific subclass — no NACE counterpart
+289,289,289,289,,partial,
+282,289,282,289,,partial,
+2891,2891,2891,2891,,partial,
+,289100,,,,derived,CH-specific subclass — no NACE counterpart
+2892,2892,2892,2892,,partial,
+,289200,,,,derived,CH-specific subclass — no NACE counterpart
+2829,2893,2829,2893,,partial,
+2893,2893,2893,2893,,partial,
+,289300,,,,derived,CH-specific subclass — no NACE counterpart
+2894,2894,2894,2894,,partial,
+,289400,,,,derived,CH-specific subclass — no NACE counterpart
+2895,2895,2895,2895,,partial,
+,289500,,,,derived,CH-specific subclass — no NACE counterpart
+2896,2896,2896,2896,,partial,
+,289600,,,,derived,CH-specific subclass — no NACE counterpart
+2899,2897,2899,2897,,partial,
+2896,2897,2896,2897,,partial,
+,289700,,,,derived,CH-specific subclass — no NACE counterpart
+2899,2899,2899,2899,,partial,
+,289900,,,,derived,CH-specific subclass — no NACE counterpart
+28,29,28,29,29,exact,
+27,29,27,29,29,exact,
+23,29,23,29,29,exact,
+29,29,29,29,29,exact,
+271,291,271,291,291,exact,
+291,291,291,291,291,exact,
+2711,2910,2711,2910,2910,exact,
+2910,2910,2910,2910,2910,exact,
+,291000,,,,derived,CH-specific subclass — no NACE counterpart
+292,292,292,292,292,exact,
+2920,2920,2920,2920,2920,exact,
+,292000,,,,derived,CH-specific subclass — no NACE counterpart
+279,293,279,293,293,exact,
+282,293,282,293,293,exact,
+231,293,231,293,293,exact,
+281,293,281,293,293,exact,
+293,293,293,293,293,exact,
+2790,2931,2790,2931,,partial,
+2931,2931,2931,2931,,partial,
+,293100,,,,derived,CH-specific subclass — no NACE counterpart
+2811,2932,2811,2932,,partial,
+2312,2932,2312,2932,,partial,
+2825,2932,2825,2932,,partial,
+2932,2932,2932,2932,,partial,
+,293200,,,,derived,CH-specific subclass — no NACE counterpart
+28,30,28,30,30,exact,
+30,30,30,30,30,exact,
+301,301,301,301,301,exact,
+3011,3011,3011,3011,3011,exact,
+,301100,,,,derived,CH-specific subclass — no NACE counterpart
+3012,3012,3012,3012,3012,exact,
+,301200,,,,derived,CH-specific subclass — no NACE counterpart
+3011,3013,3011,3013,,partial,
+,301300,,,,derived,CH-specific subclass — no NACE counterpart
+302,302,302,302,302,exact,
+3020,3020,3020,3020,3020,exact,
+,302000,,,,derived,CH-specific subclass — no NACE counterpart
+303,303,303,303,303,exact,
+,3031,,3031,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,303100,,,,derived,CH-specific subclass — no NACE counterpart
+,3032,,3032,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,303200,,,,derived,CH-specific subclass — no NACE counterpart
+304,304,304,304,304,exact,
+3040,3040,3040,3040,3040,exact,
+,304000,,,,derived,CH-specific subclass — no NACE counterpart
+281,309,281,309,309,exact,
+309,309,309,309,309,exact,
+2811,3091,2811,3091,3091,exact,
+3091,3091,3091,3091,3091,exact,
+,309100,,,,derived,CH-specific subclass — no NACE counterpart
+3091,3092,3091,3092,3092,exact,
+3092,3092,3092,3092,3092,exact,
+,309201,,,,derived,CH-specific subclass — no NACE counterpart
+,309202,,,,derived,CH-specific subclass — no NACE counterpart
+3099,3099,3099,3099,3099,exact,
+,309900,,,,derived,CH-specific subclass — no NACE counterpart
+23,31,23,31,31,exact,
+31,31,31,31,31,exact,
+234,310,234,310,310,exact,
+310,310,310,310,310,exact,
+2342,3100,2342,3100,3100,exact,
+,310001,,,,derived,CH-specific subclass — no NACE counterpart
+,310002,,,,derived,CH-specific subclass — no NACE counterpart
+,310009,,,,derived,CH-specific subclass — no NACE counterpart
+27,32,27,32,32,exact,
+32,32,32,32,32,exact,
+321,321,321,321,321,exact,
+3211,3211,3211,3211,3211,exact,
+,321100,,,,derived,CH-specific subclass — no NACE counterpart
+3212,3212,3212,3212,3212,exact,
+,321201,,,,derived,CH-specific subclass — no NACE counterpart
+,321202,,,,derived,CH-specific subclass — no NACE counterpart
+3213,3213,3213,3213,,partial,
+,321300,,,,derived,CH-specific subclass — no NACE counterpart
+322,322,322,322,322,exact,
+3220,3220,3220,3220,3220,exact,
+,322000,,,,derived,CH-specific subclass — no NACE counterpart
+323,323,323,323,323,exact,
+3230,3230,3230,3230,3230,exact,
+,323000,,,,derived,CH-specific subclass — no NACE counterpart
+324,324,324,324,324,exact,
+3240,3240,3240,3240,3240,exact,
+,324000,,,,derived,CH-specific subclass — no NACE counterpart
+325,325,325,325,325,exact,
+329,325,329,325,325,exact,
+3250,3250,3250,3250,3250,exact,
+3299,3250,3299,3250,3250,exact,
+,325001,,,,derived,CH-specific subclass — no NACE counterpart
+,325002,,,,derived,CH-specific subclass — no NACE counterpart
+,325003,,,,derived,CH-specific subclass — no NACE counterpart
+,325009,,,,derived,CH-specific subclass — no NACE counterpart
+279,329,279,329,329,exact,
+329,329,329,329,329,exact,
+323,329,323,329,329,exact,
+3291,3291,3291,3291,,partial,
+,329100,,,,derived,CH-specific subclass — no NACE counterpart
+2790,3299,2790,3299,,partial,
+3230,3299,3230,3299,,partial,
+3299,3299,3299,3299,,partial,
+,329900,,,,derived,CH-specific subclass — no NACE counterpart
+33,33,33,33,33,exact,
+30,33,30,33,33,exact,
+304,331,304,331,331,exact,
+331,331,331,331,331,exact,
+3311,3311,3311,3311,3311,exact,
+,331100,,,,derived,CH-specific subclass — no NACE counterpart
+3312,3312,3312,3312,3312,exact,
+,331200,,,,derived,CH-specific subclass — no NACE counterpart
+3313,3313,3313,3313,3313,exact,
+,331300,,,,derived,CH-specific subclass — no NACE counterpart
+3314,3314,3314,3314,3314,exact,
+,331400,,,,derived,CH-specific subclass — no NACE counterpart
+3312,3315,3312,3315,3315,exact,
+3315,3315,3315,3315,3315,exact,
+,331500,,,,derived,CH-specific subclass — no NACE counterpart
+3316,3316,3316,3316,,partial,
+,331600,,,,derived,CH-specific subclass — no NACE counterpart
+3311,3317,3311,3317,,partial,
+3317,3317,3317,3317,,partial,
+,331700,,,,derived,CH-specific subclass — no NACE counterpart
+3312,3318,3312,3318,,partial,
+3040,3318,3040,3318,,partial,
+3316,3318,3316,3318,,partial,
+3315,3318,3315,3318,,partial,
+,331800,,,,derived,CH-specific subclass — no NACE counterpart
+3319,3319,3319,3319,3319,exact,
+,331900,,,,derived,CH-specific subclass — no NACE counterpart
+332,332,332,332,332,exact,
+3320,3320,3320,3320,3320,exact,
+,332000,,,,derived,CH-specific subclass — no NACE counterpart
+52,35,52,35,35,exact,
+35,35,35,35,35,exact,
+351,351,351,351,351,exact,
+3511,3511,3511,3511,,partial,
+,351100,,,,derived,CH-specific subclass — no NACE counterpart
+3511,3512,3511,3512,,partial,
+,351200,,,,derived,CH-specific subclass — no NACE counterpart
+3512,3513,3512,3513,,partial,
+,351300,,,,derived,CH-specific subclass — no NACE counterpart
+3513,3514,3513,3514,,partial,
+,351400,,,,derived,CH-specific subclass — no NACE counterpart
+3514,3515,3514,3515,,partial,
+,351500,,,,derived,CH-specific subclass — no NACE counterpart
+3511,3516,3511,3516,,partial,
+,351600,,,,derived,CH-specific subclass — no NACE counterpart
+521,352,521,352,352,exact,
+352,352,352,352,352,exact,
+3521,3521,3521,3521,,partial,
+,352100,,,,derived,CH-specific subclass — no NACE counterpart
+3522,3522,3522,3522,,partial,
+,352200,,,,derived,CH-specific subclass — no NACE counterpart
+3523,3523,3523,3523,,partial,
+,352300,,,,derived,CH-specific subclass — no NACE counterpart
+5210,3524,5210,3524,,partial,
+,352400,,,,derived,CH-specific subclass — no NACE counterpart
+353,353,353,353,353,exact,
+3530,3530,3530,3530,3530,exact,
+,353000,,,,derived,CH-specific subclass — no NACE counterpart
+351,354,351,354,,partial,
+352,354,352,354,,partial,
+3514,3540,3514,3540,,partial,
+3523,3540,3523,3540,,partial,
+,354000,,,,derived,CH-specific subclass — no NACE counterpart
+36,36,36,36,36,exact,
+360,360,360,360,360,exact,
+3600,3600,3600,3600,3600,exact,
+,360000,,,,derived,CH-specific subclass — no NACE counterpart
+37,37,37,37,37,exact,
+370,370,370,370,370,exact,
+3700,3700,3700,3700,3700,exact,
+,370001,,,,derived,CH-specific subclass — no NACE counterpart
+,370002,,,,derived,CH-specific subclass — no NACE counterpart
+38,38,38,38,38,exact,
+381,381,381,381,381,exact,
+3811,3811,3811,3811,3811,exact,
+,381100,,,,derived,CH-specific subclass — no NACE counterpart
+3812,3812,3812,3812,3812,exact,
+,381200,,,,derived,CH-specific subclass — no NACE counterpart
+382,382,382,382,382,exact,
+383,382,383,382,382,exact,
+3821,3821,3821,3821,3821,exact,
+3832,3821,3832,3821,3821,exact,
+3831,3821,3831,3821,3821,exact,
+,382100,,,,derived,CH-specific subclass — no NACE counterpart
+3822,3822,3822,3822,3822,exact,
+3821,3822,3821,3822,3822,exact,
+,382200,,,,derived,CH-specific subclass — no NACE counterpart
+3822,3823,3822,3823,,partial,
+3821,3823,3821,3823,,partial,
+,382300,,,,derived,CH-specific subclass — no NACE counterpart
+382,383,382,383,383,exact,
+3822,3831,3822,3831,,partial,
+3821,3831,3821,3831,,partial,
+,383100,,,,derived,CH-specific subclass — no NACE counterpart
+3822,3832,3822,3832,,partial,
+3821,3832,3821,3832,,partial,
+,383200,,,,derived,CH-specific subclass — no NACE counterpart
+3822,3833,3822,3833,,partial,
+3821,3833,3821,3833,,partial,
+,383300,,,,derived,CH-specific subclass — no NACE counterpart
+39,39,39,39,39,exact,
+390,390,390,390,390,exact,
+3900,3900,3900,3900,3900,exact,
+,390000,,,,derived,CH-specific subclass — no NACE counterpart
+41,41,41,41,41,exact,
+,410,,410,410,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,4100,,4100,4100,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,410001,,,,derived,CH-specific subclass — no NACE counterpart
+,410002,,,,derived,CH-specific subclass — no NACE counterpart
+43,42,43,42,42,exact,
+42,42,42,42,42,exact,
+421,421,421,421,421,exact,
+4211,4211,4211,4211,,partial,
+,421100,,,,derived,CH-specific subclass — no NACE counterpart
+4212,4212,4212,4212,,partial,
+,421200,,,,derived,CH-specific subclass — no NACE counterpart
+4213,4213,4213,4213,,partial,
+,421300,,,,derived,CH-specific subclass — no NACE counterpart
+422,422,422,422,422,exact,
+4221,4221,4221,4221,,partial,
+,422100,,,,derived,CH-specific subclass — no NACE counterpart
+4222,4222,4222,4222,,partial,
+,422200,,,,derived,CH-specific subclass — no NACE counterpart
+429,429,429,429,429,exact,
+439,429,439,429,429,exact,
+4291,4291,4291,4291,,partial,
+,429100,,,,derived,CH-specific subclass — no NACE counterpart
+4399,4299,4399,4299,,partial,
+4299,4299,4299,4299,,partial,
+,429900,,,,derived,CH-specific subclass — no NACE counterpart
+43,43,43,43,43,exact,
+41,43,41,43,43,exact,
+82,43,82,43,43,exact,
+42,43,42,43,43,exact,
+431,431,431,431,431,exact,
+4311,4311,4311,4311,4311,exact,
+,431100,,,,derived,CH-specific subclass — no NACE counterpart
+4312,4312,4312,4312,4312,exact,
+,431200,,,,derived,CH-specific subclass — no NACE counterpart
+4313,4313,4313,4313,,partial,
+,431300,,,,derived,CH-specific subclass — no NACE counterpart
+439,432,439,432,432,exact,
+433,432,433,432,432,exact,
+432,432,432,432,432,exact,
+4321,4321,4321,4321,4321,exact,
+,432100,,,,derived,CH-specific subclass — no NACE counterpart
+4399,4322,4399,4322,4322,exact,
+4322,4322,4322,4322,4322,exact,
+,432201,,,,derived,CH-specific subclass — no NACE counterpart
+,432202,,,,derived,CH-specific subclass — no NACE counterpart
+4399,4323,4399,4323,,partial,
+,432300,,,,derived,CH-specific subclass — no NACE counterpart
+,4324,,4324,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,432401,,,,derived,CH-specific subclass — no NACE counterpart
+,432409,,,,derived,CH-specific subclass — no NACE counterpart
+439,433,439,433,433,exact,
+433,433,433,433,433,exact,
+4331,4331,4331,4331,,partial,
+,433100,,,,derived,CH-specific subclass — no NACE counterpart
+4332,4332,4332,4332,,partial,
+,433201,,,,derived,CH-specific subclass — no NACE counterpart
+,433202,,,,derived,CH-specific subclass — no NACE counterpart
+4333,4333,4333,4333,,partial,
+,433301,,,,derived,CH-specific subclass — no NACE counterpart
+,433302,,,,derived,CH-specific subclass — no NACE counterpart
+4334,4334,4334,4334,,partial,
+,433401,,,,derived,CH-specific subclass — no NACE counterpart
+,433402,,,,derived,CH-specific subclass — no NACE counterpart
+,433403,,,,derived,CH-specific subclass — no NACE counterpart
+4399,4335,4399,4335,,partial,
+,433500,,,,derived,CH-specific subclass — no NACE counterpart
+439,434,439,434,,partial,
+4399,4341,4399,4341,,partial,
+4391,4341,4391,4341,,partial,
+,434101,,,,derived,CH-specific subclass — no NACE counterpart
+,434102,,,,derived,CH-specific subclass — no NACE counterpart
+,434103,,,,derived,CH-specific subclass — no NACE counterpart
+4399,4342,4399,4342,,partial,
+,434201,,,,derived,CH-specific subclass — no NACE counterpart
+,434202,,,,derived,CH-specific subclass — no NACE counterpart
+,434203,,,,derived,CH-specific subclass — no NACE counterpart
+,434209,,,,derived,CH-specific subclass — no NACE counterpart
+439,435,439,435,,partial,
+421,435,421,435,,partial,
+4399,4350,4399,4350,,partial,
+4211,4350,4211,4350,,partial,
+,435000,,,,derived,CH-specific subclass — no NACE counterpart
+829,436,829,436,,partial,
+8299,4360,8299,4360,,partial,
+,436000,,,,derived,CH-specific subclass — no NACE counterpart
+439,439,439,439,439,exact,
+4399,4391,4399,4391,,partial,
+,439100,,,,derived,CH-specific subclass — no NACE counterpart
+4399,4399,4399,4399,,partial,
+,439900,,,,derived,CH-specific subclass — no NACE counterpart
+82,46,82,46,46,exact,
+46,46,46,46,46,exact,
+829,461,829,461,461,exact,
+461,461,461,461,461,exact,
+8299,4611,8299,4611,,partial,
+4611,4611,4611,4611,,partial,
+,461100,,,,derived,CH-specific subclass — no NACE counterpart
+8299,4612,8299,4612,,partial,
+4612,4612,4612,4612,,partial,
+,461200,,,,derived,CH-specific subclass — no NACE counterpart
+8299,4613,8299,4613,,partial,
+4613,4613,4613,4613,,partial,
+,461300,,,,derived,CH-specific subclass — no NACE counterpart
+8299,4614,8299,4614,,partial,
+4614,4614,4614,4614,,partial,
+,461400,,,,derived,CH-specific subclass — no NACE counterpart
+8299,4615,8299,4615,,partial,
+4615,4615,4615,4615,,partial,
+,461500,,,,derived,CH-specific subclass — no NACE counterpart
+8299,4616,8299,4616,,partial,
+4616,4616,4616,4616,,partial,
+,461600,,,,derived,CH-specific subclass — no NACE counterpart
+8299,4617,8299,4617,,partial,
+4617,4617,4617,4617,,partial,
+,461700,,,,derived,CH-specific subclass — no NACE counterpart
+8299,4618,8299,4618,,partial,
+4618,4618,4618,4618,,partial,
+,461800,,,,derived,CH-specific subclass — no NACE counterpart
+8299,4619,8299,4619,,partial,
+4619,4619,4619,4619,,partial,
+,461900,,,,derived,CH-specific subclass — no NACE counterpart
+462,462,462,462,462,exact,
+4621,4621,4621,4621,,partial,
+,462100,,,,derived,CH-specific subclass — no NACE counterpart
+4622,4622,4622,4622,,partial,
+,462200,,,,derived,CH-specific subclass — no NACE counterpart
+4623,4623,4623,4623,,partial,
+,462300,,,,derived,CH-specific subclass — no NACE counterpart
+4624,4624,4624,4624,,partial,
+,462400,,,,derived,CH-specific subclass — no NACE counterpart
+463,463,463,463,463,exact,
+4631,4631,4631,4631,,partial,
+,463100,,,,derived,CH-specific subclass — no NACE counterpart
+4638,4632,4638,4632,,partial,
+4632,4632,4632,4632,,partial,
+,463200,,,,derived,CH-specific subclass — no NACE counterpart
+4633,4633,4633,4633,,partial,
+,463300,,,,derived,CH-specific subclass — no NACE counterpart
+4634,4634,4634,4634,,partial,
+,463401,,,,derived,CH-specific subclass — no NACE counterpart
+,463402,,,,derived,CH-specific subclass — no NACE counterpart
+4635,4635,4635,4635,,partial,
+,463500,,,,derived,CH-specific subclass — no NACE counterpart
+4636,4636,4636,4636,,partial,
+,463600,,,,derived,CH-specific subclass — no NACE counterpart
+4637,4637,4637,4637,,partial,
+,463700,,,,derived,CH-specific subclass — no NACE counterpart
+4638,4638,4638,4638,,partial,
+,463800,,,,derived,CH-specific subclass — no NACE counterpart
+4639,4639,4639,4639,,partial,
+,463900,,,,derived,CH-specific subclass — no NACE counterpart
+466,464,466,464,464,exact,
+464,464,464,464,464,exact,
+4641,4641,4641,4641,4641,exact,
+,464100,,,,derived,CH-specific subclass — no NACE counterpart
+4642,4642,4642,4642,,partial,
+,464201,,,,derived,CH-specific subclass — no NACE counterpart
+,464202,,,,derived,CH-specific subclass — no NACE counterpart
+4643,4643,4643,4643,,partial,
+,464300,,,,derived,CH-specific subclass — no NACE counterpart
+4644,4644,4644,4644,,partial,
+,464400,,,,derived,CH-specific subclass — no NACE counterpart
+4645,4645,4645,4645,,partial,
+,464500,,,,derived,CH-specific subclass — no NACE counterpart
+4646,4646,4646,4646,,partial,
+,464601,,,,derived,CH-specific subclass — no NACE counterpart
+,464602,,,,derived,CH-specific subclass — no NACE counterpart
+4647,4647,4647,4647,,partial,
+,464700,,,,derived,CH-specific subclass — no NACE counterpart
+4648,4648,4648,4648,,partial,
+,464801,,,,derived,CH-specific subclass — no NACE counterpart
+,464802,,,,derived,CH-specific subclass — no NACE counterpart
+4643,4649,4643,4649,4649,exact,
+4649,4649,4649,4649,4649,exact,
+,464901,,,,derived,CH-specific subclass — no NACE counterpart
+,464902,,,,derived,CH-specific subclass — no NACE counterpart
+,464903,,,,derived,CH-specific subclass — no NACE counterpart
+,464909,,,,derived,CH-specific subclass — no NACE counterpart
+466,465,466,465,465,exact,
+465,465,465,465,465,exact,
+,4650,,4650,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,465000,,,,derived,CH-specific subclass — no NACE counterpart
+466,466,466,466,466,exact,
+464,466,464,466,466,exact,
+4661,4661,4661,4661,4661,exact,
+,466100,,,,derived,CH-specific subclass — no NACE counterpart
+4662,4662,4662,4662,4662,exact,
+,466200,,,,derived,CH-specific subclass — no NACE counterpart
+4663,4663,4663,4663,4663,exact,
+,466300,,,,derived,CH-specific subclass — no NACE counterpart
+4643,4664,4643,4664,,partial,
+4664,4664,4664,4664,,partial,
+,466400,,,,derived,CH-specific subclass — no NACE counterpart
+,467,,467,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,4671,,4671,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,467101,,,,derived,CH-specific subclass — no NACE counterpart
+,467102,,,,derived,CH-specific subclass — no NACE counterpart
+,4672,,4672,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,467200,,,,derived,CH-specific subclass — no NACE counterpart
+,4673,,4673,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,467300,,,,derived,CH-specific subclass — no NACE counterpart
+467,468,467,468,,partial,
+4671,4681,4671,4681,,partial,
+,468101,,,,derived,CH-specific subclass — no NACE counterpart
+,468102,,,,derived,CH-specific subclass — no NACE counterpart
+4672,4682,4672,4682,,partial,
+,468201,,,,derived,CH-specific subclass — no NACE counterpart
+,468202,,,,derived,CH-specific subclass — no NACE counterpart
+4673,4683,4673,4683,,partial,
+,468301,,,,derived,CH-specific subclass — no NACE counterpart
+,468302,,,,derived,CH-specific subclass — no NACE counterpart
+,468303,,,,derived,CH-specific subclass — no NACE counterpart
+,4684,,4684,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,468400,,,,derived,CH-specific subclass — no NACE counterpart
+,4685,,4685,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,468500,,,,derived,CH-specific subclass — no NACE counterpart
+,4686,,4686,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,468600,,,,derived,CH-specific subclass — no NACE counterpart
+,4687,,4687,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,468700,,,,derived,CH-specific subclass — no NACE counterpart
+,4689,4689,4689,,derived,derived by code identity (no explicit closeMatch in source RDF)
+,468900,,,,derived,CH-specific subclass — no NACE counterpart
+469,469,469,469,469,exact,
+4690,4690,4690,4690,4690,exact,
+,469000,,,,derived,CH-specific subclass — no NACE counterpart
+47,47,47,47,47,exact,
+82,47,82,47,47,exact,
+479,471,479,471,471,exact,
+478,471,478,471,471,exact,
+471,471,471,471,471,exact,
+4791,4711,4791,4711,4711,exact,
+4781,4711,4781,4711,4711,exact,
+4711,4711,4711,4711,4711,exact,
+,471101,,,,derived,CH-specific subclass — no NACE counterpart
+,471102,,,,derived,CH-specific subclass — no NACE counterpart
+,471103,,,,derived,CH-specific subclass — no NACE counterpart
+,471104,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4712,4791,4712,,partial,
+4782,4712,4782,4712,,partial,
+,471200,,,,derived,CH-specific subclass — no NACE counterpart
+479,472,479,472,472,exact,
+478,472,478,472,472,exact,
+472,472,472,472,472,exact,
+4791,4721,4791,4721,4721,exact,
+4781,4721,4781,4721,4721,exact,
+4721,4721,4721,4721,4721,exact,
+,472100,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4722,4791,4722,4722,exact,
+4781,4722,4781,4722,4722,exact,
+4722,4722,4722,4722,4722,exact,
+,472200,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4723,4791,4723,4723,exact,
+4781,4723,4781,4723,4723,exact,
+4723,4723,4723,4723,4723,exact,
+,472300,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4724,4791,4724,,partial,
+4781,4724,4781,4724,,partial,
+4724,4724,4724,4724,,partial,
+,472400,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4725,4791,4725,,partial,
+4781,4725,4781,4725,,partial,
+4725,4725,4725,4725,,partial,
+,472500,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4726,4791,4726,,partial,
+4781,4726,4781,4726,,partial,
+4726,4726,4726,4726,,partial,
+,472600,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4727,4791,4727,,partial,
+4781,4727,4781,4727,,partial,
+,472700,,,,derived,CH-specific subclass — no NACE counterpart
+473,473,473,473,473,exact,
+4730,4730,4730,4730,4730,exact,
+,473001,,,,derived,CH-specific subclass — no NACE counterpart
+,473002,,,,derived,CH-specific subclass — no NACE counterpart
+479,474,479,474,474,exact,
+478,474,478,474,474,exact,
+474,474,474,474,474,exact,
+4791,4740,4791,4740,,partial,
+,474000,,,,derived,CH-specific subclass — no NACE counterpart
+479,475,479,475,475,exact,
+478,475,478,475,475,exact,
+477,475,477,475,475,exact,
+475,475,475,475,475,exact,
+4791,4751,4791,4751,4751,exact,
+4782,4751,4782,4751,4751,exact,
+4751,4751,4751,4751,4751,exact,
+,475100,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4752,4791,4752,4752,exact,
+4752,4752,4752,4752,4752,exact,
+,475200,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4753,4791,4753,4753,exact,
+4753,4753,4753,4753,4753,exact,
+,475300,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4754,4791,4754,,partial,
+4754,4754,4754,4754,,partial,
+,475400,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4755,4791,4755,,partial,
+4778,4755,4778,4755,,partial,
+,475500,,,,derived,CH-specific subclass — no NACE counterpart
+479,476,479,476,476,exact,
+478,476,478,476,476,exact,
+477,476,477,476,476,exact,
+475,476,475,476,476,exact,
+476,476,476,476,476,exact,
+4791,4761,4791,4761,4761,exact,
+4761,4761,4761,4761,4761,exact,
+,476100,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4762,4791,4762,4762,exact,
+4762,4762,4762,4762,4762,exact,
+,476201,,,,derived,CH-specific subclass — no NACE counterpart
+,476202,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4763,4791,4763,4763,exact,
+4778,4763,4778,4763,4763,exact,
+4764,4763,4764,4763,4763,exact,
+,476301,,,,derived,CH-specific subclass — no NACE counterpart
+,476302,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4764,4791,4764,4764,exact,
+,476400,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4769,4791,4769,,partial,
+4778,4769,4778,4769,,partial,
+4763,4769,4763,4769,,partial,
+,476900,,,,derived,CH-specific subclass — no NACE counterpart
+479,477,479,477,477,exact,
+478,477,478,477,477,exact,
+477,477,477,477,477,exact,
+4791,4771,4791,4771,4771,exact,
+4782,4771,4782,4771,4771,exact,
+4771,4771,4771,4771,4771,exact,
+,477101,,,,derived,CH-specific subclass — no NACE counterpart
+,477102,,,,derived,CH-specific subclass — no NACE counterpart
+,477103,,,,derived,CH-specific subclass — no NACE counterpart
+,477104,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4772,4791,4772,4772,exact,
+4782,4772,4782,4772,4772,exact,
+4772,4772,4772,4772,4772,exact,
+,477201,,,,derived,CH-specific subclass — no NACE counterpart
+,477202,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4773,4791,4773,4773,exact,
+4773,4773,4773,4773,4773,exact,
+,477300,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4774,4791,4774,4774,exact,
+4778,4774,4778,4774,4774,exact,
+4774,4774,4774,4774,4774,exact,
+,477401,,,,derived,CH-specific subclass — no NACE counterpart
+,477402,,,,derived,CH-specific subclass — no NACE counterpart
+,477409,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4775,4791,4775,,partial,
+4775,4775,4775,4775,,partial,
+,477501,,,,derived,CH-specific subclass — no NACE counterpart
+,477502,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4776,4791,4776,,partial,
+4776,4776,4776,4776,,partial,
+,477601,,,,derived,CH-specific subclass — no NACE counterpart
+,477602,,,,derived,CH-specific subclass — no NACE counterpart
+,477603,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4777,4791,4777,,partial,
+4777,4777,4777,4777,,partial,
+,477700,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4778,4791,4778,,partial,
+4778,4778,4778,4778,,partial,
+,477800,,,,derived,CH-specific subclass — no NACE counterpart
+4791,4779,4791,4779,,partial,
+4779,4779,4779,4779,,partial,
+4782,4779,4782,4779,,partial,
+,477901,,,,derived,CH-specific subclass — no NACE counterpart
+,477902,,,,derived,CH-specific subclass — no NACE counterpart
+,478,,478,478,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,4781,,4781,4781,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,478101,,,,derived,CH-specific subclass — no NACE counterpart
+,478102,,,,derived,CH-specific subclass — no NACE counterpart
+,4782,,4782,4782,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,478200,,,,derived,CH-specific subclass — no NACE counterpart
+,4783,,4783,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,478300,,,,derived,CH-specific subclass — no NACE counterpart
+473,479,473,479,479,exact,
+829,479,829,479,479,exact,
+479,479,479,479,479,exact,
+477,479,477,479,479,exact,
+475,479,475,479,479,exact,
+472,479,472,479,479,exact,
+476,479,476,479,479,exact,
+474,479,474,479,479,exact,
+471,479,471,479,479,exact,
+8299,4791,8299,4791,4791,exact,
+4791,4791,4791,4791,4791,exact,
+4779,4791,4779,4791,4791,exact,
+4711,4791,4711,4791,4791,exact,
+,479100,,,,derived,CH-specific subclass — no NACE counterpart
+8299,4792,8299,4792,,partial,
+4791,4792,4791,4792,,partial,
+4723,4792,4723,4792,,partial,
+4778,4792,4778,4792,,partial,
+4774,4792,4774,4792,,partial,
+4761,4792,4761,4792,,partial,
+4779,4792,4779,4792,,partial,
+4751,4792,4751,4792,,partial,
+4762,4792,4762,4792,,partial,
+4722,4792,4722,4792,,partial,
+4773,4792,4773,4792,,partial,
+4777,4792,4777,4792,,partial,
+4772,4792,4772,4792,,partial,
+4776,4792,4776,4792,,partial,
+4724,4792,4724,4792,,partial,
+4721,4792,4721,4792,,partial,
+4753,4792,4753,4792,,partial,
+4730,4792,4730,4792,,partial,
+4764,4792,4764,4792,,partial,
+4726,4792,4726,4792,,partial,
+4725,4792,4725,4792,,partial,
+4752,4792,4752,4792,,partial,
+4754,4792,4754,4792,,partial,
+4775,4792,4775,4792,,partial,
+4763,4792,4763,4792,,partial,
+4771,4792,4771,4792,,partial,
+,479200,,,,derived,CH-specific subclass — no NACE counterpart
+49,49,49,49,49,exact,
+493,491,493,491,491,exact,
+491,491,491,491,491,exact,
+,4911,,4911,4911,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,491100,,,,derived,CH-specific subclass — no NACE counterpart
+4931,4912,4931,4912,4912,exact,
+,491200,,,,derived,CH-specific subclass — no NACE counterpart
+492,492,492,492,492,exact,
+4920,4920,4920,4920,,partial,
+,492000,,,,derived,CH-specific subclass — no NACE counterpart
+493,493,493,493,493,exact,
+4931,4931,4931,4931,,partial,
+4939,4931,4939,4931,,partial,
+,493100,,,,derived,CH-specific subclass — no NACE counterpart
+4939,4932,4939,4932,,partial,
+,493200,,,,derived,CH-specific subclass — no NACE counterpart
+4932,4933,4932,4933,,partial,
+,493300,,,,derived,CH-specific subclass — no NACE counterpart
+4931,4934,4931,4934,,partial,
+4939,4934,4939,4934,,partial,
+,493400,,,,derived,CH-specific subclass — no NACE counterpart
+4939,4939,4939,4939,,partial,
+,493900,,,,derived,CH-specific subclass — no NACE counterpart
+494,494,494,494,,partial,
+4941,4941,4941,4941,,partial,
+,494100,,,,derived,CH-specific subclass — no NACE counterpart
+4942,4942,4942,4942,,partial,
+,494200,,,,derived,CH-specific subclass — no NACE counterpart
+495,495,495,495,,partial,
+4950,4950,4950,4950,,partial,
+,495000,,,,derived,CH-specific subclass — no NACE counterpart
+50,50,50,50,50,exact,
+501,501,501,501,501,exact,
+5010,5010,5010,5010,,partial,
+,501000,,,,derived,CH-specific subclass — no NACE counterpart
+502,502,502,502,502,exact,
+5020,5020,5020,5020,,partial,
+,502000,,,,derived,CH-specific subclass — no NACE counterpart
+503,503,503,503,,partial,
+5030,5030,5030,5030,,partial,
+,503000,,,,derived,CH-specific subclass — no NACE counterpart
+504,504,504,504,,partial,
+5040,5040,5040,5040,,partial,
+,504000,,,,derived,CH-specific subclass — no NACE counterpart
+51,51,51,51,51,exact,
+511,511,511,511,511,exact,
+5110,5110,5110,5110,5110,exact,
+,511000,,,,derived,CH-specific subclass — no NACE counterpart
+512,512,512,512,512,exact,
+5121,5121,5121,5121,,partial,
+,512100,,,,derived,CH-specific subclass — no NACE counterpart
+5122,5122,5122,5122,,partial,
+,512200,,,,derived,CH-specific subclass — no NACE counterpart
+52,52,52,52,52,exact,
+79,52,79,52,52,exact,
+49,52,49,52,52,exact,
+521,521,521,521,521,exact,
+5210,5210,5210,5210,5210,exact,
+,521000,,,,derived,CH-specific subclass — no NACE counterpart
+522,522,522,522,522,exact,
+494,522,494,522,522,exact,
+5221,5221,5221,5221,5221,exact,
+,522101,,,,derived,CH-specific subclass — no NACE counterpart
+,522102,,,,derived,CH-specific subclass — no NACE counterpart
+,522103,,,,derived,CH-specific subclass — no NACE counterpart
+5222,5222,5222,5222,5222,exact,
+,522200,,,,derived,CH-specific subclass — no NACE counterpart
+5223,5223,5223,5223,5223,exact,
+,522300,,,,derived,CH-specific subclass — no NACE counterpart
+4941,5224,4941,5224,5224,exact,
+5224,5224,5224,5224,5224,exact,
+,522400,,,,derived,CH-specific subclass — no NACE counterpart
+,5225,,5225,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,522500,,,,derived,CH-specific subclass — no NACE counterpart
+,5226,,5226,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,522600,,,,derived,CH-specific subclass — no NACE counterpart
+799,523,799,523,,partial,
+791,523,791,523,,partial,
+522,523,522,523,,partial,
+493,523,493,523,,partial,
+,5231,,5231,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,523100,,,,derived,CH-specific subclass — no NACE counterpart
+7990,5232,7990,5232,,partial,
+7911,5232,7911,5232,,partial,
+4932,5232,4932,5232,,partial,
+,523200,,,,derived,CH-specific subclass — no NACE counterpart
+82,53,82,53,53,exact,
+96,53,96,53,53,exact,
+53,53,53,53,53,exact,
+531,531,531,531,531,exact,
+5310,5310,5310,5310,5310,exact,
+,531000,,,,derived,CH-specific subclass — no NACE counterpart
+532,532,532,532,532,exact,
+5320,5320,5320,5320,5320,exact,
+,532000,,,,derived,CH-specific subclass — no NACE counterpart
+829,533,829,533,,partial,
+8299,5330,8299,5330,,partial,
+,533000,,,,derived,CH-specific subclass — no NACE counterpart
+68,55,68,55,55,exact,
+79,55,79,55,55,exact,
+55,55,55,55,55,exact,
+551,551,551,551,551,exact,
+5510,5510,5510,5510,5510,exact,
+,551001,,,,derived,CH-specific subclass — no NACE counterpart
+,551002,,,,derived,CH-specific subclass — no NACE counterpart
+552,552,552,552,552,exact,
+5520,5520,5520,5520,5520,exact,
+,552001,,,,derived,CH-specific subclass — no NACE counterpart
+,552002,,,,derived,CH-specific subclass — no NACE counterpart
+553,553,553,553,,partial,
+5530,5530,5530,5530,,partial,
+,553000,,,,derived,CH-specific subclass — no NACE counterpart
+799,554,799,554,,partial,
+791,554,791,554,,partial,
+7990,5540,7990,5540,,partial,
+7911,5540,7911,5540,,partial,
+,554000,,,,derived,CH-specific subclass — no NACE counterpart
+682,559,682,559,559,exact,
+559,559,559,559,559,exact,
+6820,5590,6820,5590,5590,exact,
+5590,5590,5590,5590,5590,exact,
+,559000,,,,derived,CH-specific subclass — no NACE counterpart
+79,56,79,56,56,exact,
+56,56,56,56,56,exact,
+561,561,561,561,561,exact,
+,5611,,5611,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,561101,,,,derived,CH-specific subclass — no NACE counterpart
+,561102,,,,derived,CH-specific subclass — no NACE counterpart
+,5612,,5612,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,561200,,,,derived,CH-specific subclass — no NACE counterpart
+562,562,562,562,562,exact,
+5621,5621,5621,5621,5621,exact,
+,562100,,,,derived,CH-specific subclass — no NACE counterpart
+,5622,,5622,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,562200,,,,derived,CH-specific subclass — no NACE counterpart
+563,563,563,563,563,exact,
+5630,5630,5630,5630,5630,exact,
+,563001,,,,derived,CH-specific subclass — no NACE counterpart
+,563002,,,,derived,CH-specific subclass — no NACE counterpart
+799,564,799,564,,partial,
+7990,5640,7990,5640,,partial,
+,564000,,,,derived,CH-specific subclass — no NACE counterpart
+58,58,58,58,58,exact,
+581,581,581,581,581,exact,
+5811,5811,5811,5811,5811,exact,
+,581100,,,,derived,CH-specific subclass — no NACE counterpart
+5813,5812,5813,5812,5812,exact,
+,581200,,,,derived,CH-specific subclass — no NACE counterpart
+,5813,,5813,5813,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,581300,,,,derived,CH-specific subclass — no NACE counterpart
+5812,5819,5812,5819,5819,exact,
+5819,5819,5819,5819,5819,exact,
+,581900,,,,derived,CH-specific subclass — no NACE counterpart
+582,582,582,582,582,exact,
+5821,5821,5821,5821,,partial,
+,582100,,,,derived,CH-specific subclass — no NACE counterpart
+5829,5829,5829,5829,,partial,
+,582900,,,,derived,CH-specific subclass — no NACE counterpart
+59,59,59,59,59,exact,
+591,591,591,591,591,exact,
+5911,5911,5911,5911,5911,exact,
+,591100,,,,derived,CH-specific subclass — no NACE counterpart
+5912,5912,5912,5912,5912,exact,
+,591200,,,,derived,CH-specific subclass — no NACE counterpart
+5913,5913,5913,5913,5913,exact,
+,591300,,,,derived,CH-specific subclass — no NACE counterpart
+5914,5914,5914,5914,5914,exact,
+,591400,,,,derived,CH-specific subclass — no NACE counterpart
+592,592,592,592,592,exact,
+5920,5920,5920,5920,5920,exact,
+,592000,,,,derived,CH-specific subclass — no NACE counterpart
+63,60,63,60,60,exact,
+47,60,47,60,60,exact,
+60,60,60,60,60,exact,
+601,601,601,601,601,exact,
+6010,6010,6010,6010,6010,exact,
+,601000,,,,derived,CH-specific subclass — no NACE counterpart
+631,602,631,602,602,exact,
+602,602,602,602,602,exact,
+6020,6020,6020,6020,6020,exact,
+,602000,,,,derived,CH-specific subclass — no NACE counterpart
+479,603,479,603,,partial,
+631,603,631,603,,partial,
+639,603,639,603,,partial,
+6391,6031,6391,6031,,partial,
+,603100,,,,derived,CH-specific subclass — no NACE counterpart
+4791,6039,4791,6039,,partial,
+,603900,,,,derived,CH-specific subclass — no NACE counterpart
+82,61,82,61,61,exact,
+61,61,61,61,61,exact,
+612,611,612,611,611,exact,
+611,611,611,611,611,exact,
+6120,6110,6120,6110,6110,exact,
+6110,6110,6110,6110,6110,exact,
+,611000,,,,derived,CH-specific subclass — no NACE counterpart
+829,612,829,612,612,exact,
+619,612,619,612,612,exact,
+8299,6120,8299,6120,6120,exact,
+6190,6120,6190,6120,6120,exact,
+,612000,,,,derived,CH-specific subclass — no NACE counterpart
+612,619,612,619,619,exact,
+619,619,619,619,619,exact,
+6120,6190,6120,6190,6190,exact,
+6190,6190,6190,6190,6190,exact,
+,619000,,,,derived,CH-specific subclass — no NACE counterpart
+62,62,62,62,62,exact,
+,621,,621,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,6210,,6210,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,621000,,,,derived,CH-specific subclass — no NACE counterpart
+,622,,622,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,6220,,6220,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,622000,,,,derived,CH-specific subclass — no NACE counterpart
+,629,,629,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,6290,,6290,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,629000,,,,derived,CH-specific subclass — no NACE counterpart
+52,63,52,63,63,exact,
+63,63,63,63,63,exact,
+631,631,631,631,631,exact,
+521,631,521,631,631,exact,
+5210,6310,5210,6310,,partial,
+,631000,,,,derived,CH-specific subclass — no NACE counterpart
+631,639,631,639,639,exact,
+639,639,639,639,639,exact,
+,6391,,6391,6391,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,639100,,,,derived,CH-specific subclass — no NACE counterpart
+,6392,,6392,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,639200,,,,derived,CH-specific subclass — no NACE counterpart
+64,64,64,64,64,exact,
+641,641,641,641,641,exact,
+6411,6411,6411,6411,6411,exact,
+,641100,,,,derived,CH-specific subclass — no NACE counterpart
+6419,6419,6419,6419,6419,exact,
+,641901,,,,derived,CH-specific subclass — no NACE counterpart
+,641902,,,,derived,CH-specific subclass — no NACE counterpart
+,641903,,,,derived,CH-specific subclass — no NACE counterpart
+,641904,,,,derived,CH-specific subclass — no NACE counterpart
+,641905,,,,derived,CH-specific subclass — no NACE counterpart
+,641906,,,,derived,CH-specific subclass — no NACE counterpart
+,641907,,,,derived,CH-specific subclass — no NACE counterpart
+,641908,,,,derived,CH-specific subclass — no NACE counterpart
+,641909,,,,derived,CH-specific subclass — no NACE counterpart
+,641919,,,,derived,CH-specific subclass — no NACE counterpart
+649,642,649,642,642,exact,
+642,642,642,642,642,exact,
+,6421,,6421,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,642100,,,,derived,CH-specific subclass — no NACE counterpart
+6499,6422,6499,6422,,partial,
+,642200,,,,derived,CH-specific subclass — no NACE counterpart
+643,643,643,643,643,exact,
+,6431,,6431,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,643101,,,,derived,CH-specific subclass — no NACE counterpart
+,643102,,,,derived,CH-specific subclass — no NACE counterpart
+,6432,,6432,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,643200,,,,derived,CH-specific subclass — no NACE counterpart
+649,649,649,649,649,exact,
+6491,6491,6491,6491,6491,exact,
+,649100,,,,derived,CH-specific subclass — no NACE counterpart
+6499,6492,6499,6492,6492,exact,
+6492,6492,6492,6492,6492,exact,
+,649200,,,,derived,CH-specific subclass — no NACE counterpart
+6499,6499,6499,6499,6499,exact,
+,649900,,,,derived,CH-specific subclass — no NACE counterpart
+65,65,65,65,65,exact,
+651,651,651,651,651,exact,
+6511,6511,6511,6511,6511,exact,
+,651100,,,,derived,CH-specific subclass — no NACE counterpart
+6512,6512,6512,6512,6512,exact,
+,651201,,,,derived,CH-specific subclass — no NACE counterpart
+,651202,,,,derived,CH-specific subclass — no NACE counterpart
+,651203,,,,derived,CH-specific subclass — no NACE counterpart
+,651209,,,,derived,CH-specific subclass — no NACE counterpart
+652,652,652,652,652,exact,
+6520,6520,6520,6520,6520,exact,
+,652000,,,,derived,CH-specific subclass — no NACE counterpart
+653,653,653,653,653,exact,
+6530,6530,6530,6530,6530,exact,
+,653000,,,,derived,CH-specific subclass — no NACE counterpart
+66,66,66,66,66,exact,
+661,661,661,661,661,exact,
+6611,6611,6611,6611,6611,exact,
+,661100,,,,derived,CH-specific subclass — no NACE counterpart
+6612,6612,6612,6612,6612,exact,
+,661200,,,,derived,CH-specific subclass — no NACE counterpart
+6619,6619,6619,6619,6619,exact,
+,661900,,,,derived,CH-specific subclass — no NACE counterpart
+662,662,662,662,662,exact,
+6621,6621,6621,6621,6621,exact,
+,662100,,,,derived,CH-specific subclass — no NACE counterpart
+6622,6622,6622,6622,6622,exact,
+,662200,,,,derived,CH-specific subclass — no NACE counterpart
+6629,6629,6629,6629,6629,exact,
+,662901,,,,derived,CH-specific subclass — no NACE counterpart
+,662909,,,,derived,CH-specific subclass — no NACE counterpart
+661,663,661,663,663,exact,
+663,663,663,663,663,exact,
+6630,6630,6630,6630,6630,exact,
+6619,6630,6619,6630,6630,exact,
+,663000,,,,derived,CH-specific subclass — no NACE counterpart
+41,68,41,68,68,exact,
+42,68,42,68,68,exact,
+68,68,68,68,68,exact,
+429,681,429,681,681,exact,
+681,681,681,681,681,exact,
+,6811,,6811,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,681100,,,,derived,CH-specific subclass — no NACE counterpart
+4299,6812,4299,6812,,partial,
+,681200,,,,derived,CH-specific subclass — no NACE counterpart
+682,682,682,682,682,exact,
+6820,6820,6820,6820,6820,exact,
+,682001,,,,derived,CH-specific subclass — no NACE counterpart
+,682002,,,,derived,CH-specific subclass — no NACE counterpart
+,682003,,,,derived,CH-specific subclass — no NACE counterpart
+683,683,683,683,,partial,
+6831,6831,6831,6831,,partial,
+,683100,,,,derived,CH-specific subclass — no NACE counterpart
+6831,6832,6831,6832,,partial,
+6832,6832,6832,6832,,partial,
+,683200,,,,derived,CH-specific subclass — no NACE counterpart
+69,69,69,69,69,exact,
+691,691,691,691,691,exact,
+6910,6910,6910,6910,6910,exact,
+,691001,,,,derived,CH-specific subclass — no NACE counterpart
+,691002,,,,derived,CH-specific subclass — no NACE counterpart
+692,692,692,692,692,exact,
+6920,6920,6920,6920,6920,exact,
+,692000,,,,derived,CH-specific subclass — no NACE counterpart
+70,70,70,70,70,exact,
+701,701,701,701,701,exact,
+7010,7010,7010,7010,7010,exact,
+,701001,,,,derived,CH-specific subclass — no NACE counterpart
+,701002,,,,derived,CH-specific subclass — no NACE counterpart
+702,702,702,702,702,exact,
+,7020,,7020,7020,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,702000,,,,derived,CH-specific subclass — no NACE counterpart
+71,71,71,71,71,exact,
+711,711,711,711,711,exact,
+7111,7111,7111,7111,,partial,
+,711101,,,,derived,CH-specific subclass — no NACE counterpart
+,711102,,,,derived,CH-specific subclass — no NACE counterpart
+,711103,,,,derived,CH-specific subclass — no NACE counterpart
+7112,7112,7112,7112,,partial,
+,711201,,,,derived,CH-specific subclass — no NACE counterpart
+,711202,,,,derived,CH-specific subclass — no NACE counterpart
+,711203,,,,derived,CH-specific subclass — no NACE counterpart
+,711204,,,,derived,CH-specific subclass — no NACE counterpart
+,711205,,,,derived,CH-specific subclass — no NACE counterpart
+712,712,712,712,712,exact,
+7120,7120,7120,7120,7120,exact,
+,712000,,,,derived,CH-specific subclass — no NACE counterpart
+72,72,72,72,72,exact,
+721,721,721,721,721,exact,
+,7210,,7210,7210,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,721001,,,,derived,CH-specific subclass — no NACE counterpart
+,721002,,,,derived,CH-specific subclass — no NACE counterpart
+722,722,722,722,722,exact,
+7220,7220,7220,7220,7220,exact,
+,722000,,,,derived,CH-specific subclass — no NACE counterpart
+70,73,70,73,73,exact,
+73,73,73,73,73,exact,
+731,731,731,731,731,exact,
+7311,7311,7311,7311,,partial,
+,731100,,,,derived,CH-specific subclass — no NACE counterpart
+7312,7312,7312,7312,,partial,
+,731200,,,,derived,CH-specific subclass — no NACE counterpart
+732,732,732,732,732,exact,
+7320,7320,7320,7320,7320,exact,
+,732000,,,,derived,CH-specific subclass — no NACE counterpart
+702,733,702,733,,partial,
+,7330,,7330,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,733000,,,,derived,CH-specific subclass — no NACE counterpart
+74,74,74,74,74,exact,
+741,741,741,741,741,exact,
+,7411,,7411,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,741100,,,,derived,CH-specific subclass — no NACE counterpart
+,7412,,7412,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,741200,,,,derived,CH-specific subclass — no NACE counterpart
+,7413,,7413,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,741300,,,,derived,CH-specific subclass — no NACE counterpart
+,7414,,7414,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,741400,,,,derived,CH-specific subclass — no NACE counterpart
+742,742,742,742,742,exact,
+7420,7420,7420,7420,7420,exact,
+,742000,,,,derived,CH-specific subclass — no NACE counterpart
+743,743,743,743,,partial,
+7430,7430,7430,7430,,partial,
+,743000,,,,derived,CH-specific subclass — no NACE counterpart
+749,749,749,749,749,exact,
+,7491,,7491,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,749100,,,,derived,CH-specific subclass — no NACE counterpart
+,7499,,7499,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,749901,,,,derived,CH-specific subclass — no NACE counterpart
+,749909,,,,derived,CH-specific subclass — no NACE counterpart
+75,75,75,75,75,exact,
+750,750,750,750,750,exact,
+7500,7500,7500,7500,7500,exact,
+,750000,,,,derived,CH-specific subclass — no NACE counterpart
+82,77,82,77,77,exact,
+79,77,79,77,77,exact,
+77,77,77,77,77,exact,
+773,771,773,771,771,exact,
+771,771,771,771,771,exact,
+7739,7711,7739,7711,,partial,
+7712,7711,7712,7711,,partial,
+7711,7711,7711,7711,,partial,
+,771100,,,,derived,CH-specific subclass — no NACE counterpart
+7739,7712,7739,7712,,partial,
+7712,7712,7712,7712,,partial,
+,771200,,,,derived,CH-specific subclass — no NACE counterpart
+772,772,772,772,772,exact,
+7721,7721,7721,7721,7721,exact,
+,772100,,,,derived,CH-specific subclass — no NACE counterpart
+7722,7722,7722,7722,7722,exact,
+,772200,,,,derived,CH-specific subclass — no NACE counterpart
+773,773,773,773,773,exact,
+7731,7731,7731,7731,,partial,
+,773100,,,,derived,CH-specific subclass — no NACE counterpart
+7732,7732,7732,7732,,partial,
+,773200,,,,derived,CH-specific subclass — no NACE counterpart
+7733,7733,7733,7733,,partial,
+,773300,,,,derived,CH-specific subclass — no NACE counterpart
+7734,7734,7734,7734,,partial,
+,773400,,,,derived,CH-specific subclass — no NACE counterpart
+7735,7735,7735,7735,,partial,
+,773500,,,,derived,CH-specific subclass — no NACE counterpart
+7739,7739,7739,7739,,partial,
+,773901,,,,derived,CH-specific subclass — no NACE counterpart
+,773909,,,,derived,CH-specific subclass — no NACE counterpart
+774,774,774,774,774,exact,
+7740,7740,7740,7740,7740,exact,
+,774000,,,,derived,CH-specific subclass — no NACE counterpart
+829,775,829,775,,partial,
+799,775,799,775,,partial,
+791,775,791,775,,partial,
+8299,7751,8299,7751,,partial,
+7990,7751,7990,7751,,partial,
+7911,7751,7911,7751,,partial,
+,775100,,,,derived,CH-specific subclass — no NACE counterpart
+8299,7752,8299,7752,,partial,
+,775200,,,,derived,CH-specific subclass — no NACE counterpart
+78,78,78,78,78,exact,
+781,781,781,781,781,exact,
+7810,7810,7810,7810,7810,exact,
+,781000,,,,derived,CH-specific subclass — no NACE counterpart
+782,782,782,782,782,exact,
+7820,7820,7820,7820,7820,exact,
+,782001,,,,derived,CH-specific subclass — no NACE counterpart
+,782002,,,,derived,CH-specific subclass — no NACE counterpart
+79,79,79,79,79,exact,
+791,791,791,791,791,exact,
+7911,7911,7911,7911,7911,exact,
+,791100,,,,derived,CH-specific subclass — no NACE counterpart
+7912,7912,7912,7912,7912,exact,
+,791200,,,,derived,CH-specific subclass — no NACE counterpart
+799,799,799,799,799,exact,
+7990,7990,7990,7990,7990,exact,
+,799000,,,,derived,CH-specific subclass — no NACE counterpart
+74,80,74,80,80,exact,
+80,80,80,80,80,exact,
+749,800,749,800,,partial,
+,8001,,8001,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,800100,,,,derived,CH-specific subclass — no NACE counterpart
+,8009,,8009,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,800901,,,,derived,CH-specific subclass — no NACE counterpart
+,800909,,,,derived,CH-specific subclass — no NACE counterpart
+43,81,43,81,81,exact,
+81,81,81,81,81,exact,
+811,811,811,811,811,exact,
+8110,8110,8110,8110,8110,exact,
+,811000,,,,derived,CH-specific subclass — no NACE counterpart
+439,812,439,812,812,exact,
+433,812,433,812,812,exact,
+812,812,812,812,812,exact,
+8121,8121,8121,8121,8121,exact,
+,812100,,,,derived,CH-specific subclass — no NACE counterpart
+4399,8122,4399,8122,,partial,
+8122,8122,8122,8122,,partial,
+,812201,,,,derived,CH-specific subclass — no NACE counterpart
+,812202,,,,derived,CH-specific subclass — no NACE counterpart
+,8123,,8123,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,812301,,,,derived,CH-specific subclass — no NACE counterpart
+,812302,,,,derived,CH-specific subclass — no NACE counterpart
+,812309,,,,derived,CH-specific subclass — no NACE counterpart
+813,813,813,813,813,exact,
+8130,8130,8130,8130,8130,exact,
+,813000,,,,derived,CH-specific subclass — no NACE counterpart
+82,82,82,82,82,exact,
+79,82,79,82,82,exact,
+821,821,821,821,821,exact,
+,8210,,8210,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,821000,,,,derived,CH-specific subclass — no NACE counterpart
+822,822,822,822,822,exact,
+8220,8220,8220,8220,8220,exact,
+,822000,,,,derived,CH-specific subclass — no NACE counterpart
+823,823,823,823,823,exact,
+8230,8230,8230,8230,8230,exact,
+,823000,,,,derived,CH-specific subclass — no NACE counterpart
+829,824,829,824,,partial,
+799,824,799,824,,partial,
+8299,8240,8299,8240,,partial,
+7990,8240,7990,8240,,partial,
+,824000,,,,derived,CH-specific subclass — no NACE counterpart
+829,829,829,829,829,exact,
+8299,8291,8299,8291,8291,exact,
+8291,8291,8291,8291,8291,exact,
+,829100,,,,derived,CH-specific subclass — no NACE counterpart
+8292,8292,8292,8292,8292,exact,
+,829200,,,,derived,CH-specific subclass — no NACE counterpart
+8299,8299,8299,8299,8299,exact,
+,829900,,,,derived,CH-specific subclass — no NACE counterpart
+93,84,93,84,84,exact,
+84,84,84,84,84,exact,
+841,841,841,841,841,exact,
+8411,8411,8411,8411,8411,exact,
+,841100,,,,derived,CH-specific subclass — no NACE counterpart
+8412,8412,8412,8412,8412,exact,
+,841200,,,,derived,CH-specific subclass — no NACE counterpart
+8413,8413,8413,8413,8413,exact,
+,841300,,,,derived,CH-specific subclass — no NACE counterpart
+932,842,932,842,842,exact,
+842,842,842,842,842,exact,
+8421,8421,8421,8421,8421,exact,
+,842100,,,,derived,CH-specific subclass — no NACE counterpart
+8422,8422,8422,8422,8422,exact,
+,842201,,,,derived,CH-specific subclass — no NACE counterpart
+,842202,,,,derived,CH-specific subclass — no NACE counterpart
+8423,8423,8423,8423,8423,exact,
+,842301,,,,derived,CH-specific subclass — no NACE counterpart
+,842302,,,,derived,CH-specific subclass — no NACE counterpart
+8424,8424,8424,8424,,partial,
+,842400,,,,derived,CH-specific subclass — no NACE counterpart
+9329,8425,9329,8425,,partial,
+8425,8425,8425,8425,,partial,
+,842500,,,,derived,CH-specific subclass — no NACE counterpart
+843,843,843,843,843,exact,
+8430,8430,8430,8430,8430,exact,
+,843000,,,,derived,CH-specific subclass — no NACE counterpart
+82,85,82,85,85,exact,
+85,85,85,85,85,exact,
+88,85,88,85,85,exact,
+889,851,889,851,851,exact,
+851,851,851,851,851,exact,
+8510,8510,8510,8510,8510,exact,
+8891,8510,8891,8510,8510,exact,
+,851000,,,,derived,CH-specific subclass — no NACE counterpart
+852,852,852,852,852,exact,
+8520,8520,8520,8520,,partial,
+,852001,,,,derived,CH-specific subclass — no NACE counterpart
+,852002,,,,derived,CH-specific subclass — no NACE counterpart
+,852009,,,,derived,CH-specific subclass — no NACE counterpart
+854,853,854,853,853,exact,
+853,853,853,853,853,exact,
+8531,8531,8531,8531,,partial,
+,853101,,,,derived,CH-specific subclass — no NACE counterpart
+,853102,,,,derived,CH-specific subclass — no NACE counterpart
+,853103,,,,derived,CH-specific subclass — no NACE counterpart
+8532,8532,8532,8532,,partial,
+,853200,,,,derived,CH-specific subclass — no NACE counterpart
+,8533,,8533,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,853300,,,,derived,CH-specific subclass — no NACE counterpart
+854,854,854,854,854,exact,
+,8540,,8540,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,854001,,,,derived,CH-specific subclass — no NACE counterpart
+,854002,,,,derived,CH-specific subclass — no NACE counterpart
+,854003,,,,derived,CH-specific subclass — no NACE counterpart
+855,855,855,855,855,exact,
+8551,8551,8551,8551,,partial,
+,855101,,,,derived,CH-specific subclass — no NACE counterpart
+,855102,,,,derived,CH-specific subclass — no NACE counterpart
+8552,8552,8552,8552,,partial,
+,855200,,,,derived,CH-specific subclass — no NACE counterpart
+8553,8553,8553,8553,,partial,
+,855300,,,,derived,CH-specific subclass — no NACE counterpart
+8559,8559,8559,8559,,partial,
+,855901,,,,derived,CH-specific subclass — no NACE counterpart
+,855902,,,,derived,CH-specific subclass — no NACE counterpart
+,855903,,,,derived,CH-specific subclass — no NACE counterpart
+,855909,,,,derived,CH-specific subclass — no NACE counterpart
+829,856,829,856,,partial,
+856,856,856,856,,partial,
+8299,8561,8299,8561,,partial,
+,856100,,,,derived,CH-specific subclass — no NACE counterpart
+,8569,,8569,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,856900,,,,derived,CH-specific subclass — no NACE counterpart
+82,86,82,86,86,exact,
+86,86,86,86,86,exact,
+861,861,861,861,861,exact,
+8610,8610,8610,8610,8610,exact,
+,861001,,,,derived,CH-specific subclass — no NACE counterpart
+,861002,,,,derived,CH-specific subclass — no NACE counterpart
+862,862,862,862,862,exact,
+8621,8621,8621,8621,,partial,
+,862100,,,,derived,CH-specific subclass — no NACE counterpart
+8622,8622,8622,8622,,partial,
+,862200,,,,derived,CH-specific subclass — no NACE counterpart
+8623,8623,8623,8623,,partial,
+,862300,,,,derived,CH-specific subclass — no NACE counterpart
+829,869,829,869,869,exact,
+869,869,869,869,869,exact,
+,8691,,8691,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,869101,,,,derived,CH-specific subclass — no NACE counterpart
+,869102,,,,derived,CH-specific subclass — no NACE counterpart
+,8692,,8692,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,869200,,,,derived,CH-specific subclass — no NACE counterpart
+,8693,,8693,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,869301,,,,derived,CH-specific subclass — no NACE counterpart
+,869302,,,,derived,CH-specific subclass — no NACE counterpart
+,869303,,,,derived,CH-specific subclass — no NACE counterpart
+,8694,,8694,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,869401,,,,derived,CH-specific subclass — no NACE counterpart
+,869402,,,,derived,CH-specific subclass — no NACE counterpart
+,869403,,,,derived,CH-specific subclass — no NACE counterpart
+,8695,,8695,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,869501,,,,derived,CH-specific subclass — no NACE counterpart
+,869502,,,,derived,CH-specific subclass — no NACE counterpart
+,869503,,,,derived,CH-specific subclass — no NACE counterpart
+,8696,,8696,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,869601,,,,derived,CH-specific subclass — no NACE counterpart
+,869602,,,,derived,CH-specific subclass — no NACE counterpart
+8299,8697,8299,8697,,partial,
+,869700,,,,derived,CH-specific subclass — no NACE counterpart
+,8699,,8699,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,869901,,,,derived,CH-specific subclass — no NACE counterpart
+,869902,,,,derived,CH-specific subclass — no NACE counterpart
+,869903,,,,derived,CH-specific subclass — no NACE counterpart
+,869909,,,,derived,CH-specific subclass — no NACE counterpart
+82,87,82,87,87,exact,
+87,87,87,87,87,exact,
+871,871,871,871,871,exact,
+8710,8710,8710,8710,8710,exact,
+,871000,,,,derived,CH-specific subclass — no NACE counterpart
+872,872,872,872,872,exact,
+8720,8720,8720,8720,8720,exact,
+,872001,,,,derived,CH-specific subclass — no NACE counterpart
+,872002,,,,derived,CH-specific subclass — no NACE counterpart
+873,873,873,873,873,exact,
+8730,8730,8730,8730,8730,exact,
+,873001,,,,derived,CH-specific subclass — no NACE counterpart
+,873002,,,,derived,CH-specific subclass — no NACE counterpart
+829,879,829,879,879,exact,
+879,879,879,879,879,exact,
+8299,8791,8299,8791,,partial,
+,879100,,,,derived,CH-specific subclass — no NACE counterpart
+,8799,,8799,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,879901,,,,derived,CH-specific subclass — no NACE counterpart
+,879909,,,,derived,CH-specific subclass — no NACE counterpart
+88,88,88,88,88,exact,
+881,881,881,881,881,exact,
+8810,8810,8810,8810,8810,exact,
+,881000,,,,derived,CH-specific subclass — no NACE counterpart
+889,889,889,889,889,exact,
+8891,8891,8891,8891,,partial,
+,889100,,,,derived,CH-specific subclass — no NACE counterpart
+8899,8899,8899,8899,,partial,
+,889901,,,,derived,CH-specific subclass — no NACE counterpart
+,889909,,,,derived,CH-specific subclass — no NACE counterpart
+90,90,90,90,90,exact,
+,901,,901,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9011,,9011,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,901100,,,,derived,CH-specific subclass — no NACE counterpart
+,9012,,9012,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,901200,,,,derived,CH-specific subclass — no NACE counterpart
+,9013,,9013,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,901300,,,,derived,CH-specific subclass — no NACE counterpart
+,902,,902,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9020,,9020,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,902001,,,,derived,CH-specific subclass — no NACE counterpart
+,902002,,,,derived,CH-specific subclass — no NACE counterpart
+,903,,903,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9031,,9031,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,903100,,,,derived,CH-specific subclass — no NACE counterpart
+,9039,,9039,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,903900,,,,derived,CH-specific subclass — no NACE counterpart
+33,91,33,91,91,exact,
+41,91,41,91,91,exact,
+90,91,90,91,91,exact,
+91,91,91,91,91,exact,
+,911,,911,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9111,,9111,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,911100,,,,derived,CH-specific subclass — no NACE counterpart
+,9112,,9112,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,911200,,,,derived,CH-specific subclass — no NACE counterpart
+,912,,912,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9121,,9121,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,912100,,,,derived,CH-specific subclass — no NACE counterpart
+,9122,,9122,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,912200,,,,derived,CH-specific subclass — no NACE counterpart
+331,913,331,913,,partial,
+3319,9130,3319,9130,,partial,
+,913000,,,,derived,CH-specific subclass — no NACE counterpart
+,914,,914,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9141,,9141,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,914100,,,,derived,CH-specific subclass — no NACE counterpart
+,9142,,9142,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,914200,,,,derived,CH-specific subclass — no NACE counterpart
+92,92,92,92,92,exact,
+920,920,920,920,920,exact,
+9200,9200,9200,9200,9200,exact,
+,920000,,,,derived,CH-specific subclass — no NACE counterpart
+82,93,82,93,93,exact,
+85,93,85,93,93,exact,
+93,93,93,93,93,exact,
+931,931,931,931,931,exact,
+932,931,932,931,931,exact,
+855,931,855,931,931,exact,
+9329,9311,9329,9311,9311,exact,
+9311,9311,9311,9311,9311,exact,
+,931100,,,,derived,CH-specific subclass — no NACE counterpart
+9329,9312,9329,9312,9312,exact,
+9311,9312,9311,9312,9312,exact,
+9312,9312,9312,9312,9312,exact,
+,931200,,,,derived,CH-specific subclass — no NACE counterpart
+8551,9313,8551,9313,,partial,
+9313,9313,9313,9313,,partial,
+,931300,,,,derived,CH-specific subclass — no NACE counterpart
+9329,9319,9329,9319,9319,exact,
+9319,9319,9319,9319,9319,exact,
+,931900,,,,derived,CH-specific subclass — no NACE counterpart
+931,932,931,932,932,exact,
+932,932,932,932,932,exact,
+823,932,823,932,932,exact,
+9321,9321,9321,9321,9321,exact,
+,932100,,,,derived,CH-specific subclass — no NACE counterpart
+9329,9329,9329,9329,9329,exact,
+9311,9329,9311,9329,9329,exact,
+9319,9329,9319,9329,9329,exact,
+9321,9329,9321,9329,9329,exact,
+8230,9329,8230,9329,9329,exact,
+,932900,,,,derived,CH-specific subclass — no NACE counterpart
+94,94,94,94,94,exact,
+941,941,941,941,941,exact,
+9411,9411,9411,9411,9411,exact,
+,941100,,,,derived,CH-specific subclass — no NACE counterpart
+9412,9412,9412,9412,9412,exact,
+,941200,,,,derived,CH-specific subclass — no NACE counterpart
+942,942,942,942,942,exact,
+9420,9420,9420,9420,9420,exact,
+,942000,,,,derived,CH-specific subclass — no NACE counterpart
+949,949,949,949,949,exact,
+9491,9491,9491,9491,9491,exact,
+,949101,,,,derived,CH-specific subclass — no NACE counterpart
+,949102,,,,derived,CH-specific subclass — no NACE counterpart
+9492,9492,9492,9492,9492,exact,
+,949200,,,,derived,CH-specific subclass — no NACE counterpart
+9499,9499,9499,9499,9499,exact,
+,949901,,,,derived,CH-specific subclass — no NACE counterpart
+,949902,,,,derived,CH-specific subclass — no NACE counterpart
+,949903,,,,derived,CH-specific subclass — no NACE counterpart
+,949909,,,,derived,CH-specific subclass — no NACE counterpart
+82,95,82,95,95,exact,
+95,95,95,95,95,exact,
+951,951,951,951,951,exact,
+,9510,,9510,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,951000,,,,derived,CH-specific subclass — no NACE counterpart
+952,952,952,952,952,exact,
+9521,9521,9521,9521,9521,exact,
+,952100,,,,derived,CH-specific subclass — no NACE counterpart
+9522,9522,9522,9522,9522,exact,
+,952200,,,,derived,CH-specific subclass — no NACE counterpart
+9523,9523,9523,9523,9523,exact,
+,952300,,,,derived,CH-specific subclass — no NACE counterpart
+9524,9524,9524,9524,9524,exact,
+,952400,,,,derived,CH-specific subclass — no NACE counterpart
+9525,9525,9525,9525,,partial,
+,952500,,,,derived,CH-specific subclass — no NACE counterpart
+9529,9529,9529,9529,9529,exact,
+,952900,,,,derived,CH-specific subclass — no NACE counterpart
+,953,,953,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9531,,9531,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,953101,,,,derived,CH-specific subclass — no NACE counterpart
+,953102,,,,derived,CH-specific subclass — no NACE counterpart
+,9532,,9532,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,953200,,,,derived,CH-specific subclass — no NACE counterpart
+829,954,829,954,,partial,
+8299,9540,8299,9540,,partial,
+,954000,,,,derived,CH-specific subclass — no NACE counterpart
+81,96,81,96,96,exact,
+82,96,82,96,96,exact,
+96,96,96,96,96,exact,
+,961,,961,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9610,,9610,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,961000,,,,derived,CH-specific subclass — no NACE counterpart
+,962,,962,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9621,,9621,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,962100,,,,derived,CH-specific subclass — no NACE counterpart
+,9622,,9622,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,962200,,,,derived,CH-specific subclass — no NACE counterpart
+,9623,,9623,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,962300,,,,derived,CH-specific subclass — no NACE counterpart
+,963,,963,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,9630,,9630,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,963000,,,,derived,CH-specific subclass — no NACE counterpart
+829,964,829,964,,partial,
+8299,9640,8299,9640,,partial,
+,964000,,,,derived,CH-specific subclass — no NACE counterpart
+812,969,812,969,,partial,
+8121,9691,8121,9691,,partial,
+,969100,,,,derived,CH-specific subclass — no NACE counterpart
+,9699,,9699,,partial,no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1
+,969900,,,,derived,CH-specific subclass — no NACE counterpart
+97,97,97,97,97,exact,
+970,970,970,970,970,exact,
+9700,9700,9700,9700,9700,exact,
+,970000,,,,derived,CH-specific subclass — no NACE counterpart
+98,98,98,98,98,exact,
+981,981,981,981,981,exact,
+9810,9810,9810,9810,9810,exact,
+,981000,,,,derived,CH-specific subclass — no NACE counterpart
+982,982,982,982,982,exact,
+9820,9820,9820,9820,9820,exact,
+,982000,,,,derived,CH-specific subclass — no NACE counterpart
+99,99,99,99,99,exact,
+990,990,990,990,990,exact,
+9900,9900,9900,9900,9900,exact,
+,990001,,,,derived,CH-specific subclass — no NACE counterpart
+,990002,,,,derived,CH-specific subclass — no NACE counterpart

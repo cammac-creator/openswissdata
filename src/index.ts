@@ -9,6 +9,7 @@ import { stripeWebhookRoute } from "./routes/stripe-webhook.js";
 import { authRoute } from "./routes/auth.js";
 import { accountRoute } from "./routes/account.js";
 import { downloadRoute, publicDownload } from "./routes/download.js";
+import { mcpRoute } from "./routes/mcp/index.js";
 import { loadEnv } from "./env.js";
 
 export function createApp() {
@@ -23,6 +24,10 @@ export function createApp() {
   app.route("/api/account", accountRoute);
   app.route("/api", downloadRoute);      // serves /api/account/download-request
   app.route("/api", publicDownload);     // serves /api/download/:token
+
+  // --- MCP server (mcp.openswissdata.com / openswissdata.com/mcp/*) ---
+  // MUST be mounted BEFORE the static catch-all below.
+  app.route("/mcp", mcpRoute);
 
   // --- Static Astro frontend ---
   // web/dist is relative to repo root (Railway runs node dist/index.js from root)
