@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Audit complet · openswissdata.com — 2026-04-30</title>
+<style>
+  :root {
+    --bg-0: #0a0b0f;
+    --bg-1: #11131a;
+    --bg-2: #1a1d27;
+    --bg-3: #232734;
+    --line: #2c3242;
+    --ink-0: #f4f5f9;
+    --ink-1: #c8ccd8;
+    --ink-2: #8a91a4;
+    --ink-3: #5b6377;
+    --red: #e8504e;
+    --orange: #f5a623;
+    --green: #4caf7d;
+    --blue: #4a8cff;
+    --purple: #a073f0;
+    --gold: #d4a64a;
+    --swiss: #d52b1e;
+    --grad: linear-gradient(135deg, #d52b1e 0%, #d4a64a 100%);
+    --grad-dark: linear-gradient(180deg, rgba(213, 43, 30, 0.15), transparent);
+    --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+    --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.4), 0 16px 48px rgba(0, 0, 0, 0.3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg-0);
+    color: var(--ink-1);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    font-feature-settings: "ss01", "cv01", "cv02";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Layout */
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+  section { padding: 80px 0; border-bottom: 1px solid var(--line); }
+  section:last-child { border-bottom: none; }
+  h1, h2, h3, h4 { color: var(--ink-0); font-weight: 600; letter-spacing: -0.02em; }
+  h1 { font-size: 56px; line-height: 1.05; letter-spacing: -0.04em; }
+  h2 { font-size: 36px; line-height: 1.2; margin-bottom: 12px; }
+  h3 { font-size: 22px; line-height: 1.3; margin-bottom: 8px; }
+  h4 { font-size: 16px; line-height: 1.4; margin-bottom: 6px; }
+  p { color: var(--ink-1); margin-bottom: 12px; }
+  small { color: var(--ink-2); font-size: 13px; }
+  code, .mono { font-family: "JetBrains Mono", "SF Mono", Menlo, monospace; font-size: 13px; }
+  .mono { color: var(--gold); }
+  a { color: var(--blue); text-decoration: none; border-bottom: 1px dotted var(--blue); }
+  a:hover { color: var(--ink-0); border-bottom-color: var(--ink-0); }
+
+  /* Hero */
+  .hero {
+    padding: 100px 0 80px;
+    background:
+      radial-gradient(1200px 600px at 50% -100px, rgba(213, 43, 30, 0.18) 0%, transparent 60%),
+      radial-gradient(800px 400px at 90% 10%, rgba(212, 166, 74, 0.10) 0%, transparent 60%),
+      var(--bg-0);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+  .hero .container { position: relative; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 11px; letter-spacing: 0.08em; font-weight: 600;
+    color: var(--ink-2); text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 8px var(--orange);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .hero h1 { margin-bottom: 24px; max-width: 900px; }
+  .hero h1 .accent { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero .lead { font-size: 19px; color: var(--ink-1); max-width: 760px; margin-bottom: 40px; }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--ink-2);
+  }
+  .hero-meta strong { color: var(--ink-0); display: block; font-size: 22px; font-weight: 600; margin-bottom: 2px; }
+
+  /* Stats grid */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-top: 48px;
+  }
+  .stat {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 22px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat:hover { transform: translateY(-2px); border-color: var(--ink-3); }
+  .stat .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); margin-bottom: 8px; }
+  .stat .value { font-size: 32px; font-weight: 700; color: var(--ink-0); letter-spacing: -0.02em; line-height: 1; }
+  .stat .sub { font-size: 12px; color: var(--ink-2); margin-top: 6px; }
+  .stat.green .value { color: var(--green); }
+  .stat.orange .value { color: var(--orange); }
+  .stat.red .value { color: var(--red); }
+  .stat.blue .value { color: var(--blue); }
+
+  /* TOC */
+  .toc {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-top: 56px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px 32px;
+  }
+  .toc h4 { grid-column: 1 / -1; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 8px; }
+  .toc a { display: block; padding: 6px 0; font-size: 14px; color: var(--ink-1); border: none; }
+  .toc a:hover { color: var(--gold); }
+  .toc a .num { display: inline-block; width: 28px; color: var(--ink-3); font-family: var(--mono); font-size: 12px; }
+
+  /* Score radar */
+  .scores {
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: center;
+  }
+  .score-list { display: flex; flex-direction: column; gap: 14px; }
+  .score-item {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 20px;
+    align-items: center;
+  }
+  .score-name { font-weight: 600; color: var(--ink-0); font-size: 14px; }
+  .score-name small { display: block; color: var(--ink-2); font-weight: 400; font-size: 12px; margin-top: 2px; }
+  .score-bar { background: var(--bg-3); height: 8px; border-radius: 999px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 999px; transition: width 1s ease-out; }
+  .score-value { font-weight: 700; font-size: 16px; min-width: 50px; text-align: right; font-family: var(--mono); }
+  .score-fill-green { background: linear-gradient(90deg, #4caf7d, #6bcc97); }
+  .score-fill-orange { background: linear-gradient(90deg, #f5a623, #f7be5a); }
+  .score-fill-red { background: linear-gradient(90deg, #e8504e, #ee7472); }
+  .score-fill-blue { background: linear-gradient(90deg, #4a8cff, #6ea4ff); }
+
+  /* Radar SVG */
+  .radar-wrapper {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .radar-svg { width: 100%; height: auto; max-width: 420px; }
+
+  /* Bloqueurs grid */
+  .blockers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .blocker {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--ink-3);
+    border-radius: 10px;
+    padding: 20px 22px;
+    position: relative;
+  }
+  .blocker.crit { border-left-color: var(--red); background: linear-gradient(90deg, rgba(232, 80, 78, 0.08), transparent); }
+  .blocker.warn { border-left-color: var(--orange); background: linear-gradient(90deg, rgba(245, 166, 35, 0.06), transparent); }
+  .blocker .num {
+    position: absolute; top: 16px; right: 20px;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+    background: var(--bg-2); padding: 2px 8px; border-radius: 4px;
+  }
+  .blocker h4 { font-size: 15px; margin-bottom: 6px; padding-right: 50px; }
+  .blocker p { font-size: 13px; color: var(--ink-2); margin: 0; }
+  .blocker .meta { display: flex; gap: 12px; margin-top: 10px; font-size: 11px; color: var(--ink-3); }
+  .blocker .meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+  /* Phases */
+  .phases { display: flex; flex-direction: column; gap: 20px; margin-top: 32px; }
+  .phase {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .phase:hover { border-color: var(--ink-3); }
+  .phase-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 24px;
+    align-items: center;
+    padding: 22px 28px;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .phase-num {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gold);
+    min-width: 48px;
+  }
+  .phase-title { font-size: 18px; color: var(--ink-0); margin: 0; }
+  .phase-title small { display: block; font-size: 12px; color: var(--ink-2); font-weight: 400; margin-top: 2px; }
+  .phase-effort {
+    text-align: right;
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+  .phase-effort strong { display: block; font-size: 18px; color: var(--ink-0); }
+  .phase-status {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .phase-status.todo { background: rgba(232, 80, 78, 0.15); color: var(--red); }
+  .phase-status.next { background: rgba(245, 166, 35, 0.15); color: var(--orange); }
+  .phase-status.queued { background: rgba(74, 140, 255, 0.15); color: var(--blue); }
+  .phase-status.future { background: rgba(160, 115, 240, 0.12); color: var(--purple); }
+  .phase-body { padding: 24px 28px; }
+  .phase-why { background: var(--bg-2); padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: var(--ink-1); border-left: 3px solid var(--gold); }
+  .phase-why strong { color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; display: block; margin-bottom: 4px; }
+  .phase-actions { list-style: none; counter-reset: action; }
+  .phase-actions li {
+    counter-increment: action;
+    padding: 10px 0 10px 36px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .phase-actions li:last-child { border-bottom: none; }
+  .phase-actions li::before {
+    content: counter(action);
+    position: absolute; left: 0; top: 12px;
+    width: 22px; height: 22px;
+    background: var(--bg-3);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-1);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .phase-actions li code { background: var(--bg-3); padding: 1px 6px; border-radius: 4px; color: var(--gold); }
+  .phase-actions li strong { color: var(--ink-0); }
+
+  /* Concurrence matrix */
+  .matrix {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 32px;
+    margin-top: 32px;
+    position: relative;
+    height: 560px;
+  }
+  .matrix-axes {
+    position: absolute; inset: 60px 60px 60px 80px;
+  }
+  .matrix-axis-x, .matrix-axis-y {
+    position: absolute;
+    background: var(--line);
+  }
+  .matrix-axis-x { bottom: 0; left: 0; right: 0; height: 1px; }
+  .matrix-axis-y { top: 0; bottom: 0; left: 50%; width: 1px; }
+  .matrix-axis-h { position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--line); border-top: 1px dashed var(--line); }
+  .matrix-axis-v { position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--line); }
+  .matrix-label {
+    position: absolute;
+    font-size: 11px;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .matrix-label.x-left { bottom: -32px; left: 0; }
+  .matrix-label.x-right { bottom: -32px; right: 0; }
+  .matrix-label.y-top { top: -28px; left: 50%; transform: translateX(-50%); }
+  .matrix-label.y-bottom { bottom: -28px; left: 50%; transform: translateX(-50%); }
+  .matrix-actor {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-size: 12px;
+    color: var(--ink-1);
+    white-space: nowrap;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .matrix-actor:hover { background: var(--bg-3); border-color: var(--ink-3); transform: translate(-50%, -50%) scale(1.05); z-index: 10; }
+  .matrix-actor.us {
+    background: var(--grad);
+    border: none;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(213, 43, 30, 0.4);
+    padding: 7px 14px;
+  }
+  .matrix-actor.us::after {
+    content: "★";
+    position: absolute;
+    top: -8px; right: -6px;
+    background: var(--gold);
+    color: var(--bg-0);
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Concurrents table */
+  .concurrent-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .concurrent {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+  }
+  .concurrent h4 { font-size: 14px; margin: 0 0 4px; }
+  .concurrent p { font-size: 12px; color: var(--ink-2); margin: 0; }
+  .threat {
+    font-family: var(--mono); font-weight: 700; font-size: 16px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-3);
+  }
+  .threat-1 { color: var(--green); background: rgba(76, 175, 125, 0.15); }
+  .threat-2 { color: var(--green); background: rgba(76, 175, 125, 0.12); }
+  .threat-3 { color: var(--orange); background: rgba(245, 166, 35, 0.15); }
+  .threat-4 { color: var(--red); background: rgba(232, 80, 78, 0.18); }
+  .threat-5 { color: var(--red); background: rgba(232, 80, 78, 0.25); }
+
+  /* Pricing strategy */
+  .pricing-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 32px;
+    background: var(--bg-1);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .pricing-table th, .pricing-table td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .pricing-table th {
+    background: var(--bg-2);
+    color: var(--ink-2);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .pricing-table tr:last-child td { border-bottom: none; }
+  .pricing-table tr.new { background: rgba(212, 166, 74, 0.05); }
+  .pricing-table .skubadge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .pricing-table .badge-active { background: rgba(76, 175, 125, 0.15); color: var(--green); }
+  .pricing-table .badge-locked { background: rgba(232, 80, 78, 0.15); color: var(--red); }
+  .pricing-table .badge-new { background: rgba(212, 166, 74, 0.18); color: var(--gold); }
+  .pricing-table .badge-warn { background: rgba(245, 166, 35, 0.15); color: var(--orange); }
+  .pricing-table strong { color: var(--ink-0); }
+
+  /* Findings boxes */
+  .finding-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 32px;
+  }
+  .finding {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px 26px;
+  }
+  .finding-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .finding-icon { font-size: 22px; }
+  .finding h3 { font-size: 17px; margin: 0; }
+  .finding ul { list-style: none; margin: 0; padding: 0; }
+  .finding ul li {
+    padding: 8px 0 8px 24px;
+    position: relative;
+    font-size: 13px;
+    color: var(--ink-1);
+    line-height: 1.55;
+  }
+  .finding ul li::before {
+    content: "▸";
+    position: absolute; left: 0; top: 8px;
+    color: var(--ink-3);
+  }
+  .finding ul li strong { color: var(--ink-0); }
+  .finding ul li.crit::before { color: var(--red); content: "●"; }
+  .finding ul li.warn::before { color: var(--orange); content: "●"; }
+  .finding ul li.ok::before { color: var(--green); content: "●"; }
+
+  /* Decision boxes */
+  .decisions {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 32px;
+  }
+  .decision {
+    background: linear-gradient(180deg, var(--bg-1), var(--bg-0));
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 28px 26px;
+    position: relative;
+  }
+  .decision::before {
+    content: "";
+    position: absolute; top: 0; left: 24px; right: 24px; height: 2px;
+    background: var(--grad);
+    border-radius: 0 0 4px 4px;
+  }
+  .decision .num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  .decision h3 { font-size: 17px; margin-bottom: 10px; }
+  .decision p { font-size: 13px; color: var(--ink-2); margin: 0; }
+
+  /* Closing */
+  .closing {
+    background:
+      radial-gradient(800px 400px at 50% 50%, rgba(213, 43, 30, 0.12) 0%, transparent 70%),
+      var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 56px 48px;
+    margin-top: 32px;
+    text-align: center;
+  }
+  .closing h2 { font-size: 28px; margin-bottom: 16px; }
+  .closing p { max-width: 720px; margin: 0 auto 12px; font-size: 16px; }
+  .closing .target {
+    display: inline-flex; align-items: center; gap: 12px;
+    margin-top: 24px;
+    padding: 12px 20px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 14px; font-weight: 600;
+    color: var(--gold);
+  }
+  .closing .target .arrow { color: var(--ink-3); }
+
+  /* Footer */
+  footer {
+    padding: 40px 0;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 12px;
+  }
+  footer .mono { color: var(--ink-2); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    h1 { font-size: 36px; }
+    h2 { font-size: 26px; }
+    .stats, .blockers, .concurrent-grid, .finding-grid, .decisions { grid-template-columns: 1fr; }
+    .scores { grid-template-columns: 1fr; }
+    .radar-wrapper { display: none; }
+    .toc { grid-template-columns: 1fr; }
+    .score-item { grid-template-columns: 1fr; gap: 8px; }
+    .phase-header { grid-template-columns: 1fr; gap: 12px; text-align: left; }
+    .matrix { height: 700px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">
+      <span class="dot"></span>
+      Audit complet · 7 agents en parallèle · 2026-04-30
+    </span>
+    <h1>openswissdata.com<br><span class="accent">audit complet & roadmap optimale</span></h1>
+    <p class="lead">
+      Analyse approfondie code, sécurité, ETL, légal, conversion, infra et concurrence.
+      Verdict honnête, bloqueurs identifiés, roadmap argumentée sur 6 semaines pour atteindre les 5 premières ventes.
+    </p>
+    <div class="hero-meta">
+      <div><strong>~1300</strong>fichiers analysés</div>
+      <div><strong>7</strong>axes audités en parallèle</div>
+      <div><strong>10</strong>bloqueurs identifiés</div>
+      <div><strong>6.5/10</strong>score global de santé</div>
+      <div><strong>5-7j</strong>jusqu'au lancement TARES-only</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat green">
+        <div class="label">Tests passants</div>
+        <div class="value">232<small style="color: var(--ink-3); font-weight: 400;">/234</small></div>
+        <div class="sub">2 fails MCP non bloquants</div>
+      </div>
+      <div class="stat green">
+        <div class="label">Latence p50</div>
+        <div class="value">88<small style="color: var(--ink-3); font-weight: 400;">ms</small></div>
+        <div class="sub">Excellent · Railway eu-west4</div>
+      </div>
+      <div class="stat orange">
+        <div class="label">Vulnérabilités npm</div>
+        <div class="value">12</div>
+        <div class="sub">4 critical (devDeps), 1 high, 7 mod</div>
+      </div>
+      <div class="stat red">
+        <div class="label">Bloqueurs critiques</div>
+        <div class="value">5</div>
+        <div class="sub">DB sync, backup, OAuth secret, garantie 10×, SKUs sans permission</div>
+      </div>
+    </div>
+
+    <div class="toc">
+      <h4>Sommaire</h4>
+      <a href="#scores"><span class="num">01</span>Score de santé par axe</a>
+      <a href="#bloqueurs"><span class="num">02</span>Top 10 bloqueurs prioritaires</a>
+      <a href="#findings"><span class="num">03</span>Findings clés par axe</a>
+      <a href="#roadmap"><span class="num">04</span>Roadmap 6 semaines</a>
+      <a href="#concurrence"><span class="num">05</span>Positionnement concurrentiel</a>
+      <a href="#pricing"><span class="num">06</span>Stratégie de pricing</a>
+      <a href="#decisions"><span class="num">07</span>3 décisions structurantes</a>
+      <a href="#verdict"><span class="num">08</span>Verdict consolidé</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCORES ============ -->
+<section id="scores">
+  <div class="container">
+    <h2>Score de santé par axe</h2>
+    <p style="color: var(--ink-2); max-width: 700px; margin-bottom: 40px;">
+      Notes attribuées par les 7 agents spécialisés sur la base de l'inspection des sources, des tests automatisés, des configurations live, et des correspondances légales archivées.
+    </p>
+
+    <div class="scores">
+      <div class="score-list">
+        <div class="score-item">
+          <div class="score-name">Code applicatif <small>Hono routes, lib, db, MCP</small></div>
+          <div class="score-bar"><div class="score-bar-fill score-fill-green" style="width: 75%;"></div></div>
+          <div class="score-value" style="color: var(--green);">7.5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-name">Sécurité <small>Auth, webhook, R2, CORS, secrets</small></div>
+          <div class="score-bar"><div class="score-bar-fill score-fill-orange" style="width: 65%;"></div></div>
+          <div class="score-value" style="color: var(--orange);">6.5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-name">ETL & Datasets <small>TARES, Classifications, FINMA</small></div>
+          <div class="score-bar"><div class="score-bar-fill score-fill-orange" style="width: 70%;"></div></div>
+          <div class="score-value" style="color: var(--orange);">7.0</div>
+        </div>
+        <div class="score-item">
+          <div class="score-name">Légal & Compliance <small>BAZG, BFS, FINMA, CGV, marque</small></div>
+          <div class="score-bar"><div class="score-bar-fill score-fill-red" style="width: 40%;"></div></div>
+          <div class="score-value" style="color: var(--red);">4.0</div>
+        </div>
+        <div class="score-item">
+          <div class="score-name">Landing & Conversion <small>Hero, trust, FAQ, i18n, légal</small></div>
+          <div class="score-bar"><div class="score-bar-fill score-fill-orange" style="width: 60%;"></div></div>
+          <div class="score-value" style="color: var(--orange);">6.0</div>
+        </div>
+        <div class="score-item">
+          <div class="score-name">Infra & E2E <small>Health, monitoring, backup, CI/CD</small></div>
+          <div class="score-bar"><div class="score-bar-fill score-fill-orange" style="width: 65%;"></div></div>
+          <div class="score-value" style="color: var(--orange);">6.5</div>
+        </div>
+        <div class="score-item">
+          <div class="score-name">Position concurrentielle <small>vs 14 acteurs CH + global</small></div>
+          <div class="score-bar"><div class="score-bar-fill score-fill-green" style="width: 80%;"></div></div>
+          <div class="score-value" style="color: var(--green);">8.0</div>
+        </div>
+      </div>
+
+      <div class="radar-wrapper">
+        <svg class="radar-svg" viewBox="0 0 400 400">
+          <!-- Grid -->
+          <g fill="none" stroke="#2c3242" stroke-width="1">
+            <polygon points="200,40 340,140 290,300 110,300 60,140" />
+            <polygon points="200,80 305,160 268,275 132,275 95,160" />
+            <polygon points="200,120 270,180 246,250 154,250 130,180" />
+            <polygon points="200,160 235,200 224,225 176,225 165,200" />
+          </g>
+          <!-- Axes -->
+          <g stroke="#2c3242" stroke-width="1">
+            <line x1="200" y1="200" x2="200" y2="40" />
+            <line x1="200" y1="200" x2="340" y2="140" />
+            <line x1="200" y1="200" x2="290" y2="300" />
+            <line x1="200" y1="200" x2="110" y2="300" />
+            <line x1="200" y1="200" x2="60" y2="140" />
+          </g>
+          <!-- Score polygon (5 axes — main scores) -->
+          <polygon points="200,80 280,150 245,275 138,260 81,148"
+                   fill="rgba(213, 43, 30, 0.20)"
+                   stroke="#d52b1e" stroke-width="2" />
+          <!-- Points on polygon -->
+          <g fill="#d4a64a">
+            <circle cx="200" cy="80" r="4" /><!-- Code 7.5 -->
+            <circle cx="280" cy="150" r="4" /><!-- Position 8.0 -->
+            <circle cx="245" cy="275" r="4" /><!-- ETL 7.0 -->
+            <circle cx="138" cy="260" r="4" /><!-- Sécurité 6.5 -->
+            <circle cx="81" cy="148" r="4" /><!-- Légal 4.0 -->
+          </g>
+          <!-- Labels -->
+          <g fill="#c8ccd8" font-size="11" font-family="-apple-system, sans-serif" text-anchor="middle">
+            <text x="200" y="28">Code 7.5</text>
+            <text x="350" y="135">Position 8.0</text>
+            <text x="296" y="320">ETL 7.0</text>
+            <text x="100" y="320">Sécurité 6.5</text>
+            <text x="50" y="135">Légal 4.0</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BLOQUEURS ============ -->
+<section id="bloqueurs">
+  <div class="container">
+    <h2>Top 10 bloqueurs prioritaires</h2>
+    <p style="color: var(--ink-2); max-width: 700px; margin-bottom: 24px;">
+      Classés par criticité & blast radius. Les 5 premiers empêchent toute vente saine. Les 5 suivants exploitables après la première vente.
+    </p>
+
+    <div class="blockers">
+      <div class="blocker crit">
+        <span class="num">#1</span>
+        <h4>Désync DB TARES</h4>
+        <p>La table <code>versions</code> pointe sur le fixture 5 lignes alors que <code>tares-2026.04.30.1.zip</code> (7 511 lignes, 14.5 MB) attend en disque. <strong>Le 1er acheteur reçoit le fixture, pas le vrai dataset.</strong></p>
+        <div class="meta"><span>🔴 Catastrophique</span><span>· Effort 30 min</span><span>· Axe ETL</span></div>
+      </div>
+      <div class="blocker crit">
+        <span class="num">#2</span>
+        <h4>Backup SQLite absent</h4>
+        <p>Si le volume Railway corrompt = <strong>perte totale</strong> customers + entitlements + orders. Aucun script de backup, aucun dump périodique vers R2.</p>
+        <div class="meta"><span>🔴 Catastrophique</span><span>· Effort 1-2h</span><span>· Axe Infra</span></div>
+      </div>
+      <div class="blocker crit">
+        <span class="num">#3</span>
+        <h4>OAUTH_SIGNING_SECRET non validé</h4>
+        <p>La var n'est ni dans <code>env.ts</code> ni dans <code>.env.example</code>. Le serveur démarre OK mais <strong>tout appel MCP/OAuth crashe en 500 silencieusement</strong>.</p>
+        <div class="meta"><span>🔴 MCP cassé</span><span>· Effort 15 min</span><span>· Axe Sécurité</span></div>
+      </div>
+      <div class="blocker crit">
+        <span class="num">#4</span>
+        <h4>Garantie 10× / 50k CHF sans assurance RC</h4>
+        <p>La page <code>provenance.astro</code> §5 promet une garantie d'exactitude 10× le prix avec plafond 50 000 CHF, <strong>sans assurance RC pro adossée</strong>. Engagement contractuel ferme = patrimoine personnel en risque.</p>
+        <div class="meta"><span>🔴 Risque patrimonial</span><span>· Effort 5 min</span><span>· Axe Légal</span></div>
+      </div>
+      <div class="blocker crit">
+        <span class="num">#5</span>
+        <h4>SKUs Classifications + FINMA actifs sans permission écrite</h4>
+        <p>OFS et FINMA <strong>n'ont pas répondu</strong> aux demandes du 17/04. Vendre ces datasets aujourd'hui = exposition LCD art. 5 (revente sans droit du travail d'autrui) + risque civil entités FINMA listées.</p>
+        <div class="meta"><span>🔴 Risque LCD</span><span>· Effort 30 min</span><span>· Axe Légal</span></div>
+      </div>
+      <div class="blocker warn">
+        <span class="num">#6</span>
+        <h4>Download tokens rejouables 48h</h4>
+        <p><code>download.ts:62-74</code> met à jour <code>used_at</code> mais ne le lit jamais. Token réutilisable indéfiniment dans la fenêtre 48h. Pas de recheck entitlement → refund Stripe contournable.</p>
+        <div class="meta"><span>🟡 Exploitable</span><span>· Effort 30 min</span><span>· Axe Sécurité</span></div>
+      </div>
+      <div class="blocker warn">
+        <span class="num">#7</span>
+        <h4>Self-purchase LIVE jamais testé</h4>
+        <p>Stripe LIVE actif depuis le 25/04 (7 prix LIVE + webhook LIVE). Mais <code>preflight-15</code> n'existe pas → <strong>aucune vraie carte n'a déclenché le flow complet</strong>. Bug payment caché possible.</p>
+        <div class="meta"><span>🟡 Inconnue</span><span>· Effort 1h</span><span>· Axe Infra</span></div>
+      </div>
+      <div class="blocker warn">
+        <span class="num">#8</span>
+        <h4>Naked root <code>openswissdata.com</code> cassé</h4>
+        <p><code>curl exit 6</code> sur l'apex. Pas de A record root, pas de redirect 301 → www. UX cassée + Google considère <code>www</code> et apex comme deux propriétés distinctes (split SEO).</p>
+        <div class="meta"><span>🟡 UX/SEO</span><span>· Effort 30 min</span><span>· Axe Infra</span></div>
+      </div>
+      <div class="blocker warn">
+        <span class="num">#9</span>
+        <h4>Bandeaux "premier brouillon" CGV + Privacy</h4>
+        <p>Les pages légales finissent par "Ce document est un premier brouillon produit automatiquement". <strong>Tue la confiance B2B en 2 secondes</strong> chez un compliance officer sceptique.</p>
+        <div class="meta"><span>🟡 Trust kill</span><span>· Effort 5 min</span><span>· Axe Conversion</span></div>
+      </div>
+      <div class="blocker warn">
+        <span class="num">#10</span>
+        <h4>SPF Resend non configuré</h4>
+        <p>Zone Infomaniak n'inclut pas <code>_spf.resend.com</code>. DMARC <code>p=reject</code> repose <strong>uniquement sur DKIM</strong>. Inbox placement fragile chez compliance officers de banques (politique stricte).</p>
+        <div class="meta"><span>🟡 Deliverability</span><span>· Effort 10 min</span><span>· Axe Infra</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINDINGS ============ -->
+<section id="findings">
+  <div class="container">
+    <h2>Findings clés par axe</h2>
+    <p style="color: var(--ink-2); max-width: 700px; margin-bottom: 24px;">
+      Sept rapports parallèles agrégés. Détail intégral disponible dans <code>docs/audit-2026-04-30/AUDIT-COMPLET.md</code>.
+    </p>
+
+    <div class="finding-grid">
+      <!-- CODE -->
+      <div class="finding">
+        <div class="finding-head">
+          <div>
+            <h3>Code applicatif</h3>
+            <small style="color: var(--ink-3);">24 fichiers · 232/234 tests passent</small>
+          </div>
+          <span class="finding-icon">🟢</span>
+        </div>
+        <ul>
+          <li class="ok"><strong>Architecture nette</strong>, types stricts, transactions sur webhook, scopes bien pensés, PKCE correct.</li>
+          <li class="crit"><strong>Webhook fail-fast prématuré</strong> : si un dataset perd <code>current_version</code>, toute la commande est rejetée, Stripe retry 24h+ → client paye sans entitlement.</li>
+          <li class="crit"><strong>Code mort dans <code>register.ts:70</code></strong> : ternaire <code>?: "free" : "free"</code> qui ment sur l'intention.</li>
+          <li class="warn"><strong>Pas de runner de migrations</strong> : <code>migrate.ts</code> absent, script package.json mort, schema dupliqué.</li>
+          <li class="warn"><strong>OAuth non testé</strong> : 0 test sur <code>register/authorize/token/revoke</code> + <code>quota.ts</code>. PKCE et hash tokens non couverts par CI.</li>
+          <li class="warn"><strong>Pas de cleanup TTL</strong> : sessions, magic-links, download_tokens expirés s'accumulent indéfiniment.</li>
+          <li class="warn">Pas de retry exponentiel sur Stripe / Resend / R2. Un blip réseau perd l'opération.</li>
+        </ul>
+      </div>
+
+      <!-- SÉCURITÉ -->
+      <div class="finding">
+        <div class="finding-head">
+          <div>
+            <h3>Sécurité</h3>
+            <small style="color: var(--ink-3);">12 vulns npm · headers absents</small>
+          </div>
+          <span class="finding-icon">🟡</span>
+        </div>
+        <ul>
+          <li class="ok">Bind params SQL partout, signature Stripe correcte, magic link cryptographiquement sain, OAuth tokens hashés HMAC-SHA256.</li>
+          <li class="crit"><code>OAUTH_SIGNING_SECRET</code> <strong>non déclaré</strong> dans le schéma Zod, ni dans <code>.env.example</code>. Crash silencieux runtime.</li>
+          <li class="crit">Download tokens <strong>multi-usage</strong> dans la fenêtre 48h (le <code>used_at</code> est mis à jour mais jamais lu).</li>
+          <li class="crit"><strong>Pas de recheck entitlement</strong> au redeem : refund Stripe contournable (token actif 48h après refund).</li>
+          <li class="warn"><strong>Aucun header de sécurité</strong> (CSP, HSTS, X-Frame-Options, Permissions-Policy, Referrer-Policy).</li>
+          <li class="warn">Aucun rate-limit sur <code>/api/checkout/start</code>, <code>/oauth/register</code>, <code>/api/admin/*</code>.</li>
+          <li class="warn">12 vulnérabilités <code>npm audit</code> : 4 critical (devDeps via @xenova/transformers), 1 high (xlsx ReDoS, no fix).</li>
+        </ul>
+      </div>
+
+      <!-- ETL -->
+      <div class="finding">
+        <div class="finding-head">
+          <div>
+            <h3>ETL & datasets</h3>
+            <small style="color: var(--ink-3);">3 pipelines · provenance Ed25519 + RFC-3161</small>
+          </div>
+          <span class="finding-icon">🟡</span>
+        </div>
+        <ul>
+          <li class="ok"><strong>TARES exemplaire</strong> : 7/7 conditions BAZG implémentées (<code>assertNoForbiddenFields()</code>, disclaimers DE/FR/EN, for Berne, jamais "officiel"). Permission BAZG-PERMISSION-2026-04-21-MICHAEL-BEER active.</li>
+          <li class="ok">Multi-format (CSV + Parquet + JSON + SQL + JSON Schema) sur les 3 datasets. Provenance signée Ed25519 + horodatage RFC-3161 freetsa.org.</li>
+          <li class="crit"><strong>Désync DB TARES</strong> : versions table = fixture 5 lignes, ZIP réel 7511 lignes attend en disque. À re-sync avant la moindre vente.</li>
+          <li class="crit"><strong>STATENT inclus dans Classifications Pro sans autorisation BFS</strong>. License <code>terms_by_ask</code>, BFS muet à J+13. Tier Pro = <strong>NON vendable</strong> en l'état.</li>
+          <li class="warn">Pricing <code>provenance.astro</code> annonce TARES Pro 899, FINMA Pro 699 — <strong>SKUs fantômes</strong> qui n'existent pas dans Stripe.</li>
+          <li class="warn">Pas de cron ETL automatisé : abonnements <em>updates</em> 120-160 CHF/an ne livreraient rien à 12 mois.</li>
+          <li class="ok">FINMA Standard : risque légal faible (registre public). Vendable. Tier Zefix Sync : 97% enrichis, OK.</li>
+        </ul>
+      </div>
+
+      <!-- LÉGAL -->
+      <div class="finding">
+        <div class="finding-head">
+          <div>
+            <h3>Légal & compliance</h3>
+            <small style="color: var(--ink-3);">10 axes · 2 bloqueurs · 5 à fixer</small>
+          </div>
+          <span class="finding-icon">🔴</span>
+        </div>
+        <ul>
+          <li class="crit"><strong>BFS et FINMA n'ont pas répondu</strong> aux demandes de revente commerciale envoyées le 17/04. Vendre <code>classifications_*</code> et <code>finma_*</code> = LCD art. 5.</li>
+          <li class="crit">Garantie <strong>10× le prix / plafond 50k CHF</strong> sans RC pro adossée = patrimoine perso d'Alain en risque (raison individuelle, responsabilité illimitée).</li>
+          <li class="crit"><strong>Risque marque</strong> : "openswissdata" vs "opendata.swiss" (portail officiel CH). Trademark check swissreg/EUIPO non documenté. Risque LCD art. 3 al. 1 lit. d.</li>
+          <li class="warn">CGV : <strong>référence LCD art. 1 erronée</strong> (cite la mauvaise loi pour le droit de rétractation B2B). Pas de clause sublicensing, pas de force majeure, pas d'exclusion dol/faute grave.</li>
+          <li class="warn">Impressum : <strong>placeholder IDE/UID visible client</strong>. À remplacer par "Non applicable, art. 36 ORC + art. 10 LTVA".</li>
+          <li class="warn">Aucune procédure d'incident juridique, aucune assurance RC pro souscrite, aucun avocat de référence pré-établi.</li>
+          <li class="ok">Privacy nLPD/RGPD : conforme (5 sous-traitants listés, SCC, durées, droits art. 25 + art. 15-22).</li>
+          <li class="ok">SDR Policy : exemplaire. Provenance.astro : meilleur trust signal du projet.</li>
+        </ul>
+      </div>
+
+      <!-- LANDING -->
+      <div class="finding">
+        <div class="finding-head">
+          <div>
+            <h3>Landing & conversion</h3>
+            <small style="color: var(--ink-3);">Design propre, funnel à finir</small>
+          </div>
+          <span class="finding-icon">🟡</span>
+        </div>
+        <ul>
+          <li class="ok">Design propre, citation BAZG (Michael Beer), schémas de données visibles, échantillons CSV téléchargeables, MCP playground.</li>
+          <li class="crit">Bandeaux <strong>"premier brouillon produit automatiquement"</strong> sur CGV et Privacy = trust kill instantané.</li>
+          <li class="crit">Hero générique : promesse pas claire en 5s, pas de "pour qui", CTA "Voir les datasets" trop faible.</li>
+          <li class="warn">Pill bundle <code>−25 %</code> incohérente : 997 → 799 = 19.86 % réel.</li>
+          <li class="warn">"Mises à jour mensuelles incluses" CTA final ≠ cadence réelle (hebdo TARES/FINMA, annuel Classifications).</li>
+          <li class="warn"><code>og-default.png</code> référencé mais absent → previews LinkedIn/Twitter/Slack toutes cassées.</li>
+          <li class="warn">Site <code>lang="fr"</code> mais anglais résiduel sur <code>/account</code> et <code>/blog/index</code>. Pas de version DE/EN, pas de hreflang.</li>
+          <li class="warn">Pas de logos clients, pas de témoignages, pas de "X clients servent déjà...". Aucune preuve sociale.</li>
+        </ul>
+      </div>
+
+      <!-- INFRA -->
+      <div class="finding">
+        <div class="finding-head">
+          <div>
+            <h3>Infra & E2E</h3>
+            <small style="color: var(--ink-3);">Stripe LIVE actif, mais 3 angles morts</small>
+          </div>
+          <span class="finding-icon">🟡</span>
+        </div>
+        <ul>
+          <li class="ok">Stripe LIVE actif depuis 25/04 (7 prix + webhook signé), Resend domaine vérifié, R2 bucket EU/Frankfurt, Plausible installé, latence p50 88 ms.</li>
+          <li class="crit"><strong>Backup SQLite absent</strong> = perte totale possible. Bloqueur absolu.</li>
+          <li class="crit">Self-purchase LIVE <strong>jamais testé</strong> : <code>preflight-15</code> manquant. Bug payment caché possible.</li>
+          <li class="crit">Health check <code>/api/health</code> superficiel — répond OK même si DB locked, R2 keys expirées, ou Stripe key révoquée.</li>
+          <li class="warn">Aucun monitoring (Sentry/Datadog/Logflare), aucun uptime monitor, aucune alerte webhook fail.</li>
+          <li class="warn">Naked root cassé. SPF Resend manquant. Aucun cron ETL automatisé. Aucun CI GitHub Actions.</li>
+          <li class="warn">Dashboard admin = 2 endpoints (seed, release). Pas de stats MRR / customers / orders / downloads.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ROADMAP ============ -->
+<section id="roadmap">
+  <div class="container">
+    <h2>Roadmap argumentée — 6 semaines</h2>
+    <p style="color: var(--ink-2); max-width: 700px; margin-bottom: 24px;">
+      Sur 10-15h/semaine (contrainte UIKER). Phase 0→4 = 6-7 semaines calendaires pour atteindre les 5 premières ventes TARES.
+    </p>
+
+    <div class="phases">
+      <!-- PHASE 0 -->
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">0</div>
+          <div>
+            <h3 class="phase-title">Kill Switch immédiat<small>Site défendable + 1 SKU vendable</small></h3>
+          </div>
+          <div class="phase-effort"><strong>~6h</strong>1-2 jours</div>
+          <span class="phase-status todo">À faire maintenant</span>
+        </div>
+        <div class="phase-body">
+          <div class="phase-why">
+            <strong>Pourquoi maintenant</strong>
+            Aujourd'hui n'importe quel acheteur expose Alain à un risque LCD art. 5 (Classifications/FINMA), ou télécharge un fixture 5 lignes (TARES). Le site affiche "premier brouillon" sur ses CGV. Lancement = impossible.
+          </div>
+          <ol class="phase-actions">
+            <li><strong>Désactiver SKUs Classifications + FINMA</strong> dans Stripe Live. Ne lancer commercialement que <code>tares_oneshot</code> (299 CHF) + <code>tares_updates</code> (120 CHF/an). Liste d'attente email pour les autres.</li>
+            <li><strong>Re-sync DB TARES</strong> : <code>BASE_URL=prod npm run etl:tares</code> ou SQL direct <code>UPDATE datasets SET current_version='2026.04.30.1'</code>.</li>
+            <li><strong>Retirer la garantie 10× / 50k CHF</strong> de <code>provenance.astro</code> §5. À réintroduire après souscription RC pro.</li>
+            <li><strong>Supprimer les bandeaux "premier brouillon"</strong> sur CGV et Privacy.</li>
+            <li><strong>Compléter Impressum</strong> : "Non applicable, art. 36 ORC. TVA non assujetti, art. 10 LTVA".</li>
+            <li><strong>Trademark check swissreg.ch + EUIPO</strong> sur openswissdata. Si libre, déposer marque verbale classes 9, 35, 42 (~550 CHF).</li>
+            <li><strong>Disclaimer "non-affilié à opendata.swiss"</strong> dans footer global, page index, Impressum.</li>
+            <li><strong>Sauvegarder l'email original BAZG</strong> Michael Beer en 3 exemplaires (Drive, GitHub privé, papier).</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- PHASE 1 -->
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">1</div>
+          <div>
+            <h3 class="phase-title">Sécurité hardening<small>Production-ready B2B sérieux</small></h3>
+          </div>
+          <div class="phase-effort"><strong>~12h</strong>2-3 jours</div>
+          <span class="phase-status next">Prochaine étape</span>
+        </div>
+        <div class="phase-body">
+          <div class="phase-why">
+            <strong>Pourquoi</strong>
+            12 vulnérabilités npm, aucun header de sécurité, OAuth crash silencieux, download tokens rejouables. Pas tous bloquants pour J+1, mais exploitables après la première vente.
+          </div>
+          <ol class="phase-actions">
+            <li>Ajouter <code>OAUTH_SIGNING_SECRET</code> au schéma Zod <code>src/env.ts</code> (≥32 chars en prod) + <code>.env.example</code> + Railway env.</li>
+            <li><strong>Single-use réel</strong> sur <code>download_tokens</code> : <code>WHERE token = ? AND used_at IS NULL</code> + assert <code>changes &gt; 0</code>.</li>
+            <li><strong>Recheck entitlement</strong> à chaque redeem : join <code>entitlements.updates_until &gt; now()</code>.</li>
+            <li><strong>Headers de sécurité globaux</strong> via <code>secureHeaders()</code> Hono : CSP, HSTS, X-Frame-Options, Referrer-Policy.</li>
+            <li><strong>Rate-limit</strong> <code>/api/checkout/start</code>, <code>/oauth/register</code>, <code>/api/admin/*</code> (10 req/min/IP).</li>
+            <li><strong>Webhook fail-safe</strong> : livrer ce qui peut l'être + alerter sur le manquant. Pas de 500 sur dataset orphelin.</li>
+            <li><strong>Cleanup TTL cron</strong> : purge sessions / magic-links / download_tokens / mcp_oauth_codes expirés.</li>
+            <li><strong>Retry email Resend</strong> avec backoff exponentiel (3 tentatives, 1s/3s/9s).</li>
+            <li><code>npm audit fix</code> sur fast-xml-parser. Documenter mitigation xlsx ReDoS.</li>
+            <li>Réécrire <code>register.ts:70</code> code mort en <code>const tier: Tier = "free";</code> avec commentaire d'intention.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- PHASE 2 -->
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">2</div>
+          <div>
+            <h3 class="phase-title">Infra production<small>Backupé, monitoré, alerté</small></h3>
+          </div>
+          <div class="phase-effort"><strong>~10h</strong>2 jours</div>
+          <span class="phase-status next">Prochaine étape</span>
+        </div>
+        <div class="phase-body">
+          <div class="phase-why">
+            <strong>Pourquoi</strong>
+            Aujourd'hui une corruption volume Railway = perte totale. Un secret R2 expiré = downloads silencieusement cassés. Naked root cassé. SPF sans Resend = inbox placement fragile chez compliance officers de banques.
+          </div>
+          <ol class="phase-actions">
+            <li><strong>Backup SQLite quotidien</strong> vers R2 (<code>scripts/backup-db.ts</code>, cron 03:00 UTC, retention 30j). Bloqueur absolu.</li>
+            <li><strong>Health check profond</strong> <code>/api/health/deep</code> : DB <code>SELECT 1</code> + R2 <code>headBucket</code> + Stripe <code>balance.retrieve</code>.</li>
+            <li><strong>UptimeRobot ou BetterStack</strong> ping <code>/api/health/deep</code> 5min + alerte Slack/email.</li>
+            <li><strong>Sentry SDK</strong> + DSN Railway env. Capture <code>console.error</code> webhook/stripe/email.</li>
+            <li><strong>Stripe Dashboard alerts</strong> : "Notify on failed webhook deliveries" + <code>payment_intent.payment_failed</code>.</li>
+            <li><strong>DNS naked root → www</strong> : Cloudflare CNAME flat OU A record + redirect 301 dans <code>src/index.ts</code>.</li>
+            <li><strong>SPF Resend</strong> : <code>v=spf1 include:spf.infomaniak.ch include:_spf.resend.com -all</code>.</li>
+            <li><strong>Cron ETL hebdo</strong> GitHub Actions <code>0 3 * * 1</code> + email Resend aux entitlements actifs.</li>
+            <li><strong>CI GitHub Actions</strong> <code>test.yml</code> : vitest + tsc --noEmit + astro build sur PR/main.</li>
+            <li><strong>Self-purchase LIVE end-to-end</strong> avec vraie carte sur les 4 SKUs. Documenter dans <code>preflight-15</code>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- PHASE 3 -->
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">3</div>
+          <div>
+            <h3 class="phase-title">Conversion & Trust<small>Landing convertit + cohérences</small></h3>
+          </div>
+          <div class="phase-effort"><strong>~25h</strong>5 jours</div>
+          <span class="phase-status queued">À suivre</span>
+        </div>
+        <div class="phase-body">
+          <div class="phase-why">
+            <strong>Pourquoi</strong>
+            Le site ne convertit pas un compliance officer sceptique. Hero générique, og-default.png absent, SKUs fantômes, anglais résiduel. Aucun logo client, aucun témoignage.
+          </div>
+          <ol class="phase-actions">
+            <li><strong>Hero refondu</strong> : promesse en 5s ("branchables en 15 minutes") + 3 personas + CTA primaire échantillon gratuit.</li>
+            <li><strong>3 sections "Pour qui"</strong> avec verbatims concrets data engineer / compliance officer / fondateur SaaS paie.</li>
+            <li><strong>Section "Pourquoi pas DIY ?"</strong> avec 4 arguments : format change, 5j-homme, LCD art. 5, ROI 1ère release.</li>
+            <li><strong>FAQ 8 questions</strong> : sources, légalité, fréquence, format change, vérification provenance, intégration ERP, refund, sur-mesure.</li>
+            <li><strong>Cohérences chiffrées</strong> : pill bundle <code>-25%</code> → <code>-20%</code>. "Mises à jour mensuelles" → cadence réelle.</li>
+            <li><strong>Retirer SKUs fantômes</strong> : TARES Pro 899, FINMA Pro 699 dans <code>provenance.astro</code>.</li>
+            <li><strong>Permission line corrigée</strong> : "BAZG (acquise) · OFS &amp; FINMA (autorisations en cours)".</li>
+            <li><strong>og-default.png 1200×630</strong> dans <code>web/public/</code>.</li>
+            <li><strong>JSON-LD Schema.org</strong> Organization + Product + Offer + FAQPage dans <code>BaseLayout.astro</code>.</li>
+            <li><strong>Traduire <code>/account</code> + <code>/blog/index</code></strong> en français.</li>
+            <li><strong>Refund 14j sans condition</strong> CGV §6 (au lieu de "si non téléchargé").</li>
+            <li><strong>CGV corrections juridiques</strong> : référence LCD art.1 → CO art.40a, exclusion dol/faute grave, sublicensing, force majeure.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- PHASE 4 -->
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">4</div>
+          <div>
+            <h3 class="phase-title">Distribution<small>Moat distribution, pas data</small></h3>
+          </div>
+          <div class="phase-effort"><strong>~50h</strong>3 semaines</div>
+          <span class="phase-status queued">À suivre</span>
+        </div>
+        <div class="phase-body">
+          <div class="phase-why">
+            <strong>Pourquoi</strong>
+            Les datasets sont copiables (sources publiques). Le moat = distribution + DX. Quatre canaux à activer en parallèle, faible coût, compatibles 10-15h/sem.
+          </div>
+          <ol class="phase-actions">
+            <li><strong>SEO programmatique</strong> : 200+ pages Astro <code>/codes/noga/XX-XX</code> avec libellés FR+DE+IT+EN, cross-walks NACE/ISIC.</li>
+            <li><strong>MCP marketplace</strong> : <code>@openswissdata/mcp</code> avec 4-5 tools, soumis à Smithery + MCP.so + awesome-mcp-servers. Early window 2026.</li>
+            <li><strong>Awesome-lists PRs</strong> : awesome-swiss-open-data, awesome-fintech-ch, awesome-mcp-servers, awesome-public-apis.</li>
+            <li><strong>Outbound LinkedIn</strong> : 10 personnes/jour × 5 jours = 50 messages. Échantillon 100 lignes en porte d'entrée.</li>
+            <li><strong>Partenariats 5 fiduciaires/cabinets CH</strong> : referral en échange dataset gratuit + commission 10-20%.</li>
+            <li><strong>Show HN / Product Hunt / Indie Hackers</strong> milestone.</li>
+            <li><strong>Reddit</strong> : r/dataengineering, r/switzerland, r/OpenData (samedi seulement).</li>
+            <li><strong>Newsletter contenu</strong> : changelog hebdomadaire en public sur openswissdata.com/blog. Modèle OpenSanctions.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- PHASE 5 -->
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">5</div>
+          <div>
+            <h3 class="phase-title">Réponses BFS/FINMA + Catalogue<small>Débloquer Classifications + FINMA + Compliance Pack</small></h3>
+          </div>
+          <div class="phase-effort"><strong>~80h</strong>2 mois</div>
+          <span class="phase-status future">M2-M3</span>
+        </div>
+        <div class="phase-body">
+          <div class="phase-why">
+            <strong>Pourquoi</strong>
+            LETA/UBO mi-2026 + Pillar Two 30 juin 2026 = calendrier réglementaire qui force les acheteurs. Si Phase 0→4 tenue, Phase 5 capture la vague.
+          </div>
+          <ol class="phase-actions">
+            <li>Relances v2 BFS et FINMA + téléphone direct si silence J+30 (058 463 60 11 / 031 327 91 00).</li>
+            <li>À réception réponse OFS : réactiver SKU <code>classifications_oneshot</code> Standard (sans STATENT).</li>
+            <li>À réception réponse FINMA : réactiver SKU <code>finma_oneshot</code> Standard (registre autorisés, pas warnings).</li>
+            <li><strong>Tier Compliance Pack 1990 CHF/an</strong> : FINMA + Sanctions SECO/OFAC/EU + Zefix Sync.</li>
+            <li><strong>Reprice TARES</strong> après 5 ventes : 299 → 499 standard / 899 Pro (changelog 12-24m, embeddings DE/IT/EN).</li>
+            <li>Datasets vague Q3 par TAM : <strong>LETA/UBO</strong> (TAM 600k entités), <strong>Pillar Two GIR</strong> (250 MNE × 20-100k CHF/an), <strong>DAC8/CARF</strong>, <strong>Charges sociales canton/commune</strong>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- PHASE 6 -->
+      <div class="phase">
+        <div class="phase-header">
+          <div class="phase-num">6</div>
+          <div>
+            <h3 class="phase-title">Scale & Hardening<small>RC pro, Postgres, pen-test</small></h3>
+          </div>
+          <div class="phase-effort"><strong>~100h</strong>3 mois</div>
+          <span class="phase-status future">M3-M6</span>
+        </div>
+        <div class="phase-body">
+          <div class="phase-why">
+            <strong>Pourquoi</strong>
+            Au-dessus de 100 clients ou 500 MB DB, SQLite atteint ses limites pratiques. Avant de vendre du Compliance Pack à 1990 CHF, l'assurance RC pro est non-négociable.
+          </div>
+          <ol class="phase-actions">
+            <li><strong>Migration Postgres Railway</strong> via Drizzle si DB &gt; 500 MB ou &gt; 100 clients.</li>
+            <li><strong>Pen-test externe</strong> par solo security researcher CH (~2k CHF) avant 1ère vente Pro.</li>
+            <li><strong>Souscrire assurance RC pro</strong> Generali/Helvetia (~300 CHF/an, 1M CHF couverture).</li>
+            <li><strong>Trademark deposit</strong> "openswissdata" classes 9, 35, 42 (~550 CHF) si check Phase 0 = libre.</li>
+            <li><strong>Plan B juridique</strong> : 1-2 avocats droit numérique CH identifiés, retainer 200 CHF/mois ou contact pré-établi.</li>
+            <li><strong>Webhooks customer</strong> : notification API quand FINMA registry diff change. ARPU élevé, sticky integration.</li>
+            <li><strong>Bundles régionaux</strong> : "Pack VD" (TARES + cantonal Vaud), "Pack ZH" (FINMA + cantonal ZH).</li>
+          </ol>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONCURRENCE ============ -->
+<section id="concurrence">
+  <div class="container">
+    <h2>Positionnement concurrentiel</h2>
+    <p style="color: var(--ink-2); max-width: 700px; margin-bottom: 24px;">
+      14 concurrents analysés (directs + adjacents). Le quadrant <strong>self-serve + data brute normalisée</strong> est vide pour la donnée CH structurée payante. Étoile polaire : OpenSanctions (Berlin, 14 employés, centaines de clients commerciaux, 90 pays, zéro investisseur).
+    </p>
+
+    <div class="matrix">
+      <div class="matrix-axes">
+        <div class="matrix-axis-h"></div>
+        <div class="matrix-axis-v"></div>
+      </div>
+      <div class="matrix-label x-left">◀ self-serve · pricing transparent</div>
+      <div class="matrix-label x-right">sales-led · devis ▶</div>
+      <div class="matrix-label y-top">▲ solution complète (UI/scoring)</div>
+      <div class="matrix-label y-bottom">▼ data brute normalisée</div>
+
+      <!-- Top half : solution complète -->
+      <div class="matrix-actor" style="top: 14%; left: 28%;">Moneyhouse</div>
+      <div class="matrix-actor" style="top: 18%; left: 78%;">D&B/Bisnode</div>
+      <div class="matrix-actor" style="top: 30%; left: 24%;">KYC Spider</div>
+      <div class="matrix-actor" style="top: 28%; left: 72%;">CRIF</div>
+      <div class="matrix-actor" style="top: 32%; left: 82%;">Creditreform</div>
+      <div class="matrix-actor" style="top: 38%; left: 88%;">Intrum</div>
+      <div class="matrix-actor" style="top: 38%; left: 28%;">FPRE / Novalytica</div>
+
+      <!-- Bottom half : data brute -->
+      <div class="matrix-actor" style="top: 60%; left: 22%;">Vatstack / vatify</div>
+      <div class="matrix-actor" style="top: 65%; left: 16%;">OpenSanctions</div>
+      <div class="matrix-actor" style="top: 70%; left: 13%;">Apify scrapers</div>
+      <div class="matrix-actor us" style="top: 78%; left: 23%;">openswissdata</div>
+      <div class="matrix-actor" style="top: 86%; left: 14%;">opendata.swiss</div>
+      <div class="matrix-actor" style="top: 86%; left: 10%;">SwissParliament</div>
+      <div class="matrix-actor" style="top: 90%; left: 64%;">BFS / AFC / BAZG / FINMA</div>
+    </div>
+
+    <p style="color: var(--ink-2); margin-top: 32px; font-size: 13px; text-align: center;">
+      <em>Lecture : openswissdata occupe la zone self-serve + data CH normalisée. Aucun incumbent payant n'y est. Apify scrapers (fragiles, zone grise légale) et opendata.swiss (gratuit, brut) sont les vraies alternatives → preuve qu'il y a une demande non satisfaite.</em>
+    </p>
+
+    <h3 style="margin-top: 64px;">Concurrents avec note de menace 1-5</h3>
+    <div class="concurrent-grid">
+      <div class="concurrent">
+        <div><h4>Moneyhouse <small style="color: var(--ink-3); font-weight: 400;">(NZZ Group · 13.6M$ ARR · 11-50 emp.)</small></h4><p>Marque grand public CH, devis opaque, ergonomie dev faible.</p></div>
+        <span class="threat threat-2">2</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>D&B / Bisnode <small style="color: var(--ink-3); font-weight: 400;">(720M CHF acquisition 2021 · ~150 emp. CH)</small></h4><p>Standard mondial KYC, contrats lourds, time-to-data 4-8 semaines.</p></div>
+        <span class="threat threat-3">3</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>CRIF AG Suisse <small style="color: var(--ink-3); font-weight: 400;">(28 emp. CH · groupe 896M$)</small></h4><p>Leader credit risk, focus banques, pas dev-friendly.</p></div>
+        <span class="threat threat-2">2</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>Creditreform Suisse <small style="color: var(--ink-3); font-weight: 400;">(200 emp. CH)</small></h4><p>SOAP vieillissant, sole traders + particuliers, pas REST moderne.</p></div>
+        <span class="threat threat-2">2</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>Intrum Suisse <small style="color: var(--ink-3); font-weight: 400;">(groupe 1.73Md$)</small></h4><p>Focus debt collection, peu de chevauchement direct.</p></div>
+        <span class="threat threat-1">1</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>OpenSanctions <small style="color: var(--ink-3); font-weight: 400;">(14 emp. Berlin · 595€/mo bulk · 90 pays)</small></h4><p><strong>Étoile polaire</strong>. Modèle exact à imiter : pricing transparent, open-core, MCP-first.</p></div>
+        <span class="threat threat-3">3</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>KYC Spider <small style="color: var(--ink-3); font-weight: 400;">(11 emp. Zurich · MME JV)</small></h4><p>Plateforme complète, ne vend pas data brute.</p></div>
+        <span class="threat threat-1">1</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>FPRE / Novalytica <small style="color: var(--ink-3); font-weight: 400;">(14.8M$ ARR)</small></h4><p>Real estate analytics CH, verticale distincte.</p></div>
+        <span class="threat threat-1">1</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>Apify scrapers <small style="color: var(--ink-3); font-weight: 400;">(self-serve · 5-50$/mo)</small></h4><p>Alternative quasi-gratuite. Fragile, zone grise TOS.</p></div>
+        <span class="threat threat-4">4</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>Vatstack / vatify <small style="color: var(--ink-3); font-weight: 400;">(freemium, dev-first)</small></h4><p>CH traité second-class. Templates techniques à imiter.</p></div>
+        <span class="threat threat-3">3</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>opendata.swiss <small style="color: var(--ink-3); font-weight: 400;">(officiel, gratuit, 10k+ datasets)</small></h4><p><strong>Vraie alternative gratuite à neutraliser</strong> sur la landing. Brut, non normalisé, pas de SLA.</p></div>
+        <span class="threat threat-4">4</span>
+      </div>
+      <div class="concurrent">
+        <div><h4>BFS · AFC · BAZG · FINMA <small style="color: var(--ink-3); font-weight: 400;">(officiel, gratuit)</small></h4><p>Sources amont. Le travail openswissdata = transformer en API REST.</p></div>
+        <span class="threat threat-1">1-2</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 64px;">3 menaces existentielles à 12 mois</h3>
+    <div class="finding-grid">
+      <div class="finding">
+        <div class="finding-head"><div><h3>Menace #1 — Pivot officiel dev-friendly</h3></div><span class="finding-icon">⚠️</span></div>
+        <ul>
+          <li class="warn"><strong>Le BFS (ou cantonal innovant comme Vaud / ETH)</strong> lance une API REST moderne unifiée avec auth + métering. Si gratuit, openswissdata devient redondant pour 80% des datasets simples.</li>
+          <li class="ok"><strong>Mitigation</strong> : positionner sur la valeur ajoutée normalisation + diff + SLA, pas data brute. Signer rapidement des early adopters payants pour stack long-term contracts.</li>
+        </ul>
+      </div>
+      <div class="finding">
+        <div class="finding-head"><div><h3>Menace #2 — OpenSanctions étend Swiss</h3></div><span class="finding-icon">⚠️</span></div>
+        <ul>
+          <li class="warn">OpenSanctions a déjà open-core, pricing transparent, dev-first. <strong>S'ils lancent "Swiss Companies"</strong> en miroir Zefix, ils peuvent capter le marché en 6 mois (compétences + distribution déjà là).</li>
+          <li class="ok"><strong>Mitigation</strong> : aller plus profond sur datasets non-entité où ils n'iraient pas (TARES, NOGA, charges sociales, immo parcellaire). Catalogue spécialisé CH.</li>
+        </ul>
+      </div>
+      <div class="finding">
+        <div class="finding-head"><div><h3>Menace #3 — Concurrent CH bien financé</h3></div><span class="finding-icon">⚠️</span></div>
+        <ul>
+          <li class="warn"><strong>Une startup data CH</strong> avec budget pourrait lancer un produit similaire en 3-6 mois. Indices à surveiller : levées seed data CH, side-projects ETHZ, positions "data product manager" chez fintechs.</li>
+          <li class="ok"><strong>Mitigation</strong> : moat de distribution (SEO programmatique + MCP marketplace + awesome-lists + partenariats fiduciaires) AVANT qu'ils émergent.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section id="pricing">
+  <div class="container">
+    <h2>Stratégie de pricing — révision recommandée</h2>
+    <p style="color: var(--ink-2); max-width: 700px; margin-bottom: 24px;">
+      Phase 0 : verrouille à <strong>TARES-only</strong>. Phase 5 (M3) : reprice + Compliance Pack. Cible 5 ventes TARES @299 = 1 495 CHF dans 30 jours = preuve marché.
+    </p>
+
+    <table class="pricing-table">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Prix actuel</th>
+          <th>Statut Phase 0</th>
+          <th>Cible M3 (post-réponses BFS/FINMA)</th>
+          <th>ARPU annuel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>TARES one-shot</strong></td>
+          <td>299 CHF</td>
+          <td><span class="skubadge badge-active">✅ Actif</span></td>
+          <td>499 standard / 899 Pro</td>
+          <td>299</td>
+        </tr>
+        <tr>
+          <td>TARES updates</td>
+          <td>120 CHF/an</td>
+          <td><span class="skubadge badge-active">✅ Actif</span></td>
+          <td>199 / 399</td>
+          <td>120-399</td>
+        </tr>
+        <tr>
+          <td><strong>Classifications one-shot</strong></td>
+          <td>399 CHF</td>
+          <td><span class="skubadge badge-locked">🔒 Pré-vente</span></td>
+          <td>399 standard / 999 Pro (avec STATENT si autorisé)</td>
+          <td>399</td>
+        </tr>
+        <tr>
+          <td>Classifications updates</td>
+          <td>160 CHF/an</td>
+          <td><span class="skubadge badge-locked">🔒 Pré-vente</span></td>
+          <td>160-499</td>
+          <td>160-499</td>
+        </tr>
+        <tr>
+          <td><strong>FINMA one-shot</strong></td>
+          <td>299 CHF</td>
+          <td><span class="skubadge badge-locked">🔒 Pré-vente</span></td>
+          <td>299 / 1290 Zefix Sync</td>
+          <td>299</td>
+        </tr>
+        <tr>
+          <td>FINMA updates</td>
+          <td>120 CHF/an</td>
+          <td><span class="skubadge badge-locked">🔒 Pré-vente</span></td>
+          <td>120-499</td>
+          <td>120-499</td>
+        </tr>
+        <tr>
+          <td><strong>Bundle one-shot</strong></td>
+          <td>799 CHF</td>
+          <td><span class="skubadge badge-warn">⚠️ Aligner pill</span></td>
+          <td>1490 (3 datasets + cross-walks + 1 an updates)</td>
+          <td>799-1490</td>
+        </tr>
+        <tr class="new">
+          <td><strong>Compliance Pack</strong> (NEW)</td>
+          <td>—</td>
+          <td><span class="skubadge badge-new">★ M3</span></td>
+          <td>1990 CHF/an : FINMA + Sanctions SECO/OFAC/EU + Zefix Sync</td>
+          <td>1990</td>
+        </tr>
+        <tr class="new">
+          <td><strong>LETA UBO</strong> (NEW · vague Q3)</td>
+          <td>—</td>
+          <td><span class="skubadge badge-new">★ M6</span></td>
+          <td>590 CHF/an, TAM 600k entités CH</td>
+          <td>590</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="color: var(--ink-2); margin-top: 24px; font-size: 13px;">
+      <strong>Cible 30 jours</strong> : 5 ventes TARES @299 CHF = 1 495 CHF revenu. Preuve de marché qui débloque la suite.<br>
+      <strong>Cible M3</strong> : 10 clients Compliance Pack @1990 CHF = 19 900 CHF ARR.<br>
+      <strong>Cible M6</strong> : LETA UBO + Pillar Two GIR + DAC8/CARF datasets activés. ARR potentiel 50-100 k CHF.
+    </p>
+  </div>
+</section>
+
+<!-- ============ DECISIONS ============ -->
+<section id="decisions">
+  <div class="container">
+    <h2>3 décisions structurantes à prendre maintenant</h2>
+    <p style="color: var(--ink-2); max-width: 700px; margin-bottom: 24px;">
+      Trois choix qui définissent les 6 prochains mois. Si elles sont prises maintenant, le reste suit naturellement.
+    </p>
+
+    <div class="decisions">
+      <div class="decision">
+        <div class="num">DÉCISION 01</div>
+        <h3>Lancer en TARES-only</h3>
+        <p>Plutôt qu'attendre les 3 datasets, lancer commercialement sur le seul SKU dont la permission de revente est <strong>écrite</strong> (BAZG-PERMISSION-2026-04-21-MICHAEL-BEER). Un signal de marché à 5 ventes vaut mille planifications. Même 1 495 CHF de revenu = la preuve qui débloque tout.</p>
+      </div>
+      <div class="decision">
+        <div class="num">DÉCISION 02</div>
+        <h3>Souscrire RC pro avant la 1ère vente Pro</h3>
+        <p>Generali / Helvetia / La Mobilière, ~300 CHF/an, 1M CHF couverture. C'est la condition pour réintroduire la garantie 10× et vendre un tier Compliance Pack à 1 990 CHF. Sans assurance, le patrimoine personnel d'Alain (raison individuelle = responsabilité illimitée) est en risque sur chaque garantie contractuelle.</p>
+      </div>
+      <div class="decision">
+        <div class="num">DÉCISION 03</div>
+        <h3>MCP server openswissdata = canal #1</h3>
+        <p>L'expertise IBANforge est déjà là. Packager <code>@openswissdata/mcp</code> en 1 jour = canal de distribution unique sur 6-12 mois (early window 2026). Touche directement la cible data engineer LLM-native (la tribu d'Alain). Modèle OpenSanctions appliqué : open-core + pricing transparent + MCP-first.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VERDICT ============ -->
+<section id="verdict">
+  <div class="container">
+    <div class="closing">
+      <h2>Verdict consolidé</h2>
+      <p>
+        openswissdata est <strong style="color: var(--gold);">plus avancé que la moitié des SaaS solo founder</strong> qui annoncent un MVP. Code 232/234 tests passants, latence 88ms p50, Stripe LIVE actif, infra opérationnelle, design propre, copywriting convaincant à 75%.
+      </p>
+      <p>
+        Le projet n'a pas un problème de build. Il a un problème de <strong style="color: var(--ink-0);">finition + dérisque</strong>. Phase 0 (kill switch immédiat) prend ~6h et débloque le lancement TARES-only. Phases 1-2 (sécurité + infra) prennent 2-3 jours chacune et amènent au niveau production-ready B2B.
+      </p>
+      <p>
+        Le calendrier réglementaire <strong>LETA/UBO mi-2026</strong> et <strong>Pillar Two 30 juin 2026</strong> fait le travail commercial. Si Phase 0→4 est tenue en 6-7 semaines, openswissdata atteint son premier palier (5-10 ventes) avant que la fenêtre LETA s'ouvre. Et là, tout change.
+      </p>
+      <div class="target">
+        <span class="arrow">→</span>
+        Cible immédiate : Phase 0 sous 48h · 1ère vente sous 7-10 jours · ARR 5-10k CHF MRR à M3
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Audit généré le <span class="mono">2026-04-30</span> · Méthode : 7 agents spécialisés en parallèle (code, sécurité, ETL, légal, conversion, infra, concurrence) · Durée : ~4h cumulées</p>
+    <p style="margin-top: 8px;">Documents source · <a href="../../docs/audit-2026-04-30/AUDIT-COMPLET.md" style="color: var(--gold);">AUDIT-COMPLET.md</a> · <a href="../../docs/competitive-analysis-2026-04-30.md" style="color: var(--gold);">competitive-analysis-2026-04-30.md</a> · <a href="../../docs/legal-correspondence.md" style="color: var(--gold);">legal-correspondence.md</a></p>
+  </div>
+</footer>
+
+<script>
+  // Animate score bars on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const fills = entry.target.querySelectorAll('.score-bar-fill');
+        fills.forEach(fill => {
+          const w = fill.style.width;
+          fill.style.width = '0%';
+          setTimeout(() => { fill.style.width = w; }, 100);
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  document.querySelectorAll('.score-list').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
