@@ -1,5 +1,6 @@
 import { ingestFromFixture, ingestFromBazg } from "./ingest.js";
 import { buildBundle } from "./bundle.js";
+import { generateTaresEmbeddings, TARES_EMBEDDING_DIMENSIONS, TARES_EMBEDDING_MODEL } from "./embeddings.js";
 import { uploadZip } from "../../src/lib/r2.js";
 import { mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -48,20 +49,36 @@ export async function runRelease(
     console.log(`[release] ingested ${rows.length} rows from BAZG. stats=${JSON.stringify(result.stats)}`);
   }
 
-  // 2. Build bundle
+  // 2. Generate embeddings (Phase 1 / T1) — one vector per HS8, FR description.
+  // Skippable via `SKIP_EMBEDDINGS=1` for fast iteration; production releases must
+  // ship them so AI agents can do semantic search client-side without recomputing.
+  let embeddings: Awaited<ReturnType<typeof generateTaresEmbeddings>> | undefined;
+  if (process.env.SKIP_EMBEDDINGS === "1") {
+    console.log(`[release] SKIP_EMBEDDINGS=1, skipping embedding generation`);
+  } else {
+    const cachePath = join(outDir, "embeddings-cache-fr.json");
+    console.log(`[release] generating TARES embeddings (model=${TARES_EMBEDDING_MODEL}, ${TARES_EMBEDDING_DIMENSIONS}d, lang=fr, cache=${cachePath})...`);
+    const t0 = Date.now();
+    embeddings = await generateTaresEmbeddings(rows, { cachePath });
+    console.log(
+      `[release] generated ${embeddings.length} embeddings in ${((Date.now() - t0) / 1000).toFixed(1)}s`,
+    );
+  }
+
+  // 3. Build bundle
   console.log(`[release] building bundle...`);
-  const bundle = await buildBundle(rows, version, outDir);
+  const bundle = await buildBundle(rows, version, outDir, { embeddings });
   console.log(
-    `[release] bundle: ${bundle.zipPath} (${(bundle.sizeBytes / 1024).toFixed(1)} KB, sha256 ${bundle.sha256.slice(0, 12)}..., ${bundle.rowCount} rows)`
+    `[release] bundle: ${bundle.zipPath} (${(bundle.sizeBytes / 1024).toFixed(1)} KB, sha256 ${bundle.sha256.slice(0, 12)}..., ${bundle.rowCount} rows${embeddings ? `, ${embeddings.length} embeddings` : ""})`
   );
 
-  // 3. Upload to R2
+  // 4. Upload to R2
   const r2_key = `tares/${version}/tares.zip`;
   console.log(`[release] uploading to R2 key ${r2_key}...`);
   await uploadZip(bundle.zipPath, r2_key);
   console.log(`[release] uploaded to r2://${process.env.R2_BUCKET ?? "?"}/${r2_key}`);
 
-  // 4. Register via admin endpoint
+  // 5. Register via admin endpoint
   const endpoint = `${baseUrl.replace(/\/$/, "")}/api/admin/release`;
   console.log(`[release] POST ${endpoint} ...`);
   const res = await fetch(endpoint, {
