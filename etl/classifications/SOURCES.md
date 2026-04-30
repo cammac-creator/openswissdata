@@ -219,12 +219,18 @@ for i, score in zip(idxs[0], scores[0]):
     print(f"{codes[i]}  {score:.3f}  {labels[i]}")
 ```
 
-Output attendu (top-3 pour `"vente de café en grain et torréfaction"`) :
+Output attendu (top-3 pour `"vente de café en grain et torréfaction"`, vérifié 2026-04-30
+avec le pack v2026.04.30.2) :
 ```
-4729   0.65   Autre commerce de détail alimentaire en magasin spécialisé
-1083   0.55   Transformation du thé et du café
-4711   0.52   Commerce de détail en magasin non spécialisé à prédominance alimentaire
+4637     0.854   Commerce de gros de café, thé, cacao et épices
+463700   0.854   Commerce de gros de café, thé, cacao et épices (subclass CH)
+472      0.699   Commerce de détail de produits alimentaires, de boissons et de tabac
 ```
+
+Note : le top-3 peut inclure simultanément la classe NOGA 2025 4-digit (ex. `4637`)
+et sa subclass CH 6-digit (`463700`) avec un score identique, car la description
+est hérité tel quel. C'est volontaire (on n'enlève pas la subclass) — l'acheteur
+peut filtrer par `level` côté requête s'il veut dédupliquer.
 
 #### Exemple Python sans FAISS (NumPy uniquement)
 
