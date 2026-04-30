@@ -3,6 +3,7 @@ import { FINMA_SOURCES } from "./sources.js";
 import { buildBundle } from "./bundle.js";
 import { ingestFinmaWarnings } from "./ingest-warnings.js";
 import { flagWarningsOnRegistry } from "./unify-schema.js";
+import { fetchZefixForUids, type ZefixData } from "./ingest-zefix.js";
 import { uploadZip } from "../../src/lib/r2.js";
 import { mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -72,7 +73,39 @@ export async function runRelease(
   }
   console.log(`[release-finma] total ${entities.length} entities, ${warnings.length} warnings`);
 
-  const bundle = await buildBundle({ entities, warnings }, version, outDir);
+  // ---------------------------------------------------------------------
+  // Tier "FINMA + Zefix Sync" — bulk LINDAS SPARQL enrichment.
+  // Activated via FINMA_TIER=zefix. Default tier remains 'standard'.
+  // ---------------------------------------------------------------------
+  const tier = (process.env.FINMA_TIER ?? "standard").toLowerCase();
+  let zefixByUid: Map<string, ZefixData> | undefined;
+  if (tier === "zefix") {
+    const uniqUids = [...new Set(entities.map((e) => e.uid).filter((u): u is string => !!u))];
+    console.log(`[release-finma] tier=zefix — fetching Zefix data for ${uniqUids.length} unique UIDs from LINDAS …`);
+    const cachePath = join(outDir, "finma-cache", `zefix-bulk.json`);
+    const t0 = Date.now();
+    const r = await fetchZefixForUids(uniqUids, {
+      cachePath,
+      batchSize: 500,
+      onProgress: (done, total, dt) => {
+        console.log(`[release-finma]   LINDAS batch progress: ${done}/${total} (${dt} ms)`);
+      },
+    });
+    const dt = Date.now() - t0;
+    console.log(
+      `[release-finma] Zefix enrichment: ${r.data.size}/${uniqUids.length} matched in ${r.batches} batch(es), ${dt} ms total. ` +
+        `invalid_uids=${r.invalidUids.length}, missing=${r.missingUids.length}`,
+    );
+    if (r.data.size === 0) {
+      // Hard fail: the user explicitly asked for zefix tier, getting 0 means
+      // the endpoint or query is broken — better to fail loudly than ship an
+      // empty enrichment file pretending to be useful.
+      throw new Error("[release-finma] FINMA_TIER=zefix but 0 entities enriched — LINDAS endpoint or query is broken");
+    }
+    zefixByUid = r.data;
+  }
+
+  const bundle = await buildBundle({ entities, warnings, zefixByUid }, version, outDir);
   console.log(
     `[release-finma] bundle sha256 ${bundle.sha256.slice(0, 12)}..., ${(bundle.sizeBytes / 1024).toFixed(1)} KB`
   );
