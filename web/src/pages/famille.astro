@@ -1433,54 +1433,26 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
         background: #EAF3FB;
         box-shadow: 8px 8px 0 0 var(--red);
       }
-      /* ─── Hero illustration animations ─── */
-      .hero-papa { animation: papa-think 4.2s ease-in-out infinite; transform-origin: center bottom; }
-      @keyframes papa-think {
-        0%, 100% { transform: translateY(0) rotate(0); }
-        45%, 55% { transform: translateY(-3px) rotate(-0.3deg); }
-      }
-      .hero-papa-notebook { animation: notebook-flutter 3s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-      @keyframes notebook-flutter {
-        0%, 100% { transform: rotate(0); }
-        50% { transform: rotate(-1deg); }
-      }
-      .hero-chest { animation: chest-bounce 3.6s ease-in-out infinite; transform-origin: center bottom; transform-box: fill-box; }
-      .hero-chest-1 { animation-delay: 0s; }
-      .hero-chest-2 { animation-delay: 0.5s; }
-      .hero-chest-3 { animation-delay: 1s; }
-      @keyframes chest-bounce {
-        0%, 100% { transform: translateY(0); }
-        45%, 55% { transform: translateY(-3px); }
-      }
-      .hero-chest-icon { animation: icon-float 2.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-      .hero-chest-2 .hero-chest-icon { animation-delay: 0.4s; }
-      .hero-chest-3 .hero-chest-icon { animation-delay: 0.8s; }
-      @keyframes icon-float {
-        0%, 100% { transform: translateY(0) rotate(0); }
-        50% { transform: translateY(-2px) rotate(2deg); }
-      }
-      .hero-flag-fabric { animation: flag-wave 2.8s ease-in-out infinite; transform-origin: 0 50%; transform-box: fill-box; }
-      @keyframes flag-wave {
-        0%, 100% { transform: skewY(0) scaleX(1); }
-        50% { transform: skewY(-2deg) scaleX(0.97); }
-      }
-      .hero-sun { animation: sun-pulse 4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-      @keyframes sun-pulse {
-        0%, 100% { transform: scale(1); opacity: 0.85; }
-        50% { transform: scale(1.05); opacity: 1; }
-      }
+      /* ─── Hero illustration animations ───
+         IMPORTANT : les animations CSS sur transform ÉCRASENT l'attribut SVG
+         transform="translate(...)" et déplacent les éléments à 0,0.
+         On anime uniquement les éléments SANS transform attribut (oiseau,
+         vapeur, flag-fabric qui hérite de son parent).
+       */
       .hero-bird { animation: bird-fly 12s linear infinite; }
       @keyframes bird-fly {
-        0% { transform: translate(-20px, 0); }
-        25% { transform: translate(40px, -8px); }
-        50% { transform: translate(80px, 4px); }
-        75% { transform: translate(120px, -2px); }
-        100% { transform: translate(-20px, 0); }
+        0% { transform: translate(0, 0); }
+        25% { transform: translate(60px, -8px); }
+        50% { transform: translate(120px, 4px); }
+        75% { transform: translate(60px, -2px); }
+        100% { transform: translate(0, 0); }
       }
-      .hero-edelweiss { animation: edelweiss-sway 5s ease-in-out infinite; transform-origin: bottom center; transform-box: fill-box; }
-      @keyframes edelweiss-sway {
-        0%, 100% { transform: rotate(-2deg); }
-        50% { transform: rotate(2deg); }
+      /* Le drapeau-fabric est dans un parent translate, mais lui-même n'a pas
+         de transform attribut → skewY safe. */
+      .hero-flag-fabric { animation: flag-wave 2.8s ease-in-out infinite; transform-origin: 0 50%; transform-box: fill-box; }
+      @keyframes flag-wave {
+        0%, 100% { transform: skewY(0); }
+        50% { transform: skewY(-3deg); }
       }
       .hero-arrow-text {
         font-family: var(--font-script);
@@ -1529,14 +1501,7 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
         0%, 100% { opacity: 0; }
         50% { opacity: 1; }
       }
-      .m-exit-box { animation: exit-slide 4s ease-in-out infinite; transform-origin: left center; transform-box: fill-box; }
-      .m-exit-box-1 { animation-delay: 0s; }
-      .m-exit-box-2 { animation-delay: 0.5s; }
-      .m-exit-box-3 { animation-delay: 1s; }
-      @keyframes exit-slide {
-        0%, 100% { transform: translateX(0); }
-        50% { transform: translateX(2px); }
-      }
+      /* m-exit-box : animation transform désactivée (écrase translate attribut SVG) */
 
       /* ─── Piggy bank animations ─── */
       .piggy-body { animation: piggy-breathe 3.5s ease-in-out infinite; transform-origin: center bottom; transform-box: fill-box; }
