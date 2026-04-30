@@ -1,0 +1,355 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const mcpConfigJson = `{
+  "mcpServers": {
+    "openswissdata": {
+      "url": "https://mcp.openswissdata.com/mcp/jsonrpc",
+      "transport": "http"
+    }
+  }
+}`;
+
+const tools = [
+  {
+    pack: "TARES",
+    name: "tariff_lookup",
+    desc: "Lookup a Swiss customs tariff (HS8) and return full row + parents + non-official disclaimer.",
+    args: { hs8: "0901.10.10", lang: "fr" },
+    status: "live",
+    scope: "tariff:read",
+  },
+  {
+    pack: "TARES",
+    name: "tariff_semantic_search",
+    desc: "Semantic search across TARES descriptions (BAAI/bge-m3 multilingual embeddings, 7 511 vectors).",
+    args: { query: "bijoux en or 18 carats", top_k: 5 },
+    status: "live",
+    scope: "tariff:semantic",
+  },
+  {
+    pack: "TARES",
+    name: "tariff_changelog",
+    desc: "Historical changelog of MFN duty rates for an HS8 code over a 12-24 month rolling window. Irreplicable by scraping.",
+    args: { hs8: "0901.10.10", since: "2025-01-01" },
+    status: "live",
+    scope: "tariff:semantic",
+  },
+  {
+    pack: "Classifications",
+    name: "cross_walk",
+    desc: "Translate a code between NOGA 2008/2025, NACE 2.0/2.1, ISIC 4.",
+    args: { code: "47.29", source: "NOGA_2025", target: "NACE_2.1" },
+    status: "live",
+    scope: "classifications:read",
+  },
+  {
+    pack: "Classifications",
+    name: "classify_text",
+    desc: "Classify free-text into top-K NOGA 2025 codes with confidence scores.",
+    args: { text: "vente de café en grain et torréfaction", top_k: 3 },
+    status: "live",
+    scope: "classifications:semantic",
+  },
+  {
+    pack: "FINMA",
+    name: "kyc_check",
+    desc: "Unified KYC : FINMA registry + warnings list cross-referenced.",
+    args: { name: "UBS Switzerland AG" },
+    status: "live",
+    scope: "finma:read",
+  },
+  {
+    pack: "FINMA",
+    name: "finma_search",
+    desc: "Fuzzy search FINMA registry by name (Levenshtein, normalised noise tokens AG/SA/Sàrl).",
+    args: { name: "Vontobel", top_k: 5, include_warnings: true },
+    status: "live",
+    scope: "finma:read",
+  },
+  {
+    pack: "FINMA",
+    name: "entity_history",
+    desc: "Timeline of changes for a FINMA-supervised entity : registration, authorization changes, withdrawals.",
+    args: { uid: "CHE-101.329.561" },
+    status: "live",
+    scope: "finma:history",
+  },
+];
+---
+<BaseLayout
+  title="MCP server openswissdata — datasets fédéraux suisses pour Claude Code & Cursor"
+  description="Premier MCP server suisse pour AI agents. 8 tools : tariff_lookup, semantic_search, classify_text, kyc_check, finma_search, entity_history… Standard JSON-RPC 2.0. Free tier 100 req/jour."
+>
+
+<div class="bg-grid"></div>
+
+<!-- ========== HERO ========== -->
+<section class="v4-hero">
+  <div class="container-v4">
+    <div class="reveal-v4">
+      <div class="v4-eyebrow">
+        <span>Model Context Protocol</span>
+        <span style="opacity:.4">·</span>
+        <span class="check">v0.2.0 · 8 tools live</span>
+      </div>
+
+      <h1 class="v4-h1" style="max-width:24ch;">
+        Le premier MCP server suisse pour <span class="accent">Claude Code &amp; Cursor.</span>
+      </h1>
+
+      <p class="v4-lede" style="max-width:62ch;">
+        Branchez les datasets fédéraux suisses (TARES, NOGA, FINMA) directement dans votre agent IA. JSON-RPC 2.0, embeddings multilingues pré-calculés, manifest cryptographique signé. <strong>Free tier 100 req/jour.</strong>
+      </p>
+
+      <div class="v4-spec-row">
+        <div class="v4-spec">
+          <div class="v4-spec-label">Endpoints</div>
+          <div class="v4-spec-value">8 tools</div>
+        </div>
+        <div class="v4-spec">
+          <div class="v4-spec-label">URL</div>
+          <div class="v4-spec-value">mcp.openswissdata.com</div>
+        </div>
+        <div class="v4-spec">
+          <div class="v4-spec-label">Spec</div>
+          <div class="v4-spec-value">MCP 2025-06-18</div>
+        </div>
+      </div>
+
+      <div class="v4-cta-row">
+        <a href="#install" class="v4-btn v4-btn-primary">Installer dans Claude Code <span class="arrow">→</span></a>
+        <a href="#tools" class="v4-btn v4-btn-secondary">Documentation</a>
+        <a href="#playground" class="v4-btn-mono">Sandbox playground</a>
+      </div>
+
+      <div class="v4-permission-line">
+        <span><strong>Standard ouvert :</strong> JSON-RPC 2.0 over HTTPS</span>
+        <span style="opacity:.4">·</span>
+        <span><strong>Auth :</strong> Bearer token (OAuth 2.1 disponible)</span>
+        <span style="opacity:.4">·</span>
+        <span class="ok">Hébergement Suisse-EU</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== INSTALL ========== -->
+<section class="v4-personas" id="install" style="padding-top:60px;">
+  <div class="container-v4">
+    <div class="v4-section-eyebrow">
+      <strong>Installation</strong>
+      <span class="sep">/</span>
+      <span>30 secondes</span>
+    </div>
+    <h2 class="v4-section-h2">Connectez openswissdata à Claude Code en 30 secondes.</h2>
+
+    <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:28px;margin-top:24px;">
+      <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Étape 1 · Ajouter le serveur</p>
+      <p style="margin-bottom:14px;">Dans <code style="font-family:var(--font-mono);background:var(--bg-soft);padding:2px 8px;border-radius:4px;">~/.claude/mcp.json</code> ou via <code style="font-family:var(--font-mono);background:var(--bg-soft);padding:2px 8px;border-radius:4px;">claude mcp add</code> :</p>
+
+      <pre style="background:#0A0A0C;color:#fafafa;padding:18px 22px;border-radius:8px;font-family:var(--font-mono);font-size:13px;line-height:1.6;overflow-x:auto;margin-bottom:24px;">{mcpConfigJson}</pre>
+
+      <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Étape 2 · Redémarrer Claude Code</p>
+      <p style="margin-bottom:14px;">Les 8 outils apparaîtront automatiquement dans le picker MCP de Claude Code (commande <code style="font-family:var(--font-mono);background:var(--bg-soft);padding:2px 8px;border-radius:4px;">/mcp</code>).</p>
+
+      <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Étape 3 · Tester</p>
+      <p>Tapez par exemple : <em style="color:var(--ink);">"trouve le code TARES pour bijoux en or 18 carats"</em> et l'agent appellera <code style="font-family:var(--font-mono);background:var(--bg-soft);padding:2px 8px;border-radius:4px;">tariff_semantic_search</code> automatiquement.</p>
+    </div>
+
+    <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin-top:14px;">
+      Configuration similaire pour Cursor (<code>~/.cursor/mcp.json</code>) et autres clients MCP-compatible. Doc complète sur <a href="https://github.com/openswissdata" style="color:var(--ink);">github.com/openswissdata</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ========== TOOLS ========== -->
+<section class="v4-datasets" id="tools">
+  <div class="container-v4">
+    <div class="v4-section-eyebrow">
+      <strong>8 tools disponibles</strong>
+      <span class="sep">/</span>
+      <span>JSON-RPC 2.0</span>
+      <span class="sep">/</span>
+      <span>spec 2025-06-18</span>
+    </div>
+    <h2 class="v4-section-h2">Trois packs de données. Huit endpoints.</h2>
+
+    {["TARES", "Classifications", "FINMA"].map(packName => (
+      <div style="margin-bottom:32px;">
+        <h3 style="font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;font-weight:600;">{`// pack ${packName}`}</h3>
+        <div style="display:grid;grid-template-columns:1fr;gap:14px;">
+          {tools.filter(t => t.pack === packName).map(tool => {
+            const curlExample = `curl -X POST https://mcp.openswissdata.com/mcp/jsonrpc \\
+  -H "Content-Type: application/json" \\
+  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: tool.name, arguments: tool.args } }, null, 2)}'`;
+            return (
+              <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:22px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:8px;">
+                  <code style="font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--ink);">{tool.name}</code>
+                  <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:var(--green-soft);color:var(--green);border:1px solid rgba(21,128,61,.2);padding:3px 8px;border-radius:4px;font-weight:600;white-space:nowrap;">✓ live</span>
+                </div>
+                <p style="font-size:14px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">{tool.desc}</p>
+                <details style="font-family:var(--font-mono);font-size:12px;">
+                  <summary style="cursor:pointer;color:var(--ink);font-weight:500;padding:6px 0;">Exemple d'appel curl ↓</summary>
+                  <pre style="background:#0A0A0C;color:#fafafa;padding:14px 16px;border-radius:6px;margin-top:8px;line-height:1.6;overflow-x:auto;font-size:11.5px;">{curlExample}</pre>
+                </details>
+                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                  <span style="font-family:var(--font-mono);font-size:10px;background:var(--bg-soft);border:1px solid var(--line);color:var(--ink-soft);padding:3px 8px;border-radius:3px;">scope: {tool.scope}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<!-- ========== PLAYGROUND ========== -->
+<section class="v4-personas" id="playground">
+  <div class="container-v4">
+    <div class="v4-section-eyebrow">
+      <strong>Sandbox playground</strong>
+      <span class="sep">/</span>
+      <span>essaie tout de suite</span>
+    </div>
+    <h2 class="v4-section-h2">Sans installer Claude Code, teste les endpoints depuis ton navigateur.</h2>
+
+    <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:28px;margin-top:24px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div>
+          <label for="pg-tool" style="display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Tool</label>
+          <select id="pg-tool" style="width:100%;padding:10px 14px;font-family:var(--font-mono);font-size:13px;border:1px solid var(--line-strong);border-radius:8px;background:var(--bg);color:var(--ink);">
+            {tools.map(t => <option value={t.name}>{t.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label for="pg-args" style="display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Arguments JSON</label>
+          <input id="pg-args" type="text" style="width:100%;padding:10px 14px;font-family:var(--font-mono);font-size:13px;border:1px solid var(--line-strong);border-radius:8px;background:var(--bg);color:var(--ink);" />
+        </div>
+      </div>
+      <button id="pg-run" class="v4-btn v4-btn-primary" style="width:auto;">Try it <span class="arrow">→</span></button>
+      <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin-top:10px;">→ Free tier : 100 req/jour par IP. Pas besoin de compte pour tester.</p>
+
+      <pre id="pg-output" style="background:#0A0A0C;color:#fafafa;padding:18px 22px;border-radius:8px;font-family:var(--font-mono);font-size:13px;line-height:1.6;overflow-x:auto;margin-top:18px;min-height:200px;">→ Sélectionne un tool, ajuste les arguments, clique sur "Try it"…</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PRICING ========== -->
+<section class="v4-datasets">
+  <div class="container-v4">
+    <div class="v4-section-eyebrow">
+      <strong>Pricing</strong>
+      <span class="sep">/</span>
+      <span>généreux par design</span>
+    </div>
+    <h2 class="v4-section-h2">Free tier capable. Pro pour les workflows production.</h2>
+
+    <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin-top:24px;">
+      <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:22px;">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Free</div>
+        <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">0 CHF</div>
+        <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;">100 req/jour par IP. Aucun compte requis. Disclaimer non-officiel obligatoire dans la réponse.</p>
+        <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);">
+          <li style="padding:3px 0;">✓ 8 tools</li>
+          <li style="padding:3px 0;">✓ Pas d'auth requis</li>
+          <li style="padding:3px 0;">✗ Pas de SLA</li>
+        </ul>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:22px;">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Standard</div>
+        <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">+0 CHF</div>
+        <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;">Inclus avec achat ZIP (TARES 299 / Classif 399 / FINMA 299 CHF). 1 000 req/mois.</p>
+        <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);">
+          <li style="padding:3px 0;">✓ Toutes scopes standards</li>
+          <li style="padding:3px 0;">✓ Bearer token persistant</li>
+          <li style="padding:3px 0;">✓ Email support</li>
+        </ul>
+      </div>
+      <div style="background:var(--bg-card);border:2px solid var(--accent);border-radius:12px;padding:22px;position:relative;">
+        <span style="position:absolute;top:-10px;right:14px;background:var(--accent);color:#fff;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;font-weight:600;">populaire</span>
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Pro</div>
+        <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">999 CHF</div>
+        <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;">Inclus avec Classifications Pro. 10 000 req/mois. Accès <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg-soft);padding:1px 5px;border-radius:3px;">tariff_semantic_search</code>, <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg-soft);padding:1px 5px;border-radius:3px;">classify_text</code>, <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg-soft);padding:1px 5px;border-radius:3px;">entity_history</code>.</p>
+        <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);">
+          <li style="padding:3px 0;">✓ Tous les scopes</li>
+          <li style="padding:3px 0;">✓ STATENT (Pro tier)</li>
+          <li style="padding:3px 0;">✓ Priority support</li>
+        </ul>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:22px;">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Standalone</div>
+        <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">49 CHF<small style="font-size:13px;font-weight:500;color:var(--ink-mute);">/mois</small></div>
+        <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;">5 000 req/mois. MCP only — sans le ZIP. Pour les use cases API-only.</p>
+        <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);">
+          <li style="padding:3px 0;">✓ Tous les scopes</li>
+          <li style="padding:3px 0;">✓ Annulable mensuellement</li>
+          <li style="padding:3px 0;">✗ Pas de ZIP raw</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA FINAL ========== -->
+<section class="v4-cta-final">
+  <div class="container-v4">
+    <h2>Le premier MCP suisse pour vos agents.</h2>
+    <p>Free tier 100 req/jour. Aucun compte requis pour tester. Open spec MCP 2025-06-18.</p>
+    <div class="v4-cta-final-row">
+      <a href="#install" class="v4-btn v4-btn-primary">Connecter maintenant <span class="arrow">→</span></a>
+      <a href="/datasets/classifications" class="v4-btn v4-btn-secondary">Voir Classifications Pro</a>
+      <a href="/legal/provenance" class="v4-btn-mono">Provenance &amp; signature</a>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  const TOOL_DEFAULTS = {
+    "tariff_lookup": { hs8: "01011010", lang: "fr" },
+    "tariff_semantic_search": { query: "bijoux en or 18 carats", top_k: 5 },
+    "tariff_changelog": { hs8: "01011010", since: "2025-01-01" },
+    "cross_walk": { code: "47.29", source: "NOGA_2025", target: "NACE_2.1" },
+    "classify_text": { text: "vente de café en grain et torréfaction", top_k: 3 },
+    "kyc_check": { name: "UBS Switzerland AG" },
+    "finma_search": { name: "Vontobel", top_k: 5 },
+    "entity_history": { uid: "CHE-101.329.561" }
+  };
+  const sel = document.getElementById('pg-tool');
+  const args = document.getElementById('pg-args');
+  const run = document.getElementById('pg-run');
+  const out = document.getElementById('pg-output');
+  function refreshArgs() {
+    args.value = JSON.stringify(TOOL_DEFAULTS[sel.value] || {});
+  }
+  if (sel) {
+    refreshArgs();
+    sel.addEventListener('change', refreshArgs);
+  }
+  if (run) {
+    run.addEventListener('click', async () => {
+      out.textContent = "→ Calling " + sel.value + "...";
+      try {
+        const parsedArgs = JSON.parse(args.value);
+        const res = await fetch('https://mcp.openswissdata.com/mcp/jsonrpc', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: Date.now(),
+            method: "tools/call",
+            params: { name: sel.value, arguments: parsedArgs }
+          })
+        });
+        const json = await res.json();
+        out.textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        out.textContent = "✗ Error: " + (err.message || err);
+      }
+    });
+  }
+</script>
+
+</BaseLayout>
