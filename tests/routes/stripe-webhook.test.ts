@@ -224,11 +224,15 @@ describe("POST /api/webhook/stripe", () => {
     expect(body.ignored).toBe("customer.created");
   });
 
-  // H2: if a dataset has no current_version (simulating a partial dataset setup),
-  // the webhook must abort BEFORE inserting any order or entitlement rows.
-  it("H2: aborts with no order/entitlement when a dataset has no current_version", async () => {
+  // H2 (fail-safe partial delivery): if some datasets have no current_version,
+  // the webhook delivers what it CAN and skips the missing ones. Only if ALL
+  // datasets fail to resolve do we return 500 (so Stripe retries). This avoids
+  // the worst-case scenario where Stripe retry-storms a permanently broken
+  // dataset and the customer's email is never sent for the working ones.
+  it("H2 (partial delivery): skips dataset with no current_version, delivers the rest", async () => {
     const db = getDb();
-    // Remove current_version from 'finma' — simulates a missing version for 2nd dataset in bundle
+    // Remove current_version from 'finma' — simulates a missing version for 1
+    // of 3 datasets in the bundle. tares + classifications still have versions.
     db.prepare("UPDATE datasets SET current_version = NULL WHERE id = 'finma'").run();
     closeDb();
 
@@ -236,11 +240,10 @@ describe("POST /api/webhook/stripe", () => {
       type: "checkout.session.completed",
       data: {
         object: {
-          id: "cs_test_tx_abort",
+          id: "cs_test_tx_partial",
           customer_email: "tx-test@example.com",
           payment_intent: "pi_tx",
           amount_total: 79900,
-          // bundle expands to tares + classifications + finma; finma has no version
           metadata: { dataset_ids: "bundle" },
         },
       },
@@ -253,12 +256,60 @@ describe("POST /api/webhook/stripe", () => {
       body: "{}",
     });
 
-    // Should return 500 (not 200) because we abort before committing
-    expect(res.status).toBe(500);
+    // 200 — partial success, delivered what we could.
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.received).toBe(true);
+    expect(body.skipped).toBeDefined();
+    expect(body.skipped).toEqual([{ id: "finma", reason: "no_current_version" }]);
+    expect(body.datasets).toEqual(expect.arrayContaining(["tares", "classifications"]));
+    expect(body.datasets).not.toContain("finma");
 
-    // Crucially: no order and no entitlements must exist
+    // Order is created. Entitlements only for the resolvable datasets.
     const db2 = getDb();
-    const orders = db2.prepare("SELECT * FROM orders WHERE stripe_session_id = ?").all("cs_test_tx_abort");
+    const orders = db2
+      .prepare("SELECT * FROM orders WHERE stripe_session_id = ?")
+      .all("cs_test_tx_partial");
+    expect(orders).toHaveLength(1);
+    const ents = db2
+      .prepare("SELECT dataset_id FROM entitlements ORDER BY dataset_id")
+      .all() as Array<{ dataset_id: string }>;
+    expect(ents.map((e) => e.dataset_id)).toEqual(["classifications", "tares"]);
+  });
+
+  // H2 (fail-fast on total failure): if EVERY dataset is missing a version,
+  // we return 500 so Stripe retries — better to delay than deliver an empty
+  // order with no entitlements at all.
+  it("H2: returns 500 when ALL datasets are unresolvable", async () => {
+    const db = getDb();
+    db.prepare("UPDATE datasets SET current_version = NULL").run();
+    closeDb();
+
+    constructEventAsyncMock.mockResolvedValueOnce({
+      type: "checkout.session.completed",
+      data: {
+        object: {
+          id: "cs_test_tx_total_fail",
+          customer_email: "tx-test@example.com",
+          payment_intent: "pi_tx",
+          amount_total: 29900,
+          metadata: { dataset_ids: "tares,classifications,finma" },
+        },
+      },
+    });
+
+    const app = createApp();
+    const res = await app.request("/api/webhook/stripe", {
+      method: "POST",
+      headers: { "content-type": "application/json", "stripe-signature": "ok" },
+      body: "{}",
+    });
+
+    expect(res.status).toBe(500);
+    const db2 = getDb();
+    const orders = db2
+      .prepare("SELECT * FROM orders WHERE stripe_session_id = ?")
+      .all("cs_test_tx_total_fail");
     expect(orders).toHaveLength(0);
     const ents = db2.prepare("SELECT * FROM entitlements").all();
     expect(ents).toHaveLength(0);
