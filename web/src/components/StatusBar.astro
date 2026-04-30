@@ -1,0 +1,34 @@
+---
+// V4 sticky top status bar
+---
+<div class="v4-status" id="v4-status">
+  <div class="v4-status-left">
+    <a href="/" class="v4-status-logo">
+      <span class="v4-status-logo-mark"></span>
+      openswissdata
+    </a>
+    <div class="v4-status-meta">
+      <span>ED. <strong>2026.04</strong></span>
+      <span>v<strong>1.0.0</strong></span>
+      <span>Berne · CH</span>
+    </div>
+  </div>
+  <div class="v4-status-right">
+    <nav class="v4-status-nav">
+      <a href="/#datasets">Datasets</a>
+      <a href="/#how">Comment ça marche</a>
+      <a href="/blog">Blog</a>
+    </nav>
+    <span><span class="v4-status-dot"></span>3 datasets · live</span>
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const el = document.getElementById('v4-status');
+    if (!el) return;
+    const onScroll = () => el.classList.toggle('scrolled', window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>

@@ -1,0 +1,16 @@
+---
+interface Props {
+  title?: string;
+  height?: string;
+  bodyId?: string;
+}
+const { title = "~/erp-integration — zsh", height = "320px", bodyId = "v4-termBody" } = Astro.props;
+---
+<div class="v4-term">
+  <div class="v4-term-bar">
+    <div class="v4-term-bar-dots"><span></span><span></span><span></span></div>
+    <span class="v4-term-bar-title"><strong>{title}</strong></span>
+    <span class="live">live</span>
+  </div>
+  <div class="v4-term-body" id={bodyId} style={`min-height:${height}`}></div>
+</div>

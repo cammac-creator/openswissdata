@@ -1,0 +1,16 @@
+---
+interface Props {
+  num: string;
+  tag: string;
+  title: string;
+  text: string;
+  delay?: number;
+}
+const { num, tag, title, text, delay = 1 } = Astro.props;
+---
+<div class="v4-step reveal-v4" data-delay={delay}>
+  <div class="v4-step-num">{num}</div>
+  <div class="v4-step-tag">{tag}</div>
+  <h4 class="v4-step-title">{title}</h4>
+  <p class="v4-step-text">{text}</p>
+</div>

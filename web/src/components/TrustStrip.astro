@@ -1,0 +1,22 @@
+---
+interface Props {
+  sources: string[];
+  badges: string[];
+}
+const { sources, badges } = Astro.props;
+---
+<div class="v4-trust">
+  <div class="container-v4">
+    <div class="v4-trust-row">
+      <span class="v4-trust-label">Sources autoritaires</span>
+      {sources.map(s => <span class="src">{s}</span>)}
+      <span class="sep">/</span>
+      {badges.map((b, i) => (
+        <>
+          <span class="badge">{b}</span>
+          {i < badges.length - 1 && <span class="sep">/</span>}
+        </>
+      ))}
+    </div>
+  </div>
+</div>

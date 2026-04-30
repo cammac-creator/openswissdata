@@ -1,0 +1,27 @@
+---
+interface Props {
+  letter: 'A' | 'B' | 'C';
+  tag: string;
+  title: string;
+  description: string;
+  proof: { text: string; variant?: 'mono' | 'green' | 'teal'; prompt?: string };
+  link: string;
+  href: string;
+  delay?: number;
+}
+const { letter, tag, title, description, proof, link, href, delay = 1 } = Astro.props;
+const variantClass = proof.variant === 'green' ? 'v4-persona-proof green'
+                  : proof.variant === 'teal'  ? 'v4-persona-proof teal'
+                  : 'v4-persona-proof';
+---
+<a href={href} class="v4-persona reveal-v4" data-delay={delay}>
+  <div class="v4-persona-tag"><span class="letter">{letter}</span>{tag}</div>
+  <h3>{title}</h3>
+  <p>{description}</p>
+  <div class={variantClass}>
+    {proof.prompt && <span class="pp-prompt">{proof.prompt}</span>}
+    {proof.variant === 'green' && <span class="pp-icon">✓</span>}
+    <span>{proof.text}</span>
+  </div>
+  <span class="v4-persona-link">{link}</span>
+</a>

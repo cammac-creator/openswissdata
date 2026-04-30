@@ -1,0 +1,56 @@
+---
+interface Props {
+  ribbonLabel: string;
+  ribbonSource: string;
+  pillText: string;
+  title: string;
+  sub: string;
+  desc: string;
+  formats: string[];
+  price: string;
+  currency?: string;
+  href: string;
+  ctaLabel?: string;
+  theme?: 'default' | 'bundle';
+  roiText?: string;
+  strikePrice?: string;
+  delay?: number;
+}
+const {
+  ribbonLabel, ribbonSource, pillText, title, sub, desc, formats,
+  price, currency = "CHF", href, ctaLabel = "Détails",
+  theme = 'default', roiText, strikePrice, delay = 1
+} = Astro.props;
+---
+<a href={href} class={`v4-fiche ${theme === 'bundle' ? 'bundle' : ''} reveal-v4`} data-delay={delay}>
+  <div class="v4-fiche-ribbon">
+    <span><strong>{ribbonLabel}</strong></span>
+    <span style="opacity:.4">·</span>
+    <span>{ribbonSource}</span>
+    <span class="pill">{pillText}</span>
+  </div>
+  <div class="v4-fiche-body">
+    <h3 class="v4-fiche-h3">{title}</h3>
+    <p class="v4-fiche-sub">{sub}</p>
+    <p class="v4-fiche-desc">{desc}</p>
+    {roiText && (
+      <div class="v4-fiche-roi">
+        <span class="icon">⏱</span>
+        <span set:html={roiText}></span>
+      </div>
+    )}
+    <div class="v4-fiche-formats">
+      {formats.map((f, i) => (
+        <span class={`v4-fmt-chip ${i === 0 ? 'primary' : ''}`}>{f}</span>
+      ))}
+    </div>
+  </div>
+  <div class="v4-fiche-buy">
+    <div class="v4-fiche-price">
+      <span class="amt">{price}</span>
+      <span class="unit">{currency}</span>
+      {strikePrice && <span class="v4-fiche-strike" style="margin-left:8px">{strikePrice}</span>}
+    </div>
+    <span class="v4-fiche-cta">{ctaLabel}</span>
+  </div>
+</a>
