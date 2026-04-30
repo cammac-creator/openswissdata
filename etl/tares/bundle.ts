@@ -4,6 +4,7 @@ import archiver from "archiver";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
+import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
 import type { TaresRow } from "./types.js";
 
 const TARES_PARQUET_SCHEMA = new parquet.ParquetSchema({
@@ -117,10 +118,25 @@ export interface BundleResult {
   lastUpdatedAt: string; // ISO timestamp for BAZG traceability
 }
 
-export async function buildBundle(rows: TaresRow[], version: string, outDir: string): Promise<BundleResult> {
+export interface BuildBundleOptions {
+  /**
+   * If false, skip the RFC-3161 timestamp call. Used in tests so they don't
+   * depend on freetsa.org. Defaults to `true` in production releases.
+   */
+  withTimestamp?: boolean;
+}
+
+export async function buildBundle(
+  rows: TaresRow[],
+  version: string,
+  outDir: string,
+  opts: BuildBundleOptions = {},
+): Promise<BundleResult> {
   const workDir = join(outDir, `tares-${version}-work`);
   if (existsSync(workDir)) rmSync(workDir, { recursive: true, force: true });
   mkdirSync(workDir, { recursive: true });
+
+  const profile = PERMISSION_PROFILES.tares;
 
   // CSV — flatten nested fields to JSON strings for CSV compatibility
   const flatRows = rows.map(r => ({
@@ -188,7 +204,31 @@ Normalized (form only) Swiss customs tariff codes (HS8). Values are preserved ve
 - \`tares.sql\` — CREATE TABLE + INSERT statements (PostgreSQL/MySQL/SQLite compatible)
 - \`schema.json\` — JSON Schema (Draft-07)
 - \`checksums.sha256\`
+- \`provenance.json\` — Ed25519-signed manifest + RFC-3161 timestamp (see "Provenance" below)
 - \`LICENSE.txt\`
+
+## Provenance & verification
+
+\`provenance.json\` proves the integrity, origin, and non-back-datable issuance
+of this bundle. It contains:
+
+- BAZG permission reference (\`${profile.permissionReference}\`) granted ${profile.permissionDate}
+- SHA-256 of every shipped file
+- An Ed25519 signature over a canonical JSON serialization (sorted keys,
+  no whitespace) of the manifest **without** the \`signature\` and
+  \`timestamp_authority\` fields
+- An RFC-3161 timestamp token (DER, base64-encoded) from a public TSA
+
+To verify:
+
+\`\`\`
+npx tsx etl/shared/verify-provenance.ts <this-zip>
+\`\`\`
+
+The public key is committed at
+\`packages/schemas/openswissdata.pubkey.ed25519\` (PEM SPKI). Any third-party
+tool that supports Ed25519 (openssl ≥ 1.1.1, libsodium, etc.) can verify the
+signature without trusting this code.
 
 ## Attribution
 
@@ -214,6 +254,31 @@ https://www.bazg.admin.ch/
     return `${hash}  ${f}`;
   }).join("\n") + "\n";
   writeFileSync(join(workDir, "checksums.sha256"), checksums, "utf8");
+
+  // Provenance manifest (signed Ed25519 + RFC-3161 timestamp).
+  // Covers data files + README + LICENSE + checksums.sha256 (transitive integrity).
+  const manifestFiles: ProvenanceFile[] = [
+    ...dataFiles,
+    "README.md",
+    "LICENSE.txt",
+    "checksums.sha256",
+  ].map((f) => {
+    const p = join(workDir, f);
+    const buf = readFileSync(p);
+    return { name: f, size: buf.length, sha256: createHash("sha256").update(buf).digest("hex") };
+  });
+  const provenance = await buildSignedProvenance({
+    dataset: "tares",
+    version,
+    sourceUrl: profile.sourceUrl,
+    files: manifestFiles,
+    permissionReference: profile.permissionReference,
+    permissionAuthority: profile.permissionAuthority,
+    permissionDate: profile.permissionDate,
+    jurisdiction: profile.jurisdiction,
+    withTimestamp: opts.withTimestamp,
+  });
+  writeFileSync(join(workDir, "provenance.json"), JSON.stringify(provenance, null, 2), "utf8");
 
   // ZIP
   const zipPath = join(outDir, `tares-${version}.zip`);
