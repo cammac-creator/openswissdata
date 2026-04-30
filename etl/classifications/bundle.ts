@@ -13,6 +13,8 @@ import {
   NOGA_EMBEDDING_MODEL_VERSION,
   type NogaEmbedding,
 } from "./embeddings.js";
+import { naceEnLabelToCsvRow, type NaceEnLabelRow } from "./nace-en-labels.js";
+import { naicsCrosswalkToCsvRow, type NaicsCrosswalkRow, type IngestNaicsResult } from "./naics-crosswalk.js";
 
 const NOMENCLATURE_PARQUET_SCHEMA = new parquet.ParquetSchema({
   scheme: { type: "UTF8" },
@@ -67,6 +69,26 @@ const NOGA_EMBEDDINGS_PARQUET_SCHEMA = new parquet.ParquetSchema({
   model_version: { type: "UTF8" },
 });
 
+// NAICS 2022 ↔ ISIC 4 ↔ NACE 2.1 ↔ NOGA 2025 crosswalk (Pro tier add-on).
+const NAICS_CROSSWALK_PARQUET_SCHEMA = new parquet.ParquetSchema({
+  naics_2022: { type: "UTF8" },
+  naics_2022_title: { type: "UTF8" },
+  isic_4: { type: "UTF8" },
+  isic_4_title: { type: "UTF8" },
+  nace_2_1: { type: "UTF8", optional: true },
+  noga_2025: { type: "UTF8", optional: true },
+  mapping_type: { type: "UTF8" },
+  notes: { type: "UTF8", optional: true },
+});
+
+// NACE Rev 2.1 EN labels (Pro tier add-on).
+const NACE_EN_LABELS_PARQUET_SCHEMA = new parquet.ParquetSchema({
+  code: { type: "UTF8" },
+  level: { type: "UTF8" },
+  parent: { type: "UTF8", optional: true },
+  label_en: { type: "UTF8" },
+});
+
 const DATASET_LICENSE = `openswissdata.com — Dataset License v1.0
 
 Copyright © 2026 Claude-Alain Martin · openswissdata.com
@@ -103,10 +125,23 @@ Contact: contact@openswissdata.com
 export interface ClassificationsBundleInput {
   rows: NomenclatureRow[];
   crossWalks: CrossWalkRow[];
-  /** Optional Pro tier add-on: STATENT (BFS structural establishments + FTE). */
+  /**
+   * Historical Pro tier add-on: STATENT (BFS structural establishments + FTE).
+   * @deprecated Removed from the Pro tier 2026-04-30 — license `terms_by_ask`
+   *   not obtained from BFS. The schema branch is kept dormant in `bundle.ts`
+   *   so historical bundle reproduction stays bit-identical, but `release.ts`
+   *   no longer passes this field.
+   */
   statent?: IngestStatentResult;
-  /** Optional Pro tier add-on: pre-computed NOGA 2025 embeddings (Phase 1 / C3). */
+  /**
+   * Pro tier add-on: pre-computed NOGA 2025 embeddings (Phase 1 / C3).
+   * Now contains FR + DE + IT + EN vectors (one row per code × lang).
+   */
   embeddings?: NogaEmbedding[];
+  /** Pro tier add-on (2026-04-30): NAICS 2022 ↔ ISIC ↔ NACE/NOGA crosswalk rows. */
+  naics?: IngestNaicsResult;
+  /** Pro tier add-on (2026-04-30): NACE Rev 2.1 official EN labels (stand-alone CSV/Parquet). */
+  naceEnLabels?: NaceEnLabelRow[];
 }
 
 export interface ClassificationsBundleResult {
@@ -118,6 +153,12 @@ export interface ClassificationsBundleResult {
   crossWalkCount: number;
   statentRowCount?: { canton_division: number; commune_sector: number };
   embeddingCount?: number;
+  /** Per-language embedding counts (Pro tier — 2026-04-30 multilingual upgrade). */
+  embeddingCountByLang?: Record<"fr" | "de" | "it" | "en", number>;
+  /** NAICS crosswalk row count (Pro tier add-on). */
+  naicsCrosswalkCount?: number;
+  /** NACE 2.1 EN labels row count (Pro tier add-on). */
+  naceEnLabelCount?: number;
 }
 
 function nomenclatureToCsvRow(r: NomenclatureRow): Record<string, unknown> {
@@ -297,23 +338,104 @@ export async function buildBundle(
 
   // NOGA 2025 embeddings parquet (Phase 1 / C3 — Pro tier only).
   // We rely on the caller (release.ts) to have already paid the inference cost.
+  // 2026-04-30: now multilingual — split per-language into one parquet per
+  // language so consumers can load only the language they need (FR/DE/IT/EN).
   const embeddingFiles: string[] = [];
   const hasEmbeddings = !!input.embeddings && input.embeddings.length > 0;
+  const embeddingCountByLang: Record<"fr" | "de" | "it" | "en", number> = {
+    fr: 0,
+    de: 0,
+    it: 0,
+    en: 0,
+  };
   if (hasEmbeddings) {
-    const embeddingRows = input.embeddings!.map((e) => ({
-      code: e.code,
-      lang: e.lang,
-      description: e.description,
-      embedding: e.embedding,
-      model: e.model,
-      model_version: e.model_version,
+    const allLangs: ReadonlyArray<"fr" | "de" | "it" | "en"> = ["fr", "de", "it", "en"];
+    for (const lang of allLangs) {
+      const subset = input.embeddings!.filter((e) => e.lang === lang);
+      embeddingCountByLang[lang] = subset.length;
+      if (subset.length === 0) continue;
+      const rows = subset.map((e) => ({
+        code: e.code,
+        lang: e.lang,
+        description: e.description,
+        embedding: e.embedding,
+        model: e.model,
+        model_version: e.model_version,
+      }));
+      const filename = `noga_2025_embeddings_${lang}.parquet`;
+      await writeParquet(
+        rows as unknown as Record<string, unknown>[],
+        NOGA_EMBEDDINGS_PARQUET_SCHEMA,
+        join(workDir, filename),
+      );
+      embeddingFiles.push(filename);
+    }
+  }
+
+  // NAICS 2022 ↔ ISIC ↔ NACE 2.1 ↔ NOGA 2025 crosswalk (Pro tier add-on).
+  const naicsFiles: string[] = [];
+  const hasNaics = !!input.naics && input.naics.rows.length > 0;
+  if (hasNaics) {
+    const csvRows = input.naics!.rows.map(naicsCrosswalkToCsvRow);
+    writeCsv(csvRows, join(workDir, "naics_nace_crosswalk.csv"));
+    writeJson(input.naics!.rows, join(workDir, "naics_nace_crosswalk.json"));
+    writeSqlInsertsChunked(
+      "naics_nace_crosswalk",
+      csvRows,
+      join(workDir, "naics_nace_crosswalk.sql"),
+      1000,
+    );
+    const parquetRows = input.naics!.rows.map((r) => ({
+      naics_2022: r.naics_2022,
+      naics_2022_title: r.naics_2022_title,
+      isic_4: r.isic_4,
+      isic_4_title: r.isic_4_title,
+      nace_2_1: r.nace_2_1 ?? undefined,
+      noga_2025: r.noga_2025 ?? undefined,
+      mapping_type: r.mapping_type,
+      notes: r.notes ?? undefined,
     }));
     await writeParquet(
-      embeddingRows as unknown as Record<string, unknown>[],
-      NOGA_EMBEDDINGS_PARQUET_SCHEMA,
-      join(workDir, "noga_2025_embeddings.parquet"),
+      parquetRows as unknown as Record<string, unknown>[],
+      NAICS_CROSSWALK_PARQUET_SCHEMA,
+      join(workDir, "naics_nace_crosswalk.parquet"),
     );
-    embeddingFiles.push("noga_2025_embeddings.parquet");
+    writeJson(
+      { source: input.naics!.source, stats: input.naics!.stats },
+      join(workDir, "naics_source.json"),
+    );
+    naicsFiles.push(
+      "naics_nace_crosswalk.csv",
+      "naics_nace_crosswalk.json",
+      "naics_nace_crosswalk.sql",
+      "naics_nace_crosswalk.parquet",
+      "naics_source.json",
+    );
+  }
+
+  // NACE Rev 2.1 EN labels (Pro tier add-on — official Eurostat English).
+  const naceEnLabelsFiles: string[] = [];
+  const hasNaceEnLabels = !!input.naceEnLabels && input.naceEnLabels.length > 0;
+  if (hasNaceEnLabels) {
+    const csvRows = input.naceEnLabels!.map(naceEnLabelToCsvRow);
+    writeCsv(csvRows, join(workDir, "nace_2_1_en_labels.csv"));
+    writeJson(input.naceEnLabels!, join(workDir, "nace_2_1_en_labels.json"));
+    const parquetRows = input.naceEnLabels!.map((r) => ({
+      code: r.code,
+      level: r.level,
+      parent: r.parent ?? undefined,
+      label_en: r.label_en,
+    }));
+    await writeParquet(
+      parquetRows as unknown as Record<string, unknown>[],
+      NACE_EN_LABELS_PARQUET_SCHEMA,
+      join(workDir, "nace_2_1_en_labels.parquet"),
+    );
+    naceEnLabelsFiles.push(
+      "nace_2_1_en_labels.csv",
+      "nace_2_1_en_labels.json",
+      "nace_2_1_en_labels.parquet",
+    );
   }
 
   // JSON Schema (one schema file documenting both nomenclature + crosswalk row shapes)
@@ -371,17 +493,77 @@ export async function buildBundle(
           }
         : {}),
     },
-    ...(hasEmbeddings
+    ...(hasEmbeddings || hasNaics || hasNaceEnLabels
       ? {
           files: {
-            "noga_2025_embeddings.parquet": {
-              description: `Pre-computed multilingual semantic embeddings for NOGA 2025 codes (Phase 1 / C3). Columns: code, lang, description, embedding (list<float>, ${NOGA_EMBEDDING_DIMENSIONS}d, L2-normalised), model (${NOGA_EMBEDDING_MODEL}), model_version (${NOGA_EMBEDDING_MODEL_VERSION}). Vectors are L2-normalised so cosine similarity reduces to a dot product. See SOURCES.md → "Embeddings & classification" for a Python load + FAISS search snippet.`,
-              row_shape: "$defs/NogaEmbeddingRow",
-            },
+            ...(hasEmbeddings
+              ? Object.fromEntries(
+                  embeddingFiles.map((f) => [
+                    f,
+                    {
+                      description: `Pre-computed multilingual semantic embeddings for NOGA 2025 codes (Phase 1 / C3). Columns: code, lang, description, embedding (list<float>, ${NOGA_EMBEDDING_DIMENSIONS}d, L2-normalised), model (${NOGA_EMBEDDING_MODEL}), model_version (${NOGA_EMBEDDING_MODEL_VERSION}). Vectors are L2-normalised so cosine similarity reduces to a dot product. See SOURCES.md → "Embeddings & classification" for a Python load + FAISS search snippet.`,
+                      row_shape: "$defs/NogaEmbeddingRow",
+                    },
+                  ]),
+                )
+              : {}),
+            ...(hasNaics
+              ? {
+                  "naics_nace_crosswalk.parquet": {
+                    description:
+                      "NAICS 2022 ↔ ISIC Rev 4 ↔ NACE Rev 2.1 ↔ NOGA 2025 crosswalk via the U.S. Census Bureau concordance + ISIC pivot. Public Domain (US Government Work).",
+                    row_shape: "$defs/NaicsCrosswalkRow",
+                  },
+                }
+              : {}),
+            ...(hasNaceEnLabels
+              ? {
+                  "nace_2_1_en_labels.parquet": {
+                    description:
+                      "NACE Rev 2.1 official English labels (Eurostat re-use policy). Stand-alone projection of the EN labels embedded in nace_2_1.{csv,json,sql} for compliance officers.",
+                    row_shape: "$defs/NaceEnLabelRow",
+                  },
+                }
+              : {}),
           },
         }
       : {}),
   };
+  // Add the schema definitions for NAICS / NACE EN labels rows.
+  if (hasNaics) {
+    (schema.definitions as Record<string, unknown>).NaicsCrosswalkRow = {
+      type: "object",
+      required: [
+        "naics_2022",
+        "naics_2022_title",
+        "isic_4",
+        "isic_4_title",
+        "mapping_type",
+      ],
+      properties: {
+        naics_2022: { type: "string" },
+        naics_2022_title: { type: "string" },
+        isic_4: { type: "string" },
+        isic_4_title: { type: "string" },
+        nace_2_1: { type: ["string", "null"] },
+        noga_2025: { type: ["string", "null"] },
+        mapping_type: { enum: ["exact", "partial"] },
+        notes: { type: ["string", "null"] },
+      },
+    };
+  }
+  if (hasNaceEnLabels) {
+    (schema.definitions as Record<string, unknown>).NaceEnLabelRow = {
+      type: "object",
+      required: ["code", "level", "label_en"],
+      properties: {
+        code: { type: "string" },
+        level: { enum: ["section", "division", "group", "class", "subclass"] },
+        parent: { type: ["string", "null"] },
+        label_en: { type: "string" },
+      },
+    };
+  }
   writeJson(schema, join(workDir, "schema.json"));
 
   // README
@@ -442,7 +624,9 @@ Normalized economic activity classifications for Swiss and international reporti
 - **ISIC Rev 4** — ${nomenclatureCount["ISIC_4"]} rows
 - **Cross-walks** — ${input.crossWalks.length} mappings (5-way NOGA↔NACE↔ISIC)
 ${input.statent ? `- **STATENT (Pro)** — ${input.statent.cantonDivision.length + input.statent.communeSector.length} rows (${input.statent.stats.years_ingested.length} years)` : ""}
-${hasEmbeddings ? `- **NOGA 2025 embeddings (Pro)** — ${input.embeddings!.length} pre-computed semantic vectors (${NOGA_EMBEDDING_DIMENSIONS}d, FR)` : ""}
+${hasEmbeddings ? `- **NOGA 2025 embeddings (Pro)** — ${input.embeddings!.length} pre-computed semantic vectors (${NOGA_EMBEDDING_DIMENSIONS}d, FR/DE/IT/EN)` : ""}
+${hasNaics ? `- **NAICS 2022 ↔ ISIC ↔ NACE/NOGA crosswalk (Pro)** — ${input.naics!.rows.length} mappings (US Census Bureau, Public Domain)` : ""}
+${hasNaceEnLabels ? `- **NACE Rev 2.1 EN labels (Pro)** — ${input.naceEnLabels!.length} official Eurostat English labels` : ""}
 
 ## Files
 
@@ -464,13 +648,51 @@ ${hasEmbeddings ? `- **NOGA 2025 embeddings (Pro)** — ${input.embeddings!.leng
     hasEmbeddings
       ? `
 
-### NOGA 2025 embeddings (Pro tier — Phase 1 / C3)
+### NOGA 2025 multilingual embeddings (Pro tier — Phase 1 / C3)
 
-- \`noga_2025_embeddings.parquet\` — **${input.embeddings!.length}** rows.
-  Columns: \`code\`, \`lang\` (\`fr\`), \`description\`, \`embedding\` (list<float>, ${NOGA_EMBEDDING_DIMENSIONS}d),
-  \`model\` (\`${NOGA_EMBEDDING_MODEL}\`), \`model_version\` (\`${NOGA_EMBEDDING_MODEL_VERSION}\`).
-  Vectors are L2-normalised so cosine similarity reduces to a dot product.
-  See SOURCES.md → "Embeddings & classification" for a Python load + FAISS search snippet.`
+One parquet per language (FR / DE / IT / EN) so consumers load only what they need:
+
+- \`noga_2025_embeddings_fr.parquet\` — ${embeddingCountByLang.fr} rows
+- \`noga_2025_embeddings_de.parquet\` — ${embeddingCountByLang.de} rows
+- \`noga_2025_embeddings_it.parquet\` — ${embeddingCountByLang.it} rows
+- \`noga_2025_embeddings_en.parquet\` — ${embeddingCountByLang.en} rows
+
+Columns: \`code\`, \`lang\`, \`description\`, \`embedding\` (list<float>, ${NOGA_EMBEDDING_DIMENSIONS}d),
+\`model\` (\`${NOGA_EMBEDDING_MODEL}\`), \`model_version\` (\`${NOGA_EMBEDDING_MODEL_VERSION}\`).
+Vectors are L2-normalised so cosine similarity reduces to a dot product. The model is multilingual,
+so cross-language queries match cleanly. See SOURCES.md → "Embeddings & classification" for a
+Python load + FAISS search snippet.`
+      : ""
+  }${
+    hasNaics
+      ? `
+
+### NAICS 2022 ↔ ISIC ↔ NACE 2.1 ↔ NOGA 2025 crosswalk (Pro tier — 2026-04-30)
+
+- \`naics_nace_crosswalk.{csv,json,sql,parquet}\` — **${input.naics!.rows.length}** mappings.
+  Sourced from the U.S. Census Bureau \`2022 NAICS to ISIC Rev 4\` concordance and pivoted
+  via ISIC Rev 4 to NACE 2.1 / NOGA 2025. Public Domain (US Government Work).
+- \`naics_source.json\` — Census source URL, fetch metadata, license, attribution.
+
+Use case: any buyer with US-side reporting (Salesforce NAICS field, Census filings,
+North-American consolidation) gets an immediate join from Swiss/EU codes to NAICS.
+
+\`mapping_type\`:
+- \`exact\` — single ISIC class under the Census-listed group, no fan-out;
+- \`partial\` — fan-out to multiple ISIC classes or Census flagged the link as partial.`
+      : ""
+  }${
+    hasNaceEnLabels
+      ? `
+
+### NACE Rev 2.1 official English labels (Pro tier — 2026-04-30)
+
+- \`nace_2_1_en_labels.{csv,json,parquet}\` — **${input.naceEnLabels!.length}** rows.
+  Stand-alone projection of the EN labels parsed from the EU Vocabularies SKOS/XKOS RDF.
+  Eurostat re-use policy applies (free for commercial use with attribution).
+
+Use case: compliance officers and English-speaking analysts in international groups
+who need the OFFICIAL Eurostat NACE labels in English without joining tables.`
       : ""
   }
 
@@ -488,6 +710,8 @@ ${hasEmbeddings ? `- **NOGA 2025 embeddings (Pro)** — ${input.embeddings!.leng
 - **NACE** — Eurostat Ramon. https://ec.europa.eu/eurostat/ramon/
 - **ISIC** — United Nations Statistics Division. https://unstats.un.org/unsd/classifications/Econ/isic
 ${input.statent ? "- **STATENT** — BFS PX-Web JSON-stat2 API (px-x-0602010000_101 + _102). https://www.pxweb.bfs.admin.ch/" : ""}
+${hasNaics ? "- **NAICS 2022 ↔ ISIC Rev 4 concordance** — U.S. Census Bureau (Public Domain — US Government Work). https://www.census.gov/naics/concordances/" : ""}
+${hasEmbeddings ? "- **Embeddings model** — Xenova/paraphrase-multilingual-mpnet-base-v2 (Apache 2.0)" : ""}
 
 ## Mapping principle
 
@@ -500,7 +724,11 @@ ${input.statent ? "- **STATENT** — BFS PX-Web JSON-stat2 API (px-x-0602010000_
 
 - Bundle version: ${version}
 - Generated: ${new Date().toISOString()}
-- Tier: ${input.statent ? "Classifications Pro (with STATENT)" : "Classifications Standard"}
+- Tier: ${
+    hasEmbeddings || hasNaics || hasNaceEnLabels || input.statent
+      ? "Classifications Pro"
+      : "Classifications Standard"
+  }
 `;
   writeFileSync(join(workDir, "README.md"), readme, "utf8");
   writeFileSync(join(workDir, "LICENSE.txt"), DATASET_LICENSE, "utf8");
@@ -530,6 +758,8 @@ ${input.statent ? "- **STATENT** — BFS PX-Web JSON-stat2 API (px-x-0602010000_
     "schema.json",
     ...statentFiles,
     ...embeddingFiles,
+    ...naicsFiles,
+    ...naceEnLabelsFiles,
   ];
   const checksums =
     dataFiles
@@ -598,5 +828,8 @@ ${input.statent ? "- **STATENT** — BFS PX-Web JSON-stat2 API (px-x-0602010000_
         }
       : undefined,
     embeddingCount: hasEmbeddings ? input.embeddings!.length : undefined,
+    embeddingCountByLang: hasEmbeddings ? embeddingCountByLang : undefined,
+    naicsCrosswalkCount: hasNaics ? input.naics!.rows.length : undefined,
+    naceEnLabelCount: hasNaceEnLabels ? input.naceEnLabels!.length : undefined,
   };
 }
