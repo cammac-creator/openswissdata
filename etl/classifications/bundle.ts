@@ -7,6 +7,12 @@ import { writeCsv, writeJson, writeSqlInserts, writeSqlInsertsChunked, writeParq
 import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
 import type { NomenclatureRow, CrossWalkRow, NomenclatureScheme } from "./types.js";
 import type { IngestStatentResult } from "./ingest-statent.js";
+import {
+  NOGA_EMBEDDING_DIMENSIONS,
+  NOGA_EMBEDDING_MODEL,
+  NOGA_EMBEDDING_MODEL_VERSION,
+  type NogaEmbedding,
+} from "./embeddings.js";
 
 const NOMENCLATURE_PARQUET_SCHEMA = new parquet.ParquetSchema({
   scheme: { type: "UTF8" },
@@ -49,6 +55,18 @@ const STATENT_COMMUNE_SECTOR_SCHEMA = new parquet.ParquetSchema({
   value: { type: "DOUBLE", optional: true, compression: "GZIP" },
 });
 
+// NOGA 2025 embeddings parquet (Phase 1 / C3). FLOAT (32-bit) instead of DOUBLE
+// because the model's native precision is float32 — saves 50 % on disk.
+// `repeated: true` declares a Parquet REPEATED column = list<float>.
+const NOGA_EMBEDDINGS_PARQUET_SCHEMA = new parquet.ParquetSchema({
+  code: { type: "UTF8" },
+  lang: { type: "UTF8" },
+  description: { type: "UTF8" },
+  embedding: { type: "FLOAT", repeated: true },
+  model: { type: "UTF8" },
+  model_version: { type: "UTF8" },
+});
+
 const DATASET_LICENSE = `openswissdata.com — Dataset License v1.0
 
 Copyright © 2026 Claude-Alain Martin · openswissdata.com
@@ -87,6 +105,8 @@ export interface ClassificationsBundleInput {
   crossWalks: CrossWalkRow[];
   /** Optional Pro tier add-on: STATENT (BFS structural establishments + FTE). */
   statent?: IngestStatentResult;
+  /** Optional Pro tier add-on: pre-computed NOGA 2025 embeddings (Phase 1 / C3). */
+  embeddings?: NogaEmbedding[];
 }
 
 export interface ClassificationsBundleResult {
@@ -97,6 +117,7 @@ export interface ClassificationsBundleResult {
   nomenclatureCount: Record<NomenclatureScheme, number>;
   crossWalkCount: number;
   statentRowCount?: { canton_division: number; commune_sector: number };
+  embeddingCount?: number;
 }
 
 function nomenclatureToCsvRow(r: NomenclatureRow): Record<string, unknown> {
@@ -274,6 +295,27 @@ export async function buildBundle(
     statentFiles.push("statent_source.json");
   }
 
+  // NOGA 2025 embeddings parquet (Phase 1 / C3 — Pro tier only).
+  // We rely on the caller (release.ts) to have already paid the inference cost.
+  const embeddingFiles: string[] = [];
+  const hasEmbeddings = !!input.embeddings && input.embeddings.length > 0;
+  if (hasEmbeddings) {
+    const embeddingRows = input.embeddings!.map((e) => ({
+      code: e.code,
+      lang: e.lang,
+      description: e.description,
+      embedding: e.embedding,
+      model: e.model,
+      model_version: e.model_version,
+    }));
+    await writeParquet(
+      embeddingRows as unknown as Record<string, unknown>[],
+      NOGA_EMBEDDINGS_PARQUET_SCHEMA,
+      join(workDir, "noga_2025_embeddings.parquet"),
+    );
+    embeddingFiles.push("noga_2025_embeddings.parquet");
+  }
+
   // JSON Schema (one schema file documenting both nomenclature + crosswalk row shapes)
   const schema = {
     $schema: "http://json-schema.org/draft-07/schema#",
@@ -307,7 +349,38 @@ export async function buildBundle(
           notes: { type: "string" },
         },
       },
+      ...(hasEmbeddings
+        ? {
+            NogaEmbeddingRow: {
+              type: "object",
+              required: ["code", "lang", "description", "embedding", "model", "model_version"],
+              properties: {
+                code: { type: "string" },
+                lang: { enum: ["fr", "de", "it", "en"] },
+                description: { type: "string" },
+                embedding: {
+                  type: "array",
+                  items: { type: "number" },
+                  minItems: NOGA_EMBEDDING_DIMENSIONS,
+                  maxItems: NOGA_EMBEDDING_DIMENSIONS,
+                },
+                model: { type: "string" },
+                model_version: { type: "string" },
+              },
+            },
+          }
+        : {}),
     },
+    ...(hasEmbeddings
+      ? {
+          files: {
+            "noga_2025_embeddings.parquet": {
+              description: `Pre-computed multilingual semantic embeddings for NOGA 2025 codes (Phase 1 / C3). Columns: code, lang, description, embedding (list<float>, ${NOGA_EMBEDDING_DIMENSIONS}d, L2-normalised), model (${NOGA_EMBEDDING_MODEL}), model_version (${NOGA_EMBEDDING_MODEL_VERSION}). Vectors are L2-normalised so cosine similarity reduces to a dot product. See SOURCES.md → "Embeddings & classification" for a Python load + FAISS search snippet.`,
+              row_shape: "$defs/NogaEmbeddingRow",
+            },
+          },
+        }
+      : {}),
   };
   writeJson(schema, join(workDir, "schema.json"));
 
@@ -369,6 +442,7 @@ Normalized economic activity classifications for Swiss and international reporti
 - **ISIC Rev 4** — ${nomenclatureCount["ISIC_4"]} rows
 - **Cross-walks** — ${input.crossWalks.length} mappings (5-way NOGA↔NACE↔ISIC)
 ${input.statent ? `- **STATENT (Pro)** — ${input.statent.cantonDivision.length + input.statent.communeSector.length} rows (${input.statent.stats.years_ingested.length} years)` : ""}
+${hasEmbeddings ? `- **NOGA 2025 embeddings (Pro)** — ${input.embeddings!.length} pre-computed semantic vectors (${NOGA_EMBEDDING_DIMENSIONS}d, FR)` : ""}
 
 ## Files
 
@@ -386,7 +460,19 @@ ${input.statent ? `- **STATENT (Pro)** — ${input.statent.cantonDivision.length
 
 ### Cross-walks
 
-- \`crosswalks.{csv,json,sql,parquet}\` — one row per NOGA 2025 class linking to the 4 other standards${statentSection}
+- \`crosswalks.{csv,json,sql,parquet}\` — one row per NOGA 2025 class linking to the 4 other standards${statentSection}${
+    hasEmbeddings
+      ? `
+
+### NOGA 2025 embeddings (Pro tier — Phase 1 / C3)
+
+- \`noga_2025_embeddings.parquet\` — **${input.embeddings!.length}** rows.
+  Columns: \`code\`, \`lang\` (\`fr\`), \`description\`, \`embedding\` (list<float>, ${NOGA_EMBEDDING_DIMENSIONS}d),
+  \`model\` (\`${NOGA_EMBEDDING_MODEL}\`), \`model_version\` (\`${NOGA_EMBEDDING_MODEL_VERSION}\`).
+  Vectors are L2-normalised so cosine similarity reduces to a dot product.
+  See SOURCES.md → "Embeddings & classification" for a Python load + FAISS search snippet.`
+      : ""
+  }
 
 ### Metadata
 
@@ -443,6 +529,7 @@ ${input.statent ? "- **STATENT** — BFS PX-Web JSON-stat2 API (px-x-0602010000_
     "crosswalks.parquet",
     "schema.json",
     ...statentFiles,
+    ...embeddingFiles,
   ];
   const checksums =
     dataFiles
@@ -510,5 +597,6 @@ ${input.statent ? "- **STATENT** — BFS PX-Web JSON-stat2 API (px-x-0602010000_
           commune_sector: input.statent.communeSector.length,
         }
       : undefined,
+    embeddingCount: hasEmbeddings ? input.embeddings!.length : undefined,
   };
 }

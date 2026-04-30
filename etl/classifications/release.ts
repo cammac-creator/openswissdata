@@ -5,6 +5,12 @@ import { buildCrossWalks } from "./crosswalks.js";
 import { ingestRealClassifications } from "./ingest-real.js";
 import { ingestStatent, type IngestStatentResult } from "./ingest-statent.js";
 import { buildBundle } from "./bundle.js";
+import {
+  generateNogaEmbeddings,
+  NOGA_EMBEDDING_DIMENSIONS,
+  NOGA_EMBEDDING_MODEL,
+  type NogaEmbedding,
+} from "./embeddings.js";
 import { uploadZip } from "../../src/lib/r2.js";
 import { mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -83,7 +89,25 @@ export async function runRelease(
     );
   }
 
-  const bundle = await buildBundle({ rows, crossWalks, statent }, version, outDir);
+  // Optional Pro tier add-on: pre-computed NOGA 2025 embeddings (Phase 1 / C3).
+  // Powers the `classifyText` free-text → top-3 NOGA codes feature on the buyer side.
+  // Skippable via `SKIP_EMBEDDINGS=1` for fast iteration; production releases ship them.
+  let embeddings: NogaEmbedding[] | undefined;
+  if (tier === "pro" && process.env.SKIP_EMBEDDINGS !== "1") {
+    const cachePath = join(outDir, "embeddings-cache-fr.json");
+    console.log(
+      `[release-classifications] tier=pro — generating NOGA embeddings (model=${NOGA_EMBEDDING_MODEL}, ${NOGA_EMBEDDING_DIMENSIONS}d, lang=fr, cache=${cachePath})...`,
+    );
+    const t0 = Date.now();
+    embeddings = await generateNogaEmbeddings(rows, { cachePath });
+    console.log(
+      `[release-classifications] generated ${embeddings.length} embeddings in ${((Date.now() - t0) / 1000).toFixed(1)}s`,
+    );
+  } else if (tier === "pro") {
+    console.log("[release-classifications] SKIP_EMBEDDINGS=1 — skipping NOGA embeddings generation");
+  }
+
+  const bundle = await buildBundle({ rows, crossWalks, statent, embeddings }, version, outDir);
   console.log(
     `[release-classifications] bundle sha256 ${bundle.sha256.slice(0, 12)}..., ${(bundle.sizeBytes / 1024).toFixed(1)} KB`
   );
