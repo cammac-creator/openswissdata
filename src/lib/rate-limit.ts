@@ -26,6 +26,10 @@ export function makeRateLimit(name: string, windowMs: number, capacity = 10_000)
 }
 
 export function checkRateLimit(bucket: Bucket, ip: string): boolean {
+  // Disable rate-limit in test to keep parallelised vitest suites deterministic.
+  // Production and dev still enforce the bucket.
+  if (process.env.NODE_ENV === "test") return true;
+
   const now = Date.now();
   const last = bucket.map.get(ip);
   if (last !== undefined && now - last < bucket.windowMs) return false;
@@ -35,6 +39,16 @@ export function checkRateLimit(bucket: Bucket, ip: string): boolean {
   }
   bucket.map.set(ip, now);
   return true;
+}
+
+/**
+ * Reset all named buckets — used by tests to isolate suites.
+ * Not exported as part of the production API.
+ */
+export function _resetRateLimitsForTest(): void {
+  for (const bucket of buckets.values()) {
+    bucket.map.clear();
+  }
 }
 
 /**

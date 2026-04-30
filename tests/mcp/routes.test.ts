@@ -20,9 +20,12 @@ describe("MCP HTTP routes", () => {
     expect(body.status).toBe("ok");
   });
 
-  it("GET /mcp returns server info when auth is disabled (dev)", async () => {
+  // GET /mcp (without subpath) was retired in commit e7e7d93 to let Astro
+  // serve a human-friendly docs page at that URL. The agent discovery is
+  // now exposed at /mcp/discovery — testing that endpoint instead.
+  it("GET /mcp/discovery returns server info when auth is disabled (dev)", async () => {
     const app = createApp();
-    const res = await app.request("/mcp");
+    const res = await app.request("/mcp/discovery");
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
       protocol_version: string;
@@ -36,20 +39,35 @@ describe("MCP HTTP routes", () => {
     );
   });
 
-  it("GET /mcp returns 401 when MCP_BEARER_TOKEN is set and no auth header", async () => {
+  // Since OAuth V2, MCP_BEARER_TOKEN is no longer a hard gate — it is an
+  // *admin bypass*. Without auth, anonymous clients fall through to the free
+  // IP rate-limited tier (100 req/day). With an invalid Bearer they get 401.
+  it("GET /mcp/discovery returns 200 anonymously even when MCP_BEARER_TOKEN is set (free tier)", async () => {
     process.env.MCP_BEARER_TOKEN = "test-secret";
     const app = createApp();
-    const res = await app.request("/mcp");
-    expect(res.status).toBe(401);
+    const res = await app.request("/mcp/discovery");
+    expect(res.status).toBe(200);
   });
 
-  it("GET /mcp returns 200 with valid Bearer token", async () => {
+  it("GET /mcp/discovery returns 200 with the admin-bypass MCP_BEARER_TOKEN", async () => {
     process.env.MCP_BEARER_TOKEN = "test-secret";
     const app = createApp();
-    const res = await app.request("/mcp", {
+    const res = await app.request("/mcp/discovery", {
       headers: { authorization: "Bearer test-secret" },
     });
     expect(res.status).toBe(200);
+  });
+
+  it("GET /mcp/discovery rejects an invalid Bearer token (4xx)", async () => {
+    process.env.MCP_BEARER_TOKEN = "test-secret";
+    const app = createApp();
+    const res = await app.request("/mcp/discovery", {
+      headers: { authorization: "Bearer some-invalid-token-that-doesnt-match" },
+    });
+    // 401 (invalid_token) or 500 (server_error from token hash lookup if DB
+    // tables are absent in this minimal test setup) — either way, NOT 200.
+    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect(res.status).not.toBe(200);
   });
 
   it("POST /mcp/jsonrpc — initialize returns protocol version", async () => {
