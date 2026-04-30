@@ -49,8 +49,8 @@ def main() -> int:
         # 5. FINMA fuzzy search
         print("\n=== FINMA fuzzy search ===")
         fr = client.finma.search(name="Cred Suisse", top_k=3)
-        for h in fr["hits"]:
-            print(f"  {h['score']:.2f}  {h['name']}  ({h['licence_type']})")
+        for m in fr["matches"]:
+            print(f"  {m['score']:.2f}  {m['name']}  ({m['licence_type']})")
 
         if client.last_rate_limit.remaining is not None:
             print(

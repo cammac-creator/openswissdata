@@ -43,6 +43,8 @@ describe("tares", () => {
         { hs_code: "82119100", description: "Couteaux de table", score: 0.84 },
         { hs_code: "82119290", description: "Autres couteaux", score: 0.79 },
       ],
+      count: 2,
+      model: "Xenova/paraphrase-multilingual-mpnet-base-v2",
       disclaimer: "AVIS NON-OFFICIEL ...",
     };
     const { fetch } = makeMock(() => ({ body: rpcOk(1, fixture) }));
@@ -55,7 +57,14 @@ describe("tares", () => {
 
   it("changelog() returns change events", async () => {
     const fixture = {
-      hs8: "84620010",
+      hs_code: "84620010",
+      current: {
+        duty_mfn_value: 4.5,
+        duty_mfn_unit: "CHF/100kg",
+        duty_mfn_currency: "CHF",
+        designation_fr: "Machines",
+        valid_from: "2025-04-01",
+      },
       changes: [
         {
           from_version: "2025-01-01",
@@ -66,7 +75,8 @@ describe("tares", () => {
           recorded_at: 1714512000,
         },
       ],
-      current_version: "2025-04-01",
+      versions_observed: ["2025-01-01", "2025-04-01"],
+      source_note: "Source: TARES dated archives.",
     };
     const { fetch } = makeMock(() => ({ body: rpcOk(1, fixture) }));
     const client = new Client({ fetch, maxRetries: 0 });
@@ -74,5 +84,6 @@ describe("tares", () => {
     const result = await client.tares.changelog({ hs8: "84620010", since: "2025-01-01" });
     expect(result.changes).toHaveLength(1);
     expect(result.changes[0]!.field).toBe("duty_mfn_value");
+    expect(result.hs_code).toBe("84620010");
   });
 });

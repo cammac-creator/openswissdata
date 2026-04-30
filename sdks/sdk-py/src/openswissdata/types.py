@@ -65,6 +65,8 @@ class TariffSemanticHit(TypedDict):
 class TariffSemanticSearchResult(TypedDict):
     query: str
     hits: list[TariffSemanticHit]
+    count: int
+    model: str
     disclaimer: str
 
 
@@ -77,10 +79,20 @@ class TariffChangelogChange(TypedDict):
     recorded_at: int
 
 
+class TariffChangelogCurrent(TypedDict):
+    duty_mfn_value: float | None
+    duty_mfn_unit: str | None
+    duty_mfn_currency: str | None
+    designation_fr: str | None
+    valid_from: str | None
+
+
 class TariffChangelogResult(TypedDict):
-    hs8: str
+    hs_code: str
+    current: TariffChangelogCurrent
     changes: list[TariffChangelogChange]
-    current_version: str | None
+    versions_observed: list[str]
+    source_note: str
 
 
 # -- Classifications --------------------------------------------------------
@@ -98,6 +110,7 @@ class CrossWalkResult(TypedDict):
     target_scheme: ClassificationScheme
     source_code: str
     mappings: list[CrossWalkMapping]
+    count: int
 
 
 class ClassifyTextHit(TypedDict):
@@ -107,9 +120,12 @@ class ClassifyTextHit(TypedDict):
 
 
 class ClassifyTextResult(TypedDict, total=False):
-    text: str
-    scheme: Literal["NOGA_2025", "NACE_2.1"]
+    query: str
+    scheme_requested: Literal["NOGA_2025", "NACE_2.1"]
+    scheme_returned: Literal["NOGA_2025"]
     hits: list[ClassifyTextHit]
+    count: int
+    model: str
     degraded: bool
 
 
@@ -139,29 +155,40 @@ class KycWarning(TypedDict):
 
 class KycCheckResult(TypedDict):
     query: str
-    matches: list[KycMatch]
-    warnings: list[KycWarning]
+    registry_matches: list[KycMatch]
+    warning_matches: list[KycWarning]
+    match_count: int
+    warning_count: int
 
 
-class FinmaSearchHit(TypedDict):
-    entity_type: str
+class FinmaSearchMatch(TypedDict):
     name: str
-    normalised_name: str
     uid: str | None
     lei: str | None
+    entity_type: str
     licence_type: str
     status: str
-    canton: str | None
     city: str
+    canton: str | None
     is_warning_listed: bool
+    source_url: str
+    score: float
+
+
+class FinmaSearchWarning(TypedDict):
+    name: str
+    warning_type: str
+    category: str
+    date_added: str
     source_url: str
     score: float
 
 
 class FinmaSearchResult(TypedDict, total=False):
     query: str
-    hits: list[FinmaSearchHit]
-    warnings: list[KycWarning]
+    matches: list[FinmaSearchMatch]
+    warnings: list[FinmaSearchWarning]
+    match_count: int
 
 
 class EntityHistoryCurrent(TypedDict):
@@ -169,7 +196,8 @@ class EntityHistoryCurrent(TypedDict):
     licence_type: str | None
     status: str | None
     canton: str | None
-    address: str | None
+    city: str | None
+    is_warning_listed: bool | None
 
 
 class EntityHistoryEvent(TypedDict):
@@ -184,7 +212,9 @@ class EntityHistoryEvent(TypedDict):
 class EntityHistoryResult(TypedDict):
     uid: str
     current: EntityHistoryCurrent
-    events: list[EntityHistoryEvent]
+    timeline: list[EntityHistoryEvent]
+    versions_observed: list[str]
+    source_note: str
 
 
 # -- MCP wire ---------------------------------------------------------------

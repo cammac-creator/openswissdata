@@ -57,6 +57,8 @@ export interface TariffSemanticHit {
 export interface TariffSemanticSearchResult {
   query: string;
   hits: TariffSemanticHit[];
+  count: number;
+  model: string;
   /** Mandatory non-official disclaimer. */
   disclaimer: string;
 }
@@ -77,9 +79,17 @@ export interface TariffChangelogChange {
 }
 
 export interface TariffChangelogResult {
-  hs8: string;
+  hs_code: string;
+  current: {
+    duty_mfn_value: number | null;
+    duty_mfn_unit: string | null;
+    duty_mfn_currency: string | null;
+    designation_fr: string | null;
+    valid_from: string | null;
+  };
   changes: TariffChangelogChange[];
-  current_version: string | null;
+  versions_observed: string[];
+  source_note: string;
 }
 
 // -- Classifications --------------------------------------------------------
@@ -102,6 +112,7 @@ export interface CrossWalkResult {
   target_scheme: ClassificationScheme;
   source_code: string;
   mappings: CrossWalkMapping[];
+  count: number;
 }
 
 export interface ClassifyTextInput {
@@ -118,10 +129,13 @@ export interface ClassifyTextHit {
 }
 
 export interface ClassifyTextResult {
-  text: string;
-  scheme: "NOGA_2025" | "NACE_2.1";
+  query: string;
+  scheme_requested: "NOGA_2025" | "NACE_2.1";
+  scheme_returned: "NOGA_2025";
   hits: ClassifyTextHit[];
-  /** True if the requested scheme could not be served exactly (NACE fallback). */
+  count: number;
+  model: string;
+  /** True when scheme_requested ≠ scheme_returned (NACE fallback). */
   degraded?: boolean;
 }
 
@@ -155,8 +169,10 @@ export interface KycWarning {
 
 export interface KycCheckResult {
   query: string;
-  matches: KycMatch[];
-  warnings: KycWarning[];
+  registry_matches: KycMatch[];
+  warning_matches: KycWarning[];
+  match_count: number;
+  warning_count: number;
 }
 
 export interface FinmaSearchInput {
@@ -165,25 +181,34 @@ export interface FinmaSearchInput {
   include_warnings?: boolean;
 }
 
-export interface FinmaSearchHit {
-  entity_type: string;
+export interface FinmaSearchMatch {
   name: string;
-  normalised_name: string;
   uid: string | null;
   lei: string | null;
+  entity_type: string;
   licence_type: string;
   status: string;
-  canton: string | null;
   city: string;
+  canton: string | null;
   is_warning_listed: boolean;
+  source_url: string;
+  score: number;
+}
+
+export interface FinmaSearchWarning {
+  name: string;
+  warning_type: string;
+  category: string;
+  date_added: string;
   source_url: string;
   score: number;
 }
 
 export interface FinmaSearchResult {
   query: string;
-  hits: FinmaSearchHit[];
-  warnings?: KycWarning[];
+  matches: FinmaSearchMatch[];
+  warnings?: FinmaSearchWarning[];
+  match_count: number;
 }
 
 export interface EntityHistoryInput {
@@ -191,6 +216,7 @@ export interface EntityHistoryInput {
 }
 
 export interface EntityHistoryEvent {
+  /** "added" | "field_changed" */
   event: string;
   field: string;
   old_value: string | null;
@@ -206,9 +232,12 @@ export interface EntityHistoryResult {
     licence_type: string | null;
     status: string | null;
     canton: string | null;
-    address: string | null;
+    city: string | null;
+    is_warning_listed: boolean | null;
   };
-  events: EntityHistoryEvent[];
+  timeline: EntityHistoryEvent[];
+  versions_observed: string[];
+  source_note: string;
 }
 
 // -- MCP wire types ---------------------------------------------------------

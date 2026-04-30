@@ -52,8 +52,8 @@ async function main() {
   // 5. FINMA — fuzzy search
   console.log("\n=== FINMA fuzzy search ===");
   const fr = await client.finma.search({ name: "Cred Suisse", top_k: 3 });
-  for (const h of fr.hits) {
-    console.log(`  ${h.score.toFixed(2)}  ${h.name}  (${h.licence_type})`);
+  for (const m of fr.matches) {
+    console.log(`  ${m.score.toFixed(2)}  ${m.name}  (${m.licence_type})`);
   }
 
   // 6. Rate-limit telemetry

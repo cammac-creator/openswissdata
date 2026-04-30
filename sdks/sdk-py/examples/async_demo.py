@@ -24,7 +24,7 @@ async def main() -> None:
 
         print("HS8:", tariff["hs8"], "-", tariff["designation"])
         print("Top NOGA:", cls["hits"][0]["code"], cls["hits"][0]["label_fr"])
-        print("Top FINMA hit:", fr["hits"][0]["name"])
+        print("Top FINMA match:", fr["matches"][0]["name"])
 
 
 if __name__ == "__main__":

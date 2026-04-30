@@ -3,10 +3,10 @@ import { Client } from "../src/index.js";
 import { makeMock, rpcOk } from "./_mock.js";
 
 describe("finma", () => {
-  it("kycCheck() returns matches + warnings", async () => {
+  it("kycCheck() returns registry_matches + warning_matches", async () => {
     const fixture = {
       query: "UBS",
-      matches: [
+      registry_matches: [
         {
           entity_type: "bank",
           name: "UBS AG",
@@ -20,24 +20,26 @@ describe("finma", () => {
           source_url: "https://www.finma.ch/...",
         },
       ],
-      warnings: [],
+      warning_matches: [],
+      match_count: 1,
+      warning_count: 0,
     };
     const { fetch } = makeMock(() => ({ body: rpcOk(1, fixture) }));
     const client = new Client({ fetch, maxRetries: 0 });
 
     const r = await client.finma.kycCheck({ name: "UBS", top_k: 5 });
-    expect(r.matches[0]!.uid).toBe("CHE-101.329.561");
-    expect(r.warnings).toHaveLength(0);
+    expect(r.registry_matches[0]!.uid).toBe("CHE-101.329.561");
+    expect(r.warning_matches).toHaveLength(0);
+    expect(r.match_count).toBe(1);
   });
 
-  it("search() returns ranked fuzzy hits", async () => {
+  it("search() returns ranked fuzzy matches", async () => {
     const fixture = {
       query: "Cred Suisse",
-      hits: [
+      matches: [
         {
           entity_type: "bank",
           name: "Credit Suisse AG",
-          normalised_name: "credit suisse",
           uid: "CHE-105.884.030",
           lei: null,
           licence_type: "bank",
@@ -49,15 +51,16 @@ describe("finma", () => {
           score: 0.91,
         },
       ],
+      match_count: 1,
     };
     const { fetch } = makeMock(() => ({ body: rpcOk(1, fixture) }));
     const client = new Client({ fetch, maxRetries: 0 });
 
     const r = await client.finma.search({ name: "Cred Suisse" });
-    expect(r.hits[0]!.score).toBeGreaterThan(0.9);
+    expect(r.matches[0]!.score).toBeGreaterThan(0.9);
   });
 
-  it("entityHistory() returns events sorted", async () => {
+  it("entityHistory() returns timeline sorted", async () => {
     const fixture = {
       uid: "CHE-103.137.179",
       current: {
@@ -65,9 +68,10 @@ describe("finma", () => {
         licence_type: "asset_manager_individual",
         status: "authorised",
         canton: "GE",
-        address: "Rue du Rhône 1, 1204 Genève",
+        city: "Genève",
+        is_warning_listed: false,
       },
-      events: [
+      timeline: [
         {
           event: "added",
           field: "name",
@@ -77,12 +81,14 @@ describe("finma", () => {
           version: "2024-01-01",
         },
       ],
+      versions_observed: ["2024-01-01"],
+      source_note: "Source: FINMA registers (non-official copy).",
     };
     const { fetch } = makeMock(() => ({ body: rpcOk(1, fixture) }));
     const client = new Client({ fetch, maxRetries: 0 });
 
     const r = await client.finma.entityHistory({ uid: "CHE-103.137.179" });
     expect(r.uid).toBe("CHE-103.137.179");
-    expect(r.events).toHaveLength(1);
+    expect(r.timeline).toHaveLength(1);
   });
 });
