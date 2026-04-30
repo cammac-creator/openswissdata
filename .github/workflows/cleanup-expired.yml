@@ -1,0 +1,23 @@
+name: Cleanup expired rows
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # every 6 hours
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run cleanup:expired
+        env:
+          # Reads DATABASE_PATH from env. Adjust to whatever Railway exposes
+          # if running this from Railway scheduled service instead of GH Actions.
+          DATABASE_PATH: ${{ secrets.DATABASE_PATH || './data/openswissdata.sqlite' }}

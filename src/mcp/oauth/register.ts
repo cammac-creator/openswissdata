@@ -33,12 +33,7 @@ import {
   hashToken,
 } from "./crypto.js";
 import { insertClient } from "./store.js";
-import {
-  TIER_DEFAULT_SCOPES,
-  isValidTier,
-  serializeScopes,
-  type Tier,
-} from "./scopes.js";
+import { TIER_DEFAULT_SCOPES, serializeScopes, type Tier } from "./scopes.js";
 
 const RegisterSchema = z.object({
   name: z.string().min(1).max(120),
@@ -65,12 +60,10 @@ registerRoute.post("/register", async (c) => {
     );
   }
 
-  // Paid tiers only granted by webhook later — bound the requested tier here.
-  const requestedTier = parsed.data.tier ?? "free";
-  const tier: Tier = isValidTier(requestedTier) ? "free" : "free";
-  // Note: requestedTier is captured but ignored — registration always lands on
-  // 'free'. The Stripe webhook will UPGRADE the row once the order is paid.
-  void requestedTier;
+  // Public registration always lands on 'free'. Paid tiers are granted by the
+  // Stripe webhook after the order is paid (see stripe-webhook.ts → upgrade
+  // path). The `tier` field in the request body is intentionally ignored.
+  const tier: Tier = "free";
 
   const clientId = generateClientId();
   const clientSecret = generateClientSecret();
