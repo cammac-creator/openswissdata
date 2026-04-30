@@ -3,6 +3,7 @@ import { parseNaceCsv } from "./ingest-nace.js";
 import { parseIsicCsv } from "./ingest-isic.js";
 import { buildCrossWalks } from "./crosswalks.js";
 import { ingestRealClassifications } from "./ingest-real.js";
+import { ingestStatent, type IngestStatentResult } from "./ingest-statent.js";
 import { buildBundle } from "./bundle.js";
 import { uploadZip } from "../../src/lib/r2.js";
 import { mkdirSync, existsSync } from "node:fs";
@@ -34,8 +35,14 @@ export async function runRelease(
   const version = opts.version ?? process.env.CLASSIFICATIONS_VERSION ?? todayVersion();
   const outDir = opts.outDir ?? "./data/classifications";
   const useFixture = opts.useFixture ?? process.env.USE_FIXTURE === "1";
+  const tier = (process.env.CLASSIFICATIONS_TIER ?? "standard").toLowerCase();
+  if (tier !== "standard" && tier !== "pro") {
+    throw new Error(`CLASSIFICATIONS_TIER must be "standard" or "pro", got "${tier}"`);
+  }
 
-  console.log(`[release-classifications] version ${version} targeting ${baseUrl}`);
+  console.log(
+    `[release-classifications] version ${version} tier=${tier} targeting ${baseUrl}`,
+  );
 
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 
@@ -65,7 +72,18 @@ export async function runRelease(
     console.log(`[release-classifications] ingested ${rows.length} rows. stats=${JSON.stringify(result.stats)}`);
   }
 
-  const bundle = await buildBundle({ rows, crossWalks }, version, outDir);
+  // Optional Pro tier add-on: STATENT (BFS structural establishments + FTE).
+  let statent: IngestStatentResult | undefined;
+  if (tier === "pro" && !useFixture) {
+    const cacheDir = join(outDir, "classifications-cache");
+    console.log("[release-classifications] tier=pro — ingesting STATENT (BFS PX-Web)...");
+    statent = await ingestStatent({ cacheDir });
+    console.log(
+      `[release-classifications] STATENT ingested: canton×division=${statent.stats.canton_division_rows}, commune×sector=${statent.stats.commune_sector_rows}, suppressed=${statent.stats.suppressed_cells}, fetch=${statent.stats.fetch_seconds.toFixed(1)}s`,
+    );
+  }
+
+  const bundle = await buildBundle({ rows, crossWalks, statent }, version, outDir);
   console.log(
     `[release-classifications] bundle sha256 ${bundle.sha256.slice(0, 12)}..., ${(bundle.sizeBytes / 1024).toFixed(1)} KB`
   );
@@ -88,7 +106,9 @@ export async function runRelease(
       r2_key,
       sha256: bundle.sha256,
       size_bytes: bundle.sizeBytes,
-      changelog: `Classifications v${version} — ${rows.length} rows, ${crossWalks.length} cross-walks (fixtures)`,
+      changelog: statent
+        ? `Classifications v${version} (Pro) — ${rows.length} rows, ${crossWalks.length} cross-walks, STATENT canton×division=${statent.stats.canton_division_rows} + commune×sector=${statent.stats.commune_sector_rows}`
+        : `Classifications v${version} — ${rows.length} rows, ${crossWalks.length} cross-walks`,
     }),
   });
 
