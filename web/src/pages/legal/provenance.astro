@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const lastUpdated = new Date().toISOString().split("T")[0];
 ---
 <BaseLayout
   title="Provenance & moat juridique — openswissdata.com"
@@ -11,7 +13,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     </nav>
 
     <h1 class="text-3xl font-bold mb-2">Provenance &amp; moat juridique</h1>
-    <p class="text-sm text-slate-500 mb-8">Version 1.0 · Dernière mise à jour : 2026-04-29</p>
+    <p class="text-sm text-slate-500 mb-8">Version 1.1 · Dernière mise à jour : {lastUpdated}</p>
 
     <p class="lead text-lg">
       Cette page explique <strong>pourquoi un acheteur d'openswissdata est juridiquement mieux protégé qu'un consommateur de données scrappées</strong>, et <strong>comment vérifier techniquement la provenance</strong> de chaque ZIP livré.
@@ -22,18 +24,21 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       openswissdata ne vend pas les données — elles sont publiques. Nous vendons la <strong>chaîne de droits documentée</strong> qui permet à un acheteur professionnel de les <em>commercialiser, intégrer dans un produit, ou citer en audit</em> sans s'exposer à un risque de droit suisse de la concurrence déloyale (LCD art. 5).
     </p>
 
-    <h2 class="text-2xl font-semibold mt-10 mb-3">2. Permissions commerciales obtenues</h2>
+    <h2 class="text-2xl font-semibold mt-10 mb-3">2. Permissions commerciales et statut</h2>
     <ul class="list-disc pl-6">
       <li>
-        <strong>BAZG (Office fédéral de la douane et de la sécurité des frontières)</strong> — permission commerciale écrite accordée le <strong>21 avril 2026</strong> par M. Michael Beer, Chef Tarifgrundlagen, pour le dataset TARES. Référence : <code>BAZG-PERMISSION-2026-04-21-MICHAEL-BEER</code>. Texte intégral disponible sur demande à <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>.
+        <strong>BAZG (Office fédéral de la douane et de la sécurité des frontières)</strong> — permission commerciale écrite acquise le <strong>21 avril 2026</strong> par M. Michael Beer, Chef Tarifgrundlagen, pour le dataset TARES. Référence : <code>BAZG-PERMISSION-2026-04-21-MICHAEL-BEER</code>. Texte intégral disponible sur demande à <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>.
       </li>
       <li>
-        <strong>OFS (Office fédéral de la statistique)</strong> — demande envoyée le 17 avril 2026 pour les datasets dérivés de NOGA / classifications. Les classifications économiques elles-mêmes sont des standards internationaux ouverts (NACE © Union européenne, ISIC © Nations Unies, NOGA © Confédération suisse, toutes en réutilisation autorisée pour cause d'utilité publique).
+        <strong>OFS (Office fédéral de la statistique)</strong> — demande envoyée le 17 avril 2026 pour les datasets dérivés de NOGA / classifications. Relance prévue. Les classifications économiques utilisées sont des standards internationaux ouverts (NACE, ISIC, NOGA), réutilisables au titre du caractère public de leur publication.
       </li>
       <li>
-        <strong>FINMA (Autorité fédérale de surveillance des marchés financiers)</strong> — demande envoyée le 17 avril 2026 pour le registre unifié des entités sous surveillance.
+        <strong>FINMA (Autorité fédérale de surveillance des marchés financiers)</strong> — demande envoyée le 17 avril 2026 pour le registre unifié des entités sous surveillance. Relance prévue.
       </li>
     </ul>
+    <p>
+      Pour le détail complet des sources, des relances et des engagements de takedown, voir <a href="/compliance" class="text-indigo-600 hover:underline">/compliance</a>.
+    </p>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">3. Pourquoi le scraping ne remplace pas l'achat</h2>
     <p>
@@ -45,7 +50,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     <ul class="list-disc pl-6">
       <li>Un développeur peut <strong>scraper le BAZG, le BFS, la FINMA pour son usage personnel ou interne</strong> sans risque significatif.</li>
       <li>Une entreprise qui <strong>commercialise un produit alimenté par ces données scrappées</strong> s'expose à un risque LCD — surtout si elle redistribue les données telles quelles.</li>
-      <li>Un acheteur d'openswissdata <strong>achète une licence claire</strong> avec chaîne de droits documentée. Cela élimine le risque LCD côté acheteur, car notre permission BAZG agit comme une licence en chaîne.</li>
+      <li>Un acquéreur d'openswissdata <strong>achète une licence claire</strong> avec chaîne de droits documentée. Cela élimine le risque LCD côté acquéreur, car notre permission BAZG agit comme une licence en chaîne.</li>
     </ul>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">4. Manifest signé Ed25519 + horodatage RFC-3161</h2>
@@ -99,23 +104,7 @@ $ npx @osd/sdk verify-provenance ./tares-2026.04.zip
       Toute modification du contenu du ZIP (même un seul caractère) invalide la signature. Toute date d'émission falsifiée invalide l'horodatage RFC-3161 puisque le token est émis par une TSA tierce indépendante.
     </p>
 
-    <h2 class="text-2xl font-semibold mt-10 mb-3">5. Garantie d'exactitude (tier Pro et Enterprise)</h2>
-    <p>
-      Pour les tiers <strong>Pro</strong> (TARES Pro 899 CHF, FINMA Pro 699 CHF, Classifications Pro 999 CHF) et <strong>Enterprise</strong>, openswissdata fournit une <strong>garantie contractuelle d'exactitude des données</strong> avec clause d'indemnisation jusqu'à <strong>10× le prix de la licence annuelle</strong> (plafond 50 000 CHF par incident).
-    </p>
-    <p>
-      Cette garantie couvre :
-    </p>
-    <ul class="list-disc pl-6">
-      <li>Une amende douanière BAZG résultant directement d'une erreur de notre dataset TARES (ex : un code HS8 incorrectement dérivé).</li>
-      <li>Une sanction d'autorité fédérale résultant directement d'une erreur de classification de notre pack Classifications.</li>
-      <li>Une perte vérifiable directement causée par une donnée erronée du registre FINMA (ex : une entité marquée <code>is_warning_listed = true</code> à tort).</li>
-    </ul>
-    <p>
-      Cette clause est <strong>contraignante uniquement pour les tiers Pro et Enterprise</strong>. Le tier Standard (299-499 CHF) reste fourni « en l'état » avec limitation de responsabilité au montant de la commande, conformément aux <a href="/legal/cgv" class="text-indigo-600 hover:underline">CGV §7</a>.
-    </p>
-
-    <h2 class="text-2xl font-semibold mt-10 mb-3">6. Limites assumées</h2>
+    <h2 class="text-2xl font-semibold mt-10 mb-3">5. Limites assumées</h2>
     <ul class="list-disc pl-6">
       <li>
         <strong>Pas un avis juridique.</strong> Nos datasets sont des outils de référence et d'aide à la décision. Pour toute classification douanière contraignante, seul le BAZG peut émettre un <em>renseignement tarifaire contraignant</em> (RTC). Pour toute question d'autorisation FINMA, seule la FINMA fait foi.
@@ -124,14 +113,17 @@ $ npx @osd/sdk verify-provenance ./tares-2026.04.zip
         <strong>Erläuterungen et Entscheide BAZG exclus.</strong> Conformément à la condition 3 de notre permission BAZG, les notes explicatives et décisions de classification du BAZG sont expressément exclues de notre dataset TARES.
       </li>
       <li>
-        <strong>Permissions BFS et FINMA en cours.</strong> Les datasets dérivés de ces sources s'appuient sur le caractère public et international des standards utilisés (NACE, ISIC, classifications financières). Les permissions formelles ont été demandées et sont attendues — toute restriction qui en découlerait serait communiquée aux acheteurs avec option de remboursement.
+        <strong>Permissions BFS et FINMA en cours.</strong> Les datasets dérivés de ces sources sont republiés au titre de la valeur ajoutée de normalisation et du caractère public des registres source. Toute restriction qui découlerait d'une réponse écrite des autorités serait communiquée aux acquéreurs avec option de remboursement et procédure de takedown sous 24 heures (voir <a href="/compliance" class="text-indigo-600 hover:underline">/compliance</a>).
       </li>
     </ul>
 
-    <h2 class="text-2xl font-semibold mt-10 mb-3">7. Contact</h2>
+    <h2 class="text-2xl font-semibold mt-10 mb-3">6. Contact</h2>
     <p>
       Pour toute question juridique, pour demander une copie du texte de permission BAZG, ou pour signaler un problème de provenance :
       <br /><a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>
+    </p>
+    <p>
+      Pour toute demande de retrait par autorité source : <a href="mailto:takedown@openswissdata.com" class="text-indigo-600 hover:underline">takedown@openswissdata.com</a>
     </p>
 
     <p class="text-xs text-slate-400 mt-12 not-prose">
