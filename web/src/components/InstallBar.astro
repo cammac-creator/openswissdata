@@ -1,0 +1,32 @@
+---
+interface Props {
+  command: string;
+}
+const { command } = Astro.props;
+---
+<div class="v4-install-bar" data-cmd={command}>
+  <span class="v4-install-bar-prompt">$</span>
+  <span class="v4-install-bar-cmd">{command}</span>
+  <span class="v4-install-bar-copy">copy</span>
+</div>
+
+<script is:inline>
+  (() => {
+    document.querySelectorAll('.v4-install-bar').forEach(bar => {
+      bar.addEventListener('click', async () => {
+        const cmd = bar.dataset.cmd;
+        const copyEl = bar.querySelector('.v4-install-bar-copy');
+        if (!cmd || !copyEl) return;
+        try {
+          await navigator.clipboard.writeText(cmd);
+          copyEl.textContent = '✓ copied';
+          copyEl.classList.add('copied');
+          setTimeout(() => {
+            copyEl.textContent = 'copy';
+            copyEl.classList.remove('copied');
+          }, 1600);
+        } catch {}
+      });
+    });
+  })();
+</script>

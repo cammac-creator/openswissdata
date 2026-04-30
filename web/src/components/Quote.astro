@@ -1,0 +1,38 @@
+---
+interface QuoteCta {
+  label: string;
+  href: string;
+}
+interface Props {
+  source: string;
+  date: string;
+  text: string;
+  author: string;
+  role: string;
+  affiliation: string;
+  ctas: QuoteCta[];
+}
+const { source, date, text, author, role, affiliation, ctas } = Astro.props;
+---
+<section class="v4-quote-section">
+  <div class="container-v4">
+    <div class="v4-quote-eyebrow reveal-v4">
+      <span>Permission commerciale</span>
+      <span style="opacity:.4">·</span>
+      <span class="src">{source}</span>
+      <span style="opacity:.4">·</span>
+      <span>{date}</span>
+    </div>
+    <p class="v4-quote-text reveal-v4" data-delay="1">{text}</p>
+    <div class="v4-quote-author reveal-v4" data-delay="2">
+      <strong>{author}</strong>
+      <span style="opacity:.5">·</span>
+      <span>{role}</span>
+      <span style="opacity:.5">·</span>
+      <span>{affiliation}</span>
+    </div>
+    <div class="v4-quote-cta reveal-v4" data-delay="3">
+      {ctas.map(c => <a href={c.href}>{c.label}</a>)}
+    </div>
+  </div>
+</section>

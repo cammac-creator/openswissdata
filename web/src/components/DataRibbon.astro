@@ -1,0 +1,22 @@
+---
+interface RibbonItem {
+  label?: string;
+  value: string;
+  strong?: boolean;
+}
+interface Props {
+  items: RibbonItem[];
+}
+const { items } = Astro.props;
+---
+<div class="v4-fiche-ribbon" style="margin-bottom:16px">
+  {items.map((item, i) => (
+    <>
+      {i > 0 && <span style="opacity:.4">·</span>}
+      <span>
+        {item.label && <>{item.label} </>}
+        {item.strong ? <strong>{item.value}</strong> : item.value}
+      </span>
+    </>
+  ))}
+</div>
