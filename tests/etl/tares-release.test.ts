@@ -21,6 +21,10 @@ describe("etl/tares/release orchestration", () => {
     process.env.ADMIN_SECRET = "test-secret-1234567890";
     process.env.USE_FIXTURE = "1";
     process.env.TARES_VERSION = "2026.04.22";
+    // Phase 1/T1 added an embeddings step that downloads/loads a ~120 MB ONNX
+    // model. Tests don't need to verify embedding correctness here (covered by
+    // tares-embeddings.test.ts and a sanity script), so opt out for speed.
+    process.env.SKIP_EMBEDDINGS = "1";
     fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -35,6 +39,7 @@ describe("etl/tares/release orchestration", () => {
     rmSync(tmp, { recursive: true, force: true });
     delete process.env.USE_FIXTURE;
     delete process.env.TARES_VERSION;
+    delete process.env.SKIP_EMBEDDINGS;
   });
 
   it("end-to-end: ingest → bundle → upload → admin release", async () => {
