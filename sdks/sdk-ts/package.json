@@ -1,0 +1,67 @@
+{
+  "name": "@openswissdata/sdk",
+  "version": "0.1.0",
+  "description": "Official TypeScript SDK for openswissdata.com — Swiss customs (TARES), classifications (NOGA/NACE/ISIC) and FINMA registry, via the live MCP JSON-RPC endpoint.",
+  "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs && npm run build:types && npm run build:postcjs",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "build:postcjs": "node scripts/postbuild-cjs.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "keywords": [
+    "openswissdata",
+    "swiss",
+    "switzerland",
+    "tares",
+    "customs",
+    "tariff",
+    "noga",
+    "nace",
+    "isic",
+    "finma",
+    "kyc",
+    "compliance",
+    "mcp"
+  ],
+  "author": "openswissdata <contact@openswissdata.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cammac-creator/openswissdata.git",
+    "directory": "sdks/sdk-ts"
+  },
+  "homepage": "https://openswissdata.com",
+  "bugs": {
+    "url": "https://github.com/cammac-creator/openswissdata/issues"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false
+}

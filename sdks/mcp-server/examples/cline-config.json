@@ -1,0 +1,12 @@
+{
+  "_comment": "Cline reads MCP servers from .vscode/mcp.json or the global Cline settings UI. Either drop this snippet there or use the UI to add a stdio server with the same command/args/env triple.",
+  "mcpServers": {
+    "openswissdata": {
+      "command": "npx",
+      "args": ["-y", "@openswissdata/mcp"],
+      "env": {
+        "OPENSWISSDATA_API_KEY": "sk_live_replace_me_or_remove_for_anonymous_tier"
+      }
+    }
+  }
+}

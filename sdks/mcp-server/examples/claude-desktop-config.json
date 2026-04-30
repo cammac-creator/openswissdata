@@ -1,0 +1,12 @@
+{
+  "_comment": "Drop this snippet into ~/Library/Application Support/Claude/claude_desktop_config.json (macOS) or %APPDATA%/Claude/claude_desktop_config.json (Windows). Restart Claude Desktop after editing.",
+  "mcpServers": {
+    "openswissdata": {
+      "command": "npx",
+      "args": ["-y", "@openswissdata/mcp"],
+      "env": {
+        "OPENSWISSDATA_API_KEY": "sk_live_replace_me_or_remove_for_anonymous_tier"
+      }
+    }
+  }
+}
