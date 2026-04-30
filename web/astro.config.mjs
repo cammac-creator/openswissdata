@@ -12,7 +12,7 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/account'),
+      filter: (page) => !page.includes('/account') && !page.includes('/famille'),
       changefreq: 'weekly',
       priority: 0.7,
       lastmod: new Date(),

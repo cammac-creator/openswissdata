@@ -1,0 +1,1649 @@
+---
+const title = "Pour ma famille — l'aventure de Papa";
+const description = "Un carnet d'aventure illustré pour ma famille — le projet openswissdata, la chasse aux trésors et la tirelire qui se remplit.";
+---
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex,nofollow" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Caveat:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+
+  <body>
+    <!-- ╭──────────────────────────────────────────╮
+         │  PAPER BACKGROUND (texture + corners)    │
+         ╰──────────────────────────────────────────╯ -->
+    <div class="paper-bg" aria-hidden>
+      <div class="paper-grain"></div>
+      <div class="paper-margin paper-margin-left"></div>
+      <div class="paper-margin paper-margin-right"></div>
+      <div class="paper-corner corner-tl"></div>
+      <div class="paper-corner corner-tr"></div>
+      <div class="paper-corner corner-bl"></div>
+      <div class="paper-corner corner-br"></div>
+    </div>
+
+    <!-- ╭──────────────────────────────────────────╮
+         │  HERO — la couverture du carnet          │
+         ╰──────────────────────────────────────────╯ -->
+    <section class="cover">
+      <div class="stamp stamp-tilt">
+        <span class="stamp-line">CARNET DE BORD</span>
+        <span class="stamp-line stamp-big">CHAPITRE 1</span>
+        <span class="stamp-line">PRINTEMPS 2026</span>
+      </div>
+
+      <div class="cover-eyebrow">✚ Pour ma famille — un carnet d'aventure</div>
+
+      <h1 class="cover-title">
+        L'<span class="word-emph">aventure</span> de Papa,<br />
+        <span class="word-script">racontée comme une histoire.</span>
+      </h1>
+
+      <p class="cover-lede">
+        Bonjour. Je m'appelle Alain. Voilà ce que je fabrique chaque soir,<br />
+        pourquoi j'y crois, et comment ça pourrait nous rapporter de l'argent.
+      </p>
+
+      <!-- Hero illustration : Papa + 3 coffres -->
+      <div class="cover-illu">
+        <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" aria-label="Papa devant trois coffres">
+          <!-- Sky -->
+          <rect x="0" y="0" width="720" height="280" fill="#EAF3FB"/>
+          <!-- Mountains -->
+          <path d="M0 280 L80 200 L120 230 L200 140 L260 200 L340 130 L420 210 L500 150 L600 220 L680 170 L720 220 L720 280 Z" fill="#B0CFD9" opacity="0.5"/>
+          <path d="M0 280 L100 220 L180 250 L280 180 L380 240 L470 200 L580 250 L660 220 L720 240 L720 280 Z" fill="#7DA8B5" opacity="0.6"/>
+          <!-- Grass -->
+          <rect x="0" y="280" width="720" height="80" fill="#C5DD9C"/>
+          <ellipse cx="120" cy="320" rx="180" ry="14" fill="#A4C476" opacity="0.6"/>
+          <ellipse cx="500" cy="335" rx="240" ry="14" fill="#A4C476" opacity="0.6"/>
+
+          <!-- Sun -->
+          <circle cx="600" cy="80" r="36" fill="#F5C63E"/>
+          <g stroke="#F5C63E" stroke-width="3" stroke-linecap="round">
+            <line x1="600" y1="20" x2="600" y2="35"/>
+            <line x1="540" y1="80" x2="555" y2="80"/>
+            <line x1="660" y1="80" x2="645" y2="80"/>
+            <line x1="558" y1="40" x2="568" y2="50"/>
+            <line x1="642" y1="40" x2="632" y2="50"/>
+          </g>
+
+          <!-- Cloud -->
+          <g fill="#FFFFFF" opacity="0.85">
+            <ellipse cx="200" cy="80" rx="38" ry="18"/>
+            <ellipse cx="230" cy="68" rx="28" ry="16"/>
+            <ellipse cx="170" cy="74" rx="22" ry="14"/>
+          </g>
+
+          <!-- Papa (stick figure, casquette, clé) -->
+          <g class="papa">
+            <!-- chapeau -->
+            <path d="M270 120 L320 120 L325 110 L265 110 Z" fill="#DC1F2D"/>
+            <rect x="262" y="118" width="66" height="6" fill="#1F1A14"/>
+            <circle cx="295" cy="105" r="4" fill="#FFFFFF"/>
+            <!-- tête -->
+            <circle cx="295" cy="145" r="22" fill="#F5D6B0"/>
+            <!-- yeux -->
+            <circle cx="288" cy="142" r="2" fill="#1F1A14"/>
+            <circle cx="302" cy="142" r="2" fill="#1F1A14"/>
+            <!-- sourire -->
+            <path d="M286 152 Q295 158 304 152" stroke="#1F1A14" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- corps -->
+            <rect x="278" y="167" width="34" height="50" rx="4" fill="#5B9BD5"/>
+            <!-- bras gauche (avec clé) -->
+            <line x1="278" y1="180" x2="248" y2="208" stroke="#F5D6B0" stroke-width="6" stroke-linecap="round"/>
+            <!-- clé -->
+            <g transform="translate(232 200) rotate(20)">
+              <circle cx="6" cy="6" r="6" fill="none" stroke="#D9A648" stroke-width="3"/>
+              <circle cx="6" cy="6" r="2" fill="#FBF7EE"/>
+              <rect x="11" y="4" width="22" height="4" fill="#D9A648"/>
+              <rect x="26" y="4" width="3" height="9" fill="#D9A648"/>
+              <rect x="31" y="4" width="3" height="6" fill="#D9A648"/>
+            </g>
+            <!-- bras droit -->
+            <line x1="312" y1="180" x2="332" y2="200" stroke="#F5D6B0" stroke-width="6" stroke-linecap="round"/>
+            <!-- jambes -->
+            <line x1="288" y1="217" x2="280" y2="265" stroke="#1F1A14" stroke-width="6" stroke-linecap="round"/>
+            <line x1="302" y1="217" x2="312" y2="265" stroke="#1F1A14" stroke-width="6" stroke-linecap="round"/>
+            <!-- chaussures -->
+            <ellipse cx="278" cy="270" rx="10" ry="4" fill="#1F1A14"/>
+            <ellipse cx="314" cy="270" rx="10" ry="4" fill="#1F1A14"/>
+          </g>
+
+          <!-- Coffre 1 -->
+          <g class="chest chest-1" transform="translate(380 220)">
+            <rect x="0" y="20" width="80" height="48" rx="4" fill="#8B5E2A"/>
+            <path d="M0 24 Q40 -10 80 24 L80 30 L0 30 Z" fill="#A6712F"/>
+            <rect x="35" y="40" width="10" height="14" fill="#D9A648"/>
+            <circle cx="40" cy="44" r="2" fill="#1F1A14"/>
+            <line x1="0" y1="30" x2="80" y2="30" stroke="#5C3F1D" stroke-width="1.5"/>
+          </g>
+          <text x="420" y="298" text-anchor="middle" class="chest-label">TARES</text>
+
+          <!-- Coffre 2 -->
+          <g class="chest chest-2" transform="translate(490 215)">
+            <rect x="0" y="20" width="80" height="48" rx="4" fill="#8B5E2A"/>
+            <path d="M0 24 Q40 -10 80 24 L80 30 L0 30 Z" fill="#A6712F"/>
+            <rect x="35" y="40" width="10" height="14" fill="#D9A648"/>
+            <circle cx="40" cy="44" r="2" fill="#1F1A14"/>
+            <line x1="0" y1="30" x2="80" y2="30" stroke="#5C3F1D" stroke-width="1.5"/>
+          </g>
+          <text x="530" y="293" text-anchor="middle" class="chest-label">NOGA</text>
+
+          <!-- Coffre 3 -->
+          <g class="chest chest-3" transform="translate(600 222)">
+            <rect x="0" y="20" width="80" height="48" rx="4" fill="#8B5E2A"/>
+            <path d="M0 24 Q40 -10 80 24 L80 30 L0 30 Z" fill="#A6712F"/>
+            <rect x="35" y="40" width="10" height="14" fill="#D9A648"/>
+            <circle cx="40" cy="44" r="2" fill="#1F1A14"/>
+            <line x1="0" y1="30" x2="80" y2="30" stroke="#5C3F1D" stroke-width="1.5"/>
+          </g>
+          <text x="640" y="300" text-anchor="middle" class="chest-label">FINMA</text>
+
+          <!-- Texte décoratif -->
+          <text x="380" y="190" class="hero-arrow-text" transform="rotate(-8 380 190)">trois trésors à débloquer →</text>
+        </svg>
+      </div>
+
+      <p class="cover-signature">— Alain, le 30 avril 2026</p>
+
+      <a href="#chapter-2" class="scroll-cue">
+        Tourner la page
+        <svg width="14" height="22" viewBox="0 0 14 22" fill="none">
+          <path d="M7 1 V19 M2 14 L7 19 L12 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </section>
+
+    <!-- ╭──────────────────────────────────────────╮
+         │  CH 2 — LE PROBLÈME                      │
+         ╰──────────────────────────────────────────╯ -->
+    <section class="chapter" id="chapter-2">
+      <div class="chapter-num">Chapitre 2</div>
+      <h2 class="chapter-title">
+        Les coffres de l'État sont <em>verrouillés</em>.
+      </h2>
+
+      <div class="prose">
+        <p>
+          La Suisse a des <strong>coffres pleins de données précieuses</strong>. Le tarif douanier
+          (TARES), la liste des banques agréées (FINMA), les classifications des entreprises
+          (NOGA) — tout est là.
+        </p>
+        <p>
+          Mais quand on les ouvre, on tombe sur ça :
+        </p>
+      </div>
+
+      <!-- 3 coffres ouverts montrant des PDFs froissés -->
+      <div class="problem-chests">
+        <div class="problem-chest">
+          <div class="problem-chest-illu">
+            <svg viewBox="0 0 200 200" aria-hidden>
+              <!-- coffre ouvert -->
+              <g transform="translate(40 60)">
+                <path d="M0 30 Q60 -25 120 30 L120 80 L0 80 Z" fill="#A6712F" stroke="#5C3F1D" stroke-width="2"/>
+                <path d="M0 35 L120 35" stroke="#5C3F1D" stroke-width="1.5" fill="none"/>
+                <rect x="50" y="50" width="20" height="20" fill="#D9A648"/>
+                <circle cx="60" cy="60" r="3" fill="#1F1A14"/>
+              </g>
+              <!-- PDFs froissés qui sortent -->
+              <g class="messy-paper" transform="translate(70 30)">
+                <path d="M0 0 L40 -5 L42 25 L8 30 L4 22 L-3 18 Z" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5"/>
+                <line x1="6" y1="6" x2="35" y2="3" stroke="#C5C9D2" stroke-width="1"/>
+                <line x1="6" y1="12" x2="32" y2="9" stroke="#C5C9D2" stroke-width="1"/>
+                <line x1="6" y1="18" x2="28" y2="16" stroke="#C5C9D2" stroke-width="1"/>
+                <text x="22" y="-12" text-anchor="middle" font-family="Fredoka" font-size="10" fill="#DC1F2D" font-weight="600">PDF</text>
+              </g>
+              <g class="messy-paper-2" transform="translate(110 50)">
+                <path d="M0 0 L36 4 L34 32 L4 28 Z" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5"/>
+                <line x1="5" y1="8" x2="30" y2="11" stroke="#C5C9D2" stroke-width="1"/>
+                <line x1="5" y1="14" x2="28" y2="17" stroke="#C5C9D2" stroke-width="1"/>
+                <text x="20" y="-8" text-anchor="middle" font-family="Fredoka" font-size="9" fill="#DC1F2D" font-weight="600">XLS cassé</text>
+              </g>
+              <!-- ZZZ confusion -->
+              <text x="40" y="35" font-family="Caveat" font-size="22" fill="#8A8D95">!?</text>
+            </svg>
+          </div>
+          <h3>2&nbsp;400 pages de PDF</h3>
+          <p>Le tarif douanier suisse complet. En PDF. Bonne chance pour le brancher dans un logiciel.</p>
+        </div>
+
+        <div class="problem-chest">
+          <div class="problem-chest-illu">
+            <svg viewBox="0 0 200 200" aria-hidden>
+              <g transform="translate(40 60)">
+                <path d="M0 30 Q60 -25 120 30 L120 80 L0 80 Z" fill="#A6712F" stroke="#5C3F1D" stroke-width="2"/>
+                <path d="M0 35 L120 35" stroke="#5C3F1D" stroke-width="1.5" fill="none"/>
+                <rect x="50" y="50" width="20" height="20" fill="#D9A648"/>
+              </g>
+              <!-- Caractères cassés -->
+              <g transform="translate(60 30)">
+                <rect x="0" y="0" width="80" height="50" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="3"/>
+                <text x="6" y="14" font-family="JetBrains Mono" font-size="9" fill="#1F1A14">M&#252;ller</text>
+                <text x="6" y="26" font-family="JetBrains Mono" font-size="9" fill="#DC1F2D">M??ller</text>
+                <text x="6" y="38" font-family="JetBrains Mono" font-size="9" fill="#DC1F2D">M&Atilde;&frac14;ller</text>
+                <text x="40" y="50" font-family="Caveat" font-size="14" fill="#DC1F2D">??!</text>
+              </g>
+            </svg>
+          </div>
+          <h3>Encodage cassé</h3>
+          <p>Les noms suisses (Müller, Genève, Zürich) deviennent illisibles. C'est un fichier des années 90.</p>
+        </div>
+
+        <div class="problem-chest">
+          <div class="problem-chest-illu">
+            <svg viewBox="0 0 200 200" aria-hidden>
+              <g transform="translate(40 60)">
+                <path d="M0 30 Q60 -25 120 30 L120 80 L0 80 Z" fill="#A6712F" stroke="#5C3F1D" stroke-width="2"/>
+                <path d="M0 35 L120 35" stroke="#5C3F1D" stroke-width="1.5" fill="none"/>
+                <rect x="50" y="50" width="20" height="20" fill="#D9A648"/>
+              </g>
+              <!-- 10 listes éparpillées -->
+              <g class="scattered" transform="translate(50 30)">
+                <rect x="0" y="0" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(-12 10 13)"/>
+                <rect x="22" y="-2" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(8 32 11)"/>
+                <rect x="46" y="2" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(-5 56 15)"/>
+                <rect x="70" y="-3" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(15 80 10)"/>
+                <rect x="94" y="2" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(-8 104 15)"/>
+                <text x="60" y="-10" text-anchor="middle" font-family="Caveat" font-size="20" fill="#DC1F2D">×10</text>
+              </g>
+            </svg>
+          </div>
+          <h3>10 listes différentes</h3>
+          <p>Les banques agréées ? Réparties sur 10 pages web différentes. Aucune liste unifiée.</p>
+        </div>
+      </div>
+
+      <p class="aside aside-red">
+        <span class="aside-mark">!</span>
+        Résultat&nbsp;: <strong>personne ne les utilise</strong>. Les comptables font des copier-coller à la main.
+        Les banques refont le travail dans leur coin. Une montagne d'heures perdues, partout en Suisse.
+      </p>
+    </section>
+
+    <!-- ╭──────────────────────────────────────────╮
+         │  CH 3 — L'ATELIER                        │
+         ╰──────────────────────────────────────────╯ -->
+    <section class="chapter chapter-shaded">
+      <div class="chapter-num">Chapitre 3</div>
+      <h2 class="chapter-title">
+        Alors j'ai construit une <em>machine</em>.
+      </h2>
+
+      <div class="prose">
+        <p>
+          Une machine qui prend les fichiers cassés et les remet en ordre. Qui corrige les
+          encodages, qui assemble les 10 listes en une seule, qui transforme le PDF de
+          2&nbsp;400 pages en tableau bien rangé.
+        </p>
+        <p class="prose-handwritten">
+          Ce n'est pas magique. C'est juste très ennuyeux.<br />
+          Ça prend des semaines. <strong>C'est précisément pour ça que personne d'autre ne le fait.</strong>
+        </p>
+      </div>
+
+      <!-- Machine illustration -->
+      <div class="workshop">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet" aria-label="Machine de transformation">
+          <!-- Tapis roulant entrée -->
+          <rect x="20" y="180" width="180" height="14" fill="#5C3F1D" rx="2"/>
+          <g class="conveyor-belts">
+            <circle cx="40" cy="187" r="6" fill="#1F1A14"/>
+            <circle cx="80" cy="187" r="6" fill="#1F1A14"/>
+            <circle cx="120" cy="187" r="6" fill="#1F1A14"/>
+            <circle cx="160" cy="187" r="6" fill="#1F1A14"/>
+          </g>
+
+          <!-- PDF moche entrant -->
+          <g class="enter-paper">
+            <rect x="0" y="0" width="40" height="50" rx="3" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5"/>
+            <line x1="6" y1="10" x2="34" y2="10" stroke="#C5C9D2" stroke-width="1"/>
+            <line x1="6" y1="18" x2="30" y2="18" stroke="#C5C9D2" stroke-width="1"/>
+            <line x1="6" y1="26" x2="34" y2="26" stroke="#C5C9D2" stroke-width="1"/>
+            <line x1="6" y1="34" x2="28" y2="34" stroke="#C5C9D2" stroke-width="1"/>
+            <text x="20" y="60" text-anchor="middle" font-family="Fredoka" font-size="10" fill="#DC1F2D" font-weight="600">PDF</text>
+          </g>
+
+          <!-- Machine -->
+          <g>
+            <rect x="220" y="100" width="280" height="140" rx="14" fill="#DC1F2D"/>
+            <rect x="220" y="100" width="280" height="140" rx="14" fill="none" stroke="#9E1620" stroke-width="3"/>
+            <rect x="240" y="120" width="240" height="100" rx="8" fill="#1F1A14"/>
+            <!-- écran -->
+            <text x="360" y="155" text-anchor="middle" font-family="Fredoka" font-size="14" fill="#7DDB7D" font-weight="600">openswissdata</text>
+            <text x="360" y="178" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#7DDB7D">[ nettoyage en cours ]</text>
+            <text x="360" y="200" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#7DDB7D">7 511 lignes ✓</text>
+            <!-- diodes animées -->
+            <circle cx="248" cy="118" r="3" fill="#7DDB7D" class="led led-1"/>
+            <circle cx="262" cy="118" r="3" fill="#F5C63E" class="led led-2"/>
+            <circle cx="276" cy="118" r="3" fill="#7DDB7D" class="led led-3"/>
+            <!-- entonnoir -->
+            <path d="M210 110 L 230 130 L 230 150 L 210 130 Z" fill="#9E1620"/>
+            <path d="M210 110 L 200 110 L 200 130 L 210 130 Z" fill="#7A1019"/>
+            <!-- sortie -->
+            <path d="M510 130 L530 130 L530 150 L510 150 Z" fill="#9E1620"/>
+            <!-- vapeur -->
+            <g class="steam">
+              <circle cx="300" cy="100" r="6" fill="#FFFFFF" opacity="0.7"/>
+              <circle cx="320" cy="92" r="5" fill="#FFFFFF" opacity="0.5"/>
+              <circle cx="350" cy="86" r="7" fill="#FFFFFF" opacity="0.6"/>
+              <circle cx="380" cy="92" r="5" fill="#FFFFFF" opacity="0.5"/>
+              <circle cx="410" cy="98" r="6" fill="#FFFFFF" opacity="0.4"/>
+            </g>
+            <!-- antenne -->
+            <line x1="360" y1="100" x2="360" y2="80" stroke="#1F1A14" stroke-width="2"/>
+            <circle cx="360" cy="76" r="4" fill="#F5C63E"/>
+            <!-- pieds -->
+            <rect x="240" y="240" width="20" height="20" fill="#7A1019"/>
+            <rect x="460" y="240" width="20" height="20" fill="#7A1019"/>
+          </g>
+
+          <!-- Tapis roulant sortie -->
+          <rect x="520" y="180" width="180" height="14" fill="#5C3F1D" rx="2"/>
+          <g class="conveyor-belts">
+            <circle cx="540" cy="187" r="6" fill="#1F1A14"/>
+            <circle cx="580" cy="187" r="6" fill="#1F1A14"/>
+            <circle cx="620" cy="187" r="6" fill="#1F1A14"/>
+            <circle cx="660" cy="187" r="6" fill="#1F1A14"/>
+          </g>
+
+          <!-- Boîtes propres en sortie -->
+          <g class="exit-box exit-box-1" transform="translate(540 140)">
+            <rect x="0" y="0" width="42" height="32" rx="3" fill="#5B9BD5"/>
+            <text x="21" y="20" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#FFFFFF" font-weight="700">JSON</text>
+          </g>
+          <g class="exit-box exit-box-2" transform="translate(595 140)">
+            <rect x="0" y="0" width="50" height="32" rx="3" fill="#6FAE5E"/>
+            <text x="25" y="20" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#FFFFFF" font-weight="700">PARQUET</text>
+          </g>
+          <g class="exit-box exit-box-3" transform="translate(660 140)">
+            <rect x="0" y="0" width="34" height="32" rx="3" fill="#D9A648"/>
+            <text x="17" y="20" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#FFFFFF" font-weight="700">SQL</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="prose">
+        <p>
+          De l'autre côté, je sors des fichiers <strong>propres, vérifiés, prêts à brancher</strong>.
+          Trois formats au choix selon ce dont le client a besoin&nbsp;:
+        </p>
+        <ul class="bullet-list">
+          <li><strong>JSON</strong> — comprenez "format universel des sites web et applications".</li>
+          <li><strong>Parquet</strong> — pour les analystes qui font des graphiques.</li>
+          <li><strong>SQL</strong> — pour ceux qui ont une base de données.</li>
+        </ul>
+        <p>
+          Et chaque trimestre, je relance la machine pour que les fichiers restent à jour.
+        </p>
+      </div>
+    </section>
+
+    <!-- ╭──────────────────────────────────────────╮
+         │  CH 4 — LES TRÉSORS                      │
+         ╰──────────────────────────────────────────╯ -->
+    <section class="chapter">
+      <div class="chapter-num">Chapitre 4</div>
+      <h2 class="chapter-title">
+        Trois trésors à <em>vendre</em>. Et un coffret qui contient les trois.
+      </h2>
+
+      <div class="treasures">
+        <div class="treasure">
+          <div class="treasure-emoji">🚂</div>
+          <div class="treasure-tag">Trésor n°1 · Douanes</div>
+          <h3>TARES</h3>
+          <p>Le tarif douanier suisse complet. Pour quoi&nbsp;? Pour calculer les taxes à l'import/export.</p>
+          <div class="treasure-stats">
+            <div><span class="stat-num">7&nbsp;511</span><span class="stat-lab">codes douaniers</span></div>
+            <div><span class="stat-num">~&nbsp;40&nbsp;h</span><span class="stat-lab">économisées par client</span></div>
+          </div>
+          <div class="treasure-price">
+            <span class="price-amt">299 CHF</span>
+            <span class="price-sub">une fois · ou 120 CHF/an pour les mises à jour</span>
+          </div>
+        </div>
+
+        <div class="treasure">
+          <div class="treasure-emoji">📊</div>
+          <div class="treasure-tag">Trésor n°2 · Économie</div>
+          <h3>NOGA + NACE + ISIC</h3>
+          <p>Les codes qui classent les entreprises. Pour quoi&nbsp;? Pour comprendre dans quel secteur travaille n'importe quelle société, en Suisse, en Europe ou dans le monde.</p>
+          <div class="treasure-stats">
+            <div><span class="stat-num">3</span><span class="stat-lab">standards alignés</span></div>
+            <div><span class="stat-num">~&nbsp;800</span><span class="stat-lab">codes croisés</span></div>
+          </div>
+          <div class="treasure-price">
+            <span class="price-amt">399 CHF</span>
+            <span class="price-sub">une fois · ou 160 CHF/an pour les mises à jour</span>
+          </div>
+        </div>
+
+        <div class="treasure">
+          <div class="treasure-emoji">🏦</div>
+          <div class="treasure-tag">Trésor n°3 · Finance</div>
+          <h3>FINMA</h3>
+          <p>La liste de toutes les banques, assurances et acteurs financiers agréés en Suisse. Pour quoi&nbsp;? Pour vérifier qu'un fournisseur financier est officiellement reconnu.</p>
+          <div class="treasure-stats">
+            <div><span class="stat-num">10+</span><span class="stat-lab">registres unifiés</span></div>
+            <div><span class="stat-num">CH</span><span class="stat-lab">données officielles</span></div>
+          </div>
+          <div class="treasure-price">
+            <span class="price-amt">299 CHF</span>
+            <span class="price-sub">une fois · ou 120 CHF/an pour les mises à jour</span>
+          </div>
+        </div>
+
+        <div class="treasure treasure-bundle">
+          <div class="bundle-ribbon">⚡ Pack complet</div>
+          <div class="treasure-emoji">🎁</div>
+          <div class="treasure-tag">Le coffret du roi</div>
+          <h3>Bundle complet</h3>
+          <p>Les trois trésors d'un coup. C'est ce que la plupart des clients prennent — c'est aussi le meilleur prix.</p>
+          <div class="treasure-stats">
+            <div><span class="stat-num stat-strike">997</span><span class="stat-lab">si pris séparément</span></div>
+            <div><span class="stat-num stat-bundle">799 CHF</span><span class="stat-lab">en une seule fois</span></div>
+          </div>
+          <div class="treasure-price treasure-price-bundle">
+            <span class="price-amt">799 CHF</span>
+            <span class="price-sub">une économie de 198 CHF</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ╭──────────────────────────────────────────╮
+         │  CH 5 — LES CLIENTS                      │
+         ╰──────────────────────────────────────────╯ -->
+    <section class="chapter chapter-shaded">
+      <div class="chapter-num">Chapitre 5</div>
+      <h2 class="chapter-title">
+        Et qui voudrait <em>acheter</em> ces trésors&nbsp;?
+      </h2>
+
+      <div class="prose">
+        <p>
+          Pas grand monde individuellement. Mais beaucoup de gens un peu. C'est là que ça devient
+          intéressant. Voici qui me les achèterait, à quoi ça leur sert, et combien ils me paient.
+        </p>
+      </div>
+
+      <div class="customers">
+        <div class="customer">
+          <div class="customer-face">👨‍💼</div>
+          <h3>Le comptable</h3>
+          <p>Calcule la TVA d'import pour ses clients. A besoin du tarif douanier propre, mis à jour, branché dans son logiciel.</p>
+          <div class="customer-tag">Achète&nbsp;: TARES</div>
+        </div>
+        <div class="customer">
+          <div class="customer-face">🏦</div>
+          <h3>La banque</h3>
+          <p>Vérifie qui sont ses contreparties dans le secteur financier. A besoin du registre FINMA en temps réel.</p>
+          <div class="customer-tag">Achète&nbsp;: FINMA</div>
+        </div>
+        <div class="customer">
+          <div class="customer-face">📈</div>
+          <h3>Le consultant</h3>
+          <p>Fait des études de marché. Doit classer les entreprises par secteur (NOGA) et comparer avec l'Europe (NACE).</p>
+          <div class="customer-tag">Achète&nbsp;: Classifications</div>
+        </div>
+        <div class="customer">
+          <div class="customer-face">💼</div>
+          <h3>L'entreprise tech</h3>
+          <p>Construit son propre logiciel et ne veut pas reparser les fichiers de l'État elle-même. Achète tout d'un coup.</p>
+          <div class="customer-tag">Achète&nbsp;: Bundle 799 CHF</div>
+        </div>
+      </div>
+
+      <p class="aside aside-blue">
+        <span class="aside-mark">i</span>
+        Ce n'est pas un produit pour les particuliers. C'est un produit pour les <strong>équipes
+        techniques d'entreprises suisses</strong>, qui ont déjà payé des milliers de francs pour
+        des outils similaires. 800 francs, pour eux, c'est rien.
+      </p>
+    </section>
+
+    <!-- ╭──────────────────────────────────────────╮
+         │  CH 6 — LA TIRELIRE                      │
+         ╰──────────────────────────────────────────╯ -->
+    <section class="chapter">
+      <div class="chapter-num">Chapitre 6</div>
+      <h2 class="chapter-title chapter-title-script">
+        La tirelire — combien <em>ça peut rapporter</em>.
+      </h2>
+
+      <div class="prose">
+        <p>
+          Voilà le vrai sujet. Pourquoi je passe mes soirées dessus&nbsp;? Parce que c'est un
+          <strong>revenu annexe</strong> qui peut devenir confortable, sans que je quitte mon
+          travail principal.
+        </p>
+      </div>
+
+      <!-- Tirelire grosse animation -->
+      <div class="piggy-section">
+        <div class="piggy-illu">
+          <svg viewBox="0 0 360 320" preserveAspectRatio="xMidYMid meet" aria-label="Tirelire avec pièces qui tombent">
+            <!-- Pièces qui tombent -->
+            <g class="coin coin-a">
+              <circle cx="180" cy="0" r="14" fill="#F5C63E" stroke="#D9A648" stroke-width="2"/>
+              <text x="180" y="5" text-anchor="middle" font-family="Fredoka" font-size="13" fill="#1F1A14" font-weight="700">CHF</text>
+            </g>
+            <g class="coin coin-b">
+              <circle cx="200" cy="0" r="12" fill="#F5C63E" stroke="#D9A648" stroke-width="2"/>
+              <text x="200" y="4" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#1F1A14" font-weight="700">CHF</text>
+            </g>
+            <g class="coin coin-c">
+              <circle cx="160" cy="0" r="12" fill="#F5C63E" stroke="#D9A648" stroke-width="2"/>
+              <text x="160" y="4" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#1F1A14" font-weight="700">CHF</text>
+            </g>
+
+            <!-- Tirelire -->
+            <g transform="translate(60 140)">
+              <ellipse cx="120" cy="100" rx="120" ry="80" fill="#FFB6C1"/>
+              <ellipse cx="120" cy="100" rx="120" ry="80" fill="none" stroke="#E89BA6" stroke-width="3"/>
+              <!-- ouverture -->
+              <rect x="100" y="50" width="40" height="6" fill="#1F1A14" rx="2"/>
+              <!-- œil -->
+              <circle cx="80" cy="80" r="6" fill="#1F1A14"/>
+              <circle cx="83" cy="78" r="2" fill="#FFFFFF"/>
+              <!-- joue rouge -->
+              <circle cx="60" cy="100" r="10" fill="#FF8A95" opacity="0.6"/>
+              <!-- groin -->
+              <ellipse cx="40" cy="100" rx="15" ry="20" fill="#FF8A95"/>
+              <circle cx="35" cy="95" r="3" fill="#1F1A14"/>
+              <circle cx="35" cy="105" r="3" fill="#1F1A14"/>
+              <!-- pattes -->
+              <rect x="40" y="170" width="20" height="20" rx="4" fill="#E89BA6"/>
+              <rect x="80" y="170" width="20" height="20" rx="4" fill="#E89BA6"/>
+              <rect x="140" y="170" width="20" height="20" rx="4" fill="#E89BA6"/>
+              <rect x="180" y="170" width="20" height="20" rx="4" fill="#E89BA6"/>
+              <!-- queue (tire-bouchon) -->
+              <path d="M232 90 Q 250 80 245 100 Q 235 110 250 120" stroke="#E89BA6" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <!-- oreille -->
+              <path d="M100 30 L 110 50 L 90 50 Z" fill="#FF8A95"/>
+              <!-- petit sourire -->
+              <path d="M30 110 Q 40 116 50 110" stroke="#1F1A14" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </g>
+
+            <!-- "Cling!" texte -->
+            <text x="305" y="60" font-family="Caveat" font-size="32" fill="#DC1F2D" font-weight="700" class="cling">cling&nbsp;!</text>
+          </svg>
+        </div>
+
+        <div class="piggy-numbers">
+          <div class="calc-card">
+            <div class="calc-eyebrow">Scénario raisonnable</div>
+            <div class="calc-row">
+              <span class="calc-num">30</span>
+              <span class="calc-text">clients par an qui prennent le bundle</span>
+            </div>
+            <div class="calc-row">
+              <span class="calc-num">×</span>
+              <span class="calc-text">800 CHF en moyenne</span>
+            </div>
+            <div class="calc-row calc-row-total">
+              <span class="calc-num calc-total">24&nbsp;000 CHF</span>
+              <span class="calc-text">de revenu annexe annuel</span>
+            </div>
+            <p class="calc-note">
+              Et chaque trimestre, une journée pour relancer la machine. C'est tout.
+              Au bout de quelques années, si la base s'élargit (50 → 100 → 200 clients),
+              ça peut devenir un vrai revenu complémentaire.
+            </p>
+          </div>
+
+          <div class="calc-side">
+            <div class="calc-side-eyebrow">Le vrai pari</div>
+            <p>
+              Le marché total en Suisse est petit&nbsp;: <strong>quelques milliers d'entreprises</strong>
+              qui ont besoin de ce genre de données. Mais il n'y a personne d'autre qui le fait
+              en propre. Si ne serait-ce que <strong>1 % de ce marché</strong> me paie, c'est gagné.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ╭──────────────────────────────────────────╮
+         │  CH 7 — POURQUOI                         │
+         ╰──────────────────────────────────────────╯ -->
+    <section class="chapter chapter-shaded">
+      <div class="chapter-num">Chapitre 7</div>
+      <h2 class="chapter-title chapter-title-script">
+        Pourquoi je passe mes soirées dessus.
+      </h2>
+
+      <div class="prose prose-narrow">
+        <p>
+          Parce que <em>j'aime transformer du sale en propre</em>. C'est une vraie satisfaction de
+          prendre un PDF de 2&nbsp;400 pages que personne ne peut utiliser, et d'en sortir un
+          fichier propre, élégant, bien rangé.
+        </p>
+        <p>
+          Parce que c'est <em>petit, concret, mesurable</em>. Quand un client paie 799 francs, je
+          le vois sur le compte bancaire. Pas de hiérarchie, pas de présentation à un boss,
+          pas d'incertitude.
+        </p>
+        <p>
+          Parce que c'est <em>tranquille</em>. Une fois la machine construite, ça tourne tout seul.
+          Je peux dormir, faire autre chose, et la machine continue à servir des fichiers.
+        </p>
+        <p>
+          Et parce que <em>l'argent qui rentre est à nous</em>. Pas pour un actionnaire, pas pour
+          un patron, pas pour une caisse. Pour notre famille — pour des vacances, pour les
+          enfants, pour respirer un peu plus large.
+        </p>
+      </div>
+    </section>
+
+    <!-- ╭──────────────────────────────────────────╮
+         │  CH 8 — MERCI                            │
+         ╰──────────────────────────────────────────╯ -->
+    <section class="chapter chapter-final">
+      <h2 class="chapter-title chapter-title-script">
+        Merci d'avoir lu jusqu'ici.
+      </h2>
+
+      <p class="final-lede">
+        Maintenant tu sais pourquoi Papa est devant son écran le soir.<br />
+        Si tu veux voir l'atelier, c'est ici&nbsp;:
+      </p>
+
+      <div class="final-ctas">
+        <a href="/" class="final-cta">
+          Voir openswissdata <span aria-hidden>→</span>
+        </a>
+        <a href="/bundle" class="final-cta-ghost">
+          Voir les trois trésors
+        </a>
+      </div>
+
+      <div class="final-stamp">
+        <svg viewBox="0 0 200 200" width="120" height="120" aria-hidden>
+          <circle cx="100" cy="100" r="92" fill="none" stroke="#DC1F2D" stroke-width="3"/>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="#DC1F2D" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <text x="100" y="80" text-anchor="middle" font-family="Fredoka" font-size="14" fill="#DC1F2D" font-weight="700">CARNET DE</text>
+          <text x="100" y="100" text-anchor="middle" font-family="Fredoka" font-size="14" fill="#DC1F2D" font-weight="700">PAPA</text>
+          <text x="100" y="125" text-anchor="middle" font-family="Caveat" font-size="22" fill="#DC1F2D" font-weight="700">2026</text>
+          <path d="M55 145 L75 155 L70 165" fill="none" stroke="#DC1F2D" stroke-width="2"/>
+        </svg>
+      </div>
+
+      <p class="final-signature">— Alain</p>
+    </section>
+
+    <!-- ╭──────────────────────────────────────────╮
+         │  STYLES                                  │
+         ╰──────────────────────────────────────────╯ -->
+    <style is:global>
+      :root {
+        --bg: #FBF7EE;
+        --bg-shade: #F4ECD7;
+        --bg-dark: #1F1A14;
+        --ink: #1F1A14;
+        --ink-soft: #5A5046;
+        --ink-mute: #9A9183;
+        --line: #D9CFB7;
+        --line-soft: #EAE2C9;
+        --red: #DC1F2D;
+        --red-soft: #FCE8EA;
+        --gold: #D9A648;
+        --gold-soft: #FBF1D6;
+        --blue: #5B9BD5;
+        --blue-soft: #DDEAF6;
+        --green: #6FAE5E;
+        --green-soft: #E2F0DC;
+        --pink: #FFB6C1;
+
+        --font-display: 'Fredoka', system-ui, sans-serif;
+        --font-body: 'Inter', system-ui, sans-serif;
+        --font-script: 'Caveat', cursive;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font-body);
+        font-size: 17px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      ::selection { background: var(--red); color: var(--bg); }
+
+      /* ─── Paper background ─── */
+      .paper-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .paper-grain {
+        position: absolute;
+        inset: -10%;
+        background-image:
+          radial-gradient(circle at 25% 30%, rgba(217, 175, 90, 0.07), transparent 50%),
+          radial-gradient(circle at 75% 70%, rgba(220, 31, 45, 0.05), transparent 50%),
+          radial-gradient(rgba(31, 26, 20, 0.06) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 4px 4px;
+      }
+      .paper-margin {
+        position: absolute;
+        top: 0; bottom: 0;
+        width: 1px;
+        background: var(--red);
+        opacity: 0.18;
+      }
+      .paper-margin-left { left: 7%; display: none; }
+      .paper-margin-right { right: 7%; display: none; }
+      @media (min-width: 1100px) {
+        .paper-margin-left,
+        .paper-margin-right { display: block; }
+      }
+      .paper-corner {
+        position: absolute;
+        width: 28px; height: 28px;
+        border: 2px solid var(--ink);
+        opacity: 0.18;
+      }
+      .corner-tl { top: 24px; left: 24px; border-right: none; border-bottom: none; }
+      .corner-tr { top: 24px; right: 24px; border-left: none; border-bottom: none; }
+      .corner-bl { bottom: 24px; left: 24px; border-right: none; border-top: none; }
+      .corner-br { bottom: 24px; right: 24px; border-left: none; border-top: none; }
+
+      /* ─── Cover ─── */
+      .cover {
+        position: relative;
+        z-index: 1;
+        padding: 6rem 1.5rem 4rem;
+        max-width: 980px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      @media (min-width: 768px) {
+        .cover { padding: 8rem 2rem 5rem; }
+      }
+
+      .stamp {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border: 2.5px solid var(--red);
+        border-radius: 6px;
+        font-family: var(--font-display);
+        color: var(--red);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.9;
+        background: rgba(220, 31, 45, 0.04);
+      }
+      .stamp-tilt { transform: rotate(8deg); }
+      .stamp-line { font-size: 0.65rem; font-weight: 600; line-height: 1.2; }
+      .stamp-big { font-size: 0.95rem; font-weight: 700; padding: 2px 0; }
+
+      @media (max-width: 600px) {
+        .stamp { top: 1rem; right: 1rem; padding: 0.5rem 0.7rem; }
+        .stamp-line { font-size: 0.55rem; }
+        .stamp-big { font-size: 0.78rem; }
+      }
+
+      .cover-eyebrow {
+        display: inline-block;
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: var(--red);
+        letter-spacing: 0.05em;
+        padding: 0.35rem 0.9rem;
+        border: 1.5px solid var(--red);
+        border-radius: 999px;
+        background: var(--red-soft);
+        margin-bottom: 1.5rem;
+      }
+
+      .cover-title {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: clamp(2.4rem, 6.5vw, 4.6rem);
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        margin: 0 0 1.5rem;
+      }
+      .word-emph {
+        color: var(--red);
+        position: relative;
+        white-space: nowrap;
+      }
+      .word-emph::after {
+        content: '';
+        position: absolute;
+        left: 0; right: 0;
+        bottom: 0.05em;
+        height: 0.18em;
+        background: var(--gold);
+        opacity: 0.5;
+        border-radius: 2px;
+        transform: skew(-8deg);
+        z-index: -1;
+      }
+      .word-script {
+        font-family: var(--font-script);
+        font-weight: 600;
+        font-size: 1.05em;
+        color: var(--ink-soft);
+      }
+
+      .cover-lede {
+        font-family: var(--font-body);
+        font-size: clamp(1rem, 1.8vw, 1.2rem);
+        line-height: 1.6;
+        color: var(--ink-soft);
+        max-width: 36rem;
+        margin: 0 auto 2.5rem;
+      }
+
+      .cover-illu {
+        max-width: 720px;
+        margin: 2rem auto 1rem;
+      }
+      .cover-illu svg {
+        width: 100%;
+        height: auto;
+        border: 2px solid var(--ink);
+        border-radius: 14px;
+        background: #EAF3FB;
+        box-shadow: 8px 8px 0 0 var(--red);
+      }
+      .papa { animation: papa-bob 2.6s ease-in-out infinite; transform-origin: center bottom; }
+      @keyframes papa-bob {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+      }
+      .chest { animation: chest-bounce 3.2s ease-in-out infinite; transform-origin: center bottom; }
+      .chest-1 { animation-delay: 0s; }
+      .chest-2 { animation-delay: 0.4s; }
+      .chest-3 { animation-delay: 0.8s; }
+      @keyframes chest-bounce {
+        0%, 100% { transform: translateY(0); }
+        45%, 55% { transform: translateY(-3px); }
+      }
+      .chest-label {
+        font-family: var(--font-display);
+        font-size: 12px;
+        font-weight: 600;
+        fill: var(--ink);
+      }
+      .hero-arrow-text {
+        font-family: var(--font-script);
+        font-size: 18px;
+        fill: var(--ink-soft);
+      }
+
+      .cover-signature {
+        font-family: var(--font-script);
+        font-size: 1.6rem;
+        color: var(--red);
+        font-weight: 600;
+        margin: 2rem 0 0;
+      }
+
+      .scroll-cue {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        text-decoration: none;
+        color: var(--ink-soft);
+        font-family: var(--font-display);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 500;
+        animation: scroll-bob 2.5s ease-in-out infinite;
+        transition: color 0.2s;
+      }
+      .scroll-cue:hover { color: var(--red); }
+      @keyframes scroll-bob {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(6px); }
+      }
+
+      /* ─── Chapter ─── */
+      .chapter {
+        position: relative;
+        z-index: 1;
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem;
+      }
+      @media (min-width: 768px) {
+        .chapter { padding: 7rem 2rem; }
+      }
+      .chapter-shaded {
+        max-width: 100%;
+        background: var(--bg-shade);
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        border-top: 1px dashed var(--line);
+        border-bottom: 1px dashed var(--line);
+      }
+      .chapter-shaded > * {
+        max-width: 920px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .chapter-num {
+        font-family: var(--font-display);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--red);
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .chapter-title {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: clamp(1.8rem, 4.2vw, 3rem);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        margin: 0 0 2rem;
+        color: var(--ink);
+      }
+      .chapter-title em {
+        color: var(--red);
+        font-style: normal;
+        position: relative;
+        white-space: nowrap;
+      }
+      .chapter-title em::after {
+        content: '';
+        position: absolute;
+        left: -2px; right: -2px;
+        bottom: 0.06em;
+        height: 0.16em;
+        background: var(--gold);
+        opacity: 0.45;
+        border-radius: 2px;
+        transform: skew(-6deg);
+        z-index: -1;
+      }
+      .chapter-title-script {
+        font-family: var(--font-script);
+        font-size: clamp(2.4rem, 6vw, 4rem);
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+      .chapter-title-script em {
+        font-family: var(--font-script);
+        font-style: normal;
+      }
+
+      /* ─── Prose ─── */
+      .prose {
+        font-family: var(--font-body);
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: var(--ink-soft);
+        max-width: 64ch;
+      }
+      .prose-narrow {
+        max-width: 56ch;
+      }
+      .prose p {
+        margin: 0 0 1.3rem;
+      }
+      .prose strong {
+        color: var(--ink);
+        font-weight: 600;
+        background: linear-gradient(180deg, transparent 65%, var(--gold-soft) 65%);
+        padding: 0 2px;
+      }
+      .prose em {
+        color: var(--red);
+        font-style: italic;
+        font-weight: 500;
+      }
+      .prose-handwritten {
+        font-family: var(--font-script);
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: var(--ink);
+        line-height: 1.4;
+        margin: 1.5rem 0;
+      }
+      .bullet-list {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0 1.5rem;
+        font-size: 1.02rem;
+      }
+      .bullet-list li {
+        padding: 0.6rem 0 0.6rem 1.8rem;
+        border-bottom: 1px dashed var(--line);
+        position: relative;
+        line-height: 1.5;
+      }
+      .bullet-list li::before {
+        content: '✚';
+        position: absolute;
+        left: 0;
+        top: 0.6rem;
+        color: var(--red);
+        font-weight: 700;
+      }
+      .bullet-list li:last-child { border-bottom: none; }
+
+      /* ─── Aside ─── */
+      .aside {
+        margin-top: 2.5rem;
+        padding: 1.4rem 1.6rem 1.4rem 3.6rem;
+        font-family: var(--font-body);
+        font-size: 1.02rem;
+        line-height: 1.55;
+        color: var(--ink);
+        position: relative;
+        border-radius: 8px;
+        font-style: italic;
+      }
+      .aside-mark {
+        position: absolute;
+        left: 1rem;
+        top: 1.2rem;
+        width: 32px; height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-style: normal;
+        font-weight: 700;
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+      }
+      .aside-red {
+        background: var(--red-soft);
+        border: 1.5px solid var(--red);
+      }
+      .aside-red .aside-mark {
+        background: var(--red);
+        color: white;
+      }
+      .aside-blue {
+        background: var(--blue-soft);
+        border: 1.5px solid var(--blue);
+      }
+      .aside-blue .aside-mark {
+        background: var(--blue);
+        color: white;
+      }
+
+      /* ─── Problem chests ─── */
+      .problem-chests {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin: 2.5rem 0;
+      }
+      @media (min-width: 720px) {
+        .problem-chests { grid-template-columns: repeat(3, 1fr); }
+      }
+      .problem-chest {
+        background: var(--bg);
+        border: 2px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.5rem;
+        box-shadow: 4px 4px 0 0 var(--gold);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .problem-chest:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0 0 var(--red);
+      }
+      .problem-chest-illu {
+        width: 100%;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+      .problem-chest-illu svg {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+      }
+      .problem-chest h3 {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0 0 0.6rem;
+        letter-spacing: -0.01em;
+      }
+      .problem-chest p {
+        margin: 0;
+        font-size: 0.98rem;
+        line-height: 1.5;
+        color: var(--ink-soft);
+      }
+      .messy-paper { animation: shake-paper 4s ease-in-out infinite; }
+      .messy-paper-2 { animation: shake-paper 4s 0.4s ease-in-out infinite; }
+      @keyframes shake-paper {
+        0%, 100% { transform: translate(110px, 50px) rotate(0); }
+        25% { transform: translate(110px, 50px) rotate(-3deg); }
+        75% { transform: translate(110px, 50px) rotate(3deg); }
+      }
+      .scattered { animation: scatter 5s ease-in-out infinite; }
+      @keyframes scatter {
+        0%, 100% { transform: translate(50px, 30px) scale(1); }
+        50% { transform: translate(50px, 28px) scale(1.02); }
+      }
+
+      /* ─── Workshop ─── */
+      .workshop {
+        margin: 3rem 0;
+      }
+      .workshop svg {
+        width: 100%;
+        max-width: 720px;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+        border: 2px solid var(--ink);
+        border-radius: 16px;
+        background: #FFF8E7;
+        box-shadow: 8px 8px 0 0 var(--blue);
+      }
+      .conveyor-belts circle {
+        animation: roll 2s linear infinite;
+      }
+      @keyframes roll {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+      .led { animation: led-blink 1.4s infinite; }
+      .led-1 { animation-delay: 0s; }
+      .led-2 { animation-delay: 0.5s; }
+      .led-3 { animation-delay: 1s; }
+      @keyframes led-blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+      }
+      .steam circle {
+        animation: steam-rise 2.4s ease-out infinite;
+      }
+      .steam circle:nth-child(2) { animation-delay: 0.3s; }
+      .steam circle:nth-child(3) { animation-delay: 0.6s; }
+      .steam circle:nth-child(4) { animation-delay: 0.9s; }
+      .steam circle:nth-child(5) { animation-delay: 1.2s; }
+      @keyframes steam-rise {
+        0% { opacity: 0; transform: translateY(0) scale(0.6); }
+        50% { opacity: 0.7; }
+        100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
+      }
+      .enter-paper {
+        animation: enter-conveyor 4s ease-in-out infinite;
+      }
+      @keyframes enter-conveyor {
+        0% { transform: translate(20px, 160px); opacity: 0; }
+        15%, 35% { transform: translate(170px, 160px); opacity: 1; }
+        50%, 100% { transform: translate(220px, 160px); opacity: 0; }
+      }
+      .exit-box {
+        animation: exit-conveyor 4s ease-in-out infinite;
+      }
+      .exit-box-1 { animation-delay: 0.4s; }
+      .exit-box-2 { animation-delay: 0.4s; }
+      .exit-box-3 { animation-delay: 0.4s; }
+      @keyframes exit-conveyor {
+        0%, 50% { opacity: 0; }
+        60% { opacity: 1; }
+        100% { opacity: 1; }
+      }
+
+      /* ─── Treasures ─── */
+      .treasures {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin: 2.5rem 0;
+      }
+      @media (min-width: 720px) {
+        .treasures { grid-template-columns: repeat(2, 1fr); }
+      }
+      .treasure {
+        background: var(--bg);
+        border: 2px solid var(--ink);
+        border-radius: 14px;
+        padding: 2rem 1.5rem;
+        position: relative;
+        box-shadow: 5px 5px 0 0 var(--gold);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .treasure:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 7px 7px 0 0 var(--red);
+      }
+      .treasure-emoji {
+        font-size: 3rem;
+        line-height: 1;
+        margin-bottom: 0.6rem;
+        animation: emoji-pop 4s ease-in-out infinite;
+        display: inline-block;
+      }
+      .treasure:nth-child(2) .treasure-emoji { animation-delay: 0.5s; }
+      .treasure:nth-child(3) .treasure-emoji { animation-delay: 1s; }
+      .treasure:nth-child(4) .treasure-emoji { animation-delay: 1.5s; }
+      @keyframes emoji-pop {
+        0%, 100% { transform: scale(1) rotate(0); }
+        50% { transform: scale(1.08) rotate(-4deg); }
+      }
+      .treasure-tag {
+        font-family: var(--font-display);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--ink-mute);
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+      }
+      .treasure h3 {
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin: 0 0 0.7rem;
+        letter-spacing: -0.01em;
+      }
+      .treasure p {
+        margin: 0 0 1.2rem;
+        font-size: 0.98rem;
+        color: var(--ink-soft);
+        line-height: 1.55;
+      }
+      .treasure-stats {
+        display: flex;
+        gap: 1.5rem;
+        padding: 0.8rem 0;
+        border-top: 1px dashed var(--line);
+        border-bottom: 1px dashed var(--line);
+        margin-bottom: 1rem;
+      }
+      .treasure-stats > div {
+        display: flex;
+        flex-direction: column;
+      }
+      .stat-num {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--ink);
+        line-height: 1;
+      }
+      .stat-strike {
+        text-decoration: line-through;
+        color: var(--ink-mute);
+      }
+      .stat-bundle {
+        color: var(--red);
+      }
+      .stat-lab {
+        font-size: 0.78rem;
+        color: var(--ink-mute);
+        margin-top: 0.2rem;
+      }
+      .treasure-price {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+      .price-amt {
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--red);
+        line-height: 1;
+      }
+      .price-sub {
+        font-size: 0.85rem;
+        color: var(--ink-mute);
+      }
+      .treasure-bundle {
+        background: var(--gold-soft);
+        border-color: var(--red);
+        box-shadow: 5px 5px 0 0 var(--red);
+      }
+      .treasure-bundle:hover {
+        box-shadow: 7px 7px 0 0 var(--ink);
+      }
+      .bundle-ribbon {
+        position: absolute;
+        top: -14px;
+        right: 16px;
+        background: var(--red);
+        color: white;
+        font-family: var(--font-display);
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.4rem 0.8rem;
+        border-radius: 999px;
+        letter-spacing: 0.04em;
+        box-shadow: 2px 2px 0 0 var(--ink);
+      }
+      .treasure-price-bundle .price-amt {
+        font-size: 2rem;
+      }
+
+      /* ─── Customers ─── */
+      .customers {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin: 2.5rem 0;
+      }
+      @media (min-width: 600px) {
+        .customers { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (min-width: 980px) {
+        .customers { grid-template-columns: repeat(4, 1fr); }
+      }
+      .customer {
+        background: var(--bg);
+        border: 2px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.5rem 1.25rem;
+        text-align: center;
+        box-shadow: 4px 4px 0 0 var(--blue);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .customer:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0 0 var(--red);
+      }
+      .customer-face {
+        font-size: 3rem;
+        line-height: 1;
+        margin-bottom: 0.6rem;
+        display: inline-block;
+        animation: face-wobble 3s ease-in-out infinite;
+      }
+      .customer:nth-child(2) .customer-face { animation-delay: 0.4s; }
+      .customer:nth-child(3) .customer-face { animation-delay: 0.8s; }
+      .customer:nth-child(4) .customer-face { animation-delay: 1.2s; }
+      @keyframes face-wobble {
+        0%, 100% { transform: rotate(0); }
+        25% { transform: rotate(-6deg); }
+        75% { transform: rotate(6deg); }
+      }
+      .customer h3 {
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+        color: var(--ink);
+      }
+      .customer p {
+        margin: 0 0 1rem;
+        font-size: 0.92rem;
+        color: var(--ink-soft);
+        line-height: 1.5;
+      }
+      .customer-tag {
+        display: inline-block;
+        padding: 0.3rem 0.7rem;
+        background: var(--gold-soft);
+        color: var(--ink);
+        border: 1.5px solid var(--gold);
+        border-radius: 999px;
+        font-family: var(--font-display);
+        font-size: 0.78rem;
+        font-weight: 500;
+      }
+
+      /* ─── Piggy / tirelire ─── */
+      .piggy-section {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin: 3rem 0;
+        align-items: center;
+      }
+      @media (min-width: 900px) {
+        .piggy-section { grid-template-columns: 360px 1fr; gap: 3rem; }
+      }
+
+      .piggy-illu {
+        background: var(--bg);
+        border: 2px solid var(--ink);
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 8px 8px 0 0 var(--gold);
+      }
+      .piggy-illu svg { width: 100%; height: auto; }
+      .coin {
+        animation: coin-drop 3s ease-in infinite;
+        opacity: 0;
+      }
+      .coin-a { animation-delay: 0s; }
+      .coin-b { animation-delay: 1s; }
+      .coin-c { animation-delay: 2s; }
+      @keyframes coin-drop {
+        0% { transform: translateY(0); opacity: 0; }
+        10% { opacity: 1; }
+        45% { transform: translateY(170px); opacity: 1; }
+        55% { transform: translateY(160px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 0; }
+      }
+      .cling {
+        animation: cling-pop 3s ease-out infinite;
+        opacity: 0;
+        transform-origin: center;
+      }
+      @keyframes cling-pop {
+        0%, 40% { opacity: 0; transform: scale(0.6) rotate(-10deg); }
+        47% { opacity: 1; transform: scale(1.2) rotate(8deg); }
+        55% { opacity: 1; transform: scale(1) rotate(-3deg); }
+        80%, 100% { opacity: 0; transform: scale(1) rotate(0); }
+      }
+
+      .piggy-numbers {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+      .calc-card {
+        background: var(--bg);
+        border: 2px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.75rem;
+        box-shadow: 5px 5px 0 0 var(--red);
+      }
+      .calc-eyebrow {
+        font-family: var(--font-display);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--red);
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+      .calc-row {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px dashed var(--line);
+      }
+      .calc-row:last-of-type { border-bottom: none; }
+      .calc-row-total {
+        margin-top: 0.4rem;
+        padding-top: 1rem;
+        border-top: 2px solid var(--ink);
+        border-bottom: none;
+      }
+      .calc-num {
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--ink);
+        min-width: 2.4em;
+      }
+      .calc-total {
+        color: var(--red);
+        font-size: 2.2rem;
+      }
+      .calc-text {
+        color: var(--ink-soft);
+        font-size: 1rem;
+      }
+      .calc-note {
+        margin-top: 1.2rem;
+        padding-top: 1rem;
+        border-top: 1px dashed var(--line);
+        font-size: 0.92rem;
+        color: var(--ink-soft);
+        line-height: 1.55;
+        font-style: italic;
+      }
+
+      .calc-side {
+        background: var(--blue-soft);
+        border: 2px solid var(--blue);
+        border-radius: 14px;
+        padding: 1.5rem;
+      }
+      .calc-side-eyebrow {
+        font-family: var(--font-display);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--blue);
+        font-weight: 600;
+        margin-bottom: 0.7rem;
+      }
+      .calc-side p {
+        margin: 0;
+        font-size: 0.98rem;
+        line-height: 1.55;
+        color: var(--ink);
+      }
+      .calc-side strong {
+        background: white;
+        padding: 0 4px;
+      }
+
+      /* ─── Final ─── */
+      .chapter-final {
+        text-align: center;
+        padding: 6rem 1.5rem 7rem;
+      }
+      .final-lede {
+        font-family: var(--font-body);
+        font-size: 1.15rem;
+        font-style: italic;
+        color: var(--ink-soft);
+        max-width: 32rem;
+        margin: 0 auto 2.5rem;
+        line-height: 1.55;
+      }
+      .final-ctas {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 3rem;
+      }
+      @media (min-width: 540px) {
+        .final-ctas { flex-direction: row; justify-content: center; }
+      }
+      .final-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 1rem 1.7rem;
+        background: var(--red);
+        color: white;
+        border-radius: 999px;
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 1.05rem;
+        text-decoration: none;
+        box-shadow: 4px 4px 0 0 var(--ink);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .final-cta:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0 0 var(--ink);
+      }
+      .final-cta-ghost {
+        display: inline-flex;
+        align-items: center;
+        padding: 1rem 1.7rem;
+        background: transparent;
+        color: var(--ink);
+        border: 2px solid var(--ink);
+        border-radius: 999px;
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 1.05rem;
+        text-decoration: none;
+        transition: background 0.2s, color 0.2s;
+      }
+      .final-cta-ghost:hover {
+        background: var(--ink);
+        color: white;
+      }
+      .final-stamp {
+        margin: 2rem 0;
+        display: flex;
+        justify-content: center;
+        animation: stamp-tilt 3s ease-in-out infinite;
+        transform-origin: center;
+      }
+      @keyframes stamp-tilt {
+        0%, 100% { transform: rotate(-4deg); }
+        50% { transform: rotate(4deg); }
+      }
+      .final-signature {
+        font-family: var(--font-script);
+        font-size: 2.2rem;
+        color: var(--red);
+        font-weight: 600;
+        margin: 1rem 0 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .papa, .chest, .messy-paper, .messy-paper-2, .scattered,
+        .conveyor-belts circle, .led, .steam circle,
+        .enter-paper, .exit-box, .treasure-emoji, .customer-face,
+        .coin, .cling, .scroll-cue, .final-stamp {
+          animation: none !important;
+        }
+      }
+    </style>
+  </body>
+</html>
