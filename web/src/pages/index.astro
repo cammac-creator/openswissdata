@@ -241,6 +241,83 @@ import Quote from "../components/Quote.astro";
   ]}
 />
 
+<!-- ========== POURQUOI PAS DIY ========== -->
+<section class="v4-diy">
+  <div class="container-v4">
+    <span class="v4-eyebrow reveal-v4">PRÉ-RÉPONSES AUX OBJECTIONS</span>
+    <h2 class="v4-section-h2 reveal-v4" data-delay="1">"Je peux le faire moi-même avec opendata.swiss."</h2>
+    <p class="v4-section-lead reveal-v4" data-delay="2">
+      Vous pourriez. Voici pourquoi nos clients préfèrent payer 299 CHF.
+    </p>
+
+    <div class="v4-diy-grid">
+      <div class="v4-diy-item reveal-v4" data-delay="3">
+        <div class="v4-diy-num">1</div>
+        <h3>Le format change sans prévenir</h3>
+        <p>Le BAZG passe d'XLSX à XML, ajoute une colonne, retire un onglet. Vous l'apprenez quand votre pipeline casse en prod un mardi à 17h. On absorbe ces changements pour vous.</p>
+      </div>
+      <div class="v4-diy-item reveal-v4" data-delay="4">
+        <div class="v4-diy-num">2</div>
+        <h3>La normalisation prend ~5 jours-homme</h3>
+        <p>Les XLSX BAZG ont 30+ régimes préférentiels en colonnes en string concaténées. Faire le job <em>une fois</em> est facile, le maintenir 12 mois plus tard est douloureux.</p>
+      </div>
+      <div class="v4-diy-item reveal-v4" data-delay="5">
+        <div class="v4-diy-num">3</div>
+        <h3>La LCD art. 5 vous protège mal en B2B</h3>
+        <p>Scraper opendata.swiss pour usage interne = OK. Le brancher dans un produit que vous facturez = zone grise. Un acheteur openswissdata reçoit une chaîne de droits documentée.</p>
+      </div>
+      <div class="v4-diy-item reveal-v4" data-delay="6">
+        <div class="v4-diy-num">4</div>
+        <h3>Le coût caché est ~6 000 CHF/release</h3>
+        <p>À 1 200 CHF/jour interne × 5 jours par release. Le bundle complet (799 CHF) paie son ROI dès la première release.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FAQ ========== -->
+<section class="v4-faq">
+  <div class="container-v4">
+    <span class="v4-eyebrow reveal-v4">QUESTIONS FRÉQUENTES</span>
+    <h2 class="v4-section-h2 reveal-v4" data-delay="1">Avant de cliquer "Acheter".</h2>
+
+    <div class="v4-faq-list">
+      <details class="v4-faq-item reveal-v4" data-delay="2">
+        <summary>Qui sont vos sources ?</summary>
+        <p>BAZG (douanes, permission écrite Michael Beer 21.04.2026), OFS / BFS (statistiques), FINMA (surveillance financière), Eurostat (NACE), UN (ISIC). Toutes officielles, vérifiables. Voir <code>provenance.json</code> dans chaque ZIP.</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>C'est légal de revendre des données publiques ?</summary>
+        <p>Oui. Nous ne vendons pas les données — elles sont publiques. Nous vendons le travail de normalisation, la chaîne de droits documentée, la signature cryptographique et les mises à jour. La LCD art. 5 protège ce travail. <a href="/compliance">Voir la page Compliance</a>.</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>À quelle fréquence c'est mis à jour ?</summary>
+        <p>TARES et FINMA : delta hebdomadaire suivant les publications officielles, avec changelog 90 jours. Classifications : refresh annuel + révisions majeures (NOGA 2025, NACE 2.1).</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>Que se passe-t-il si le format officiel change ?</summary>
+        <p>On absorbe. Notre schéma est stable depuis le début, peu importe ce que fait le BAZG en interne. Si une rupture force un changement de schéma chez vous, on prévient 30 jours avant via email et changelog.</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>Comment je vérifie que le ZIP n'a pas été altéré ?</summary>
+        <p><code>npx @openswissdata/sdk verify-provenance ./tares-2026.04.zip</code>. Vérifie la signature Ed25519, l'horodatage RFC-3161 (freetsa.org) et le hash SHA-256 du fichier source. Notre clé publique est sur le site et dans chaque ZIP.</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>C'est exploitable dans un ERP existant (SAP, Odoo, Sage) ?</summary>
+        <p>Oui. Format Parquet, JSON et SQL (DuckDB / SQLite / Postgres dump). Les schémas sont tabulaires standards. Un dev senior intègre TARES dans un module SAP en 2-4h.</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>Que couvre exactement le refund 14 jours ?</summary>
+        <p>Si dans les 14 jours après achat le dataset ne couvre pas votre besoin, on rembourse intégralement, sans condition. Une seule règle : ne pas redistribuer le ZIP ailleurs entre-temps (CGV §2bis).</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>Vous faites du sur-mesure ?</summary>
+        <p>Pour les besoins enterprise (>5 000 CHF/an), oui : champs supplémentaires, formats spécifiques, SLA contractuel. Email à <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a>.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
 <!-- ========== CTA FINAL ========== -->
 <section class="v4-cta-final">
   <div class="container-v4">

@@ -1677,6 +1677,34 @@ details[open] .faq-body {
 .v4-quote-cta a:hover { color: #fff; }
 .v4-quote-cta a:hover::after { transform: translateX(3px); }
 
+/* "Pourquoi pas DIY" objection-handler */
+.v4-diy { padding: 96px 0 88px; position: relative; z-index: 2; border-top: 1px solid var(--line); background: var(--bg-soft); }
+.v4-diy .v4-eyebrow { display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; color: var(--ink-mute); margin-bottom: 12px; }
+.v4-diy h2 { font-weight: 700; font-size: clamp(28px, 3.2vw, 40px); letter-spacing: -.025em; line-height: 1.1; margin-bottom: 14px; max-width: 28ch; }
+.v4-diy .v4-section-lead { font-size: 17px; color: var(--ink-soft); margin-bottom: 48px; max-width: 60ch; line-height: 1.55; }
+.v4-diy-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.v4-diy-item { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 26px 28px; transition: border-color var(--t-fast) var(--ease-out), transform var(--t-med) var(--ease-out); }
+.v4-diy-item:hover { border-color: var(--ink); transform: translateY(-1px); }
+.v4-diy-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-family: var(--font-mono); font-weight: 700; font-size: 13px; margin-bottom: 14px; }
+.v4-diy-item h3 { font-size: 17px; font-weight: 600; letter-spacing: -.012em; margin-bottom: 8px; line-height: 1.3; }
+.v4-diy-item p { font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+
+/* FAQ */
+.v4-faq { padding: 96px 0 88px; position: relative; z-index: 2; border-top: 1px solid var(--line); }
+.v4-faq .v4-eyebrow { display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; color: var(--ink-mute); margin-bottom: 12px; }
+.v4-faq h2 { font-weight: 700; font-size: clamp(28px, 3.2vw, 40px); letter-spacing: -.025em; margin-bottom: 32px; max-width: 22ch; }
+.v4-faq-list { display: flex; flex-direction: column; gap: 10px; max-width: 760px; }
+.v4-faq-item { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px; padding: 0; overflow: hidden; transition: border-color var(--t-fast) var(--ease-out); }
+.v4-faq-item:hover { border-color: var(--ink); }
+.v4-faq-item summary { padding: 16px 22px; font-weight: 600; font-size: 15px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; line-height: 1.4; }
+.v4-faq-item summary::-webkit-details-marker { display: none; }
+.v4-faq-item summary::after { content: '+'; font-family: var(--font-mono); font-size: 18px; color: var(--ink-mute); transition: transform var(--t-med) var(--ease-out); }
+.v4-faq-item[open] summary::after { content: '−'; }
+.v4-faq-item p { padding: 0 22px 18px; margin: 0; font-size: 14px; color: var(--ink-soft); line-height: 1.65; }
+.v4-faq-item p code { background: rgba(10,10,12,.06); padding: 1px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; }
+.v4-faq-item p a { color: var(--accent); text-decoration: none; border-bottom: 1px dashed rgba(220,31,45,.3); }
+.v4-faq-item p a:hover { border-bottom-style: solid; }
+
 /* CTA final */
 .v4-cta-final { padding: 100px 0 120px; text-align: center; position: relative; z-index: 2; border-top: 1px solid var(--line); }
 .v4-cta-final h2 { font-weight: 700; font-size: clamp(32px, 3.8vw, 48px); letter-spacing: -.03em; line-height: 1.05; margin-bottom: 20px; max-width: 22ch; margin-left: auto; margin-right: auto; }
