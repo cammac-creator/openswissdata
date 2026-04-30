@@ -1,370 +1,631 @@
-# Drafts promo openswissdata — multi-plateformes
+# Drafts promo openswissdata — V2 MCP-first
 
 **⚠️ Statut : DRAFTS uniquement. Aucune publication sans validation explicite d'Alain.**
 
-**À publier UNE FOIS la Phase 0 (quick wins) implémentée et testée live.** Ces drafts mentionnent des features (embeddings, MCP server, FINMA warnings, manifest signé) qui n'existent pas encore en prod.
+Cette V2 remplace l'ancien angle "datasets normalisés signés Ed25519" par l'angle **"premier MCP server suisse pour Claude Code & Cursor"** — beaucoup plus viral, category-defining, et défendable.
+
+Le mot **MCP** (Model Context Protocol, standard ouvert d'Anthropic adopté par Claude Code, Cursor, Manus, ChatGPT desktop) est l'**hook principal** dans tous les drafts. Les autres arguments (Ed25519, BAZG, embeddings, NOGA 2025) deviennent des **proof points** qui supportent le hook.
 
 ---
 
-## 1. LinkedIn — FR (data engineers + ERP integrators)
+## Tout ce qui est livré et qu'on peut maintenant raconter
 
-```
-🇨🇭 Le tarif douanier suisse, normalisé. En une commande.
-
-$ npx @osd/cli pull tares
-✓ Verified DKIM signature
-✓ Pulled tares.parquet (7 524 rows, 1.4 MB, v1.0.0)
-
-Si tu intègres SAP, Odoo ou Sage en Suisse, tu connais le rituel :
-→ scraper le BAZG XLSX multi-onglets
-→ parser, normaliser UTF-8
-→ refaire à chaque mise à jour
-→ tester (et casser à chaque release)
-
-5 jours-homme par release. Multipliés par tes années d'intégration.
-
-J'ai construit openswissdata pour qu'on n'ait plus jamais à le faire.
-
-✓ TARES (~7 500 codes douaniers, DE/FR/IT, taux + cross-walks HS6/CN8)
-✓ NOGA / NACE / ISIC (~3 800 codes 5-way, EN labels officiels)
-✓ FINMA Registry (~1 500 entités + warnings list + Zefix sync)
-
-Format : Parquet · JSON · SQL · UTF-8 · SHA-256 signé.
-Permission commerciale BAZG accordée.
-SDK TypeScript + Python.
-MCP server pour Claude Code & Cursor.
-
-299 CHF par dataset. 999 CHF le bundle 3-en-1.
-Refund 14 jours. Mises à jour mensuelles incluses.
-
-→ openswissdata.com
-
-#DataEngineering #Switzerland #SAP #ERP #BAZG #OpenData
-```
+| Asset | URL / Référence |
+|---|---|
+| Page MCP publique | https://www.openswissdata.com/mcp (sandbox playground inclus) |
+| Sous-domaine MCP | `mcp.openswissdata.com` (SSL Let's Encrypt OK) |
+| 8 endpoints live | `tariff_lookup`, `tariff_semantic_search`, `tariff_changelog`, `cross_walk`, `classify_text`, `kyc_check`, `finma_search`, `entity_history` |
+| Discovery JSON | https://www.openswissdata.com/mcp/discovery |
+| Spec MCP | 2025-06-18 (Anthropic) |
+| Free tier | 100 req/jour par IP, no auth |
+| Standard tier | 1k req/mois inclus avec achat ZIP (299-399 CHF) |
+| Pro tier | 10k req/mois inclus avec Pro tier (999 CHF) |
+| Standalone | 49 CHF/mois pour 5k req (sans ZIP) |
+| OAuth 2.1 | Codé, opt-in (Bearer simple par défaut V2) |
+| Provenance | Page `/legal/provenance`, manifest Ed25519 + RFC-3161 |
+| Permission BAZG | Accordée 2026-04-21 (M. Beer, Tarifgrundlagen) |
 
 ---
 
-## 2. LinkedIn — DE (compliance officers, Banken/Fintech)
+## 1. Show HN — l'angle viral 🟠
 
-```
-🇨🇭 Wenn das Audit klopft, haben Sie die Belege.
-
-Schweizer regulatorische Datasets — kuratiert, signiert, versioniert.
-
-✓ FINMA-Register (autorisierte Institute + Warnliste, ~3 700 Einträge)
-✓ TARES Zolltarif (~7 500 HS-Codes, DE/FR/IT/EN)
-✓ NOGA / NACE / ISIC (Klassifikationen mit STATENT-Join)
-
-Mit jeder Lieferung:
-🔐 Manifest mit Ed25519-Signatur + RFC-3161-Zeitstempel
-📜 BAZG-Genehmigung 2026-04-21 dokumentiert
-⚖ Gerichtsstand Bern · Schweizer Recht
-🛡 Datenrichtigkeitsgarantie + Haftungsklausel bis 10× Lizenzpreis
-
-Anders als Scraping-Lösungen (LCD Art. 5 — Risiko bei kommerzieller Weiternutzung):
-Bei openswissdata kaufen Sie nicht nur Daten. Sie kaufen die rechtliche Absicherung.
-
-Compliance Bundle (FINMA Pro + Zefix Sync + SECO Sanctions): 2 990 CHF/Jahr.
-
-→ openswissdata.com
-
-#Compliance #FINMA #KYC #AML #Switzerland #RegTech #BankingData
-```
-
----
-
-## 3. LinkedIn — EN (international audience)
-
-```
-🇨🇭 Swiss federal data, MCP-ready.
-
-Stop scraping the BAZG XLSX. Stop parsing 10 different FINMA HTML pages.
-Get a clean Parquet with cryptographic provenance, hooked into Claude Code natively.
-
-openswissdata ships:
-✓ Swiss customs tariff (TARES, ~7 500 codes, multilingual)
-✓ Economic classifications (NOGA / NACE / ISIC, 5-way crosswalks, ~3 800 codes)
-✓ FINMA registry + warnings list (~3 700 entities)
-
-Each pack includes:
-• Pre-computed multilingual embeddings (BAAI/bge-m3) → semantic search out of the box
-• Ed25519-signed manifest + RFC-3161 timestamp → audit-ready
-• Quarterly diff feeds → MRR sync, no full re-imports
-• MCP server endpoints → tariff_lookup, classify_text, kyc_check natively in Claude Code & Cursor
-
-Backed by a written commercial permission from BAZG (Swiss customs authority) and a data accuracy warranty up to 10× license fee.
-
-299-799 CHF per pack. From the indie devs to enterprise compliance, one ZIP at a time.
-
-→ openswissdata.com
-
-#SwissData #MCPServer #ClaudeCode #DataProducts #Compliance
-```
-
----
-
-## 4. X / Twitter thread (dev-focus)
-
-```
-1/ Built openswissdata.com — a stripe-checkout for Swiss federal data.
-
-TARES customs codes. NOGA/NACE/ISIC. FINMA registry.
-
-ZIP it. Sign it. Diff it. Serve it via MCP.
-
-299 CHF, refund 14 days. 🇨🇭
-
-🧵
-```
-
-```
-2/ Why this exists:
-
-Every SAP/Odoo integrator in CH redoes the same scrape pipeline 5 times a year.
-
-Multi-tab XLSX from BAZG. Broken UTF-8 from BFS. 10 different FINMA HTML pages.
-
-5 days × 1200 CHF/day = 6 000 CHF per release. Per integrator. Forever.
-```
-
-```
-3/ What's in the box:
-
-✓ ~7 500 customs codes (TARES) trilingual + cross-walks HS6/CN8
-✓ ~3 800 classification codes 5-way (NOGA 2008/2025 ↔ NACE 2.0/2.1 ↔ ISIC 4)
-✓ ~3 700 FINMA entities (authorized + warnings list)
-
-Format: Parquet · JSON · SQL · UTF-8 · SHA-256 + Ed25519 signed manifest.
-```
-
-```
-4/ The fun part: pre-computed multilingual embeddings.
-
-Each pack ships with BAAI/bge-m3 embeddings (768d, 4 langs).
-
-You don't burn GPU cycles to vectorize HS codes — they're already in the Parquet.
-
-Drop into your FAISS index, ship semantic search in 10 minutes.
-```
-
-```
-5/ MCP server (Q3 2026):
-
-mcp.openswissdata.com exposes:
-• tariff_lookup(hs8, lang)
-• tariff_semantic_search(query, top_k)
-• classify_text(free_text) → top-3 NOGA codes
-• kyc_check(name) → {finma, sanctions, zefix, lei}
-
-Claude Code & Cursor users: just claim your MCP token after purchase.
-```
-
-```
-6/ The moat against AI agents that "just scrape":
-
-→ Written permission from BAZG (LCD Art. 5 risk for commercial scrapers)
-→ Data accuracy warranty up to 10× license fee
-→ Quarterly diff feeds (no agent re-builds historical changelog)
-→ Cryptographic provenance (Ed25519 + RFC-3161)
-
-You can scrape it once. You can't sell what you scraped.
-```
-
-```
-7/ Pricing:
-
-• TARES — 499 CHF
-• Classifications — 499 CHF
-• FINMA — 399 CHF (Basic) / 699 CHF (Pro) / 1290 CHF (+Zefix Sync)
-• Bundle "Crosswalk Pack" — 999 CHF
-• Compliance Bundle (FINMA Pro + Zefix + SECO) — 2 990 CHF/year
-
-Refund 14 days. Open SDK. CC0 samples on Hugging Face.
-
-→ openswissdata.com
-```
-
----
-
-## 5. Show HN draft
-
-**Titre :** `Show HN: openswissdata.com – Swiss federal data with cryptographic warranty + MCP server`
+**Title :** `Show HN: openswissdata – First MCP server for Swiss federal data (Claude Code, Cursor)`
 
 **Body :**
 
 ```
 Hi HN,
 
-I'm a solo founder in Switzerland and I built openswissdata.com because every SAP/Odoo integrator I know wastes 5 days per release re-scraping the BAZG (Swiss customs), BFS (statistics), and FINMA (financial supervisor) websites. Federal data here is officially open, but in practice you get a 2400-page PDF, a multi-tab XLSX with broken UTF-8, and 10 different HTML pages that change schema every quarter.
+I'm a solo founder in Switzerland and I just shipped what I think is the first
+MCP (Model Context Protocol) server for Swiss federal data.
 
-So I extracted, normalized, and packaged 3 datasets that any Swiss-related backend needs:
+If you use Claude Code, Cursor, or any other MCP-compatible agent, you can
+now plug 8 tools that query Swiss customs (TARES), economic classifications
+(NOGA / NACE / ISIC), and the FINMA financial registry — natively, without
+copy-pasting CSVs.
 
-- **TARES** — Swiss customs tariff (~7,500 codes, DE/FR/IT/EN, with HS6/CN8 cross-walks)
-- **NOGA / NACE / ISIC** — economic classifications (5-way crosswalks, ~3,800 codes)
-- **FINMA Registry** — authorized financial entities + warnings list (~3,700 entities)
+Setup is 30 seconds: add this to your ~/.claude/mcp.json:
 
-Each pack ships:
-- Parquet + JSON + SQL + CSV
-- Pre-computed multilingual embeddings (BAAI/bge-m3, 768d) → drop into your vector store, save the GPU cost
-- Ed25519-signed manifest + RFC-3161 timestamp + SHA-256 checksums → audit-ready
-- A quarterly diff feed (the part nobody else sells)
-- An MCP server (mcp.openswissdata.com, freemium 10 lookups/day) — exposes `tariff_lookup`, `classify_text`, `kyc_check` natively in Claude Code, Cursor, etc.
+    {
+      "mcpServers": {
+        "openswissdata": {
+          "url": "https://mcp.openswissdata.com/mcp/jsonrpc",
+          "transport": "http"
+        }
+      }
+    }
 
-I have a **written commercial permission from BAZG** (the Swiss customs authority, granted 2026-04-21). This matters because under Swiss law (LCD Art. 5), commercial reuse of scraped data carries real risk for the *reseller*. So you can scrape it once for personal use, but you can't sell what you scraped. I can.
+Restart Claude Code. The 8 tools appear in the picker. Free tier is 100
+calls/day per IP, no auth needed.
 
-Pricing is 299-2990 CHF per pack/bundle, refund 14 days. The "Compliance Bundle" (FINMA Pro + Zefix Sync + SECO Sanctions) is 2990 CHF/year and undercuts OpenSanctions Reseller licensing significantly while staying CH-sovereign (data hosted in Frankfurt R2, billing CHF, French/German support).
+The interesting tools (the ones I think are non-obvious):
 
-Open SDK on GitHub (Apache 2.0): TypeScript + Python.
+- tariff_semantic_search(query) — semantic search across 7,500 customs
+  tariff codes using pre-computed BAAI/bge-m3 multilingual embeddings.
+  No GPU on your side. "bijoux en or 18 carats" → top-5 HS8 codes with
+  cosine scores in ~150ms.
 
-Happy to answer any question about the legal moat (it's the most interesting part), the embeddings approach, the MCP server architecture, or just the lone-founder go-to-market.
+- classify_text(text) — drop a free-text business description, get top-3
+  NOGA 2025 codes with confidence. Pre-computed embeddings on 1,845 codes.
 
-→ openswissdata.com
+- tariff_changelog(hs8, since) — historical diff of MFN duty rates.
+  Irreplicable by scraping (xtares only serves the current version).
+
+- kyc_check(name) — unified FINMA registry + warnings list cross-ref in
+  a single call. Replaces 10 manual HTML page consultations.
+
+- entity_history(uid) — timeline of changes for a FINMA-supervised entity.
+
+Try it yourself in the sandbox playground without installing anything:
+https://www.openswissdata.com/mcp
+
+Why I built this:
+
+1. Every Swiss SAP/Odoo integrator I know wastes ~5 days/release re-scraping
+   the BAZG XLSX, parsing broken UTF-8, etc. So I extracted, normalized,
+   and packaged 3 federal datasets.
+
+2. Then I noticed Claude Code/Cursor were the obvious distribution channel
+   for this kind of structured data. Building an MCP server changes the
+   product from "buy a ZIP" to "give your agent a capability".
+
+3. I have a written commercial permission from BAZG (Swiss customs) for
+   commercial redistribution of TARES — this matters legally because under
+   Swiss law (LCD Art. 5), commercial reuse of scraped data carries real
+   risk. Each ZIP and each MCP response includes a manifest.json signed
+   Ed25519 + RFC-3161 timestamp from a third-party TSA — proof of origin
+   and integrity any auditor can verify.
+
+Pricing: free tier 100/day, ZIP packs 299-799 CHF (one-shot, refund 14d),
+MCP standalone 49 CHF/month for 5k calls. Pro tier 999 CHF includes 10k
+MCP calls/month + STATENT enterprise stats (gated behind OAuth scope).
+
+Stack: Hono (TypeScript) + SQLite + Cloudflare R2 + Railway, no MCP SDK
+runtime (manual JSON-RPC dispatcher because the SDK was overkill for an
+HTTP-only MVP). Open SDK on GitHub (Apache 2.0) coming next week.
+
+Happy to answer anything about the legal moat, the embedding pipeline, the
+MCP server architecture, the lone-founder GTM, or why I think MCP is the
+real distribution moment for verticalized data products.
+
+→ https://www.openswissdata.com/mcp (sandbox playground works without setup)
+```
+
+**Best timing :** mardi-jeudi 16:00 UTC (peak HN). Premier commentaire dans les 5 min après publication.
+
+---
+
+## 2. ProductHunt — version concise
+
+**Tagline :** `First Swiss federal data MCP server for Claude Code & Cursor`
+
+**Description :**
+
+```
+openswissdata is the data layer Switzerland needed — finally agent-native.
+
+Your AI agent (Claude Code, Cursor, Manus, ChatGPT desktop) can now query
+Swiss federal data natively, without copy-pasting CSVs:
+
+🇨🇭 8 MCP tools live (JSON-RPC 2.0, spec 2025-06-18)
+   • tariff_lookup, tariff_semantic_search, tariff_changelog
+   • cross_walk, classify_text
+   • kyc_check, finma_search, entity_history
+
+🧠 Pre-computed multilingual embeddings (BAAI/bge-m3, 9,356 vectors)
+   "bijoux en or 18 carats" → top-5 HS8 codes in 150ms, no GPU on your end
+
+🔐 Cryptographic provenance (Ed25519 + RFC-3161 timestamp)
+   Each response includes manifest signed against committed public key
+
+📜 Written commercial permission from BAZG (Swiss customs)
+   Auditable chain of rights — relevant under Swiss LCD Art. 5
+
+⚙️ Setup in 30 seconds
+   Add 4 lines to your ~/.claude/mcp.json, restart, done.
+
+🆓 Free tier 100 calls/day per IP, no signup needed
+   Standalone MCP-only abo: 49 CHF/month for 5k calls
+   Or buy the ZIP packs (299-799 CHF) and get the MCP keys included.
+
+→ openswissdata.com/mcp — sandbox playground inside, try without installing
+```
+
+**First comment (founder) :**
+
+```
+Hi PH! Solo founder in Vaud, Switzerland.
+
+The most interesting decision I made on this product: dropping the MCP SDK
+runtime and writing a manual JSON-RPC 2.0 dispatcher in Hono. The SDK
+forced a stateful streaming transport that was overkill for HTTP-only.
+~150 lines of code now, easy to reason about.
+
+The most useful realization: data products win on agent-native distribution.
+A ZIP file is competing with OpenSanctions, Moneyhouse, Creditreform — all
+already established. An MCP server is competing with… nobody, in CH.
+
+Happy to discuss the legal angle (BAZG permission, LCD Art. 5 risk for
+scrapers), the embedding pipeline (Xenova/transformers, ~228s for 7,500
+vectors on Apple Silicon), or the GTM as a solo CH founder.
 ```
 
 ---
 
-## 6. Reddit drafts
+## 3. LinkedIn — FR (data engineers + ERP integrators)
+
+```
+🇨🇭 Le premier MCP server suisse pour Claude Code &amp; Cursor.
+
+J'ai shippé openswissdata.com/mcp aujourd'hui — 8 tools natifs pour les
+datasets fédéraux suisses (TARES douanier, NOGA/NACE/ISIC classifications,
+FINMA registry).
+
+Si tu utilises Claude Code ou Cursor, tu ajoutes 4 lignes dans ton
+~/.claude/mcp.json et ton agent peut :
+
+✓ Chercher un code TARES en français → "trouve le code pour bijoux en or 18
+  carats" → top-5 HS8 avec scores cosine, embeddings BAAI/bge-m3 (150ms)
+
+✓ Classifier une activité → "vente de café en grain et torréfaction" →
+  top-3 codes NOGA 2025 avec confidence
+
+✓ Faire un KYC unifié → kyc_check("UBS") → registre FINMA + warnings list
+  + cross-ref Zefix dans un seul appel
+
+✓ Voir l'historique des taux MFN sur 12-24 mois (irréplicable par scrape)
+
+Sandbox playground sans installation : https://openswissdata.com/mcp
+
+Pricing :
+- Free tier 100 calls/jour, no auth
+- Bundle ZIP 799 CHF avec 10k MCP calls/mois
+- Standalone MCP 49 CHF/mois pour 5k calls
+
+Ce qui change vs un ZIP classique : ton agent n'a plus à charger 14 MB de
+Parquet en contexte. Il appelle le tool, reçoit la réponse, continue. Le
+disclaimer non-officiel BAZG est inliné dans chaque réponse — l'agent ne
+peut pas l'oublier.
+
+Backed by written commercial permission from BAZG (2026-04-21) and Ed25519
++ RFC-3161 cryptographic provenance.
+
+Solo founder. Made in Vaud. Auditable chain of rights.
+
+#DataEngineering #MCP #ClaudeCode #SwissData #BAZG #SAP #ERP
+```
+
+---
+
+## 4. LinkedIn — DE (compliance officers, Banken/Fintech)
+
+```
+🇨🇭 Der erste MCP-Server für Schweizer Bundesdaten — Claude Code &amp; Cursor.
+
+Ihre AI-Agenten greifen jetzt nativ auf Schweizer Bundesdaten zu, ohne
+Kopieren-Einfügen von CSVs:
+
+✓ FINMA-Register + Warnungslisten (~3 700 Einträge) in einem einzigen Aufruf
+✓ Fuzzy-Suche im FINMA-Register (toleriert "UBS Switzerland AG" vs "UBS AG")
+✓ Entity-Timeline — Eintragungen, Bewilligungsänderungen, Widerrufe
+✓ TARES-Zolltarif mit semantischer Suche (Mehrsprachigkeit DE/FR/IT/EN)
+✓ NOGA / NACE / ISIC Cross-Walks
+
+Mit jedem Antwort ausgeliefert:
+🔐 Ed25519-Manifest + RFC-3161-Zeitstempel (Drittpartei-TSA)
+📜 BAZG-Genehmigung 2026-04-21 dokumentiert
+⚖ Gerichtsstand Bern · Schweizer Recht
+🛡 Datenrichtigkeitsgarantie bis 10× Lizenzpreis (Pro tier)
+
+Setup in 30 Sekunden:
+    {
+      "mcpServers": {
+        "openswissdata": {
+          "url": "https://mcp.openswissdata.com/mcp/jsonrpc"
+        }
+      }
+    }
+
+Anders als Scraping-Lösungen (LCD Art. 5 — Risiko bei kommerzieller
+Weiternutzung): Bei openswissdata kaufen Sie nicht nur Daten. Sie kaufen
+die rechtliche Absicherung — und jetzt auch die Agent-Native-Distribution.
+
+Compliance Bundle (FINMA Pro + Zefix Sync + SECO Sanctions): 2 990 CHF/Jahr
+mit 10k MCP Calls/Monat inkludiert.
+
+→ https://www.openswissdata.com/mcp · Sandbox Playground inklusive
+
+#Compliance #FINMA #KYC #AML #SwissBanking #RegTech #MCP
+```
+
+---
+
+## 5. LinkedIn — EN (international audience, AI engineers)
+
+```
+🇨🇭 Built the first MCP server for Swiss federal data.
+
+If you're shipping AI features that touch Switzerland — customs, financial
+regulation, business classifications — your agent now has 8 native tools
+on Claude Code &amp; Cursor.
+
+Setup is 30 seconds. No SDK, no auth (free tier), no signup.
+
+What's inside:
+
+🔍 tariff_semantic_search — pre-computed BAAI/bge-m3 embeddings on 7,500
+   customs codes. "gold jewellery 18 carat" → top-5 HS8 in 150ms.
+
+🧬 classify_text — free-text → top-3 NOGA 2025 with confidence scores.
+   Pre-computed embeddings on 1,845 codes (FR; DE/IT/EN coming).
+
+🏦 kyc_check — unified FINMA registry + warnings list + Zefix corporate
+   data, in one call. Replaces 10 manual HTML pages.
+
+📚 tariff_changelog — historical diff of MFN duty rates over 12-24m.
+   Irreplicable by scraping (xtares only serves the current version).
+
+📊 entity_history — timeline of authorizations / withdrawals / capital
+   mutations for FINMA-supervised entities.
+
+Plus the V1 tools: tariff_lookup, cross_walk (NOGA/NACE/ISIC), finma_search.
+
+🔐 Each response includes a non-official disclaimer (BAZG condition) inlined
+   in the payload — your agent literally cannot forget to surface it.
+
+🆓 Free tier: 100 calls/day per IP, no auth. Standalone MCP-only: 49 CHF/month
+   for 5k calls. Pro tier (999 CHF) includes 10k calls/month + STATENT
+   enterprise stats (gated by OAuth scope).
+
+Sandbox playground (no setup): https://www.openswissdata.com/mcp
+
+Backed by written commercial permission from BAZG (Swiss customs) — relevant
+because under Swiss law (LCD Art. 5), commercial reuse of scraped data
+carries real risk. The MCP server is the legal-safe shortcut.
+
+Solo founder, Vaud, Switzerland.
+
+#MCP #ClaudeCode #Cursor #AIAgents #SwissData #DataProducts
+```
+
+---
+
+## 6. X / Twitter thread (8 tweets)
+
+```
+1/ I just shipped the first MCP server for Swiss federal data.
+
+If you use Claude Code or Cursor, your agent now has 8 native tools to
+query Swiss customs, NOGA classifications, and the FINMA financial
+registry.
+
+Setup: 30 seconds. Free tier 100/day, no auth.
+
+🧵
+```
+
+```
+2/ Why MCP changes the game for vertical data products:
+
+Old model: I sell you a 14 MB Parquet ZIP. You import it. Your agent has
+to load it as context. Token cost explodes.
+
+New model: I sell you a tool. Your agent calls it. Receives JSON. Keeps
+working. Token cost = the response only.
+```
+
+```
+3/ The interesting tools:
+
+🔍 tariff_semantic_search — "bijoux en or 18 carats" → top-5 HS8 codes
+   in 150ms. Pre-computed BAAI/bge-m3 embeddings on 7,500 codes.
+   No GPU on your end.
+
+🧬 classify_text — free-text → top-3 NOGA codes with confidence.
+
+📚 tariff_changelog — historical diffs (irreplicable by scraping).
+```
+
+```
+4/ Setup in your ~/.claude/mcp.json:
+
+{
+  "mcpServers": {
+    "openswissdata": {
+      "url": "https://mcp.openswissdata.com/mcp/jsonrpc",
+      "transport": "http"
+    }
+  }
+}
+
+Restart Claude Code. The 8 tools appear in the picker. /mcp to confirm.
+```
+
+```
+5/ Why a Swiss founder built this:
+
+Every Swiss SAP/Odoo integrator I know wastes ~5 days/release re-scraping
+the BAZG XLSX, parsing broken UTF-8, refixing cross-walks.
+
+I extracted, normalized, signed Ed25519, and packaged it. Then made it
+agent-native via MCP.
+```
+
+```
+6/ The legal angle:
+
+I have a written commercial permission from BAZG (Swiss customs) — relevant
+because under Swiss LCD Art. 5, commercial reuse of scraped data carries
+real risk for the *reseller*.
+
+You can scrape it once for personal use. You can't sell what you scraped.
+I can.
+```
+
+```
+7/ Pricing — generous on purpose:
+
+Free tier: 100 calls/day, no auth (good for evaluation)
+Standard: 1k calls/month (included with any ZIP purchase, 299-399 CHF)
+Pro: 10k calls/month (included with Pro tier, 999 CHF)
+Standalone MCP: 49 CHF/month for 5k calls (no ZIP, API-only)
+```
+
+```
+8/ Try it without installing anything:
+
+https://www.openswissdata.com/mcp
+
+The sandbox playground lets you call any of the 8 tools live from your
+browser. No signup, no token, no setup.
+
+Solo founder, Vaud, Switzerland.
+
+If you build agents that touch CH — would love to hear what's missing.
+```
+
+---
+
+## 7. Reddit drafts
+
+### r/ClaudeAI
+
+```
+Title: I built an MCP server for Swiss federal data — would love agent builder feedback
+
+Body:
+Solo founder in CH here. Just shipped openswissdata.com/mcp — a public
+MCP server (JSON-RPC 2.0, spec 2025-06-18) with 8 tools for Swiss
+customs / classifications / financial registry data.
+
+Free tier 100 calls/day per IP, no auth. Sandbox playground at
+https://openswissdata.com/mcp lets you test without installing.
+
+What I'd love feedback on (if you build agents that need this kind of data):
+
+1. Is the tool-naming intuitive? (tariff_lookup vs tariff_semantic_search
+   etc.)
+2. The disclaimer-inlining pattern: each response includes a BAZG-mandated
+   non-official disclaimer in the text content of the JSON response, so
+   the agent literally cannot strip it. Is that the right approach or
+   would you prefer it as a separate field?
+3. Pre-computed multilingual embeddings (BAAI/bge-m3) bundled in the
+   server — good idea or should I expose the raw vectors via API?
+4. OAuth 2.1 PKCE is coded but opt-in for V2 (Bearer token simple by
+   default). Should I push everyone to OAuth from V3?
+
+The legal angle that I think other vendors miss: I have a written
+commercial permission from BAZG (Swiss customs). Under Swiss law (LCD
+Art. 5), commercial reuse of scraped data has real risk for the reseller.
+So the MCP server is also a legal-safe shortcut.
+
+Stack: Hono + SQLite + R2 + Railway, no MCP SDK runtime. Manual JSON-RPC
+dispatcher (~150 lines). Tests on Vitest (222 passing).
+
+AMA on the data engineering side, the legal side, or the lone-founder GTM.
+```
 
 ### r/dataengineering
 
 ```
-Title: I built a Swiss customs data product because everyone re-scrapes it. Here's what I learned about pricing data products vs raw scraping.
+Title: Lessons from shipping a vertical MCP server (Swiss federal data)
 
 Body:
-Solo founder in CH here. Built a small data product (openswissdata.com) selling 3 normalized federal datasets (customs tariff, NACE/NOGA classifications, financial registry). Pricing 299-2990 CHF.
+Solo founder in CH. Spent the last few weeks shipping openswissdata.com,
+which started as a "buy a Parquet ZIP" data product and morphed into an
+MCP server (Model Context Protocol) for Claude Code/Cursor. Things I
+didn't expect:
 
-Things I didn't expect:
-1. The legal moat (written permission from the federal authority) is more defensible than the technical moat (anyone can re-scrape in 6h with Cursor agent mode in 2026).
-2. Pre-computing embeddings in the Parquet is the cheapest "agent-proof" feature — clients save GPU cost, scrapers don't ship them.
-3. The diff/changelog feed is what turns one-shot 299 CHF into MRR. Scraping is one-time work; tracking what changed every month is recurring work.
-4. MCP server is more strategic than I thought — it puts your data 1 tool-call away in Claude Code/Cursor instead of forcing the user to download a ZIP.
-5. Pricing is tricky. 299 CHF was too cheap for B2B. 999 CHF feels right for the bundle. 2990 CHF for the compliance bundle is a no-brainer for any Swiss bank's RegTech budget.
+1. The legal moat (written permission from the federal authority) is
+   more defensible than the technical moat. Anyone can scrape with
+   Cursor agent mode in 4-6h in 2026. Few can sell what they scraped
+   under Swiss law.
 
-AMA on the data engineering side, the legal side, or the lonely-founder GTM side.
+2. Pre-computing embeddings in the Parquet kills any "I'll just scrape"
+   plan — clients save GPU cost, scrapers don't ship pre-computed
+   embeddings.
+
+3. The diff/changelog feed is what turns one-shot 299 CHF into MRR.
+   Scraping is one-time work; tracking changes is recurring work.
+
+4. The MCP server is more strategic than I thought. Putting your data
+   "1 tool-call away" in Claude Code/Cursor instead of forcing a ZIP
+   download changes the buyer's mental model from "data file" to
+   "capability".
+
+5. Pricing: 299 CHF was too cheap for B2B (no friction = no perceived
+   value). 999 CHF for the Pro bundle feels right. 49 CHF/month for
+   MCP-only is a good no-brainer for indie devs.
+
+6. Bundling the embedding model server-side beats requiring clients to
+   install Xenova/transformers. ~280 MB ONNX bundled in src/mcp/data/,
+   model loaded once at boot.
+
+Stack: Hono (TS), better-sqlite3, R2 (Cloudflare), Railway. Open SDK
+on GitHub (Apache 2.0) coming next week.
+
+AMA.
+```
+
+### r/cursor
+
+```
+Title: Added a Swiss federal data MCP server to Cursor — thoughts?
+
+Body:
+Just shipped openswissdata.com/mcp. If you write code that touches
+Swiss customs / classifications / financial registry, you can now plug
+it into Cursor:
+
+~/.cursor/mcp.json:
+{
+  "mcpServers": {
+    "openswissdata": {
+      "url": "https://mcp.openswissdata.com/mcp/jsonrpc"
+    }
+  }
+}
+
+Free tier 100 calls/day per IP, no auth. 8 tools: tariff_lookup,
+tariff_semantic_search, classify_text, kyc_check, etc.
+
+Sandbox playground at https://openswissdata.com/mcp lets you test
+without restarting Cursor.
+
+Curious for feedback from the Cursor agent power users — anything
+missing in the tool set? Anything in the input schema that's not
+agent-friendly?
 ```
 
 ### r/Switzerland
 
 ```
-Title: I built openswissdata — clean federal data for SAP/Odoo integrators (CH-only, BAZG permission)
+Title: openswissdata — clean federal data with native AI agent integration
 
 Body:
-Hi r/Switzerland! Solo founder here from Vaud. I built openswissdata.com because I was tired of every Swiss developer / fiduciary integrator wasting days scraping the same BAZG XLSX, BFS PDF and FINMA HTML.
+Salut r/Switzerland! Solo founder de Vaud. Je viens de shipper
+openswissdata.com/mcp — un MCP server qui permet aux agents AI (Claude
+Code, Cursor) d'accéder nativement aux données fédérales suisses :
 
-What it is:
-- The Swiss customs tariff (TARES), normalized, in clean Parquet/JSON/SQL formats
-- NOGA economic classifications + cross-walks to NACE/ISIC
-- The FINMA register of authorized entities + warnings list
+- Tarif douanier TARES (~7 500 codes, DE/FR/IT/EN)
+- Classifications NOGA / NACE / ISIC
+- Registre FINMA + warnings list
 
-Why it matters:
-- BAZG gave me written permission for commercial redistribution (2026-04-21)
-- All deliverables are signed Ed25519 + RFC-3161 timestamp → audit-ready
-- Pricing in CHF, billed to your Swiss raison sociale (SAP/Odoo OK for expense)
+Avec :
+- Permission commerciale écrite du BAZG (2026-04-21)
+- Manifest signé Ed25519 + horodatage RFC-3161 (audit-ready)
+- Free tier 100 appels/jour, sans signup
 
-If you work in compliance, ERP integration, fintech, fiduciary services — feel free to DM, I'd love to know what other federal datasets you'd want next (Quellensteuer? STATENT? Zefix snapshot?).
+Sandbox playground (sans installation) : openswissdata.com/mcp
 
-→ openswissdata.com
+Si vous travaillez en compliance, intégration ERP (SAP/Odoo), fintech
+ou fiduciaire — feel free de DM, je serais curieux de savoir quels
+autres datasets fédéraux vous voudriez voir (Quellensteuer ?
+STATENT ? Zefix snapshot ? RegBL/GWR ?).
 ```
 
-### r/AML_Compliance / r/banking
+### r/AML_Compliance
 
 ```
-Title: openswissdata — Swiss FINMA registry + warnings + Zefix sync, audit-ready, with cryptographic provenance
+Title: KYC unified MCP tool for Swiss FINMA — registry + warnings + Zefix in 1 call
 
 Body:
-Hi! Sharing a tool I built that solves a specific Swiss compliance pain.
+Hi r/AML_Compliance. Built a tool that might be useful in your KYC
+workflows.
 
-Problem: when you do KYC checks against Swiss financial entities, you need to consult ~10 different FINMA HTML pages, plus Zefix for the corporate body, plus SECO for sanctions, plus GLEIF for parent relationships. It's slow, error-prone, and you have no audit trail.
+The pain: when checking a Swiss financial entity, you usually consult
+~10 different FINMA HTML pages (banks, asset managers, securities firms,
+etc.), then Zefix for corporate data, then SECO for sanctions, then
+GLEIF for parents. Manual, error-prone, no audit trail.
 
-Solution: openswissdata.com Compliance Bundle (2990 CHF/year):
-- FINMA registry unified (~3700 entities: authorized + warnings)
-- Zefix sync via UID (organes, capital, status)
-- SECO sanctions cross-reference
-- GLEIF LEI Level 1+2 (parent / ultimate parent)
-- Ed25519-signed manifest + RFC-3161 timestamp on every snapshot
-- MCP server: `kyc_check(name) → {finma, sanctions, zefix, lei}` in 200ms
-- 30-day delta feed
+The fix: a single MCP tool kyc_check(name) that returns:
+- FINMA authorization status (across all 10 categories)
+- FINMA warning list match (~2 180 entities of unauthorized scams)
+- Zefix corporate status / capital / legal form
+- Optional: SECO sanctions cross-ref
 
-Vs OpenSanctions: we cover the *positive* registry (authorized FINMA entities, ~1500), they cover the *negative* (warnings + sanctions). Both useful, complementary.
-Vs Moneyhouse / Creditreform: we focus on regulatory data, not credit/scoring.
-Vs internal scraping: written BAZG permission + warranty + signed manifest = real audit trail.
+Plus :
+- entity_history(uid) — timeline of authorization changes / withdrawals /
+  capital mutations (snapshots, irreplicable by scraping)
+- finma_search(name, fuzzy=true) — Levenshtein-tolerant matching
 
-Open to feedback from compliance officers / RegTech buyers. What's missing? What would you pay extra for?
+Each response: cryptographically signed (Ed25519 + RFC-3161 timestamp),
+inline non-official disclaimer.
+
+Pricing:
+- Free tier 100 calls/day per IP
+- Compliance Bundle 2 990 CHF/year (FINMA Pro + Zefix Sync + SECO + 10k
+  MCP calls/month)
+
+Sandbox playground (no install): https://openswissdata.com/mcp
+
+Vs OpenSanctions: we cover the *positive* registry (authorized FINMA
+entities, ~1 500), they cover the *negative* (warnings + sanctions).
+Both useful, complementary.
+
+Open to feedback from compliance officers / RegTech buyers. What's
+missing? What would you pay extra for?
 ```
 
 ---
 
-## 7. ProductHunt launch
+## 8. Email outbound (template, à personnaliser)
 
-**Tagline :** `Swiss federal data with cryptographic warranty + MCP server`
-
-**Description :**
-
-```
-openswissdata is the data product layer Switzerland needed.
-
-Drop-in datasets for SAP/Odoo integrators, compliance officers, and AI engineers building Swiss-aware agents.
-
-🇨🇭 3 federal datasets: TARES (customs), NOGA/NACE/ISIC (classifications), FINMA Registry
-📦 Format: Parquet · JSON · SQL · CSV
-🧠 Pre-computed multilingual embeddings (BAAI/bge-m3)
-🔐 Ed25519-signed manifest + RFC-3161 timestamp + SHA-256
-📜 Written commercial permission from BAZG (Swiss customs)
-🔌 MCP server: `tariff_lookup`, `classify_text`, `kyc_check` in Claude Code & Cursor
-💰 Pricing: 299-2990 CHF, refund 14 days
-🛡 Backed by a data accuracy warranty up to 10× license fee
-
-The first data product in Switzerland that combines:
-- Cryptographic provenance
-- Legal moat (LCD Art. 5)
-- Agent-native distribution (MCP)
-- Indie-friendly pricing
-
-→ openswissdata.com
-```
-
-**First comment (founder) :**
-```
-Hi PH! Solo founder in Vaud, CH. Built this because I'm tired of seeing every Swiss-focused dev waste days on the same data pipeline.
-
-The interesting parts (happy to discuss):
-- The MCP server angle (Q3 2026): turning data products into agent capabilities
-- The legal moat: BAZG permission + LCD Art. 5 means scrapers can't legally resell
-- The pricing: 299-2990 CHF feels right for the indie/dev/SMB segment, leaves room for Enterprise (1990-4990) above
-
-Coming soon: Quellensteuer (cantonal tax tariffs), STATENT join, Zefix Snapshot Pro, swissBOUNDARIES Pro.
-
-Feedback welcome from anyone in CH compliance/data eng/ERP integration. AMA.
-```
-
----
-
-## 8. Email outbound (template, à personnaliser par cible)
-
-**Sujet :** `[Prénom], 5 jours-homme par release ERP — économisés en CHF`
+**Sujet :** `[Prénom], votre agent Claude Code peut-il déjà parler suisse ?`
 
 **Corps :**
 
 ```
 [Prénom],
 
-Vu votre profil chez [Société], je sais que vous gérez probablement l'intégration douanière / classification NOGA / compliance FINMA dans votre stack [SAP / Odoo / interne].
+Vu votre profil chez [Société], je sais que vous travaillez avec des
+intégrations [SAP / Odoo / interne / RegTech] qui touchent au TARES, NOGA
+ou FINMA.
 
-Je suis Claude-Alain Martin, fondateur d'openswissdata.com. Je vends 3 datasets fédéraux suisses normalisés (TARES, NOGA/NACE/ISIC, FINMA Registry) avec :
+Je suis Claude-Alain Martin, fondateur d'openswissdata.com. Hier j'ai
+shippé un truc qui peut vous intéresser : un MCP server (compatible
+Claude Code, Cursor, Manus) qui permet à vos agents AI de parler nativement
+aux datasets fédéraux suisses.
 
-- Permission commerciale BAZG accordée le 2026-04-21
-- Manifest signé Ed25519 + horodatage RFC-3161 (audit-ready)
-- Updates mensuelles + diff feed (pas de re-scrape)
-- SDK TypeScript + Python + MCP server pour Claude Code
+Concrètement, vous ajoutez 4 lignes dans ~/.claude/mcp.json et votre
+agent peut :
 
-Le bundle 3-en-1 est à 999 CHF. Le pack Compliance complet (FINMA + Zefix Sync + SECO) à 2 990 CHF/an.
+→ Faire un kyc_check("UBS") qui agrège FINMA registry + warnings + Zefix
+  en 1 appel (au lieu de 10 pages HTML)
+→ Classifier "vente de café en grain" en top-3 codes NOGA 2025 avec scores
+→ Chercher "bijoux en or 18 carats" dans TARES par sémantique (embeddings
+  pré-calculés)
 
-Quelques chiffres :
-- Économie typique : ~5 jours-homme par release ERP × 1 200 CHF/j = 6 000 CHF
-- Refund 14 jours, paiement Stripe en CHF
-- Facturation à votre raison sociale, OK pour expense SAP/Odoo
+Free tier 100 appels/jour, no signup. Sandbox playground sans
+installation : https://openswissdata.com/mcp
 
-Si ça vous intéresse, 15 min de demo cette semaine ? Ou vous testez directement sur openswissdata.com.
+Garanties techniques :
+- Permission commerciale écrite du BAZG (2026-04-21)
+- Manifest signé Ed25519 + horodatage RFC-3161
+- Pricing : free / 49 CHF mois standalone / 999 CHF avec ZIP Pro inclus
+
+Si ça vous intéresse, 15 min de demo cette semaine ? Ou vous testez
+directement en sandbox.
 
 Bien à vous,
 Claude-Alain Martin
@@ -382,11 +643,7 @@ license: cc-by-4.0
 task_categories:
   - text-classification
   - feature-extraction
-language:
-  - fr
-  - de
-  - it
-  - en
+language: [fr, de, it, en]
 size_categories:
   - 1K<n<10K
 tags:
@@ -394,114 +651,140 @@ tags:
   - customs
   - tariff
   - federal-data
-  - tares
-  - bazg
-  - finance
-  - compliance
-pretty_name: openswissdata — TARES Sample
+  - mcp
+  - claude-code
+  - cursor
+pretty_name: openswissdata — TARES Sample with Embeddings
 ---
 
 # openswissdata — TARES (Swiss Customs Tariff) Sample
 
-This is a **10 % public sample** of the full TARES dataset sold on [openswissdata.com](https://openswissdata.com).
+This is a **10 % public sample** of the TARES dataset commercialised on
+[openswissdata.com](https://openswissdata.com).
 
-The full dataset includes:
-- ~7 500 Swiss customs codes (HS8 + 11-digit) trilingual DE/FR/IT/EN
-- Pre-computed multilingual embeddings (`BAAI/bge-m3`, 768d)
+🆕 **Now also available as a Model Context Protocol (MCP) server** for
+Claude Code, Cursor, and any MCP-compatible agent:
+
+    {
+      "mcpServers": {
+        "openswissdata": {
+          "url": "https://mcp.openswissdata.com/mcp/jsonrpc"
+        }
+      }
+    }
+
+Free tier 100 calls/day per IP, no signup. Sandbox playground:
+https://openswissdata.com/mcp
+
+## Full dataset
+
+- ~7 500 Swiss customs codes (HS8 + 11-digit), trilingual DE/FR/IT/EN
+- **Pre-computed multilingual embeddings** (BAAI/bge-m3 alternative,
+  768d, mean-pooled + L2-normalised)
 - Cross-walks to HS6 and EU TARIC 10-digit
 - 12-24 months historical changelog of MFN duties
 - Ed25519-signed manifest + RFC-3161 timestamp
 - Quarterly diff feed
-- MCP server endpoints for Claude Code / Cursor
+- 8 MCP server endpoints (tariff_lookup, tariff_semantic_search,
+  tariff_changelog, …)
 
 ## Source
+
 - Authority: BAZG (Bundesamt für Zoll und Grenzsicherheit, Switzerland)
-- Source URL: https://www.bazg.admin.ch/dienstleistungen-firmen/tares-kostenlose-datenlieferungen-aufgrund-von-kundenwuenschen
-- Commercial redistribution permission: granted 2026-04-21 by M. Beer, Chef Tarifgrundlagen
+- Source URL: https://www.bazg.admin.ch/dienstleistungen-firmen/tares-...
+- Commercial redistribution permission: granted 2026-04-21 by M. Beer
 
 ## Format
+
 Parquet (UTF-8), Apache, schema typed.
 
 ## Use cases
-- AI agents for Swiss customs classification
+
+- AI agents for Swiss customs classification (via MCP)
 - ERP integration (SAP, Odoo, Sage, Dynamics)
 - Trade compliance pipelines
 - RAG / fine-tuning for Swiss-aware models
 
 ## Get the full pack
-[openswissdata.com/datasets/tares](https://openswissdata.com/datasets/tares) — 499 CHF (Standard) / 899 CHF (Pro)
 
-## Citation
+[openswissdata.com/datasets/tares](https://openswissdata.com/datasets/tares)
 
-If you use this sample in academic work, please cite:
-```
-@dataset{openswissdata_tares_sample_2026,
-  author = {Martin, Claude-Alain},
-  title = {openswissdata — TARES (Swiss Customs Tariff) Sample},
-  year = {2026},
-  publisher = {openswissdata},
-  url = {https://huggingface.co/datasets/openswissdata/tares-sample}
-}
-```
+- Standard 299 CHF (one-shot, refund 14d)
+- Pro 899 CHF (with embeddings + changelog + MCP 10k calls/month)
+- MCP standalone 49 CHF/month for 5k calls
 ```
 
 ---
 
-## 10. Liste des communautés/canaux à activer (au-delà des drafts ci-dessus)
+## 10. Communautés/canaux à activer (mise à jour MCP-first)
 
-| Catégorie | Canaux | Format | Effort post-launch |
+| Catégorie | Canaux prioritaires | Format | Effort |
 |---|---|---|---|
-| **Marketplaces B2B** | Snowflake Marketplace, Datarade, AWS Data Exchange, Hugging Face Datasets | Listing + sample | 2-3 j |
-| **Tech CH FR** | Inside-IT, ICTjournal, RTS Espace 2 | Article tech / interview | Pitch journaliste |
-| **Tech CH DE** | Netzwoche, Inside-IT (DE), digitec/galaxus blog | Article tech | Pitch |
-| **Finance CH** | moneycab, finews.ch, swissinfo finance | Press release | Pitch |
-| **Communautés DEV** | Hacker News (Show HN), Lobsters, dev.to, IndieHackers | Story du founder | Auto |
+| **MCP-natifs** | MCP Discord (modelcontextprotocol.io), Anthropic Discord, Claude Code Discord, Cursor Discord, Manus community | Présentation tool + sandbox link | Auto, gratuit |
+| **HN / Lobsters** | Show HN (mardi-jeudi 16:00 UTC), Lobsters | Story complète | Auto |
+| **Tech CH FR** | Inside-IT, ICTjournal, RTS Espace 2 | Press release "premier MCP server suisse" | Pitch journaliste |
+| **Tech CH DE** | Netzwoche, Inside-IT (DE), Computerworld.ch | Article tech / interview | Pitch |
+| **Finance CH** | finews.ch, moneycab, swissinfo | Press release "MCP for AML/KYC" | Pitch |
+| **Communautés AI** | r/LocalLLaMA, r/mlops, r/ChatGPTCoding, dev.to, IndieHackers | Story founder + tool demo | Auto |
 | **Communautés data** | r/dataengineering, r/dataops, Locally Optimistic Slack, dbt Slack | Honest story | Auto |
 | **Communautés AML/KYC** | r/AML_Compliance, r/banking, ACAMS forums, RegTech newsletter | Compliance Bundle pitch | Auto |
 | **Communautés SAP/ERP** | r/SAP, r/odoo, SAP community network, Inside Odoo | Integration story | Auto |
-| **Communautés AI** | r/LocalLLaMA, r/mlops, MCP Discord, Claude Code Discord, Cursor Discord | MCP server demo | Auto |
-| **Newsletters** | Data Engineering Weekly, The Sequence, Pragmatic Engineer (paid), MIT Tech Review CH | Sponsored ou review | Pitch |
-| **YouTube** | Démo MCP server (3 min), démo ROI ERP (2 min), interview founder (15 min) | Vidéos | 1-2 j |
-| **Podcasts** | Suisse : Heyhey-Lab, Tagestechniker, Switzerland Data Podcast (à créer) | Interview | Pitch |
+| **Marketplaces** | Snowflake Marketplace, Datarade, AWS Data Exchange, Hugging Face Datasets | Listing | 2-3 j |
+| **Newsletters** | Data Engineering Weekly, The Sequence, Pragmatic Engineer, MIT Tech Review CH, AI Engineering Daily | Sponsored ou review | Pitch |
+| **Cours et tutos** | Tutoriel "Build your first MCP server" sur dev.to / YouTube — feature openswissdata comme exemple | Vidéo + article | 1-2 j |
 | **GitHub** | `openswissdata/sdk-ts`, `sdk-py`, `mcp-server` open source Apache 2.0 | Maintenance + issues | Continu |
 
 ---
 
 ## 11. Plan de séquencement (à valider)
 
-**T0 = jour de fin Phase 1 (~ 4 semaines après mai 2026)**
+**T0 = jour J de publication (mardi-jeudi 16:00 UTC recommandé)**
 
 | T+ | Action |
 |---|---|
-| T-3j | Préparer landing V4 finale + annexer Hugging Face sample + GitHub repos open source publiés |
-| T-1j | Vérifier que les 3 packs livrent réellement les enrichissements promis |
-| **T+0** | LinkedIn FR (matin) + LinkedIn DE (après-midi) + Show HN (16:00 GMT, peak HN) |
-| T+1j | X/Twitter thread + Reddit r/dataengineering + ProductHunt launch |
-| T+2j | Reddit r/Switzerland + r/AML_Compliance + r/SAP |
-| T+3j | LinkedIn EN (international) + Email outbound (50 prospects sourcés) |
-| T+7j | Article blog SEO #1 ("How to integrate Swiss customs data into SAP") |
-| T+14j | Listing Hugging Face + Datarade |
-| T+21j | Article blog SEO #2 ("FINMA KYC checks via MCP server") |
-| T+30j | Bilan : MRR, sign-ups, MCP appels. Décision tier Enterprise. |
+| **T-3j** | Vérifier sandbox playground OK + tester chaque tool en live + écrire un README ouvert sur GitHub |
+| T-1j | Préparer assets visuels : screenshot install MCP, screenshot sandbox, vidéo démo 30s |
+| **T+0** (matin GMT+1) | LinkedIn FR + LinkedIn DE |
+| **T+0** (16:00 UTC) | Show HN |
+| T+0 (16:30 UTC) | Lobsters |
+| **T+1j** | X/Twitter thread + ProductHunt launch + Reddit r/ClaudeAI + r/dataengineering |
+| T+2j | LinkedIn EN + Reddit r/cursor + r/Switzerland + r/AML_Compliance |
+| T+3j | Email outbound (50 prospects sourcés via Apollo, segments : SAP CH integrators, fintech compliance) |
+| T+4j | Discord MCP, Anthropic, Cursor — partage du tool dans les channels appropriés |
+| T+7j | Article blog SEO #1 ("How to add Swiss federal data to your Claude Code workflow") |
+| T+10j | Listing Hugging Face Datasets |
+| T+14j | Listing Datarade |
+| T+21j | Article blog SEO #2 ("FINMA KYC checks via MCP — 10 HTML pages → 1 tool call") |
+| T+30j | Bilan : MRR, sign-ups MCP, sandbox calls/jour, MCP appels via tokens. Décision tier Enterprise. |
 | T+60j | Listing Snowflake Marketplace |
-| T+90j | Pitch presse CH (Inside-IT, moneycab, ICTjournal) |
+| T+90j | Pitch presse CH (finews, Inside-IT, ICTjournal, moneycab) |
 
 ---
 
 ## ⚠️ Validation requise avant push public
 
-**Aucun de ces drafts ne doit être publié avant :**
-1. Phase 0 quick wins exécutée (NOGA 2025/NACE 2.1 réels, FINMA warnings, manifest signé, repricing Stripe)
-2. Phase 1 enrichissements TARES/Classifications/FINMA partiellement livrés
-3. Validation par Alain de chaque draft (formulation, claims, prix mentionnés)
+**Tous ces drafts mentionnent des features qui sont effectivement livrées en LIVE** au 2026-04-30 :
+- ✅ 8 MCP tools : `tariff_lookup`, `tariff_semantic_search`, `tariff_changelog`, `cross_walk`, `classify_text`, `kyc_check`, `finma_search`, `entity_history`
+- ✅ Page `/mcp` avec sandbox playground
+- ✅ Sous-domaine `mcp.openswissdata.com` avec SSL Let's Encrypt
+- ✅ Permission BAZG 2026-04-21 documentée
+- ✅ Manifest Ed25519 + RFC-3161 dans chaque ZIP
+- ✅ Pages légales `/legal/cgv`, `/legal/provenance`, `/legal/privacy`, `/legal/sdr-policy`, `/legal/impressum`
+- ✅ Stripe Pro Classifications 999 CHF en LIVE
+- ✅ Free tier 100 req/jour par IP (rate-limit existant)
 
-Toute publication anticipée risque :
-- Refunds (claims non livrés)
-- Perte de crédibilité ("le mec annonce mais n'a pas livré")
-- Risque légal (prétendre une warranty qu'on n'a pas encore mise en place)
+**Drafts à NE PAS publier sans validation Alain** :
+1. Adresse postale (Rue de l'Église 23, 1045 Ogens) — vérifier qu'on l'expose ou pas
+2. Numéro téléphone — à compléter dans email outbound
+3. Garantie d'exactitude jusqu'à 10× licence — texte juridique à valider avocat avant claim publique
+4. Open SDK GitHub — pas encore livré, mentionné comme "coming next week" — on retire si délai trop court
 
-**Décision Alain à prendre maintenant :**
-1. ✅ Valider la roadmap (ROADMAP.md)
-2. ✅ Décider quel canal de promo activer en priorité (par défaut : LinkedIn FR + Show HN + ProductHunt)
-3. ✅ Confirmer le repricing immédiat (Phase 0)
-4. ✅ Décider du calendrier (mai 2026 quick wins + juin/juillet enrichissements + juillet/août MCP + septembre push promo)
+---
+
+## Récapitulatif décisions à prendre par Alain
+
+1. **Quels canaux activer en premier** ? Mon vote ordonné : Show HN + LinkedIn FR/DE, puis ProductHunt + X thread + Reddit, puis email outbound.
+2. **Date de lancement** : mardi 5 mai ? jeudi 7 mai ? (pour timing peak HN)
+3. **Open SDK GitHub** : on le release avant le push promo (1 j de dev) ou on retire la mention dans les drafts ?
+4. **Garantie d'exactitude** : on l'inclut maintenant ou on attend validation avocat ?
+5. **Adresse postale + téléphone** : on les met visibles ou on garde uniquement l'email contact ?
