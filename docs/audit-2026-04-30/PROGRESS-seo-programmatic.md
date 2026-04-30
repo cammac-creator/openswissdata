@@ -63,6 +63,11 @@ Les sous-classes (798 codes en `XX.XX.XX`) sont volontairement exclues : leur tr
 3. Surveiller les requêtes « code NOGA » dans le rapport Performance (12 semaines de patience minimum pour voir l'effet).
 4. Optimisation future : ajouter pages `/codes/nace/[code]` (~600 codes) et `/codes/isic/[code]` (~419 codes) si le trafic NOGA décolle.
 
+## TODO suivants
+
+- **hreflang DE/IT/EN** : ajouter `<link rel="alternate" hreflang="de|it|en">` dans `BaseLayout.astro` quand les versions DE/IT/EN seront disponibles. Aujourd'hui `lang="fr"` only. Voir audit landing page recommandation.
+- **Sous-classes (level subclass, 798 codes)** : actuellement non générées (URL aurait été `/codes/noga/621000/`). Affichées en `<span>` non-cliquable dans les listes "sous-niveaux directs" pour éviter les 404. À évaluer si volume SEO le justifie.
+
 ## Fichiers créés / modifiés
 
 - `web/src/lib/noga-helpers.ts` (nouveau, 290 lignes TS)

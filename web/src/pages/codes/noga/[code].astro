@@ -66,13 +66,15 @@ const currentRow: HierarchyRow = {
 };
 // Intègre le current dans le tableau pour éviter un <tr> hors-boucle (problème esbuild Astro).
 const ancestors: HierarchyRow[] = [...ancestorsBase, currentRow];
+// Les sous-classes (level subclass) ne sont pas générées côté SEO :
+// on omet le href pour éviter les liens cassés vers /codes/noga/XXXXXX (404).
 const children: HierarchyRow[] = childrenRaw.slice(0, 30).map((c) => ({
   level: c.level,
   levelLabel: _levelLabel[c.level] || c.level,
   code: c.code,
   display: dottedCode(c.code),
   label: c.label_fr,
-  href: `/codes/noga/${c.code}`,
+  href: c.level === "subclass" ? "" : `/codes/noga/${c.code}`,
   current: false,
 }));
 const childrenTotal = childrenRaw.length;
@@ -261,7 +263,10 @@ const jsonLd = {
                 {children.map((c) => (
                   <tr>
                     <td>{c.levelLabel}</td>
-                    <td class="mono"><a href={c.href}>{c.display}</a></td>
+                    <td class="mono">
+                      {c.href && <a href={c.href}>{c.display}</a>}
+                      {!c.href && <span>{c.display}</span>}
+                    </td>
                     <td class="dim">{c.label}</td>
                   </tr>
                 ))}
