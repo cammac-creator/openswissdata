@@ -1,4 +1,4 @@
-import type { FinmaEntity, FinmaSource } from "./types.js";
+import type { FinmaEntity, FinmaSource, FinmaWarning } from "./types.js";
 
 /**
  * Normalize a UID to canonical CHE-xxx.xxx.xxx form, or return undefined if unparseable.
@@ -61,4 +61,133 @@ export function unifyRow(raw: Record<string, unknown>, source: FinmaSource): Fin
   }
   if (!mapped.name) return null;
   return mapped as FinmaEntity;
+}
+
+// ---------------------------------------------------------------------------
+// Warning-list cross-reference
+// ---------------------------------------------------------------------------
+
+/**
+ * Legal-form suffixes and noise words to strip when normalizing names for
+ * fuzzy matching. Keep it conservative: too aggressive and we get false
+ * positives between unrelated companies sharing a generic stem.
+ */
+const NAME_NOISE = [
+  "ag", "sa", "sarl", "sàrl", "gmbh", "ltd", "limited", "inc", "incorporated",
+  "llc", "llp", "lp", "plc", "kg", "ohg", "se", "ev", "co", "corp", "corporation",
+  "company", "holding", "group", "groupe", "and", "the",
+];
+
+const NAME_NOISE_SET = new Set(NAME_NOISE);
+
+/**
+ * Normalize an entity name for fuzzy matching:
+ *   1. Lowercase
+ *   2. Replace any non-alphanumeric with a single space
+ *   3. Drop legal-form suffixes / noise words
+ *   4. Collapse whitespace
+ *
+ * Example: "Premiere Swiss Trust AG" -> "premiere swiss trust"
+ */
+export function normalizeNameForMatch(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((w) => w.length > 0 && !NAME_NOISE_SET.has(w))
+    .join(" ")
+    .trim();
+}
+
+/**
+ * Levenshtein distance between two strings (iterative DP, O(m*n) time, O(min(m,n)) space).
+ * Pure function; used for fuzzy name matching against the warnings list.
+ */
+function levenshtein(a: string, b: string): number {
+  if (a === b) return 0;
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  // Ensure a is the shorter string for memory efficiency.
+  if (a.length > b.length) {
+    const tmp = a;
+    a = b;
+    b = tmp;
+  }
+  const prev = new Array<number>(a.length + 1);
+  const curr = new Array<number>(a.length + 1);
+  for (let i = 0; i <= a.length; i++) prev[i] = i;
+  for (let j = 1; j <= b.length; j++) {
+    curr[0] = j;
+    for (let i = 1; i <= a.length; i++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[i] = Math.min(
+        curr[i - 1] + 1,    // insertion
+        prev[i] + 1,        // deletion
+        prev[i - 1] + cost, // substitution
+      );
+    }
+    for (let i = 0; i <= a.length; i++) prev[i] = curr[i];
+  }
+  return prev[a.length];
+}
+
+/**
+ * Similarity score in [0, 1]. 1 = identical, 0 = totally different.
+ */
+export function similarity(a: string, b: string): number {
+  if (!a && !b) return 1;
+  const maxLen = Math.max(a.length, b.length);
+  if (maxLen === 0) return 1;
+  const dist = levenshtein(a, b);
+  return 1 - dist / maxLen;
+}
+
+/**
+ * Mutate `entities` in place, setting `is_warning_listed = true` on rows whose
+ * normalized name fuzzy-matches a normalized warning name with score >= threshold.
+ *
+ * Authorised registries and warning lists are disjoint by definition, so we
+ * expect very few (often zero) matches — that's a correct outcome, not a bug.
+ *
+ * @returns the number of entities flagged.
+ */
+export function flagWarningsOnRegistry(
+  entities: FinmaEntity[],
+  warnings: FinmaWarning[],
+  threshold = 0.8,
+): number {
+  if (entities.length === 0 || warnings.length === 0) return 0;
+  const normalizedWarnings: string[] = [];
+  for (const w of warnings) {
+    const n = normalizeNameForMatch(w.name);
+    if (n.length >= 3) normalizedWarnings.push(n);
+  }
+  if (normalizedWarnings.length === 0) return 0;
+
+  let flagged = 0;
+  for (const e of entities) {
+    const en = normalizeNameForMatch(e.name);
+    if (en.length < 3) continue;
+    let bestScore = 0;
+    for (const wn of normalizedWarnings) {
+      // Cheap pre-filter: require a 3-char prefix overlap or substring
+      // containment. Skips ~99% of the 1500*2200 = 3.3M pairs.
+      if (
+        wn[0] !== en[0] ||
+        (Math.abs(wn.length - en.length) / Math.max(wn.length, en.length) > 1 - threshold)
+      ) {
+        continue;
+      }
+      const score = similarity(en, wn);
+      if (score > bestScore) {
+        bestScore = score;
+        if (bestScore >= 0.999) break;
+      }
+    }
+    if (bestScore >= threshold) {
+      e.is_warning_listed = true;
+      flagged++;
+    }
+  }
+  return flagged;
 }

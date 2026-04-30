@@ -1,10 +1,11 @@
-import { mkdirSync, rmSync, existsSync, createWriteStream, readFileSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, existsSync, createWriteStream, readFileSync, statSync, writeFileSync, copyFileSync } from "node:fs";
 import { join } from "node:path";
 import archiver from "archiver";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
-import type { FinmaEntity, FinmaEntityType } from "./types.js";
+import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
+import type { FinmaEntity, FinmaEntityType, FinmaWarning } from "./types.js";
 import type { DeltaChange } from "./delta.js";
 
 const FINMA_PARQUET_SCHEMA = new parquet.ParquetSchema({
@@ -23,6 +24,18 @@ const FINMA_PARQUET_SCHEMA = new parquet.ParquetSchema({
   address: { type: "UTF8", optional: true },
   source_list: { type: "UTF8" },
   source_url: { type: "UTF8" },
+  is_warning_listed: { type: "BOOLEAN", optional: true },
+});
+
+const FINMA_WARNINGS_PARQUET_SCHEMA = new parquet.ParquetSchema({
+  name: { type: "UTF8" },
+  country: { type: "UTF8", optional: true },
+  date_added: { type: "UTF8", optional: true },
+  category: { type: "UTF8", optional: true },
+  source_url: { type: "UTF8" },
+  source_list: { type: "UTF8" },
+  warning_type: { type: "UTF8" },
+  additional_info: { type: "UTF8", optional: true },
 });
 
 const DATASET_LICENSE = `openswissdata.com — Dataset License v1.0
@@ -60,6 +73,7 @@ Contact: contact@openswissdata.com
 
 export interface FinmaBundleInput {
   entities: FinmaEntity[];
+  warnings?: FinmaWarning[];
   recentChanges?: DeltaChange[]; // 90-day delta, optional
 }
 
@@ -71,6 +85,8 @@ export interface FinmaBundleResult {
   entityCount: number;
   countByType: Record<FinmaEntityType, number>;
   changeCount: number;
+  warningCount: number;
+  warningListedFlagCount: number;
 }
 
 function toCsvRow(e: FinmaEntity): Record<string, unknown> {
@@ -90,6 +106,20 @@ function toCsvRow(e: FinmaEntity): Record<string, unknown> {
     address: e.address ?? "",
     source_list: e.source_list,
     source_url: e.source_url,
+    is_warning_listed: e.is_warning_listed === true ? "true" : "false",
+  };
+}
+
+function warningToCsvRow(w: FinmaWarning): Record<string, unknown> {
+  return {
+    name: w.name,
+    country: w.country ?? "",
+    date_added: w.date_added ?? "",
+    category: w.category ?? "",
+    source_url: w.source_url,
+    source_list: w.source_list,
+    warning_type: w.warning_type,
+    additional_info: w.additional_info ?? "",
   };
 }
 
@@ -105,7 +135,17 @@ function deltaToCsvRow(c: DeltaChange): Record<string, unknown> {
   };
 }
 
-export async function buildBundle(input: FinmaBundleInput, version: string, outDir: string): Promise<FinmaBundleResult> {
+export interface FinmaBuildBundleOptions {
+  /** Skip the RFC-3161 timestamp call (used in offline tests). */
+  withTimestamp?: boolean;
+}
+
+export async function buildBundle(
+  input: FinmaBundleInput,
+  version: string,
+  outDir: string,
+  opts: FinmaBuildBundleOptions = {},
+): Promise<FinmaBundleResult> {
   const workDir = join(outDir, `finma-${version}-work`);
   if (existsSync(workDir)) rmSync(workDir, { recursive: true, force: true });
   mkdirSync(workDir, { recursive: true });
@@ -119,6 +159,7 @@ export async function buildBundle(input: FinmaBundleInput, version: string, outD
   ];
   for (const t of entityTypes) countByType[t] = 0;
   for (const e of input.entities) countByType[e.entity_type] = (countByType[e.entity_type] ?? 0) + 1;
+  const warningListedFlagCount = input.entities.reduce((acc, e) => acc + (e.is_warning_listed ? 1 : 0), 0);
 
   // Unified registry in 4 formats
   const csvRows = input.entities.map(toCsvRow);
@@ -141,16 +182,40 @@ export async function buildBundle(input: FinmaBundleInput, version: string, outD
     address: e.address,
     source_list: e.source_list,
     source_url: e.source_url,
+    is_warning_listed: e.is_warning_listed === true,
   }));
   await writeParquet(parquetRows as Record<string, unknown>[], FINMA_PARQUET_SCHEMA, join(workDir, "finma_registry.parquet"));
 
-  // Per-type CSV files for granular consumption
+  // Per-type CSV files for granular consumption (registry only — warnings
+  // are a separate, parallel dataset and never enter this loop).
   for (const t of entityTypes) {
     const filtered = csvRows.filter(r => r.entity_type === t);
     if (filtered.length > 0) {
       writeCsv(filtered, join(workDir, `finma_${t}.csv`));
     }
   }
+
+  // FINMA Warning List — parallel dataset (negative cross-reference).
+  const warnings = input.warnings ?? [];
+  const warningCsvRows = warnings.map(warningToCsvRow);
+  writeCsv(warningCsvRows, join(workDir, "finma_warnings.csv"));
+  writeJson(warnings, join(workDir, "finma_warnings.json"));
+  writeSqlInserts("finma_warnings", warningCsvRows, join(workDir, "finma_warnings.sql"));
+  const warningParquetRows = warnings.map((w) => ({
+    name: w.name,
+    country: w.country,
+    date_added: w.date_added,
+    category: w.category,
+    source_url: w.source_url,
+    source_list: w.source_list,
+    warning_type: w.warning_type,
+    additional_info: w.additional_info,
+  }));
+  await writeParquet(
+    warningParquetRows as Record<string, unknown>[],
+    FINMA_WARNINGS_PARQUET_SCHEMA,
+    join(workDir, "finma_warnings.parquet"),
+  );
 
   // Changelog (90-day delta) — write even if empty
   const changes = input.recentChanges ?? [];
@@ -177,22 +242,47 @@ export async function buildBundle(input: FinmaBundleInput, version: string, outD
         address: { type: "string" },
         source_list: { type: "string" },
         source_url: { type: "string", format: "uri" },
+        is_warning_listed: { type: "boolean" },
       },
     },
   };
   writeJson(schema, join(workDir, "schema.json"));
 
+  const warningsSchema = {
+    $schema: "http://json-schema.org/draft-07/schema#",
+    title: "FINMA Warning List",
+    type: "array",
+    items: {
+      type: "object",
+      required: ["name", "source_list", "source_url", "warning_type"],
+      properties: {
+        name: { type: "string" },
+        country: { type: "string" },
+        date_added: { type: "string", format: "date" },
+        category: { type: "string" },
+        source_url: { type: "string", format: "uri" },
+        source_list: { const: "finma-warnings" },
+        warning_type: { type: "string" },
+        additional_info: { type: "string" },
+      },
+    },
+  };
+  writeJson(warningsSchema, join(workDir, "schema_warnings.json"));
+
   // README
   const readme = `# FINMA Registry Dataset — version ${version}
 
-Unified registry of financial institutions authorised by FINMA (Swiss Financial Market Supervisory Authority).
-${input.entities.length} entities across ${entityTypes.length} entity types.
+Unified registry of financial institutions authorised by FINMA (Swiss Financial Market Supervisory Authority), plus the FINMA Warning List of unauthorised providers (cross-referenced).
+
+${input.entities.length} authorised entities across ${entityTypes.length} entity types.
+${warnings.length} entries in the FINMA Warning List.
+${warningListedFlagCount} authorised entities flagged \`is_warning_listed=true\` (cross-ref).
 
 ## Files
 
-### Unified registry (all entity types)
+### Unified registry (all entity types — authorised institutions)
 
-- \`finma_registry.csv\` — UTF-8 comma-separated
+- \`finma_registry.csv\` — UTF-8 comma-separated (now includes \`is_warning_listed\`)
 - \`finma_registry.json\` — JSON array
 - \`finma_registry.sql\` — CREATE TABLE + INSERT statements
 - \`finma_registry.parquet\` — Apache Parquet (columnar)
@@ -201,14 +291,20 @@ ${input.entities.length} entities across ${entityTypes.length} entity types.
 
 ${entityTypes.map(t => `- \`finma_${t}.csv\` — ${countByType[t] ?? 0} entries`).join("\n")}
 
+### FINMA Warning List (unauthorised providers)
+
+- \`finma_warnings.csv\` / \`.json\` / \`.sql\` / \`.parquet\` — ${warnings.length} entries
+- Source: https://www.finma.ch/en/finma-public/warnungen/warning-list/
+
 ### Delta
 
 - \`changelog_90d.{csv,json}\` — changes vs the last snapshot (additions, removals, status/address/licence changes)
 
 ### Metadata
 
-- \`schema.json\` — JSON Schema (Draft-07)
+- \`schema.json\` / \`schema_warnings.json\` — JSON Schema (Draft-07)
 - \`checksums.sha256\`
+- \`provenance.json\` — Ed25519-signed manifest + RFC-3161 timestamp (verify with \`npx tsx etl/shared/verify-provenance.ts <zip>\`; public key at \`packages/schemas/openswissdata.pubkey.ed25519\`)
 - \`LICENSE.txt\`
 
 ## Attribution
@@ -217,7 +313,9 @@ Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.
 
 ## Dataset metadata
 
-- Entities: ${input.entities.length}
+- Authorised entities: ${input.entities.length}
+- Warnings: ${warnings.length}
+- Authorised entities cross-flagged on warning list: ${warningListedFlagCount}
 - Changes in last snapshot: ${changes.length}
 - Version: ${version}
 - Generated: ${new Date().toISOString()}
@@ -229,8 +327,9 @@ Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.
   const dataFiles = [
     "finma_registry.csv", "finma_registry.json", "finma_registry.sql", "finma_registry.parquet",
     ...entityTypes.filter(t => countByType[t] > 0).map(t => `finma_${t}.csv`),
+    "finma_warnings.csv", "finma_warnings.json", "finma_warnings.sql", "finma_warnings.parquet",
     "changelog_90d.csv", "changelog_90d.json",
-    "schema.json",
+    "schema.json", "schema_warnings.json",
   ];
   const checksums = dataFiles.map(f => {
     const content = readFileSync(join(workDir, f));
@@ -238,6 +337,30 @@ Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.
     return `${hash}  ${f}`;
   }).join("\n") + "\n";
   writeFileSync(join(workDir, "checksums.sha256"), checksums, "utf8");
+
+  // Provenance manifest (signed Ed25519 + RFC-3161 timestamp)
+  const manifestFiles: ProvenanceFile[] = [
+    ...dataFiles,
+    "README.md",
+    "LICENSE.txt",
+    "checksums.sha256",
+  ].map((f) => {
+    const p = join(workDir, f);
+    const buf = readFileSync(p);
+    return { name: f, size: buf.length, sha256: createHash("sha256").update(buf).digest("hex") };
+  });
+  const profile = PERMISSION_PROFILES.finma;
+  const provenance = await buildSignedProvenance({
+    dataset: "finma",
+    version,
+    sourceUrl: profile.sourceUrl,
+    files: manifestFiles,
+    permissionReference: profile.permissionReference,
+    permissionAuthority: profile.permissionAuthority,
+    jurisdiction: profile.jurisdiction,
+    withTimestamp: opts.withTimestamp,
+  });
+  writeFileSync(join(workDir, "provenance.json"), JSON.stringify(provenance, null, 2), "utf8");
 
   // ZIP
   const zipPath = join(outDir, `finma-${version}.zip`);
@@ -256,7 +379,30 @@ Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.
   const sha256 = createHash("sha256").update(buf).digest("hex");
   const sizeBytes = statSync(zipPath).size;
 
+  // Copy the registry CSV and the standalone warnings outputs to outDir
+  // BEFORE deleting workDir, so that downstream smoke tests / operators
+  // don't have to extract the zip to inspect them.
+  for (const f of [
+    "finma_registry.csv",
+    "finma_warnings.csv",
+    "finma_warnings.json",
+    "finma_warnings.parquet",
+  ]) {
+    const src = join(workDir, f);
+    if (existsSync(src)) copyFileSync(src, join(outDir, f));
+  }
+
   rmSync(workDir, { recursive: true, force: true });
 
-  return { zipPath, sha256, sizeBytes, version, entityCount: input.entities.length, countByType, changeCount: changes.length };
+  return {
+    zipPath,
+    sha256,
+    sizeBytes,
+    version,
+    entityCount: input.entities.length,
+    countByType,
+    changeCount: changes.length,
+    warningCount: warnings.length,
+    warningListedFlagCount,
+  };
 }
