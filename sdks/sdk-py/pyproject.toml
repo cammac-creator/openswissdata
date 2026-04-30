@@ -1,0 +1,85 @@
+[project]
+name = "openswissdata"
+version = "0.1.0"
+description = "Official Python SDK for openswissdata.com — TARES, NOGA/NACE/ISIC and FINMA registry."
+readme = "README.md"
+authors = [{ name = "openswissdata", email = "contact@openswissdata.com" }]
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+keywords = [
+  "openswissdata",
+  "swiss",
+  "switzerland",
+  "tares",
+  "customs",
+  "tariff",
+  "noga",
+  "nace",
+  "isic",
+  "finma",
+  "kyc",
+  "compliance",
+  "mcp",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
+]
+dependencies = [
+  "httpx>=0.27,<1.0",
+]
+
+[project.optional-dependencies]
+pandas = ["pandas>=2.0"]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "respx>=0.21",
+  "ruff>=0.6",
+  "mypy>=1.10",
+]
+
+[project.urls]
+Homepage = "https://openswissdata.com"
+Repository = "https://github.com/cammac-creator/openswissdata"
+Issues = "https://github.com/cammac-creator/openswissdata/issues"
+Documentation = "https://openswissdata.com/docs"
+
+[project.scripts]
+openswissdata = "openswissdata.__main__:main"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/openswissdata"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/openswissdata", "README.md", "LICENSE", "pyproject.toml", "tests", "examples"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>openswissdata — browser example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body { font: 14px/1.5 system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+      pre { background: #f6f8fa; padding: 1rem; border-radius: 6px; overflow: auto; }
+      input, button { padding: .4rem .6rem; font-size: 1rem; }
+      .disclaimer { font-size: .85em; color: #6b7280; margin-top: 1rem; }
+    </style>
+  </head>
+  <body>
+    <h1>openswissdata browser SDK demo</h1>
+    <p>
+      Loads <code>@openswissdata/sdk</code> from a CDN as an ES module and
+      runs a TARES lookup against the live MCP endpoint.
+    </p>
+
+    <label>HS8 code: <input id="hs8" value="84620010" maxlength="8" /></label>
+    <button id="go">Lookup</button>
+
+    <pre id="out">Click "Lookup" to call https://mcp.openswissdata.com</pre>
+
+    <p class="disclaimer">
+      Replace the <code>import</code> URL below with the published CDN URL once
+      <code>@openswissdata/sdk</code> ships on npm. During local development
+      use <code>../dist/esm/index.js</code> after running <code>npm run build</code>.
+    </p>
+
+    <script type="module">
+      // Production: import { Client } from "https://esm.sh/@openswissdata/sdk@0.1.0";
+      // Local dev:
+      import { Client, RateLimitError } from "../dist/esm/index.js";
+
+      const out = document.getElementById("out");
+      const button = document.getElementById("go");
+      const hs8 = document.getElementById("hs8");
+
+      const client = new Client({
+        // apiKey: "...optional Bearer token..."
+      });
+
+      button.addEventListener("click", async () => {
+        out.textContent = "Loading…";
+        try {
+          const r = await client.tares.lookup({ hs8: hs8.value, lang: "en" });
+          out.textContent = JSON.stringify(r, null, 2);
+        } catch (e) {
+          if (e instanceof RateLimitError) {
+            out.textContent = `Rate limited — retry after ${e.retryAfterSeconds}s`;
+          } else {
+            out.textContent = `Error: ${e.message}`;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

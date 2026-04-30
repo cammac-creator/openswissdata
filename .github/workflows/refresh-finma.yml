@@ -1,0 +1,41 @@
+name: Daily FINMA refresh + customer notifications
+
+on:
+  schedule:
+    # Daily at 03:00 UTC (05:00 CEST). Aligned with FINMA's typical update window
+    # and before business hours so a takedown alert reaches us with maximum lead time.
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh-and-notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Run FINMA ETL → produce diff vs previous version
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          BASE_URL: https://www.openswissdata.com
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          OSD_SIGNING_KEY_ED25519: ${{ secrets.OSD_SIGNING_KEY_ED25519 }}
+        run: npm run etl:finma
+
+      - name: Notify entitled customers if new entities removed from registry
+        env:
+          DATABASE_PATH: ./data/openswissdata.sqlite
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          BASE_URL: https://www.openswissdata.com
+        run: npx tsx scripts/notify-finma-diff.ts || true
+        # `|| true` because notification failures must not abort the workflow —
+        # the dataset is already published; emails are best-effort.

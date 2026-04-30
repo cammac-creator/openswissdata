@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.github
+.vscode
+tests
+examples
+*.log
+.DS_Store

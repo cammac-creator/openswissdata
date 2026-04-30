@@ -1,0 +1,11 @@
+node_modules/
+src/
+tests/
+examples/
+coverage/
+tsconfig*.json
+vitest.config.ts
+.gitignore
+.npmignore
+*.log
+.env*

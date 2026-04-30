@@ -37,6 +37,34 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
+    {/* Organization-level Schema.org JSON-LD — applies sitewide.
+        Dataset and FAQ pages can supplement this with their own JSON-LD
+        in their <slot /> via additional <script> tags. */}
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "openswissdata",
+      url: "https://www.openswissdata.com",
+      logo: "https://www.openswissdata.com/favicon.svg",
+      description: "Datasets officiels suisses normalisés — TARES (douanes), classifications NOGA/NACE/ISIC, registre FINMA. Format multi (CSV, Parquet, JSON, SQL), signature Ed25519, mises à jour automatiques.",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Rue de l'Église 23",
+        postalCode: "1045",
+        addressLocality: "Ogens",
+        addressCountry: "CH",
+      },
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: "contact@openswissdata.com",
+        availableLanguage: ["French", "German", "English"],
+      },
+      sameAs: [
+        "https://github.com/cammac-creator/openswissdata",
+      ],
+    })} />
+
     {Astro.url.hostname === "www.openswissdata.com" && (
       <script is:inline defer data-domain="openswissdata.com" src="https://plausible.io/js/script.js"></script>
     )}

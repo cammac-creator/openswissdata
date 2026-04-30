@@ -1,0 +1,66 @@
+{
+  "name": "@openswissdata/mcp",
+  "version": "0.1.0",
+  "description": "Standalone MCP server (STDIO) that proxies to the openswissdata.com remote MCP endpoint. Plug-and-play for Claude Desktop, Cursor, Cline and other MCP clients.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "openswissdata-mcp": "./dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "keywords": [
+    "openswissdata",
+    "swiss",
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "cursor",
+    "cline",
+    "tares",
+    "noga",
+    "finma"
+  ],
+  "author": "openswissdata <contact@openswissdata.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cammac-creator/openswissdata.git",
+    "directory": "sdks/mcp-server"
+  },
+  "homepage": "https://openswissdata.com",
+  "bugs": {
+    "url": "https://github.com/cammac-creator/openswissdata/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
