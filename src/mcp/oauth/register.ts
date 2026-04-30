@@ -34,6 +34,11 @@ import {
 } from "./crypto.js";
 import { insertClient } from "./store.js";
 import { TIER_DEFAULT_SCOPES, serializeScopes, type Tier } from "./scopes.js";
+import {
+  oauthRegisterBucket,
+  checkRateLimit,
+  getClientIp,
+} from "../../lib/rate-limit.js";
 
 const RegisterSchema = z.object({
   name: z.string().min(1).max(120),
@@ -45,6 +50,11 @@ const RegisterSchema = z.object({
 export const registerRoute = new Hono();
 
 registerRoute.post("/register", async (c) => {
+  // Rate-limit: open registration → easy spam vector if uncapped.
+  if (!checkRateLimit(oauthRegisterBucket, getClientIp(c))) {
+    return c.json({ error: "too_many_requests" }, 429);
+  }
+
   let body: unknown;
   try {
     body = await c.req.json();

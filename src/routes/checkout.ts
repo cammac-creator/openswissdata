@@ -4,8 +4,24 @@ import type Stripe from "stripe";
 import { z } from "zod";
 import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
+import { checkoutBucket, checkRateLimit, getClientIp } from "../lib/rate-limit.js";
 
 export const checkoutRoute = new Hono();
+
+// Rate-limit guard applied to both POST /session and POST /start to prevent
+// flooding the Stripe API with junk session creations.
+checkoutRoute.use("/session", async (c, next) => {
+  if (!checkRateLimit(checkoutBucket, getClientIp(c))) {
+    return c.json({ error: "too_many_requests" }, 429);
+  }
+  return next();
+});
+checkoutRoute.use("/start", async (c, next) => {
+  if (!checkRateLimit(checkoutBucket, getClientIp(c))) {
+    return c.json({ error: "too_many_requests" }, 429);
+  }
+  return next();
+});
 
 const DATASET_IDS = ["tares", "classifications", "finma", "bundle"] as const;
 type DatasetId = (typeof DATASET_IDS)[number];
