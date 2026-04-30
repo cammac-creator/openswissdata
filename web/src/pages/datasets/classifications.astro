@@ -140,24 +140,21 @@ import ClassificationsLookup from "../../components/ClassificationsLookup.astro"
       </p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0;">
         <div style="padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);">
-          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">01 · Embeddings</div>
-          <strong style="font-size:14px;color:var(--ink);">Vecteurs 768d pré-calculés</strong>
-          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">Sur les 1 845 codes NOGA 2025. Recherche sémantique instantanée chez vous, sans GPU.</p>
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">01 · Embeddings DE/IT/EN</div>
+          <strong style="font-size:14px;color:var(--ink);">Vecteurs 768d pré-calculés multilingues</strong>
+          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">Sur les 1 845 codes NOGA 2025 × 4 langues (FR + DE + IT + EN). Recherche sémantique instantanée dans la langue de votre UI, sans GPU. 7 380 vecteurs Parquet.</p>
         </div>
         <div style="padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);">
-          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">02 · Cross-walks NAICS</div>
-          <strong style="font-size:14px;color:var(--ink);">Pivot ISIC → NAICS 2022</strong>
-          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">Export US-ready. Compatible reporting pour filiales américaines et data US Census.</p>
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">02 · Cross-walks NAICS 2022</div>
+          <strong style="font-size:14px;color:var(--ink);">NAICS US ↔ ISIC ↔ NACE/NOGA</strong>
+          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">Concordance officielle US Census Bureau (Public Domain) pivotée via ISIC Rev 4. Compatible reporting pour filiales américaines, Salesforce NAICS et data Census.</p>
         </div>
         <div style="padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);">
-          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">03 · EN labels NOGA</div>
-          <strong style="font-size:14px;color:var(--ink);">Labels anglais officiels</strong>
-          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">Issus du SKOS Eurostat (24 langues disponibles). Pour les exports vers maison-mère internationale.</p>
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">03 · EN labels NACE Rev 2.1</div>
+          <strong style="font-size:14px;color:var(--ink);">Labels anglais officiels Eurostat</strong>
+          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">Projection autonome des 1 047 codes NACE Rev 2.1 en anglais (SKOS Eurostat re-use policy). Stand-alone CSV/Parquet — pour exports compliance vers maison-mère internationale, sans JOIN.</p>
         </div>
       </div>
-      <p style="font-size:13px;color:var(--ink-mute);font-family:var(--font-mono);margin-bottom:20px;border-left:2px solid var(--line);padding-left:12px;">
-        À venir en V2 (Pro inchangé) : STATENT (établissements × NOGA × commune, ~978 600 lignes) — en attente d'autorisation OFS écrite avant inclusion commerciale.
-      </p>
       <a href="https://buy.stripe.com/00w9AVbls2tq0CHgKbes000" class="ds-cta-btn" style="background:var(--ink);">
         Acheter Classifications Pro — 999 CHF
         <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>

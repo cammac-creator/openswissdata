@@ -59,3 +59,36 @@ Ancien Stripe TEST conservé en commentaire dans `.env` pour rollback éventuel.
 ## Prochaine étape
 
 Pour valider le tunnel LIVE end-to-end, passage à #15 : self-purchase test avec vraie carte sur les 4 SKUs (refundable depuis dashboard).
+
+## Mise à jour 2026-04-30 — refonte du contenu Classifications Pro
+
+⚠️ **Le Stripe Price LIVE existant pour Classifications Pro reste inchangé** (`price_1TRsIN…`, 999 CHF) — pas de modification côté Stripe.
+
+Mais **le contenu livré dans le ZIP Pro a changé** :
+
+### Avant 2026-04-30 (composition initiale)
+
+- Standard (399 CHF) : NOGA 2008/2025 + NACE 2.0/2.1 + ISIC Rev 4 + cross-walks 5-way
+- Pro (999 CHF) : Standard + STATENT (978 614 lignes établissements × commune × année) + embeddings NOGA 2025 FR
+
+### Depuis 2026-04-30 (refonte sans STATENT)
+
+- Standard (399 CHF) : **inchangé**
+- Pro (999 CHF) : Standard + **3 nouvelles valeurs ajoutées** :
+  1. Embeddings multilingues NOGA 2025 (FR + DE + IT + EN, 4 × 1 845 = 7 380 vecteurs 768d) — Apache 2.0
+  2. Cross-walks NAICS 2022 ↔ ISIC ↔ NACE/NOGA (US Census Bureau, Public Domain — ~2 100 mappings)
+  3. NACE Rev 2.1 EN labels officiels (Eurostat re-use policy, 1 047 lignes stand-alone)
+
+### Raison du retrait STATENT
+
+License `terms_by_ask` de l'OFS exige une autorisation écrite pour utilisation commerciale, qui n'a pas été obtenue. Le code historique (`ingest-statent.ts`, `bundle.ts` STATENT branch, `ingestStatent` test) est conservé dormant pour reproduire bit-identiquement les bundles déjà émis, mais `release.ts` n'instancie plus STATENT pour le tier Pro.
+
+### Action côté Stripe
+
+**Aucune** — le Price ID `price_1TRsIN…` continue de pointer vers le produit `prod_UOg2HYIDH06mD0` Classifications Pro. Le client reçoit le nouveau ZIP avec les 3 valeurs ajoutées au lieu de STATENT.
+
+### Documentation client
+
+- README dans le ZIP Pro mis à jour automatiquement (`bundle.ts` génère le README à partir des artéfacts présents).
+- Page produit `/datasets/classifications` (Astro) reformatée pour refléter les 3 nouvelles valeurs ajoutées (cards 01/02/03).
+- `etl/classifications/SOURCES.md` mis à jour : sections v3 STATENT marquées "RETIRÉ", nouvelles sections v5 NAICS + v6 NACE EN labels.
