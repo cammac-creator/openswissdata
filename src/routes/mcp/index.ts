@@ -1,67 +1,47 @@
 /**
  * MCP HTTP routes.
  *
- * Mounted under `/mcp` in `src/index.ts`. In production a CNAME on
- * `mcp.openswissdata.com` will point to the same Railway service (DNS work
- * pending — see docs/mcp/README.md).
+ * In production both `https://mcp.openswissdata.com/*` and
+ * `https://www.openswissdata.com/mcp/*` resolve here. The host-based router
+ * in `src/index.ts` strips the `/mcp` prefix when serving the dedicated
+ * sub-domain so the same Hono router handles both layouts.
  *
  * Endpoints:
- *   GET  /mcp              — server info (protocol version, capabilities, tools)
- *   GET  /mcp/health       — liveness probe (no auth)
- *   POST /mcp/jsonrpc      — JSON-RPC 2.0 endpoint for `initialize`,
- *                            `tools/list`, `tools/call`
+ *   GET  /              — server info (protocol version, capabilities, tools)
+ *   GET  /health        — liveness probe (no auth)
+ *   POST /jsonrpc       — JSON-RPC 2.0 endpoint (initialize/tools/list/call)
  *
- * Auth (MVP):
- *   - If env var MCP_BEARER_TOKEN is set, all requests require
- *     `Authorization: Bearer <token>`.
- *   - If unset (dev/test), auth is bypassed — same convention as the
- *     Resend/R2 keys handled in src/env.ts.
- *   - V2 will replace this with OAuth 2.1 + per-licence quotas.
+ *   POST /oauth/register
+ *   GET  /oauth/authorize
+ *   POST /oauth/authorize/decision
+ *   POST /oauth/token
+ *   POST /oauth/revoke
+ *
+ * Auth (V2):
+ *   - OAuth 2.1 Bearer tokens issued via /oauth/* routes — verified by the
+ *     `oauthVerify()` middleware.
+ *   - The legacy `MCP_BEARER_TOKEN` env var still works as an admin bypass.
+ *   - Anonymous calls (no token) hit the IP-keyed in-memory rate limit and
+ *     can only invoke the V1 read-only tools (`tariff_lookup`, `kyc_check`,
+ *     `cross_walk`).
  */
 
 import { Hono } from "hono";
 import { dispatch, getServerInfo } from "../../mcp/server.js";
-import { checkRateLimit } from "../../mcp/rate-limit.js";
+import { oauthRouter, oauthVerify, type MCPAuthVar } from "../../mcp/oauth/index.js";
 
-export const mcpRoute = new Hono();
+export const mcpRoute = new Hono<MCPAuthVar>();
 
-function bearerOk(c: { req: { header: (n: string) => string | undefined } }): boolean {
-  const expected = process.env.MCP_BEARER_TOKEN;
-  if (!expected) return true; // dev/test — auth not enforced
-  const auth = c.req.header("authorization") ?? c.req.header("Authorization");
-  if (!auth) return false;
-  const m = auth.match(/^Bearer\s+(.+)$/);
-  if (!m) return false;
-  return m[1].trim() === expected;
-}
-
-function clientIp(c: { req: { header: (n: string) => string | undefined } }): string {
-  return (
-    c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
-    c.req.header("x-real-ip") ||
-    "unknown"
-  );
-}
-
+// Health is intentionally unauthenticated — used by Railway's healthcheck.
 mcpRoute.get("/health", (c) => c.json({ status: "ok" }));
 
-mcpRoute.get("/", (c) => {
-  if (!bearerOk(c)) return c.json({ error: "unauthorized" }, 401);
-  return c.json(getServerInfo());
-});
+// OAuth endpoints (registered before the Bearer-protected JSON-RPC route).
+mcpRoute.route("/oauth", oauthRouter);
 
-mcpRoute.post("/jsonrpc", async (c) => {
-  if (!bearerOk(c)) return c.json({ error: "unauthorized" }, 401);
+// Server info — bypasses quota; bare auth check only.
+mcpRoute.get("/", oauthVerify(), (c) => c.json(getServerInfo()));
 
-  const ip = clientIp(c);
-  const rl = checkRateLimit(ip);
-  c.header("X-RateLimit-Limit", String(rl.limit));
-  c.header("X-RateLimit-Remaining", String(rl.remaining));
-  c.header("X-RateLimit-Reset", String(Math.floor(rl.resetAt / 1000)));
-  if (!rl.allowed) {
-    return c.json({ error: "rate_limited", reset_at: rl.resetAt }, 429);
-  }
-
+mcpRoute.post("/jsonrpc", oauthVerify(), async (c) => {
   let body: unknown;
   try {
     body = await c.req.json();
@@ -72,12 +52,13 @@ mcpRoute.post("/jsonrpc", async (c) => {
     );
   }
 
-  // Batch requests (MCP spec allows arrays, but we keep MVP simple)
+  const auth = c.get("mcp_auth");
+
   if (Array.isArray(body)) {
-    const out = await Promise.all(body.map((r) => dispatch(r)));
+    const out = await Promise.all(body.map((r) => dispatch(r, auth)));
     return c.json(out);
   }
 
-  const response = await dispatch(body);
+  const response = await dispatch(body, auth);
   return c.json(response);
 });
