@@ -92,3 +92,90 @@ we ingest directly from the FINMA primary source.
 4 synthetic fixtures materialized by `fixtures/generate-fixture.ts` cover
 Banks / PSP / Insurance / Asset Managers. Real ingestion uses the official
 FINMA `uid.csv` (registry) and the warning-list JSON API (warnings).
+
+## Tier "FINMA + Zefix Sync" — LINDAS bulk enrichment
+
+Activated by setting `FINMA_TIER=zefix` before running `npm run etl:finma`.
+Default tier (`standard`) is unchanged — Zefix files are NOT shipped.
+
+### Endpoint
+
+- URL: `POST https://register.ld.admin.ch/query`
+- Content-Type: `application/sparql-query`
+- Accept: `application/sparql-results+json`
+- Discovery: `https://register.ld.admin.ch/.well-known/dataset/foj-zefix`
+- Public, no auth required.
+
+### Graph
+
+`<https://lindas.admin.ch/foj/zefix>`
+
+### Bulk query (batches of 500 UIDs)
+
+```sparql
+PREFIX schema: <http://schema.org/>
+SELECT ?uidValue ?company ?legalName ?legalForm ?desc WHERE {
+  GRAPH <https://lindas.admin.ch/foj/zefix> {
+    VALUES ?uidValue { "CHE103137179" "CHE105928677" ... }
+    ?uidNode schema:name "CompanyUID" ;
+             schema:value ?uidValue .
+    ?company schema:identifier ?uidNode ;
+             schema:legalName ?legalName .
+    OPTIONAL { ?company schema:additionalType ?legalForm }
+    OPTIONAL { ?company schema:description ?desc }
+  }
+}
+```
+
+UIDs are passed in the canonical Zefix flat form (no separators), e.g.
+`CHE103137179` (= FINMA `CHE-103.137.179`). The implementation in
+`etl/finma/ingest-zefix.ts` handles round-trip normalization.
+
+### Vocabulary
+
+| RDF predicate                               | Field                | Notes                                        |
+|---------------------------------------------|----------------------|----------------------------------------------|
+| `schema:legalName`                          | `name`               | canonical legal name                         |
+| `schema:description`                        | `zefix_purpose`      | corporate purpose / objet social             |
+| `schema:additionalType`                     | `zefix_legal_form*`  | URI under `https://ld.admin.ch/ech/97/legalforms/<code>` (eCH-0097) |
+| `schema:identifier` (sub-node `CompanyUID`) | UID round-trip       | `schema:value` literal carries `CHEnnnnnnnnn`|
+| `schema:address` (sub-node)                 | (not yet promoted)   | nested locn:address with street/postcode     |
+
+The eCH-0097 code → human label table is embedded in `ingest-zefix.ts`
+(`ECH_0097_LABELS`).
+
+### Cache
+
+`./data/finma/finma-cache/zefix-bulk.json` keyed by SHA-256 of the sorted UID
+list. Re-using the same UID set short-circuits all SPARQL calls.
+
+### Join with FINMA Registry
+
+`finma_with_zefix.{csv,json,sql,parquet}` is built by left-joining the
+authorised registry on `uid` (canonical form `CHE-xxx.xxx.xxx`). Entities
+without a UID (e.g. some `asset_manager_individual` rows for natural persons)
+or without a Zefix match keep all `zefix_*` columns empty/null.
+
+### Limitations (v1)
+
+LINDAS does NOT expose:
+- `capital`, `capital_currency`
+- RC status (active / inactive / liquidation)
+- `organes` (board members, signatures)
+- mutations / SOGC journal entries
+- `last_update`
+
+These fields require the **authenticated Zefix REST API** (Swagger:
+https://www.zefix.admin.ch/ZefixPublicREST/swagger-ui/index.html). The API
+key is requested by emailing `zefix@bj.admin.ch` — not yet obtained as of
+this release. Once provisioned, a complementary `ingest-zefix-rest.ts`
+module will populate the missing columns. The interface `ZefixData` is
+already forward-compatible.
+
+### Match rate
+
+Empirical (2026-04-29 sample): ~91% of FINMA UIDs match Zefix. Misses are
+expected for:
+- foreign branches (no Swiss UID in Zefix)
+- natural persons (asset_manager_individual without UID)
+- entities deregistered before LINDAS coverage

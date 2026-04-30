@@ -6,6 +6,7 @@ import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
 import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
 import type { FinmaEntity, FinmaEntityType, FinmaWarning } from "./types.js";
+import type { ZefixData } from "./ingest-zefix.js";
 import type { DeltaChange } from "./delta.js";
 
 const FINMA_PARQUET_SCHEMA = new parquet.ParquetSchema({
@@ -36,6 +37,37 @@ const FINMA_WARNINGS_PARQUET_SCHEMA = new parquet.ParquetSchema({
   source_list: { type: "UTF8" },
   warning_type: { type: "UTF8" },
   additional_info: { type: "UTF8", optional: true },
+});
+
+// Zefix-enriched FINMA registry — adds 7 columns. Note: nested arrays/structs
+// are flaky in parquetjs-lite, so `zefix_organes` is JSON-stringified and
+// stored as UTF8 (consistent across CSV/SQL/JSON/Parquet for v1).
+const FINMA_WITH_ZEFIX_PARQUET_SCHEMA = new parquet.ParquetSchema({
+  entity_type: { type: "UTF8" },
+  name: { type: "UTF8" },
+  uid: { type: "UTF8", optional: true },
+  lei: { type: "UTF8", optional: true },
+  licence_type: { type: "UTF8", optional: true },
+  licence_type_de: { type: "UTF8", optional: true },
+  licence_type_fr: { type: "UTF8", optional: true },
+  licence_type_it: { type: "UTF8", optional: true },
+  licence_date: { type: "UTF8", optional: true },
+  status: { type: "UTF8", optional: true },
+  canton: { type: "UTF8", optional: true },
+  city: { type: "UTF8", optional: true },
+  address: { type: "UTF8", optional: true },
+  source_list: { type: "UTF8" },
+  source_url: { type: "UTF8" },
+  is_warning_listed: { type: "BOOLEAN", optional: true },
+  zefix_status: { type: "UTF8", optional: true },
+  zefix_capital: { type: "DOUBLE", optional: true },
+  zefix_capital_currency: { type: "UTF8", optional: true },
+  zefix_legal_form: { type: "UTF8", optional: true },
+  zefix_legal_form_code: { type: "UTF8", optional: true },
+  zefix_purpose: { type: "UTF8", optional: true },
+  zefix_organes: { type: "UTF8", optional: true },
+  zefix_last_update: { type: "UTF8", optional: true },
+  zefix_id: { type: "UTF8", optional: true },
 });
 
 const DATASET_LICENSE = `openswissdata.com — Dataset License v1.0
@@ -75,6 +107,8 @@ export interface FinmaBundleInput {
   entities: FinmaEntity[];
   warnings?: FinmaWarning[];
   recentChanges?: DeltaChange[]; // 90-day delta, optional
+  /** Tier "FINMA + Zefix Sync": Zefix data keyed by FINMA UID. Optional. */
+  zefixByUid?: Map<string, ZefixData>;
 }
 
 export interface FinmaBundleResult {
@@ -87,6 +121,8 @@ export interface FinmaBundleResult {
   changeCount: number;
   warningCount: number;
   warningListedFlagCount: number;
+  /** Number of FINMA entities enriched with Zefix data (0 if tier=standard). */
+  zefixEnrichedCount: number;
 }
 
 function toCsvRow(e: FinmaEntity): Record<string, unknown> {
@@ -195,6 +231,92 @@ export async function buildBundle(
     }
   }
 
+  // Tier "FINMA + Zefix Sync" — enriched registry (only if zefixByUid provided).
+  const zefixByUid = input.zefixByUid;
+  let zefixEnrichedCount = 0;
+  const includeZefix = zefixByUid !== undefined;
+  if (includeZefix) {
+    const enriched = input.entities.map((e) => {
+      const z = e.uid ? zefixByUid!.get(e.uid) : undefined;
+      if (z) zefixEnrichedCount++;
+      return {
+        ...e,
+        zefix_status: z?.status,
+        zefix_capital: z?.capital,
+        zefix_capital_currency: z?.capital_currency,
+        zefix_legal_form: z?.legal_form,
+        zefix_legal_form_code: z?.legal_form_code,
+        zefix_purpose: z?.purpose,
+        zefix_organes: z?.organes,
+        zefix_last_update: z?.last_update,
+        zefix_id: z?.zefix_id,
+      };
+    });
+
+    const enrichedCsvRows = enriched.map((e) => ({
+      entity_type: e.entity_type,
+      name: e.name,
+      uid: e.uid ?? "",
+      lei: e.lei ?? "",
+      licence_type: e.licence_type ?? "",
+      licence_type_de: e.licence_type_de ?? "",
+      licence_type_fr: e.licence_type_fr ?? "",
+      licence_type_it: e.licence_type_it ?? "",
+      licence_date: e.licence_date ?? "",
+      status: e.status ?? "",
+      canton: e.canton ?? "",
+      city: e.city ?? "",
+      address: e.address ?? "",
+      source_list: e.source_list,
+      source_url: e.source_url,
+      is_warning_listed: e.is_warning_listed === true ? "true" : "false",
+      zefix_status: e.zefix_status ?? "",
+      zefix_capital: e.zefix_capital ?? "",
+      zefix_capital_currency: e.zefix_capital_currency ?? "",
+      zefix_legal_form: e.zefix_legal_form ?? "",
+      zefix_legal_form_code: e.zefix_legal_form_code ?? "",
+      zefix_purpose: e.zefix_purpose ?? "",
+      zefix_organes: e.zefix_organes ? JSON.stringify(e.zefix_organes) : "",
+      zefix_last_update: e.zefix_last_update ?? "",
+      zefix_id: e.zefix_id ?? "",
+    }));
+    writeCsv(enrichedCsvRows, join(workDir, "finma_with_zefix.csv"));
+    writeJson(enriched, join(workDir, "finma_with_zefix.json"));
+    writeSqlInserts("finma_with_zefix", enrichedCsvRows, join(workDir, "finma_with_zefix.sql"));
+    const enrichedParquetRows = enriched.map((e) => ({
+      entity_type: e.entity_type,
+      name: e.name,
+      uid: e.uid,
+      lei: e.lei,
+      licence_type: e.licence_type,
+      licence_type_de: e.licence_type_de,
+      licence_type_fr: e.licence_type_fr,
+      licence_type_it: e.licence_type_it,
+      licence_date: e.licence_date,
+      status: e.status,
+      canton: e.canton,
+      city: e.city,
+      address: e.address,
+      source_list: e.source_list,
+      source_url: e.source_url,
+      is_warning_listed: e.is_warning_listed === true,
+      zefix_status: e.zefix_status,
+      zefix_capital: e.zefix_capital,
+      zefix_capital_currency: e.zefix_capital_currency,
+      zefix_legal_form: e.zefix_legal_form,
+      zefix_legal_form_code: e.zefix_legal_form_code,
+      zefix_purpose: e.zefix_purpose,
+      zefix_organes: e.zefix_organes ? JSON.stringify(e.zefix_organes) : undefined,
+      zefix_last_update: e.zefix_last_update,
+      zefix_id: e.zefix_id,
+    }));
+    await writeParquet(
+      enrichedParquetRows as Record<string, unknown>[],
+      FINMA_WITH_ZEFIX_PARQUET_SCHEMA,
+      join(workDir, "finma_with_zefix.parquet"),
+    );
+  }
+
   // FINMA Warning List — parallel dataset (negative cross-reference).
   const warnings = input.warnings ?? [];
   const warningCsvRows = warnings.map(warningToCsvRow);
@@ -269,14 +391,51 @@ export async function buildBundle(
   };
   writeJson(warningsSchema, join(workDir, "schema_warnings.json"));
 
+  // Schema for FINMA + Zefix enriched registry (only when zefix tier active)
+  if (includeZefix) {
+    const enrichedSchema = {
+      $schema: "http://json-schema.org/draft-07/schema#",
+      title: "FINMA Registry + Zefix Enrichment",
+      type: "array",
+      items: {
+        type: "object",
+        required: ["entity_type", "name", "source_list", "source_url"],
+        properties: {
+          ...schema.items.properties,
+          zefix_status: { enum: ["active", "inactive", "liquidation", "unknown"] },
+          zefix_capital: { type: "number" },
+          zefix_capital_currency: { type: "string" },
+          zefix_legal_form: { type: "string" },
+          zefix_legal_form_code: { type: "string", pattern: "^\\d{4}$" },
+          zefix_purpose: { type: "string" },
+          zefix_organes: { type: "string", description: "JSON-serialized array of organes (board members, signatures)" },
+          zefix_last_update: { type: "string", format: "date" },
+          zefix_id: { type: "string", description: "Zefix internal company id" },
+        },
+      },
+    };
+    writeJson(enrichedSchema, join(workDir, "schema_with_zefix.json"));
+  }
+
   // README
+  const zefixSection = includeZefix
+    ? `
+
+### FINMA + Zefix Sync (enriched registry)
+
+- \`finma_with_zefix.csv\` / \`.json\` / \`.sql\` / \`.parquet\` — ${input.entities.length} entries (${zefixEnrichedCount} enriched with Zefix data)
+- Source: LINDAS SPARQL endpoint \`https://register.ld.admin.ch/query\` (graph \`<https://lindas.admin.ch/foj/zefix>\`)
+- Added columns: \`zefix_status\`, \`zefix_capital\`, \`zefix_capital_currency\`, \`zefix_legal_form\`, \`zefix_legal_form_code\`, \`zefix_purpose\`, \`zefix_organes\`, \`zefix_last_update\`, \`zefix_id\`
+- Schema: \`schema_with_zefix.json\`
+- v1 limitation: LINDAS exposes \`legal_form\`, \`legal_form_code\`, \`purpose\`, \`zefix_id\`. Other fields (\`capital\`, \`organes\`, \`status\`, \`last_update\`) require the authenticated Zefix REST API and remain undefined in this release. See \`SOURCES.md\` in the repo for details.`
+    : "";
   const readme = `# FINMA Registry Dataset — version ${version}
 
 Unified registry of financial institutions authorised by FINMA (Swiss Financial Market Supervisory Authority), plus the FINMA Warning List of unauthorised providers (cross-referenced).
 
 ${input.entities.length} authorised entities across ${entityTypes.length} entity types.
 ${warnings.length} entries in the FINMA Warning List.
-${warningListedFlagCount} authorised entities flagged \`is_warning_listed=true\` (cross-ref).
+${warningListedFlagCount} authorised entities flagged \`is_warning_listed=true\` (cross-ref).${includeZefix ? `\n${zefixEnrichedCount} entities enriched with Zefix data (LINDAS).` : ""}
 
 ## Files
 
@@ -294,7 +453,7 @@ ${entityTypes.map(t => `- \`finma_${t}.csv\` — ${countByType[t] ?? 0} entries`
 ### FINMA Warning List (unauthorised providers)
 
 - \`finma_warnings.csv\` / \`.json\` / \`.sql\` / \`.parquet\` — ${warnings.length} entries
-- Source: https://www.finma.ch/en/finma-public/warnungen/warning-list/
+- Source: https://www.finma.ch/en/finma-public/warnungen/warning-list/${zefixSection}
 
 ### Delta
 
@@ -302,20 +461,20 @@ ${entityTypes.map(t => `- \`finma_${t}.csv\` — ${countByType[t] ?? 0} entries`
 
 ### Metadata
 
-- \`schema.json\` / \`schema_warnings.json\` — JSON Schema (Draft-07)
+- \`schema.json\` / \`schema_warnings.json\`${includeZefix ? " / `schema_with_zefix.json`" : ""} — JSON Schema (Draft-07)
 - \`checksums.sha256\`
 - \`provenance.json\` — Ed25519-signed manifest + RFC-3161 timestamp (verify with \`npx tsx etl/shared/verify-provenance.ts <zip>\`; public key at \`packages/schemas/openswissdata.pubkey.ed25519\`)
 - \`LICENSE.txt\`
 
 ## Attribution
 
-Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.ch/
+Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.ch/${includeZefix ? "\nSecondary source (Zefix Sync tier): Federal Office of Justice / EHRA via LINDAS. https://register.ld.admin.ch/" : ""}
 
 ## Dataset metadata
 
 - Authorised entities: ${input.entities.length}
 - Warnings: ${warnings.length}
-- Authorised entities cross-flagged on warning list: ${warningListedFlagCount}
+- Authorised entities cross-flagged on warning list: ${warningListedFlagCount}${includeZefix ? `\n- Zefix-enriched entities: ${zefixEnrichedCount}` : ""}
 - Changes in last snapshot: ${changes.length}
 - Version: ${version}
 - Generated: ${new Date().toISOString()}
@@ -330,6 +489,15 @@ Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.
     "finma_warnings.csv", "finma_warnings.json", "finma_warnings.sql", "finma_warnings.parquet",
     "changelog_90d.csv", "changelog_90d.json",
     "schema.json", "schema_warnings.json",
+    ...(includeZefix
+      ? [
+          "finma_with_zefix.csv",
+          "finma_with_zefix.json",
+          "finma_with_zefix.sql",
+          "finma_with_zefix.parquet",
+          "schema_with_zefix.json",
+        ]
+      : []),
   ];
   const checksums = dataFiles.map(f => {
     const content = readFileSync(join(workDir, f));
@@ -404,5 +572,6 @@ Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.
     changeCount: changes.length,
     warningCount: warnings.length,
     warningListedFlagCount,
+    zefixEnrichedCount,
   };
 }
