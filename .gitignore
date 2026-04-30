@@ -7,6 +7,9 @@ dist/
 *.db-journal
 *.db-wal
 data/
+# Exception: bundled MCP data slice ships with the deploy (small CSVs only)
+!src/mcp/data/
+!src/mcp/data/*
 .DS_Store
 permissions-emails/
 coverage/
