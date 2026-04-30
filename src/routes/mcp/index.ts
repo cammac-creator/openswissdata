@@ -39,7 +39,20 @@ mcpRoute.get("/health", (c) => c.json({ status: "ok" }));
 mcpRoute.route("/oauth", oauthRouter);
 
 // Server info — bypasses quota; bare auth check only.
-mcpRoute.get("/", oauthVerify(), (c) => c.json(getServerInfo()));
+// Return JSON only when caller asks for it (curl, Accept: application/json, agents) ;
+// otherwise let the request bubble through so Astro's static `/mcp/index.html`
+// (the public docs page) is served by the catch-all below.
+mcpRoute.get("/", oauthVerify(), (c) => {
+  const accept = c.req.header("Accept") ?? "";
+  const wantsJson = accept.includes("application/json") && !accept.includes("text/html");
+  if (wantsJson) return c.json(getServerInfo());
+  // Fallthrough: let the static HTML page serve.
+  return c.notFound();
+});
+
+// Explicit JSON discovery endpoint for agents that follow standard browser
+// `Accept: text/html` (which would otherwise get the docs page).
+mcpRoute.get("/discovery", oauthVerify(), (c) => c.json(getServerInfo()));
 
 mcpRoute.post("/jsonrpc", oauthVerify(), async (c) => {
   let body: unknown;
