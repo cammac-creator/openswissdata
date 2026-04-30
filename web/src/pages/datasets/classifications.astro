@@ -131,11 +131,45 @@ import ClassificationsLookup from "../../components/ClassificationsLookup.astro"
       </div>
     </section>
 
+    <!-- ============ TIER PRO ============ -->
+    <section class="ds-section reveal" style="margin-top:64px;padding:32px;background:var(--bg);border:2px solid var(--ink);border-radius:14px;position:relative;">
+      <span style="position:absolute;top:-12px;left:24px;background:var(--ink);color:var(--bg);font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;padding:4px 10px;border-radius:4px;">Nouveau · Pro tier</span>
+      <h2 class="ds-section-title" style="margin-top:8px;">Classifications <span class="serif">Pro</span> — pour les pipelines AI &amp; intégrations sérieuses.</h2>
+      <p class="ds-section-intro" style="margin-bottom:20px;">
+        Tout le contenu Standard <strong>+ 3 valeurs ajoutées</strong> qui économisent des jours de travail à vos équipes data ou compliance :
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0;">
+        <div style="padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">01 · Embeddings</div>
+          <strong style="font-size:14px;color:var(--ink);">Vecteurs 768d pré-calculés</strong>
+          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">Sur les 1 845 codes NOGA 2025. Recherche sémantique instantanée chez vous, sans GPU.</p>
+        </div>
+        <div style="padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">02 · Cross-walks NAICS</div>
+          <strong style="font-size:14px;color:var(--ink);">Pivot ISIC → NAICS 2022</strong>
+          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">Export US-ready. Compatible reporting pour filiales américaines et data US Census.</p>
+        </div>
+        <div style="padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">03 · EN labels NOGA</div>
+          <strong style="font-size:14px;color:var(--ink);">Labels anglais officiels</strong>
+          <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">Issus du SKOS Eurostat (24 langues disponibles). Pour les exports vers maison-mère internationale.</p>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--ink-mute);font-family:var(--font-mono);margin-bottom:20px;border-left:2px solid var(--line);padding-left:12px;">
+        À venir en V2 (Pro inchangé) : STATENT (établissements × NOGA × commune, ~978 600 lignes) — en attente d'autorisation OFS écrite avant inclusion commerciale.
+      </p>
+      <a href="https://buy.stripe.com/00w9AVbls2tq0CHgKbes000" class="ds-cta-btn" style="background:var(--ink);">
+        Acheter Classifications Pro — 999 CHF
+        <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <p class="ds-cta-sub" style="margin-top:16px;">Paiement sécurisé Stripe · Manifest signé Ed25519 + RFC-3161 · Refund 14 jours si non téléchargé</p>
+    </section>
+
     <div class="ds-cta">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
         <input type="hidden" name="dataset_ids" value="classifications" />
         <button type="submit" class="ds-cta-btn">
-          Acheter Classifications — 399 CHF
+          Acheter Classifications Standard — 399 CHF
           <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </form>
