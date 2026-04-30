@@ -95,7 +95,7 @@
 | `sdks/sdk-ts/` `@openswissdata/sdk` v0.1.0 | ✅ | Dual ESM+CJS, 20 tests passent, retry exp + jitter, types stricts |
 | `sdks/sdk-py/` `openswissdata` v0.1.0 | ✅ | Sync `Client` + Async `AsyncClient`, 23 tests, CLI `python -m openswissdata`, extras `[pandas]` |
 | `sdks/mcp-server/` `@openswissdata/mcp` | ✅ | Proxy STDIO local → mcp.openswissdata.com, Dockerfile two-stage non-root, configs Claude Desktop + Cursor |
-| **Publication npm/PyPI** | 🟡 | **À faire toi-même** quand prêt. Voir `docs/audit-2026-04-30/PROGRESS-sdks.md` pour les commandes. |
+| **Publication npm/PyPI** | 🔴 | **BLOQUÉ — conflit de noms à trancher.** Les anciens `packages/sdk-ts` et `packages/sdk-py` (loaders CSV créés 22/04, jamais publiés) utilisent **les mêmes noms** (`@openswissdata/sdk` + `openswissdata`) que les nouveaux SDKs MCP/HTTP dans `sdks/`. Recommandation agent : supprimer `packages/sdk-{ts,py}` (jamais publié, remplacé par les SDKs MCP). Alternative : renommer les nouveaux `@openswissdata/client`. **Décision pour toi au réveil.** |
 
 ### ✅ Phase 7 — SEO programmatique (agent SEO)
 
@@ -153,7 +153,8 @@
 
 ### Optionnel (après preuve marché)
 
-- **Publier les 3 SDKs** : `npm publish` dans `sdks/sdk-ts/dist`, `python -m build && twine upload` dans `sdks/sdk-py`, `npm publish` dans `sdks/mcp-server`.
+- **Trancher conflit nommage SDKs** : `packages/sdk-{ts,py}` (anciens loaders CSV, jamais publiés sur npm/PyPI, dernière modif 22/04) vs `sdks/sdk-{ts,py}` (nouveaux SDKs HTTP/MCP, fonctionnels et testés). Les deux portent le nom `@openswissdata/sdk` / `openswissdata`. **Recommandation** : `git rm -rf packages/sdk-ts packages/sdk-py` puis publier les nouveaux. Coût : 0 (les anciens n'ont jamais quitté le repo).
+- **Publier les 3 SDKs** (après résolution du conflit ci-dessus) : `npm publish` dans `sdks/sdk-ts/dist`, `python -m build && twine upload` dans `sdks/sdk-py`, `npm publish` dans `sdks/mcp-server`.
 - **Soumettre sitemap-index.xml** à Google Search Console + Bing Webmaster.
 - **Souscrire RC pro Generali/Helvetia** (~300 CHF/an) avant de réintroduire la garantie 10×.
 - **Trademark check swissreg.ch + EUIPO** sur "openswissdata".
