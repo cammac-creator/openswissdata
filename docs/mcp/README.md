@@ -66,7 +66,7 @@ curl -X POST https://www.openswissdata.com/mcp/jsonrpc \
   }'
 ```
 
-If a `MCP_BEARER_TOKEN` is configured in the production env (it is), add `-H "authorization: Bearer <token>"` to every call. Public access without a token will return `401`.
+**Auth status as of MVP launch (2026-04-30):** `MCP_BEARER_TOKEN` is **not** set in the production environment yet — the endpoint is open behind per-IP rate limiting (100 req/h). This matches the "scaffolding that responds" remit of the V1 MVP. Once a token is provisioned (`railway variables --set MCP_BEARER_TOKEN=$(openssl rand -hex 32)`), every request will need `-H "authorization: Bearer <token>"` and unauthenticated calls will return `401`.
 
 ## Use it from Claude Code
 
