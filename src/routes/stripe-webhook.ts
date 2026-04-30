@@ -72,25 +72,40 @@ stripeWebhookRoute.post("/", async (c) => {
   const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
   const updatesUntil = now + ENTITLEMENT_DAYS * 24 * 3600 * 1000;
 
-  // H2: Pre-resolve dataset+version rows before opening the transaction so any
-  // missing row causes an early abort — BEFORE any DB write happens.
+  // H2 (relaxed for fail-safe partial delivery):
+  // Pre-resolve dataset+version rows. If a dataset has no current_version
+  // (e.g. ETL not yet run), DON'T fail the whole webhook — log loud and
+  // skip just that dataset. Stripe retries the whole webhook on 500, so a
+  // permanent dataset gap would block ALL emails for the order, including
+  // the datasets that ARE ready. Better: deliver what we can, raise an
+  // alert on the missing one. The customer can email support to claim the
+  // missing dataset; the order/entitlement stays in DB.
   type EmailPayload = { datasetId: string; datasetName: string; r2Key: string; version: string };
   const emailPayloads: EmailPayload[] = [];
+  const skippedDatasets: Array<{ id: string; reason: string }> = [];
 
   for (const datasetId of resolvedDatasets) {
     const dataset = db.prepare("SELECT name, current_version FROM datasets WHERE id = ?")
       .get(datasetId) as { name: string; current_version: string | null } | undefined;
     if (!dataset?.current_version) {
-      console.warn(`[webhook] dataset ${datasetId} has no current_version — aborting tx`);
-      return c.json({ error: "dataset_missing_version", dataset_id: datasetId }, 500);
+      console.error(`[webhook] ALERT dataset ${datasetId} has no current_version — skipping in this delivery (order ${session.id})`);
+      skippedDatasets.push({ id: datasetId, reason: "no_current_version" });
+      continue;
     }
     const versionRow = db.prepare("SELECT r2_key FROM versions WHERE dataset_id = ? AND version = ?")
       .get(datasetId, dataset.current_version) as { r2_key: string } | undefined;
     if (!versionRow) {
-      console.warn(`[webhook] no version row for ${datasetId}@${dataset.current_version} — aborting tx`);
-      return c.json({ error: "version_row_missing", dataset_id: datasetId }, 500);
+      console.error(`[webhook] ALERT no version row for ${datasetId}@${dataset.current_version} — skipping (order ${session.id})`);
+      skippedDatasets.push({ id: datasetId, reason: "version_row_missing" });
+      continue;
     }
     emailPayloads.push({ datasetId, datasetName: dataset.name, r2Key: versionRow.r2_key, version: dataset.current_version });
+  }
+
+  if (emailPayloads.length === 0) {
+    // Every dataset failed pre-resolution — that's catastrophic, retry is OK.
+    console.error(`[webhook] no datasets could be resolved for order ${session.id} — returning 500 to trigger Stripe retry`);
+    return c.json({ error: "all_datasets_unresolvable", skipped: skippedDatasets }, 500);
   }
 
   // H2: Wrap order + ALL entitlement inserts in one atomic transaction.
@@ -149,5 +164,10 @@ stripeWebhookRoute.post("/", async (c) => {
     }
   }
 
-  return c.json({ received: true, order_id: orderId, datasets: resolvedDatasets });
+  return c.json({
+    received: true,
+    order_id: orderId,
+    datasets: emailPayloads.map((p) => p.datasetId),
+    skipped: skippedDatasets.length > 0 ? skippedDatasets : undefined,
+  });
 });
