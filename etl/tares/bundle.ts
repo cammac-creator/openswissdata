@@ -6,6 +6,12 @@ import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
 import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
 import type { TaresRow } from "./types.js";
+import {
+  TARES_EMBEDDING_DIMENSIONS,
+  TARES_EMBEDDING_MODEL,
+  TARES_EMBEDDING_MODEL_VERSION,
+  type TaresEmbedding,
+} from "./embeddings.js";
 
 const TARES_PARQUET_SCHEMA = new parquet.ParquetSchema({
   hs8: { type: "UTF8" },
@@ -25,6 +31,18 @@ const TARES_PARQUET_SCHEMA = new parquet.ParquetSchema({
   customs_relief_codes_json: { type: "UTF8", optional: true },
   valid_from: { type: "UTF8" },
   source_url: { type: "UTF8" },
+});
+
+// Embeddings parquet schema. We use FLOAT (32-bit) instead of DOUBLE (64-bit):
+// the model's native precision is float32 and we save 50% on disk for free.
+// `repeated: true` declares a Parquet REPEATED column = list<float>.
+const TARES_EMBEDDINGS_PARQUET_SCHEMA = new parquet.ParquetSchema({
+  hs_code: { type: "UTF8" },
+  lang: { type: "UTF8" },
+  description: { type: "UTF8" },
+  embedding: { type: "FLOAT", repeated: true },
+  model: { type: "UTF8" },
+  model_version: { type: "UTF8" },
 });
 
 const TARES_JSON_SCHEMA = {
@@ -124,6 +142,15 @@ export interface BuildBundleOptions {
    * depend on freetsa.org. Defaults to `true` in production releases.
    */
   withTimestamp?: boolean;
+  /**
+   * Optional pre-computed embeddings (one row per HS8 × lang). When provided,
+   * a `tares_embeddings.parquet` file is added to the bundle, listed in
+   * `checksums.sha256` and covered by the signed provenance manifest.
+   *
+   * If `undefined`, the bundle is built WITHOUT embeddings — for backwards
+   * compatibility with releases predating Phase 1 / T1 (and to keep tests fast).
+   */
+  embeddings?: TaresEmbedding[];
 }
 
 export async function buildBundle(
@@ -178,6 +205,25 @@ export async function buildBundle(
   // JSON Schema
   writeJson(TARES_JSON_SCHEMA, join(workDir, "schema.json"));
 
+  // Embeddings parquet (Phase 1 / T1) — only when caller supplied them.
+  // We rely on the caller (release.ts) to have already paid the inference cost.
+  const hasEmbeddings = !!opts.embeddings && opts.embeddings.length > 0;
+  if (hasEmbeddings) {
+    const embeddingRows = opts.embeddings!.map((e) => ({
+      hs_code: e.hs_code,
+      lang: e.lang,
+      description: e.description,
+      embedding: e.embedding,
+      model: e.model,
+      model_version: e.model_version,
+    }));
+    await writeParquet(
+      embeddingRows as Record<string, unknown>[],
+      TARES_EMBEDDINGS_PARQUET_SCHEMA,
+      join(workDir, "tares_embeddings.parquet"),
+    );
+  }
+
   // README
   const lastUpdatedAt = new Date().toISOString();
   const readme = `# TARES Dataset — version ${version}
@@ -202,7 +248,12 @@ Normalized (form only) Swiss customs tariff codes (HS8). Values are preserved ve
 - \`tares.parquet\` — Apache Parquet
 - \`tares.json\` — hierarchical JSON (all nested fields preserved)
 - \`tares.sql\` — CREATE TABLE + INSERT statements (PostgreSQL/MySQL/SQLite compatible)
-- \`schema.json\` — JSON Schema (Draft-07)
+- \`schema.json\` — JSON Schema (Draft-07)${hasEmbeddings ? `
+- \`tares_embeddings.parquet\` — pre-computed multilingual semantic embeddings (Phase 1 / T1).
+  Columns: \`hs_code\`, \`lang\`, \`description\`, \`embedding\` (list<float>, ${TARES_EMBEDDING_DIMENSIONS}d),
+  \`model\` (\`${TARES_EMBEDDING_MODEL}\`), \`model_version\` (\`${TARES_EMBEDDING_MODEL_VERSION}\`).
+  Vectors are L2-normalised so cosine similarity reduces to a dot product.
+  See SOURCES.md → "Embeddings (Phase 1 / T1)" for a Python load + search snippet.` : ""}
 - \`checksums.sha256\`
 - \`provenance.json\` — Ed25519-signed manifest + RFC-3161 timestamp (see "Provenance" below)
 - \`LICENSE.txt\`
@@ -246,8 +297,20 @@ https://www.bazg.admin.ch/
   // LICENSE.txt
   writeFileSync(join(workDir, "LICENSE.txt"), DATASET_LICENSE, "utf8");
 
-  // Compute checksums of the 5 data files (NOT README/LICENSE/checksums itself)
-  const dataFiles = ["tares.csv", "tares.parquet", "tares.json", "tares.sql", "schema.json"];
+  // Compute checksums of the data files (NOT README/LICENSE/checksums itself).
+  // CRITICAL: every file in this list is covered by:
+  //   1. checksums.sha256 (line-per-file digest)
+  //   2. provenance.json `manifest.files[]` (Ed25519-signed)
+  // If you add a file to the bundle, add it here too — otherwise a buyer can
+  // tamper with it and the signature will still validate.
+  const dataFiles = [
+    "tares.csv",
+    "tares.parquet",
+    "tares.json",
+    "tares.sql",
+    "schema.json",
+    ...(hasEmbeddings ? ["tares_embeddings.parquet"] : []),
+  ];
   const checksums = dataFiles.map(f => {
     const content = readFileSync(join(workDir, f));
     const hash = createHash("sha256").update(content).digest("hex");
