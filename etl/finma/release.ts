@@ -1,10 +1,12 @@
 import { ingestOneSource, ingestFromFinmaCsv } from "./ingest.js";
 import { FINMA_SOURCES } from "./sources.js";
 import { buildBundle } from "./bundle.js";
+import { ingestFinmaWarnings } from "./ingest-warnings.js";
+import { flagWarningsOnRegistry } from "./unify-schema.js";
 import { uploadZip } from "../../src/lib/r2.js";
 import { mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import type { FinmaEntity } from "./types.js";
+import type { FinmaEntity, FinmaWarning } from "./types.js";
 
 function todayVersion(): string {
   const d = new Date();
@@ -44,6 +46,7 @@ export async function runRelease(
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 
   let entities: FinmaEntity[] = [];
+  let warnings: FinmaWarning[] = [];
   if (useFixture) {
     for (const f of FIXTURE_MAP) {
       const source = FINMA_SOURCES.find((s) => s.entity_type === f.entity_type);
@@ -58,10 +61,18 @@ export async function runRelease(
     const result = await ingestFromFinmaCsv({ cacheDir });
     entities = result.entities;
     console.log(`[release-finma] ingested ${entities.length} entities. unmapped types: ${JSON.stringify(result.stats.unmappedTypes)}`);
-  }
-  console.log(`[release-finma] total ${entities.length} entities`);
 
-  const bundle = await buildBundle({ entities }, version, outDir);
+    console.log(`[release-finma] ingesting FINMA warning list ...`);
+    const warn = await ingestFinmaWarnings({ cacheDir });
+    warnings = warn.warnings;
+    console.log(`[release-finma] ingested ${warnings.length} warnings. categories: ${JSON.stringify(warn.stats.categoryCounts)}`);
+
+    const flagged = flagWarningsOnRegistry(entities, warnings, 0.8);
+    console.log(`[release-finma] cross-ref: ${flagged} authorised entities flagged is_warning_listed=true`);
+  }
+  console.log(`[release-finma] total ${entities.length} entities, ${warnings.length} warnings`);
+
+  const bundle = await buildBundle({ entities, warnings }, version, outDir);
   console.log(
     `[release-finma] bundle sha256 ${bundle.sha256.slice(0, 12)}..., ${(bundle.sizeBytes / 1024).toFixed(1)} KB`
   );
@@ -84,7 +95,7 @@ export async function runRelease(
       r2_key,
       sha256: bundle.sha256,
       size_bytes: bundle.sizeBytes,
-      changelog: `FINMA v${version} — ${entities.length} entities (fixtures)`,
+      changelog: `FINMA v${version} — ${entities.length} entities + ${warnings.length} warnings`,
     }),
   });
 

@@ -29,6 +29,11 @@ export interface FinmaEntity {
   address?: string;
   source_list: string;      // e.g. "finma-uid-csv"
   source_url: string;
+  /**
+   * True if a fuzzy-name match (score >= 0.8) was found against the FINMA
+   * Warning List. Computed during cross-reference, not from upstream.
+   */
+  is_warning_listed?: boolean;
 }
 
 export interface FinmaSource {
@@ -40,4 +45,32 @@ export interface FinmaSource {
    * FinmaEntity field name. Columns not in the map are ignored.
    */
   headers_map: Partial<Record<string, keyof FinmaEntity>>;
+}
+
+/**
+ * One entry in the FINMA Warning List — a public list of companies and
+ * individuals carrying out financial activities without FINMA authorisation.
+ *
+ * Source: https://www.finma.ch/en/finma-public/warnungen/warning-list/
+ */
+export interface FinmaWarning {
+  /** Entity name as published by FINMA. */
+  name: string;
+  /** ISO 2-letter country code, when available. Always undefined in v1
+   *  (would require fetching one detail page per entity). */
+  country?: string;
+  /** ISO date (YYYY-MM-DD) when the entity was added to the warning list. */
+  date_added?: string;
+  /** Free-text label from FINMA, e.g. "Entered in commercial register" or
+   *  "Not entered in commercial register". */
+  category?: string;
+  /** Absolute URL of the entity's FINMA detail page. */
+  source_url: string;
+  /** Always "finma-warnings". */
+  source_list: "finma-warnings";
+  /** Bucket label, e.g. "unauthorized_provider". */
+  warning_type: string;
+  /** Free text holding upstream sub-fields not yet promoted to first-class
+   *  columns (currently the slug derived from the URL). */
+  additional_info?: string;
 }
