@@ -36,6 +36,11 @@ const EnvSchema = z.object({
   R2_PUBLIC_URL: z.string().optional(),
   // MCP server — optional (missing token = auth disabled, suitable for dev)
   MCP_BEARER_TOKEN: z.string().optional(),
+  // OAuth 2.1 signing secret for /oauth/* tokens. Required in prod ≥32 chars.
+  // Without this, every authenticated MCP request crashes with HTTP 500.
+  OAUTH_SIGNING_SECRET: isProd
+    ? z.string().min(32)
+    : z.string().min(16).default("dev-oauth-signing-secret-change-me"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

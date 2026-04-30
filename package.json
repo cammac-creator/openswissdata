@@ -18,6 +18,9 @@
     "etl:tares": "tsx etl/tares/release.ts",
     "etl:classifications": "tsx etl/classifications/release.ts",
     "etl:finma": "tsx etl/finma/release.ts",
+    "backup:db": "tsx scripts/backup-db.ts",
+    "backup:db:dry": "tsx scripts/backup-db.ts --dry-run",
+    "cleanup:expired": "tsx scripts/cleanup-expired.ts",
     "web:dev": "cd web && npx astro dev",
     "web:build": "cd web && npm ci && npx astro build"
   },

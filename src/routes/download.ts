@@ -56,18 +56,48 @@ downloadRoute.post("/account/download-request", requireAuth, async (c) => {
 });
 
 // Public-ish endpoint: redeems a download_token → fresh R2 signed URL redirect.
-// Token itself is the auth (48h TTL). Safe to share with an employee.
-// NO requireAuth here.
+// Token itself is the auth (48h TTL).
+// Single-use: rejects if used_at IS NOT NULL (prevents replay after Slack/screenshot leak).
+// Re-checks the entitlement at redeem time (covers the Stripe refund case where
+// the order is reversed but a previously-issued token is still in its 48h window).
 export const publicDownload = new Hono();
 publicDownload.get("/download/:token", async (c) => {
   const token = c.req.param("token");
   if (!isValidTokenFormat(token)) return c.text("invalid token", 400);
   const db = getDb();
-  const row = db.prepare("SELECT customer_id, dataset_id, version, expires_at FROM download_tokens WHERE token = ?").get(token) as { customer_id: number; dataset_id: string; version: string; expires_at: number } | undefined;
+  const row = db
+    .prepare(
+      "SELECT customer_id, dataset_id, version, expires_at, used_at FROM download_tokens WHERE token = ?",
+    )
+    .get(token) as
+    | { customer_id: number; dataset_id: string; version: string; expires_at: number; used_at: number | null }
+    | undefined;
   if (!row) return c.text("token not found", 404);
   if (row.expires_at < Date.now()) return c.text("token expired", 410);
-  db.prepare("UPDATE download_tokens SET used_at = ? WHERE token = ?").run(Date.now(), token);
-  const versionRow = db.prepare("SELECT r2_key FROM versions WHERE dataset_id = ? AND version = ?").get(row.dataset_id, row.version) as { r2_key: string } | undefined;
+  if (row.used_at !== null) return c.text("token already used", 410);
+
+  // Recheck entitlement at redeem time — covers refund/expiration races.
+  const ent = db
+    .prepare(
+      "SELECT updates_until FROM entitlements WHERE customer_id = ? AND dataset_id = ?",
+    )
+    .get(row.customer_id, row.dataset_id) as { updates_until: number | null } | undefined;
+  if (!ent) return c.text("entitlement revoked", 403);
+  if (ent.updates_until !== null && ent.updates_until < Date.now()) {
+    return c.text("entitlement expired", 403);
+  }
+
+  // Atomic single-use claim: only redeem if still unused.
+  const claim = db
+    .prepare(
+      "UPDATE download_tokens SET used_at = ? WHERE token = ? AND used_at IS NULL",
+    )
+    .run(Date.now(), token);
+  if (claim.changes === 0) return c.text("token already used", 410);
+
+  const versionRow = db
+    .prepare("SELECT r2_key FROM versions WHERE dataset_id = ? AND version = ?")
+    .get(row.dataset_id, row.version) as { r2_key: string } | undefined;
   if (!versionRow) return c.text("version missing", 500);
   const signedUrl = await signedDownloadUrl(versionRow.r2_key, R2_SIGNED_TTL_S);
   return c.redirect(signedUrl, 302);

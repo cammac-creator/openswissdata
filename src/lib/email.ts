@@ -14,36 +14,65 @@ function fromAddress(): string {
   return process.env.RESEND_FROM_EMAIL || "hello@openswissdata.com";
 }
 
+/**
+ * Send an email through Resend with exponential backoff on transient failures.
+ * Retries 3 times (immediate, +1s, +3s) on:
+ *  - network errors (fetch threw)
+ *  - HTTP 5xx (Resend backend issue)
+ *  - HTTP 429 (rate limit)
+ * Does NOT retry on 4xx other than 429 (auth, validation, domain not verified)
+ * because those won't recover by waiting.
+ */
 async function resendSend(to: string, subject: string, html: string): Promise<EmailSendResult> {
   const key = resendApiKey();
   if (!key) {
     console.warn(`[email] skipping send to ${to} — RESEND_API_KEY not configured (subject: "${subject}")`);
     return { sent: false, reason: "no_api_key" };
   }
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: fromAddress(),
-        to: [to],
-        subject,
-        html,
-      }),
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      console.error(`[email] Resend returned ${res.status}: ${body}`);
-      return { sent: false, reason: "resend_error", details: `HTTP ${res.status}` };
+
+  const MAX_ATTEMPTS = 3;
+  const DELAYS_MS = [0, 1000, 3000];
+  let lastError: { reason: "resend_error"; details: string } = {
+    reason: "resend_error",
+    details: "no_attempts",
+  };
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (DELAYS_MS[attempt] > 0) {
+      await new Promise((resolve) => setTimeout(resolve, DELAYS_MS[attempt]));
     }
-    return { sent: true };
-  } catch (err) {
-    console.error(`[email] network error:`, err);
-    return { sent: false, reason: "resend_error", details: String(err) };
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: fromAddress(),
+          to: [to],
+          subject,
+          html,
+        }),
+      });
+      if (res.ok) return { sent: true };
+
+      const body = await res.text();
+      const isRetryable = res.status >= 500 || res.status === 429;
+      console.error(
+        `[email] attempt ${attempt + 1}/${MAX_ATTEMPTS} — Resend returned ${res.status}: ${body}`,
+      );
+      lastError = { reason: "resend_error", details: `HTTP ${res.status}` };
+      if (!isRetryable) return { sent: false, ...lastError };
+    } catch (err) {
+      // Network error → always retryable.
+      console.error(`[email] attempt ${attempt + 1}/${MAX_ATTEMPTS} — network error:`, err);
+      lastError = { reason: "resend_error", details: String(err) };
+    }
   }
+
+  console.error(`[email] all ${MAX_ATTEMPTS} attempts failed for ${to}, subject="${subject}"`);
+  return { sent: false, ...lastError };
 }
 
 export interface DownloadEmailParams {

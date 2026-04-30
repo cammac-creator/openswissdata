@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { secureHeaders } from "hono/secure-headers";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { existsSync } from "node:fs";
@@ -14,6 +15,41 @@ import { loadEnv } from "./env.js";
 
 export function createApp() {
   const app = new Hono();
+
+  // --- Security headers (HSTS, CSP, frame-ancestors, referrer-policy) ---
+  // Applied globally before any route. Astro inline styles need 'unsafe-inline'
+  // for now; tighten to nonce/hash if/when we audit individual pages.
+  app.use(
+    "*",
+    secureHeaders({
+      strictTransportSecurity: "max-age=15552000; includeSubDomains",
+      xFrameOptions: "DENY",
+      referrerPolicy: "strict-origin-when-cross-origin",
+      xContentTypeOptions: "nosniff",
+      contentSecurityPolicy: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://plausible.io"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: [
+          "'self'",
+          "https://plausible.io",
+          "https://api.stripe.com",
+          "https://*.r2.cloudflarestorage.com",
+        ],
+        frameAncestors: ["'none'"],
+        formAction: ["'self'", "https://checkout.stripe.com"],
+        baseUri: ["'self'"],
+      },
+      permissionsPolicy: {
+        camera: [],
+        microphone: [],
+        geolocation: [],
+        payment: ["self", "https://checkout.stripe.com"],
+      },
+    }),
+  );
 
   // --- Host-based routing for the dedicated MCP sub-domain ---
   //
