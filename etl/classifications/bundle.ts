@@ -4,6 +4,7 @@ import archiver from "archiver";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
+import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
 import type { NomenclatureRow, CrossWalkRow, NomenclatureScheme } from "./types.js";
 
 const NOMENCLATURE_PARQUET_SCHEMA = new parquet.ParquetSchema({
@@ -99,10 +100,16 @@ function crossWalkToCsvRow(w: CrossWalkRow): Record<string, unknown> {
   };
 }
 
+export interface ClassificationsBuildBundleOptions {
+  /** Skip the RFC-3161 timestamp call (used in offline tests). */
+  withTimestamp?: boolean;
+}
+
 export async function buildBundle(
   input: ClassificationsBundleInput,
   version: string,
   outDir: string,
+  opts: ClassificationsBuildBundleOptions = {},
 ): Promise<ClassificationsBundleResult> {
   const workDir = join(outDir, `classifications-${version}-work`);
   if (existsSync(workDir)) rmSync(workDir, { recursive: true, force: true });
@@ -243,6 +250,7 @@ Normalized economic activity classifications for Swiss and international reporti
 
 - \`schema.json\` — JSON Schema (Draft-07)
 - \`checksums.sha256\`
+- \`provenance.json\` — Ed25519-signed manifest + RFC-3161 timestamp (verify with \`npx tsx etl/shared/verify-provenance.ts <zip>\`; public key at \`packages/schemas/openswissdata.pubkey.ed25519\`)
 - \`LICENSE.txt\`
 - \`README.md\` (this file)
 
@@ -300,6 +308,30 @@ Normalized economic activity classifications for Swiss and international reporti
       })
       .join("\n") + "\n";
   writeFileSync(join(workDir, "checksums.sha256"), checksums, "utf8");
+
+  // Provenance manifest (signed Ed25519 + RFC-3161 timestamp)
+  const manifestFiles: ProvenanceFile[] = [
+    ...dataFiles,
+    "README.md",
+    "LICENSE.txt",
+    "checksums.sha256",
+  ].map((f) => {
+    const p = join(workDir, f);
+    const buf = readFileSync(p);
+    return { name: f, size: buf.length, sha256: createHash("sha256").update(buf).digest("hex") };
+  });
+  const profile = PERMISSION_PROFILES.classifications;
+  const provenance = await buildSignedProvenance({
+    dataset: "classifications",
+    version,
+    sourceUrl: profile.sourceUrl,
+    files: manifestFiles,
+    permissionReference: profile.permissionReference,
+    permissionAuthority: profile.permissionAuthority,
+    jurisdiction: profile.jurisdiction,
+    withTimestamp: opts.withTimestamp,
+  });
+  writeFileSync(join(workDir, "provenance.json"), JSON.stringify(provenance, null, 2), "utf8");
 
   // ZIP
   const zipPath = join(outDir, `classifications-${version}.zip`);
