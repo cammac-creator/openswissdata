@@ -19,25 +19,47 @@
 import { tariffLookupTool } from "./tools/tariff-lookup.js";
 import { kycCheckTool } from "./tools/kyc-check.js";
 import { crossWalkTool } from "./tools/cross-walk.js";
+import { tariffSemanticSearchTool } from "./tools/tariff-semantic-search.js";
+import { classifyTextTool } from "./tools/classify-text.js";
+import { finmaSearchTool } from "./tools/finma-search.js";
+import { tariffChangelogTool } from "./tools/tariff-changelog.js";
+import { entityHistoryTool } from "./tools/entity-history.js";
+import { TOOL_SCOPE, isToolAllowed, type MCPAuthContext } from "./oauth/index.js";
 
 const PROTOCOL_VERSION = "2025-06-18";
 const SERVER_INFO = {
   name: "openswissdata-mcp",
-  version: "0.1.0",
+  version: "0.2.0",
 } as const;
+
+export interface ToolResult {
+  content: { type: "text"; text: string }[];
+  isError?: boolean;
+  structured?: unknown;
+}
 
 interface Tool {
   name: string;
   description: string;
   inputSchema: Readonly<Record<string, unknown>>;
-  handler: (args: unknown) => {
-    content: { type: "text"; text: string }[];
-    isError?: boolean;
-    structured?: unknown;
-  };
+  /**
+   * Tool handlers may be sync (CSV-only tools) or async (embedding-based
+   * tools that await `@xenova/transformers`). The dispatch layer awaits the
+   * return value uniformly.
+   */
+  handler: (args: unknown) => ToolResult | Promise<ToolResult>;
 }
 
-const TOOLS: readonly Tool[] = [tariffLookupTool, kycCheckTool, crossWalkTool] as const;
+const TOOLS: readonly Tool[] = [
+  tariffLookupTool,
+  kycCheckTool,
+  crossWalkTool,
+  tariffSemanticSearchTool,
+  classifyTextTool,
+  finmaSearchTool,
+  tariffChangelogTool,
+  entityHistoryTool,
+] as const;
 const TOOLS_BY_NAME: Record<string, Tool> = Object.fromEntries(TOOLS.map((t) => [t.name, t]));
 
 export interface JsonRpcRequest {
@@ -94,7 +116,10 @@ export function getServerInfo(): {
   };
 }
 
-export async function dispatch(req: unknown): Promise<JsonRpcResponse> {
+export async function dispatch(
+  req: unknown,
+  ctx: MCPAuthContext | null = null,
+): Promise<JsonRpcResponse> {
   if (!req || typeof req !== "object") {
     return err(null, ERR.INVALID_REQUEST, "Request must be a JSON object");
   }
@@ -131,7 +156,21 @@ export async function dispatch(req: unknown): Promise<JsonRpcResponse> {
         if (!tool) {
           return err(id, ERR.METHOD_NOT_FOUND, `Unknown tool: ${params.name}`);
         }
-        const result = tool.handler(params.arguments ?? {});
+
+        // OAuth scope check — anonymous callers only get V1 tools, token
+        // bearers must hold the scope the tool requires (see TOOL_SCOPE).
+        const required = TOOL_SCOPE[params.name] ?? null;
+        if (!isToolAllowed(params.name, required, ctx)) {
+          return err(
+            id,
+            -32001,
+            `Insufficient scope for tool '${params.name}' (requires '${required ?? "?"}')`,
+          );
+        }
+
+        // Always await — some handlers are sync (CSV lookup) and some are
+        // async (embedding pipeline). `await` of a non-promise is a no-op.
+        const result = await tool.handler(params.arguments ?? {});
         return ok(id, result);
       }
 

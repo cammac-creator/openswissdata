@@ -15,6 +15,25 @@ import { loadEnv } from "./env.js";
 export function createApp() {
   const app = new Hono();
 
+  // --- Host-based routing for the dedicated MCP sub-domain ---
+  //
+  // When the request hits `mcp.openswissdata.com` we want the Hono router for
+  // MCP to handle the URL at the root (so `/jsonrpc` not `/mcp/jsonrpc`).
+  // Implemented by rewriting the request URL to prepend `/mcp` and letting
+  // the `app.route("/mcp", mcpRoute)` mount handle the dispatch — keeping a
+  // single mount point.
+  app.use("*", async (c, next) => {
+    const host = (c.req.header("host") ?? "").split(":")[0].toLowerCase();
+    const isMcpHost = host === "mcp.openswissdata.com" || host === "mcp.localhost";
+    if (!isMcpHost) return next();
+
+    const url = new URL(c.req.url);
+    if (url.pathname.startsWith("/mcp")) return next();
+    url.pathname = "/mcp" + url.pathname;
+    const rewritten = new Request(url, c.req.raw);
+    return app.fetch(rewritten);
+  });
+
   // --- API routes ---
   app.route("/api/health", healthRoute);
   app.route("/api/admin", adminRoute);

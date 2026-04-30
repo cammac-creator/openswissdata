@@ -6,10 +6,12 @@
  * artifact, unlike the full `data/` tree which is gitignored / railwayignored.
  *
  * Datasets:
- *   - tares.csv               (TARES customs tariffs, ~7.5k HS8 rows)
- *   - finma_registry.csv      (FINMA-supervised entities, ~2.9k rows)
- *   - finma_warnings.csv      (FINMA warnings list, ~2.2k rows)
- *   - crosswalks.csv          (NOGA/NACE/ISIC translations, ~2.2k rows)
+ *   - tares.csv                              (TARES customs tariffs, ~7.5k HS8 rows)
+ *   - finma_registry.csv                     (FINMA-supervised entities, ~2.9k rows)
+ *   - finma_warnings.csv                     (FINMA warnings list, ~2.2k rows)
+ *   - crosswalks.csv                         (NOGA/NACE/ISIC translations, ~2.2k rows)
+ *   - embeddings/tares_embeddings.parquet    (TARES FR mpnet 768d, ~7.5k vectors)
+ *   - embeddings/noga_2025_embeddings.parquet (NOGA FR mpnet 768d, ~1.8k vectors)
  *
  * NOTE: V2 will replace these with R2-backed parquet + a streaming reader
  * to support deltas + entity_history.
@@ -19,6 +21,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "csv-parse/sync";
+import parquet from "parquetjs-lite";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "data");
@@ -83,11 +86,22 @@ export interface CrosswalkRow {
   notes: string;
 }
 
+/** Pre-computed embedding row, materialised once at first use. */
+export interface EmbeddingRow {
+  code: string;
+  lang: string;
+  description: string;
+  /** Float32Array of fixed dimension (768). L2-normalised at generation time. */
+  vector: Float32Array;
+}
+
 let _tares: TaresRow[] | null = null;
 let _taresByHs8: Map<string, TaresRow> | null = null;
 let _finmaRegistry: FinmaRegistryRow[] | null = null;
 let _finmaWarnings: FinmaWarningRow[] | null = null;
 let _crosswalks: CrosswalkRow[] | null = null;
+let _taresEmbeddingsPromise: Promise<EmbeddingRow[]> | null = null;
+let _nogaEmbeddingsPromise: Promise<EmbeddingRow[]> | null = null;
 
 function loadCsv<T>(filename: string): T[] {
   const path = join(DATA_DIR, filename);
@@ -124,6 +138,74 @@ export function getCrosswalks(): readonly CrosswalkRow[] {
   return _crosswalks;
 }
 
+/**
+ * Read every row of a Parquet file into memory. We use this once per
+ * embeddings dataset (TARES ~7.5k × 768f = 23 MB; NOGA ~1.8k × 768f = 5.6 MB)
+ * — well within RAM budget. parquetjs-lite is async-cursor only.
+ */
+interface ParquetEmbeddingRow {
+  hs_code?: string;
+  code?: string;
+  lang: string;
+  description: string;
+  embedding: number[];
+}
+
+async function readEmbeddingsParquet(filename: string): Promise<EmbeddingRow[]> {
+  const path = join(DATA_DIR, "embeddings", filename);
+  const reader = await parquet.ParquetReader.openFile(path);
+  try {
+    const cursor = reader.getCursor();
+    const out: EmbeddingRow[] = [];
+    let row: ParquetEmbeddingRow | null = (await cursor.next()) as ParquetEmbeddingRow | null;
+    while (row) {
+      // Schemas differ: TARES bundle uses `hs_code`, classifications uses `code`.
+      const code = row.hs_code ?? row.code ?? "";
+      out.push({
+        code,
+        lang: row.lang,
+        description: row.description,
+        // Float32 keeps memory ~half of double — cosine math handles it natively.
+        vector: new Float32Array(row.embedding),
+      });
+      row = (await cursor.next()) as ParquetEmbeddingRow | null;
+    }
+    return out;
+  } finally {
+    await reader.close();
+  }
+}
+
+/**
+ * TARES embeddings — multilingual mpnet 768d, FR-only in v1.
+ * Promise-cached so concurrent boot calls share the same load.
+ */
+export function getTaresEmbeddings(): Promise<EmbeddingRow[]> {
+  if (!_taresEmbeddingsPromise) {
+    _taresEmbeddingsPromise = readEmbeddingsParquet("tares_embeddings.parquet").catch((e) => {
+      // Reset on failure so a retried request can attempt again rather than
+      // sticking to a poisoned promise forever.
+      _taresEmbeddingsPromise = null;
+      throw e;
+    });
+  }
+  return _taresEmbeddingsPromise;
+}
+
+/**
+ * NOGA 2025 embeddings — multilingual mpnet 768d, FR-only in v1.
+ * Promise-cached so concurrent boot calls share the same load.
+ */
+export function getNogaEmbeddings(): Promise<EmbeddingRow[]> {
+  if (!_nogaEmbeddingsPromise) {
+    _nogaEmbeddingsPromise = readEmbeddingsParquet("noga_2025_embeddings.parquet").catch((e) => {
+      _nogaEmbeddingsPromise = null;
+      throw e;
+    });
+  }
+  return _nogaEmbeddingsPromise;
+}
+
 /** Test helper: clears in-memory caches so tests can swap fixture data. */
 export function _resetDataLoaderCache(): void {
   _tares = null;
@@ -131,4 +213,6 @@ export function _resetDataLoaderCache(): void {
   _finmaRegistry = null;
   _finmaWarnings = null;
   _crosswalks = null;
+  _taresEmbeddingsPromise = null;
+  _nogaEmbeddingsPromise = null;
 }
