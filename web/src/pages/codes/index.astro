@@ -1,0 +1,401 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  getSections,
+  getDivisionsBySection,
+  loadNoga2025,
+  dottedCode,
+} from "../../lib/noga-helpers";
+
+const sections = getSections();
+const all = loadNoga2025();
+
+// Données pour la recherche client-side : SEO codes uniquement (allégé).
+const searchIndex = all
+  .filter(
+    (r) =>
+      r.level === "section" ||
+      r.level === "division" ||
+      r.level === "group" ||
+      r.level === "class",
+  )
+  .map((r) => ({
+    code: r.code,
+    label: r.label_fr,
+    level: r.level,
+    dotted: dottedCode(r.code),
+  }));
+
+const totalSeoCodes = searchIndex.length;
+const totalAllCodes = all.length;
+
+const sectionsWithChildren = sections.map((s) => ({
+  section: s,
+  divisions: getDivisionsBySection(s.code),
+}));
+
+// Pour chaque section, on précompute les groupes/classes pour navigation
+const childrenByCode: Record<string, typeof all> = {};
+for (const row of all) {
+  if (row.parent) {
+    if (!childrenByCode[row.parent]) childrenByCode[row.parent] = [];
+    childrenByCode[row.parent].push(row);
+  }
+}
+---
+<BaseLayout
+  title="Tous les codes NOGA 2025 — Nomenclature suisse | openswissdata.com"
+  description="Index complet des codes NOGA 2025 (nomenclature générale des activités économiques suisse) : 22 sections, 87 divisions, 287 groupes, 651 classes. Recherche, hiérarchie et cross-walks NACE 2.1 et ISIC."
+>
+  <section class="ds-container">
+    <div class="container-tight">
+      <nav class="ds-breadcrumb">
+        <a href="/">accueil</a>
+        <span class="sep">·</span>
+        <span class="current">codes NOGA</span>
+      </nav>
+
+      <div class="ds-hero">
+        <div>
+          <span class="ds-badge green reveal">
+            NOGA 2025 · OFS / BFS
+          </span>
+          <h1 class="ds-hero-title reveal" data-delay="1">
+            Tous les codes <span class="serif">NOGA 2025</span>
+          </h1>
+          <p class="ds-hero-lede reveal" data-delay="2">
+            Nomenclature générale des activités économiques suisse, version 2025.
+            {totalSeoCodes} codes indexés (sections, divisions, groupes, classes), avec leurs équivalents NACE 2.1 et ISIC Rev 4.
+          </p>
+        </div>
+        <div class="ds-price-box reveal" data-delay="2">
+          <div class="ds-price-box-label">Codes</div>
+          <div class="ds-price-box-amount" style="font-size: 36px;">
+            {totalAllCodes}
+          </div>
+          <div class="ds-price-box-renew">version officielle 2025</div>
+        </div>
+      </div>
+
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">Recherche <span class="serif">rapide</span></h2>
+        <p class="ds-section-intro">
+          Tapez un code (ex. <code class="mono">62.01</code>), une activité (ex. « banque ») ou un mot-clé.
+        </p>
+        <input
+          type="search"
+          id="noga-search"
+          placeholder="Code, mot-clé, désignation..."
+          autocomplete="off"
+          spellcheck="false"
+          style="width: 100%; padding: 14px 18px; font-size: 16px; border: 1px solid var(--color-line); border-radius: 12px; background: white; font-family: var(--font-sans); margin-bottom: 16px;"
+        />
+        <div id="noga-results" style="display: none; max-height: 480px; overflow-y: auto; border: 1px solid var(--color-line); border-radius: 12px; background: white;"></div>
+        <p id="noga-search-count" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
+      </section>
+
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">Hiérarchie <span class="serif">complète</span></h2>
+        <p class="ds-section-intro">
+          NOGA 2025 est organisée en {sections.length} sections (lettres A à V), elles-mêmes subdivisées en divisions, groupes et classes.
+        </p>
+
+        <div class="noga-tree">
+          {sectionsWithChildren.map(({ section, divisions }) => (
+            <details class="noga-section">
+              <summary>
+                <a href={`/codes/noga/${section.code}`} class="noga-section-letter">{section.code}</a>
+                <span class="noga-section-label">{section.label_fr}</span>
+                <span class="noga-section-count">{divisions.length} division{divisions.length > 1 ? "s" : ""}</span>
+              </summary>
+              <div class="noga-section-body">
+                {divisions.map((div) => {
+                  const groups = childrenByCode[div.code] || [];
+                  return (
+                    <details class="noga-division">
+                      <summary>
+                        <a href={`/codes/noga/${div.code}`} class="noga-code">{dottedCode(div.code)}</a>
+                        <span class="noga-label">{div.label_fr}</span>
+                        {groups.length > 0 && (
+                          <span class="noga-count">{groups.length} groupe{groups.length > 1 ? "s" : ""}</span>
+                        )}
+                      </summary>
+                      <ul class="noga-groups">
+                        {groups.map((grp) => {
+                          const classes = childrenByCode[grp.code] || [];
+                          return (
+                            <li>
+                              <a href={`/codes/noga/${grp.code}`} class="noga-code">{dottedCode(grp.code)}</a>
+                              <span class="noga-label">{grp.label_fr}</span>
+                              {classes.length > 0 && (
+                                <ul class="noga-classes">
+                                  {classes.map((cls) => (
+                                    <li>
+                                      <a href={`/codes/noga/${cls.code}`} class="noga-code">{dottedCode(cls.code)}</a>
+                                      <span class="noga-label dim">{cls.label_fr}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </details>
+                  );
+                })}
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">Données <span class="serif">complètes</span></h2>
+        <p class="ds-section-intro">
+          Besoin du dataset complet (1 845 codes incluant les sous-classes, 5 nomenclatures alignées, cross-walks 5-way, formats CSV / JSON / Parquet / SQL) ?
+        </p>
+        <a href="/datasets/classifications" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; background: var(--color-ink); color: var(--color-bg); border-radius: 10px; text-decoration: none; font-weight: 500; font-size: 15px;">
+          Voir le bundle Classifications
+          <span style="opacity:.7;">→</span>
+        </a>
+      </section>
+
+      <footer style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--color-line); font-size: 12px; line-height: 1.6; color: var(--color-ink-mute);">
+        Index généré à partir de la nomenclature NOGA 2025 publiée par l'Office fédéral de la statistique. openswissdata.com n'est pas affilié à l'OFS. Source officielle : <a href="https://www.bfs.admin.ch/bfs/fr/home/statistiques/industrie-services/nomenclatures/noga.html" target="_blank" rel="noopener">bfs.admin.ch</a>.
+      </footer>
+    </div>
+  </section>
+
+  <style>
+    .noga-tree {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .noga-section {
+      background: white;
+      border: 1px solid var(--color-line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .noga-section > summary {
+      padding: 16px 20px;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: background .15s ease;
+    }
+    .noga-section > summary:hover { background: var(--color-bg-alt); }
+    .noga-section > summary::-webkit-details-marker { display: none; }
+    .noga-section > summary::before {
+      content: "+";
+      font-family: var(--font-mono);
+      width: 18px;
+      text-align: center;
+      color: var(--color-ink-mute);
+      font-size: 18px;
+      line-height: 1;
+    }
+    .noga-section[open] > summary::before { content: "−"; }
+    .noga-section-letter {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--color-ink);
+      width: 30px;
+    }
+    .noga-section-label {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: .02em;
+      color: var(--color-ink);
+    }
+    .noga-section-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-ink-mute);
+    }
+
+    .noga-section-body {
+      padding: 8px 20px 20px 50px;
+      border-top: 1px solid var(--color-line-soft);
+    }
+
+    .noga-division {
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--color-line-soft);
+    }
+    .noga-division:last-child { border-bottom: none; }
+    .noga-division > summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .noga-division > summary::-webkit-details-marker { display: none; }
+    .noga-division > summary::before {
+      content: "▸";
+      color: var(--color-ink-mute);
+      font-size: 10px;
+      transition: transform .15s ease;
+    }
+    .noga-division[open] > summary::before { transform: rotate(90deg); }
+
+    .noga-code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      text-decoration: none;
+      min-width: 60px;
+    }
+    .noga-code:hover { color: var(--color-accent); }
+    .noga-label {
+      font-size: 13px;
+      color: var(--color-ink-soft);
+    }
+    .noga-label.dim { color: var(--color-ink-mute); }
+
+    .noga-count {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-ink-mute);
+      margin-left: auto;
+    }
+
+    .noga-groups {
+      list-style: none;
+      padding: 8px 0 0 24px;
+      margin: 0;
+    }
+    .noga-groups > li {
+      padding: 4px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .noga-groups > li > a + .noga-label { display: inline; }
+    .noga-classes {
+      list-style: none;
+      padding: 4px 0 6px 18px;
+      margin: 0;
+      border-left: 1px dashed var(--color-line-soft);
+    }
+    .noga-classes > li {
+      padding: 3px 0;
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      font-size: 12px;
+    }
+
+    /* Search results */
+    .noga-result-item {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--color-line-soft);
+      display: flex;
+      gap: 16px;
+      align-items: baseline;
+      transition: background .15s ease;
+    }
+    .noga-result-item:hover { background: var(--color-bg-alt); }
+    .noga-result-item:last-child { border-bottom: none; }
+    .noga-result-item a { text-decoration: none; color: var(--color-ink); display: contents; }
+    .noga-result-code {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 13px;
+      min-width: 70px;
+    }
+    .noga-result-label {
+      flex: 1;
+      font-size: 13px;
+      color: var(--color-ink-soft);
+    }
+    .noga-result-level {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-ink-mute);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+  </style>
+
+  <script define:vars={{ searchIndex }}>
+    const input = document.getElementById("noga-search");
+    const results = document.getElementById("noga-results");
+    const countEl = document.getElementById("noga-search-count");
+    const levelLabels = {
+      section: "section",
+      division: "division",
+      group: "groupe",
+      class: "classe",
+    };
+
+    function render(matches) {
+      if (matches.length === 0) {
+        results.style.display = "none";
+        countEl.textContent = "Aucun code ne correspond.";
+        return;
+      }
+      results.style.display = "block";
+      results.innerHTML = matches
+        .slice(0, 50)
+        .map(
+          (m) => `
+          <div class="noga-result-item">
+            <a href="/codes/noga/${m.code}">
+              <span class="noga-result-code">${m.dotted}</span>
+              <span class="noga-result-label">${m.label}</span>
+              <span class="noga-result-level">${levelLabels[m.level] || m.level}</span>
+            </a>
+          </div>
+        `,
+        )
+        .join("");
+      countEl.textContent =
+        matches.length > 50
+          ? `${matches.length} résultats (50 affichés)`
+          : `${matches.length} résultat${matches.length > 1 ? "s" : ""}`;
+    }
+
+    function normalize(s) {
+      return (s || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "");
+    }
+
+    input?.addEventListener("input", (e) => {
+      const q = normalize(e.target.value.trim());
+      if (q.length === 0) {
+        results.style.display = "none";
+        countEl.textContent = "";
+        return;
+      }
+      const qNoDot = q.replace(/\./g, "");
+      const matches = searchIndex.filter((r) => {
+        if (r.code.startsWith(qNoDot)) return true;
+        if (r.dotted.startsWith(q)) return true;
+        if (normalize(r.label).includes(q)) return true;
+        return false;
+      });
+      // Tri : code-match d'abord, puis label-match
+      matches.sort((a, b) => {
+        const aCode =
+          a.code.startsWith(qNoDot) || a.dotted.startsWith(q) ? 0 : 1;
+        const bCode =
+          b.code.startsWith(qNoDot) || b.dotted.startsWith(q) ? 0 : 1;
+        if (aCode !== bCode) return aCode - bCode;
+        return a.code.localeCompare(b.code);
+      });
+      render(matches);
+    });
+  </script>
+</BaseLayout>

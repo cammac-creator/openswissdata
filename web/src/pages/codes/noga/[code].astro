@@ -1,0 +1,387 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import {
+  getSeoCodes,
+  getAncestors,
+  getChildren,
+  getNeighbors,
+  getCrosswalksFor,
+  generateActivityExamples,
+  dottedCode,
+  type NogaRow,
+} from "../../../lib/noga-helpers";
+
+export async function getStaticPaths() {
+  const codes = getSeoCodes();
+  return codes.map((row) => ({
+    params: { code: row.code },
+    props: { row },
+  }));
+}
+
+type Props = { row: NogaRow };
+const { row } = Astro.props as Props;
+
+const dotted = dottedCode(row.code);
+const ancestorsRaw = getAncestors(row.code);
+const childrenRaw = getChildren(row.code);
+const neighbors = getNeighbors(row.code, 8);
+const crosswalks = getCrosswalksFor(row.code);
+const examples = generateActivityExamples(row);
+
+// Pré-calcule les rows "hiérarchie" pour éviter les ternaires JSX dans la boucle.
+interface HierarchyRow {
+  level: string;
+  levelLabel: string;
+  code: string;
+  display: string;
+  label: string;
+  href: string;
+  current: boolean;
+}
+const _levelLabel: Record<string, string> = {
+  section: "section",
+  division: "division",
+  group: "groupe",
+  class: "classe",
+  subclass: "sous-classe",
+};
+const ancestorsBase: HierarchyRow[] = ancestorsRaw.map((a) => ({
+  level: a.level,
+  levelLabel: _levelLabel[a.level] || a.level,
+  code: a.code,
+  display: a.level === "section" ? a.code : dottedCode(a.code),
+  label: a.label_fr,
+  href: `/codes/noga/${a.code}`,
+  current: false,
+}));
+const currentRow: HierarchyRow = {
+  level: row.level,
+  levelLabel: _levelLabel[row.level] || row.level,
+  code: row.code,
+  display: dotted,
+  label: row.label_fr,
+  href: `/codes/noga/${row.code}`,
+  current: true,
+};
+// Intègre le current dans le tableau pour éviter un <tr> hors-boucle (problème esbuild Astro).
+const ancestors: HierarchyRow[] = [...ancestorsBase, currentRow];
+const children: HierarchyRow[] = childrenRaw.slice(0, 30).map((c) => ({
+  level: c.level,
+  levelLabel: _levelLabel[c.level] || c.level,
+  code: c.code,
+  display: dottedCode(c.code),
+  label: c.label_fr,
+  href: `/codes/noga/${c.code}`,
+  current: false,
+}));
+const childrenTotal = childrenRaw.length;
+const childrenOverflow = Math.max(0, childrenTotal - 30);
+
+interface CrosswalkRowFlat {
+  standard: string;
+  code: string;
+  label: string;
+  mapping_type: string;
+  bold: boolean;
+}
+
+const crosswalkRows: CrosswalkRowFlat[] = [];
+for (const cw of crosswalks) {
+  if (cw.nace_2_1) {
+    crosswalkRows.push({
+      standard: "NACE Rev 2.1",
+      code: dottedCode(cw.nace_2_1),
+      label: cw.nace_2_1_label_en || "—",
+      mapping_type: cw.mapping_type,
+      bold: true,
+    });
+  }
+  if (cw.nace_2_0) {
+    crosswalkRows.push({
+      standard: "NACE Rev 2.0",
+      code: dottedCode(cw.nace_2_0),
+      label: cw.nace_2_0_label_en || "—",
+      mapping_type: cw.mapping_type,
+      bold: false,
+    });
+  }
+  if (cw.isic_4) {
+    crosswalkRows.push({
+      standard: "ISIC Rev 4",
+      code: cw.isic_4,
+      label: cw.isic_4_label_en || "—",
+      mapping_type: cw.mapping_type,
+      bold: false,
+    });
+  }
+  if (cw.noga_2008) {
+    crosswalkRows.push({
+      standard: "NOGA 2008",
+      code: dottedCode(cw.noga_2008),
+      label: cw.noga_2008_label_fr || "—",
+      mapping_type: cw.mapping_type,
+      bold: false,
+    });
+  }
+}
+
+const levelLabel: Record<string, string> = {
+  section: "section",
+  division: "division",
+  group: "groupe",
+  class: "classe",
+  subclass: "sous-classe",
+};
+
+const labelShort = row.label_fr.length > 80
+  ? row.label_fr.slice(0, 77) + "..."
+  : row.label_fr;
+
+const pageTitle = `Code NOGA ${dotted} — ${labelShort} | openswissdata.com`;
+const pageDescription = `Définition du code NOGA ${dotted} (${labelShort}), cross-walks NACE 2.1 et ISIC Rev 4, codes voisins. Source officielle OFS.`;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "DefinedTerm",
+  "@id": `https://www.openswissdata.com/codes/noga/${row.code}`,
+  name: `NOGA ${dotted}`,
+  alternateName: [`Code NOGA ${dotted}`, row.code],
+  termCode: row.code,
+  description: row.label_fr,
+  inDefinedTermSet: {
+    "@type": "DefinedTermSet",
+    name: "NOGA 2025",
+    description: "Nomenclature générale des activités économiques (Suisse)",
+    url: "https://www.bfs.admin.ch/bfs/fr/home/statistiques/industrie-services/nomenclatures/noga.html",
+  },
+  inLanguage: ["fr", "de", "it", "en"],
+};
+---
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <section class="ds-container">
+    <div class="container-tight">
+      <nav class="ds-breadcrumb">
+        <a href="/">accueil</a>
+        <span class="sep">·</span>
+        <a href="/codes/">codes</a>
+        <span class="sep">·</span>
+        <a href="/codes/">noga 2025</a>
+        <span class="sep">·</span>
+        <span class="current">{dotted}</span>
+      </nav>
+
+      <div class="ds-hero">
+        <div>
+          <span class="ds-badge green reveal">NOGA 2025 · {levelLabel[row.level]}</span>
+          <h1 class="ds-hero-title reveal" data-delay="1">
+            Code NOGA <span class="serif">{dotted}</span> — {row.label_fr}
+          </h1>
+          <p class="ds-hero-lede reveal" data-delay="2">
+            Activité de la nomenclature générale des activités économiques suisse (NOGA 2025), publiée par l'Office fédéral de la statistique (OFS).
+          </p>
+        </div>
+        <div class="ds-price-box reveal" data-delay="2">
+          <div class="ds-price-box-label">Niveau</div>
+          <div class="ds-price-box-amount" style="font-size: 28px;">{levelLabel[row.level]}</div>
+          <div class="ds-price-box-renew">Code brut : <code style="font-family: var(--font-mono);">{row.code}</code></div>
+        </div>
+      </div>
+
+      <div class="ds-meta-grid">
+        <div class="ds-meta-card reveal">
+          <div class="ds-meta-label">Désignation officielle</div>
+          <div class="ds-meta-value">{row.label_fr}</div>
+        </div>
+        <div class="ds-meta-card reveal" data-delay="1">
+          <div class="ds-meta-label">Source · standard</div>
+          <div class="ds-meta-value">NOGA 2025 · OFS / BFS · janvier 2026</div>
+        </div>
+      </div>
+
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">Description <span class="serif">multilingue</span></h2>
+        <p class="ds-section-intro">
+          La nomenclature NOGA 2025 fournit la désignation officielle dans les quatre langues utilisées par les autorités fédérales suisses et leurs équivalents européens.
+        </p>
+        <div class="ds-table-wrap">
+          <table class="ds-table">
+            <thead>
+              <tr><th>Langue</th><th>Désignation</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Français (fr)</strong></td><td>{row.label_fr || "—"}</td></tr>
+              <tr><td><strong>Allemand (de)</strong></td><td>{row.label_de || "—"}</td></tr>
+              <tr><td><strong>Italien (it)</strong></td><td>{row.label_it || "—"}</td></tr>
+              <tr><td><strong>Anglais (en)</strong></td><td>{row.label_en || "—"}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+
+      {ancestors.length > 0 && (
+        <section class="ds-section reveal">
+          <h2 class="ds-section-title">Hiérarchie <span class="serif">NOGA</span></h2>
+          <p class="ds-section-intro">
+            Le code NOGA <strong>{dotted}</strong> s'inscrit dans la hiérarchie suivante (du plus général au plus spécifique).
+          </p>
+          <div class="ds-table-wrap">
+            <table class="ds-table">
+              <thead>
+                <tr><th>Niveau</th><th>Code</th><th>Désignation</th></tr>
+              </thead>
+              <tbody>
+                {ancestors.map((a) => (
+                  <tr class={a.current ? "current-hierarchy-row" : ""}>
+                    <td>{a.levelLabel}</td>
+                    <td class="mono"><a href={a.href}>{a.display}</a></td>
+                    <td class="dim">{a.label}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {children.length > 0 && (
+        <section class="ds-section reveal">
+          <h2 class="ds-section-title">Sous-niveaux <span class="serif">directs</span></h2>
+          <p class="ds-section-intro">
+            Le code <strong>{dotted}</strong> se décompose en {childrenTotal} sous-{childrenTotal === 1 ? "niveau plus précis" : "niveaux plus précis"}.
+          </p>
+          <div class="ds-table-wrap">
+            <table class="ds-table">
+              <thead>
+                <tr><th>Niveau</th><th>Code</th><th>Désignation</th></tr>
+              </thead>
+              <tbody>
+                {children.map((c) => (
+                  <tr>
+                    <td>{c.levelLabel}</td>
+                    <td class="mono"><a href={c.href}>{c.display}</a></td>
+                    <td class="dim">{c.label}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {crosswalkRows.length > 0 && (
+        <section class="ds-section reveal">
+          <h2 class="ds-section-title">Cross-walks <span class="serif">officiels</span></h2>
+          <p class="ds-section-intro">
+            Équivalence du code NOGA {dotted} dans les standards européens (NACE) et internationaux (ISIC). Ces correspondances sont issues des tables officielles publiées par l'OFS et Eurostat.
+          </p>
+          <div class="ds-table-wrap">
+            <table class="ds-table">
+              <thead>
+                <tr><th>Standard</th><th>Code</th><th>Désignation</th><th>Type</th></tr>
+              </thead>
+              <tbody>
+                {crosswalkRows.map((cw) => (
+                  <tr>
+                    <td>{cw.standard}</td>
+                    <td class="mono">{cw.code}</td>
+                    <td class="dim">{cw.label}</td>
+                    <td class="dim">{cw.mapping_type}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="ds-section-note">
+            Type <code class="mono">exact</code> = équivalence stricte 1:1.
+            Type <code class="mono">partial</code> = recouvrement partiel.
+            Type <code class="mono">multi</code> = un code source mappe vers plusieurs codes cibles.
+          </p>
+        </section>
+      )}
+
+      {neighbors.length > 0 && (
+        <section class="ds-section reveal">
+          <h2 class="ds-section-title">Codes <span class="serif">voisins</span></h2>
+          <p class="ds-section-intro">
+            Codes NOGA proches du code {dotted}, dans le même groupe parent ou au même niveau hiérarchique.
+          </p>
+          <div class="ds-table-wrap">
+            <table class="ds-table">
+              <thead>
+                <tr><th>Code</th><th>Niveau</th><th>Désignation</th></tr>
+              </thead>
+              <tbody>
+                {neighbors.map((n) => (
+                  <tr>
+                    <td class="mono"><a href={`/codes/noga/${n.code}`}>{dottedCode(n.code)}</a></td>
+                    <td>{_levelLabel[n.level] || n.level}</td>
+                    <td class="dim">{n.label_fr}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">Exemples <span class="serif">d'activités</span></h2>
+        <p class="ds-section-intro">
+          Profils d'entreprises typiquement classées sous le code NOGA {dotted}.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          {examples.map((ex) => (
+            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: var(--color-ink-soft);">{ex}</p>
+          ))}
+        </div>
+      </section>
+
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">Comment <span class="serif">ce code est utilisé</span></h2>
+        <p class="ds-section-intro">
+          Le code NOGA <strong>{dotted}</strong> est utilisé par les autorités fédérales suisses pour classer les entreprises selon leur activité économique principale. Il est notamment requis dans les contextes suivants :
+        </p>
+        <ul style="font-size: 15px; line-height: 1.7; color: var(--color-ink-soft); padding-left: 20px; margin: 0;">
+          <li><strong>Office fédéral de la statistique (OFS)</strong> : registre des entreprises et des établissements (REE / BUR), recensements et statistiques structurelles.</li>
+          <li><strong>Caisses de compensation AVS</strong> : classification de l'activité de l'employeur lors de l'affiliation.</li>
+          <li><strong>Administration fédérale des contributions (AFC)</strong> : profilage TVA, taux dette fiscale nette et statistiques sectorielles.</li>
+          <li><strong>Registre du commerce</strong> : champ « activités » lors de l'inscription d'une nouvelle entité juridique.</li>
+          <li><strong>SUVA et caisses LAA</strong> : tarification des cotisations assurance-accidents selon classe de risque.</li>
+          <li><strong>SECO et statistique du marché du travail</strong> : analyses sectorielles, mesures de soutien ciblées.</li>
+        </ul>
+      </section>
+
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">Source <span class="serif">officielle</span></h2>
+        <p class="ds-section-intro">
+          Cette page reprend les informations du standard NOGA 2025 publié par l'Office fédéral de la statistique. Pour la version officielle, consultez :
+        </p>
+        <p style="font-size: 15px; line-height: 1.6;">
+          <a href="https://www.bfs.admin.ch/bfs/fr/home/statistiques/industrie-services/nomenclatures/noga.html" target="_blank" rel="noopener">
+            bfs.admin.ch — NOGA — Nomenclature générale des activités économiques
+          </a>
+        </p>
+      </section>
+
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">Données <span class="serif">complètes</span></h2>
+        <p class="ds-section-intro">
+          Vous avez besoin du dataset complet (1 845 codes NOGA 2025 + 5 nomenclatures alignées + cross-walks 5-way) pour vos systèmes ?
+        </p>
+        <a href="/datasets/classifications" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; background: var(--color-ink); color: var(--color-bg); border-radius: 10px; text-decoration: none; font-weight: 500; font-size: 15px;">
+          Voir le bundle Classifications
+          <span style="opacity:.7;">→</span>
+        </a>
+      </section>
+
+      <footer style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--color-line); font-size: 12px; line-height: 1.6; color: var(--color-ink-mute);">
+        Cette page est générée à partir de la nomenclature <strong>NOGA 2025</strong> publiée par l'Office fédéral de la statistique (OFS / BFS). openswissdata.com n'est pas affilié à l'OFS. Désignations officielles utilisées avec attribution conformément à la pratique citationnelle de l'OFS. Pour la version faisant foi, consultez le portail bfs.admin.ch.
+      </footer>
+    </div>
+  </section>
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</BaseLayout>

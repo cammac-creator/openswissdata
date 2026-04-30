@@ -949,6 +949,24 @@ details[open] .faq-body {
   border-radius: 12px;
 }
 
+/* === Pages /codes/noga/[code] et /codes/ === */
+.current-hierarchy-row {
+  background: var(--color-bg-alt);
+}
+.current-hierarchy-row td {
+  font-weight: 600;
+}
+.ds-section-overflow {
+  font-size: 13px;
+  color: var(--color-ink-mute);
+  margin-top: 12px;
+}
+.ds-section-note {
+  font-size: 12px;
+  color: var(--color-ink-mute);
+  margin-top: 12px;
+}
+
 .ds-sample {
   background: var(--color-bg-alt);
   border: 1px solid var(--color-line);
