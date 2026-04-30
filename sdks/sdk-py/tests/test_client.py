@@ -245,12 +245,11 @@ def test_finma_search() -> None:
                 1,
                 {
                     "query": "Cred Suisse",
-                    "hits": [
+                    "matches": [
                         {
                             "name": "Credit Suisse AG",
                             "score": 0.91,
                             "entity_type": "bank",
-                            "normalised_name": "credit suisse",
                             "uid": "CHE-105.884.030",
                             "lei": None,
                             "licence_type": "bank",
@@ -261,13 +260,15 @@ def test_finma_search() -> None:
                             "source_url": "https://www.finma.ch/",
                         }
                     ],
+                    "match_count": 1,
                 },
             ),
         )
     )
     with Client(transport=transport, max_retries=0) as client:
         result = client.finma.search(name="Cred Suisse")
-    assert result["hits"][0]["score"] > 0.9
+    assert result["matches"][0]["score"] > 0.9
+    assert result["match_count"] == 1
 
 
 def test_discovery_returns_server_info() -> None:

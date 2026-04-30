@@ -53,6 +53,17 @@ Serveur MCP STDIO standalone qui proxy vers l'endpoint HTTP remote — différen
 
 Aucun test ne touche l'API live — tout passe par fetch / httpx mocks. Typecheck strict OK pour les 2 packages TypeScript ; build dual ESM+CJS validée par chargement runtime.
 
+### Smoke test live (2 requêtes anonymes)
+
+Avant le commit final, vérification de cohérence entre les types SDK et la réalité API en interrogeant `https://mcp.openswissdata.com/jsonrpc` :
+
+- `tariff_lookup({hs8: "01051200"})` → `structured` matche exactement `TariffLookupResult` (14 keys).
+- `kyc_check({name: "UBS"})` → diff détecté avec mes types initiaux : la réponse live retourne `registry_matches` / `warning_matches` / `match_count` / `warning_count` (pas `matches` / `warnings`). Corrigé.
+- `cross_walk` retourne aussi `count`. Ajouté.
+- Lecture du source `src/mcp/tools/*.ts` post-correction pour aligner aussi `tariff_semantic_search` (`count`+`model`+`disclaimer`), `tariff_changelog` (`hs_code`+`current`+`versions_observed`+`source_note`), `classify_text` (`query`+`scheme_requested`+`scheme_returned`+`count`+`model`+`degraded?`), `finma_search` (`matches` au lieu de `hits`), `entity_history` (`timeline`+`versions_observed`+`source_note`).
+
+Tests + exemples + types Python mis à jour en cascade.
+
 ## Instructions de publication finale
 
 ⚠️ **Rien n'est publié pour le moment.** Étapes à exécuter une fois la validation d'Alain donnée :
