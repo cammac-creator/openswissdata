@@ -58,101 +58,277 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
 
       <!-- Hero illustration : Papa + 3 coffres -->
       <div class="cover-illu">
-        <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" aria-label="Papa devant trois coffres">
-          <!-- Sky -->
-          <rect x="0" y="0" width="720" height="280" fill="#EAF3FB"/>
-          <!-- Mountains -->
-          <path d="M0 280 L80 200 L120 230 L200 140 L260 200 L340 130 L420 210 L500 150 L600 220 L680 170 L720 220 L720 280 Z" fill="#B0CFD9" opacity="0.5"/>
-          <path d="M0 280 L100 220 L180 250 L280 180 L380 240 L470 200 L580 250 L660 220 L720 240 L720 280 Z" fill="#7DA8B5" opacity="0.6"/>
-          <!-- Grass -->
-          <rect x="0" y="280" width="720" height="80" fill="#C5DD9C"/>
-          <ellipse cx="120" cy="320" rx="180" ry="14" fill="#A4C476" opacity="0.6"/>
-          <ellipse cx="500" cy="335" rx="240" ry="14" fill="#A4C476" opacity="0.6"/>
+        <svg viewBox="0 0 720 420" preserveAspectRatio="xMidYMid meet" aria-label="Papa devant trois coffres au pied des Alpes suisses">
+          <defs>
+            <!-- Texture aquarelle subtile -->
+            <filter id="watercolor" x="-5%" y="-5%" width="110%" height="110%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3"/>
+              <feColorMatrix values="0 0 0 0 0.36  0 0 0 0 0.25  0 0 0 0 0.11  0 0 0 0.07 0"/>
+              <feComposite in2="SourceGraphic" operator="in"/>
+            </filter>
+            <!-- Grain papier -->
+            <filter id="paper-grain">
+              <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="5"/>
+              <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.05 0"/>
+            </filter>
+            <!-- Hachures sépia -->
+            <pattern id="hatch" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="5" stroke="#5C3F1D" stroke-width="0.4" opacity="0.4"/>
+            </pattern>
+            <linearGradient id="skygrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#EFE6CE"/>
+              <stop offset="50%" stop-color="#F4ECD7"/>
+              <stop offset="100%" stop-color="#EAE0C5"/>
+            </linearGradient>
+            <linearGradient id="grassgrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#C5DD9C"/>
+              <stop offset="100%" stop-color="#A4C476"/>
+            </linearGradient>
+            <symbol id="cross" viewBox="0 0 32 32">
+              <rect x="13.5" y="6" width="5" height="20" fill="#FBF7EE"/>
+              <rect x="6" y="13.5" width="20" height="5" fill="#FBF7EE"/>
+            </symbol>
+          </defs>
 
-          <!-- Sun -->
-          <circle cx="600" cy="80" r="36" fill="#F5C63E"/>
-          <g stroke="#F5C63E" stroke-width="3" stroke-linecap="round">
-            <line x1="600" y1="20" x2="600" y2="35"/>
-            <line x1="540" y1="80" x2="555" y2="80"/>
-            <line x1="660" y1="80" x2="645" y2="80"/>
-            <line x1="558" y1="40" x2="568" y2="50"/>
-            <line x1="642" y1="40" x2="632" y2="50"/>
-          </g>
+          <!-- Background ciel -->
+          <rect x="0" y="0" width="720" height="320" fill="url(#skygrad)"/>
 
-          <!-- Cloud -->
-          <g fill="#FFFFFF" opacity="0.85">
-            <ellipse cx="200" cy="80" rx="38" ry="18"/>
-            <ellipse cx="230" cy="68" rx="28" ry="16"/>
-            <ellipse cx="170" cy="74" rx="22" ry="14"/>
-          </g>
-
-          <!-- Papa (stick figure, casquette, clé) -->
-          <g class="papa">
-            <!-- chapeau -->
-            <path d="M270 120 L320 120 L325 110 L265 110 Z" fill="#DC1F2D"/>
-            <rect x="262" y="118" width="66" height="6" fill="#1F1A14"/>
-            <circle cx="295" cy="105" r="4" fill="#FFFFFF"/>
-            <!-- tête -->
-            <circle cx="295" cy="145" r="22" fill="#F5D6B0"/>
-            <!-- yeux -->
-            <circle cx="288" cy="142" r="2" fill="#1F1A14"/>
-            <circle cx="302" cy="142" r="2" fill="#1F1A14"/>
-            <!-- sourire -->
-            <path d="M286 152 Q295 158 304 152" stroke="#1F1A14" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <!-- corps -->
-            <rect x="278" y="167" width="34" height="50" rx="4" fill="#5B9BD5"/>
-            <!-- bras gauche (avec clé) -->
-            <line x1="278" y1="180" x2="248" y2="208" stroke="#F5D6B0" stroke-width="6" stroke-linecap="round"/>
-            <!-- clé -->
-            <g transform="translate(232 200) rotate(20)">
-              <circle cx="6" cy="6" r="6" fill="none" stroke="#D9A648" stroke-width="3"/>
-              <circle cx="6" cy="6" r="2" fill="#FBF7EE"/>
-              <rect x="11" y="4" width="22" height="4" fill="#D9A648"/>
-              <rect x="26" y="4" width="3" height="9" fill="#D9A648"/>
-              <rect x="31" y="4" width="3" height="6" fill="#D9A648"/>
+          <!-- Soleil -->
+          <g class="hero-sun" transform="translate(610 80)">
+            <circle r="26" fill="#F5C63E" opacity="0.85"/>
+            <circle r="26" fill="none" stroke="#D9A648" stroke-width="0.6" opacity="0.5"/>
+            <g stroke="#D9A648" stroke-width="1.4" stroke-linecap="round" opacity="0.6">
+              <line x1="-38" y1="0" x2="-32" y2="0"/>
+              <line x1="38" y1="0" x2="32" y2="0"/>
+              <line x1="0" y1="-38" x2="0" y2="-32"/>
+              <line x1="-26" y1="-26" x2="-22" y2="-22"/>
+              <line x1="26" y1="-26" x2="22" y2="-22"/>
+              <line x1="-26" y1="26" x2="-22" y2="22"/>
+              <line x1="26" y1="26" x2="22" y2="22"/>
             </g>
-            <!-- bras droit -->
-            <line x1="312" y1="180" x2="332" y2="200" stroke="#F5D6B0" stroke-width="6" stroke-linecap="round"/>
-            <!-- jambes -->
-            <line x1="288" y1="217" x2="280" y2="265" stroke="#1F1A14" stroke-width="6" stroke-linecap="round"/>
-            <line x1="302" y1="217" x2="312" y2="265" stroke="#1F1A14" stroke-width="6" stroke-linecap="round"/>
-            <!-- chaussures -->
-            <ellipse cx="278" cy="270" rx="10" ry="4" fill="#1F1A14"/>
-            <ellipse cx="314" cy="270" rx="10" ry="4" fill="#1F1A14"/>
           </g>
 
-          <!-- Coffre 1 -->
-          <g class="chest chest-1" transform="translate(380 220)">
-            <rect x="0" y="20" width="80" height="48" rx="4" fill="#8B5E2A"/>
-            <path d="M0 24 Q40 -10 80 24 L80 30 L0 30 Z" fill="#A6712F"/>
-            <rect x="35" y="40" width="10" height="14" fill="#D9A648"/>
-            <circle cx="40" cy="44" r="2" fill="#1F1A14"/>
-            <line x1="0" y1="30" x2="80" y2="30" stroke="#5C3F1D" stroke-width="1.5"/>
+          <!-- Nuages aquarelle -->
+          <g fill="#FBF7EE" opacity="0.85" filter="url(#watercolor)">
+            <ellipse cx="180" cy="80" rx="38" ry="11"/>
+            <ellipse cx="200" cy="71" rx="22" ry="10"/>
+            <ellipse cx="158" cy="76" rx="20" ry="9"/>
+            <ellipse cx="450" cy="50" rx="28" ry="7" opacity="0.7"/>
+            <ellipse cx="465" cy="44" rx="18" ry="6" opacity="0.7"/>
           </g>
-          <text x="420" y="298" text-anchor="middle" class="chest-label">TARES</text>
 
-          <!-- Coffre 2 -->
-          <g class="chest chest-2" transform="translate(490 215)">
-            <rect x="0" y="20" width="80" height="48" rx="4" fill="#8B5E2A"/>
-            <path d="M0 24 Q40 -10 80 24 L80 30 L0 30 Z" fill="#A6712F"/>
-            <rect x="35" y="40" width="10" height="14" fill="#D9A648"/>
-            <circle cx="40" cy="44" r="2" fill="#1F1A14"/>
-            <line x1="0" y1="30" x2="80" y2="30" stroke="#5C3F1D" stroke-width="1.5"/>
+          <!-- Oiseau qui plane -->
+          <g class="hero-bird" stroke="#5C3F1D" stroke-width="1.4" fill="none" stroke-linecap="round">
+            <path d="M380 92 q5 -6 10 0 q5 -6 10 0"/>
           </g>
-          <text x="530" y="293" text-anchor="middle" class="chest-label">NOGA</text>
 
-          <!-- Coffre 3 -->
-          <g class="chest chest-3" transform="translate(600 222)">
-            <rect x="0" y="20" width="80" height="48" rx="4" fill="#8B5E2A"/>
-            <path d="M0 24 Q40 -10 80 24 L80 30 L0 30 Z" fill="#A6712F"/>
-            <rect x="35" y="40" width="10" height="14" fill="#D9A648"/>
-            <circle cx="40" cy="44" r="2" fill="#1F1A14"/>
-            <line x1="0" y1="30" x2="80" y2="30" stroke="#5C3F1D" stroke-width="1.5"/>
+          <!-- Montagnes lointaines -->
+          <path d="M0 290 L60 240 L120 258 L200 218 L260 250 L320 218 L380 240 L440 220 L520 250 L600 230 L660 245 L720 235 L720 290 Z"
+                fill="#D6CDB7" opacity="0.65"/>
+
+          <!-- Cervin / Matterhorn (centre) -->
+          <g class="hero-matterhorn">
+            <path d="M260 290 L 360 145 L 380 165 L 410 200 L 470 290 Z" fill="#9A8C75"/>
+            <path d="M260 290 L 360 145 L 372 175 L 350 290 Z" fill="#7A6E5C" opacity="0.7"/>
+            <!-- neige sommet, en flocons aquarelle -->
+            <path d="M348 162 L 360 145 L 378 165 L 372 172 L 360 167 L 354 175 Z" fill="#FBF7EE"/>
+            <path d="M340 192 Q 348 184 358 190 Q 354 198 343 196 Z" fill="#FBF7EE" opacity="0.85"/>
+            <path d="M386 220 Q 392 215 400 222 Q 396 230 388 226 Z" fill="#FBF7EE" opacity="0.7"/>
+            <!-- hachures de relief -->
+            <path d="M310 230 L 305 270 M325 215 L 318 270 M395 215 L 405 270 M425 230 L 440 270"
+                  stroke="#5C3F1D" stroke-width="0.5" fill="none" opacity="0.3"/>
           </g>
-          <text x="640" y="300" text-anchor="middle" class="chest-label">FINMA</text>
 
-          <!-- Texte décoratif -->
-          <text x="380" y="190" class="hero-arrow-text" transform="rotate(-8 380 190)">trois trésors à débloquer →</text>
+          <!-- Pic mineur droite -->
+          <g class="hero-peak">
+            <path d="M480 290 L 540 200 L 570 230 L 605 290 Z" fill="#A89A82"/>
+            <path d="M480 290 L 540 200 L 552 232 L 530 290 Z" fill="#84775F" opacity="0.55"/>
+            <path d="M533 208 L 540 200 L 562 222 L 550 226 L 540 218 Z" fill="#FBF7EE"/>
+          </g>
+
+          <!-- Plaine + sol -->
+          <path d="M0 285 Q 360 275 720 290 L720 360 L0 360 Z" fill="url(#grassgrad)"/>
+          <ellipse cx="120" cy="335" rx="160" ry="6" fill="#7B9F4F" opacity="0.4"/>
+          <ellipse cx="540" cy="345" rx="200" ry="6" fill="#7B9F4F" opacity="0.4"/>
+
+          <!-- Touffes herbe -->
+          <g stroke="#7B9F4F" stroke-width="0.8" stroke-linecap="round" opacity="0.7" fill="none">
+            <path d="M40 305 q1 -5 2 -7 m2 6 q-1 -4 0 -6"/>
+            <path d="M88 308 q1 -4 2 -6 m1 5 q1 -3 1 -5"/>
+            <path d="M155 310 q1 -4 2 -6"/>
+            <path d="M620 305 q1 -5 1 -7 m2 6 q0 -4 0 -5"/>
+            <path d="M680 308 q-1 -4 0 -6"/>
+          </g>
+
+          <!-- Edelweiss à gauche -->
+          <g class="hero-edelweiss" transform="translate(54 322)">
+            <g fill="#FBF7EE" stroke="#D6CDB7" stroke-width="0.5">
+              <ellipse cx="0" cy="-8" rx="3.5" ry="6"/>
+              <ellipse cx="-6" cy="-3" rx="6" ry="3.5" transform="rotate(-30)"/>
+              <ellipse cx="6" cy="-3" rx="6" ry="3.5" transform="rotate(30)"/>
+              <ellipse cx="-3" cy="2" rx="6" ry="3.5" transform="rotate(-60)"/>
+              <ellipse cx="3" cy="2" rx="6" ry="3.5" transform="rotate(60)"/>
+            </g>
+            <circle cx="0" cy="-2" r="2.5" fill="#F5C63E" stroke="#D9A648" stroke-width="0.4"/>
+            <line x1="0" y1="2" x2="0" y2="14" stroke="#7B9F4F" stroke-width="1"/>
+            <path d="M0 8 q-3 -3 -6 -2 M0 11 q3 -2 6 -1" stroke="#7B9F4F" stroke-width="0.8" fill="none"/>
+          </g>
+
+          <!-- Drapeau suisse planté -->
+          <g class="hero-flag" transform="translate(118 200)">
+            <line x1="0" y1="0" x2="0" y2="100" stroke="#5C3F1D" stroke-width="2.5"/>
+            <circle cx="0" cy="0" r="3" fill="#D9A648"/>
+            <g class="hero-flag-fabric">
+              <path d="M0 6 q 14 -3 28 0 q 14 3 28 0 L56 38 Q 42 41 28 38 Q 14 35 0 38 Z" fill="#DC1F2D"/>
+              <use href="#cross" x="14" y="13" width="28" height="18"/>
+            </g>
+          </g>
+
+          <!-- Coffre TARES (douane / balance) -->
+          <g class="hero-chest hero-chest-1" transform="translate(348 248)">
+            <ellipse cx="40" cy="64" rx="40" ry="4.5" fill="#5C3F1D" opacity="0.28"/>
+            <rect x="0" y="20" width="80" height="42" rx="3" fill="#8B5E2A" stroke="#5C3F1D" stroke-width="1.5"/>
+            <path d="M0 24 Q40 -7 80 24 L80 30 L0 30 Z" fill="#A6712F" stroke="#5C3F1D" stroke-width="1.5"/>
+            <line x1="2" y1="32" x2="78" y2="32" stroke="#5C3F1D" stroke-width="0.8"/>
+            <rect x="6" y="22" width="3" height="38" fill="#5C3F1D"/>
+            <rect x="71" y="22" width="3" height="38" fill="#5C3F1D"/>
+            <rect x="35" y="40" width="10" height="14" rx="1" fill="#D9A648" stroke="#9F7728" stroke-width="0.8"/>
+            <circle cx="40" cy="44" r="1.6" fill="#1F1A14"/>
+            <rect x="0" y="20" width="80" height="42" fill="url(#hatch)" opacity="0.35"/>
+            <!-- icône balance romaine -->
+            <g class="hero-chest-icon" transform="translate(40 6)">
+              <line x1="-13" y1="0" x2="13" y2="0" stroke="#5C3F1D" stroke-width="1.4"/>
+              <line x1="0" y1="0" x2="0" y2="-9" stroke="#5C3F1D" stroke-width="1.2"/>
+              <circle cx="0" cy="-10" r="1.6" fill="#5C3F1D"/>
+              <line x1="-13" y1="0" x2="-13" y2="3" stroke="#5C3F1D" stroke-width="0.7"/>
+              <line x1="13" y1="0" x2="13" y2="3" stroke="#5C3F1D" stroke-width="0.7"/>
+              <path d="M-15 3 L-11 9 L-19 9 Z" fill="#D9A648" stroke="#9F7728" stroke-width="0.6"/>
+              <path d="M15 3 L19 9 L11 9 Z" fill="#D9A648" stroke="#9F7728" stroke-width="0.6"/>
+            </g>
+            <text x="40" y="80" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#5C3F1D" font-weight="600">TARES</text>
+            <text x="40" y="92" text-anchor="middle" font-family="Caveat" font-size="11" fill="#8B5E2A" opacity="0.85">douanes</text>
+          </g>
+
+          <!-- Coffre NOGA (livre comptable) -->
+          <g class="hero-chest hero-chest-2" transform="translate(458 240)">
+            <ellipse cx="40" cy="64" rx="40" ry="4.5" fill="#5C3F1D" opacity="0.28"/>
+            <rect x="0" y="20" width="80" height="42" rx="3" fill="#8B5E2A" stroke="#5C3F1D" stroke-width="1.5"/>
+            <path d="M0 24 Q40 -7 80 24 L80 30 L0 30 Z" fill="#A6712F" stroke="#5C3F1D" stroke-width="1.5"/>
+            <line x1="2" y1="32" x2="78" y2="32" stroke="#5C3F1D" stroke-width="0.8"/>
+            <rect x="6" y="22" width="3" height="38" fill="#5C3F1D"/>
+            <rect x="71" y="22" width="3" height="38" fill="#5C3F1D"/>
+            <rect x="35" y="40" width="10" height="14" rx="1" fill="#D9A648" stroke="#9F7728" stroke-width="0.8"/>
+            <circle cx="40" cy="44" r="1.6" fill="#1F1A14"/>
+            <rect x="0" y="20" width="80" height="42" fill="url(#hatch)" opacity="0.35"/>
+            <!-- icône livre ouvert -->
+            <g class="hero-chest-icon" transform="translate(40 4)">
+              <path d="M-15 1 L0 -3 L15 1 L15 9 L0 5 L-15 9 Z" fill="#FBF7EE" stroke="#5C3F1D" stroke-width="0.9"/>
+              <line x1="0" y1="-3" x2="0" y2="5" stroke="#5C3F1D" stroke-width="0.7"/>
+              <line x1="-12" y1="3" x2="-3" y2="0" stroke="#9F7728" stroke-width="0.4"/>
+              <line x1="-12" y1="6" x2="-3" y2="3" stroke="#9F7728" stroke-width="0.4"/>
+              <line x1="3" y1="0" x2="12" y2="3" stroke="#9F7728" stroke-width="0.4"/>
+              <line x1="3" y1="3" x2="12" y2="6" stroke="#9F7728" stroke-width="0.4"/>
+            </g>
+            <text x="40" y="80" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#5C3F1D" font-weight="600">NOGA</text>
+            <text x="40" y="92" text-anchor="middle" font-family="Caveat" font-size="11" fill="#8B5E2A" opacity="0.85">classifications</text>
+          </g>
+
+          <!-- Coffre FINMA (lanterne / banque) -->
+          <g class="hero-chest hero-chest-3" transform="translate(572 246)">
+            <ellipse cx="40" cy="64" rx="40" ry="4.5" fill="#5C3F1D" opacity="0.28"/>
+            <rect x="0" y="20" width="80" height="42" rx="3" fill="#8B5E2A" stroke="#5C3F1D" stroke-width="1.5"/>
+            <path d="M0 24 Q40 -7 80 24 L80 30 L0 30 Z" fill="#A6712F" stroke="#5C3F1D" stroke-width="1.5"/>
+            <line x1="2" y1="32" x2="78" y2="32" stroke="#5C3F1D" stroke-width="0.8"/>
+            <rect x="6" y="22" width="3" height="38" fill="#5C3F1D"/>
+            <rect x="71" y="22" width="3" height="38" fill="#5C3F1D"/>
+            <rect x="35" y="40" width="10" height="14" rx="1" fill="#D9A648" stroke="#9F7728" stroke-width="0.8"/>
+            <circle cx="40" cy="44" r="1.6" fill="#1F1A14"/>
+            <rect x="0" y="20" width="80" height="42" fill="url(#hatch)" opacity="0.35"/>
+            <!-- icône lanterne -->
+            <g class="hero-chest-icon" transform="translate(40 6)">
+              <circle r="13" fill="#F5C63E" opacity="0.18"/>
+              <line x1="0" y1="-12" x2="0" y2="-7" stroke="#5C3F1D" stroke-width="1"/>
+              <rect x="-7" y="-7" width="14" height="2" fill="#5C3F1D"/>
+              <rect x="-6" y="-5" width="12" height="11" rx="1" fill="#F5C63E" stroke="#9F7728" stroke-width="0.8"/>
+              <rect x="-7" y="6" width="14" height="2" fill="#5C3F1D"/>
+              <line x1="-3" y1="-3" x2="-3" y2="4" stroke="#9F7728" stroke-width="0.5"/>
+              <line x1="3" y1="-3" x2="3" y2="4" stroke="#9F7728" stroke-width="0.5"/>
+              <circle cx="0" cy="0" r="2" fill="#FFFFFF" opacity="0.7"/>
+            </g>
+            <text x="40" y="80" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#5C3F1D" font-weight="600">FINMA</text>
+            <text x="40" y="92" text-anchor="middle" font-family="Caveat" font-size="11" fill="#8B5E2A" opacity="0.85">banques</text>
+          </g>
+
+          <!-- Papa : ingénieur avec carnet, lunettes, barbe légère -->
+          <g class="hero-papa" transform="translate(208 215)">
+            <!-- ombre -->
+            <ellipse cx="58" cy="122" rx="44" ry="5" fill="#5C3F1D" opacity="0.25"/>
+            <!-- jambes pantalon -->
+            <path d="M50 70 L 42 120" stroke="#3D4F66" stroke-width="7" stroke-linecap="round"/>
+            <path d="M70 70 L 78 120" stroke="#3D4F66" stroke-width="7" stroke-linecap="round"/>
+            <ellipse cx="40" cy="123" rx="9" ry="3.5" fill="#3D2A1A"/>
+            <ellipse cx="80" cy="123" rx="9" ry="3.5" fill="#3D2A1A"/>
+            <!-- chemise carreaux -->
+            <path d="M40 24 Q 40 20 44 20 L 76 20 Q 80 20 80 24 L 78 72 L 42 72 Z" fill="#5B9BD5"/>
+            <g stroke="#3D6B96" stroke-width="0.5" opacity="0.6">
+              <line x1="50" y1="22" x2="50" y2="71"/>
+              <line x1="60" y1="22" x2="60" y2="71"/>
+              <line x1="70" y1="22" x2="70" y2="71"/>
+              <line x1="42" y1="34" x2="78" y2="34"/>
+              <line x1="42" y1="46" x2="78" y2="46"/>
+              <line x1="42" y1="58" x2="78" y2="58"/>
+            </g>
+            <!-- col -->
+            <path d="M52 22 L60 30 L68 22 Z" fill="#FBF7EE" stroke="#5C3F1D" stroke-width="0.6"/>
+            <!-- bras gauche tenant carnet -->
+            <line x1="44" y1="34" x2="22" y2="52" stroke="#F5D6B0" stroke-width="6" stroke-linecap="round"/>
+            <!-- carnet de bord -->
+            <g class="hero-papa-notebook" transform="translate(6 38)">
+              <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#5C3F1D" stroke-width="1"/>
+              <rect x="0" y="0" width="3" height="28" fill="#DC1F2D"/>
+              <line x1="6" y1="6" x2="18" y2="6" stroke="#8B5E2A" stroke-width="0.5"/>
+              <line x1="6" y1="10" x2="18" y2="10" stroke="#8B5E2A" stroke-width="0.5"/>
+              <line x1="6" y1="14" x2="16" y2="14" stroke="#8B5E2A" stroke-width="0.5"/>
+              <line x1="6" y1="18" x2="18" y2="18" stroke="#8B5E2A" stroke-width="0.5"/>
+              <line x1="6" y1="22" x2="13" y2="22" stroke="#8B5E2A" stroke-width="0.5"/>
+            </g>
+            <!-- bras droit pointant vers les coffres -->
+            <line x1="76" y1="34" x2="104" y2="22" stroke="#F5D6B0" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="107" cy="20" r="3.5" fill="#F5D6B0"/>
+            <!-- tête -->
+            <circle cx="60" cy="0" r="20" fill="#F5D6B0"/>
+            <!-- cheveux courts -->
+            <path d="M42 -8 Q 50 -22 60 -20 Q 70 -22 78 -8 L 78 -3 Q 72 -10 60 -10 Q 48 -10 42 -3 Z" fill="#3D2A1A"/>
+            <!-- lunettes -->
+            <g>
+              <circle cx="52" cy="-2" r="5" fill="#FBF7EE" opacity="0.5"/>
+              <circle cx="68" cy="-2" r="5" fill="#FBF7EE" opacity="0.5"/>
+              <circle cx="52" cy="-2" r="5" fill="none" stroke="#1F1A14" stroke-width="1.2"/>
+              <circle cx="68" cy="-2" r="5" fill="none" stroke="#1F1A14" stroke-width="1.2"/>
+              <line x1="57" y1="-2" x2="63" y2="-2" stroke="#1F1A14" stroke-width="1"/>
+            </g>
+            <circle cx="52" cy="-2" r="1.2" fill="#1F1A14"/>
+            <circle cx="68" cy="-2" r="1.2" fill="#1F1A14"/>
+            <!-- nez -->
+            <path d="M60 1 L 62 7 L 58 7 Z" fill="#E0BC97" opacity="0.6"/>
+            <!-- sourire -->
+            <path d="M54 11 Q 60 15 66 11" stroke="#1F1A14" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+            <!-- barbe légère -->
+            <g stroke="#3D2A1A" stroke-width="0.5" fill="none" opacity="0.45">
+              <path d="M48 8 Q 54 14 60 13"/>
+              <path d="M60 13 Q 66 14 72 8"/>
+            </g>
+          </g>
+
+          <!-- Texte décoratif "trois trésors à débloquer" avec flèche script -->
+          <g class="hero-arrow-text" transform="translate(355 198) rotate(-7)">
+            <text font-family="Caveat" font-size="22" fill="#5C3F1D" opacity="0.9" font-weight="600">trois trésors à débloquer</text>
+            <path d="M218 -2 q 8 0 18 6" stroke="#5C3F1D" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.85"/>
+            <path d="M232 6 l 4 -2 m-4 2 l 0 -4" stroke="#5C3F1D" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.85"/>
+          </g>
+
+          <!-- Couche aquarelle finale subtile -->
+          <rect x="0" y="0" width="720" height="420" fill="#5C3F1D" opacity="0.025"/>
         </svg>
       </div>
 
@@ -186,34 +362,54 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
         </p>
       </div>
 
-      <!-- 3 coffres ouverts montrant des PDFs froissés -->
+      <!-- 3 illustrations problème : pile de PDF, encodage cassé, 10 listes -->
       <div class="problem-chests">
         <div class="problem-chest">
           <div class="problem-chest-illu">
             <svg viewBox="0 0 200 200" aria-hidden>
-              <!-- coffre ouvert -->
-              <g transform="translate(40 60)">
-                <path d="M0 30 Q60 -25 120 30 L120 80 L0 80 Z" fill="#A6712F" stroke="#5C3F1D" stroke-width="2"/>
-                <path d="M0 35 L120 35" stroke="#5C3F1D" stroke-width="1.5" fill="none"/>
-                <rect x="50" y="50" width="20" height="20" fill="#D9A648"/>
-                <circle cx="60" cy="60" r="3" fill="#1F1A14"/>
+              <!-- Pile vertigineuse de PDFs froissés -->
+              <ellipse cx="100" cy="180" rx="68" ry="6" fill="#5C3F1D" opacity="0.18"/>
+              <!-- couche papier en bas -->
+              <g transform="translate(36 130)">
+                <rect x="0" y="0" width="128" height="44" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1.2" transform="rotate(-2 64 22)"/>
+                <line x1="10" y1="10" x2="120" y2="10" stroke="#C5C9D2" stroke-width="0.6" transform="rotate(-2 64 22)"/>
+                <line x1="10" y1="18" x2="115" y2="18" stroke="#C5C9D2" stroke-width="0.6" transform="rotate(-2 64 22)"/>
+                <line x1="10" y1="26" x2="118" y2="26" stroke="#C5C9D2" stroke-width="0.6" transform="rotate(-2 64 22)"/>
               </g>
-              <!-- PDFs froissés qui sortent -->
-              <g class="messy-paper" transform="translate(70 30)">
-                <path d="M0 0 L40 -5 L42 25 L8 30 L4 22 L-3 18 Z" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5"/>
-                <line x1="6" y1="6" x2="35" y2="3" stroke="#C5C9D2" stroke-width="1"/>
-                <line x1="6" y1="12" x2="32" y2="9" stroke="#C5C9D2" stroke-width="1"/>
-                <line x1="6" y1="18" x2="28" y2="16" stroke="#C5C9D2" stroke-width="1"/>
-                <text x="22" y="-12" text-anchor="middle" font-family="Fredoka" font-size="10" fill="#DC1F2D" font-weight="600">PDF</text>
+              <g transform="translate(40 96)">
+                <rect x="0" y="0" width="120" height="44" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1.2" transform="rotate(3 60 22)"/>
+                <line x1="10" y1="10" x2="105" y2="10" stroke="#C5C9D2" stroke-width="0.6" transform="rotate(3 60 22)"/>
+                <line x1="10" y1="18" x2="110" y2="18" stroke="#C5C9D2" stroke-width="0.6" transform="rotate(3 60 22)"/>
+                <line x1="10" y1="26" x2="100" y2="26" stroke="#C5C9D2" stroke-width="0.6" transform="rotate(3 60 22)"/>
               </g>
-              <g class="messy-paper-2" transform="translate(110 50)">
-                <path d="M0 0 L36 4 L34 32 L4 28 Z" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5"/>
-                <line x1="5" y1="8" x2="30" y2="11" stroke="#C5C9D2" stroke-width="1"/>
-                <line x1="5" y1="14" x2="28" y2="17" stroke="#C5C9D2" stroke-width="1"/>
-                <text x="20" y="-8" text-anchor="middle" font-family="Fredoka" font-size="9" fill="#DC1F2D" font-weight="600">XLS cassé</text>
+              <g transform="translate(38 64)">
+                <rect x="0" y="0" width="124" height="44" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1.2" transform="rotate(-1 62 22)"/>
+                <rect x="6" y="4" width="22" height="6" fill="#DC1F2D" opacity="0.85" transform="rotate(-1 62 22)"/>
+                <line x1="10" y1="18" x2="115" y2="18" stroke="#C5C9D2" stroke-width="0.6" transform="rotate(-1 62 22)"/>
+                <line x1="10" y1="26" x2="100" y2="26" stroke="#C5C9D2" stroke-width="0.6" transform="rotate(-1 62 22)"/>
+                <line x1="10" y1="34" x2="118" y2="34" stroke="#C5C9D2" stroke-width="0.6" transform="rotate(-1 62 22)"/>
               </g>
-              <!-- ZZZ confusion -->
-              <text x="40" y="35" font-family="Caveat" font-size="22" fill="#8A8D95">!?</text>
+              <g transform="translate(48 28) rotate(6 56 22)">
+                <rect x="0" y="0" width="112" height="44" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1.4"/>
+                <text x="8" y="14" font-family="Fredoka" font-size="11" fill="#DC1F2D" font-weight="700">PDF</text>
+                <text x="46" y="14" font-family="Caveat" font-size="13" fill="#8B5E2A">2 400 pages</text>
+                <line x1="8" y1="22" x2="100" y2="22" stroke="#C5C9D2" stroke-width="0.7"/>
+                <line x1="8" y1="28" x2="92" y2="28" stroke="#C5C9D2" stroke-width="0.7"/>
+                <line x1="8" y1="34" x2="98" y2="34" stroke="#C5C9D2" stroke-width="0.7"/>
+              </g>
+              <!-- bulle d'exaspération -->
+              <g transform="translate(150 20)">
+                <ellipse cx="0" cy="0" rx="22" ry="14" fill="#FBF7EE" stroke="#5C3F1D" stroke-width="1"/>
+                <path d="M-8 12 L -2 18 L 0 11 Z" fill="#FBF7EE" stroke="#5C3F1D" stroke-width="1"/>
+                <text x="0" y="4" text-anchor="middle" font-family="Caveat" font-size="18" fill="#DC1F2D" font-weight="700">!?</text>
+              </g>
+              <!-- petits flocons dispersés -->
+              <g fill="#8B5E2A" opacity="0.4">
+                <circle cx="20" cy="50" r="1.5"/>
+                <circle cx="180" cy="100" r="1.2"/>
+                <circle cx="14" cy="120" r="1"/>
+                <circle cx="186" cy="160" r="1.4"/>
+              </g>
             </svg>
           </div>
           <h3>2&nbsp;400 pages de PDF</h3>
@@ -223,18 +419,34 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
         <div class="problem-chest">
           <div class="problem-chest-illu">
             <svg viewBox="0 0 200 200" aria-hidden>
-              <g transform="translate(40 60)">
-                <path d="M0 30 Q60 -25 120 30 L120 80 L0 80 Z" fill="#A6712F" stroke="#5C3F1D" stroke-width="2"/>
-                <path d="M0 35 L120 35" stroke="#5C3F1D" stroke-width="1.5" fill="none"/>
-                <rect x="50" y="50" width="20" height="20" fill="#D9A648"/>
+              <!-- Cadre terminal vintage avec caractères cassés -->
+              <ellipse cx="100" cy="180" rx="64" ry="5" fill="#5C3F1D" opacity="0.18"/>
+              <g transform="translate(28 30)">
+                <!-- corps écran -->
+                <rect x="0" y="8" width="144" height="116" rx="6" fill="#3D4F66" stroke="#1F2937" stroke-width="1.5"/>
+                <rect x="6" y="14" width="132" height="100" rx="3" fill="#1F2937"/>
+                <!-- titre barre -->
+                <rect x="6" y="14" width="132" height="14" fill="#374151"/>
+                <circle cx="14" cy="21" r="2.2" fill="#DC1F2D"/>
+                <circle cx="22" cy="21" r="2.2" fill="#F5C63E"/>
+                <circle cx="30" cy="21" r="2.2" fill="#A4C476"/>
+                <text x="72" y="25" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9CA3AF">finma_banks_1995.txt</text>
+                <!-- contenu -->
+                <text x="14" y="44" font-family="JetBrains Mono" font-size="9" fill="#7DDB7D">$ cat banks.txt</text>
+                <text x="14" y="58" font-family="JetBrains Mono" font-size="10" fill="#FBF7EE">Müller AG     ✓</text>
+                <text x="14" y="72" font-family="JetBrains Mono" font-size="10" fill="#F87171">M??ller AG    ✗</text>
+                <text x="14" y="86" font-family="JetBrains Mono" font-size="10" fill="#F87171">M&#195;&#188;ller AG   ✗</text>
+                <text x="14" y="100" font-family="JetBrains Mono" font-size="10" fill="#F87171">Genève → Gen?ve</text>
+                <text x="14" y="112" font-family="JetBrains Mono" font-size="9" fill="#9CA3AF">$ _</text>
+                <!-- pied écran -->
+                <rect x="58" y="124" width="28" height="6" fill="#374151"/>
+                <rect x="48" y="130" width="48" height="3" rx="1" fill="#374151"/>
               </g>
-              <!-- Caractères cassés -->
-              <g transform="translate(60 30)">
-                <rect x="0" y="0" width="80" height="50" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="3"/>
-                <text x="6" y="14" font-family="JetBrains Mono" font-size="9" fill="#1F1A14">M&#252;ller</text>
-                <text x="6" y="26" font-family="JetBrains Mono" font-size="9" fill="#DC1F2D">M??ller</text>
-                <text x="6" y="38" font-family="JetBrains Mono" font-size="9" fill="#DC1F2D">M&Atilde;&frac14;ller</text>
-                <text x="40" y="50" font-family="Caveat" font-size="14" fill="#DC1F2D">??!</text>
+              <!-- petite étiquette caveat -->
+              <g transform="translate(160 60) rotate(8)">
+                <path d="M0 0 q 8 -10 22 -8" stroke="#5C3F1D" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+                <path d="M22 -8 l -3 -1 m3 1 l -2 -3" stroke="#5C3F1D" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+                <text x="-10" y="14" font-family="Caveat" font-size="14" fill="#DC1F2D" font-weight="700">aïe</text>
               </g>
             </svg>
           </div>
@@ -245,19 +457,80 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
         <div class="problem-chest">
           <div class="problem-chest-illu">
             <svg viewBox="0 0 200 200" aria-hidden>
-              <g transform="translate(40 60)">
-                <path d="M0 30 Q60 -25 120 30 L120 80 L0 80 Z" fill="#A6712F" stroke="#5C3F1D" stroke-width="2"/>
-                <path d="M0 35 L120 35" stroke="#5C3F1D" stroke-width="1.5" fill="none"/>
-                <rect x="50" y="50" width="20" height="20" fill="#D9A648"/>
+              <!-- 10 mini-pages éparpillées en cercle, reliées par des lignes incertaines -->
+              <ellipse cx="100" cy="180" rx="68" ry="5" fill="#5C3F1D" opacity="0.18"/>
+              <!-- lignes de connexion incertaines -->
+              <g stroke="#8B5E2A" stroke-width="0.6" stroke-dasharray="3 3" fill="none" opacity="0.55">
+                <path d="M40 60 Q 80 90 120 50"/>
+                <path d="M30 110 Q 70 130 110 100"/>
+                <path d="M150 70 Q 130 110 80 130"/>
+                <path d="M60 50 Q 100 80 160 110"/>
+                <path d="M170 140 Q 130 120 50 145"/>
               </g>
-              <!-- 10 listes éparpillées -->
-              <g class="scattered" transform="translate(50 30)">
-                <rect x="0" y="0" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(-12 10 13)"/>
-                <rect x="22" y="-2" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(8 32 11)"/>
-                <rect x="46" y="2" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(-5 56 15)"/>
-                <rect x="70" y="-3" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(15 80 10)"/>
-                <rect x="94" y="2" width="20" height="26" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5" rx="2" transform="rotate(-8 104 15)"/>
-                <text x="60" y="-10" text-anchor="middle" font-family="Caveat" font-size="20" fill="#DC1F2D">×10</text>
+              <!-- 10 mini-pages -->
+              <g>
+                <g transform="translate(34 38) rotate(-12)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <line x1="3" y1="6" x2="18" y2="6" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="11" x2="16" y2="11" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="16" x2="18" y2="16" stroke="#C5C9D2" stroke-width="0.6"/>
+                </g>
+                <g transform="translate(72 26) rotate(8)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <line x1="3" y1="6" x2="18" y2="6" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="11" x2="16" y2="11" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <rect x="3" y="14" width="6" height="6" fill="#DC1F2D" opacity="0.6"/>
+                </g>
+                <g transform="translate(112 30) rotate(-5)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <line x1="3" y1="6" x2="18" y2="6" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="12" x2="16" y2="12" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="18" x2="18" y2="18" stroke="#C5C9D2" stroke-width="0.6"/>
+                </g>
+                <g transform="translate(150 50) rotate(15)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <line x1="3" y1="7" x2="18" y2="7" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="13" x2="16" y2="13" stroke="#C5C9D2" stroke-width="0.6"/>
+                </g>
+                <g transform="translate(28 90) rotate(6)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <line x1="3" y1="6" x2="18" y2="6" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="11" x2="14" y2="11" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="16" x2="17" y2="16" stroke="#C5C9D2" stroke-width="0.6"/>
+                </g>
+                <g transform="translate(160 96) rotate(-10)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <rect x="3" y="4" width="8" height="4" fill="#5B9BD5" opacity="0.6"/>
+                  <line x1="3" y1="12" x2="17" y2="12" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="17" x2="14" y2="17" stroke="#C5C9D2" stroke-width="0.6"/>
+                </g>
+                <g transform="translate(56 132) rotate(-8)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <line x1="3" y1="6" x2="18" y2="6" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="13" x2="14" y2="13" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="19" x2="17" y2="19" stroke="#C5C9D2" stroke-width="0.6"/>
+                </g>
+                <g transform="translate(98 140) rotate(4)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <line x1="3" y1="6" x2="18" y2="6" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="12" x2="16" y2="12" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="18" x2="13" y2="18" stroke="#C5C9D2" stroke-width="0.6"/>
+                </g>
+                <g transform="translate(140 142) rotate(-12)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <line x1="3" y1="7" x2="18" y2="7" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="13" x2="14" y2="13" stroke="#C5C9D2" stroke-width="0.6"/>
+                </g>
+                <g transform="translate(98 80) rotate(2)">
+                  <rect x="0" y="0" width="22" height="28" rx="1" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1"/>
+                  <line x1="3" y1="6" x2="18" y2="6" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="12" x2="16" y2="12" stroke="#C5C9D2" stroke-width="0.6"/>
+                  <line x1="3" y1="18" x2="14" y2="18" stroke="#C5C9D2" stroke-width="0.6"/>
+                </g>
+              </g>
+              <!-- "×10" en script + flèches -->
+              <g transform="translate(98 16)">
+                <text font-family="Caveat" font-size="22" fill="#DC1F2D" font-weight="700">×10</text>
               </g>
             </svg>
           </div>
@@ -294,83 +567,236 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
         </p>
       </div>
 
-      <!-- Machine illustration -->
+      <!-- Machine illustration : style atelier Rube Goldberg avec engrenages, manomètre, vapeur -->
       <div class="workshop">
-        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet" aria-label="Machine de transformation">
+        <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" aria-label="Machine de transformation">
+          <defs>
+            <pattern id="m-rivets" patternUnits="userSpaceOnUse" width="20" height="20">
+              <circle cx="10" cy="10" r="1.5" fill="#7A1019"/>
+            </pattern>
+            <linearGradient id="m-body" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#E8323E"/>
+              <stop offset="100%" stop-color="#B81825"/>
+            </linearGradient>
+            <radialGradient id="m-screen" cx="0.5" cy="0.5" r="0.6">
+              <stop offset="0%" stop-color="#1F2937"/>
+              <stop offset="100%" stop-color="#111827"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Sol / hachures -->
+          <line x1="0" y1="320" x2="720" y2="320" stroke="#5C3F1D" stroke-width="1"/>
+          <g stroke="#8B5E2A" stroke-width="0.5" opacity="0.4">
+            <line x1="20" y1="328" x2="40" y2="320"/>
+            <line x1="60" y1="328" x2="80" y2="320"/>
+            <line x1="100" y1="328" x2="120" y2="320"/>
+            <line x1="600" y1="328" x2="620" y2="320"/>
+            <line x1="640" y1="328" x2="660" y2="320"/>
+            <line x1="680" y1="328" x2="700" y2="320"/>
+          </g>
+
           <!-- Tapis roulant entrée -->
-          <rect x="20" y="180" width="180" height="14" fill="#5C3F1D" rx="2"/>
-          <g class="conveyor-belts">
-            <circle cx="40" cy="187" r="6" fill="#1F1A14"/>
-            <circle cx="80" cy="187" r="6" fill="#1F1A14"/>
-            <circle cx="120" cy="187" r="6" fill="#1F1A14"/>
-            <circle cx="160" cy="187" r="6" fill="#1F1A14"/>
+          <g class="m-conveyor m-conveyor-in">
+            <rect x="10" y="220" width="190" height="16" fill="#5C3F1D" rx="3"/>
+            <rect x="10" y="220" width="190" height="3" fill="#3D2A1A"/>
+            <circle cx="22" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="22" cy="228" r="3" fill="#9F7728"/>
+            <circle cx="60" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="100" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="140" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="180" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="180" cy="228" r="3" fill="#9F7728"/>
           </g>
 
-          <!-- PDF moche entrant -->
-          <g class="enter-paper">
-            <rect x="0" y="0" width="40" height="50" rx="3" fill="#FFFFFF" stroke="#8A8D95" stroke-width="1.5"/>
-            <line x1="6" y1="10" x2="34" y2="10" stroke="#C5C9D2" stroke-width="1"/>
-            <line x1="6" y1="18" x2="30" y2="18" stroke="#C5C9D2" stroke-width="1"/>
-            <line x1="6" y1="26" x2="34" y2="26" stroke="#C5C9D2" stroke-width="1"/>
-            <line x1="6" y1="34" x2="28" y2="34" stroke="#C5C9D2" stroke-width="1"/>
-            <text x="20" y="60" text-anchor="middle" font-family="Fredoka" font-size="10" fill="#DC1F2D" font-weight="600">PDF</text>
+          <!-- PDF froissé entrant -->
+          <g class="m-enter-paper" transform="translate(40 175)">
+            <rect x="0" y="0" width="42" height="50" rx="2" fill="#FBF7EE" stroke="#8A8D95" stroke-width="1.4"/>
+            <rect x="4" y="4" width="14" height="5" fill="#DC1F2D" opacity="0.85"/>
+            <text x="22" y="9" font-family="Fredoka" font-size="9" fill="#1F1A14" font-weight="700">PDF</text>
+            <line x1="4" y1="16" x2="38" y2="16" stroke="#C5C9D2" stroke-width="0.7"/>
+            <line x1="4" y1="22" x2="34" y2="22" stroke="#C5C9D2" stroke-width="0.7"/>
+            <line x1="4" y1="28" x2="38" y2="28" stroke="#C5C9D2" stroke-width="0.7"/>
+            <line x1="4" y1="34" x2="30" y2="34" stroke="#C5C9D2" stroke-width="0.7"/>
+            <line x1="4" y1="40" x2="36" y2="40" stroke="#C5C9D2" stroke-width="0.7"/>
+            <!-- corne pliée -->
+            <path d="M32 0 L42 0 L42 10 Z" fill="#E8DFCE" stroke="#8A8D95" stroke-width="1"/>
           </g>
 
-          <!-- Machine -->
+          <!-- Cheminée vapeur -->
           <g>
-            <rect x="220" y="100" width="280" height="140" rx="14" fill="#DC1F2D"/>
-            <rect x="220" y="100" width="280" height="140" rx="14" fill="none" stroke="#9E1620" stroke-width="3"/>
-            <rect x="240" y="120" width="240" height="100" rx="8" fill="#1F1A14"/>
-            <!-- écran -->
-            <text x="360" y="155" text-anchor="middle" font-family="Fredoka" font-size="14" fill="#7DDB7D" font-weight="600">openswissdata</text>
-            <text x="360" y="178" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#7DDB7D">[ nettoyage en cours ]</text>
-            <text x="360" y="200" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#7DDB7D">7 511 lignes ✓</text>
-            <!-- diodes animées -->
-            <circle cx="248" cy="118" r="3" fill="#7DDB7D" class="led led-1"/>
-            <circle cx="262" cy="118" r="3" fill="#F5C63E" class="led led-2"/>
-            <circle cx="276" cy="118" r="3" fill="#7DDB7D" class="led led-3"/>
-            <!-- entonnoir -->
-            <path d="M210 110 L 230 130 L 230 150 L 210 130 Z" fill="#9E1620"/>
-            <path d="M210 110 L 200 110 L 200 130 L 210 130 Z" fill="#7A1019"/>
-            <!-- sortie -->
-            <path d="M510 130 L530 130 L530 150 L510 150 Z" fill="#9E1620"/>
-            <!-- vapeur -->
-            <g class="steam">
-              <circle cx="300" cy="100" r="6" fill="#FFFFFF" opacity="0.7"/>
-              <circle cx="320" cy="92" r="5" fill="#FFFFFF" opacity="0.5"/>
-              <circle cx="350" cy="86" r="7" fill="#FFFFFF" opacity="0.6"/>
-              <circle cx="380" cy="92" r="5" fill="#FFFFFF" opacity="0.5"/>
-              <circle cx="410" cy="98" r="6" fill="#FFFFFF" opacity="0.4"/>
+            <rect x="280" y="60" width="22" height="60" fill="#3D2A1A" stroke="#1F1A14" stroke-width="1"/>
+            <ellipse cx="291" cy="60" rx="14" ry="4" fill="#5C3F1D" stroke="#1F1A14" stroke-width="1"/>
+            <rect x="278" y="58" width="26" height="4" fill="#7A1019"/>
+          </g>
+
+          <!-- Vapeur en boules animées -->
+          <g class="m-steam" fill="#FBF7EE" opacity="0.8">
+            <circle cx="291" cy="42" r="9" class="m-puff m-puff-1"/>
+            <circle cx="298" cy="28" r="11" class="m-puff m-puff-2"/>
+            <circle cx="285" cy="14" r="14" class="m-puff m-puff-3" opacity="0.5"/>
+          </g>
+
+          <!-- Corps de la machine -->
+          <g class="m-body">
+            <!-- ombre -->
+            <ellipse cx="360" cy="316" rx="160" ry="6" fill="#5C3F1D" opacity="0.25"/>
+            <!-- caisson principal -->
+            <rect x="200" y="120" width="320" height="160" rx="10" fill="url(#m-body)" stroke="#7A1019" stroke-width="2"/>
+            <rect x="200" y="120" width="320" height="160" rx="10" fill="url(#m-rivets)" opacity="0.6"/>
+            <!-- bandeau supérieur -->
+            <rect x="200" y="120" width="320" height="22" fill="#9E1620"/>
+            <text x="360" y="136" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#FBF7EE" font-weight="700" letter-spacing="2">L'ATELIER OPENSWISSDATA</text>
+            <!-- ligne séparatrice plaque rivetée -->
+            <line x1="200" y1="142" x2="520" y2="142" stroke="#7A1019" stroke-width="1"/>
+
+            <!-- écran central -->
+            <rect x="240" y="158" width="240" height="80" rx="6" fill="url(#m-screen)" stroke="#7A1019" stroke-width="2"/>
+            <text x="360" y="186" text-anchor="middle" font-family="Fredoka" font-size="13" fill="#7DDB7D" font-weight="600">openswissdata</text>
+            <text x="360" y="206" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#7DDB7D">[ nettoyage en cours ]</text>
+            <text x="360" y="222" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#FBF7EE">7&#160;511 lignes &#8226; UTF-8 &#8226; SHA-256 &#10003;</text>
+            <!-- ligne de scan -->
+            <rect x="240" y="158" width="240" height="2" fill="#7DDB7D" opacity="0.4" class="m-scanline"/>
+
+            <!-- Engrenage gauche -->
+            <g class="m-cog m-cog-l" transform="translate(228 200)">
+              <g>
+                <circle r="14" fill="#3D2A1A" stroke="#1F1A14" stroke-width="1.5"/>
+                <g fill="#3D2A1A" stroke="#1F1A14" stroke-width="1.2">
+                  <rect x="-2" y="-19" width="4" height="6"/>
+                  <rect x="-2" y="13" width="4" height="6"/>
+                  <rect x="-19" y="-2" width="6" height="4"/>
+                  <rect x="13" y="-2" width="6" height="4"/>
+                  <rect x="-15" y="-15" width="5" height="5" transform="rotate(45)"/>
+                  <rect x="10" y="-15" width="5" height="5" transform="rotate(45)"/>
+                  <rect x="-15" y="10" width="5" height="5" transform="rotate(45)"/>
+                  <rect x="10" y="10" width="5" height="5" transform="rotate(45)"/>
+                </g>
+                <circle r="5" fill="#9F7728" stroke="#1F1A14" stroke-width="1"/>
+                <circle r="2" fill="#1F1A14"/>
+              </g>
             </g>
-            <!-- antenne -->
-            <line x1="360" y1="100" x2="360" y2="80" stroke="#1F1A14" stroke-width="2"/>
-            <circle cx="360" cy="76" r="4" fill="#F5C63E"/>
-            <!-- pieds -->
-            <rect x="240" y="240" width="20" height="20" fill="#7A1019"/>
-            <rect x="460" y="240" width="20" height="20" fill="#7A1019"/>
+            <!-- Engrenage droit (sens opposé) -->
+            <g class="m-cog m-cog-r" transform="translate(492 200)">
+              <g>
+                <circle r="14" fill="#3D2A1A" stroke="#1F1A14" stroke-width="1.5"/>
+                <g fill="#3D2A1A" stroke="#1F1A14" stroke-width="1.2">
+                  <rect x="-2" y="-19" width="4" height="6"/>
+                  <rect x="-2" y="13" width="4" height="6"/>
+                  <rect x="-19" y="-2" width="6" height="4"/>
+                  <rect x="13" y="-2" width="6" height="4"/>
+                  <rect x="-15" y="-15" width="5" height="5" transform="rotate(45)"/>
+                  <rect x="10" y="-15" width="5" height="5" transform="rotate(45)"/>
+                  <rect x="-15" y="10" width="5" height="5" transform="rotate(45)"/>
+                  <rect x="10" y="10" width="5" height="5" transform="rotate(45)"/>
+                </g>
+                <circle r="5" fill="#9F7728" stroke="#1F1A14" stroke-width="1"/>
+                <circle r="2" fill="#1F1A14"/>
+              </g>
+            </g>
+
+            <!-- Manomètre -->
+            <g transform="translate(252 256)">
+              <circle r="14" fill="#FBF7EE" stroke="#1F1A14" stroke-width="1.5"/>
+              <circle r="11" fill="none" stroke="#9F7728" stroke-width="0.5"/>
+              <text x="0" y="-5" text-anchor="middle" font-family="Fredoka" font-size="6" fill="#5C3F1D">PSI</text>
+              <line x1="0" y1="0" x2="6" y2="-3" stroke="#DC1F2D" stroke-width="1.5" stroke-linecap="round" class="m-needle"/>
+              <circle r="1.5" fill="#1F1A14"/>
+              <!-- ticks -->
+              <g stroke="#5C3F1D" stroke-width="0.5">
+                <line x1="-9" y1="0" x2="-11" y2="0"/>
+                <line x1="9" y1="0" x2="11" y2="0"/>
+                <line x1="0" y1="-9" x2="0" y2="-11"/>
+                <line x1="6" y1="-7" x2="7" y2="-9"/>
+                <line x1="-6" y1="-7" x2="-7" y2="-9"/>
+              </g>
+            </g>
+
+            <!-- Diodes top -->
+            <circle cx="232" cy="130" r="2.5" fill="#7DDB7D" class="m-led m-led-1"/>
+            <circle cx="244" cy="130" r="2.5" fill="#F5C63E" class="m-led m-led-2"/>
+            <circle cx="256" cy="130" r="2.5" fill="#7DDB7D" class="m-led m-led-3"/>
+            <circle cx="268" cy="130" r="2.5" fill="#F87171" class="m-led m-led-4"/>
+
+            <!-- Levier rouge à droite -->
+            <g transform="translate(496 254)">
+              <line x1="0" y1="0" x2="-12" y2="-22" stroke="#5C3F1D" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="-12" cy="-22" r="5" fill="#DC1F2D" stroke="#1F1A14" stroke-width="1"/>
+              <circle cx="0" cy="0" r="3" fill="#1F1A14"/>
+            </g>
+
+            <!-- Pieds -->
+            <rect x="220" y="278" width="22" height="20" fill="#7A1019"/>
+            <rect x="478" y="278" width="22" height="20" fill="#7A1019"/>
+            <rect x="216" y="298" width="30" height="6" fill="#3D2A1A"/>
+            <rect x="474" y="298" width="30" height="6" fill="#3D2A1A"/>
+          </g>
+
+          <!-- Entonnoir gauche -->
+          <g>
+            <path d="M196 168 L 220 188 L 220 212 L 196 192 Z" fill="#9E1620" stroke="#7A1019" stroke-width="1"/>
+            <path d="M196 168 L 184 168 L 184 192 L 196 192 Z" fill="#7A1019"/>
+            <line x1="190" y1="174" x2="190" y2="186" stroke="#5C3F1D" stroke-width="0.5"/>
+          </g>
+
+          <!-- Tube de sortie -->
+          <g>
+            <path d="M520 188 L 540 188 L 540 212 L 520 212 Z" fill="#9E1620" stroke="#7A1019" stroke-width="1"/>
+            <line x1="528" y1="194" x2="528" y2="206" stroke="#5C3F1D" stroke-width="0.5"/>
           </g>
 
           <!-- Tapis roulant sortie -->
-          <rect x="520" y="180" width="180" height="14" fill="#5C3F1D" rx="2"/>
-          <g class="conveyor-belts">
-            <circle cx="540" cy="187" r="6" fill="#1F1A14"/>
-            <circle cx="580" cy="187" r="6" fill="#1F1A14"/>
-            <circle cx="620" cy="187" r="6" fill="#1F1A14"/>
-            <circle cx="660" cy="187" r="6" fill="#1F1A14"/>
+          <g class="m-conveyor m-conveyor-out">
+            <rect x="540" y="220" width="170" height="16" fill="#5C3F1D" rx="3"/>
+            <rect x="540" y="220" width="170" height="3" fill="#3D2A1A"/>
+            <circle cx="552" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="552" cy="228" r="3" fill="#9F7728"/>
+            <circle cx="586" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="620" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="654" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="688" cy="228" r="9" fill="#1F1A14" stroke="#5C3F1D" stroke-width="1.5"/>
+            <circle cx="688" cy="228" r="3" fill="#9F7728"/>
           </g>
 
-          <!-- Boîtes propres en sortie -->
-          <g class="exit-box exit-box-1" transform="translate(540 140)">
-            <rect x="0" y="0" width="42" height="32" rx="3" fill="#5B9BD5"/>
-            <text x="21" y="20" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#FFFFFF" font-weight="700">JSON</text>
+          <!-- Boîtes propres en sortie (papier kraft + étiquette) -->
+          <g class="m-exit-box m-exit-box-1" transform="translate(548 178)">
+            <rect x="0" y="0" width="42" height="36" rx="2" fill="#FBF7EE" stroke="#5C3F1D" stroke-width="1.2"/>
+            <rect x="0" y="6" width="42" height="2" fill="#8B5E2A" opacity="0.6"/>
+            <rect x="3" y="11" width="36" height="14" rx="1" fill="#5B9BD5"/>
+            <text x="21" y="22" text-anchor="middle" font-family="Fredoka" font-size="9" fill="#FBF7EE" font-weight="700">JSON</text>
+            <text x="21" y="32" text-anchor="middle" font-family="Caveat" font-size="9" fill="#5C3F1D">propre</text>
           </g>
-          <g class="exit-box exit-box-2" transform="translate(595 140)">
-            <rect x="0" y="0" width="50" height="32" rx="3" fill="#6FAE5E"/>
-            <text x="25" y="20" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#FFFFFF" font-weight="700">PARQUET</text>
+          <g class="m-exit-box m-exit-box-2" transform="translate(602 174)">
+            <rect x="0" y="0" width="50" height="36" rx="2" fill="#FBF7EE" stroke="#5C3F1D" stroke-width="1.2"/>
+            <rect x="0" y="6" width="50" height="2" fill="#8B5E2A" opacity="0.6"/>
+            <rect x="3" y="11" width="44" height="14" rx="1" fill="#6FAE5E"/>
+            <text x="25" y="22" text-anchor="middle" font-family="Fredoka" font-size="9" fill="#FBF7EE" font-weight="700">PARQUET</text>
+            <text x="25" y="32" text-anchor="middle" font-family="Caveat" font-size="9" fill="#5C3F1D">analyse</text>
           </g>
-          <g class="exit-box exit-box-3" transform="translate(660 140)">
-            <rect x="0" y="0" width="34" height="32" rx="3" fill="#D9A648"/>
-            <text x="17" y="20" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#FFFFFF" font-weight="700">SQL</text>
+          <g class="m-exit-box m-exit-box-3" transform="translate(666 178)">
+            <rect x="0" y="0" width="36" height="36" rx="2" fill="#FBF7EE" stroke="#5C3F1D" stroke-width="1.2"/>
+            <rect x="0" y="6" width="36" height="2" fill="#8B5E2A" opacity="0.6"/>
+            <rect x="3" y="11" width="30" height="14" rx="1" fill="#D9A648"/>
+            <text x="18" y="22" text-anchor="middle" font-family="Fredoka" font-size="9" fill="#FBF7EE" font-weight="700">SQL</text>
+            <text x="18" y="32" text-anchor="middle" font-family="Caveat" font-size="9" fill="#5C3F1D">base</text>
+          </g>
+
+          <!-- Étincelles -->
+          <g class="m-sparks" stroke="#F5C63E" stroke-width="1.2" stroke-linecap="round">
+            <line x1="232" y1="120" x2="232" y2="112"/>
+            <line x1="240" y1="118" x2="244" y2="112"/>
+            <line x1="252" y1="120" x2="252" y2="112"/>
+          </g>
+
+          <!-- Annotations script main -->
+          <g transform="translate(110 130) rotate(-7)">
+            <path d="M0 0 q 12 -10 30 -8" stroke="#5C3F1D" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+            <path d="M30 -8 l -3 -2 m3 2 l -2 -4" stroke="#5C3F1D" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+            <text font-family="Caveat" font-size="14" fill="#5C3F1D" font-weight="600" opacity="0.85">en entrée : le fouillis</text>
+          </g>
+          <g transform="translate(550 290) rotate(4)">
+            <path d="M0 0 q 12 -10 36 -10" stroke="#5C3F1D" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+            <path d="M36 -10 l -2 -3 m2 3 l -3 -2" stroke="#5C3F1D" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+            <text font-family="Caveat" font-size="14" fill="#5C3F1D" font-weight="600" opacity="0.85">en sortie : du propre</text>
           </g>
         </svg>
       </div>
@@ -532,54 +958,151 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
         </p>
       </div>
 
-      <!-- Tirelire grosse animation -->
+      <!-- Tirelire cochon expressif avec pièces qui tombent et ombre douce -->
       <div class="piggy-section">
         <div class="piggy-illu">
-          <svg viewBox="0 0 360 320" preserveAspectRatio="xMidYMid meet" aria-label="Tirelire avec pièces qui tombent">
-            <!-- Pièces qui tombent -->
-            <g class="coin coin-a">
-              <circle cx="180" cy="0" r="14" fill="#F5C63E" stroke="#D9A648" stroke-width="2"/>
-              <text x="180" y="5" text-anchor="middle" font-family="Fredoka" font-size="13" fill="#1F1A14" font-weight="700">CHF</text>
-            </g>
-            <g class="coin coin-b">
-              <circle cx="200" cy="0" r="12" fill="#F5C63E" stroke="#D9A648" stroke-width="2"/>
-              <text x="200" y="4" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#1F1A14" font-weight="700">CHF</text>
-            </g>
-            <g class="coin coin-c">
-              <circle cx="160" cy="0" r="12" fill="#F5C63E" stroke="#D9A648" stroke-width="2"/>
-              <text x="160" y="4" text-anchor="middle" font-family="Fredoka" font-size="11" fill="#1F1A14" font-weight="700">CHF</text>
+          <svg viewBox="0 0 400 360" preserveAspectRatio="xMidYMid meet" aria-label="Tirelire cochon">
+            <defs>
+              <radialGradient id="piggy-belly" cx="0.5" cy="0.4" r="0.6">
+                <stop offset="0%" stop-color="#FFC4CC"/>
+                <stop offset="100%" stop-color="#F5A0AC"/>
+              </radialGradient>
+              <radialGradient id="coin-grad" cx="0.4" cy="0.4" r="0.8">
+                <stop offset="0%" stop-color="#FBE08C"/>
+                <stop offset="100%" stop-color="#D9A648"/>
+              </radialGradient>
+              <pattern id="piggy-blush" patternUnits="userSpaceOnUse" width="3" height="3">
+                <circle cx="1.5" cy="1.5" r="0.4" fill="#E07A87" opacity="0.6"/>
+              </pattern>
+            </defs>
+
+            <!-- Halo doux -->
+            <circle cx="200" cy="220" r="140" fill="#FFE4E1" opacity="0.4"/>
+
+            <!-- Étoiles décoratives -->
+            <g stroke="#F5C63E" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.7">
+              <g transform="translate(40 50)"><line x1="-4" y1="0" x2="4" y2="0"/><line x1="0" y1="-4" x2="0" y2="4"/><line x1="-3" y1="-3" x2="3" y2="3"/></g>
+              <g transform="translate(360 80)"><line x1="-5" y1="0" x2="5" y2="0"/><line x1="0" y1="-5" x2="0" y2="5"/></g>
+              <g transform="translate(50 280)"><line x1="-3" y1="0" x2="3" y2="0"/><line x1="0" y1="-3" x2="0" y2="3"/></g>
             </g>
 
-            <!-- Tirelire -->
-            <g transform="translate(60 140)">
-              <ellipse cx="120" cy="100" rx="120" ry="80" fill="#FFB6C1"/>
-              <ellipse cx="120" cy="100" rx="120" ry="80" fill="none" stroke="#E89BA6" stroke-width="3"/>
-              <!-- ouverture -->
-              <rect x="100" y="50" width="40" height="6" fill="#1F1A14" rx="2"/>
-              <!-- œil -->
-              <circle cx="80" cy="80" r="6" fill="#1F1A14"/>
-              <circle cx="83" cy="78" r="2" fill="#FFFFFF"/>
-              <!-- joue rouge -->
-              <circle cx="60" cy="100" r="10" fill="#FF8A95" opacity="0.6"/>
-              <!-- groin -->
-              <ellipse cx="40" cy="100" rx="15" ry="20" fill="#FF8A95"/>
-              <circle cx="35" cy="95" r="3" fill="#1F1A14"/>
-              <circle cx="35" cy="105" r="3" fill="#1F1A14"/>
-              <!-- pattes -->
-              <rect x="40" y="170" width="20" height="20" rx="4" fill="#E89BA6"/>
-              <rect x="80" y="170" width="20" height="20" rx="4" fill="#E89BA6"/>
-              <rect x="140" y="170" width="20" height="20" rx="4" fill="#E89BA6"/>
-              <rect x="180" y="170" width="20" height="20" rx="4" fill="#E89BA6"/>
-              <!-- queue (tire-bouchon) -->
-              <path d="M232 90 Q 250 80 245 100 Q 235 110 250 120" stroke="#E89BA6" stroke-width="6" fill="none" stroke-linecap="round"/>
-              <!-- oreille -->
-              <path d="M100 30 L 110 50 L 90 50 Z" fill="#FF8A95"/>
-              <!-- petit sourire -->
-              <path d="M30 110 Q 40 116 50 110" stroke="#1F1A14" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- Pièces qui tombent (3) -->
+            <g class="piggy-coin piggy-coin-a">
+              <ellipse cx="200" cy="-10" rx="16" ry="3" fill="#9F7728" opacity="0.5"/>
+              <circle cx="200" cy="-10" r="16" fill="url(#coin-grad)" stroke="#9F7728" stroke-width="1.5"/>
+              <circle cx="200" cy="-10" r="13" fill="none" stroke="#9F7728" stroke-width="0.7"/>
+              <text x="200" y="-6" text-anchor="middle" font-family="Fredoka" font-size="12" fill="#5C3F1D" font-weight="700">CHF</text>
+              <text x="200" y="-12" text-anchor="middle" font-family="Caveat" font-size="6" fill="#9F7728" opacity="0.7">helvetia</text>
+            </g>
+            <g class="piggy-coin piggy-coin-b">
+              <ellipse cx="222" cy="-10" rx="13" ry="2.5" fill="#9F7728" opacity="0.5"/>
+              <circle cx="222" cy="-10" r="13" fill="url(#coin-grad)" stroke="#9F7728" stroke-width="1.5"/>
+              <circle cx="222" cy="-10" r="10" fill="none" stroke="#9F7728" stroke-width="0.6"/>
+              <text x="222" y="-6" text-anchor="middle" font-family="Fredoka" font-size="9" fill="#5C3F1D" font-weight="700">CHF</text>
+            </g>
+            <g class="piggy-coin piggy-coin-c">
+              <ellipse cx="180" cy="-10" rx="13" ry="2.5" fill="#9F7728" opacity="0.5"/>
+              <circle cx="180" cy="-10" r="13" fill="url(#coin-grad)" stroke="#9F7728" stroke-width="1.5"/>
+              <text x="180" y="-6" text-anchor="middle" font-family="Fredoka" font-size="9" fill="#5C3F1D" font-weight="700">CHF</text>
             </g>
 
-            <!-- "Cling!" texte -->
-            <text x="305" y="60" font-family="Caveat" font-size="32" fill="#DC1F2D" font-weight="700" class="cling">cling&nbsp;!</text>
+            <!-- Ombre cochon -->
+            <ellipse cx="200" cy="328" rx="120" ry="8" fill="#5C3F1D" opacity="0.2"/>
+
+            <!-- Cochon -->
+            <g class="piggy-body">
+              <!-- Pattes arrière -->
+              <ellipse cx="270" cy="298" rx="14" ry="16" fill="#E89BA6" stroke="#C8838E" stroke-width="1"/>
+              <ellipse cx="240" cy="305" rx="13" ry="14" fill="#E89BA6" stroke="#C8838E" stroke-width="1"/>
+              <!-- Pattes avant -->
+              <ellipse cx="160" cy="305" rx="13" ry="14" fill="#E89BA6" stroke="#C8838E" stroke-width="1"/>
+              <ellipse cx="130" cy="298" rx="14" ry="16" fill="#E89BA6" stroke="#C8838E" stroke-width="1"/>
+              <!-- petits sabots -->
+              <ellipse cx="270" cy="312" rx="9" ry="3" fill="#5C3F1D"/>
+              <ellipse cx="240" cy="318" rx="8" ry="2.5" fill="#5C3F1D"/>
+              <ellipse cx="160" cy="318" rx="8" ry="2.5" fill="#5C3F1D"/>
+              <ellipse cx="130" cy="312" rx="9" ry="3" fill="#5C3F1D"/>
+
+              <!-- Corps principal -->
+              <ellipse cx="200" cy="220" rx="124" ry="84" fill="url(#piggy-belly)" stroke="#C8838E" stroke-width="1.8"/>
+
+              <!-- Ventre clair -->
+              <ellipse cx="200" cy="240" rx="92" ry="52" fill="#FFD4DA" opacity="0.5"/>
+
+              <!-- Texture aquarelle subtile -->
+              <ellipse cx="200" cy="220" rx="124" ry="84" fill="url(#piggy-blush)" opacity="0.3"/>
+
+              <!-- Oreille gauche -->
+              <g transform="translate(110 158) rotate(-20)">
+                <path d="M0 0 Q -6 -22 14 -18 Q 22 -10 18 6 Z" fill="#E89BA6" stroke="#C8838E" stroke-width="1.4"/>
+                <path d="M5 -2 Q 0 -14 12 -12 Q 16 -6 14 2 Z" fill="#FFC4CC" opacity="0.6"/>
+              </g>
+
+              <!-- Oreille droite (cachée) -->
+              <g transform="translate(280 158) rotate(20)">
+                <path d="M0 0 Q -6 -22 14 -18 Q 22 -10 18 6 Z" fill="#C8838E" stroke="#A6707D" stroke-width="1.4"/>
+              </g>
+
+              <!-- Fente tirelire (top) -->
+              <rect x="178" y="148" width="44" height="7" rx="3" fill="#1F1A14"/>
+              <rect x="180" y="150" width="40" height="2" fill="#3D2A1A" opacity="0.5"/>
+
+              <!-- Joues roses -->
+              <ellipse cx="138" cy="240" rx="18" ry="10" fill="#FF8A95" opacity="0.55"/>
+              <ellipse cx="262" cy="240" rx="18" ry="10" fill="#FF8A95" opacity="0.55"/>
+
+              <!-- Œil gauche (avec cils tendres) -->
+              <g class="piggy-eye-l">
+                <ellipse cx="160" cy="208" rx="6" ry="7" fill="#FBF7EE"/>
+                <circle cx="161" cy="210" r="4" fill="#1F1A14"/>
+                <circle cx="162" cy="208" r="1.4" fill="#FBF7EE"/>
+                <!-- cils -->
+                <path d="M154 202 q -3 -3 -1 -5 M156 200 q -2 -3 0 -5 M161 199 q 0 -3 1 -5" stroke="#1F1A14" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+              </g>
+
+              <!-- Œil droit -->
+              <g class="piggy-eye-r">
+                <ellipse cx="240" cy="208" rx="6" ry="7" fill="#FBF7EE"/>
+                <circle cx="241" cy="210" r="4" fill="#1F1A14"/>
+                <circle cx="242" cy="208" r="1.4" fill="#FBF7EE"/>
+                <path d="M246 202 q 3 -3 1 -5 M244 200 q 2 -3 0 -5 M239 199 q 0 -3 -1 -5" stroke="#1F1A14" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+              </g>
+
+              <!-- Groin -->
+              <g class="piggy-snout">
+                <ellipse cx="200" cy="252" rx="36" ry="22" fill="#FF8A95" stroke="#C8838E" stroke-width="1.5"/>
+                <ellipse cx="200" cy="252" rx="32" ry="18" fill="none" stroke="#E07A87" stroke-width="0.6" opacity="0.6"/>
+                <ellipse cx="186" cy="252" rx="3.5" ry="6" fill="#1F1A14"/>
+                <ellipse cx="214" cy="252" rx="3.5" ry="6" fill="#1F1A14"/>
+              </g>
+
+              <!-- Sourire -->
+              <path d="M168 280 Q 200 296 232 280" stroke="#1F1A14" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M196 290 Q 200 294 204 290" stroke="#1F1A14" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.6"/>
+
+              <!-- Queue tire-bouchon -->
+              <path d="M324 200 Q 348 192 348 212 Q 344 232 358 232 Q 366 230 364 222"
+                    stroke="#C8838E" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <path d="M324 200 Q 348 192 348 212 Q 344 232 358 232 Q 366 230 364 222"
+                    stroke="#E89BA6" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
+            </g>
+
+            <!-- "Cling !" en script avec étoiles -->
+            <g class="piggy-cling">
+              <text x="316" y="80" font-family="Caveat" font-size="34" fill="#DC1F2D" font-weight="700">cling&#160;!</text>
+              <g stroke="#DC1F2D" stroke-width="1.4" stroke-linecap="round" fill="none">
+                <line x1="324" y1="50" x2="328" y2="42"/>
+                <line x1="380" y1="55" x2="384" y2="48"/>
+                <line x1="362" y1="98" x2="368" y2="104"/>
+              </g>
+            </g>
+
+            <!-- Annotation script "tirelire familiale" -->
+            <g transform="translate(40 140) rotate(-8)">
+              <text font-family="Caveat" font-size="14" fill="#5C3F1D" opacity="0.7" font-weight="600">tirelire familiale</text>
+              <path d="M-4 10 q 8 8 18 14" stroke="#5C3F1D" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.6"/>
+              <path d="M14 24 l -4 -1 m4 1 l -1 -4" stroke="#5C3F1D" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.6"/>
+            </g>
           </svg>
         </div>
 
@@ -672,13 +1195,46 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
       </div>
 
       <div class="final-stamp">
-        <svg viewBox="0 0 200 200" width="120" height="120" aria-hidden>
-          <circle cx="100" cy="100" r="92" fill="none" stroke="#DC1F2D" stroke-width="3"/>
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#DC1F2D" stroke-width="1.5" stroke-dasharray="3 3"/>
-          <text x="100" y="80" text-anchor="middle" font-family="Fredoka" font-size="14" fill="#DC1F2D" font-weight="700">CARNET DE</text>
-          <text x="100" y="100" text-anchor="middle" font-family="Fredoka" font-size="14" fill="#DC1F2D" font-weight="700">PAPA</text>
-          <text x="100" y="125" text-anchor="middle" font-family="Caveat" font-size="22" fill="#DC1F2D" font-weight="700">2026</text>
-          <path d="M55 145 L75 155 L70 165" fill="none" stroke="#DC1F2D" stroke-width="2"/>
+        <svg viewBox="0 0 220 220" width="160" height="160" aria-hidden>
+          <defs>
+            <filter id="stamp-rough" x="-5%" y="-5%" width="110%" height="110%">
+              <feTurbulence type="fractalNoise" baseFrequency="2" numOctaves="2" seed="3"/>
+              <feDisplacementMap in="SourceGraphic" scale="1.2"/>
+            </filter>
+            <path id="stamp-curve-top" d="M 110 110 m -82 0 a 82 82 0 0 1 164 0" fill="none"/>
+            <path id="stamp-curve-bot" d="M 110 110 m 82 0 a 82 82 0 0 1 -164 0" fill="none"/>
+          </defs>
+
+          <!-- Cercle externe avec aspérités -->
+          <circle cx="110" cy="110" r="100" fill="none" stroke="#DC1F2D" stroke-width="3.5" filter="url(#stamp-rough)" opacity="0.92"/>
+          <circle cx="110" cy="110" r="92" fill="none" stroke="#DC1F2D" stroke-width="1" stroke-dasharray="2 3" opacity="0.85"/>
+          <circle cx="110" cy="110" r="74" fill="none" stroke="#DC1F2D" stroke-width="0.7" opacity="0.6"/>
+
+          <!-- Texte qui suit la courbe haute -->
+          <text font-family="Fredoka" font-size="11" fill="#DC1F2D" font-weight="700" letter-spacing="3">
+            <textPath href="#stamp-curve-top" startOffset="50%" text-anchor="middle">★ CARNET DE PAPA ★</textPath>
+          </text>
+          <!-- Texte qui suit la courbe basse -->
+          <text font-family="Fredoka" font-size="9" fill="#DC1F2D" font-weight="600" letter-spacing="2">
+            <textPath href="#stamp-curve-bot" startOffset="50%" text-anchor="middle">OPENSWISSDATA · 2026</textPath>
+          </text>
+
+          <!-- Croix suisse stylisée centrale -->
+          <g transform="translate(110 110)" filter="url(#stamp-rough)" opacity="0.85">
+            <rect x="-22" y="-6" width="44" height="12" fill="#DC1F2D"/>
+            <rect x="-6" y="-22" width="12" height="44" fill="#DC1F2D"/>
+          </g>
+
+          <!-- Petit "fait main" en script -->
+          <text x="110" y="172" text-anchor="middle" font-family="Caveat" font-size="20" fill="#DC1F2D" font-weight="700" opacity="0.92">fait main</text>
+
+          <!-- Étoiles décoratives autour -->
+          <g fill="#DC1F2D" opacity="0.7">
+            <circle cx="40" cy="60" r="1.5"/>
+            <circle cx="180" cy="60" r="1.5"/>
+            <circle cx="40" cy="160" r="1.5"/>
+            <circle cx="180" cy="160" r="1.5"/>
+          </g>
         </svg>
       </div>
 
@@ -877,29 +1433,143 @@ const description = "Un carnet d'aventure illustré pour ma famille — le proje
         background: #EAF3FB;
         box-shadow: 8px 8px 0 0 var(--red);
       }
-      .papa { animation: papa-bob 2.6s ease-in-out infinite; transform-origin: center bottom; }
-      @keyframes papa-bob {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-4px); }
+      /* ─── Hero illustration animations ─── */
+      .hero-papa { animation: papa-think 4.2s ease-in-out infinite; transform-origin: center bottom; }
+      @keyframes papa-think {
+        0%, 100% { transform: translateY(0) rotate(0); }
+        45%, 55% { transform: translateY(-3px) rotate(-0.3deg); }
       }
-      .chest { animation: chest-bounce 3.2s ease-in-out infinite; transform-origin: center bottom; }
-      .chest-1 { animation-delay: 0s; }
-      .chest-2 { animation-delay: 0.4s; }
-      .chest-3 { animation-delay: 0.8s; }
+      .hero-papa-notebook { animation: notebook-flutter 3s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+      @keyframes notebook-flutter {
+        0%, 100% { transform: rotate(0); }
+        50% { transform: rotate(-1deg); }
+      }
+      .hero-chest { animation: chest-bounce 3.6s ease-in-out infinite; transform-origin: center bottom; transform-box: fill-box; }
+      .hero-chest-1 { animation-delay: 0s; }
+      .hero-chest-2 { animation-delay: 0.5s; }
+      .hero-chest-3 { animation-delay: 1s; }
       @keyframes chest-bounce {
         0%, 100% { transform: translateY(0); }
         45%, 55% { transform: translateY(-3px); }
       }
-      .chest-label {
-        font-family: var(--font-display);
-        font-size: 12px;
-        font-weight: 600;
-        fill: var(--ink);
+      .hero-chest-icon { animation: icon-float 2.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+      .hero-chest-2 .hero-chest-icon { animation-delay: 0.4s; }
+      .hero-chest-3 .hero-chest-icon { animation-delay: 0.8s; }
+      @keyframes icon-float {
+        0%, 100% { transform: translateY(0) rotate(0); }
+        50% { transform: translateY(-2px) rotate(2deg); }
+      }
+      .hero-flag-fabric { animation: flag-wave 2.8s ease-in-out infinite; transform-origin: 0 50%; transform-box: fill-box; }
+      @keyframes flag-wave {
+        0%, 100% { transform: skewY(0) scaleX(1); }
+        50% { transform: skewY(-2deg) scaleX(0.97); }
+      }
+      .hero-sun { animation: sun-pulse 4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+      @keyframes sun-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.85; }
+        50% { transform: scale(1.05); opacity: 1; }
+      }
+      .hero-bird { animation: bird-fly 12s linear infinite; }
+      @keyframes bird-fly {
+        0% { transform: translate(-20px, 0); }
+        25% { transform: translate(40px, -8px); }
+        50% { transform: translate(80px, 4px); }
+        75% { transform: translate(120px, -2px); }
+        100% { transform: translate(-20px, 0); }
+      }
+      .hero-edelweiss { animation: edelweiss-sway 5s ease-in-out infinite; transform-origin: bottom center; transform-box: fill-box; }
+      @keyframes edelweiss-sway {
+        0%, 100% { transform: rotate(-2deg); }
+        50% { transform: rotate(2deg); }
       }
       .hero-arrow-text {
         font-family: var(--font-script);
         font-size: 18px;
         fill: var(--ink-soft);
+      }
+
+      /* ─── Machine animations ─── */
+      .m-cog-l > g { animation: cog-spin 8s linear infinite; transform-origin: center; transform-box: fill-box; }
+      .m-cog-r > g { animation: cog-spin-rev 8s linear infinite; transform-origin: center; transform-box: fill-box; }
+      @keyframes cog-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+      @keyframes cog-spin-rev { from { transform: rotate(0); } to { transform: rotate(-360deg); } }
+      .m-conveyor-in circle, .m-conveyor-out circle { animation: cog-spin 4s linear infinite; transform-origin: center; transform-box: fill-box; }
+      .m-puff-1 { animation: puff-rise 3s ease-out infinite; }
+      .m-puff-2 { animation: puff-rise 3s ease-out infinite 0.6s; }
+      .m-puff-3 { animation: puff-rise 3s ease-out infinite 1.2s; }
+      @keyframes puff-rise {
+        0% { transform: translateY(20px) scale(0.6); opacity: 0; }
+        30% { opacity: 0.8; }
+        100% { transform: translateY(-30px) scale(1.2); opacity: 0; }
+      }
+      .m-led { animation: led-blink 1.4s ease-in-out infinite; }
+      .m-led-1 { animation-delay: 0s; }
+      .m-led-2 { animation-delay: 0.3s; }
+      .m-led-3 { animation-delay: 0.6s; }
+      .m-led-4 { animation-delay: 0.9s; }
+      @keyframes led-blink {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+      }
+      .m-needle { animation: needle-tick 3s ease-in-out infinite; transform-origin: 0 0; transform-box: fill-box; }
+      @keyframes needle-tick {
+        0%, 100% { transform: rotate(-30deg); }
+        50% { transform: rotate(40deg); }
+      }
+      .m-scanline { animation: scan-down 2.5s ease-in-out infinite; transform-origin: top; transform-box: fill-box; }
+      @keyframes scan-down {
+        0% { transform: translateY(0); opacity: 0.4; }
+        50% { opacity: 0.6; }
+        100% { transform: translateY(76px); opacity: 0.2; }
+      }
+      .m-sparks line { animation: sparks-flicker 0.6s ease-in-out infinite; }
+      .m-sparks line:nth-child(2) { animation-delay: 0.2s; }
+      .m-sparks line:nth-child(3) { animation-delay: 0.4s; }
+      @keyframes sparks-flicker {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+      }
+      .m-exit-box { animation: exit-slide 4s ease-in-out infinite; transform-origin: left center; transform-box: fill-box; }
+      .m-exit-box-1 { animation-delay: 0s; }
+      .m-exit-box-2 { animation-delay: 0.5s; }
+      .m-exit-box-3 { animation-delay: 1s; }
+      @keyframes exit-slide {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(2px); }
+      }
+
+      /* ─── Piggy bank animations ─── */
+      .piggy-body { animation: piggy-breathe 3.5s ease-in-out infinite; transform-origin: center bottom; transform-box: fill-box; }
+      @keyframes piggy-breathe {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.015); }
+      }
+      .piggy-snout { animation: snout-wiggle 2.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+      @keyframes snout-wiggle {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-1px); }
+        75% { transform: translateX(1px); }
+      }
+      .piggy-eye-l, .piggy-eye-r { animation: piggy-blink 5s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+      @keyframes piggy-blink {
+        0%, 92%, 100% { transform: scaleY(1); }
+        94%, 96% { transform: scaleY(0.1); }
+      }
+      .piggy-coin { animation: coin-fall 2.4s ease-in infinite; transform-origin: center; transform-box: fill-box; }
+      .piggy-coin-a { animation-delay: 0s; }
+      .piggy-coin-b { animation-delay: 0.8s; }
+      .piggy-coin-c { animation-delay: 1.6s; }
+      @keyframes coin-fall {
+        0% { transform: translateY(-30px) rotate(0); opacity: 0; }
+        15% { opacity: 1; }
+        70% { transform: translateY(155px) rotate(360deg); opacity: 1; }
+        85% { transform: translateY(165px) rotate(380deg); opacity: 0; }
+        100% { transform: translateY(165px) rotate(380deg); opacity: 0; }
+      }
+      .piggy-cling { animation: cling-pop 2.4s ease-out infinite; transform-origin: center; transform-box: fill-box; }
+      @keyframes cling-pop {
+        0%, 70%, 100% { transform: scale(1) rotate(-2deg); opacity: 0.92; }
+        76% { transform: scale(1.15) rotate(2deg); opacity: 1; }
       }
 
       .cover-signature {
