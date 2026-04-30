@@ -40,11 +40,19 @@ Toutes les sources ci-dessous sont récupérées dynamiquement par
 - Les codes CH-spécifiques NOGA 2025 à 6 chiffres (ex. `011100`, `113001`) n'ont
   pas de NACE counterpart → `nace_2_1 = null` avec note explicative.
 
-## v3 Pro tier — STATENT (ingéré 2026-04-30 dans `ingest-statent.ts`)
+## v3 Pro tier — STATENT (RETIRÉ 2026-04-30 — license non obtenue)
 
-Activation : `CLASSIFICATIONS_TIER=pro` (default = `standard`, qui ne livre pas STATENT).
+> ⚠️ **Statut au 2026-04-30 : RETIRÉ du tier Pro.**
+>
+> La license `terms_by_ask` (CH Open Data ToU) exige une autorisation écrite
+> de BFS pour toute utilisation commerciale. Cette autorisation n'a pas été
+> obtenue, le dataset STATENT a donc été retiré de la composition du tier
+> Pro. Le code `ingest-statent.ts` et la branche STATENT dans `bundle.ts`
+> sont conservés (dormants) pour reproduire bit-identiquement les bundles
+> historiques. La nouvelle composition du Pro est documentée plus bas
+> ("Pro tier 2026-04-30 — refonte sans STATENT").
 
-### Source
+### Source (référence historique uniquement)
 
 | Champ | Valeur |
 |---|---|
@@ -136,7 +144,7 @@ WHERE s.observation_unit = 'establishments' AND s.year = 2023;
 > Données : OFS — Statistique structurelle des entreprises (STATENT), via opendata.swiss.
 > Conditions : `terms_by_ask` (utilisation commerciale soumise à autorisation BFS).
 
-## v4 Pro tier — Embeddings & classification (ingéré 2026-04-30 dans `embeddings.ts` + `classify.ts`)
+## v4 Pro tier — Embeddings & classification (refonte 2026-04-30, multilingue)
 
 Activation : `CLASSIFICATIONS_TIER=pro` (default = `standard`, qui ne livre pas les embeddings).
 
@@ -149,27 +157,39 @@ Activation : `CLASSIFICATIONS_TIER=pro` (default = `standard`, qui ne livre pas 
 | Pooling | Mean-pooled |
 | Normalisation | L2 (cosine = dot product) |
 | Quantisation | Activée (int8) — ~4× plus rapide CPU, qualité préservée |
-| Langues | 50+ supportées par le modèle ; v1 livre uniquement FR (lang='fr') |
+| Langues livrées | **FR + DE + IT + EN** — 4 parquets séparés (était FR uniquement avant 2026-04-30) |
 | Modèle réutilisé pour | TARES (T1) — même setup, donc cache de poids partagé entre packs |
 
-### Volume
+### Volume (2026-04-30 multilingue)
 
-- **1 845 vecteurs** (1 par code NOGA 2025, FR description) × 768 floats float32
-- ~5.6 MB en mémoire chargé, ~3 MB en parquet (compression GZIP automatique)
-- Génération : 4-6 min sur Apple Silicon (CPU, M1) — résumable via cache JSON
+- **4 × 1 845 = 7 380 vecteurs** (1 par code NOGA 2025 × langue) × 768 floats float32
+- ~22 MB en mémoire chargé total, ~12 MB en parquets cumulés (compression GZIP)
+- Génération : 4-6 min × 3 langues additionnelles (DE/IT/EN) ≈ 12-18 min sur M1 — résumable via caches per-language
 
-### Cache resumable
+### Caches resumables (un par langue)
 
-- Path : `data/classifications/embeddings-cache-fr.json`
+- Paths :
+  - `data/classifications/embeddings-cache-fr.json` (existant — non recalculé)
+  - `data/classifications/embeddings-cache-de.json`
+  - `data/classifications/embeddings-cache-it.json`
+  - `data/classifications/embeddings-cache-en.json`
 - Format : `{ model, model_version, dimensions, entries: { "<code>:<lang>": [768 floats] } }`
 - Validation : si le cache existe et `model` + `dimensions` matchent, on reprend ; sinon on régénère
 - Flush : toutes les 10 secondes pendant l'inférence (insurance contre crash)
+- Optimisation : si le cache est complet (todo=0), `embeddings.ts` skip totalement le chargement du modèle (économise ~3 s par langue à chaque release)
 
-### Fichier livré (uniquement quand `tier=pro`)
+### Fichiers livrés (uniquement quand `tier=pro`, depuis 2026-04-30)
+
+Un parquet par langue (FR/DE/IT/EN) — les acheteurs chargent uniquement la(les) langue(s) dont ils ont besoin :
 
 | Fichier | Contenu | Format | Volume typique |
 |---|---|---|---|
-| `noga_2025_embeddings.parquet` | code × lang × description × embedding[768] × model × model_version | Parquet (FLOAT, list-typed) | ~3 MB |
+| `noga_2025_embeddings_fr.parquet` | 1 845 vecteurs FR | Parquet | ~3 MB |
+| `noga_2025_embeddings_de.parquet` | 1 845 vecteurs DE | Parquet | ~3 MB |
+| `noga_2025_embeddings_it.parquet` | 1 845 vecteurs IT | Parquet | ~3 MB |
+| `noga_2025_embeddings_en.parquet` | 1 845 vecteurs EN | Parquet | ~3 MB |
+
+Le modèle est multilingue → une requête en allemand contre des vecteurs FR/IT/EN matche correctement (espace vectoriel partagé). Les vecteurs per-language donnent simplement des matches plus nets pour des queries quasi-monolingues.
 
 ### Schéma (Parquet)
 
@@ -268,6 +288,85 @@ une release future, le `model_version` sera bumpé pour que vous puissiez détec
 
 Modèle Xenova/paraphrase-multilingual-mpnet-base-v2 : Apache 2.0, libre redistribution
 et utilisation commerciale. Source : https://huggingface.co/Xenova/paraphrase-multilingual-mpnet-base-v2
+
+## v5 Pro tier — NAICS 2022 ↔ ISIC ↔ NACE 2.1 / NOGA 2025 cross-walk (ajouté 2026-04-30 dans `naics-crosswalk.ts`)
+
+Activation : `CLASSIFICATIONS_TIER=pro`.
+
+### Source
+
+| Champ | Valeur |
+|---|---|
+| Dataset | NAICS 2022 to ISIC Rev 4 concordance |
+| Producteur | U.S. Census Bureau |
+| URL | https://www.census.gov/naics/concordances/2022_NAICS_to_ISIC_Rev_4.xlsx |
+| Format | XLSX, 1 sheet ("NAICS 22 to ISIC 4 technical"), 1 712 lignes brutes |
+| **Licence** | **Public Domain** — US Government Work (17 U.S.C. § 105). Redistribution commerciale libre, attribution recommandée. |
+| TTL cache | 30 jours dans `data/classifications/naics-cache/2022_NAICS_to_ISIC_Rev_4.xlsx` |
+| Pivot | ISIC Rev 4 (déjà ingéré dans le pack) → NACE 2.1 / NOGA 2025 par identité au niveau classe |
+
+### Particularité de la concordance Census
+
+Le fichier Census lie chaque code NAICS à 6 chiffres aux **groupes ISIC à 3 chiffres** (pas aux classes 4-chiffres). On expand donc chaque lien Census en énumérant les classes ISIC sous le groupe annoncé, et on emet une ligne par paire (NAICS, ISIC class).
+
+`mapping_type` :
+- `exact` — un seul ISIC class sous le groupe Census, et le flag "Part of ..." n'est pas marqué (pas de fan-out).
+- `partial` — fan-out vers plusieurs classes ISIC OU le Census flagué le lien comme partiel.
+
+### Fichiers livrés
+
+| Fichier | Contenu | Format |
+|---|---|---|
+| `naics_nace_crosswalk.csv` | naics_2022, naics_2022_title, isic_4, isic_4_title, nace_2_1, noga_2025, mapping_type, notes | CSV (header) |
+| `naics_nace_crosswalk.json` | idem (objects) | JSON pretty-printed |
+| `naics_nace_crosswalk.sql` | idem en chunks INSERT 1000-tuples | SQL portable |
+| `naics_nace_crosswalk.parquet` | idem typé string + enum | Parquet (PLAIN encoding) |
+| `naics_source.json` | métadonnées source (URL, fetched_at, license, attribution, stats fetch + counts) | JSON |
+
+### Volume
+
+~2 100-2 800 lignes (selon le fan-out groupe→classes ISIC). Validé en CI sur fixtures synthétiques + intégration end-to-end.
+
+### Attribution
+
+À reproduire dans tout produit dérivé :
+
+> NAICS-ISIC concordance: U.S. Census Bureau, 2022 NAICS to ISIC Rev 4 concordance.
+> Public Domain — US Government Work.
+
+## v6 Pro tier — NACE Rev 2.1 EN labels (ajouté 2026-04-30 dans `nace-en-labels.ts`)
+
+Activation : `CLASSIFICATIONS_TIER=pro`. Pas de nouveau téléchargement — projection des données déjà ingérées par `ingest-real.ts` depuis le RDF Eurostat.
+
+### Source
+
+| Champ | Valeur |
+|---|---|
+| Dataset | NACE Rev 2.1 official labels (EN) |
+| Producteur | Eurostat — DG ESTAT, EU Vocabularies |
+| URL | (déjà téléchargé) https://op.europa.eu/o/opportal-service/euvoc-download-handler?cellarURI=…ESTAT-NACE2.1.rdf |
+| Format | SKOS/XKOS RDF (24 langues) — la projection EN est livrée comme stand-alone CSV/Parquet pour fast-path compliance |
+| **Licence** | **Eurostat re-use policy** — utilisation libre y compris commerciale avec attribution. https://ec.europa.eu/eurostat/web/main/about-us/policies/copyright |
+
+### Pourquoi un fichier dédié si EN est déjà dans `nace_2_1.csv`
+
+Le pack Standard livre déjà les 4 langues dans la table NACE 2.1 unifiée. Le pack Pro livre en plus une **projection autonome** (`nace_2_1_en_labels.csv`/`json`/`parquet`) pour :
+
+1. **Workflow tableur** des compliance officers anglophones → fichier directement ouvrable sans JOIN ;
+2. **Distribution interne** dans des outils internes qui ne consomment qu'une seule colonne langue ;
+3. **Réduction du payload** — un consommateur EN-only peut ignorer FR/DE/IT.
+
+### Fichiers livrés
+
+| Fichier | Contenu | Format |
+|---|---|---|
+| `nace_2_1_en_labels.csv` | code, level, parent, label_en | CSV |
+| `nace_2_1_en_labels.json` | idem | JSON |
+| `nace_2_1_en_labels.parquet` | idem | Parquet |
+
+### Volume
+
+1 047 lignes (= toutes les rangées NACE 2.1, sections inclues). Les codes sans label EN (rares) sont émis avec une chaîne vide.
 
 ## Anciens fichiers (v1 fixtures, encore utilisables via `USE_FIXTURE=1`)
 
