@@ -138,7 +138,7 @@ import ClassificationsLookup from "../../components/ClassificationsLookup.astro"
       <p class="ds-section-intro" style="margin-bottom:20px;">
         Tout le contenu Standard <strong>+ 3 valeurs ajoutées</strong> qui économisent des jours de travail à vos équipes data ou compliance :
       </p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0;">
+      <div class="cls-pro-grid">
         <div style="padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);">
           <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">01 · Embeddings DE/IT/EN</div>
           <strong style="font-size:14px;color:var(--ink);">Vecteurs 768d pré-calculés multilingues</strong>
@@ -163,6 +163,17 @@ import ClassificationsLookup from "../../components/ClassificationsLookup.astro"
     </section>
 
     <div class="ds-cta">
+      <style>
+        .cls-pro-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          margin: 24px 0;
+        }
+        @media (max-width: 880px) {
+          .cls-pro-grid { grid-template-columns: 1fr; }
+        }
+      </style>
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
         <input type="hidden" name="dataset_ids" value="classifications" />
         <button type="submit" class="ds-cta-btn">

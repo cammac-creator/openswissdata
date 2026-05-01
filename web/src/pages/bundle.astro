@@ -231,5 +231,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     border-radius: 0 0 14px 14px;
   }
   .ds-saving-row.save .mono { color: var(--color-accent); font-weight: 700; }
+  @media (max-width: 540px) {
+    .ds-saving-table { padding: 8px 16px; }
+    .ds-saving-row.save { margin: 4px -16px -8px; padding: 14px 16px; }
+    .ds-saving-row { font-size: 13px; }
+  }
 </style>
 </BaseLayout>
