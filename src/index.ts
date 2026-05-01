@@ -80,14 +80,21 @@ export function createApp() {
   // Sets sensible cache policies depending on path:
   //   - /_astro/* (hashed assets): 1 year, immutable (Astro fingerprints filenames)
   //   - /favicon.* /og-default.png /samples/*: 1 year (rarely change)
-  //   - /api/* /mcp/*: no-store (handlers may set their own)
-  //   - HTML pages (everything else): 5 min browser, 10 min CDN, SWR 1 day
+  //   - /api/*, explicit MCP API endpoints: no-store (auth-bearing or dynamic)
+  //   - HTML pages (incl. `/mcp` public docs): 5 min browser, 10 min CDN, SWR 1 day
   // Only set if the route handler did not set its own Cache-Control.
+  // Note: `/mcp` and `/mcp/` are the Astro public docs page — only explicit
+  // MCP API paths below get no-store.
   app.use("*", async (c, next) => {
     await next();
     if (c.res.headers.has("Cache-Control")) return;
     const path = new URL(c.req.url).pathname;
-    if (path.startsWith("/api/") || path.startsWith("/mcp")) {
+    const isMcpApi =
+      path === "/mcp/jsonrpc" ||
+      path === "/mcp/discovery" ||
+      path === "/mcp/health" ||
+      path.startsWith("/mcp/oauth/");
+    if (path.startsWith("/api/") || isMcpApi) {
       c.res.headers.set("Cache-Control", "no-store");
       return;
     }
