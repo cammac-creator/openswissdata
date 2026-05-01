@@ -11,7 +11,16 @@ function resendApiKey(): string | null {
 }
 
 function fromAddress(): string {
-  return process.env.RESEND_FROM_EMAIL || "hello@openswissdata.com";
+  return process.env.RESEND_FROM_EMAIL || "noreply@openswissdata.com";
+}
+
+/**
+ * Reply-To routes any reply on a transactional email back to a real human
+ * inbox. `noreply@` is a one-way sender; clients who hit "Reply" should
+ * land in `contact@` (which is the actual Infomaniak mailbox in production).
+ */
+function replyToAddress(): string {
+  return process.env.RESEND_REPLY_TO || "contact@openswissdata.com";
 }
 
 /**
@@ -51,6 +60,7 @@ async function resendSend(to: string, subject: string, html: string): Promise<Em
         body: JSON.stringify({
           from: fromAddress(),
           to: [to],
+          reply_to: replyToAddress(),
           subject,
           html,
         }),
