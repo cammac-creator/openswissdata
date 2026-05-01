@@ -1,0 +1,767 @@
+scheme,code,level,parent,label_fr,label_de,label_it,label_en
+ISIC_4,01,division,0,"Culture et production animale, chasse et activités de services connexes",,,"Crop and animal production, hunting and related service activities"
+ISIC_4,011,group,01,Cultures temporaires,,,Growing of non-perennial crops
+ISIC_4,0111,class,011,"Culture de céréales (à lexception du riz), de légumineuses et de graines oléagineuses",,,"Growing of cereals (except rice), leguminous crops and oil seeds"
+ISIC_4,0112,class,011,Culture du riz,,,Growing of rice
+ISIC_4,0113,class,011,"Culture de légumes et de melons, de racines et tubercules",,,"Growing of vegetables and melons, roots and tubers"
+ISIC_4,0114,class,011,Culture de canne à sucre,,,Growing of sugar cane
+ISIC_4,0115,class,011,Culture de tabac,,,Growing of tobacco
+ISIC_4,0116,class,011,Culture de plantes à fibres textiles,,,Growing of fibre crops
+ISIC_4,0119,class,011,Autres cultures temporaires,,,Growing of other non-perennial crops
+ISIC_4,012,group,01,Cultures permanentes,,,Growing of perennial crops
+ISIC_4,0121,class,012,Culture de raisin,,,Growing of grapes
+ISIC_4,0122,class,012,Culture de fruits tropicaux et subtropicaux,,,Growing of tropical and subtropical fruits
+ISIC_4,0123,class,012,Culture dagrumes,,,Growing of citrus fruits
+ISIC_4,0124,class,012,Culture de fruits à pépins et de fruits à noyaux,,,Growing of pome fruits and stone fruits
+ISIC_4,0125,class,012,"Culture dautres fruits sur arbres et arbustes, et de fruits à coque",,,Growing of other tree and bush fruits and nuts
+ISIC_4,0126,class,012,Culture de fruits oléagineux,,,Growing of oleaginous fruits
+ISIC_4,0127,class,012,Culture de plantes pour boisson,,,Growing of beverage crops
+ISIC_4,0128,class,012,"Culture de plantes pour épices, de plantes aromatiques et de planres pour médicaments et produits pharmaceutiques",,,"Growing of spices, aromatic, drug and pharmaceutical crops"
+ISIC_4,0129,class,012,Autres cultures permanentes,,,Growing of other perennial crops
+ISIC_4,013,group,01,Prolifération végétale,,,Plant propagation
+ISIC_4,0130,class,013,Prolifération végétale,,,Plant propagation
+ISIC_4,014,group,01,Production animale,,,Animal production
+ISIC_4,0141,class,014,Élevage de bovins et de buffles,,,Raising of cattle and buffaloes
+ISIC_4,0142,class,014,Élevage de chevaux et autres équidés,,,Raising of horses and other equines
+ISIC_4,0143,class,014,Élevage de chameaux et autres camélidés,,,Raising of camels and camelids
+ISIC_4,0144,class,014,Élevage de moutons et de chèvres,,,Raising of sheep and goats
+ISIC_4,0145,class,014,Élevage de porcins,,,Raising of swine/pigs
+ISIC_4,0146,class,014,Élevage de volailles,,,Raising of poultry
+ISIC_4,0149,class,014,Élevage dautres animaux,,,Raising of other animals
+ISIC_4,015,group,01,Exploitation mixte,,,Mixed farming
+ISIC_4,0150,class,015,Exploitation mixte,,,Mixed farming
+ISIC_4,016,group,01,Activités dappui à lagriculture et activités consécutives à la récolte,,,Support activities to agriculture and post-harvest crop activities
+ISIC_4,0161,class,016,Activités dappui à la culture,,,Support activities for crop production
+ISIC_4,0162,class,016,Activités dappui à la production animale,,,Support activities for animal production
+ISIC_4,0163,class,016,Activités consécutives à la récolte,,,Post-harvest crop activities
+ISIC_4,0164,class,016,Préparation des semences aux fins de propagation,,,Seed processing for propagation
+ISIC_4,017,group,01,"Chasse, piégeage et activités de services connexes",,,"Hunting, trapping and related service activities"
+ISIC_4,0170,class,017,"Chasse, piégeage et activités de services connexes",,,"Hunting, trapping and related service activities"
+ISIC_4,02,division,0,Sylviculture et exploitation forestière,,,Forestry and logging
+ISIC_4,021,group,02,Sylviculture et autres activités dexploitation forestière,,,Silviculture and other forestry activities
+ISIC_4,0210,class,021,Sylviculture et autres activités dexploitation forestière,,,Silviculture and other forestry activities
+ISIC_4,022,group,02,Exploitation forestière,,,Logging
+ISIC_4,0220,class,022,Exploitation forestière,,,Logging
+ISIC_4,023,group,02,Récolte de produits forestiers autres que le bois,,,Gathering of non-wood forest products
+ISIC_4,0230,class,023,Récolte de produits forestiers autres que le bois,,,Gathering of non-wood forest products
+ISIC_4,024,group,02,Services dappui à la sylviculture,,,Support services to forestry
+ISIC_4,0240,class,024,Services dappui à la sylviculture,,,Support services to forestry
+ISIC_4,03,division,0,Pêche et aquaculture,,,Fishing and aquaculture
+ISIC_4,031,group,03,Pêche,,,Fishing
+ISIC_4,0311,class,031,Pêche en mer,,,Marine fishing
+ISIC_4,0312,class,031,Pêche en eau douce,,,Freshwater fishing
+ISIC_4,032,group,03,Aquaculture,,,Aquaculture
+ISIC_4,0321,class,032,Aquaculture en mer,,,Marine aquaculture
+ISIC_4,0322,class,032,Aquaculture en eau douce,,,Freshwater aquaculture
+ISIC_4,05,division,0,Extraction de charbon et de lignite,,,Mining of coal and lignite
+ISIC_4,051,group,05,Extraction de houille,,,Mining of hard coal
+ISIC_4,0510,class,051,Extraction de houille,,,Mining of hard coal
+ISIC_4,052,group,05,Extraction de lignite,,,Mining of lignite
+ISIC_4,0520,class,052,Extraction de lignite,,,Mining of lignite
+ISIC_4,06,division,0,Extraction de pétrole brut et de gaz naturel,,,Extraction of crude petroleum and natural gas
+ISIC_4,061,group,06,Extraction de pétrole brut,,,Extraction of crude petroleum
+ISIC_4,0610,class,061,Extraction de pétrole brut,,,Extraction of crude petroleum
+ISIC_4,062,group,06,Extraction de gaz naturel,,,Extraction of natural gas
+ISIC_4,0620,class,062,Extraction de gaz naturel,,,Extraction of natural gas
+ISIC_4,07,division,0,Extraction de minerais métalliques,,,Mining of metal ores
+ISIC_4,071,group,07,Extraction de minerais métalliques,,,Mining of iron ores
+ISIC_4,0710,class,071,Extraction de minerais métalliques,,,Mining of iron ores
+ISIC_4,072,group,07,Extraction de métaux non ferreux,,,Mining of non-ferrous metal ores
+ISIC_4,0721,class,072,Extraction de minerais duranium et de thorium,,,Mining of uranium and thorium ores
+ISIC_4,0729,class,072,Extraction de minerais et dautres métaux non ferreux,,,Mining of other non-ferrous metal ores
+ISIC_4,08,division,0,Autres activités extractives,,,Other mining and quarrying
+ISIC_4,081,group,08,"Extraction de pierres, de sables et dargiles",,,"Quarrying of stone, sand and clay"
+ISIC_4,0810,class,081,"Extraction de pierres, de sables et dargiles",,,"Quarrying of stone, sand and clay"
+ISIC_4,089,group,08,"Activités extractives, n.c.a.",,,Mining and quarrying n.e.c.
+ISIC_4,0891,class,089,Extraction de minerais pour lindustrie chimique et dengrais naturels,,,Mining of chemical and fertilizer minerals
+ISIC_4,0892,class,089,Extraction de tourbe,,,Extraction of peat
+ISIC_4,0893,class,089,Extraction de sel,,,Extraction of salt
+ISIC_4,0899,class,089,"Autres activités extractives, n.c.a.",,,Other mining and quarrying n.e.c.
+ISIC_4,09,division,0,Activités annexes de lextraction,,,Mining support service activities
+ISIC_4,091,group,09,Activités annexes à lextraction depétrole et de gaz naturel,,,Support activities for petroleum and natural gas extraction
+ISIC_4,0910,class,091,Activités annexes à lextraction depétrole et de gaz naturel,,,Support activities for petroleum and natural gas extraction
+ISIC_4,099,group,09,Activités annexes dautres activités extractives,,,Support activities for other mining and quarrying
+ISIC_4,0990,class,099,Activités annexes dautres activités extractives,,,Support activities for other mining and quarrying
+ISIC_4,10,division,1,Fabrication de produits alimentaires et de boissons,,,Manufacture of food products
+ISIC_4,101,group,10,Traitement et conservation de viande,,,Processing and preserving of meat
+ISIC_4,1010,class,101,Traitement et conservation de viande,,,Processing and preserving of meat
+ISIC_4,102,group,10,"Traitement et conservation de poissons, crustacés et mollusques",,,"Processing and preserving of fish, crustaceans and molluscs"
+ISIC_4,1020,class,102,"Traitement et conservation de poissons, crustacés et mollusques",,,"Processing and preserving of fish, crustaceans and molluscs"
+ISIC_4,103,group,10,Traitement et conservation de fruits et légumes,,,Processing and preserving of fruit and vegetables
+ISIC_4,1030,class,103,Traitement et conservation de fruits et légumes,,,Processing and preserving of fruit and vegetables
+ISIC_4,104,group,10,Fabrication dhuiles et graisses végétales et animales,,,Manufacture of vegetable and animal oils and fats
+ISIC_4,1040,class,104,Fabrication dhuiles et graisses végétales et animales,,,Manufacture of vegetable and animal oils and fats
+ISIC_4,105,group,10,Fabrication de produits laitiers,,,Manufacture of dairy products
+ISIC_4,1050,class,105,Fabrication de produits laitiers,,,Manufacture of dairy products
+ISIC_4,106,group,10,Travail des grains et fabrication de produits amylacés,,,"Manufacture of grain mill products, starches and starch products"
+ISIC_4,1061,class,106,Travail des grains,,,Manufacture of grain mill products
+ISIC_4,1062,class,106,Fabrication de produits amylacés,,,Manufacture of starches and starch products
+ISIC_4,107,group,10,Fabrication dautres produits alimentaires,,,Manufacture of other food products
+ISIC_4,1071,class,107,"Boulangerie, pâtisserie, biscuiterie",,,Manufacture of bakery products
+ISIC_4,1072,class,107,Fabrication de sucre,,,Manufacture of sugar
+ISIC_4,1073,class,107,"Fabrication de cacao, chocolat et confiserie",,,"Manufacture of cocoa, chocolate and sugar confectionery"
+ISIC_4,1074,class,107,"Fabrication de pâtes alimentaires, de couscous et de produits farineux similaires",,,"Manufacture of macaroni, noodles, couscous and similar farinaceous products"
+ISIC_4,1075,class,107,Fabrication de plats préparés,,,Manufacture of prepared meals and dishes
+ISIC_4,1079,class,107,"Fabrication dautres produits alimentaires, n.c.a.",,,Manufacture of other food products n.e.c.
+ISIC_4,108,group,10,Fabrication daliments pour animaux,,,Manufacture of prepared animal feeds
+ISIC_4,1080,class,108,Fabrication daliments pour animaux,,,Manufacture of prepared animal feeds
+ISIC_4,11,division,1,Fabrication de boissons,,,Manufacture of beverages
+ISIC_4,110,group,11,Fabrication de boissons,,,Manufacture of beverages
+ISIC_4,1101,class,110,"Distillation, rectification et mélange de spiritueux",,,"Distilling, rectifying and blending of spirits"
+ISIC_4,1102,class,110,Fabrication de vins,,,Manufacture of wines
+ISIC_4,1103,class,110,Fabrication de boissons alcoolisées à base de malt; production de malt,,,Manufacture of malt liquors and malt
+ISIC_4,1104,class,110,Fabrication de boissons non alcoolisées; production deaux minérales et autres eaux en bouteille,,,Manufacture of soft drinks; production of mineral waters and other bottled waters
+ISIC_4,12,division,1,Fabrication de produits à base de tabac,,,Manufacture of tobacco products
+ISIC_4,120,group,12,Fabrication de produits à base de tabac,,,Manufacture of tobacco products
+ISIC_4,1200,class,120,Fabrication de produits à base de tabac,,,Manufacture of tobacco products
+ISIC_4,13,division,1,Fabrication de textiles,,,Manufacture of textiles
+ISIC_4,131,group,13,"Filature, tissage et achèvement des textiles",,,"Spinning, weaving and finishing of textiles"
+ISIC_4,1311,class,131,Préparation et filature des fibres textiles,,,Preparation and spinning of textile fibres
+ISIC_4,1312,class,131,Tissage des textiles,,,Weaving of textiles
+ISIC_4,1313,class,131,Achèvement des textiles,,,Finishing of textiles
+ISIC_4,139,group,13,Fabrication dautres articles textiles,,,Manufacture of other textiles
+ISIC_4,1391,class,139,Fabrication détoffes et darticles de bonneterie,,,Manufacture of knitted and crocheted fabrics
+ISIC_4,1392,class,139,"Fabrication darticles confectionnés en textiles, sauf lhabillement",,,"Manufacture of made-up textile articles, except apparel"
+ISIC_4,1393,class,139,Fabrication de tapis et carpettes,,,Manufacture of carpets and rugs
+ISIC_4,1394,class,139,"Fabrication de cordes, câbles, ficelles et filets",,,"Manufacture of cordage, rope, twine and netting"
+ISIC_4,1399,class,139,"Fabrication darticles textiles, n.c.a.",,,Manufacture of other textiles n.e.c.
+ISIC_4,14,division,1,Fabrication darticles dhabillement,,,Manufacture of wearing apparel
+ISIC_4,141,group,14,Fabrication darticles dhabillement autre quen fourrure,,,"Manufacture of wearing apparel, except fur apparel"
+ISIC_4,1410,class,141,Fabrication darticles dhabillement autre quen fourrure,,,"Manufacture of wearing apparel, except fur apparel"
+ISIC_4,142,group,14,Fabrication darticles en fourrure,,,Manufacture of articles of fur
+ISIC_4,1420,class,142,Fabrication darticles en fourrure,,,Manufacture of articles of fur
+ISIC_4,143,group,14,Fabrication darticles de bonneterie,,,Manufacture of knitted and crocheted apparel
+ISIC_4,1430,class,143,Fabrication darticles de bonneterie,,,Manufacture of knitted and crocheted apparel
+ISIC_4,15,division,1,Fabrication de cuir et darticles de cuir,,,Manufacture of leather and related products
+ISIC_4,151,group,15,"Apprêt et tannage des cuirs; fabrication darticles de voyage et de maroquinerie, darticles de sellerie et de bourrellerie; préparation et teinture des fourrures",,,"Tanning and dressing of leather; manufacture of luggage, handbags, saddlery and harness; dressing and dyeing of fur"
+ISIC_4,1511,class,151,Apprêt et tannage des cuirs; préparation et teinture des fourrures,,,Tanning and dressing of leather; dressing and dyeing of fur
+ISIC_4,1512,class,151,"Fabrication darticles de voyage et de maroquinerie, darticles de sellerie et de bourrellerie",,,"Manufacture of luggage, handbags and the like, saddlery and harness"
+ISIC_4,152,group,15,Fabrication de chaussures,,,Manufacture of footwear
+ISIC_4,1520,class,152,Fabrication de chaussures,,,Manufacture of footwear
+ISIC_4,16,division,1,Production de bois et darticles en bois et en liège (sauf fabrication de meubles); fabrication darticles de vannerie et de sparterie,,,"Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting materials"
+ISIC_4,161,group,16,Sciage et rabotage du bois,,,Sawmilling and planing of wood
+ISIC_4,1610,class,161,Sciage et rabotage du bois,,,Sawmilling and planing of wood
+ISIC_4,162,group,16,"Fabrication darticles en bois, liège, vannerie et sparterie",,,"Manufacture of products of wood, cork, straw and plaiting materials"
+ISIC_4,1621,class,162,Fabrication de feuilles de placage et de panneaux à base de bois,,,Manufacture of veneer sheets and wood-based panels
+ISIC_4,1622,class,162,Fabrication douvrages de charpenterie et de menuiserie du bâtiment,,,Manufacture of builders' carpentry and joinery
+ISIC_4,1623,class,162,Fabrication demballages en bois,,,Manufacture of wooden containers
+ISIC_4,1629,class,162,"Fabrication dautres ouvrages en bois; fabrication douvrages en liège, vannerie et sparterie",,,"Manufacture of other products of wood; manufacture of articles of cork, straw and plaiting materials"
+ISIC_4,17,division,1,Fabrication de papier et darticles en papier,,,Manufacture of paper and paper products
+ISIC_4,170,group,17,Fabrication de papier et darticles en papier,,,Manufacture of paper and paper products
+ISIC_4,1701,class,170,"Fabrication de pâte, de papier et de carton",,,"Manufacture of pulp, paper and paperboard"
+ISIC_4,1702,class,170,Fabrication de papier et carton ondulés et demballages en papier et carton,,,Manufacture of corrugated paper and paperboard and of containers of paper and paperboard
+ISIC_4,1709,class,170,Fabrication dautres articles en papier et carton,,,Manufacture of other articles of paper and paperboard
+ISIC_4,18,division,1,Imprimerie et reproduction de supports enregistrés,,,Printing and reproduction of recorded media
+ISIC_4,181,group,18,Imprimerie et activités annexes,,,Printing and service activities related to printing
+ISIC_4,1811,class,181,Imprimerie,,,Printing
+ISIC_4,1812,class,181,Activités annexes à limprimerie,,,Service activities related to printing
+ISIC_4,182,group,18,Reproduction de supports enregistrés,,,Reproduction of recorded media
+ISIC_4,1820,class,182,Reproduction de supports enregistrés,,,Reproduction of recorded media
+ISIC_4,19,division,1,Cokéfaction et fabrication de produits pétroliers raffinés,,,Manufacture of coke and refined petroleum products
+ISIC_4,191,group,19,Cokéfaction,,,Manufacture of coke oven products
+ISIC_4,1910,class,191,Cokéfaction,,,Manufacture of coke oven products
+ISIC_4,192,group,19,Production de produits pétroliers raffinés,,,Manufacture of refined petroleum products
+ISIC_4,1920,class,192,Production de produits pétroliers raffinés,,,Manufacture of refined petroleum products
+ISIC_4,20,division,2,Fabrication de produits chimiques,,,Manufacture of chemicals and chemical products
+ISIC_4,201,group,20,"Fabrication de produits chimiques de base, dengrais et de produits azotés, de matières plastiques et de caoutchouc synthétique sous formes primaires",,,"Manufacture of basic chemicals, fertilizers and nitrogen compounds, plastics and synthetic rubber in primary forms"
+ISIC_4,2011,class,201,Fabrication de produits chimiques de base,,,Manufacture of basic chemicals
+ISIC_4,2012,class,201,Fabrication dengrais et de produits azotés,,,Manufacture of fertilizers and nitrogen compounds
+ISIC_4,2013,class,201,Fabrication de matières plastiques et de caoutchouc synthétique sous formes primaires,,,Manufacture of plastics and synthetic rubber in primary forms
+ISIC_4,202,group,20,Fabrication dautres produits chimiques,,,Manufacture of other chemical products
+ISIC_4,2021,class,202,Fabrication de pesticides et dautres produits agrochimiques,,,Manufacture of pesticides and other agrochemical products
+ISIC_4,2022,class,202,"Fabrication de peintures, vernis et produits similaires, dencres dimprimerie et de mastics",,,"Manufacture of paints, varnishes and similar coatings, printing ink and mastics"
+ISIC_4,2023,class,202,"Fabrication de savons et détergents, de produits dentretien, de parfums et de produits pour la toilette",,,"Manufacture of soap and detergents, cleaning and polishing preparations, perfumes and toilet preparations"
+ISIC_4,2029,class,202,"Fabrication dautres produits chimiques, n.c.a.",,,Manufacture of other chemical products n.e.c.
+ISIC_4,203,group,20,Fabrication de fibres synthétiques ou artificielles,,,Manufacture of man-made fibres
+ISIC_4,2030,class,203,Fabrication de fibres synthétiques ou artificielles,,,Manufacture of man-made fibres
+ISIC_4,21,division,2,"Fabrication de préparations pharmaceutiques, de produits chimiques à usage médicinal et de produits dherboristerie",,,Manufacture of basic pharmaceutical products and pharmaceutical preparations
+ISIC_4,210,group,21,"Fabrication de préparations pharmaceutiques, de produits chimiques à usage médicinal et de produits dherboristerie",,,"Manufacture of pharmaceuticals, medicinal chemical and botanical products"
+ISIC_4,2100,class,210,"Fabrication de préparations pharmaceutiques, de produits chimiques à usage médicinal et de produits dherboristerie",,,"Manufacture of pharmaceuticals, medicinal chemical and botanical products"
+ISIC_4,22,division,2,Fabrication darticles en caoutchouc et en matières plastiques,,,Manufacture of rubber and plastics products
+ISIC_4,221,group,22,Fabrication de produits en caoutchouc,,,Manufacture of rubber products
+ISIC_4,2211,class,221,Fabrication de pneumatiques et de chambres à air; rechapage et resculptage de pneumatiques,,,Manufacture of rubber tyres and tubes; retreading and rebuilding of rubber tyres
+ISIC_4,2219,class,221,Fabrication dautres articles en caoutchouc,,,Manufacture of other rubber products
+ISIC_4,222,group,22,Fabrication darticles en matières plastiques,,,Manufacture of plastics products
+ISIC_4,2220,class,222,Fabrication darticles en matières plastiques,,,Manufacture of plastics products
+ISIC_4,23,division,2,Fabrication dautres produits minéraux non métalliques,,,Manufacture of other non-metallic mineral products
+ISIC_4,231,group,23,Fabrication de verre et darticles en verre,,,Manufacture of glass and glass products
+ISIC_4,2310,class,231,Fabrication de verre et darticles en verre,,,Manufacture of glass and glass products
+ISIC_4,239,group,23,"Fabrication de produits minéraux non métalliques, n.c.a.",,,Manufacture of non-metallic mineral products n.e.c.
+ISIC_4,2391,class,239,Fabrication de produits réfractaires,,,Manufacture of refractory products
+ISIC_4,2392,class,239,Fabrication de matériaux de construction en argile,,,Manufacture of clay building materials
+ISIC_4,2393,class,239,Fabrication dautres articles en porcelaine et en céramique,,,Manufacture of other porcelain and ceramic products
+ISIC_4,2394,class,239,"Fabrication de ciment, chaux et plâtre",,,"Manufacture of cement, lime and plaster"
+ISIC_4,2395,class,239,"Fabrication douvrages en béton, en ciment et en plâtre",,,"Manufacture of articles of concrete, cement and plaster"
+ISIC_4,2396,class,239,"Taille, façonnage et finissage de la pierre",,,"Cutting, shaping and finishing of stone"
+ISIC_4,2399,class,239,"Fabrication dautres produits minéraux non métalliques, n.c.a.",,,Manufacture of other non-metallic mineral products n.e.c.
+ISIC_4,24,division,2,Fabrication de produits métallurgiques de base,,,Manufacture of basic metals
+ISIC_4,241,group,24,Sidérurgie et première transformation de lacier,,,Manufacture of basic iron and steel
+ISIC_4,2410,class,241,Sidérurgie et première transformation de lacier,,,Manufacture of basic iron and steel
+ISIC_4,242,group,24,Métallurgie et première transformation des métaux précieux et des métaux non ferreux,,,Manufacture of basic precious and other non-ferrous metals
+ISIC_4,2420,class,242,Métallurgie et première transformation des métaux précieux et des métaux non ferreux,,,Manufacture of basic precious and other non-ferrous metals
+ISIC_4,243,group,24,Fonderie,,,Casting of metals
+ISIC_4,2431,class,243,Fonderie de métaux ferreux,,,Casting of iron and steel
+ISIC_4,2432,class,243,Fonderie de métaux non ferreux,,,Casting of non-ferrous metals
+ISIC_4,25,division,2,Fabrication douvrages en métaux (sauf machines et matériel),,,"Manufacture of fabricated metal products, except machinery and equipment"
+ISIC_4,251,group,25,"Construction et menuiserie métalliques; fabrication de citernes, réservoirs et générateurs de vapeur",,,"Manufacture of structural metal products, tanks, reservoirs and steam generators"
+ISIC_4,2511,class,251,Construction et menuiserie métalliques,,,Manufacture of structural metal products
+ISIC_4,2512,class,251,"Fabrication de réservoirs, citernes et conteneurs métalliques",,,"Manufacture of tanks, reservoirs and containers of metal"
+ISIC_4,2513,class,251,Fabrication de générateurs de vapeur (sauf chaudières de chauffage central à eau chaude),,,"Manufacture of steam generators, except central heating hot water boilers"
+ISIC_4,252,group,25,Fabrication darmes et de munitions,,,Manufacture of weapons and ammunition
+ISIC_4,2520,class,252,Fabrication darmes et de munitions,,,Manufacture of weapons and ammunition
+ISIC_4,259,group,25,Fabrication dautres ouvrages en métaux; activités de services du travail des métaux,,,Manufacture of other fabricated metal products; metalworking service activities
+ISIC_4,2591,class,259,"Forgeage, emboutissage, estampage et profilage du métal; métallurgie des poudres",,,"Forging, pressing, stamping and roll-forming of metal; powder metallurgy"
+ISIC_4,2592,class,259,Traitement et revêtement des métaux; façonnage,,,Treatment and coating of metals; machining
+ISIC_4,2593,class,259,"Fabrication de coutellerie, doutils à main et de quincaillerie générale",,,"Manufacture of cutlery, hand tools and general hardware"
+ISIC_4,2599,class,259,"Fabrication douvrages en métaux, n.c.a.",,,Manufacture of other fabricated metal products n.e.c.
+ISIC_4,26,division,2,"Fabrication dordinateurs, darticles électroniques et optiques",,,"Manufacture of computer, electronic and optical products"
+ISIC_4,261,group,26,Fabrication de composants électroniques et de dispositifs daffichage,,,Manufacture of electronic components and boards
+ISIC_4,2610,class,261,Fabrication de composants électroniques et de dispositifs daffichage,,,Manufacture of electronic components and boards
+ISIC_4,262,group,26,Fabrication dordinateurs et de matériel périphérique,,,Manufacture of computers and peripheral equipment
+ISIC_4,2620,class,262,Fabrication dordinateurs et de matériel périphérique,,,Manufacture of computers and peripheral equipment
+ISIC_4,263,group,26,Fabrication de matériel de communication,,,Manufacture of communication equipment
+ISIC_4,2630,class,263,Fabrication de matériel de communication,,,Manufacture of communication equipment
+ISIC_4,264,group,26,Fabrication de matériel électronique grand public,,,Manufacture of consumer electronics
+ISIC_4,2640,class,264,Fabrication de matériel électronique grand public,,,Manufacture of consumer electronics
+ISIC_4,265,group,26,"Fabrication de matériel pour la mesure, la vérification, la navigation et le contrôle; horlogerie",,,"Manufacture of measuring, testing, navigating and control equipment; watches and clocks"
+ISIC_4,2651,class,265,"Fabrication de matériel pour la mesure, la vérification, la navigation et le contrôle",,,"Manufacture of measuring, testing, navigating and control equipment"
+ISIC_4,2652,class,265,Fabrication dhorlogerie,,,Manufacture of watches and clocks
+ISIC_4,266,group,26,"Fabrication de matériel dirradiation, électromédical et électrothérapeutique.",,,"Manufacture of irradiation, electromedical and electrotherapeutic equipment"
+ISIC_4,2660,class,266,"Fabrication de matériel dirradiation, électromédical et électrothérapeutique.",,,"Manufacture of irradiation, electromedical and electrotherapeutic equipment"
+ISIC_4,267,group,26,Fabrication dinstruments doptique et de matériel photographique,,,Manufacture of optical instruments and photographic equipment
+ISIC_4,2670,class,267,Fabrication dinstruments doptique et de matériel photographique,,,Manufacture of optical instruments and photographic equipment
+ISIC_4,268,group,26,Fabrication de supports magnétiques et optiques,,,Manufacture of magnetic and optical media
+ISIC_4,2680,class,268,Fabrication de supports magnétiques et optiques,,,Manufacture of magnetic and optical media
+ISIC_4,27,division,2,Fabrication de matériels électriques,,,Manufacture of electrical equipment
+ISIC_4,271,group,27,"Fabrication de moteurs, génératrices et transformateurs électriques, de matériel électrique de distribution et de commandes",,,"Manufacture of electric motors, generators, transformers and electricity distribution and control apparatus"
+ISIC_4,2710,class,271,"Fabrication de moteurs, génératrices et transformateurs électriques, de matériel électrique de distribution et de commandes",,,"Manufacture of electric motors, generators, transformers and electricity distribution and control apparatus"
+ISIC_4,272,group,27,Fabrication de batteries et daccumulateurs,,,Manufacture of batteries and accumulators
+ISIC_4,2720,class,272,Fabrication de batteries et daccumulateurs,,,Manufacture of batteries and accumulators
+ISIC_4,273,group,27,Fabrication de câbles et dispositifs de câblage,,,Manufacture of wiring and wiring devices
+ISIC_4,2731,class,273,Fabrication de câbles de fibres optiques,,,Manufacture of fibre optic cables
+ISIC_4,2732,class,273,Fabrication dautres fils et câbles électroniques et électriques,,,Manufacture of other electronic and electric wires and cables
+ISIC_4,2733,class,273,Fabrication de dispositifs de câblage,,,Manufacture of wiring devices
+ISIC_4,274,group,27,Fabrication dappareils électriques déclairage,,,Manufacture of electric lighting equipment
+ISIC_4,2740,class,274,Fabrication dappareils électriques déclairage,,,Manufacture of electric lighting equipment
+ISIC_4,275,group,27,Fabrication dappareils ménagers,,,Manufacture of domestic appliances
+ISIC_4,2750,class,275,Fabrication dappareils ménagers,,,Manufacture of domestic appliances
+ISIC_4,279,group,27,Fabrication dautres matériels électriques,,,Manufacture of other electrical equipment
+ISIC_4,2790,class,279,Fabrication dautres matériels électriques,,,Manufacture of other electrical equipment
+ISIC_4,28,division,2,"Fabrication de machines et de matériel, n.c.a.",,,Manufacture of machinery and equipment n.e.c.
+ISIC_4,281,group,28,Fabrication de machines dusage général,,,Manufacture of general-purpose machinery
+ISIC_4,2811,class,281,"Fabrication de moteurs et de turbines, sauf moteurs pour avions, automobiles et motocycles",,,"Manufacture of engines and turbines, except aircraft, vehicle and cycle engines"
+ISIC_4,2812,class,281,Fabrication de matériel hydraulique,,,Manufacture of fluid power equipment
+ISIC_4,2813,class,281,"Fabrication dautres pompes, compresseurs, et articles de robinetterie",,,"Manufacture of other pumps, compressors, taps and valves"
+ISIC_4,2814,class,281,"Fabrication de paliers, dengrenages et dorganes mécaniques de transmission",,,"Manufacture of bearings, gears, gearing and driving elements"
+ISIC_4,2815,class,281,Fabrication de fours et de brûleurs,,,"Manufacture of ovens, furnaces and furnace burners"
+ISIC_4,2816,class,281,Fabrication de matériel de levage et de manutention,,,Manufacture of lifting and handling equipment
+ISIC_4,2817,class,281,Fabrication de machines et de matériel de bureau (à lexception des ordinateurs et du matériel périphérique),,,Manufacture of office machinery and equipment (except computers and peripheral equipment)
+ISIC_4,2818,class,281,Fabrication doutils à main à entraînement mécanique,,,Manufacture of power-driven hand tools
+ISIC_4,2819,class,281,Fabrication dautres machines dusage général,,,Manufacture of other general-purpose machinery
+ISIC_4,282,group,28,Fabrication de machines dusage spécifique,,,Manufacture of special-purpose machinery
+ISIC_4,2821,class,282,Fabrication de machines agricoles et forestières,,,Manufacture of agricultural and forestry machinery
+ISIC_4,2822,class,282,Fabrication de machines pour le travail des métaux et de machines-outils,,,Manufacture of metal-forming machinery and machine tools
+ISIC_4,2823,class,282,Fabrication de machines pour la métallurgie,,,Manufacture of machinery for metallurgy
+ISIC_4,2824,class,282,"Fabrication de machines pour les mines, les carrières et la construction",,,"Manufacture of machinery for mining, quarrying and construction"
+ISIC_4,2825,class,282,"Fabrication de machines pour le traitement des produits alimentaires, des boissons et du tabac",,,"Manufacture of machinery for food, beverage and tobacco processing"
+ISIC_4,2826,class,282,"Fabrication de machines pour les industries du textile, de lhabillement et des cuirs",,,"Manufacture of machinery for textile, apparel and leather production"
+ISIC_4,2829,class,282,Fabrication dautres machines dusage spécifique,,,Manufacture of other special-purpose machinery
+ISIC_4,29,division,2,"Construction de véhicules automobiles, de remorques et semi-remorques",,,"Manufacture of motor vehicles, trailers and semi-trailers"
+ISIC_4,291,group,29,Construction de véhicules automobiles,,,Manufacture of motor vehicles
+ISIC_4,2910,class,291,Construction de véhicules automobiles,,,Manufacture of motor vehicles
+ISIC_4,292,group,29,Fabrication de carrosseries pour véhicules automobiles; fabrication de remorques et de semi-remorques,,,Manufacture of bodies (coachwork) for motor vehicles; manufacture of trailers and semi-trailers
+ISIC_4,2920,class,292,Fabrication de carrosseries pour véhicules automobiles; fabrication de remorques et de semi-remorques,,,Manufacture of bodies (coachwork) for motor vehicles; manufacture of trailers and semi-trailers
+ISIC_4,293,group,29,Fabrication de pièces et accessoires pour véhicules automobiles et leurs moteurs,,,Manufacture of parts and accessories for motor vehicles
+ISIC_4,2930,class,293,Fabrication de pièces et accessoires pour véhicules automobiles et leurs moteurs,,,Manufacture of parts and accessories for motor vehicles
+ISIC_4,30,division,3,Fabrication dautres matériels de transport,,,Manufacture of other transport equipment
+ISIC_4,301,group,30,Construction de navires et de bateaux,,,Building of ships and boats
+ISIC_4,3011,class,301,Construction de navires et dengins flottants,,,Building of ships and floating structures
+ISIC_4,3012,class,301,Construction de bateaux de plaisance et de sport,,,Building of pleasure and sporting boats
+ISIC_4,302,group,30,Fabrication de matériel ferroviaire roulant,,,Manufacture of railway locomotives and rolling stock
+ISIC_4,3020,class,302,Fabrication de matériel ferroviaire roulant,,,Manufacture of railway locomotives and rolling stock
+ISIC_4,303,group,30,Construction aéronautique et spatiale et de matériel connexe,,,Manufacture of air and spacecraft and related machinery
+ISIC_4,3030,class,303,Construction aéronautique et spatiale et de matériel connexe,,,Manufacture of air and spacecraft and related machinery
+ISIC_4,304,group,30,Fabrication de véhicules militaires de combat,,,Manufacture of military fighting vehicles
+ISIC_4,3040,class,304,Fabrication de véhicules militaires de combat,,,Manufacture of military fighting vehicles
+ISIC_4,309,group,30,"Fabrication de matériels de transport, n.c.a.",,,Manufacture of transport equipment n.e.c.
+ISIC_4,3091,class,309,Fabrication de motocycles,,,Manufacture of motorcycles
+ISIC_4,3092,class,309,Fabrication de bicycles et de véhicules pour invalides,,,Manufacture of bicycles and invalid carriages
+ISIC_4,3099,class,309,"Fabrication dautres matériels de transport, n.c.a.",,,Manufacture of other transport equipment n.e.c.
+ISIC_4,31,division,3,Fabrication de meubles,,,Manufacture of furniture
+ISIC_4,310,group,31,Fabrication de meubles,,,Manufacture of furniture
+ISIC_4,3100,class,310,Fabrication de meubles,,,Manufacture of furniture
+ISIC_4,32,division,3,Autres activités de fabrication,,,Other manufacturing
+ISIC_4,321,group,32,Fabrication de bijouterie et darticles similaires,,,"Manufacture of jewellery, bijouterie and related articles"
+ISIC_4,3211,class,321,Fabrication de bijouterie et darticles similaires,,,Manufacture of jewellery and related articles
+ISIC_4,3212,class,321,Fabrication de bijouterie de fantaisie et darticles similaires,,,Manufacture of imitation jewellery and related articles
+ISIC_4,322,group,32,Fabrication dinstruments de musique,,,Manufacture of musical instruments
+ISIC_4,3220,class,322,Fabrication dinstruments de musique,,,Manufacture of musical instruments
+ISIC_4,323,group,32,Fabrication darticles de sport,,,Manufacture of sports goods
+ISIC_4,3230,class,323,Fabrication darticles de sport,,,Manufacture of sports goods
+ISIC_4,324,group,32,Fabrication de jeux et jouets,,,Manufacture of games and toys
+ISIC_4,3240,class,324,Fabrication de jeux et jouets,,,Manufacture of games and toys
+ISIC_4,325,group,32,Fabrication dinstruments et appareils médicaux et dentaires,,,Manufacture of medical and dental instruments and supplies
+ISIC_4,3250,class,325,Fabrication dinstruments et appareils médicaux et dentaires,,,Manufacture of medical and dental instruments and supplies
+ISIC_4,329,group,32,"Autres activités de fabrication, n.c.a.",,,Other manufacturing n.e.c.
+ISIC_4,3290,class,329,"Autres activités de fabrication, n.c.a.",,,Other manufacturing n.e.c.
+ISIC_4,33,division,3,Réparation et installation de machines et de matériel,,,Repair and installation of machinery and equipment
+ISIC_4,331,group,33,"Réparation douvrages en métaux, de machines et matériel",,,"Repair of fabricated metal products, machinery and equipment"
+ISIC_4,3311,class,331,Réparation douvrages en métaux,,,Repair of fabricated metal products
+ISIC_4,3312,class,331,Réparation de machines,,,Repair of machinery
+ISIC_4,3313,class,331,Réparation de matériel électronique et optique,,,Repair of electronic and optical equipment
+ISIC_4,3314,class,331,Réparation de matériel électrique,,,Repair of electrical equipment
+ISIC_4,3315,class,331,"Réparation de matériel de transport, à lexception des véhicules à moteur",,,"Repair of transport equipment, except motor vehicles"
+ISIC_4,3319,class,331,Réparation dautres matériels,,,Repair of other equipment
+ISIC_4,332,group,33,Installation de machines et de matériel pour lindustrie,,,Installation of industrial machinery and equipment
+ISIC_4,3320,class,332,Installation de machines et de matériel pour lindustrie,,,Installation of industrial machinery and equipment
+ISIC_4,35,division,3,"Production et distribution délectricité, de gaz, de vapeur et climatisation",,,"Electricity, gas, steam and air conditioning supply"
+ISIC_4,351,group,35,"Production, transport et distribution délectricité",,,"Electric power generation, transmission and distribution"
+ISIC_4,3510,class,351,"Production, transport et distribution délectricité",,,"Electric power generation, transmission and distribution"
+ISIC_4,352,group,35,"Fabrication de gaz, distribution par conduites de combustibles gazeux",,,Manufacture of gas; distribution of gaseous fuels through mains
+ISIC_4,3520,class,352,"Fabrication de gaz, distribution par conduites de combustibles gazeux",,,Manufacture of gas; distribution of gaseous fuels through mains
+ISIC_4,353,group,35,Production et distribution de vapeur et climatisation,,,Steam and air conditioning supply
+ISIC_4,3530,class,353,Production et distribution de vapeur et climatisation,,,Steam and air conditioning supply
+ISIC_4,36,division,3,"Collecte et traitement des eaux, distribution deau",,,"Water collection, treatment and supply"
+ISIC_4,360,group,36,"Collecte et traitement des eaux, distribution deau",,,"Water collection, treatment and supply"
+ISIC_4,3600,class,360,"Collecte et traitement des eaux, distribution deau",,,"Water collection, treatment and supply"
+ISIC_4,37,division,3,Réseau dassainissement,,,Sewerage
+ISIC_4,370,group,37,Réseau dassainissement,,,Sewerage
+ISIC_4,3700,class,370,Réseau dassainissement,,,Sewerage
+ISIC_4,38,division,3,"Collecte des déchets, activités de traitement et dévacuation; récupération des matières",,,"Waste collection, treatment and disposal activities; materials recovery"
+ISIC_4,381,group,38,Collecte des déchets,,,Waste collection
+ISIC_4,3811,class,381,Collecte de déchets non dangereux,,,Collection of non-hazardous waste
+ISIC_4,3812,class,381,Collecte de déchets dangereux,,,Collection of hazardous waste
+ISIC_4,382,group,38,Traitement et évacuation des déchets,,,Waste treatment and disposal
+ISIC_4,3821,class,382,Traitement et évacuation des déchets non dangereux,,,Treatment and disposal of non-hazardous waste
+ISIC_4,3822,class,382,Traitement et évacuation des déchets dangereux,,,Treatment and disposal of hazardous waste
+ISIC_4,383,group,38,Récupération des matières,,,Materials recovery
+ISIC_4,3830,class,383,Récupération des matières,,,Materials recovery
+ISIC_4,39,division,3,Activités de remise en état et autres services de traitement des déchets,,,Remediation activities and other waste management services
+ISIC_4,390,group,39,Activités de remise en état et autres services de traitement des déchets,,,Remediation activities and other waste management services
+ISIC_4,3900,class,390,Activités de remise en état et autres services de traitement des déchets,,,Remediation activities and other waste management services
+ISIC_4,41,division,4,Construction de bâtiments,,,Construction of buildings
+ISIC_4,410,group,41,Construction de bâtiments,,,Construction of buildings
+ISIC_4,4100,class,410,Construction de bâtiments,,,Construction of buildings
+ISIC_4,42,division,4,Génie civil,,,Civil engineering
+ISIC_4,421,group,42,Construction de routes et de voies ferrées,,,Construction of roads and railways
+ISIC_4,4210,class,421,Construction de routes et de voies ferrées,,,Construction of roads and railways
+ISIC_4,422,group,42,Projets dinstallation déquipements collectifs,,,Construction of utility projects
+ISIC_4,4220,class,422,Projets dinstallation déquipements collectifs,,,Construction of utility projects
+ISIC_4,429,group,42,Autres projets de génie civil,,,Construction of other civil engineering projects
+ISIC_4,4290,class,429,Autres projets de génie civil,,,Construction of other civil engineering projects
+ISIC_4,43,division,4,Activités de construction spécialisées,,,Specialized construction activities
+ISIC_4,431,group,43,Démolition et préparation des sites,,,Demolition and site preparation
+ISIC_4,4311,class,431,Démolition,,,Demolition
+ISIC_4,4312,class,431,Préparation des sites,,,Site preparation
+ISIC_4,432,group,43,Travaux dinstallations délectricité et de plomberie et autres travaux dinstallation,,,"Electrical, plumbing and other construction installation activities"
+ISIC_4,4321,class,432,Installation délectricité,,,Electrical installation
+ISIC_4,4322,class,432,"Installation de matériel de plomberie, chauffage et climatisation",,,"Plumbing, heat and air-conditioning installation"
+ISIC_4,4329,class,432,Autres travaux dinstallation,,,Other construction installation
+ISIC_4,433,group,43,Travaux de finition,,,Building completion and finishing
+ISIC_4,4330,class,433,Travaux de finition,,,Building completion and finishing
+ISIC_4,439,group,43,Autres activités de construction spécialisées,,,Other specialized construction activities
+ISIC_4,4390,class,439,Autres activités de construction spécialisées,,,Other specialized construction activities
+ISIC_4,45,division,4,"Commerce de gros et de détail, réparation de véhicules automobiles et de motocycles",,,Wholesale and retail trade and repair of motor vehicles and motorcycles
+ISIC_4,451,group,45,Vente de véhicules automobiles,,,Sale of motor vehicles
+ISIC_4,4510,class,451,Vente de véhicules automobiles,,,Sale of motor vehicles
+ISIC_4,452,group,45,Entretien et réparation de véhicules automobiles,,,Maintenance and repair of motor vehicles
+ISIC_4,4520,class,452,Entretien et réparation de véhicules automobiles,,,Maintenance and repair of motor vehicles
+ISIC_4,453,group,45,Commerce de pièces et accessoires de véhicules automobiles,,,Sale of motor vehicle parts and accessories
+ISIC_4,4530,class,453,Commerce de pièces et accessoires de véhicules automobiles,,,Sale of motor vehicle parts and accessories
+ISIC_4,454,group,45,"Commerce, entretien et réparation de motocycles et de leurs pièces et accessoires",,,"Sale, maintenance and repair of motorcycles and related parts and accessories"
+ISIC_4,4540,class,454,"Commerce, entretien et réparation de motocycles et de leurs pièces et accessoires",,,"Sale, maintenance and repair of motorcycles and related parts and accessories"
+ISIC_4,46,division,4,Commerce de gros à lexception des véhicules automobiles et des motocycles,,,"Wholesale trade, except of motor vehicles and motorcycles"
+ISIC_4,461,group,46,Activités dintermédiaires de commerce de gros,,,Wholesale on a fee or contract basis
+ISIC_4,4610,class,461,Activités dintermédiaires de commerce de gros,,,Wholesale on a fee or contract basis
+ISIC_4,462,group,46,Commerce de gros de produits agricoles bruts et danimaux vivants,,,Wholesale of agricultural raw materials and live animals
+ISIC_4,4620,class,462,Commerce de gros de produits agricoles bruts et danimaux vivants,,,Wholesale of agricultural raw materials and live animals
+ISIC_4,463,group,46,"Commerce de gros de produits alimentaires, boissons et tabac",,,"Wholesale of food, beverages and tobacco"
+ISIC_4,4630,class,463,"Commerce de gros de produits alimentaires, boissons et tabac",,,"Wholesale of food, beverages and tobacco"
+ISIC_4,464,group,46,Commerce de gros darticles de ménage,,,Wholesale of household goods
+ISIC_4,4641,class,464,"Commerce de gros de textiles, habillement et chaussures",,,"Wholesale of textiles, clothing and footwear"
+ISIC_4,4649,class,464,Commerce de gros dautres articles de ménage,,,Wholesale of other household goods
+ISIC_4,465,group,46,"Commerce de gros de machines, équipements et fournitures",,,"Wholesale of machinery, equipment and supplies"
+ISIC_4,4651,class,465,"Commerce de gros dordinateurs, de matériel périphérique et de logiciels dordinateurs",,,"Wholesale of computers, computer peripheral equipment and software"
+ISIC_4,4652,class,465,Commerce de gros de parties et déquipements électroniques et de télécommunication,,,Wholesale of electronic and telecommunications equipment and parts
+ISIC_4,4653,class,465,"Commerce de gros de machines, équipement et fournitures agricoles",,,"Wholesale of agricultural machinery, equipment and supplies"
+ISIC_4,4659,class,465,Commerces de gros dautres machines et équipements,,,Wholesale of other machinery and equipment
+ISIC_4,466,group,46,Autres commerces de gros spécialisés,,,Other specialized wholesale
+ISIC_4,4661,class,466,"Commerce de gros de combustibles solides, liquides et gazeux et de produits dérivés",,,"Wholesale of solid, liquid and gaseous fuels and related products"
+ISIC_4,4662,class,466,Commerce de gros de métaux et de minerais métalliques,,,Wholesale of metals and metal ores
+ISIC_4,4663,class,466,"Commerce de gros de matériaux de construction et déquipement, et fournitures de quincaillerie, plomberie et chauffage",,,"Wholesale of construction materials, hardware, plumbing and heating equipment and supplies"
+ISIC_4,4669,class,466,"Commerce de gros de déchets et débris et autres produits, n.c.a.",,,Wholesale of waste and scrap and other products n.e.c.
+ISIC_4,469,group,46,Commerce de gros non spécialisé,,,Non-specialized wholesale trade
+ISIC_4,4690,class,469,Commerce de gros non spécialisé,,,Non-specialized wholesale trade
+ISIC_4,47,division,4,Commerce de détail à lexception des véhicules automobiles et des motocycles,,,"Retail trade, except of motor vehicles and motorcycles"
+ISIC_4,471,group,47,Commerce de détail en magasins non spécialisés,,,Retail sale in non-specialized stores
+ISIC_4,4711,class,471,"Commerce de détail en magasins non spécialisés, avec vente prédominante de produits alimentaires, boissons et tabacs",,,"Retail sale in non-specialized stores with food, beverages or tobacco predominating"
+ISIC_4,4719,class,471,Autres commerces de détail en magasins non spécialisés,,,Other retail sale in non-specialized stores
+ISIC_4,472,group,47,"Commerce de détail de produits alimentaires, boissons et tabacs en magasins spécialisés",,,"Retail sale of food, beverages and tobacco in specialized stores"
+ISIC_4,4721,class,472,Commerce de détail de produits alimentaires en magasins spécialisés,,,Retail sale of food in specialized stores
+ISIC_4,4722,class,472,Commerce de détail de boissons en magasins spécialisés,,,Retail sale of beverages in specialized stores
+ISIC_4,4723,class,472,Commerce de détail de tabacs en magasins spécialisés,,,Retail sale of tobacco products in specialized stores
+ISIC_4,473,group,47,Commerce de détail de carburants automobiles en magasins spécialisés,,,Retail sale of automotive fuel in specialized stores
+ISIC_4,4730,class,473,Commerce de détail de carburants automobiles en magasins spécialisés,,,Retail sale of automotive fuel in specialized stores
+ISIC_4,474,group,47,Commerce de détail déquipement dinformation et de communication en magasins spécialisés,,,Retail sale of information and communications equipment in specialized stores
+ISIC_4,4741,class,474,"Commerce de détail dordinateurs, dunités périphériques, de logiciels et de matériel de télécommunications en magasins spécialisés",,,"Retail sale of computers, peripheral units, software and telecommunications equipment in specialized stores"
+ISIC_4,4742,class,474,Commerce de détail de matériel audio et vidéo en magasins spécialisés,,,Retail sale of audio and video equipment in specialized stores
+ISIC_4,475,group,47,Commerce de détail dautres équipements ménagers en magasins spécialisés,,,Retail sale of other household equipment in specialized stores
+ISIC_4,4751,class,475,Commerce de détail de textiles en magasins spécialisés,,,Retail sale of textiles in specialized stores
+ISIC_4,4752,class,475,"Commerce de détail de quincaillerie, peinture et verrerie en magasins spécialisés",,,"Retail sale of hardware, paints and glass in specialized stores"
+ISIC_4,4753,class,475,"Commerce de détail de moquette, tapis, revêtements de murs et sols en magasins spécialisés",,,"Retail sale of carpets, rugs, wall and floor coverings in specialized stores"
+ISIC_4,4759,class,475,"Commerce de détail dappareils électroménagers, de meubles de maison, darticles déclairage et dautres articles ménagers en magasins spécialisés.",,,"Retail sale of electrical household appliances, furniture, lighting equipment and other household articles in specialized stores"
+ISIC_4,476,group,47,"Commerce de détail darticles pour la culture et les loisirs, en magasins spécialisés",,,Retail sale of cultural and recreation goods in specialized stores
+ISIC_4,4761,class,476,"Commerce de détail de livres, journaux et articles de papeterie en magasins spécialisés",,,"Retail sale of books, newspapers and stationary in specialized stores"
+ISIC_4,4762,class,476,Commerce de détail denregistrements musicaux et vidéo en magasins spécialisés,,,Retail sale of music and video recordings in specialized stores
+ISIC_4,4763,class,476,Commerce de détail de matériel pour le sport en magasins spécialisés,,,Retail sale of sporting equipment in specialized stores
+ISIC_4,4764,class,476,Commerce de détail de jeux et jouets en magasins spécialisés,,,Retail sale of games and toys in specialized stores
+ISIC_4,477,group,47,Commerce de détail dautres articles en magasins spécialisés,,,Retail sale of other goods in specialized stores
+ISIC_4,4771,class,477,"Commerce de détail de vêtements, de chaussures et darticles de cuir en magasins spécialisés",,,"Retail sale of clothing, footwear and leather articles in specialized stores"
+ISIC_4,4772,class,477,"Commerce de détail de produits pharmaceutiques et médicaux, de produits de beauté et darticles de toilette",,,"Retail sale of pharmaceutical and medical goods, cosmetic and toilet articles in specialized stores"
+ISIC_4,4773,class,477,Autres commerces de détail darticles neufs en magasins spécialisés,,,Other retail sale of new goods in specialized stores
+ISIC_4,4774,class,477,Vente de détail darticles doccasion,,,Retail sale of second-hand goods
+ISIC_4,478,group,47,Vente de détail sur éventaires et marchés,,,Retail sale via stalls and markets
+ISIC_4,4781,class,478,"Vente de détail sur éventaires et marchés de produits alimentaires, boissons et tabac",,,"Retail sale via stalls and markets of food, beverages and tobacco products"
+ISIC_4,4782,class,478,"Vente de détail sur éventaires et marchés de textiles, habillement et chaussures",,,"Retail sale via stalls and markets of textiles, clothing and footwear"
+ISIC_4,4789,class,478,Vente de détail sur éventaires et marchés dautres articles,,,Retail sale via stalls and markets of other goods
+ISIC_4,479,group,47,"Vente de détail autre quen magasins, éventaires ou marchés",,,"Retail trade not in stores, stalls or markets"
+ISIC_4,4791,class,479,"Vente de détail par les entreprises de vente par correspondance, ou sur Internet",,,Retail sale via mail order houses or via Internet
+ISIC_4,4799,class,479,"Autres commerces de détail autres quen magasin, sur éventaires ou marchés",,,"Other retail sale not in stores, stalls or markets"
+ISIC_4,49,division,4,"Transports terrestres, transport par conduites",,,Land transport and transport via pipelines
+ISIC_4,491,group,49,Transports par chemin de fer,,,Transport via railways
+ISIC_4,4911,class,491,Transport de voyageurs par chemin de fer interurbain,,,"Passenger rail transport, interurban"
+ISIC_4,4912,class,491,Transport de marchandises par chemin de fer,,,Freight rail transport
+ISIC_4,492,group,49,Autres transports terrestres,,,Other land transport
+ISIC_4,4921,class,492,Transports terrestres de voyageurs par des réseaux urbains et suburbains,,,Urban and suburban passenger land transport
+ISIC_4,4922,class,492,Autres transports terrestres de voyageurs,,,Other passenger land transport
+ISIC_4,4923,class,492,Transports routiers de marchandises,,,Freight transport by road
+ISIC_4,493,group,49,Transports par conduites,,,Transport via pipeline
+ISIC_4,4930,class,493,Transports par conduites,,,Transport via pipeline
+ISIC_4,50,division,5,Transports par eau,,,Water transport
+ISIC_4,501,group,50,Transports maritimes et côtiers,,,Sea and coastal water transport
+ISIC_4,5011,class,501,Transports maritimes et côtiers de voyageurs,,,Sea and coastal passenger water transport
+ISIC_4,5012,class,501,Transports maritimes et côtiers de marchandises,,,Sea and coastal freight water transport
+ISIC_4,502,group,50,Transports par voies navigables intérieures,,,Inland water transport
+ISIC_4,5021,class,502,Transport de voyageurs par voies navigables intérieures,,,Inland passenger water transport
+ISIC_4,5022,class,502,Transport de marchandises par voies navigables intérieures,,,Inland freight water transport
+ISIC_4,51,division,5,Transports aériens,,,Air transport
+ISIC_4,511,group,51,Transport aérien de voyageurs,,,Passenger air transport
+ISIC_4,5110,class,511,Transport aérien de voyageurs,,,Passenger air transport
+ISIC_4,512,group,51,Transport aérien de marchandises,,,Freight air transport
+ISIC_4,5120,class,512,Transport aérien de marchandises,,,Freight air transport
+ISIC_4,52,division,5,Magasinage et activités annexes des transports,,,Warehousing and support activities for transportation
+ISIC_4,521,group,52,Magasinage et entreposage,,,Warehousing and storage
+ISIC_4,5210,class,521,Magasinage et entreposage,,,Warehousing and storage
+ISIC_4,522,group,52,Activités annexes des transports,,,Support activities for transportation
+ISIC_4,5221,class,522,Activités de services annexes des transports terrestres,,,Service activities incidental to land transportation
+ISIC_4,5222,class,522,Activités de services annexes des transports par eau,,,Service activities incidental to water transportation
+ISIC_4,5223,class,522,Activités de services annexes des transports aériens,,,Service activities incidental to air transportation
+ISIC_4,5224,class,522,Manutention,,,Cargo handling
+ISIC_4,5229,class,522,Autres activités annexes des transports,,,Other transportation support activities
+ISIC_4,53,division,5,Activités de poste et de courrier,,,Postal and courier activities
+ISIC_4,531,group,53,Activités de poste,,,Postal activities
+ISIC_4,5310,class,531,Activités de poste,,,Postal activities
+ISIC_4,532,group,53,Activités de courrier,,,Courier activities
+ISIC_4,5320,class,532,Activités de courrier,,,Courier activities
+ISIC_4,55,division,5,Hébergement,,,Accommodation
+ISIC_4,551,group,55,Activités dhébergement temporaire,,,Short term accommodation activities
+ISIC_4,5510,class,551,Activités dhébergement temporaire,,,Short term accommodation activities
+ISIC_4,552,group,55,"Terrains de camping, parcs pour véhicules de loisirs et caravanes",,,"Camping grounds, recreational vehicle parks and trailer parks"
+ISIC_4,5520,class,552,"Terrains de camping, parcs pour véhicules de loisirs et caravanes",,,"Camping grounds, recreational vehicle parks and trailer parks"
+ISIC_4,559,group,55,Autres activités dhébergement,,,Other accommodation
+ISIC_4,5590,class,559,Autres activités dhébergement,,,Other accommodation
+ISIC_4,56,division,5,Activités de services de restauration et de consommation de boissons,,,Food and beverage service activities
+ISIC_4,561,group,56,Activités de restaurants et de services de restauration mobiles,,,Restaurants and mobile food service activities
+ISIC_4,5610,class,561,Activités de restaurants et de services de restauration mobiles,,,Restaurants and mobile food service activities
+ISIC_4,562,group,56,Activités de restauration en kiosque et autres activités de services de restauration,,,Event catering and other food service activities
+ISIC_4,5621,class,562,Activités de restauration en kiosque,,,Event catering
+ISIC_4,5629,class,562,Autres activités de services de restauration,,,Other food service activities
+ISIC_4,563,group,56,Activités de consommation de boissons,,,Beverage serving activities
+ISIC_4,5630,class,563,Activités de consommation de boissons,,,Beverage serving activities
+ISIC_4,58,division,5,Activités dédition,,,Publishing activities
+ISIC_4,581,group,58,"Édition de livres, revues et autres activités dédition",,,"Publishing of books, periodicals and other publishing activities"
+ISIC_4,5811,class,581,Édition de livres,,,Book publishing
+ISIC_4,5812,class,581,Édition dannuaires et de fichiers dadresses,,,Publishing of directories and mailing lists
+ISIC_4,5813,class,581,"Édition de journaux, revues professionnelles, et périodiques",,,"Publishing of newspapers, journals and periodicals"
+ISIC_4,5819,class,581,Autres activités dédition,,,Other publishing activities
+ISIC_4,582,group,58,Édition de logiciels,,,Software publishing
+ISIC_4,5820,class,582,Édition de logiciels,,,Software publishing
+ISIC_4,59,division,5,"Activités de production de films cinématographiques et vidéo, de programmes de télévision, denregistrements sonores et dédition musicale",,,"Motion picture, video and television programme production, sound recording and music publishing activities"
+ISIC_4,591,group,59,"Activités de production de films cinématographiques et vidéo, et de programmes de télévision",,,"Motion picture, video and television programme activities"
+ISIC_4,5911,class,591,"Activités de production de films cinématographiques et vidéo, et de programmes de télévision",,,"Motion picture, video and television programme production activities"
+ISIC_4,5912,class,591,"Activités consécutives à la production de films cinématographiques et vidéo, et de programmes de télévision",,,"Motion picture, video and television programme post-production activities"
+ISIC_4,5913,class,591,"Activités de distribution de films cinématographiques et vidéo, et de programmes de télévision",,,"Motion picture, video and television programme distribution activities"
+ISIC_4,5914,class,591,Activités de projection de films cinématographiques,,,Motion picture projection activities
+ISIC_4,592,group,59,Activités denregistrement du son et dédition musicale.,,,Sound recording and music publishing activities
+ISIC_4,5920,class,592,Activités denregistrement du son et dédition musicale.,,,Sound recording and music publishing activities
+ISIC_4,60,division,6,Activités de programmation et de diffusion,,,Programming and broadcasting activities
+ISIC_4,601,group,60,Radiodiffusion,,,Radio broadcasting
+ISIC_4,6010,class,601,Radiodiffusion,,,Radio broadcasting
+ISIC_4,602,group,60,Activités de production et de diffusion de programmes de télévision,,,Television programming and broadcasting activities
+ISIC_4,6020,class,602,Activités de production et de diffusion de programmes de télévision,,,Television programming and broadcasting activities
+ISIC_4,61,division,6,Télécommunications,,,Telecommunications
+ISIC_4,611,group,61,Activités de télécommunications par câble,,,Wired telecommunications activities
+ISIC_4,6110,class,611,Activités de télécommunications par câble,,,Wired telecommunications activities
+ISIC_4,612,group,61,Activités de télécommunications sans fil,,,Wireless telecommunications activities
+ISIC_4,6120,class,612,Activités de télécommunications sans fil,,,Wireless telecommunications activities
+ISIC_4,613,group,61,Activités de télécommunications par satellite,,,Satellite telecommunications activities
+ISIC_4,6130,class,613,Activités de télécommunications par satellite,,,Satellite telecommunications activities
+ISIC_4,619,group,61,Autres activités de télécommunications,,,Other telecommunications activities
+ISIC_4,6190,class,619,Autres activités de télécommunications,,,Other telecommunications activities
+ISIC_4,62,division,6,Programmation informatique; conseils et activités connexes,,,"Computer programming, consultancy and related activities"
+ISIC_4,620,group,62,Programmation informatique; conseils et activités connexes,,,"Computer programming, consultancy and related activities"
+ISIC_4,6201,class,620,Activités de programmation informatique,,,Computer programming activities
+ISIC_4,6202,class,620,"Activités de conseils en matière informatique, et de gestion des moyens informatiques",,,Computer consultancy and computer facilities management activities
+ISIC_4,6209,class,620,Autres activités de services concernant la technologie de linformation et linformatique,,,Other information technology and computer service activities
+ISIC_4,63,division,6,Activités de services dinformation,,,Information service activities
+ISIC_4,631,group,63,"Activités de traitement des données, dhébergement et activités connexes; portails dentrée sur le Web",,,"Data processing, hosting and related activities; web portals"
+ISIC_4,6311,class,631,"Traitement de données, hébergement et activités connexes",,,"Data processing, hosting and related activities"
+ISIC_4,6312,class,631,Portails dentrée sur le Web,,,Web portals
+ISIC_4,639,group,63,Autres activités de services dinformation,,,Other information service activities
+ISIC_4,6391,class,639,Activités dagence de presse,,,News agency activities
+ISIC_4,6399,class,639,"Autres activités de services dinformation, n.c.a.",,,Other information service activities n.e.c.
+ISIC_4,64,division,6,"Activités de services financiers, à lexception des assurances et des caisses de retraite",,,"Financial service activities, except insurance and pension funding"
+ISIC_4,641,group,64,Intermédiation monétaire,,,Monetary intermediation
+ISIC_4,6411,class,641,Activités de banques centrales,,,Central banking
+ISIC_4,6419,class,641,Autres intermédiations monétaires,,,Other monetary intermediation
+ISIC_4,642,group,64,Activités des sociétés de portefeuille,,,Activities of holding companies
+ISIC_4,6420,class,642,Activités des sociétés de portefeuille,,,Activities of holding companies
+ISIC_4,643,group,64,"Fonds fiduciaires, fonds et entités financières analogues",,,"Trusts, funds and similar financial entities"
+ISIC_4,6430,class,643,"Fonds fiduciaires, fonds et entités financières analogues",,,"Trusts, funds and similar financial entities"
+ISIC_4,649,group,64,"Autres activités de services financiers, à lexception des activités dassurances et de caisses de retraite",,,"Other financial service activities, except insurance and pension funding activities"
+ISIC_4,6491,class,649,Crédit-bail,,,Financial leasing
+ISIC_4,6492,class,649,Autres activités de crédit,,,Other credit granting
+ISIC_4,6499,class,649,"Autres activités de services financiers, à lexception des activités dassurance et de caisses de retraite, n.c.a.",,,"Other financial service activities, except insurance and pension funding activities, n.e.c."
+ISIC_4,65,division,6,"Activités dassurances, réassurance et de caisses de retraite, à lexception de la sécurité sociale obligatoire",,,"Insurance, reinsurance and pension funding, except compulsory social security"
+ISIC_4,651,group,65,Activités dassurances,,,Insurance
+ISIC_4,6511,class,651,Activités dassurances sur la vie,,,Life insurance
+ISIC_4,6512,class,651,Activités dassurances autres que sur la vie,,,Non-life insurance
+ISIC_4,652,group,65,Activités de réassurance,,,Reinsurance
+ISIC_4,6520,class,652,Activités de réassurance,,,Reinsurance
+ISIC_4,653,group,65,Activités de caisses de retraite,,,Pension funding
+ISIC_4,6530,class,653,Activités de caisses de retraite,,,Pension funding
+ISIC_4,66,division,6,Activités auxiliaires des services financiers et des assurances,,,Activities auxiliary to financial service and insurance activities
+ISIC_4,661,group,66,Activités auxiliaires des services financiers à lexception des assurances et des caisses de retraite,,,"Activities auxiliary to financial service activities, except insurance and pension funding"
+ISIC_4,6611,class,661,Administration de marchés financiers,,,Administration of financial markets
+ISIC_4,6612,class,661,Activités de courtage en contrats de valeurs et de produits,,,Security and commodity contracts brokerage
+ISIC_4,6619,class,661,Autres activités auxiliaires des activités de services financiers,,,Other activities auxiliary to financial service activities
+ISIC_4,662,group,66,Activités auxiliaires de financement des assurances et caisses de retraite,,,Activities auxiliary to insurance and pension funding
+ISIC_4,6621,class,662,Évaluation de risque dassurance et de dommages,,,Risk and damage evaluation
+ISIC_4,6622,class,662,Activités des agents dassurance et des courtiers,,,Activities of insurance agents and brokers
+ISIC_4,6629,class,662,Autres activités auxiliaires de financement des assurances et caisses de retraite,,,Other activities auxiliary to insurance and pension funding
+ISIC_4,663,group,66,Activités de gestion de fonds,,,Fund management activities
+ISIC_4,6630,class,663,Activités de gestion de fonds,,,Fund management activities
+ISIC_4,68,division,6,Activités immobilières,,,Real estate activities
+ISIC_4,681,group,68,Activités immobilières sur biens propres ou loués,,,Real estate activities with own or leased property
+ISIC_4,6810,class,681,Activités immobilières sur biens propres ou loués,,,Real estate activities with own or leased property
+ISIC_4,682,group,68,Activités immobilières à forfait ou sous contrat,,,Real estate activities on a fee or contract basis
+ISIC_4,6820,class,682,Activités immobilières à forfait ou sous contrat,,,Real estate activities on a fee or contract basis
+ISIC_4,69,division,6,Activités juridiques et comptables,,,Legal and accounting activities
+ISIC_4,691,group,69,Activités juridiques,,,Legal activities
+ISIC_4,6910,class,691,Activités juridiques,,,Legal activities
+ISIC_4,692,group,69,Activités comptables et daudit; conseil fiscal,,,"Accounting, bookkeeping and auditing activities; tax consultancy"
+ISIC_4,6920,class,692,Activités comptables et daudit; conseil fiscal,,,"Accounting, bookkeeping and auditing activities; tax consultancy"
+ISIC_4,70,division,7,Activités de bureaux principaux; activités de conseils en matière de gestion,,,Activities of head offices; management consultancy activities
+ISIC_4,701,group,70,Activités de bureaux principaux,,,Activities of head offices
+ISIC_4,7010,class,701,Activités de bureaux principaux,,,Activities of head offices
+ISIC_4,702,group,70,Activités de conseils en matière de gestion,,,Management consultancy activities
+ISIC_4,7020,class,702,Activités de conseils en matière de gestion,,,Management consultancy activities
+ISIC_4,71,division,7,Activités darchitecture et dingénierie; activités dessais et danalyses techniques,,,Architectural and engineering activities; technical testing and analysis
+ISIC_4,711,group,71,Activités darchitecture et dingénierie et de conseils techniques connexes,,,Architectural and engineering activities and related technical consultancy
+ISIC_4,7110,class,711,Activités darchitecture et dingénierie et de conseils techniques connexes,,,Architectural and engineering activities and related technical consultancy
+ISIC_4,712,group,71,Activités dessais et danalyses techniques,,,Technical testing and analysis
+ISIC_4,7120,class,712,Activités dessais et danalyses techniques,,,Technical testing and analysis
+ISIC_4,72,division,7,Recherche scientifique et développement,,,Scientific research and development
+ISIC_4,721,group,72,Recherche-développement expérimental en sciences physiques et naturelles et en ingénierie,,,Research and experimental development on natural sciences and engineering
+ISIC_4,7210,class,721,Recherche-développement expérimental en sciences physiques et naturelles et en ingénierie,,,Research and experimental development on natural sciences and engineering
+ISIC_4,722,group,72,Recherche-développement expérimental en sciences sociales et humaines,,,Research and experimental development on social sciences and humanities
+ISIC_4,7220,class,722,Recherche-développement expérimental en sciences sociales et humaines,,,Research and experimental development on social sciences and humanities
+ISIC_4,73,division,7,Publicité et études de marché,,,Advertising and market research
+ISIC_4,731,group,73,Publicité,,,Advertising
+ISIC_4,7310,class,731,Publicité,,,Advertising
+ISIC_4,732,group,73,Activités détudes de marché et de sondage,,,Market research and public opinion polling
+ISIC_4,7320,class,732,Activités détudes de marché et de sondage,,,Market research and public opinion polling
+ISIC_4,74,division,7,"Autres activités professionnelles, scientifiques et techniques",,,"Other professional, scientific and technical activities"
+ISIC_4,741,group,74,Activités de conception de modèles,,,Specialized design activities
+ISIC_4,7410,class,741,Activités de conception de modèles,,,Specialized design activities
+ISIC_4,742,group,74,Activités photographiques,,,Photographic activities
+ISIC_4,7420,class,742,Activités photographiques,,,Photographic activities
+ISIC_4,749,group,74,"Autres activités professionnelles, scientifiques et techniques, n.c.a.",,,"Other professional, scientific and technical activities n.e.c."
+ISIC_4,7490,class,749,"Autres activités professionnelles, scientifiques et techniques, n.c.a.",,,"Other professional, scientific and technical activities n.e.c."
+ISIC_4,75,division,7,Activités de services vétérinaires,,,Veterinary activities
+ISIC_4,750,group,75,Activités de services vétérinaires,,,Veterinary activities
+ISIC_4,7500,class,750,Activités de services vétérinaires,,,Veterinary activities
+ISIC_4,77,division,7,Activités de location,,,Rental and leasing activities
+ISIC_4,771,group,77,Location de véhicules automobiles,,,Renting and leasing of motor vehicles
+ISIC_4,7710,class,771,Location de véhicules automobiles,,,Renting and leasing of motor vehicles
+ISIC_4,772,group,77,Location darticles personnels ou ménagers,,,Renting and leasing of personal and household goods
+ISIC_4,7721,class,772,Location darticles pour le sport et les loisirs,,,Renting and leasing of recreational and sports goods
+ISIC_4,7722,class,772,Location de vidéocassettes et de vidéodisques,,,Renting of video tapes and disks
+ISIC_4,7729,class,772,Location dautres articles personnels ou ménagers,,,Renting and leasing of other personal and household goods
+ISIC_4,773,group,77,"Location dautres machines, équipement et biens corporels",,,"Renting and leasing of other machinery, equipment and tangible goods"
+ISIC_4,7730,class,773,"Location dautres machines, équipement et biens corporels",,,"Renting and leasing of other machinery, equipment and tangible goods"
+ISIC_4,774,group,77,"Location de produits de la propriété intellectuelle et dautres produits similaires, à lexception des droits dauteur",,,"Leasing of intellectual property and similar products, except copyrighted works"
+ISIC_4,7740,class,774,"Location de produits de la propriété intellectuelle et dautres produits similaires, à lexception des droits dauteur",,,"Leasing of intellectual property and similar products, except copyrighted works"
+ISIC_4,78,division,7,Activités relatives à lemploi,,,Employment activities
+ISIC_4,781,group,78,Activités des agences de placement,,,Activities of employment placement agencies
+ISIC_4,7810,class,781,Activités des agences de placement,,,Activities of employment placement agencies
+ISIC_4,782,group,78,Activités des agences demploi temporaire,,,Temporary employment agency activities
+ISIC_4,7820,class,782,Activités des agences demploi temporaire,,,Temporary employment agency activities
+ISIC_4,783,group,78,Autres activités de fourniture de personnel,,,Other human resources provision
+ISIC_4,7830,class,783,Autres activités de fourniture de personnel,,,Other human resources provision
+ISIC_4,79,division,7,"Activités des agences de voyages, voyagistes, services de réservation et activités connexes",,,"Travel agency, tour operator, reservation service and related activities"
+ISIC_4,791,group,79,Activités des agences de voyages et des voyagistes,,,Travel agency and tour operator activities
+ISIC_4,7911,class,791,Activités des agences de voyages,,,Travel agency activities
+ISIC_4,7912,class,791,Activités des voyagistes,,,Tour operator activities
+ISIC_4,799,group,79,Autres activités des services de réservation et activités connexes,,,Other reservation service and related activities
+ISIC_4,7990,class,799,Autres activités des services de réservation et activités connexes,,,Other reservation service and related activities
+ISIC_4,80,division,8,Activités denquêtes et de sécurité,,,Security and investigation activities
+ISIC_4,801,group,80,Activités de services de sécurité privés,,,Private security activities
+ISIC_4,8010,class,801,Activités de services de sécurité privés,,,Private security activities
+ISIC_4,802,group,80,Activités des services de systèmes de sécurité,,,Security systems service activities
+ISIC_4,8020,class,802,Activités des services de systèmes de sécurité,,,Security systems service activities
+ISIC_4,803,group,80,Activités denquête,,,Investigation activities
+ISIC_4,8030,class,803,Activités denquête,,,Investigation activities
+ISIC_4,81,division,8,"Activités des services concernant les bâtiments, architecture paysagère",,,Services to buildings and landscape activities
+ISIC_4,811,group,81,Activités dappui aux installations intégrées,,,Combined facilities support activities
+ISIC_4,8110,class,811,Activités dappui aux installations intégrées,,,Combined facilities support activities
+ISIC_4,812,group,81,Activités de nettoyage,,,Cleaning activities
+ISIC_4,8121,class,812,Nettoyage général des bâtiments,,,General cleaning of buildings
+ISIC_4,8129,class,812,Autres activités de nettoyage de bâtiments et de nettoyage industriel,,,Other building and industrial cleaning activities
+ISIC_4,813,group,81,Activités des services dentretien des espaces verts,,,Landscape care and maintenance service activities
+ISIC_4,8130,class,813,Activités des services dentretien des espaces verts,,,Landscape care and maintenance service activities
+ISIC_4,82,division,8,"Activités dappui administratif, de secrétariat, et autres activités dappui aux entreprises",,,"Office administrative, office support and other business support activities"
+ISIC_4,821,group,82,Activités dappui administratif,,,Office administrative and support activities
+ISIC_4,8211,class,821,Activités des services intégrés dappui administratif,,,Combined office administrative service activities
+ISIC_4,8219,class,821,"Photocopie, préparation de documents et autres activités spécialisées dappui aux bureaux",,,"Photocopying, document preparation and other specialized office support activities"
+ISIC_4,822,group,82,Activités des centres dappel,,,Activities of call centres
+ISIC_4,8220,class,822,Activités des centres dappel,,,Activities of call centres
+ISIC_4,823,group,82,Organisation de congrès et de foires commerciales,,,Organization of conventions and trade shows
+ISIC_4,8230,class,823,Organisation de congrès et de foires commerciales,,,Organization of conventions and trade shows
+ISIC_4,829,group,82,"Activités de services dappui aux entreprises, n.c.a.",,,Business support service activities n.e.c.
+ISIC_4,8291,class,829,Activités des agences de recouvrement et de crédit,,,Activities of collection agencies and credit bureaus
+ISIC_4,8292,class,829,Activités de conditionnement,,,Packaging activities
+ISIC_4,8299,class,829,"Autres activités de services aux entreprises, n.c.a.",,,Other business support service activities n.e.c.
+ISIC_4,84,division,8,Administration publique et défense; sécurité sociale obligatoire,,,Public administration and defence; compulsory social security
+ISIC_4,841,group,84,Administration générale; administration de la politique économique et sociale,,,Administration of the State and the economic and social policy of the community
+ISIC_4,8411,class,841,Activités dadministration publique générale,,,General public administration activities
+ISIC_4,8412,class,841,"Tutelle des activités des organismes qui soccupent de santé, déducation, de culture et dautres activités sociales, à lexception de la sécurité sociale",,,"Regulation of the activities of providing health care, education, cultural services and other social services, excluding social security"
+ISIC_4,8413,class,841,Réglementation de lexploitation des entreprises et contribution à lamélioration de son efficacité,,,Regulation of and contribution to more efficient operation of businesses
+ISIC_4,842,group,84,Services fournis à lensemble de la collectivité,,,Provision of services to the community as a whole
+ISIC_4,8421,class,842,Affaires étrangères,,,Foreign affairs
+ISIC_4,8422,class,842,Activités de défense,,,Defence activities
+ISIC_4,8423,class,842,Activités de maintien de lordre et de la sécurité publics,,,Public order and safety activities
+ISIC_4,843,group,84,Activités de sécurité sociale obligatoire,,,Compulsory social security activities
+ISIC_4,8430,class,843,Activités de sécurité sociale obligatoire,,,Compulsory social security activities
+ISIC_4,85,division,8,Éducation,,,Education
+ISIC_4,851,group,85,Activités denseignement préprimaire et primaire,,,Pre-primary and primary education
+ISIC_4,8510,class,851,Activités denseignement préprimaire et primaire,,,Pre-primary and primary education
+ISIC_4,852,group,85,Activités denseignement secondaire,,,Secondary education
+ISIC_4,8521,class,852,Activités denseignement secondaire général,,,General secondary education
+ISIC_4,8522,class,852,Activités denseignement secondaire technique et professionnel,,,Technical and vocational secondary education
+ISIC_4,853,group,85,Activités denseignement supérieur,,,Higher education
+ISIC_4,8530,class,853,Activités denseignement supérieur,,,Higher education
+ISIC_4,854,group,85,Autres activités denseignement,,,Other education
+ISIC_4,8541,class,854,Activités denseignement lié aux sports et aux loisirs,,,Sports and recreation education
+ISIC_4,8542,class,854,Activités denseignement à caractère culturel,,,Cultural education
+ISIC_4,8549,class,854,"Autres activités denseignement, n.c.a.",,,Other education n.e.c.
+ISIC_4,855,group,85,Activités dappui pédagogique,,,Educational support activities
+ISIC_4,8550,class,855,Activités dappui pédagogique,,,Educational support activities
+ISIC_4,86,division,8,Activités relatives à la santé,,,Human health activities
+ISIC_4,861,group,86,Activités hospitalières,,,Hospital activities
+ISIC_4,8610,class,861,Activités hospitalières,,,Hospital activities
+ISIC_4,862,group,86,Activités de pratique médicale et dentaire,,,Medical and dental practice activities
+ISIC_4,8620,class,862,Activités de pratique médicale et dentaire,,,Medical and dental practice activities
+ISIC_4,869,group,86,Autres activités relatives à la santé,,,Other human health activities
+ISIC_4,8690,class,869,Autres activités relatives à la santé,,,Other human health activities
+ISIC_4,87,division,8,Activités de soins de santé dispensés en établissement,,,Residential care activities
+ISIC_4,871,group,87,Installations de soins de santé en établissement hospitalier,,,Residential nursing care facilities
+ISIC_4,8710,class,871,Installations de soins de santé en établissement hospitalier,,,Residential nursing care facilities
+ISIC_4,872,group,87,"Activités de soins de santé pour retardés mentaux, malades mentaux et toxicomanes",,,"Residential care activities for mental retardation, mental health and substance abuse"
+ISIC_4,8720,class,872,"Activités de soins de santé pour retardés mentaux, malades mentaux et toxicomanes",,,"Residential care activities for mental retardation, mental health and substance abuse"
+ISIC_4,873,group,87,Activités de soins de santé en établissement hospitalier pour les personnes âgées et les handicapés,,,Residential care activities for the elderly and disabled
+ISIC_4,8730,class,873,Activités de soins de santé en établissement hospitalier pour les personnes âgées et les handicapés,,,Residential care activities for the elderly and disabled
+ISIC_4,879,group,87,Autres activités de soins de santé en établissement hospitalier,,,Other residential care activities
+ISIC_4,8790,class,879,Autres activités de soins de santé en établissement hospitalier,,,Other residential care activities
+ISIC_4,88,division,8,Activités daction sociale sans hébergement,,,Social work activities without accommodation
+ISIC_4,881,group,88,Activités daction sociale sans hébergement pour les personnes âgées et les handicapés,,,Social work activities without accommodation for the elderly and disabled
+ISIC_4,8810,class,881,Activités daction sociale sans hébergement pour les personnes âgées et les handicapés,,,Social work activities without accommodation for the elderly and disabled
+ISIC_4,889,group,88,Autres activités daction sociale sans hébergement,,,Other social work activities without accommodation
+ISIC_4,8890,class,889,Autres activités daction sociale sans hébergement,,,Other social work activities without accommodation
+ISIC_4,90,division,9,"Activités créatives, arts et spectacles",,,"Creative, arts and entertainment activities"
+ISIC_4,900,group,90,"Activités créatives, arts et spectacles",,,"Creative, arts and entertainment activities"
+ISIC_4,9000,class,900,"Activités créatives, arts et spectacles",,,"Creative, arts and entertainment activities"
+ISIC_4,91,division,9,"Activités des bibliothèques, archives, musées et autres activités culturelles",,,"Libraries, archives, museums and other cultural activities"
+ISIC_4,910,group,91,"Activités des bibliothèques, archives, musées et autres activités culturelles",,,"Libraries, archives, museums and other cultural activities"
+ISIC_4,9101,class,910,Activités des bibliothèques et archives,,,Library and archives activities
+ISIC_4,9102,class,910,Activités des musées et exploitation de sites et monuments historiques,,,Museums activities and operation of historical sites and buildings
+ISIC_4,9103,class,910,Activités des jardins botaniques et zoologiques et des réserves naturelles,,,Botanical and zoological gardens and nature reserves activities
+ISIC_4,92,division,9,Activités de jeux de hasard et de pari,,,Gambling and betting activities
+ISIC_4,920,group,92,Activités de jeux de hasard et de pari,,,Gambling and betting activities
+ISIC_4,9200,class,920,Activités de jeux de hasard et de pari,,,Gambling and betting activities
+ISIC_4,93,division,9,Activités sportives et de loisirs et activités récréatives,,,Sports activities and amusement and recreation activities
+ISIC_4,931,group,93,Activités sportives,,,Sports activities
+ISIC_4,9311,class,931,Exploitation dinstallations sportives,,,Operation of sports facilities
+ISIC_4,9312,class,931,Activités des clubs sportifs,,,Activities of sports clubs
+ISIC_4,9319,class,931,Autres activités sportives,,,Other sports activities
+ISIC_4,932,group,93,Autres activités récréatives et de loisirs,,,Other amusement and recreation activities
+ISIC_4,9321,class,932,Activités des parcs dattraction et à thèmes,,,Activities of amusement parks and theme parks
+ISIC_4,9329,class,932,"Autres activités récréatives et de loisirs, n.c.a.",,,Other amusement and recreation activities n.e.c.
+ISIC_4,94,division,9,Activités des organisations associatives,,,Activities of membership organizations
+ISIC_4,941,group,94,"Activités dorganisations associatives économiques, patronales et professionnelles",,,"Activities of business, employers and professional membership organizations"
+ISIC_4,9411,class,941,Activités dorganisations associatives économiques et patronales,,,Activities of business and employers membership organizations
+ISIC_4,9412,class,941,Activités dorganisations associatives professionnelles,,,Activities of professional membership organizations
+ISIC_4,942,group,94,Activités de syndicats de salariés,,,Activities of trade unions
+ISIC_4,9420,class,942,Activités de syndicats de salariés,,,Activities of trade unions
+ISIC_4,949,group,94,Activités dautres organisations associatives,,,Activities of other membership organizations
+ISIC_4,9491,class,949,Activités dorganisations religieuses,,,Activities of religious organizations
+ISIC_4,9492,class,949,Activités dorganisations politiques,,,Activities of political organizations
+ISIC_4,9499,class,949,"Activités dautres organisations associatives, n.c.a.",,,Activities of other membership organizations n.e.c.
+ISIC_4,95,division,9,Activités de réparation dordinateurs et darticles personnels et ménagers,,,Repair of computers and personal and household goods
+ISIC_4,951,group,95,Réparation dordinateurs et de matériel de communication,,,Repair of computers and communication equipment
+ISIC_4,9511,class,951,Réparation dordinateurs et de matériel périphérique,,,Repair of computers and peripheral equipment
+ISIC_4,9512,class,951,Réparation de matériel de communication,,,Repair of communication equipment
+ISIC_4,952,group,95,Réparation darticles personnels et ménagers,,,Repair of personal and household goods
+ISIC_4,9521,class,952,Réparation de biens de consommation : matériel électronique,,,Repair of consumer electronics
+ISIC_4,9522,class,952,Réparation dappareils ménagers et de matériel pour la maison et le jardin,,,Repair of household appliances and home and garden equipment
+ISIC_4,9523,class,952,Réparation de chaussures et darticles de cuir,,,Repair of footwear and leather goods
+ISIC_4,9524,class,952,Réparation de mobilier et de meubles de maison,,,Repair of furniture and home furnishings
+ISIC_4,9529,class,952,Réparation dautres articles personnels et ménagers,,,Repair of other personal and household goods
+ISIC_4,96,division,9,Autres activités de services personnels,,,Other personal service activities
+ISIC_4,960,group,96,Autres activités de services personnels,,,Other personal service activities
+ISIC_4,9601,class,960,Lavage et nettoyage à sec de textiles et de fourrures,,,Washing and (dry-) cleaning of textile and fur products
+ISIC_4,9602,class,960,Coiffure et autres soins esthétiques,,,Hairdressing and other beauty treatment
+ISIC_4,9603,class,960,Activités de pompes funèbres et activités connexes,,,Funeral and related activities
+ISIC_4,9609,class,960,"Autres activités de services personnels, n.c.a.",,,Other personal service activities n.e.c.
+ISIC_4,97,division,9,Activités des ménages privés employant du personnel domestique,,,Activities of households as employers of domestic personnel
+ISIC_4,970,group,97,Activités des ménages privés employant du personnel domestique,,,Activities of households as employers of domestic personnel
+ISIC_4,9700,class,970,Activités des ménages privés employant du personnel domestique,,,Activities of households as employers of domestic personnel
+ISIC_4,98,division,9,Activités non différenciées de production de biens et de services des ménages privés pour usage propre,,,Undifferentiated goods- and services-producing activities of private households for own use
+ISIC_4,981,group,98,Activités non différenciées de production de biens des ménages privés pour usage propre,,,Undifferentiated goods-producing activities of private households for own use
+ISIC_4,9810,class,981,Activités non différenciées de production de biens des ménages privés pour usage propre,,,Undifferentiated goods-producing activities of private households for own use
+ISIC_4,982,group,98,Activités non différenciées de production de services des ménages privés pour usage propre,,,Undifferentiated service-producing activities of private households for own use
+ISIC_4,9820,class,982,Activités non différenciées de production de services des ménages privés pour usage propre,,,Undifferentiated service-producing activities of private households for own use
+ISIC_4,99,division,9,Activités des organisations et organismes extra-territoriaux,,,Activities of extraterritorial organizations and bodies
+ISIC_4,990,group,99,Activités des organisations et organismes extra-territoriaux,,,Activities of extraterritorial organizations and bodies
+ISIC_4,9900,class,990,Activités des organisations et organismes extra-territoriaux,,,Activities of extraterritorial organizations and bodies
+ISIC_4,A,section,,"Agriculture, sylviculture et pêche",,,"Agriculture, forestry and fishing"
+ISIC_4,B,section,,Activités extractives,,,Mining and quarrying
+ISIC_4,C,section,,Activités de fabrication,,,Manufacturing
+ISIC_4,D,section,,"Production et distribution délectricité, de gaz, de vapeur et climatisation",,,"Electricity, gas, steam and air conditioning supply"
+ISIC_4,E,section,,Distribution deau; réseau dassainissement; gestion des déchets et activités de remise en état,,,"Water supply; sewerage, waste management and remediation activities"
+ISIC_4,F,section,,Construction,,,Construction
+ISIC_4,G,section,,"Commerce de gros et de détail, réparations de véhicules automobiles et de motocycles",,,Wholesale and retail trade; repair of motor vehicles and motorcycles
+ISIC_4,H,section,,Transport et entreposage,,,Transportation and storage
+ISIC_4,I,section,,Activités dhébergement et de restauration,,,Accommodation and food service activities
+ISIC_4,J,section,,Information et communication,,,Information and communication
+ISIC_4,K,section,,Activités financières et dassurances,,,Financial and insurance activities
+ISIC_4,L,section,,Activités immobilières,,,Real estate activities
+ISIC_4,M,section,,"Activités professionnelles, scientifiques et techniques",,,"Professional, scientific and technical activities"
+ISIC_4,N,section,,Activités de services administratifs et dappui,,,Administrative and support service activities
+ISIC_4,O,section,,Administration publique et défense; sécurité sociale obligatoire,,,Public administration and defence; compulsory social security
+ISIC_4,P,section,,Éducation,,,Education
+ISIC_4,Q,section,,Santé et et activités daction sociale,,,Human health and social work activities
+ISIC_4,R,section,,"Arts, spectacles et loisirs",,,"Arts, entertainment and recreation"
+ISIC_4,S,section,,Autres activités de services,,,Other service activities
+ISIC_4,T,section,,Activités des ménages privés employant du personnel domestique; activités non différenciées de production de biens et de services des ménages privés pour usage propre,,,Activities of households as employers; undifferentiated goods- and services-producing activities of households for own use
+ISIC_4,U,section,,Activités des organisations et organismes extra-territoriaux,,,Activities of extraterritorial organizations and bodies
