@@ -20,6 +20,7 @@ describe("lib/email graceful degradation", () => {
     global.fetch = origFetch;
     delete process.env.RESEND_API_KEY;
     delete process.env.RESEND_FROM_EMAIL;
+    delete process.env.RESEND_REPLY_TO;
   });
 
   it("returns sent:false when RESEND_API_KEY is missing", async () => {
@@ -41,7 +42,8 @@ describe("lib/email graceful degradation", () => {
 
   it("sends via Resend API when key is set", async () => {
     process.env.RESEND_API_KEY = "re_real_abc";
-    process.env.RESEND_FROM_EMAIL = "hello@openswissdata.com";
+    process.env.RESEND_FROM_EMAIL = "noreply@openswissdata.com";
+    process.env.RESEND_REPLY_TO = "contact@openswissdata.com";
     const r = await sendDownloadEmail({
       to: "alice@example.com", datasetName: "TARES", downloadUrl: "https://dl/x", accountUrl: "https://acc", version: "2026.04.22",
     });
@@ -52,10 +54,21 @@ describe("lib/email graceful degradation", () => {
     expect(opts.method).toBe("POST");
     expect(opts.headers.Authorization).toBe("Bearer re_real_abc");
     const body = JSON.parse(opts.body);
-    expect(body.from).toBe("hello@openswissdata.com");
+    expect(body.from).toBe("noreply@openswissdata.com");
+    expect(body.reply_to).toBe("contact@openswissdata.com");
     expect(body.to).toEqual(["alice@example.com"]);
     expect(body.subject).toContain("TARES");
     expect(body.html).toContain("2026.04.22");
+  });
+
+  it("defaults from to noreply@ and reply_to to contact@ when env vars are unset", async () => {
+    process.env.RESEND_API_KEY = "re_real_abc";
+    delete process.env.RESEND_FROM_EMAIL;
+    delete process.env.RESEND_REPLY_TO;
+    await sendMagicLinkEmail({ to: "x@y.com", magicUrl: "https://link" });
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.from).toBe("noreply@openswissdata.com");
+    expect(body.reply_to).toBe("contact@openswissdata.com");
   });
 
   it("escapes HTML in dataset name (XSS guard)", async () => {
