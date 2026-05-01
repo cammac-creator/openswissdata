@@ -231,14 +231,32 @@ Tests Vitest : **297/297 passed**. Build Astro : **1066 pages, 2.89s**.
 
 ---
 
-## 9. Checklist post-déploiement (à vérifier 3 min après push)
+## 9. Validation post-déploiement (vérifié 2026-05-02 00:05 CEST)
 
-- [ ] `curl -sI https://www.openswissdata.com/` retourne `cache-control: public, max-age=300, s-maxage=600, stale-while-revalidate=86400`
-- [ ] `curl -s -H "Accept-Encoding: gzip" -D - -o /dev/null https://www.openswissdata.com/` retourne `content-encoding: gzip`
-- [ ] `curl -sI https://www.openswissdata.com/_astro/BaseLayout.*.css` retourne `cache-control: public, max-age=31536000, immutable`
-- [ ] HSTS et CSP toujours présents (vérifier que mes middlewares n'ont pas écrasé `secureHeaders`)
-- [ ] Fastly `x-cache: HIT` après 2 hits successifs sur la même page (pas immédiat, dépend du shielding et du PoP)
-- [ ] Lancer PSI plus tard (quota reset 24h) pour scores Lighthouse vrais
+Vérifications effectuées sur prod après les 2 commits push :
+
+| Page | content-encoding | cache-control |
+|------|------------------|---------------|
+| `/` | gzip ✓ | `max-age=300, s-maxage=600, stale-while-revalidate=86400` ✓ |
+| `/datasets/tares` | gzip ✓ | `max-age=300, s-maxage=600, stale-while-revalidate=86400` ✓ |
+| `/mcp` (page docs) | gzip ✓ | `max-age=300, s-maxage=600, stale-while-revalidate=86400` ✓ |
+| `/compliance` | gzip ✓ | `max-age=300, s-maxage=600, stale-while-revalidate=86400` ✓ |
+| `/codes/noga/6210/` | gzip ✓ | `max-age=300, s-maxage=600, stale-while-revalidate=86400` ✓ |
+| `/_astro/BaseLayout.*.css` | gzip ✓ | `max-age=31536000, immutable` ✓ |
+
+Headers de sécurité préservés :
+- `strict-transport-security: max-age=15552000; includeSubDomains` ✓
+- `content-security-policy: default-src 'self'; ...` ✓ (CSP complète intacte)
+
+Mesure réelle : page `/` passe de 30’971 bytes plain à **8’919 bytes** sur le wire après gzip = -71%.
+
+À vérifier dans 24h :
+- [ ] PSI Lighthouse Mobile sur les 5 pages (quota Google reset)
+- [ ] `x-cache: HIT` Fastly après quelques hits successifs depuis le même PoP
+
+### Nouvelles modifications appliquées (commit 2)
+
+Le premier commit appliquait `no-store` à tout `/mcp*`, ce qui rendait la page de docs publique non-cacheable. Commit 2 (`perf: scope no-store cache to actual MCP API paths only`) restreint `no-store` aux endpoints API explicites : `/mcp/jsonrpc`, `/mcp/discovery`, `/mcp/health`, `/mcp/oauth/*`. La page `/mcp` HTML retrouve son cache normal. Vérifié sur prod ✓.
 
 ---
 
