@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Récap session du 30 avril — où on en est</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FBFBF8;
+  --bg-soft: #F4F4F0;
+  --bg-card: #FFFFFF;
+  --ink: #0A0A0C;
+  --ink-soft: #4A4D55;
+  --ink-mute: #8A8D95;
+  --line: rgba(10,10,12,.10);
+  --green: #15803D;
+  --green-soft: rgba(21,128,61,.08);
+  --red: #DC1F2D;
+  --red-soft: rgba(220,31,45,.06);
+  --amber: #B45309;
+  --amber-soft: rgba(180,83,9,.08);
+  --teal: #0F766E;
+  --teal-soft: rgba(15,118,110,.08);
+}
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 920px; margin: 0 auto; padding: 48px 32px; }
+
+/* === Header === */
+.header {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 24px;
+  margin-bottom: 56px;
+}
+.header-tag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 12px;
+}
+.header h1 {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -.025em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.header h1 .accent { color: var(--red); }
+.header p {
+  font-size: 18px;
+  color: var(--ink-soft);
+  max-width: 60ch;
+}
+
+/* === Sections === */
+.section { margin-bottom: 64px; }
+.section-num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 8px;
+}
+.section h2 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -.018em;
+  line-height: 1.15;
+  margin-bottom: 28px;
+}
+
+/* === Cards récap (avant/après) === */
+.recap-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.pack {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px 28px;
+  position: relative;
+}
+.pack-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.pack-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -.015em;
+}
+.pack-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+.pack-status {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.pack-status.live { background: var(--green-soft); color: var(--green); border: 1px solid rgba(21,128,61,.18); }
+.pack-status.live::before { content: '✓ '; }
+.pack-status.warn { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(180,83,9,.18); }
+.pack-status.warn::before { content: '⚠ '; }
+
+.pack-row {
+  display: grid;
+  grid-template-columns: 1fr 30px 1fr;
+  gap: 14px;
+  align-items: center;
+}
+.pack-before, .pack-after {
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pack-before {
+  background: var(--bg-soft);
+  border: 1px dashed var(--line);
+  color: var(--ink-mute);
+  text-decoration: line-through;
+  text-decoration-color: rgba(220,31,45,.5);
+}
+.pack-before strong { color: var(--ink-soft); font-weight: 500; }
+.pack-after {
+  background: var(--green-soft);
+  border: 1px solid rgba(21,128,61,.20);
+  color: var(--ink);
+}
+.pack-after strong { color: var(--green); font-weight: 600; }
+.pack-arrow {
+  color: var(--red);
+  font-family: 'Geist Mono', monospace;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+.pack-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 4px;
+}
+
+.pack-note {
+  margin-top: 16px;
+  padding: 10px 12px;
+  background: var(--amber-soft);
+  border: 1px solid rgba(180,83,9,.18);
+  border-radius: 6px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  color: var(--amber);
+  line-height: 1.4;
+}
+.pack-note strong { font-weight: 600; }
+
+/* === V4 design row === */
+.design-card {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 12px;
+  padding: 28px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.design-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(500px circle at 100% 0%, rgba(220,31,45,.18), transparent 50%);
+  pointer-events: none;
+}
+.design-card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; position: relative; }
+.design-card-title { font-size: 22px; font-weight: 600; letter-spacing: -.015em; }
+.design-card-title .accent { color: var(--red); }
+.design-card-status { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--green); }
+.design-card-status::before { content: '✓ '; }
+.design-card p { font-size: 14px; color: rgba(255,255,255,.75); line-height: 1.55; max-width: 70ch; position: relative; }
+.design-card a {
+  display: inline-block;
+  margin-top: 12px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(255,255,255,.4);
+  padding-bottom: 1px;
+  position: relative;
+}
+.design-card a::after { content: ' →'; }
+
+/* === Décisions === */
+.decision {
+  background: var(--bg-card);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 16px;
+  transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+.decision:hover {
+  border-color: var(--ink);
+  box-shadow: 0 8px 24px -12px rgba(10,10,12,.18);
+  transform: translateY(-1px);
+}
+.decision-num {
+  display: inline-block;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .08em;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.decision h3 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -.012em;
+  margin-bottom: 8px;
+}
+.decision p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.decision .my-vote {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  background: var(--green-soft);
+  border: 1px solid rgba(21,128,61,.20);
+  color: var(--green);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+.decision .my-vote strong { font-weight: 600; }
+
+.decision-options { display: flex; gap: 10px; flex-wrap: wrap; }
+.decision-options label {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all .15s;
+  background: var(--bg);
+}
+.decision-options label:hover { border-color: var(--ink); background: var(--bg-card); }
+.decision-options input { display: none; }
+.decision-options input:checked + span {
+  color: #fff;
+}
+.decision-options label:has(input:checked) {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.decision-options label:has(input[value="non"]:checked) {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* === Reply box === */
+.reply {
+  margin-top: 56px;
+  padding: 32px;
+  background: var(--bg-soft);
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.reply h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.reply pre {
+  background: var(--ink);
+  color: #fafafa;
+  padding: 16px 20px;
+  border-radius: 8px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-top: 12px;
+  overflow-x: auto;
+}
+.reply pre .green { color: #4ade80; }
+.reply pre .red { color: #f87171; }
+
+.reply-summary {
+  margin-top: 16px;
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  border: 1px dashed var(--line);
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  display: none;
+}
+.reply-summary.show { display: block; }
+
+/* === Footer === */
+.footer {
+  margin-top: 80px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: .04em;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header class="header">
+  <div class="header-tag">Récap session · 30 avril 2026 · openswissdata</div>
+  <h1>Voilà ce qui a changé aujourd'hui.<br><span class="accent">Et ce que j'attends de toi.</span></h1>
+  <p>Pas de jargon technique. Tu coches en bas. Tu me dis le numéro. On enchaîne.</p>
+</header>
+
+<!-- ============ SECTION 1 : ce qui a été fait ============ -->
+<section class="section">
+  <div class="section-num">§ 01 · ce qui a été fait</div>
+  <h2>Tes 3 packs sont passés à un autre niveau. En une session.</h2>
+
+  <div class="recap-grid">
+
+    <!-- TARES -->
+    <div class="pack">
+      <div class="pack-head">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="pack-emoji">🛃</span>
+            <span class="pack-title">TARES — Tarif douanier</span>
+          </div>
+        </div>
+        <span class="pack-status live">Live</span>
+      </div>
+      <div class="pack-row">
+        <div>
+          <div class="pack-label">Avant</div>
+          <div class="pack-before">7 500 codes en CSV/JSON. <strong>Pas de signature</strong>. Pas d'embeddings. Pas de moat technique.</div>
+        </div>
+        <div class="pack-arrow">→</div>
+        <div>
+          <div class="pack-label">Après</div>
+          <div class="pack-after"><strong>+ 7 511 embeddings vectoriels</strong> pré-calculés (recherche sémantique instantanée chez l'acheteur). <strong>+ Manifest signé Ed25519</strong> + horodatage RFC-3161.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Classifications -->
+    <div class="pack">
+      <div class="pack-head">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="pack-emoji">📊</span>
+            <span class="pack-title">Classifications — NOGA · NACE · ISIC</span>
+          </div>
+        </div>
+        <span class="pack-status warn">À débloquer</span>
+      </div>
+      <div class="pack-row">
+        <div>
+          <div class="pack-label">Avant (bug critique)</div>
+          <div class="pack-before"><strong>NOGA 2025 = 0 lignes</strong>. <strong>NACE 2.1 = 0 lignes</strong>. Les acheteurs recevaient des fichiers vides sur les nomenclatures les plus récentes.</div>
+        </div>
+        <div class="pack-arrow">→</div>
+        <div>
+          <div class="pack-label">Après</div>
+          <div class="pack-after"><strong>1 845 codes NOGA 2025</strong> + <strong>1 047 codes NACE 2.1</strong> + 2 177 cross-walks officiels Eurostat. <strong>+ 978 614 lignes STATENT</strong> (établissements × commune × NOGA).</div>
+        </div>
+      </div>
+      <div class="pack-note">
+        <strong>⚠ Attention licence STATENT :</strong> l'OFS exige une autorisation écrite avant de vendre STATENT en commercial. Le pack est prêt techniquement mais on ne peut pas l'inclure dans un tier payant tant qu'on n'a pas le waiver. Voir décision 1 plus bas.
+      </div>
+    </div>
+
+    <!-- FINMA -->
+    <div class="pack">
+      <div class="pack-head">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="pack-emoji">🏦</span>
+            <span class="pack-title">FINMA — Registre + Warnings + Zefix</span>
+          </div>
+        </div>
+        <span class="pack-status live">Live</span>
+      </div>
+      <div class="pack-row">
+        <div>
+          <div class="pack-label">Avant</div>
+          <div class="pack-before">~1 500 entités autorisées seules. <strong>Pas de warnings</strong>. Pas de cross-réf Zefix. Pas de signature.</div>
+        </div>
+        <div class="pack-arrow">→</div>
+        <div>
+          <div class="pack-label">Après</div>
+          <div class="pack-after"><strong>+ 2 182 warnings FINMA</strong> (entités non autorisées, scams). <strong>+ 2 715 UIDs</strong> enrichis Zefix (forme légale, objet social) — 99,85% de match. + Manifest signé Ed25519.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Design V4 -->
+    <div class="design-card">
+      <div class="design-card-head">
+        <div class="design-card-title">🎨 Landing V4 "Swiss Data Engineering"</div>
+        <span class="design-card-status">Live</span>
+      </div>
+      <p>
+        Refonte complète de la page d'accueil. <strong style="color:#fff">Geist + Geist Mono</strong> remplacent Inter / Instrument Serif italique (le "look SaaS template" qui te dérangeait).
+        Animations smooth (terminal qui tape tout seul, compteur qui s'incrémente, reveal stagger).
+        3 angles persona (data eng / conformité / ERP) orchestrés sans saturer.
+      </p>
+      <a href="https://www.openswissdata.com/" target="_blank">Ouvrir openswissdata.com en incognito</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ SECTION 2 : ce qui reste à décider ============ -->
+<section class="section">
+  <div class="section-num">§ 02 · ce que j'attends de toi</div>
+  <h2>4 décisions courtes. Tu coches. Je continue.</h2>
+
+  <!-- Décision 1 -->
+  <div class="decision">
+    <span class="decision-num">DÉCISION 1</span>
+    <h3>Préparer un email à statent@bfs.admin.ch ?</h3>
+    <p>Pour obtenir l'autorisation écrite de vendre STATENT dans le tier Pro Classifications. Je rédige un draft (basé sur le précédent BAZG qui a marché). Tu relis, tu envoies quand prêt.</p>
+    <div class="my-vote"><strong>Mon vote :</strong> Oui — sans waiver, on ne peut pas vendre les 978k lignes qu'on vient de générer.</div>
+    <div class="decision-options">
+      <label><input type="radio" name="d1" value="oui" onchange="updateReply()"><span>✓ Oui, prépare le draft</span></label>
+      <label><input type="radio" name="d1" value="non" onchange="updateReply()"><span>✗ Non, pas maintenant</span></label>
+    </div>
+  </div>
+
+  <!-- Décision 2 -->
+  <div class="decision">
+    <span class="decision-num">DÉCISION 2</span>
+    <h3>Lancer le tier Classifications Pro à 999 CHF maintenant — sans STATENT pour l'instant ?</h3>
+    <p>On annonce le Pro avec embeddings + cross-walks NAICS + EN labels (déjà prêt). Quand BFS valide, on ajoute STATENT en V2 sans changer le prix. Sinon on attend une réponse BFS qui peut prendre des semaines.</p>
+    <div class="my-vote"><strong>Mon vote :</strong> Oui — on a déjà assez pour justifier 999 CHF, et on n'attend pas BFS.</div>
+    <div class="decision-options">
+      <label><input type="radio" name="d2" value="oui" onchange="updateReply()"><span>✓ Oui, lancer Pro sans STATENT</span></label>
+      <label><input type="radio" name="d2" value="non" onchange="updateReply()"><span>✗ Non, attendre BFS</span></label>
+    </div>
+  </div>
+
+  <!-- Décision 3 -->
+  <div class="decision">
+    <span class="decision-num">DÉCISION 3</span>
+    <h3>Lancer le développement de C3 (classifier free-text → top-3 NOGA) maintenant ?</h3>
+    <p>Tu donnes "vente de café en grain et torréfaction" → le système retourne top-3 codes NOGA avec score. Killer feature pour les CRM/sales/AI agents. Réutilise le modèle Xenova qu'on a déjà installé pour T1. ~30 min de dev en background.</p>
+    <div class="my-vote"><strong>Mon vote :</strong> Oui — coût très faible, valeur très haute.</div>
+    <div class="decision-options">
+      <label><input type="radio" name="d3" value="oui" onchange="updateReply()"><span>✓ Oui, lance C3</span></label>
+      <label><input type="radio" name="d3" value="non" onchange="updateReply()"><span>✗ Non, plus tard</span></label>
+    </div>
+  </div>
+
+  <!-- Décision 4 -->
+  <div class="decision">
+    <span class="decision-num">DÉCISION 4</span>
+    <h3>On attaque la Phase 2 MCP server ?</h3>
+    <p>C'est la fonctionnalité qui va débloquer la promo (Show HN, ProductHunt, LinkedIn). Imagine : un utilisateur de Claude Code peut demander "trouve-moi le code TARES pour des bijoux en or" et l'agent appelle directement openswissdata via MCP. C'est ce qui transforme tes datasets en outil "agent-native". ~8 jours de dev (parallélisable en agents).</p>
+    <div class="my-vote"><strong>Mon vote :</strong> Oui — c'est le levier le plus fort pour le push promo.</div>
+    <div class="decision-options">
+      <label><input type="radio" name="d4" value="oui" onchange="updateReply()"><span>✓ Oui, attaquons</span></label>
+      <label><input type="radio" name="d4" value="plus-tard" onchange="updateReply()"><span>⏸ Plus tard cette semaine</span></label>
+      <label><input type="radio" name="d4" value="non" onchange="updateReply()"><span>✗ Pas encore</span></label>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============ SECTION 3 : comment me répondre ============ -->
+<div class="reply">
+  <h3>📝 Comment me répondre</h3>
+  <p style="font-size:15px; color:var(--ink-soft); margin-top:8px;">Tu coches au-dessus, puis tu copies-colles cette ligne dans ton chat avec moi :</p>
+  <pre id="reply-text"><span class="green">D1=</span><span style="color:#999">?</span> · <span class="green">D2=</span><span style="color:#999">?</span> · <span class="green">D3=</span><span style="color:#999">?</span> · <span class="green">D4=</span><span style="color:#999">?</span></pre>
+  <div class="reply-summary" id="reply-summary"></div>
+  <p style="font-size:13px; color:var(--ink-mute); margin-top:14px;">Si tu veux pas réfléchir, écris simplement "<strong>D1=oui · D2=oui · D3=oui · D4=oui</strong>" — c'est ce que je recommande.</p>
+</div>
+
+<footer class="footer">
+  <div>openswissdata · 30 avril 2026 · récap pour Alain</div>
+  <div>12 commits · 3 packs upgradés · landing V4 live</div>
+</footer>
+
+</div>
+
+<script>
+function updateReply() {
+  const get = (n) => {
+    const checked = document.querySelector('input[name="' + n + '"]:checked');
+    return checked ? checked.value : null;
+  };
+  const d1 = get('d1');
+  const d2 = get('d2');
+  const d3 = get('d3');
+  const d4 = get('d4');
+  const fmt = (v) => v === null
+    ? '<span style="color:#999">?</span>'
+    : v === 'oui' ? '<span class="green">' + v + '</span>'
+    : '<span class="red">' + v + '</span>';
+
+  document.getElementById('reply-text').innerHTML =
+    '<span class="green">D1=</span>' + fmt(d1) + ' · ' +
+    '<span class="green">D2=</span>' + fmt(d2) + ' · ' +
+    '<span class="green">D3=</span>' + fmt(d3) + ' · ' +
+    '<span class="green">D4=</span>' + fmt(d4);
+
+  const summary = document.getElementById('reply-summary');
+  if (d1 && d2 && d3 && d4) {
+    const ouiCount = [d1, d2, d3, d4].filter(v => v === 'oui').length;
+    summary.innerHTML = '✓ Tout coché. Copie la ligne ci-dessus dans ton chat. ' + ouiCount + '/4 oui.';
+    summary.classList.add('show');
+  } else {
+    summary.classList.remove('show');
+  }
+}
+</script>
+
+</body>
+</html>

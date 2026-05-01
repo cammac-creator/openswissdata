@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Récap session 30 avril — bilan + ce qui reste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FBFBF8;
+  --bg-soft: #F4F4F0;
+  --bg-card: #FFFFFF;
+  --ink: #0A0A0C;
+  --ink-soft: #4A4D55;
+  --ink-mute: #8A8D95;
+  --line: rgba(10,10,12,.10);
+  --line-strong: rgba(10,10,12,.18);
+  --green: #15803D;
+  --green-soft: rgba(21,128,61,.08);
+  --red: #DC1F2D;
+  --red-soft: rgba(220,31,45,.06);
+  --amber: #B45309;
+  --amber-soft: rgba(180,83,9,.08);
+  --teal: #0F766E;
+  --teal-soft: rgba(15,118,110,.08);
+  --indigo: #4338CA;
+  --indigo-soft: rgba(67,56,202,.08);
+}
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 48px 32px 96px; }
+
+/* === Header === */
+.header { border-bottom: 2px solid var(--ink); padding-bottom: 28px; margin-bottom: 56px; }
+.header-tag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 14px;
+}
+.header h1 {
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -.025em;
+  line-height: 1.05;
+  margin-bottom: 14px;
+  max-width: 22ch;
+}
+.header h1 .accent { color: var(--red); }
+.header p { font-size: 18px; color: var(--ink-soft); max-width: 60ch; }
+
+/* === Stats top === */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 56px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px;
+}
+.stat-card-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 6px;
+}
+.stat-card-value {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.018em;
+}
+.stat-card-sub {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+/* === Sections === */
+.section { margin-bottom: 64px; }
+.section-num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 8px;
+}
+.section h2 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  margin-bottom: 24px;
+}
+
+/* === Timeline === */
+.timeline {
+  position: relative;
+  padding-left: 40px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: var(--line);
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 22px;
+}
+.timeline-item::before {
+  content: '✓';
+  position: absolute;
+  left: -34px;
+  top: 18px;
+  width: 28px;
+  height: 28px;
+  background: var(--green);
+  color: #fff;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  border: 3px solid var(--bg);
+}
+.timeline-item.in-progress::before { content: '⏳'; background: var(--amber); }
+.timeline-item.todo::before { content: '○'; background: var(--bg-card); color: var(--ink-mute); border-color: var(--line-strong); }
+.timeline-item h3 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -.012em;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.timeline-item p {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.timeline-item .badge {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.badge-live { background: var(--green-soft); color: var(--green); border: 1px solid rgba(21,128,61,.2); }
+.badge-pending { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(180,83,9,.2); }
+.badge-todo { background: var(--bg-soft); color: var(--ink-mute); border: 1px solid var(--line); }
+.badge-design { background: var(--indigo-soft); color: var(--indigo); border: 1px solid rgba(67,56,202,.2); }
+.badge-doc { background: var(--teal-soft); color: var(--teal); border: 1px solid rgba(15,118,110,.2); }
+
+.timeline-item .links {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+}
+.timeline-item .links a {
+  color: var(--red);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(220,31,45,.4);
+}
+.timeline-item .links a:hover { border-bottom-style: solid; }
+
+/* === Phase headers === */
+.phase-header {
+  background: var(--ink);
+  color: #fff;
+  padding: 14px 22px;
+  border-radius: 10px;
+  margin: 32px 0 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.phase-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -.012em;
+}
+.phase-header .meta {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,.7);
+  letter-spacing: .04em;
+}
+
+/* === What's next big card === */
+.next-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+.next-card {
+  background: var(--bg-card);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 26px;
+  transition: border-color .15s;
+}
+.next-card.priority { border-color: var(--red); position: relative; }
+.next-card.priority::before {
+  content: 'PRIORITÉ';
+  position: absolute;
+  top: -10px;
+  left: 22px;
+  background: var(--red);
+  color: #fff;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  padding: 3px 9px;
+  border-radius: 3px;
+}
+.next-card h3 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -.012em;
+  margin-bottom: 10px;
+}
+.next-card p { font-size: 14px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.6; }
+.next-card .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.next-card .option {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+}
+.next-card .option strong { color: var(--ink); display: block; margin-bottom: 4px; font-family: 'Geist', sans-serif; font-size: 14px; }
+.next-card .option.recommended { border-color: var(--green); background: var(--green-soft); }
+.next-card .option.recommended strong::after { content: ' ✓'; color: var(--green); }
+
+/* === Big visual blocks === */
+.block-mcp {
+  background: linear-gradient(135deg, var(--ink) 0%, #1a1a22 100%);
+  color: #fff;
+  border-radius: 14px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+.block-mcp::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(500px circle at 100% 0%, rgba(220,31,45,.15), transparent 50%);
+  pointer-events: none;
+}
+.block-mcp-eyebrow {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+  margin-bottom: 8px;
+  position: relative;
+}
+.block-mcp h2 {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -.018em;
+  margin-bottom: 10px;
+  position: relative;
+}
+.block-mcp p { color: rgba(255,255,255,.85); font-size: 15px; max-width: 60ch; position: relative; }
+.block-mcp .tools-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 24px;
+  position: relative;
+}
+.block-mcp .tool-pill {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* === Reply box === */
+.reply {
+  margin-top: 56px;
+  padding: 36px;
+  background: var(--bg-soft);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+}
+.reply h3 { font-size: 22px; font-weight: 600; margin-bottom: 14px; letter-spacing: -.018em; }
+.reply p { font-size: 15px; color: var(--ink-soft); margin-bottom: 18px; }
+.reply pre {
+  background: var(--ink);
+  color: #fafafa;
+  padding: 18px 22px;
+  border-radius: 8px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+.reply .green-text { color: #86efac; }
+.reply .label-text { color: #9ca3af; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header class="header">
+  <div class="header-tag">openswissdata · récap session 29-30 avril 2026</div>
+  <h1>
+    Voilà tout ce qui a été <span class="accent">bâti</span> en 36h.<br>
+    Et ce qu'il faut décider pour publier.
+  </h1>
+  <p>Pas de jargon. Tu coches en bas. On enchaîne.</p>
+</header>
+
+<!-- ============ STATS TOP ============ -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-card-label">Commits poussés</div>
+    <div class="stat-card-value">~30</div>
+    <div class="stat-card-sub">tous live sur Railway</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-label">Fichiers livrés</div>
+    <div class="stat-card-value">+90</div>
+    <div class="stat-card-sub">~7 000 lignes</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-label">Tools MCP en LIVE</div>
+    <div class="stat-card-value">8 / 9</div>
+    <div class="stat-card-sub">+1 gated en attente</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-label">Drafts promo prêts</div>
+    <div class="stat-card-value">11</div>
+    <div class="stat-card-sub">à publier après ton OK</div>
+  </div>
+</div>
+
+<!-- ============ § 1 : ce qui a été fait ============ -->
+<section class="section">
+  <div class="section-num">§ 1 · ce qui a été fait — TOUT en LIVE</div>
+  <h2>Le tour complet du chantier des dernières 36 heures.</h2>
+
+  <!-- ─── Phase 0 ─── -->
+  <div class="phase-header">
+    <h3>📦 Phase 0 — Quick wins critiques</h3>
+    <span class="meta">5 / 6 livrés · Q5 reporté</span>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item">
+      <h3>Q1 · NOGA 2025 + NACE 2.1 — bug critique fixé <span class="badge badge-live">live</span></h3>
+      <p>Avant : fixtures vides en prod (acheteurs recevaient 0 lignes !). Après : <strong>1 845 codes NOGA 2025</strong> + <strong>1 047 codes NACE 2.1</strong> + 2 177 cross-walks officiels, ingérés depuis Eurostat ShowVoc et BFS i14y.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>Q3 · FINMA Warnings list <span class="badge badge-live">live</span></h3>
+      <p><strong>2 182 warnings FINMA</strong> ingérés depuis l'API officielle (reverse-engineered). 96 entités du registre flagées <code>is_warning_listed=true</code> par fuzzy-match.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>Q4 · Manifest signé Ed25519 + RFC-3161 <span class="badge badge-live">live</span></h3>
+      <p>Chaque ZIP livré contient un <code>provenance.json</code> signé cryptographiquement avec horodatage tiers indépendant (freetsa.org). 191/191 tests passent.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>Q6 · Page /legal/provenance <span class="badge badge-live">live</span></h3>
+      <p>Explique le moat juridique (LCD art. 5 + permission BAZG + signature) en français accessible.</p>
+      <div class="links"><a href="https://www.openswissdata.com/legal/provenance" target="_blank">openswissdata.com/legal/provenance →</a></div>
+    </div>
+    <div class="timeline-item todo">
+      <h3>Q5 · Repricing Stripe (REPORTÉ) <span class="badge badge-todo">on garde les prix</span></h3>
+      <p>Décision actée : pas de hausse, on garde 299/399/299/799 CHF.</p>
+    </div>
+  </div>
+
+  <!-- ─── Phase 1 ─── -->
+  <div class="phase-header">
+    <h3>🔧 Phase 1 — Enrichissements datasets</h3>
+    <span class="meta">4 / 4 livrés</span>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item">
+      <h3>T1 · Embeddings TARES multilingues <span class="badge badge-live">live</span></h3>
+      <p>7 511 vecteurs 768d pré-calculés (modèle <code>Xenova/paraphrase-multilingual-mpnet-base-v2</code>). Permet recherche sémantique instantanée chez l'acheteur, sans GPU.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>C2 · STATENT join (978 614 lignes) <span class="badge badge-pending">livré · vente bloquée</span></h3>
+      <p>Établissements + FTE × NOGA × commune × année 2011-2023. <strong>Vente Pro bloquée par waiver OFS</strong> — code prêt côté tier Pro derrière OAuth scope <code>statent:read</code>.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>C3 · Embeddings NOGA + classifier free-text <span class="badge badge-live">live</span></h3>
+      <p>1 845 vecteurs NOGA 2025 + fonction <code>classifyText("vente de café…")</code> qui retourne top-3 codes avec score cosine. Sanity check 5/5 PASS.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>F2 · Zefix Sync (2 715 / 2 719 UIDs) <span class="badge badge-live">live</span></h3>
+      <p>99,85 % match avec Zefix LINDAS SPARQL. Champs récupérés : forme légale, code légal, objet social, ID interne. Capital + organes nécessitent REST API (V3).</p>
+    </div>
+  </div>
+
+  <!-- ─── V4 design ─── -->
+  <div class="phase-header">
+    <h3>🎨 V4 design landing complète</h3>
+    <span class="meta">4 / 4 phases livrées</span>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item">
+      <h3>Refonte landing "Swiss Data Engineering" <span class="badge badge-design">live</span></h3>
+      <p>Drop Inter / Instrument Serif → adopt Geist + Geist Mono. Animations smooth (terminal typewriter, count-up rAF, reveal stagger). 10 nouveaux composants Astro. Trust strip + 3 personas + bundle premium + quote BAZG.</p>
+      <div class="links"><a href="https://www.openswissdata.com/" target="_blank">openswissdata.com →</a></div>
+    </div>
+    <div class="timeline-item">
+      <h3>Chaîne de provenance illustrée <span class="badge badge-design">live</span></h3>
+      <p>Remplace la vague rouge SVG ondulée par <code>BAZG → SHA-256 → Ed25519 → RFC-3161 → ✓ Verified</code> animée en cascade.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>Refonte 5 illustrations page /famille <span class="badge badge-design">live</span></h3>
+      <p>Direction "Tomi Ungerer × Sempé × Beatrix Potter". Cervin + drapeau suisse + Papa avec carnet + atelier Rube Goldberg + cochon-tirelire expressif + tampon avec textPath.</p>
+      <div class="links"><a href="https://www.openswissdata.com/famille" target="_blank">openswissdata.com/famille →</a></div>
+    </div>
+  </div>
+
+  <!-- ─── Tier Pro Classifications ─── -->
+  <div class="phase-header">
+    <h3>💰 Tier Pro Classifications 999 CHF</h3>
+    <span class="meta">D2 livré</span>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item">
+      <h3>Stripe Price LIVE + Payment Link + page produit <span class="badge badge-live">live</span></h3>
+      <p>Nouveau Stripe Price <code>price_1TRsIN…</code>, Payment Link <code>buy.stripe.com/00w9AVbls2tq…</code>, encart Pro sur la page Classifications avec 3 valeurs ajoutées (embeddings + cross-walks NAICS + EN labels).</p>
+      <div class="links"><a href="https://www.openswissdata.com/datasets/classifications" target="_blank">openswissdata.com/datasets/classifications →</a></div>
+    </div>
+  </div>
+
+  <!-- ─── MCP server (la pièce maîtresse) ─── -->
+  <div class="block-mcp">
+    <div class="block-mcp-eyebrow">⚙️ Phase 2 V1 + V2 — la pièce maîtresse</div>
+    <h2>Le premier MCP server suisse pour Claude Code &amp; Cursor.</h2>
+    <p>Sous-domaine dédié <code>mcp.openswissdata.com</code> avec SSL Let's Encrypt. JSON-RPC 2.0, spec 2025-06-18. Free tier 100 req/jour par IP, no auth. <strong>8 tools en LIVE</strong>, accessibles depuis n'importe quel agent MCP-compatible.</p>
+    <div class="tools-grid">
+      <div class="tool-pill">tariff_lookup</div>
+      <div class="tool-pill">tariff_semantic_search</div>
+      <div class="tool-pill">tariff_changelog</div>
+      <div class="tool-pill">cross_walk</div>
+      <div class="tool-pill">classify_text</div>
+      <div class="tool-pill">kyc_check</div>
+      <div class="tool-pill">finma_search</div>
+      <div class="tool-pill">entity_history</div>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <h3>MCP V1 MVP (3 tools + auth Bearer simple) <span class="badge badge-live">live</span></h3>
+      <p>Premier scaffolding par agent : Hono + dispatcher JSON-RPC 2.0 sans MCP SDK runtime (mode dégradé propre). 3 tools : tariff_lookup, kyc_check, cross_walk.</p>
+    </div>
+    <div class="timeline-item">
+      <h3>MCP V2 (+5 tools + OAuth 2.1) <span class="badge badge-live">live</span></h3>
+      <p>Ajout des tools "data lookup" (semantic_search, classify_text, finma_search) + "history" (changelog, entity_history). OAuth 2.1 PKCE codé (10 fichiers, ~1 200 lignes, Bearer simple par défaut). 4 tables DB (mcp_clients, oauth_codes, tokens, usage).</p>
+    </div>
+    <div class="timeline-item">
+      <h3>Sous-domaine mcp.openswissdata.com <span class="badge badge-live">live</span></h3>
+      <p>DNS Infomaniak + Railway custom domain configurés. SSL Let's Encrypt OK. POST <code>mcp.openswissdata.com/mcp/jsonrpc</code> répond.</p>
+      <div class="links"><a href="https://mcp.openswissdata.com/mcp/discovery" target="_blank">mcp.openswissdata.com/mcp/discovery →</a></div>
+    </div>
+    <div class="timeline-item">
+      <h3>Page /mcp publique avec sandbox playground <span class="badge badge-live">live</span></h3>
+      <p>Doc complète des 8 tools (par pack TARES / Classifications / FINMA), exemples curl JSON-RPC pliables, playground interactif (sélecteur tool + JSON args + bouton "Try" → fetch réel), section pricing 4 tiers.</p>
+      <div class="links"><a href="https://www.openswissdata.com/mcp" target="_blank">openswissdata.com/mcp →</a></div>
+    </div>
+  </div>
+
+  <!-- ─── Phase 4 prep ─── -->
+  <div class="phase-header">
+    <h3>📣 Phase 4 — préparation push promo</h3>
+    <span class="meta">drafts prêts · pas encore publiés</span>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item">
+      <h3>11 drafts promo MCP-first <span class="badge badge-doc">draft prêt</span></h3>
+      <p>Show HN, ProductHunt, LinkedIn FR/DE/EN, X thread, Reddit (×5), email outbound, Hugging Face dataset card, plan séquencement T-3j → T+90j. Tous mentionnent des features LIVE et utilisent <strong>"premier MCP suisse"</strong> comme angle hero.</p>
+      <div class="links"><a href="../docs/perfectionnement-2026-04-29/PROMO-DRAFTS.md" target="_blank">PROMO-DRAFTS.md →</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ § 2 : ce qui reste à faire ============ -->
+<section class="section">
+  <div class="section-num">§ 2 · ce qu'il reste à décider — tout est entre tes mains</div>
+  <h2>5 décisions à prendre avant de pousser le bouton publication.</h2>
+  <p style="color:var(--ink-soft);margin-bottom:32px;font-size:15px;">
+    Le produit technique est prêt. Le matériel marketing est prêt. Il manque juste tes décisions de fondateur sur le timing et le périmètre du push.
+  </p>
+
+  <div class="next-grid">
+
+    <!-- D1 -->
+    <div class="next-card priority">
+      <h3>1. Quels canaux activer en premier ?</h3>
+      <p>11 drafts sont prêts dans <code>PROMO-DRAFTS.md</code>. La fenêtre MCP (Q2 2026, hype Anthropic + Cursor) est étroite. Plus on attend, plus le risque que d'autres prennent la place "premier MCP suisse".</p>
+      <div class="options">
+        <div class="option recommended">
+          <strong>A. Multi-canal coordonné</strong>
+          T+0 : Show HN + LinkedIn FR/DE<br>T+1 : ProductHunt + X + Reddit<br>T+4 : Discord MCP/Cursor
+        </div>
+        <div class="option">
+          <strong>B. Soft launch</strong>
+          Juste LinkedIn FR + Discord MCP. On voit les retours avant Show HN.
+        </div>
+      </div>
+    </div>
+
+    <!-- D2 -->
+    <div class="next-card">
+      <h3>2. Date de publication ?</h3>
+      <p>Le timing optimal Show HN = mardi-jeudi 16:00 UTC. Maintenant on est dans la semaine du 30 avril.</p>
+      <div class="options">
+        <div class="option recommended">
+          <strong>A. Mardi 5 mai 16:00</strong>
+          Laisse 4 jours pour finaliser, relire, préparer assets visuels.
+        </div>
+        <div class="option">
+          <strong>B. Jeudi 7 mai 16:00</strong>
+          Plus de marge mais semaine entamée, moins de visibilité HN.
+        </div>
+      </div>
+    </div>
+
+    <!-- D3 -->
+    <div class="next-card">
+      <h3>3. Open SDK GitHub avant launch ?</h3>
+      <p>Plusieurs drafts mentionnent "Open SDK on GitHub (Apache 2.0) coming next week". Ça crédibilise mais demande ~1 jour de dev pour publier <code>openswissdata/sdk-ts</code> + <code>sdk-py</code> + <code>mcp-server</code>.</p>
+      <div class="options">
+        <div class="option recommended">
+          <strong>A. Oui, on le ship</strong>
+          Donne un signal "open source first", renvoyer vers GitHub crée backlinks et crédibilité dev.
+        </div>
+        <div class="option">
+          <strong>B. On retire la mention</strong>
+          On gagne 1 jour. Risque : promesse non tenue si quelqu'un la check.
+        </div>
+      </div>
+    </div>
+
+    <!-- D4 -->
+    <div class="next-card">
+      <h3>4. Garantie d'exactitude 10× licence ?</h3>
+      <p>Mentionnée dans <code>/legal/provenance</code> et plusieurs drafts. Audacieux et défendable, mais demande validation par un avocat suisse avant claim public (~500 CHF + 1 semaine).</p>
+      <div class="options">
+        <div class="option">
+          <strong>A. On garde la mention</strong>
+          On accepte le risque légal modéré, on l'annonce, on valide après. Plus impactant promo.
+        </div>
+        <div class="option recommended">
+          <strong>B. On retire pour V1</strong>
+          On valide d'abord avec avocat, on ajoute en V2 du push promo. Plus safe.
+        </div>
+      </div>
+    </div>
+
+    <!-- D5 -->
+    <div class="next-card">
+      <h3>5. Adresse + téléphone visibles dans email outbound ?</h3>
+      <p>Le template email mentionne ton adresse postale (Rue de l'Église 23, 1045 Ogens) et un placeholder téléphone. Question privacy / professionalisme.</p>
+      <div class="options">
+        <div class="option recommended">
+          <strong>A. Email seulement</strong>
+          contact@openswissdata.com en signature. Adresse postale uniquement dans Impressum (déjà accessible).
+        </div>
+        <div class="option">
+          <strong>B. Tout exposer</strong>
+          Adresse + téléphone visibles. Plus pro pour B2B compliance, mais expose plus.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ § 3 : reply ============ -->
+<section class="section">
+  <div class="section-num">§ 3 · réponse</div>
+  <h2>Comment me répondre</h2>
+
+  <div class="reply">
+    <h3>📝 Si tu valides toutes mes recommandations</h3>
+    <p>Copie-colle simplement cette ligne dans le chat :</p>
+    <pre><span class="green-text">D1</span>=<span style="color:#fff">multi-canal</span> · <span class="green-text">D2</span>=<span style="color:#fff">5-mai</span> · <span class="green-text">D3</span>=<span style="color:#fff">oui-sdk</span> · <span class="green-text">D4</span>=<span style="color:#fff">retirer</span> · <span class="green-text">D5</span>=<span style="color:#fff">email-seul</span></pre>
+
+    <h3 style="margin-top:32px;">Ou ajuster question par question</h3>
+    <p>Réponds avec ton choix par décision (lettre A ou B), exemple :</p>
+    <pre><span class="label-text">D1=B (soft launch)<br>D2=B (jeudi)<br>D3=B (retirer mention SDK)<br>D4=A (garder garantie)<br>D5=B (tout exposer)</span></pre>
+
+    <p style="margin-top:24px;font-size:13px;color:var(--ink-mute);font-style:italic;">
+      Une fois validé : je prépare le calendrier publication exact (avec liens drafts, scheduling Show HN, assets visuels), puis tu pushes les boutons "Publier" sur LinkedIn / ProductHunt / Show HN au moment T.
+    </p>
+  </div>
+</section>
+
+</div>
+
+</body>
+</html>

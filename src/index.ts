@@ -1,3 +1,9 @@
+// Sentry MUST be initialized before any other import that could throw,
+// so the SDK can hook into the global handlers. The init is no-op if
+// SENTRY_DSN is not set (dev, test, first deploy).
+import { initSentry, captureException, flushSentry } from "./lib/sentry.js";
+initSentry();
+
 import { Hono } from "hono";
 import { secureHeaders } from "hono/secure-headers";
 import { serve } from "@hono/node-server";
@@ -15,6 +21,18 @@ import { loadEnv } from "./env.js";
 
 export function createApp() {
   const app = new Hono();
+
+  // --- Error handler — capture in Sentry, return 500 to client ---
+  // Hooks before everything so even errors in the routing layer are caught.
+  app.onError((err, c) => {
+    captureException(err, {
+      url: c.req.url,
+      method: c.req.method,
+      headers: Object.fromEntries(c.req.raw.headers.entries()),
+    });
+    console.error("[unhandled]", err);
+    return c.json({ error: "internal_server_error" }, 500);
+  });
 
   // --- Security headers (HSTS, CSP, frame-ancestors, referrer-policy) ---
   // Applied globally before any route. Astro inline styles need 'unsafe-inline'
@@ -122,4 +140,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const app = createApp();
   serve({ fetch: app.fetch, port: env.PORT });
   console.log(`Listening on :${env.PORT}`);
+
+  // Flush Sentry events on graceful shutdown so errors right before
+  // SIGTERM aren't lost.
+  const shutdown = async (sig: string) => {
+    console.log(`[shutdown] received ${sig}, flushing Sentry…`);
+    await flushSentry(2000);
+    process.exit(0);
+  };
+  process.on("SIGTERM", () => void shutdown("SIGTERM"));
+  process.on("SIGINT", () => void shutdown("SIGINT"));
 }
