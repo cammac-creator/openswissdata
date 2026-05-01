@@ -217,7 +217,7 @@ const tools = [
     <h2 class="v4-section-h2">Sans installer Claude Code, teste les endpoints depuis ton navigateur.</h2>
 
     <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:28px;margin-top:24px;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="mcp-playground-row">
         <div>
           <label for="pg-tool" style="display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Tool</label>
           <select id="pg-tool" style="width:100%;padding:10px 14px;font-family:var(--font-mono);font-size:13px;border:1px solid var(--line-strong);border-radius:8px;background:var(--bg);color:var(--ink);">
@@ -247,7 +247,7 @@ const tools = [
     </div>
     <h2 class="v4-section-h2">Free tier capable. Pro pour les workflows production.</h2>
 
-    <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin-top:24px;">
+    <div class="mcp-pricing-grid">
       <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:22px;">
         <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Free</div>
         <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">0 CHF</div>
@@ -307,6 +307,28 @@ const tools = [
     </div>
   </div>
 </section>
+
+<style>
+  .mcp-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 24px;
+  }
+  .mcp-playground-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 1024px) {
+    .mcp-pricing-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .mcp-pricing-grid { grid-template-columns: 1fr; }
+    .mcp-playground-row { grid-template-columns: 1fr; }
+  }
+</style>
 
 <script is:inline>
   const TOOL_DEFAULTS = {
