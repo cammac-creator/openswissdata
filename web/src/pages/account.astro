@@ -11,7 +11,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <h1 class="text-3xl font-bold mb-2">Sign in</h1>
       <p class="text-slate-600 mb-6">Enter your email — we'll send you a magic link valid for 15 minutes.</p>
       <form id="login-form" class="flex flex-col gap-3 max-w-md">
+        <label for="login-email" class="sr-only">Adresse email</label>
         <input
+          id="login-email"
           type="email"
           name="email"
           required

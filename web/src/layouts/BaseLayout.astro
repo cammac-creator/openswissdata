@@ -24,7 +24,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
 
@@ -70,8 +70,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     )}
   </head>
   <body>
+    <a href="#main" class="skip-to-content">Aller au contenu principal</a>
     <StatusBar />
-    <main><slot /></main>
+    <main id="main" tabindex="-1"><slot /></main>
     <Footer />
 
     <script is:inline>
