@@ -19,6 +19,27 @@ healthRoute.get("/", (c) => {
 });
 
 /**
+ * Sentry integration smoke test — ONLY usable when SENTRY_TEST_TOKEN matches.
+ * Throws a deliberate Error which Hono's app.onError() captures and forwards
+ * to Sentry. Used once during launch prep to verify SENTRY_DSN is wired
+ * correctly in production. Remove or restrict to admin once verified.
+ *
+ * Usage:
+ *   curl -H "x-sentry-test: $SENTRY_TEST_TOKEN" \
+ *        https://www.openswissdata.com/api/health/sentry-test
+ *
+ * Response: 500 with no body (the error is captured upstream).
+ */
+healthRoute.get("/sentry-test", (c) => {
+  const expected = process.env.SENTRY_TEST_TOKEN;
+  const provided = c.req.header("x-sentry-test");
+  if (!expected || !provided || expected !== provided) {
+    return c.json({ error: "not_found" }, 404);
+  }
+  throw new Error("Sentry smoke test — intentional throw at " + new Date().toISOString());
+});
+
+/**
  * Deep health check — exercises every external dependency we depend on for a
  * paying customer to receive their dataset:
  *  - SQLite (read query)
