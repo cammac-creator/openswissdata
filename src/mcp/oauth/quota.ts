@@ -74,6 +74,13 @@ export function consumeQuota(clientId: string, tier: Tier, db?: Database.Databas
   const dayUsed = row?.day_count ?? 0;
   const monthUsed = row?.month_count ?? 0;
 
+  // The UPSERT above incremented BEFORE this SELECT, so dayUsed reflects the
+  // count INCLUDING the current request. With `<=`:
+  //   - 1st request:   dayUsed=1,   limit=100 → ok   (1 <= 100)
+  //   - 100th request: dayUsed=100, limit=100 → ok   (100 <= 100)
+  //   - 101st request: dayUsed=101, limit=100 → fail (101 > 100)
+  // So a tier with `day=100` correctly allows exactly 100 calls per day.
+  // DO NOT change to `<` strict — that would cap the tier at limit-1.
   const dayOk = limits.day < 0 || dayUsed <= limits.day;
   const monthOk = limits.month < 0 || monthUsed <= limits.month;
 
