@@ -6,6 +6,7 @@ initSentry();
 
 import { Hono } from "hono";
 import { secureHeaders } from "hono/secure-headers";
+import { compress } from "hono/compress";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { existsSync } from "node:fs";
@@ -68,6 +69,45 @@ export function createApp() {
       },
     }),
   );
+
+  // --- Gzip/deflate compression (post-secureHeaders, pre-routes) ---
+  // Compresses HTML, CSS, JS, JSON, SVG, etc. above 1 KB. Static binary
+  // assets (PNG, fonts) are skipped automatically based on Content-Type.
+  // Uses native CompressionStream — works on Node ≥18.
+  app.use("*", compress());
+
+  // --- Cache-Control headers ---
+  // Sets sensible cache policies depending on path:
+  //   - /_astro/* (hashed assets): 1 year, immutable (Astro fingerprints filenames)
+  //   - /favicon.* /og-default.png /samples/*: 1 year (rarely change)
+  //   - /api/* /mcp/*: no-store (handlers may set their own)
+  //   - HTML pages (everything else): 5 min browser, 10 min CDN, SWR 1 day
+  // Only set if the route handler did not set its own Cache-Control.
+  app.use("*", async (c, next) => {
+    await next();
+    if (c.res.headers.has("Cache-Control")) return;
+    const path = new URL(c.req.url).pathname;
+    if (path.startsWith("/api/") || path.startsWith("/mcp")) {
+      c.res.headers.set("Cache-Control", "no-store");
+      return;
+    }
+    if (
+      path.startsWith("/_astro/") ||
+      path.startsWith("/samples/") ||
+      path === "/favicon.svg" ||
+      path === "/favicon.ico" ||
+      path === "/og-default.png" ||
+      path === "/og-image.png"
+    ) {
+      c.res.headers.set("Cache-Control", "public, max-age=31536000, immutable");
+      return;
+    }
+    // HTML pages — fresh-ish but cacheable at edge with SWR fallback
+    c.res.headers.set(
+      "Cache-Control",
+      "public, max-age=300, s-maxage=600, stale-while-revalidate=86400",
+    );
+  });
 
   // --- Host-based routing for the dedicated MCP sub-domain ---
   //
