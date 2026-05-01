@@ -96,12 +96,12 @@ export interface DownloadEmailParams {
 export async function sendDownloadEmail(p: DownloadEmailParams): Promise<EmailSendResult> {
   const html = `
     <p>Bonjour,</p>
-    <p>Merci d'avoir acheté <strong>${escapeHtml(p.datasetName)}</strong> (version ${escapeHtml(p.version)}).</p>
-    <p><a href="${escapeHtmlAttr(p.downloadUrl)}" style="display:inline-block;padding:12px 20px;background:#4f46e5;color:white;text-decoration:none;border-radius:6px">Télécharger le ZIP (lien valide 48h)</a></p>
-    <p>Accès permanent via ton espace client : <a href="${escapeHtmlAttr(p.accountUrl)}">${escapeHtml(p.accountUrl)}</a></p>
+    <p>Merci pour votre achat de <strong>${escapeHtml(p.datasetName)}</strong> (version ${escapeHtml(p.version)}).</p>
+    <p><a href="${escapeHtmlAttr(p.downloadUrl)}" style="display:inline-block;padding:12px 20px;background:#4f46e5;color:white;text-decoration:none;border-radius:6px">Télécharger le ZIP (lien valide 48 h)</a></p>
+    <p>Accès permanent via votre espace client : <a href="${escapeHtmlAttr(p.accountUrl)}">${escapeHtml(p.accountUrl)}</a></p>
     <p>— openswissdata.com</p>
   `;
-  return resendSend(p.to, `Your ${p.datasetName} download`, html);
+  return resendSend(p.to, `Votre dataset ${p.datasetName} est prêt — openswissdata`, html);
 }
 
 export interface MagicLinkEmailParams {
@@ -112,11 +112,12 @@ export interface MagicLinkEmailParams {
 export async function sendMagicLinkEmail(p: MagicLinkEmailParams): Promise<EmailSendResult> {
   const html = `
     <p>Bonjour,</p>
-    <p>Voici ton lien de connexion à openswissdata.com (valide 15 min) :</p>
-    <p><a href="${escapeHtmlAttr(p.magicUrl)}">${escapeHtml(p.magicUrl)}</a></p>
+    <p>Voici votre lien de connexion à openswissdata.com (valide 15 minutes) :</p>
+    <p><a href="${escapeHtmlAttr(p.magicUrl)}" style="display:inline-block;padding:12px 20px;background:#4f46e5;color:white;text-decoration:none;border-radius:6px">Se connecter à openswissdata</a></p>
+    <p style="font-size:13px;color:#666;">Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer ce message.</p>
     <p>— openswissdata.com</p>
   `;
-  return resendSend(p.to, "Your openswissdata login link", html);
+  return resendSend(p.to, "Votre lien de connexion openswissdata", html);
 }
 
 function escapeHtml(s: string): string {

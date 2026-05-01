@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Sentry + Self-purchase test — guide final</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FBFBF8;
+  --bg-soft: #F4F4F0;
+  --bg-card: #FFFFFF;
+  --ink: #0A0A0C;
+  --ink-soft: #4A4D55;
+  --ink-mute: #8A8D95;
+  --line: rgba(10,10,12,.10);
+  --green: #15803D;
+  --green-soft: rgba(21,128,61,.08);
+  --red: #DC1F2D;
+  --red-soft: rgba(220,31,45,.06);
+  --amber: #B45309;
+  --amber-soft: rgba(180,83,9,.08);
+  --blue: #1D4ED8;
+  --blue-soft: rgba(29,78,216,.08);
+  --purple: #6D28D9;
+  --purple-soft: rgba(109,40,217,.08);
+}
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+  background: var(--bg); color: var(--ink); font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 980px; margin: 0 auto; padding: 48px 32px 96px; }
+code { font-family: 'Geist Mono', monospace; font-size: 13px; background: rgba(10,10,12,.06); padding: 1px 6px; border-radius: 4px; }
+
+/* Header */
+.header { border-bottom: 2px solid var(--ink); padding-bottom: 28px; margin-bottom: 56px; }
+.header-tag { font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 14px; }
+.header h1 { font-size: 42px; font-weight: 700; letter-spacing: -.025em; line-height: 1.05; margin-bottom: 14px; max-width: 22ch; }
+.header h1 .accent { color: var(--purple); }
+.header p { font-size: 17px; color: var(--ink-soft); max-width: 60ch; }
+
+/* Validated tasks pill */
+.validated-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 999px;
+  font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+}
+.pill.done { background: var(--green-soft); color: var(--green); border: 1px solid rgba(21,128,61,.2); }
+.pill.done::before { content: '✓'; font-weight: 700; }
+.pill.now { background: var(--purple-soft); color: var(--purple); border: 1px solid rgba(109,40,217,.2); }
+.pill.now::before { content: '●'; animation: pulse 2s infinite; }
+.pill.next { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(180,83,9,.2); }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Sections */
+.section { margin-bottom: 72px; }
+.section-num { font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; }
+.section-num.s5 { color: var(--purple); }
+.section-num.s6 { color: var(--red); }
+.section h2 { font-size: 32px; font-weight: 700; letter-spacing: -.025em; line-height: 1.1; margin-bottom: 14px; }
+.section .lead { font-size: 16px; color: var(--ink-soft); max-width: 65ch; margin-bottom: 28px; }
+
+/* Why callout */
+.why { background: var(--blue-soft); border-left: 3px solid var(--blue); border-radius: 0 10px 10px 0; padding: 20px 24px; margin: 24px 0; }
+.why-title { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); font-weight: 600; margin-bottom: 8px; }
+.why p { font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+.why p strong { color: var(--ink); }
+
+/* Steps */
+.steps { display: flex; flex-direction: column; gap: 14px; margin: 24px 0; }
+.step {
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 22px 26px; display: grid; grid-template-columns: 32px 1fr; gap: 20px; align-items: start;
+}
+.step-num {
+  font-family: 'Geist Mono', monospace; font-weight: 700; font-size: 14px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ink); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-num.purple { background: var(--purple); }
+.step-num.red { background: var(--red); }
+.step-content h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; line-height: 1.3; }
+.step-content p { font-size: 14px; color: var(--ink-soft); line-height: 1.55; margin-bottom: 10px; }
+.step-content p:last-child { margin-bottom: 0; }
+.step-content ul { font-size: 14px; color: var(--ink-soft); line-height: 1.7; margin: 8px 0 8px 18px; }
+.step-content code { font-size: 12px; }
+
+/* Code block */
+.code-block { background: var(--ink); color: #f4f4f0; border-radius: 8px; padding: 16px 20px; font-family: 'Geist Mono', monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; margin: 12px 0; }
+.code-block .comment { color: #9ca3af; }
+.code-block .key { color: #fca5a5; }
+.code-block .val { color: #86efac; }
+
+/* Mock UI Sentry */
+.mock-sentry {
+  background: linear-gradient(135deg, #1A1B26 0%, #0F1117 100%);
+  border: 1px solid #2D3139; border-radius: 12px;
+  padding: 24px; margin: 16px 0;
+  font-family: 'Geist Mono', monospace; font-size: 13px; color: #C8CCD5;
+}
+.mock-sentry-header { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #6E7280; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #2D3139; }
+.mock-sentry .dsn-line { background: rgba(255,255,255,.05); padding: 14px 16px; border-radius: 6px; word-break: break-all; font-size: 12px; line-height: 1.5; color: #f9fafb; }
+.mock-sentry .dsn-highlight { color: #fbbf24; }
+.mock-sentry .label { color: #9ca3af; font-size: 11px; margin-bottom: 6px; display: block; }
+
+/* Visual flow */
+.flow {
+  display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 14px; align-items: center;
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 28px 24px; margin: 28px 0;
+}
+.flow-node {
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; text-align: center;
+}
+.flow-node-label { font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+.flow-node-content { font-weight: 600; font-size: 14px; line-height: 1.3; }
+.flow-node-sub { font-size: 11px; color: var(--ink-soft); margin-top: 4px; line-height: 1.4; }
+.flow-arrow { font-family: 'Geist Mono', monospace; font-size: 22px; color: var(--ink-mute); text-align: center; }
+
+/* Testing checklist */
+.checklist {
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 28px 32px; margin: 24px 0;
+}
+.checklist-row {
+  display: grid; grid-template-columns: 28px 1fr auto; gap: 14px;
+  padding: 14px 0; border-bottom: 1px dashed var(--line); align-items: start;
+}
+.checklist-row:last-child { border-bottom: none; }
+.checklist-icon { width: 24px; height: 24px; border: 2px solid var(--ink-mute); border-radius: 50%; }
+.checklist-content { font-size: 14px; color: var(--ink-soft); }
+.checklist-content strong { color: var(--ink); display: block; margin-bottom: 3px; font-size: 14px; }
+.checklist-time { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--ink-mute); white-space: nowrap; }
+
+/* SKU cards for self-purchase */
+.sku-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 24px 0; }
+.sku-card {
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 10px;
+  padding: 18px 20px;
+}
+.sku-card.priority { border-color: var(--red); border-width: 2px; }
+.sku-eyebrow { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+.sku-eyebrow.red { color: var(--red); }
+.sku-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+.sku-price { font-family: 'Geist Mono', monospace; font-weight: 700; font-size: 15px; color: var(--ink); }
+.sku-validations { margin-top: 12px; font-size: 12px; color: var(--ink-soft); line-height: 1.7; }
+.sku-validations li { padding-left: 14px; position: relative; list-style: none; }
+.sku-validations li::before { content: '→'; position: absolute; left: 0; color: var(--ink-mute); }
+
+/* Tip */
+.tip {
+  background: var(--amber-soft); border: 1px solid rgba(180,83,9,.2); border-radius: 10px;
+  padding: 16px 20px; margin: 20px 0; display: flex; gap: 14px; align-items: flex-start;
+}
+.tip-icon { font-size: 18px; flex-shrink: 0; }
+.tip-content { font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+.tip-content strong { color: var(--amber); }
+
+/* Final box */
+.final {
+  background: linear-gradient(135deg, var(--ink) 0%, #1A1D24 100%); color: #fff;
+  border-radius: 16px; padding: 36px 40px; text-align: center; margin-top: 32px;
+}
+.final-tag { font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: .12em; color: rgba(255,255,255,.5); text-transform: uppercase; margin-bottom: 14px; }
+.final h2 { color: #fff; font-size: 26px; font-weight: 700; letter-spacing: -.018em; line-height: 1.2; margin-bottom: 14px; }
+.final h2 .green { color: #86efac; }
+.final h2 .amber { color: #fbbf24; }
+.final p { color: rgba(255,255,255,.85); max-width: 55ch; margin: 14px auto 0; font-size: 15px; }
+
+@media (max-width: 700px) {
+  .flow { grid-template-columns: 1fr; }
+  .flow-arrow { transform: rotate(90deg); }
+  .sku-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header class="header">
+  <div class="validated-pills">
+    <span class="pill done">DB sync</span>
+    <span class="pill done">Mail-tester 10/10</span>
+    <span class="pill done">DNS root → www</span>
+    <span class="pill done">UptimeRobot</span>
+    <span class="pill now">Sentry · 5/6</span>
+    <span class="pill next">Self-purchase · 6/6</span>
+  </div>
+  <div class="header-tag">DERNIÈRES ÉTAPES AVANT LAUNCH JEUDI 7 MAI</div>
+  <h1>2 actions. <span class="accent">~45 min.</span> Et la prod est launch-ready.</h1>
+  <p>Le code Sentry est déjà déployé sur Railway (commit <code>97167b3</code>). Reste à créer le compte + récupérer le DSN. Puis on attaque le self-purchase test pour valider le flow E2E payant.</p>
+</header>
+
+<!-- ============== ACTION 5 — SENTRY ============== -->
+<section class="section">
+  <div class="section-num s5">ACTION 5/6 — 15 MIN</div>
+  <h2>Sentry — créer le compte + poser le DSN</h2>
+  <p class="lead">
+    UptimeRobot te dit <em>quand</em> la prod tombe. Sentry te dit <em>pourquoi</em>. Stack trace + contexte HTTP + email d'alerte 30s. 5 000 erreurs/mois gratuit, suffit largement.
+  </p>
+
+  <div class="why">
+    <div class="why-title">Le SDK est déjà intégré côté code</div>
+    <p>
+      <code>src/lib/sentry.ts</code> est déployé. Init dans <code>src/index.ts</code> (avant tout autre import). Handler global <code>app.onError</code> capture les exceptions non gérées avec <strong>url + method + headers</strong> en contexte. <code>beforeSend()</code> strip automatiquement Bearer/whsec/sk_/re_ tokens avant envoi (anti-leak secrets).<br><br>
+      <strong>Si tu ne fais rien</strong> : SDK no-op silencieux (DSN absent → captureException = free function call). Aucun crash, juste pas de tracking.
+    </p>
+  </div>
+
+  <h3 style="font-size:18px;font-weight:600;margin:32px 0 12px;">Procédure</h3>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num purple">1</div>
+      <div class="step-content">
+        <h3>Inscription Sentry</h3>
+        <p>Va sur <a href="https://sentry.io/signup/" target="_blank"><strong>sentry.io/signup</strong></a>. Plus rapide : sign in via <strong>GitHub `cammac-creator`</strong> (comme UptimeRobot, comme Railway). Plan : <strong>Developer (free)</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num purple">2</div>
+      <div class="step-content">
+        <h3>Créer le projet "openswissdata-api"</h3>
+        <p>Wizard "Create Project" :</p>
+        <ul>
+          <li><strong>Platform</strong> : <code>Node.js</code> (PAS Browser, PAS Next.js)</li>
+          <li><strong>Project name</strong> : <code>openswissdata-api</code></li>
+          <li><strong>Alert frequency</strong> : "Alert me on every new issue"</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num purple">3</div>
+      <div class="step-content">
+        <h3>Récupérer le DSN</h3>
+        <p>Sentry t'affiche une page d'instructions install. Ignore le code Node — c'est déjà fait. <strong>Tu ne cherches qu'une chose : le DSN</strong>. C'est une URL longue, copie-la entièrement.</p>
+        <div class="mock-sentry">
+          <div class="mock-sentry-header">SENTRY → openswissdata-api → CLIENT KEYS (DSN)</div>
+          <span class="label">DSN à copier (exemple)</span>
+          <div class="dsn-line">https://<span class="dsn-highlight">abc123def456ghi789</span>@<span class="dsn-highlight">o1234567</span>.ingest.us.sentry.io/<span class="dsn-highlight">9876543</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num purple">4</div>
+      <div class="step-content">
+        <h3>Poser le DSN dans Railway</h3>
+        <p>Railway → projet <code>openswissdata</code> → service <code>api</code> → onglet <strong>Variables</strong> → <strong>+ New Variable</strong> :</p>
+        <div class="code-block">
+<span class="key">SENTRY_DSN</span> = <span class="val">https://abc123...@o1234567.ingest.us.sentry.io/9876543</span>
+        </div>
+        <p>Save → Railway redéploie automatiquement (~30 sec).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num purple">5</div>
+      <div class="step-content">
+        <h3>Vérifier que ça marche</h3>
+        <p>Une fois le redeploy fait, je te lancerai un test : on déclenche une erreur volontaire sur un endpoint, et on vérifie que Sentry la capture en temps réel sur le dashboard.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <div class="tip-icon">🔒</div>
+    <div class="tip-content">
+      <strong>Sécurité :</strong> le DSN est <strong>public</strong> (pas un secret au sens strict — il identifie ton projet, pas une clé d'auth). Mais il vaut mieux le garder dans Railway env plutôt que dans le code source pour permettre la rotation future.
+    </div>
+  </div>
+</section>
+
+<!-- ============== ACTION 6 — SELF-PURCHASE ============== -->
+<section class="section">
+  <div class="section-num s6">ACTION 6/6 — 30 MIN</div>
+  <h2>Self-purchase LIVE — l'aboutissement.</h2>
+  <p class="lead">
+    On a tout testé séparément (DB, R2, Stripe, email, MCP, headers, watermark). Manque le <strong>test bout-en-bout</strong> : un VRAI achat avec une VRAIE carte qui exerce toute la chaîne. C'est <code>preflight-15</code> — le dernier verrou avant launch.
+  </p>
+
+  <div class="why">
+    <div class="why-title">Pourquoi c'est non-négociable</div>
+    <p>
+      Stripe LIVE est actif depuis le 25/04, mais <strong>aucun vrai paiement n'a jamais traversé le webhook avec la signature LIVE</strong>. Si une typo Railway env, un retry loop sur Resend, un volume R2 désynchronisé, ou une race condition existe → ton 1er client réel sera le cobaye. Mauvais. C'est toi qui dois être le cobaye d'abord.<br><br>
+      Coût du test : <strong>~1 200 CHF</strong> (achats sur ton propre compte) que tu refunderas immédiatement après. Stripe te facture juste les <strong>fees ~30 CHF</strong> (~2.5% × 1200) — c'est ton ticket d'assurance.
+    </p>
+  </div>
+
+  <h3 style="font-size:18px;font-weight:600;margin:32px 0 12px;">Le flow E2E à valider</h3>
+
+  <div class="flow">
+    <div class="flow-node">
+      <div class="flow-node-label">1. Achat</div>
+      <div class="flow-node-content">Stripe Checkout</div>
+      <div class="flow-node-sub">Carte de débit personnelle</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-node-label">2. Backend</div>
+      <div class="flow-node-content">Webhook signé</div>
+      <div class="flow-node-sub">Order + entitlements en DB</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-node-label">3. Livraison</div>
+      <div class="flow-node-content">Email + Download</div>
+      <div class="flow-node-sub">Resend → R2 signed URL</div>
+    </div>
+  </div>
+
+  <h3 style="font-size:18px;font-weight:600;margin:32px 0 12px;">Les 4 SKUs à acheter</h3>
+
+  <div class="sku-grid">
+    <div class="sku-card priority">
+      <div class="sku-eyebrow red">SKU #1 · CRITIQUE</div>
+      <div class="sku-title">TARES one-shot</div>
+      <div class="sku-price">299 CHF</div>
+      <ul class="sku-validations">
+        <li>Stripe Live charge OK</li>
+        <li>Webhook signature LIVE valide</li>
+        <li>Email confirmation reçu</li>
+        <li>Magic link login fonctionne</li>
+        <li>Download R2 ZIP 14.9 MB</li>
+        <li>SHA-256 ZIP matche manifest</li>
+      </ul>
+    </div>
+    <div class="sku-card">
+      <div class="sku-eyebrow">SKU #2</div>
+      <div class="sku-title">Classifications Standard</div>
+      <div class="sku-price">399 CHF</div>
+      <ul class="sku-validations">
+        <li>Idem TARES</li>
+        <li>+ vérif que STATENT n'est PAS dans le ZIP</li>
+        <li>+ vérif embeddings DE/IT/EN si Pro tier</li>
+      </ul>
+    </div>
+    <div class="sku-card">
+      <div class="sku-eyebrow">SKU #3</div>
+      <div class="sku-title">FINMA Standard</div>
+      <div class="sku-price">299 CHF</div>
+      <ul class="sku-validations">
+        <li>Idem TARES</li>
+        <li>+ vérif Warning List incluse</li>
+        <li>+ vérif disclaimer FINMA dans README ZIP</li>
+      </ul>
+    </div>
+    <div class="sku-card">
+      <div class="sku-eyebrow">SKU #4</div>
+      <div class="sku-title">Bundle 3-en-1</div>
+      <div class="sku-price">799 CHF (-20%)</div>
+      <ul class="sku-validations">
+        <li>3 entitlements créés en 1 webhook</li>
+        <li>3 emails distincts ou 1 combiné ?</li>
+        <li>Download des 3 ZIPs</li>
+        <li>Logique de bundle correcte</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="font-size:18px;font-weight:600;margin:32px 0 12px;">Checklist test E2E pour chaque SKU</h3>
+
+  <div class="checklist">
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>1. Aller sur la page produit</strong>
+        Ex: https://www.openswissdata.com/datasets/tares
+      </div>
+      <span class="checklist-time">30s</span>
+    </div>
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>2. Cliquer "Acheter" / "Buy"</strong>
+        Redirection vers Stripe Checkout (URL en buy.stripe.com)
+      </div>
+      <span class="checklist-time">10s</span>
+    </div>
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>3. Saisir une vraie carte</strong>
+        Ta carte de débit perso, pas la carte test 4242. Email = adresse réelle (pas contact@openswissdata.com — un email externe genre Gmail).
+      </div>
+      <span class="checklist-time">1 min</span>
+    </div>
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>4. Confirmer le paiement</strong>
+        3D Secure peut s'activer. Tu reçois SMS de ta banque, valide.
+      </div>
+      <span class="checklist-time">30s</span>
+    </div>
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>5. Vérifier réception email transactionnel</strong>
+        Inbox Gmail (ou autre) — sujet "Bienvenue sur openswissdata", from "noreply@openswissdata.com", lien CTA "Accéder à mon espace client". <strong>Si en spam : bug deliverability à fixer.</strong>
+      </div>
+      <span class="checklist-time">1 min</span>
+    </div>
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>6. Magic link login</strong>
+        Aller sur /account, demander un magic link sur ton email d'achat. Le mail arrive, click → connecté.
+      </div>
+      <span class="checklist-time">1 min</span>
+    </div>
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>7. Téléchargement ZIP</strong>
+        Sur /account, voir l'entitlement actif. Click "Télécharger". Le navigateur télécharge un ZIP. Vérifie taille + ouvre-le, vérifie le manifest <code>provenance.json</code>.
+      </div>
+      <span class="checklist-time">2 min</span>
+    </div>
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>8. Vérifier dans Stripe Dashboard</strong>
+        dashboard.stripe.com → Payments → vois ton paiement avec statut "Succeeded". Webhook log → vois "checkout.session.completed" avec response 200.
+      </div>
+      <span class="checklist-time">1 min</span>
+    </div>
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>9. Refund le paiement</strong>
+        Dans Stripe → click sur le paiement → "Refund payment" → confirm. Tu récupères les CHF (Stripe garde 30 cts de fees, tant pis).
+      </div>
+      <span class="checklist-time">30s</span>
+    </div>
+    <div class="checklist-row">
+      <span class="checklist-icon"></span>
+      <div class="checklist-content">
+        <strong>10. Vérifier que l'entitlement est révoqué</strong>
+        Sur /account après refund, l'entitlement disparait OU le download retourne 403. Sinon → bug recheck-entitlement (à investiguer).
+      </div>
+      <span class="checklist-time">1 min</span>
+    </div>
+  </div>
+
+  <p style="font-size:14px;color:var(--ink-soft);margin-top:24px;">
+    Total par SKU : ~10 min × 4 SKUs = 40 min en théorie. En pratique 25-30 min si tout va bien.<br>
+    On documente chaque test dans <code>docs/preflight-15-stripe-live-self-purchase.md</code> au fur et à mesure.
+  </p>
+
+  <div class="tip">
+    <div class="tip-icon">⚠️</div>
+    <div class="tip-content">
+      <strong>Si quelque chose casse à l'étape 5 (email pas reçu) ou 7 (download échoue) :</strong> on diagnostique immédiatement avant de continuer. Sentry devrait avoir capturé l'erreur. Stripe Dashboard montrera le webhook fail. Ce sera notre 1ère validation utile de la stack observability.
+    </div>
+  </div>
+</section>
+
+<!-- ============== FINAL ============== -->
+<section class="section">
+  <div class="final">
+    <div class="final-tag">UNE FOIS LES 2 ACTIONS FAITES</div>
+    <h2>
+      <span class="green">Stack 100%</span> launch-ready.<br>
+      <span class="amber">Jeudi 7 mai</span> — go live.
+    </h2>
+    <p>
+      Tu lances Show HN + LinkedIn + ProductHunt sereinement. Stripe Live testé. Email à 10/10. Headers sécurité actifs. Monitoring + alerting en place. Toutes les pages legales finalisées. 1066 pages SEO indexables. Mail bouclier juridique opérationnel via takedown@.
+    </p>
+  </div>
+</section>
+
+</div>
+
+</body>
+</html>

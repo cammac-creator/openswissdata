@@ -1,15 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
-<BaseLayout title="Your datasets — openswissdata">
+<BaseLayout title="Espace client — openswissdata">
   <section class="max-w-3xl mx-auto px-6 py-16">
 
     <div id="banner" class="hidden mb-6 rounded-lg px-4 py-3 text-sm" role="status" aria-live="polite"></div>
 
     <!-- Login view -->
     <div id="login-view" class="hidden">
-      <h1 class="text-3xl font-bold mb-2">Sign in</h1>
-      <p class="text-slate-600 mb-6">Enter your email — we'll send you a magic link valid for 15 minutes.</p>
+      <h1 class="text-3xl font-bold mb-2">Connexion</h1>
+      <p class="text-slate-600 mb-6">Entrez votre adresse email — nous vous enverrons un lien de connexion valable 15 minutes.</p>
       <form id="login-form" class="flex flex-col gap-3 max-w-md">
         <label for="login-email" class="sr-only">Adresse email</label>
         <input
@@ -18,13 +18,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           name="email"
           required
           autocomplete="email"
-          placeholder="you@company.com"
+          placeholder="vous@entreprise.com"
           class="px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
         />
         <button
           type="submit"
           class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium transition-colors"
-        >Send magic link</button>
+        >Recevoir le lien de connexion</button>
       </form>
       <p id="login-msg" class="mt-4 text-sm text-slate-600"></p>
     </div>
@@ -33,35 +33,46 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <div id="dashboard-view" class="hidden">
       <div class="flex items-baseline justify-between flex-wrap gap-3 mb-6">
         <div>
-          <h1 class="text-3xl font-bold">Your datasets</h1>
+          <h1 class="text-3xl font-bold">Mes datasets</h1>
           <p class="text-sm text-slate-500 mt-1" id="dashboard-email"></p>
         </div>
-        <button id="logout-btn" class="text-sm text-slate-500 hover:text-slate-800 underline">Log out</button>
+        <button id="logout-btn" class="text-sm text-slate-500 hover:text-slate-800 underline">Se déconnecter</button>
       </div>
       <ul id="datasets-list" class="space-y-3"></ul>
       <p id="empty-state" class="hidden text-slate-500 text-sm mt-6">
-        You don't have any dataset purchases yet. <a href="/bundle" class="text-indigo-600 hover:underline">Browse the bundle</a>.
+        Vous n'avez pas encore de dataset. <a href="/bundle" class="text-indigo-600 hover:underline">Voir le bundle complet</a>.
       </p>
     </div>
 
-    <div id="loading-view" class="text-slate-500 text-sm">Loading…</div>
+    <div id="loading-view" class="text-slate-500 text-sm">Chargement…</div>
   </section>
 
   <script is:inline>
     (function () {
       const qs = new URLSearchParams(window.location.search);
       const authStatus = qs.get("auth");
+      const checkoutStatus = qs.get("checkout");
       const banner = document.getElementById("banner");
-      if (authStatus === "ok") {
-        banner.textContent = "Signed in successfully.";
+
+      // Post-paiement Stripe — message en priorité (avant auth)
+      if (checkoutStatus === "success") {
+        banner.textContent = "✓ Paiement reçu. Vous allez recevoir un email de confirmation avec un lien de connexion sous 5 minutes. Vérifiez aussi vos spams si rien n'arrive.";
+        banner.className = "mb-6 rounded-lg px-4 py-3 text-sm bg-emerald-50 border border-emerald-200 text-emerald-900";
+        banner.classList.remove("hidden");
+      } else if (checkoutStatus === "cancelled") {
+        banner.textContent = "Paiement annulé — aucun montant n'a été débité. Vous pouvez réessayer à tout moment.";
+        banner.className = "mb-6 rounded-lg px-4 py-3 text-sm bg-amber-50 border border-amber-200 text-amber-900";
+        banner.classList.remove("hidden");
+      } else if (authStatus === "ok") {
+        banner.textContent = "Connexion réussie.";
         banner.className = "mb-6 rounded-lg px-4 py-3 text-sm bg-emerald-50 border border-emerald-200 text-emerald-900";
         banner.classList.remove("hidden");
       } else if (authStatus === "invalid") {
-        banner.textContent = "That link is not valid. Please request a new one.";
+        banner.textContent = "Ce lien de connexion n'est pas valide. Veuillez en demander un nouveau.";
         banner.className = "mb-6 rounded-lg px-4 py-3 text-sm bg-rose-50 border border-rose-200 text-rose-900";
         banner.classList.remove("hidden");
       } else if (authStatus === "expired") {
-        banner.textContent = "That link has expired. Please request a new one.";
+        banner.textContent = "Ce lien de connexion a expiré. Veuillez en demander un nouveau.";
         banner.className = "mb-6 rounded-lg px-4 py-3 text-sm bg-amber-50 border border-amber-200 text-amber-900";
         banner.classList.remove("hidden");
       }
@@ -101,11 +112,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           nameEl.textContent = d.name;
           const metaEl = document.createElement("div");
           metaEl.className = "text-xs text-slate-500 mt-0.5";
-          const vers = d.current_version ? ("v" + d.current_version) : "no version yet";
+          const vers = d.current_version ? ("v" + d.current_version) : "aucune version disponible";
           let meta = vers;
           if (d.updates_until) {
-            const until = new Date(d.updates_until).toLocaleDateString();
-            meta += " · updates until " + until;
+            const until = new Date(d.updates_until).toLocaleDateString("fr-CH");
+            meta += " · mises à jour incluses jusqu'au " + until;
           }
           metaEl.textContent = meta;
           infoDiv.appendChild(nameEl);
@@ -113,11 +124,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
           const btn = document.createElement("button");
           btn.className = "shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium transition-colors";
-          btn.textContent = "Download";
+          btn.textContent = "Télécharger";
           btn.setAttribute("data-id", d.id);
           btn.addEventListener("click", async function () {
             btn.disabled = true;
-            btn.textContent = "Preparing…";
+            btn.textContent = "Préparation…";
             try {
               const r = await fetch("/api/account/download-request", {
                 method: "POST",
@@ -133,8 +144,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
               window.location.href = body.download_url;
             } catch (e) {
               btn.disabled = false;
-              btn.textContent = "Retry";
-              alert("Download failed: " + (e && e.message ? e.message : String(e)));
+              btn.textContent = "Réessayer";
+              alert("Échec du téléchargement : " + (e && e.message ? e.message : String(e)));
             }
           });
 
@@ -154,7 +165,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           const dsBody = dsRes.ok ? await dsRes.json() : { datasets: [] };
           showDashboard(meBody.customer, dsBody.datasets);
         } catch (e) {
-          loadingEl.textContent = "Failed to load account. Please refresh.";
+          loadingEl.textContent = "Impossible de charger votre espace client. Veuillez actualiser la page.";
         }
       }
 
@@ -164,7 +175,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         const email = String(fd.get("email") || "").trim();
         if (!email) return;
         const msgEl = document.getElementById("login-msg");
-        msgEl.textContent = "Sending…";
+        msgEl.textContent = "Envoi en cours…";
         try {
           const r = await fetch("/api/auth/magic-link", {
             method: "POST",
@@ -173,14 +184,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             body: JSON.stringify({ email: email }),
           });
           if (r.ok) {
-            msgEl.textContent = "Check your inbox — the link is valid for 15 minutes.";
+            msgEl.textContent = "Vérifiez votre boîte de réception — le lien est valable 15 minutes.";
             msgEl.className = "mt-4 text-sm text-emerald-700";
           } else {
-            msgEl.textContent = "Something went wrong. Please try again.";
+            msgEl.textContent = "Une erreur est survenue. Veuillez réessayer.";
             msgEl.className = "mt-4 text-sm text-rose-700";
           }
         } catch (err) {
-          msgEl.textContent = "Network error. Please try again.";
+          msgEl.textContent = "Erreur réseau. Veuillez réessayer.";
           msgEl.className = "mt-4 text-sm text-rose-700";
         }
       });

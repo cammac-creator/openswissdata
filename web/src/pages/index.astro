@@ -300,7 +300,7 @@ import Quote from "../components/Quote.astro";
       </details>
       <details class="v4-faq-item reveal-v4" data-delay="3">
         <summary>Comment je vérifie que le ZIP n'a pas été altéré ?</summary>
-        <p><code>npx @openswissdata/sdk verify-provenance ./tares-2026.04.zip</code>. Vérifie la signature Ed25519, l'horodatage RFC-3161 (freetsa.org) et le hash SHA-256 du fichier source. Notre clé publique est sur le site et dans chaque ZIP.</p>
+        <p>Chaque ZIP contient un fichier <code>provenance.json</code> avec hash SHA-256 + signature Ed25519 + horodatage RFC-3161. Vérification rapide en CLI : <code>openssl dgst -sha256 tares-2026.04.zip</code> et compare au champ <code>sha256</code> du <code>provenance.json</code>. Détails et clé publique sur la <a href="/legal/provenance">page Provenance</a>. Un SDK officiel <code>@openswissdata/sdk verify-provenance</code> sera publié peu après le launch (release tracked sur GitHub).</p>
       </details>
       <details class="v4-faq-item reveal-v4" data-delay="3">
         <summary>C'est exploitable dans un ERP existant (SAP, Odoo, Sage) ?</summary>
