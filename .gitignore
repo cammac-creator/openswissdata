@@ -10,6 +10,21 @@ data/
 # Exception: bundled MCP data slice ships with the deploy (small CSVs only)
 !src/mcp/data/
 !src/mcp/data/*
+# Exception: classifications CSVs needed by Astro build for SEO pages
+# (web/src/lib/noga-helpers.ts → /codes/noga/[code]). Keep only the small
+# text formats — the .json / .sql / .parquet duplicates stay gitignored.
+!data/classifications/
+data/classifications/*
+!data/classifications/classifications-2026.04.29-test-work/
+data/classifications/classifications-2026.04.29-test-work/*
+!data/classifications/classifications-2026.04.29-test-work/noga_2025.csv
+!data/classifications/classifications-2026.04.29-test-work/noga_2008.csv
+!data/classifications/classifications-2026.04.29-test-work/nace_2_0.csv
+!data/classifications/classifications-2026.04.29-test-work/nace_2_1.csv
+!data/classifications/classifications-2026.04.29-test-work/isic_4.csv
+!data/classifications/classifications-2026.04.29-test-work/crosswalks.csv
+!data/classifications/classifications-2026.04.29-test-work/LICENSE.txt
+!data/classifications/classifications-2026.04.29-test-work/README.md
 .DS_Store
 permissions-emails/
 coverage/

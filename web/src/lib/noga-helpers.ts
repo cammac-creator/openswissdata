@@ -16,10 +16,17 @@ const DATA_DIR = resolve(
   "data/classifications/classifications-2026.04.29-test-work",
 );
 
-if (!existsSync(DATA_DIR)) {
-  throw new Error(
+// Defensive: if the dataset is missing (e.g. partial clone, fresh CI runner
+// without the data dir), emit a warning and let the loaders return empty
+// arrays. Astro's getStaticPaths() then produces ZERO /codes/noga/* pages,
+// but the rest of the site still builds. Better than failing the whole
+// deploy on a missing optional asset.
+const DATASET_AVAILABLE = existsSync(DATA_DIR);
+if (!DATASET_AVAILABLE) {
+  console.warn(
     `[noga-helpers] Classification dataset not found at ${DATA_DIR}. ` +
-      `Have the ETL files moved? Update DATA_DIR in noga-helpers.ts. cwd=${process.cwd()}`,
+      `SEO programmatic pages (/codes/noga/*) will be skipped. ` +
+      `cwd=${process.cwd()}`,
   );
 }
 
@@ -126,6 +133,7 @@ let _crosswalks: CrosswalkRow[] | null = null;
 
 export function loadNoga2025(): NogaRow[] {
   if (_noga) return _noga;
+  if (!DATASET_AVAILABLE) { _noga = []; return _noga; }
   const raw = readFileSync(resolve(DATA_DIR, "noga_2025.csv"), "utf-8");
   _noga = parseCsv<NogaRow>(raw);
   return _noga;
@@ -133,6 +141,7 @@ export function loadNoga2025(): NogaRow[] {
 
 export function loadNace21(): NaceRow[] {
   if (_nace21) return _nace21;
+  if (!DATASET_AVAILABLE) { _nace21 = []; return _nace21; }
   const raw = readFileSync(resolve(DATA_DIR, "nace_2_1.csv"), "utf-8");
   _nace21 = parseCsv<NaceRow>(raw);
   return _nace21;
@@ -140,6 +149,7 @@ export function loadNace21(): NaceRow[] {
 
 export function loadNace20(): NaceRow[] {
   if (_nace20) return _nace20;
+  if (!DATASET_AVAILABLE) { _nace20 = []; return _nace20; }
   const raw = readFileSync(resolve(DATA_DIR, "nace_2_0.csv"), "utf-8");
   _nace20 = parseCsv<NaceRow>(raw);
   return _nace20;
@@ -147,6 +157,7 @@ export function loadNace20(): NaceRow[] {
 
 export function loadIsic4(): IsicRow[] {
   if (_isic) return _isic;
+  if (!DATASET_AVAILABLE) { _isic = []; return _isic; }
   const raw = readFileSync(resolve(DATA_DIR, "isic_4.csv"), "utf-8");
   _isic = parseCsv<IsicRow>(raw);
   return _isic;
@@ -154,6 +165,7 @@ export function loadIsic4(): IsicRow[] {
 
 export function loadCrosswalks(): CrosswalkRow[] {
   if (_crosswalks) return _crosswalks;
+  if (!DATASET_AVAILABLE) { _crosswalks = []; return _crosswalks; }
   const raw = readFileSync(resolve(DATA_DIR, "crosswalks.csv"), "utf-8");
   _crosswalks = parseCsv<CrosswalkRow>(raw);
   return _crosswalks;
