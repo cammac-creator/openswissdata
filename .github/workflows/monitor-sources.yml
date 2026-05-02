@@ -1,0 +1,119 @@
+name: Daily source canary
+
+# Surveille les sources amont (BAZG, FINMA, BFS) et ouvre une issue dès qu'une
+# rupture structurelle est détectée. Pas d'email — issue GitHub seulement, pour
+# éviter le bruit pendant la phase de tuning.
+
+on:
+  schedule:
+    # Quotidien 07:00 UTC (09:00 CEST). Après les fenêtres de publication
+    # habituelles des autorités fédérales, avant la journée de travail.
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+    inputs:
+      update_baseline:
+        description: "Replace baseline with current hashes (use after a planned schema change)"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Run canary
+        id: canary
+        run: |
+          if [ "${{ github.event.inputs.update_baseline }}" = "true" ]; then
+            npx tsx scripts/monitor-sources.ts --update
+          else
+            npx tsx scripts/monitor-sources.ts
+          fi
+        continue-on-error: true
+
+      - name: Read report
+        id: report
+        if: always()
+        run: |
+          if [ -f etl/canary-report.json ]; then
+            cat etl/canary-report.json
+            echo "DRIFTS=$(jq '.drift' etl/canary-report.json)" >> $GITHUB_OUTPUT
+            echo "ERRORS=$(jq '.error' etl/canary-report.json)" >> $GITHUB_OUTPUT
+            echo "NEW=$(jq '.new' etl/canary-report.json)" >> $GITHUB_OUTPUT
+          else
+            echo "DRIFTS=0" >> $GITHUB_OUTPUT
+            echo "ERRORS=0" >> $GITHUB_OUTPUT
+            echo "NEW=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Open issue on drift
+        if: steps.report.outputs.DRIFTS != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          DRIFT_LIST=$(jq -r '.drifts[] | "- **\(.id)** — \(.description) · prev=`\(.previous_hash[0:12])` now=`\(.current_hash[0:12])` size=\(.size)b"' etl/canary-report.json)
+          BODY=$(cat <<EOF
+          # 🚨 Source canary drift — $DATE
+
+          Le canary quotidien a détecté une **rupture structurelle** sur ${{ steps.report.outputs.DRIFTS }} source(s) amont.
+
+          ## Sources qui ont changé
+
+          $DRIFT_LIST
+
+          ## Action attendue
+
+          1. Vérifier manuellement la nouvelle version de la source.
+          2. Adapter le parser ETL si nécessaire.
+          3. Notifier les clients impactés (changelog + email).
+          4. Mettre à jour la baseline : \`gh workflow run monitor-sources.yml -f update_baseline=true\`
+
+          ## Rapport complet
+
+          \`\`\`json
+          $(cat etl/canary-report.json)
+          \`\`\`
+          EOF
+          )
+          gh issue create \
+            --title "🚨 Source drift — $DATE (${{ steps.report.outputs.DRIFTS }} source(s))" \
+            --label "canary,priority:high" \
+            --body "$BODY" \
+            --repo ${{ github.repository }}
+
+      - name: Open issue on error
+        if: steps.report.outputs.ERRORS != '0' && steps.report.outputs.DRIFTS == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          ERROR_LIST=$(jq -r '.errors[] | "- **\(.id)** — \(.description) · `\(.error)`"' etl/canary-report.json)
+          BODY=$(cat <<EOF
+          # ⚠️ Source canary errors — $DATE
+
+          ${{ steps.report.outputs.ERRORS }} source(s) ont échoué (timeout, 4xx, etc.). Pas forcément une rupture — peut être transitoire.
+
+          ## Sources en erreur
+
+          $ERROR_LIST
+
+          Si les erreurs persistent >24h, vérifier manuellement les URLs.
+          EOF
+          )
+          gh issue create \
+            --title "⚠️ Source canary errors — $DATE" \
+            --label "canary,priority:medium" \
+            --body "$BODY" \
+            --repo ${{ github.repository }}

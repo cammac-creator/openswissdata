@@ -29,3 +29,5 @@ data/classifications/classifications-2026.04.29-test-work/*
 permissions-emails/
 coverage/
 *.log
+# Canary report is regenerated each run — only the baseline is checked in.
+etl/canary-report.json
