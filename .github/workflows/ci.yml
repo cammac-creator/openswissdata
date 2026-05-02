@@ -36,3 +36,21 @@ jobs:
           # Build needs the web bundle which has no runtime secrets, but
           # tsc needs NODE_ENV=development to allow defaults from env.ts.
           NODE_ENV: development
+
+  mcp-server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install sub-package deps
+        working-directory: sdks/mcp-server
+        run: npm install
+      - name: Typecheck mcp-server
+        working-directory: sdks/mcp-server
+        run: npm run typecheck
+      - name: Test mcp-server
+        working-directory: sdks/mcp-server
+        run: npm test
