@@ -1,13 +1,16 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import FinmaLookup from "../../components/FinmaLookup.astro";
+import TrustStrip from "../../components/TrustStrip.astro";
 ---
 <BaseLayout
   title="Registre FINMA unifié — Conformité financière suisse | openswissdata"
   description="Les 10 listes publiques d'autorisations FINMA consolidées sous un schéma unique. Banques, assurances, PSPs, gestionnaires d'actifs, SRO. Enrichi UID + LEI. 299 CHF one-shot."
 >
-<section class="ds-container">
-  <div class="container-tight">
+<div class="bg-grid"></div>
+
+<section class="v4-hero ds-page">
+  <div class="container-v4">
     <nav class="ds-breadcrumb">
       <a href="/">accueil</a>
       <span class="sep">·</span>
@@ -16,42 +19,89 @@ import FinmaLookup from "../../components/FinmaLookup.astro";
       <span class="current">FINMA Registry</span>
     </nav>
 
-    <div class="ds-hero">
+    <div class="v4-hero-grid">
       <div>
-        <span class="ds-badge amber reveal">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 3v2.5L6.5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-          FINMA · permission demandée 2026-04-17
-        </span>
-        <h1 class="ds-hero-title reveal" data-delay="1">
-          FINMA Registry — <span class="serif">10 listes</span>, un seul registre.
+        <div class="v4-eyebrow reveal-v4">
+          <span>FINMA · Registre unifié</span>
+          <span style="opacity:.4">·</span>
+          <span>Permission demandée 2026-04-17</span>
+        </div>
+
+        <h1 class="v4-h1 reveal-v4" data-delay="1">
+          10 listes FINMA,<br>
+          <span class="accent">un seul registre.</span>
         </h1>
-        <p class="ds-hero-lede reveal" data-delay="2">
+
+        <p class="v4-lede reveal-v4" data-delay="2">
           Toutes les institutions financières autorisées par la FINMA, consolidées sous un schéma unifié :
-          banques, assurances, PSPs, gestionnaires d'actifs, courtiers, SRO. Enrichi avec UID suisse et LEI international.
+          banques, assurances, PSPs, gestionnaires d'actifs, courtiers, SRO. <strong>Enrichi UID suisse + LEI international.</strong>
           Mises à jour hebdomadaires avec changelog 90 jours.
         </p>
+
+        <div class="v4-spec-row reveal-v4" data-delay="3">
+          <div class="v4-spec">
+            <div class="v4-spec-label">Listes</div>
+            <div class="v4-spec-value">10 unifiées</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Entités</div>
+            <div class="v4-spec-value">~2 912</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Mises à jour</div>
+            <div class="v4-spec-value">Hebdomadaires</div>
+          </div>
+        </div>
+
+        <div class="v4-cta-row reveal-v4" data-delay="4">
+          <a href="#acheter" class="v4-btn v4-btn-primary">Acheter — 299 CHF <span class="arrow">→</span></a>
+          <a href="/samples/finma-sample.csv" download class="v4-btn v4-btn-secondary">Échantillon CSV</a>
+        </div>
+
+        <div class="v4-permission-line reveal-v4" data-delay="5">
+          <span><strong>Source :</strong> FINMA</span>
+          <span style="opacity:.4">·</span>
+          <span>Listes publiques officielles</span>
+          <span style="opacity:.4">·</span>
+          <span><strong>For :</strong> Berne</span>
+        </div>
       </div>
-      <div class="ds-price-box reveal" data-delay="2">
+
+      <div class="ds-price-box reveal-v4" data-delay="2">
         <div class="ds-price-box-label">One-shot</div>
         <div class="ds-price-box-amount">299<span class="ds-price-box-currency">CHF</span></div>
-        <div class="ds-price-box-renew">+120 CHF/an mises à jour (optionnel)</div>
+        <div class="ds-price-box-renew">+120 CHF/an mises à jour (optionnel) · 360 jours d'updates inclus</div>
       </div>
     </div>
+  </div>
+</section>
 
+<TrustStrip
+  sources={["FINMA", "UID Registry", "GLEIF (LEI)"]}
+  badges={["10 listes consolidées", "Manifest signé Ed25519", "Horodatage RFC-3161"]}
+/>
+
+<section class="v4-datasets ds-page">
+  <div class="container-v4">
     <div class="ds-meta-grid">
-      <div class="ds-meta-card reveal">
+      <div class="ds-meta-card reveal-v4">
         <div class="ds-meta-label">Formats inclus</div>
         <div class="ds-meta-value">CSV (unifié + par type) · JSON · Parquet · SQL · changelog 90 jours · JSON Schema · README · LICENSE · SHA-256</div>
       </div>
-      <div class="ds-meta-card reveal" data-delay="1">
+      <div class="ds-meta-card reveal-v4" data-delay="1">
         <div class="ds-meta-label">Mises à jour</div>
         <div class="ds-meta-value">Diff hebdomadaire + changelog 90 jours · 360 jours inclus · renouvellement 120 CHF/an</div>
       </div>
     </div>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">10 <span class="serif">types d'entités</span> couverts</h2>
-      <p class="ds-section-intro">
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Périmètre</strong>
+        <span class="sep">/</span>
+        <span>10 types d'entités FINMA</span>
+      </div>
+      <h2 class="v4-section-h2">10 <span class="serif">types d'entités</span> couverts.</h2>
+      <p class="v4-section-intro">
         Toutes les listes publiques FINMA sont récupérées, normalisées et fusionnées sous un schéma commun avec un champ <code class="mono" style="background: var(--color-bg-alt); padding: 2px 6px; border-radius: 4px;">entity_type</code> pour distinguer.
       </p>
 
@@ -76,9 +126,14 @@ import FinmaLookup from "../../components/FinmaLookup.astro";
       </div>
     </section>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">Schéma <span class="serif">unifié</span> sur les 10 listes</h2>
-      <p class="ds-section-intro">
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Schéma</strong>
+        <span class="sep">/</span>
+        <span>Champs communs aux 10 listes</span>
+      </div>
+      <h2 class="v4-section-h2">Schéma <span class="serif">unifié</span> sur les 10 listes.</h2>
+      <p class="v4-section-intro">
         Tous les enregistrements partagent les mêmes champs. Vous pouvez filtrer par <code class="mono" style="background: var(--color-bg-alt); padding: 2px 6px; border-radius: 4px;">entity_type</code> ou interroger toutes les institutions d'un seul coup.
       </p>
 
@@ -103,13 +158,18 @@ import FinmaLookup from "../../components/FinmaLookup.astro";
       </div>
     </section>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">Essayez <span class="serif">en vrai</span></h2>
-      <p class="ds-section-intro">Cherchez une institution suisse et voyez immédiatement son type FINMA, son UID et son LEI.</p>
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Démo live</strong>
+        <span class="sep">/</span>
+        <span>Sans inscription</span>
+      </div>
+      <h2 class="v4-section-h2">Essayez <span class="serif">en vrai</span>.</h2>
+      <p class="v4-section-intro">Cherchez une institution suisse et voyez immédiatement son type FINMA, son UID et son LEI.</p>
       <FinmaLookup />
     </section>
 
-    <div class="ds-sample reveal">
+    <div class="ds-sample reveal-v4">
       <h3>Échantillon gratuit — 200 entités sur les 10 types</h3>
       <p>Aperçu équilibré (20 par type d'entité) pour valider le format. Toutes les colonnes sont présentes.</p>
       <a href="/samples/finma-sample.csv" download class="ds-sample-dl">
@@ -118,8 +178,13 @@ import FinmaLookup from "../../components/FinmaLookup.astro";
       </a>
     </div>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">À <span class="serif">qui</span> ça s'adresse</h2>
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Cas d'usage</strong>
+        <span class="sep">/</span>
+        <span>4 profils types</span>
+      </div>
+      <h2 class="v4-section-h2">À <span class="serif">qui</span> ça s'adresse.</h2>
       <div class="ds-audience-grid">
         <div class="ds-audience-item">
           <strong>Compliance officers FinTech &amp; banques</strong>
@@ -140,12 +205,12 @@ import FinmaLookup from "../../components/FinmaLookup.astro";
       </div>
     </section>
 
-    <div class="ds-cta">
+    <div class="ds-cta" id="acheter">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
         <input type="hidden" name="dataset_ids" value="finma" />
-        <button type="submit" class="ds-cta-btn">
+        <button type="submit" class="v4-btn v4-btn-primary v4-btn-cta">
           Acheter FINMA Registry — 299 CHF
-          <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="arrow">→</span>
         </button>
       </form>
       <p class="ds-cta-sub">Paiement sécurisé Stripe · Téléchargement immédiat par email · Remboursement 14 jours sans condition</p>
