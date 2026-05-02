@@ -1,42 +1,93 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import TrustStrip from "../components/TrustStrip.astro";
 ---
 <BaseLayout
   title="Bundle complet — TARES + Classifications + FINMA | openswissdata"
   description="Les 3 datasets openswissdata en un seul achat (TARES douanes, Classifications NOGA/NACE/ISIC, Registre FINMA) pour 799 CHF. Économisez près de 200 CHF (~20 %) vs achat séparé."
 >
-<section class="ds-container">
-  <div class="container-tight">
+<div class="bg-grid"></div>
+
+<section class="v4-hero ds-page">
+  <div class="container-v4">
     <nav class="ds-breadcrumb">
       <a href="/">accueil</a>
       <span class="sep">·</span>
       <span class="current">Bundle complet</span>
     </nav>
 
-    <div class="ds-hero">
+    <div class="v4-hero-grid">
       <div>
-        <span class="ds-badge red reveal">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1l1.5 3L10 4.5l-2.5 2L8 10 5 8.5 2 10l.5-3.5L0 4.5 3.5 4z" fill="currentColor"/></svg>
-          Le plus populaire · ≈ 200 CHF économisés
-        </span>
-        <h1 class="ds-hero-title reveal" data-delay="1">
-          Tout openswissdata, <span class="serif">en un seul achat.</span>
+        <div class="v4-eyebrow reveal-v4">
+          <span>Bundle 3-en-1 · Le plus populaire</span>
+          <span style="opacity:.4">·</span>
+          <span class="check">≈ 200 CHF économisés</span>
+        </div>
+
+        <h1 class="v4-h1 reveal-v4" data-delay="1">
+          Tout openswissdata,<br>
+          <span class="accent">en un seul achat.</span>
         </h1>
-        <p class="ds-hero-lede reveal" data-delay="2">
+
+        <p class="v4-lede reveal-v4" data-delay="2">
           Les trois datasets pour les équipes qui ont besoin d'une vision complète des données réglementaires suisses.
-          Un seul checkout, trois boîtes à outils. Compliance, finance, douanes — couvert.
+          <strong>Un seul checkout, trois boîtes à outils.</strong> Compliance, finance, douanes — couvert.
         </p>
+
+        <div class="v4-spec-row reveal-v4" data-delay="3">
+          <div class="v4-spec">
+            <div class="v4-spec-label">Datasets</div>
+            <div class="v4-spec-value">3 inclus</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Économie</div>
+            <div class="v4-spec-value">≈ 200 CHF (−20 %)</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Mises à jour</div>
+            <div class="v4-spec-value">360 jours inclus</div>
+          </div>
+        </div>
+
+        <div class="v4-cta-row reveal-v4" data-delay="4">
+          <a href="#acheter" class="v4-btn v4-btn-primary">Acheter le bundle — 799 CHF <span class="arrow">→</span></a>
+          <a href="#detail-economie" class="v4-btn v4-btn-secondary">Voir le détail</a>
+        </div>
+
+        <div class="v4-permission-line reveal-v4" data-delay="5">
+          <span><strong>Sources :</strong> BAZG · BFS · FINMA</span>
+          <span style="opacity:.4">·</span>
+          <span class="ok">Permission BAZG accordée 2026-04-21</span>
+          <span style="opacity:.4">·</span>
+          <span><strong>For :</strong> Berne</span>
+        </div>
       </div>
-      <div class="ds-price-box reveal" data-delay="2">
-        <div class="ds-price-box-label">Bundle</div>
-        <div class="ds-price-box-amount" style="text-decoration: line-through; color: var(--color-ink-mute); font-size: 22px;">997 CHF</div>
-        <div class="ds-price-box-amount" style="color: var(--color-accent);">799<span class="ds-price-box-currency">CHF</span></div>
+
+      <div class="ds-price-box reveal-v4" data-delay="2">
+        <div class="ds-price-box-label">Bundle complet</div>
+        <div class="bundle-price-strike">997 CHF</div>
+        <div class="ds-price-box-amount accent">799<span class="ds-price-box-currency">CHF</span></div>
         <div class="ds-price-box-renew">≈ 200 CHF économisés · 360 jours d'updates inclus</div>
       </div>
     </div>
+  </div>
+</section>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">Trois <span class="serif">datasets</span> dans le bundle</h2>
+<TrustStrip
+  sources={["BAZG", "BFS / OFS", "FINMA"]}
+  badges={["Permission BAZG · 2026-04-21", "3 datasets unifiés", "Manifest signé Ed25519"]}
+/>
+
+<section class="v4-datasets ds-page">
+  <div class="container-v4">
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Contenu du bundle</strong>
+        <span class="sep">/</span>
+        <span>3 datasets autoritaires</span>
+      </div>
+      <h2 class="v4-section-h2">Trois <span class="serif">datasets</span> dans le bundle.</h2>
       <div class="ds-bundle-grid">
         <a href="/datasets/tares" class="ds-bundle-card">
           <div class="ds-bundle-meta">Douanes · BAZG ✓</div>
@@ -62,8 +113,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </div>
     </section>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">Le <span class="serif">détail</span> de l'économie</h2>
+    <section class="ds-section reveal-v4" id="detail-economie">
+      <div class="v4-section-eyebrow">
+        <strong>Économie</strong>
+        <span class="sep">/</span>
+        <span>Détail prix vs bundle</span>
+      </div>
+      <h2 class="v4-section-h2">Le <span class="serif">détail</span> de l'économie.</h2>
       <div class="ds-saving-table">
         <div class="ds-saving-row">
           <span>TARES</span>
@@ -92,17 +148,27 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </div>
     </section>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">Les <span class="serif">mises à jour</span></h2>
-      <p class="ds-section-intro">
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Mises à jour</strong>
+        <span class="sep">/</span>
+        <span>Pas d'engagement</span>
+      </div>
+      <h2 class="v4-section-h2">Les <span class="serif">mises à jour</span>.</h2>
+      <p class="v4-section-intro">
         360 jours de mises à jour pour les 3 datasets inclus dans le prix.
         Au-delà : renouvellement par dataset (120 CHF/an pour TARES et FINMA, 160 CHF/an pour Classifications) ou vous gardez les versions que vous avez.
         <strong>Pas d'engagement, pas d'auto-renouvellement.</strong>
       </p>
     </section>
 
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">Pour <span class="serif">qui</span> est le bundle ?</h2>
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Cas d'usage</strong>
+        <span class="sep">/</span>
+        <span>4 profils types</span>
+      </div>
+      <h2 class="v4-section-h2">Pour <span class="serif">qui</span> est le bundle ?</h2>
       <div class="ds-audience-grid">
         <div class="ds-audience-item">
           <strong>Équipes data complètes</strong>
@@ -123,12 +189,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </div>
     </section>
 
-    <div class="ds-cta">
+    <div class="ds-cta" id="acheter">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
         <input type="hidden" name="dataset_ids" value="bundle" />
-        <button type="submit" class="ds-cta-btn">
+        <button type="submit" class="v4-btn v4-btn-primary v4-btn-cta">
           Acheter le bundle complet — 799 CHF
-          <svg class="btn-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="arrow">→</span>
         </button>
       </form>
       <p class="ds-cta-sub">Paiement sécurisé Stripe · 3 téléchargements immédiats par email · Remboursement 14 jours si aucun téléchargé · Support email prioritaire inclus</p>
@@ -137,6 +203,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </section>
 
 <style>
+  .bundle-price-strike {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-mute);
+    text-decoration: line-through;
+    margin-bottom: 4px;
+  }
+  .v4-hero.ds-page .ds-price-box .ds-price-box-amount.accent { color: var(--accent); }
+
   .ds-bundle-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -145,8 +220,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   @media (max-width: 880px) { .ds-bundle-grid { grid-template-columns: 1fr; } }
 
   .ds-bundle-card {
-    background: white;
-    border: 1px solid var(--color-line);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
     border-radius: 14px;
     padding: 24px;
     text-decoration: none;
@@ -193,8 +268,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   .ds-saving-table {
-    background: white;
-    border: 1px solid var(--color-line);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
     border-radius: 14px;
     padding: 8px 24px;
   }
