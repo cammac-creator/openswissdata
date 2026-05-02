@@ -1,0 +1,47 @@
+name: Weekly TARES refresh
+
+# CRON DESACTIVE pour le moment — workflow_dispatch only.
+# Une fois validé par un dry-run manuel, retirer le `if: false` du job pour
+# activer le cron hebdomadaire (lundi 04:00 UTC = 06:00 CEST).
+on:
+  schedule:
+    # Hebdomadaire, lundi 04:00 UTC. BAZG publie les XLSX de manière continue
+    # mais les changements significatifs sont rares (~1-2 par mois). Tourner
+    # une fois par semaine suffit largement.
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: "Force release even if BAZG sources unchanged"
+        required: false
+        default: "false"
+
+jobs:
+  refresh-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Disable scheduled runs until first dry-run validates end-to-end. Set to
+    # `true` (or remove the line) once ready.
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.TARES_CRON_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Run TARES ETL → publish to R2 + register in DB
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          BASE_URL: https://www.openswissdata.com
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          OSD_SIGNING_KEY_ED25519: ${{ secrets.OSD_SIGNING_KEY_ED25519 }}
+          # Skip embeddings in CI — they take ~10 min on CPU and the model
+          # weights aren't cached in the runner. Embeddings are recomputed
+          # locally before each major release, not on weekly refreshes.
+          SKIP_EMBEDDINGS: "1"
+        run: npm run etl:tares
