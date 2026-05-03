@@ -7,7 +7,10 @@ const lastUpdated = new Date().toISOString().split("T")[0];
   title="Provenance & moat juridique — openswissdata.com"
   description="Comment openswissdata garantit la provenance des données : permission BAZG, manifest signé Ed25519, horodatage RFC-3161, conformité LCD."
 >
-  <section class="max-w-3xl mx-auto px-6 py-16 prose prose-slate">
+  <div class="bg-grid"></div>
+  <section class="legal-page">
+    <div class="container-v4">
+      <div class="legal-content">
     <nav class="text-sm text-slate-500 mb-4 not-prose">
       <a href="/" class="hover:underline">Accueil</a> · <a href="/legal/cgv" class="hover:underline">Légal</a> · <span>Provenance</span>
     </nav>
@@ -129,5 +132,7 @@ $ npx @osd/sdk verify-provenance ./tares-2026.04.zip
     <p class="text-xs text-slate-400 mt-12 not-prose">
       openswissdata · Édité à Ogens, VD, Suisse · For juridique : Berne · Édition non officielle.
     </p>
+      </div>
+    </div>
   </section>
 </BaseLayout>

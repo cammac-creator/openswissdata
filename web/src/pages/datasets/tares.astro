@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import HSLookup from "../../components/HSLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
+import ProductFaq from "../../components/ProductFaq.astro";
 
 const productJsonLd = {
   "@context": "https://schema.org",
@@ -203,6 +204,8 @@ const productJsonLd = {
         </div>
       </div>
     </section>
+
+    <ProductFaq productName="TARES" formatNote="CSV (100 lignes sample), JSON, Parquet et SQL inclus dans tous les achats." />
 
     <div class="ds-cta" id="acheter">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">

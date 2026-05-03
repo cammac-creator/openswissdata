@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ClassificationsLookup from "../../components/ClassificationsLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
+import ProductFaq from "../../components/ProductFaq.astro";
 
 const productJsonLd = {
   "@context": "https://schema.org",
@@ -253,6 +254,8 @@ const productJsonLd = {
         <p class="ds-cta-sub" style="margin-top:16px;">Paiement sécurisé Stripe · Manifest signé Ed25519 + RFC-3161 · Refund 14 jours si non téléchargé</p>
       </div>
     </section>
+
+    <ProductFaq productName="Classifications" />
 
     <div class="ds-cta" id="acheter">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
