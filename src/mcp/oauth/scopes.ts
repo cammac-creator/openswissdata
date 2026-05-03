@@ -10,7 +10,7 @@
  *                  OR `tariff:read classifications:read finma:read` if the
  *                  client has registered.
  *   - standard   : `tariff:read classifications:read finma:read`
- *   - pro        : adds `tariff:semantic classifications:semantic
+ *   - pro        : adds `tariff:semantic tariff:history classifications:semantic
  *                  statent:read finma:history`
  *   - standalone : 5k/month dedicated MCP subscription — same as standard.
  *
@@ -20,6 +20,7 @@
 export const SCOPES = [
   "tariff:read",
   "tariff:semantic",
+  "tariff:history",
   "classifications:read",
   "classifications:semantic",
   "statent:read",
@@ -45,7 +46,7 @@ export const TOOL_SCOPE: Readonly<Record<string, Scope>> = {
   // V2 tools (planned — registered here so /oauth/authorize can include them
   // in the requested scope set up-front).
   tariff_semantic_search: "tariff:semantic",
-  tariff_changelog: "tariff:semantic",
+  tariff_changelog: "tariff:history",
   classify_text: "classifications:semantic",
   statent_lookup: "statent:read",
   entity_history: "finma:history",
@@ -59,6 +60,7 @@ export const TIER_DEFAULT_SCOPES: Readonly<Record<string, readonly Scope[]>> = {
   pro: [
     "tariff:read",
     "tariff:semantic",
+    "tariff:history",
     "classifications:read",
     "classifications:semantic",
     "statent:read",
