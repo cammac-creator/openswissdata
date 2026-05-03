@@ -2,10 +2,31 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ClassificationsLookup from "../../components/ClassificationsLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Classifications NOGA + NACE + ISIC",
+  description: "5 classifications d'activités économiques unifiées : NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Cross-walks bidirectionnels, 4 langues. JSON / Parquet / SQL.",
+  image: "https://www.openswissdata.com/og-default.png",
+  url: "https://www.openswissdata.com/datasets/classifications",
+  brand: { "@type": "Brand", name: "openswissdata" },
+  category: "Reference data — economic activity classifications",
+  offers: {
+    "@type": "Offer",
+    price: "399",
+    priceCurrency: "CHF",
+    availability: "https://schema.org/InStock",
+    url: "https://www.openswissdata.com/datasets/classifications#acheter",
+    priceValidUntil: "2026-12-31",
+    seller: { "@type": "Organization", name: "openswissdata" },
+  },
+};
 ---
 <BaseLayout
   title="Classifications économiques NOGA + NACE + ISIC | openswissdata"
   description="5 classifications d'activités économiques unifiées : NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Cross-walks bidirectionnels, 4 langues. JSON / Parquet / SQL. 399 CHF one-shot."
+  productJsonLd={productJsonLd}
 >
 <div class="bg-grid"></div>
 

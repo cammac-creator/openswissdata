@@ -1,10 +1,36 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import TrustStrip from "../components/TrustStrip.astro";
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Bundle openswissdata — TARES + Classifications + FINMA",
+  description: "Les 3 datasets openswissdata en un seul achat. Économie 200 CHF (20 %) vs achat séparé. 360 jours de mises à jour incluses.",
+  image: "https://www.openswissdata.com/og-default.png",
+  url: "https://www.openswissdata.com/bundle",
+  brand: { "@type": "Brand", name: "openswissdata" },
+  category: "Reference data bundle",
+  offers: {
+    "@type": "Offer",
+    price: "797",
+    priceCurrency: "CHF",
+    availability: "https://schema.org/InStock",
+    url: "https://www.openswissdata.com/bundle#acheter",
+    priceValidUntil: "2026-12-31",
+    seller: { "@type": "Organization", name: "openswissdata" },
+  },
+  isRelatedTo: [
+    { "@type": "Product", name: "TARES", url: "https://www.openswissdata.com/datasets/tares" },
+    { "@type": "Product", name: "Classifications", url: "https://www.openswissdata.com/datasets/classifications" },
+    { "@type": "Product", name: "FINMA Registry", url: "https://www.openswissdata.com/datasets/finma" },
+  ],
+};
 ---
 <BaseLayout
   title="Bundle complet — TARES + Classifications + FINMA | openswissdata"
   description="Les 3 datasets openswissdata en un seul achat (TARES douanes, Classifications NOGA/NACE/ISIC, Registre FINMA) pour 797 CHF. Économisez 200 CHF (20 %) vs achat séparé."
+  productJsonLd={productJsonLd}
 >
 <div class="bg-grid"></div>
 

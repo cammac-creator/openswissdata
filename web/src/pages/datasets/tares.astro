@@ -2,10 +2,31 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import HSLookup from "../../components/HSLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "TARES — Tarif douanier suisse normalisé",
+  description: "~7 500 codes HS8 actuels, désignations DE/FR/IT/EN, droits MFN, 30+ régimes préférentiels (UE/AELE/UK/Chine/Japon…), codes ZCO d'allègement. JSON / Parquet / SQL.",
+  image: "https://www.openswissdata.com/og-default.png",
+  url: "https://www.openswissdata.com/datasets/tares",
+  brand: { "@type": "Brand", name: "openswissdata" },
+  category: "Reference data — customs tariff",
+  offers: {
+    "@type": "Offer",
+    price: "299",
+    priceCurrency: "CHF",
+    availability: "https://schema.org/InStock",
+    url: "https://www.openswissdata.com/datasets/tares#acheter",
+    priceValidUntil: "2026-12-31",
+    seller: { "@type": "Organization", name: "openswissdata" },
+  },
+};
 ---
 <BaseLayout
   title="TARES — Tarif douanier suisse normalisé | openswissdata"
   description="Tarif douanier suisse complet : ~7 500 codes HS8 actuels, désignations DE/FR/IT/EN, droits MFN, 30+ régimes préférentiels (UE/AELE/UK/Chine/Japon…), codes ZCO d'allègement. JSON / Parquet / SQL. 299 CHF one-shot."
+  productJsonLd={productJsonLd}
 >
 <div class="bg-grid"></div>
 
