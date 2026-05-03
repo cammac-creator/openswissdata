@@ -174,14 +174,15 @@ export function createApp() {
       }),
     );
 
-    // 404 fallback — serve the Astro-built /404/index.html with HTTP 404 status.
+    // 404 fallback — serve the Astro-built /404.html with HTTP 404 status.
     // Without this, Hono returns a default text/plain "404 Not Found" body that
     // bypasses the Astro 404.astro page entirely (bad UX + bad SEO signal).
+    // Astro outputs `dist/404.html` (not `dist/404/index.html`) for top-level
+    // 404 pages, so we read that exact path.
     app.notFound(async (c) => {
-      const path = "/404/index.html";
       try {
         const fs = await import("node:fs/promises");
-        const html = await fs.readFile(`${webRoot}${path}`, "utf-8");
+        const html = await fs.readFile(`${webRoot}/404.html`, "utf-8");
         return c.html(html, 404);
       } catch {
         return c.text("404 Not Found", 404);
