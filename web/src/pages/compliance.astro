@@ -27,7 +27,7 @@ const lastUpdated = new Date().toISOString().split("T")[0];
     <h2 class="text-2xl font-semibold mt-10 mb-3">1. Sources officielles</h2>
     <div class="not-prose my-4" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
     <table class="w-full text-sm border border-slate-300" style="min-width:560px;">
-      <thead class="bg-slate-50">
+      <thead>
         <tr>
           <th class="text-left px-3 py-2 border-b border-slate-300">Dataset</th>
           <th class="text-left px-3 py-2 border-b border-slate-300">Source officielle</th>
@@ -61,14 +61,14 @@ const lastUpdated = new Date().toISOString().split("T")[0];
       </tbody>
     </table>
     </div>
-    <p class="text-sm text-slate-600">
+    <p class="legal-meta" style="margin: 8px 0; padding: 0; border: none;">
       Les fichiers source sont téléchargés depuis les portails publics des autorités émettrices, hashés en SHA-256, normalisés (schéma stable, multilingue FR/DE/IT/EN, cross-walks NACE/ISIC), versionnés et signés Ed25519. Pour le détail technique : <a href="/legal/provenance" class="text-indigo-600 hover:underline">/legal/provenance</a>.
     </p>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">2. Demandes de permission en cours</h2>
     <div class="not-prose my-4" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
     <table class="w-full text-sm border border-slate-300" style="min-width:560px;">
-      <thead class="bg-slate-50">
+      <thead>
         <tr>
           <th class="text-left px-3 py-2 border-b border-slate-300">Destinataire</th>
           <th class="text-left px-3 py-2 border-b border-slate-300">Sujet</th>
@@ -148,7 +148,7 @@ const lastUpdated = new Date().toISOString().split("T")[0];
     </p>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">5. Disclaimer FINMA</h2>
-    <blockquote class="border-l-4 border-slate-300 pl-4 text-slate-700">
+    <blockquote style="border-left: 3px solid var(--line-strong); padding-left: 16px; color: var(--ink-soft); margin: 16px 0;">
       « Source : FINMA. Aucune garantie sur l'exactitude, la fiabilité ou l'actualité. openswissdata.com n'est pas affilié à la FINMA, ne représente pas la FINMA, et ses données ne se substituent pas à la consultation directe de finma.ch. »
     </blockquote>
     <p>
