@@ -207,6 +207,6 @@ This is the kind of concrete, documentable process that moves an audit from a mu
 
 ## Buy the bundle
 
-[/datasets/finma](/datasets/finma) — CHF 299 · or the [full bundle](/bundle) at CHF 799 for FINMA + Classifications + TARES together.
+[/datasets/finma](/datasets/finma) — CHF 299 · or the [full bundle](/bundle) at CHF 797 for FINMA + Classifications + TARES together.
 
 A final word: this dataset is derived from FINMA's public register, which FINMA itself does not endorse, certify, or support for third-party redistribution. Our bundle adds format, normalization, and delta tracking; the authoritative source remains https://www.finma.ch/ and we link back to it on every row via the `source_url` field. Use accordingly.

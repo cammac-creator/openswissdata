@@ -174,4 +174,4 @@ If you need help deciding which NOGA 2025 code to assign to a specific activity,
 
 ## Buy the bundle
 
-[/datasets/classifications](/datasets/classifications) — CHF 399 one-off, 360 days of updates included. Or grab the [full 3-dataset bundle](/bundle) at CHF 799 for Classifications + TARES + FINMA.
+[/datasets/classifications](/datasets/classifications) — CHF 399 one-off, 360 days of updates included. Or grab the [full 3-dataset bundle](/bundle) at CHF 797 for Classifications + TARES + FINMA.
