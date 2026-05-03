@@ -1,0 +1,105 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout
+  title="Page introuvable — 404 | openswissdata"
+  description="Cette page n'existe pas (ou plus). Voici les chemins les plus utiles pour retrouver ce que vous cherchez."
+>
+<div class="bg-grid"></div>
+
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href="/">accueil</a>
+      <span class="sep">·</span>
+      <span class="current">404</span>
+    </nav>
+
+    <div class="not-found-grid">
+      <div>
+        <div class="v4-eyebrow">
+          <span>Erreur 404</span>
+          <span style="opacity:.4">·</span>
+          <span>Page introuvable</span>
+        </div>
+
+        <h1 class="v4-h1">
+          Cette page n'existe<br>
+          <span class="accent">plus.</span>
+        </h1>
+
+        <p class="v4-lede">
+          Ou bien le lien était cassé, ou bien la page a été déplacée. Aucun de nos datasets n'est concerné — l'API et les téléchargements continuent de fonctionner.
+        </p>
+
+        <div class="v4-cta-row">
+          <a href="/" class="v4-btn v4-btn-primary">Retour à l'accueil <span class="arrow">→</span></a>
+          <a href="/bundle" class="v4-btn v4-btn-secondary">Voir les datasets</a>
+        </div>
+      </div>
+
+      <div class="not-found-links">
+        <h2 class="not-found-title">Liens utiles</h2>
+        <ul>
+          <li><a href="/datasets/tares">TARES — Tarif douanier suisse · 299 CHF</a></li>
+          <li><a href="/datasets/classifications">Classifications NOGA + NACE + ISIC · 399 CHF</a></li>
+          <li><a href="/datasets/finma">FINMA Registry · 299 CHF</a></li>
+          <li><a href="/bundle">Bundle complet · 797 CHF (économie 200 CHF)</a></li>
+          <li><a href="/codes">Tous les codes NOGA 2025 (1047 codes SEO)</a></li>
+          <li><a href="/mcp">MCP Server (Claude, Cursor, Cline)</a></li>
+          <li><a href="/blog">Blog &amp; tutoriels</a></li>
+          <li><a href="/legal/cgv">CGV · refund 14 jours</a></li>
+          <li><a href="/legal/provenance">Provenance cryptographique</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+</BaseLayout>
+
+<style>
+  .not-found-grid {
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: 48px;
+    align-items: start;
+    margin-top: 24px;
+  }
+  @media (max-width: 880px) { .not-found-grid { grid-template-columns: 1fr; gap: 32px; } }
+  .not-found-links {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px 28px;
+  }
+  .not-found-title {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    font-weight: 500;
+  }
+  .not-found-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .not-found-links li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .not-found-links li:last-child { border-bottom: none; }
+  .not-found-links a {
+    color: var(--ink);
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .not-found-links a:hover {
+    color: var(--accent);
+  }
+</style>
