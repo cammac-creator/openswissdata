@@ -24,6 +24,7 @@ import { classifyTextTool } from "./tools/classify-text.js";
 import { finmaSearchTool } from "./tools/finma-search.js";
 import { tariffChangelogTool } from "./tools/tariff-changelog.js";
 import { entityHistoryTool } from "./tools/entity-history.js";
+import { statentLookupTool } from "./tools/statent-lookup.js";
 import { TOOL_SCOPE, isToolAllowed, type MCPAuthContext } from "./oauth/index.js";
 
 const PROTOCOL_VERSION = "2025-06-18";
@@ -59,6 +60,7 @@ const TOOLS: readonly Tool[] = [
   finmaSearchTool,
   tariffChangelogTool,
   entityHistoryTool,
+  statentLookupTool,
 ] as const;
 const TOOLS_BY_NAME: Record<string, Tool> = Object.fromEntries(TOOLS.map((t) => [t.name, t]));
 

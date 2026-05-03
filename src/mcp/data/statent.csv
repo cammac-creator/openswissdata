@@ -1,0 +1,2270 @@
+canton_code,canton_name,noga_division,noga_label,year,etablissements,emplois,emplois_eq_plein_temps
+999,"Suisse",999,"Division économique - total",2023,721727,5644870,4379510
+999,"Suisse",1,"01 Culture et production animale, chasse et services annexes",2023,48788,151762,99004
+999,"Suisse",2,"02 Sylviculture et exploitation forestière",2023,1407,6515,5492
+999,"Suisse",3,"03 Pêche et aquaculture",2023,177,555,473
+999,"Suisse",5,"05 Extraction de houille et de lignite",2023,0,0,0
+999,"Suisse",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+999,"Suisse",7,"07 Extraction de minerais métalliques",2023,0,0,0
+999,"Suisse",8,"08 Autres industries extractives",2023,310,4699,4323
+999,"Suisse",9,"09 Services de soutien aux industries extractives",2023,6,24,23
+999,"Suisse",10,"10 Industries alimentaires",2023,4825,82778,70301
+999,"Suisse",11,"11 Fabrication de boissons",2023,688,6821,5721
+999,"Suisse",12,"12 Fabrication de produits à base de tabac",2023,17,2133,2064
+999,"Suisse",13,"13 Fabrication de textiles",2023,825,6406,5417
+999,"Suisse",14,"14 Industrie de l'habillement",2023,1696,5130,3837
+999,"Suisse",15,"15 Industrie du cuir et de la chaussure",2023,320,2698,2335
+999,"Suisse",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,7068,39687,35533
+999,"Suisse",17,"17 Industrie du papier et du carton",2023,189,6246,5805
+999,"Suisse",18,"18 Imprimerie et reproduction d'enregistrements",2023,1788,14170,12166
+999,"Suisse",19,"19 Cokéfaction et raffinage",2023,7,377,365
+999,"Suisse",20,"20 Industrie chimique",2023,913,25750,23961
+999,"Suisse",21,"21 Industrie pharmaceutique",2023,382,54820,52225
+999,"Suisse",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,712,22087,20419
+999,"Suisse",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,1438,16843,15522
+999,"Suisse",24,"24 Métallurgie",2023,240,12619,12037
+999,"Suisse",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,7048,85088,77782
+999,"Suisse",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,2133,120116,113073
+999,"Suisse",27,"27 Fabrication d'équipements électriques",2023,852,27871,26039
+999,"Suisse",28,"28 Fabrication de machines et équipements n.c.a.",2023,2015,79985,75365
+999,"Suisse",29,"29 Industrie automobile",2023,239,4466,4151
+999,"Suisse",30,"30 Fabrication d'autres matériels de transport",2023,288,12264,11616
+999,"Suisse",31,"31 Fabrication de meubles",2023,905,9117,8272
+999,"Suisse",32,"32 Autres industries manufacturières",2023,3745,29829,26430
+999,"Suisse",33,"33 Réparation et installation de machines et d'équipements",2023,2832,21851,19828
+999,"Suisse",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,1165,33211,29231
+999,"Suisse",36,"36 Captage, traitement et distribution d'eau",2023,466,2914,2138
+999,"Suisse",37,"37 Collecte et traitement des eaux usées",2023,669,5731,5167
+999,"Suisse",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,1057,13330,11718
+999,"Suisse",39,"39 Dépollution et autres services de gestion des déchets",2023,37,201,173
+999,"Suisse",41,"41 Construction de bâtiments",2023,9761,88475,81663
+999,"Suisse",42,"42 Génie civil",2023,1147,24446,23129
+999,"Suisse",43,"43 Travaux de construction spécialisés",2023,41442,255306,232494
+999,"Suisse",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,17449,90990,80371
+999,"Suisse",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,22545,226509,200140
+999,"Suisse",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,49321,312732,231959
+999,"Suisse",49,"49 Transports terrestres et transport par conduites",2023,12523,135563,116447
+999,"Suisse",50,"50 Transports par eau",2023,218,7576,6388
+999,"Suisse",51,"51 Transports aériens",2023,204,12530,10556
+999,"Suisse",52,"52 Entreposage et services auxiliaires des transports",2023,2481,66925,58828
+999,"Suisse",53,"53 Activités de poste et de courrier",2023,2142,42537,31739
+999,"Suisse",55,"55 Hébergement",2023,5729,79079,64932
+999,"Suisse",56,"56 Restauration",2023,26675,189138,136911
+999,"Suisse",58,"58 Édition",2023,1757,17963,13338
+999,"Suisse",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,4316,11626,7171
+999,"Suisse",60,"60 Programmation et diffusion",2023,159,9718,7755
+999,"Suisse",61,"61 Télécommunications",2023,950,25481,23609
+999,"Suisse",62,"62 Programmation, conseil et autres activités informatiques",2023,19828,132212,116391
+999,"Suisse",63,"63 Services d'information",2023,1344,11235,9584
+999,"Suisse",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,8496,126104,111455
+999,"Suisse",65,"65 Assurance",2023,1170,53032,45190
+999,"Suisse",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,11123,84264,71891
+999,"Suisse",68,"68 Activités immobilières",2023,20427,77057,46929
+999,"Suisse",69,"69 Activités juridiques et comptables",2023,23187,90551,69766
+999,"Suisse",70,"70 Activités des sièges sociaux, conseil de gestion",2023,28231,147940,123519
+999,"Suisse",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,26139,148568,123111
+999,"Suisse",72,"72 Recherche-développement scientifique",2023,2221,36678,32378
+999,"Suisse",73,"73 Publicité et études de marché",2023,5233,25216,17405
+999,"Suisse",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,23261,40599,26246
+999,"Suisse",75,"75 Activités vétérinaires",2023,1369,8930,6493
+999,"Suisse",77,"77 Activités de location et location-bail",2023,2179,12748,10267
+999,"Suisse",78,"78 Activités liées à l'emploi",2023,2767,140349,106749
+999,"Suisse",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,2479,16397,11862
+999,"Suisse",80,"80 Enquêtes et sécurité",2023,918,25495,17955
+999,"Suisse",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,19056,160087,102805
+999,"Suisse",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,3711,21210,15810
+999,"Suisse",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,8783,215230,175700
+999,"Suisse",85,"85 Enseignement",2023,37157,427215,261077
+999,"Suisse",86,"86 Activités pour la santé humaine",2023,70938,469899,335408
+999,"Suisse",87,"87 Hébergement médico-social et social",2023,3927,211804,150284
+999,"Suisse",88,"88 Action sociale sans hébergement",2023,13713,146752,90994
+999,"Suisse",90,"90 Activités créatives, artistiques et de spectacle",2023,16509,35108,17157
+999,"Suisse",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,1309,15951,9660
+999,"Suisse",92,"92 Organisation de jeux de hasard et d'argent",2023,83,3415,2654
+999,"Suisse",93,"93 Activités sportives, récréatives et de loisirs",2023,10815,64260,34996
+999,"Suisse",94,"94 Activités des organisations associatives",2023,14214,110771,65930
+999,"Suisse",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,2556,5584,4345
+999,"Suisse",96,"96 Autres services personnels",2023,44518,75521,50064
+1,"Zürich",999,"Division économique - total",2023,125493,1141903,875865
+1,"Zürich",1,"01 Culture et production animale, chasse et services annexes",2023,3139,11161,7500
+1,"Zürich",2,"02 Sylviculture et exploitation forestière",2023,115,446,363
+1,"Zürich",3,"03 Pêche et aquaculture",2023,14,62,53
+1,"Zürich",5,"05 Extraction de houille et de lignite",2023,0,0,0
+1,"Zürich",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+1,"Zürich",7,"07 Extraction de minerais métalliques",2023,0,0,0
+1,"Zürich",8,"08 Autres industries extractives",2023,30,852,793
+1,"Zürich",10,"10 Industries alimentaires",2023,533,11277,9494
+1,"Zürich",11,"11 Fabrication de boissons",2023,62,662,568
+1,"Zürich",13,"13 Fabrication de textiles",2023,121,651,545
+1,"Zürich",14,"14 Industrie de l'habillement",2023,314,688,481
+1,"Zürich",15,"15 Industrie du cuir et de la chaussure",2023,47,1140,1041
+1,"Zürich",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,794,3780,3384
+1,"Zürich",17,"17 Industrie du papier et du carton",2023,25,535,490
+1,"Zürich",18,"18 Imprimerie et reproduction d'enregistrements",2023,332,2562,2257
+1,"Zürich",19,"19 Cokéfaction et raffinage",2023,,17,15
+1,"Zürich",20,"20 Industrie chimique",2023,140,3364,3053
+1,"Zürich",21,"21 Industrie pharmaceutique",2023,36,703,643
+1,"Zürich",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,91,1623,1489
+1,"Zürich",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,193,1611,1437
+1,"Zürich",24,"24 Métallurgie",2023,28,561,521
+1,"Zürich",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,824,9391,8570
+1,"Zürich",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,254,14423,13511
+1,"Zürich",27,"27 Fabrication d'équipements électriques",2023,160,3298,3088
+1,"Zürich",28,"28 Fabrication de machines et équipements n.c.a.",2023,301,12422,11693
+1,"Zürich",29,"29 Industrie automobile",2023,44,569,512
+1,"Zürich",30,"30 Fabrication d'autres matériels de transport",2023,41,1892,1811
+1,"Zürich",31,"31 Fabrication de meubles",2023,113,886,801
+1,"Zürich",32,"32 Autres industries manufacturières",2023,672,3487,2968
+1,"Zürich",33,"33 Réparation et installation de machines et d'équipements",2023,317,4113,3852
+1,"Zürich",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,114,3745,3362
+1,"Zürich",36,"36 Captage, traitement et distribution d'eau",2023,64,561,473
+1,"Zürich",37,"37 Collecte et traitement des eaux usées",2023,108,1206,1111
+1,"Zürich",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,116,2002,1783
+1,"Zürich",39,"39 Dépollution et autres services de gestion des déchets",2023,8,28,23
+1,"Zürich",41,"41 Construction de bâtiments",2023,1201,12162,11256
+1,"Zürich",42,"42 Génie civil",2023,124,3074,2934
+1,"Zürich",43,"43 Travaux de construction spécialisés",2023,6037,39222,35846
+1,"Zürich",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,2731,16587,14755
+1,"Zürich",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,3871,46065,40888
+1,"Zürich",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,7850,56624,42648
+1,"Zürich",49,"49 Transports terrestres et transport par conduites",2023,2640,20817,17912
+1,"Zürich",50,"50 Transports par eau",2023,17,368,294
+1,"Zürich",51,"51 Transports aériens",2023,52,9481,7931
+1,"Zürich",52,"52 Entreposage et services auxiliaires des transports",2023,362,13041,11183
+1,"Zürich",53,"53 Activités de poste et de courrier",2023,336,7279,4997
+1,"Zürich",55,"55 Hébergement",2023,362,7874,6518
+1,"Zürich",56,"56 Restauration",2023,4206,41365,30012
+1,"Zürich",58,"58 Édition",2023,456,6801,5278
+1,"Zürich",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,1371,3951,2537
+1,"Zürich",60,"60 Programmation et diffusion",2023,33,3629,2801
+1,"Zürich",61,"61 Télécommunications",2023,189,8603,8110
+1,"Zürich",62,"62 Programmation, conseil et autres activités informatiques",2023,4879,47540,42687
+1,"Zürich",63,"63 Services d'information",2023,437,5181,4539
+1,"Zürich",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,1308,43715,39547
+1,"Zürich",65,"65 Assurance",2023,236,21933,19185
+1,"Zürich",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,2329,25280,21954
+1,"Zürich",68,"68 Activités immobilières",2023,3243,16589,10508
+1,"Zürich",69,"69 Activités juridiques et comptables",2023,4652,24461,19958
+1,"Zürich",70,"70 Activités des sièges sociaux, conseil de gestion",2023,6554,52264,45386
+1,"Zürich",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,5259,35094,29220
+1,"Zürich",72,"72 Recherche-développement scientifique",2023,390,6369,5443
+1,"Zürich",73,"73 Publicité et études de marché",2023,1385,8503,6215
+1,"Zürich",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,5837,10947,6848
+1,"Zürich",75,"75 Activités vétérinaires",2023,213,1117,806
+1,"Zürich",77,"77 Activités de location et location-bail",2023,313,2296,1850
+1,"Zürich",78,"78 Activités liées à l'emploi",2023,649,33038,21510
+1,"Zürich",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,456,4019,3191
+1,"Zürich",80,"80 Enquêtes et sécurité",2023,174,4981,3562
+1,"Zürich",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,3498,37673,22842
+1,"Zürich",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,818,5776,4362
+1,"Zürich",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,943,35638,28474
+1,"Zürich",85,"85 Enseignement",2023,7787,106528,60383
+1,"Zürich",86,"86 Activités pour la santé humaine",2023,13065,87959,62047
+1,"Zürich",87,"87 Hébergement médico-social et social",2023,623,35376,25458
+1,"Zürich",88,"88 Action sociale sans hébergement",2023,2879,30509,19424
+1,"Zürich",90,"90 Activités créatives, artistiques et de spectacle",2023,3796,8237,4179
+1,"Zürich",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,201,3189,1973
+1,"Zürich",92,"92 Organisation de jeux de hasard et d'argent",2023,12,225,167
+1,"Zürich",93,"93 Activités sportives, récréatives et de loisirs",2023,1742,13740,7399
+1,"Zürich",94,"94 Activités des organisations associatives",2023,2370,21724,12671
+1,"Zürich",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,403,1096,884
+1,"Zürich",96,"96 Autres services personnels",2023,8050,14240,9603
+2,"Bern / Berne",999,"Division économique - total",2023,80883,673902,505489
+2,"Bern / Berne",1,"01 Culture et production animale, chasse et services annexes",2023,9889,30124,19158
+2,"Bern / Berne",2,"02 Sylviculture et exploitation forestière",2023,208,838,659
+2,"Bern / Berne",3,"03 Pêche et aquaculture",2023,20,67,60
+2,"Bern / Berne",5,"05 Extraction de houille et de lignite",2023,0,0,0
+2,"Bern / Berne",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+2,"Bern / Berne",7,"07 Extraction de minerais métalliques",2023,0,0,0
+2,"Bern / Berne",8,"08 Autres industries extractives",2023,45,644,582
+2,"Bern / Berne",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+2,"Bern / Berne",10,"10 Industries alimentaires",2023,718,11968,10017
+2,"Bern / Berne",11,"11 Fabrication de boissons",2023,69,461,339
+2,"Bern / Berne",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+2,"Bern / Berne",13,"13 Fabrication de textiles",2023,114,983,825
+2,"Bern / Berne",14,"14 Industrie de l'habillement",2023,201,434,272
+2,"Bern / Berne",15,"15 Industrie du cuir et de la chaussure",2023,40,122,95
+2,"Bern / Berne",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,1039,5641,4895
+2,"Bern / Berne",17,"17 Industrie du papier et du carton",2023,22,833,765
+2,"Bern / Berne",18,"18 Imprimerie et reproduction d'enregistrements",2023,207,1806,1517
+2,"Bern / Berne",19,"19 Cokéfaction et raffinage",2023,0,0,0
+2,"Bern / Berne",20,"20 Industrie chimique",2023,66,2017,1844
+2,"Bern / Berne",21,"21 Industrie pharmaceutique",2023,17,2455,2273
+2,"Bern / Berne",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,74,2024,1844
+2,"Bern / Berne",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,177,2135,1936
+2,"Bern / Berne",24,"24 Métallurgie",2023,42,1107,1040
+2,"Bern / Berne",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,1000,12368,11016
+2,"Bern / Berne",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,231,13271,12453
+2,"Bern / Berne",27,"27 Fabrication d'équipements électriques",2023,73,2022,1842
+2,"Bern / Berne",28,"28 Fabrication de machines et équipements n.c.a.",2023,279,12548,11736
+2,"Bern / Berne",29,"29 Industrie automobile",2023,39,471,429
+2,"Bern / Berne",30,"30 Fabrication d'autres matériels de transport",2023,35,1227,1126
+2,"Bern / Berne",31,"31 Fabrication de meubles",2023,113,1449,1316
+2,"Bern / Berne",32,"32 Autres industries manufacturières",2023,410,3697,3230
+2,"Bern / Berne",33,"33 Réparation et installation de machines et d'équipements",2023,355,2777,2462
+2,"Bern / Berne",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,178,4016,3238
+2,"Bern / Berne",36,"36 Captage, traitement et distribution d'eau",2023,61,318,213
+2,"Bern / Berne",37,"37 Collecte et traitement des eaux usées",2023,77,490,406
+2,"Bern / Berne",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,136,1749,1487
+2,"Bern / Berne",39,"39 Dépollution et autres services de gestion des déchets",2023,6,39,27
+2,"Bern / Berne",41,"41 Construction de bâtiments",2023,895,9663,8742
+2,"Bern / Berne",42,"42 Génie civil",2023,151,3247,3052
+2,"Bern / Berne",43,"43 Travaux de construction spécialisés",2023,4515,28903,25864
+2,"Bern / Berne",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,1992,10598,9128
+2,"Bern / Berne",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,1614,18773,16145
+2,"Bern / Berne",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,5462,39271,28144
+2,"Bern / Berne",49,"49 Transports terrestres et transport par conduites",2023,1118,20333,17263
+2,"Bern / Berne",50,"50 Transports par eau",2023,7,160,130
+2,"Bern / Berne",51,"51 Transports aériens",2023,19,139,102
+2,"Bern / Berne",52,"52 Entreposage et services auxiliaires des transports",2023,214,6065,5375
+2,"Bern / Berne",53,"53 Activités de poste et de courrier",2023,278,7310,5615
+2,"Bern / Berne",55,"55 Hébergement",2023,825,11783,9388
+2,"Bern / Berne",56,"56 Restauration",2023,2855,20140,13843
+2,"Bern / Berne",58,"58 Édition",2023,190,1791,1166
+2,"Bern / Berne",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,433,1084,594
+2,"Bern / Berne",60,"60 Programmation et diffusion",2023,21,685,521
+2,"Bern / Berne",61,"61 Télécommunications",2023,105,5940,5470
+2,"Bern / Berne",62,"62 Programmation, conseil et autres activités informatiques",2023,1718,12215,10494
+2,"Bern / Berne",63,"63 Services d'information",2023,100,1335,1108
+2,"Bern / Berne",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,568,9176,7864
+2,"Bern / Berne",65,"65 Assurance",2023,138,6278,5178
+2,"Bern / Berne",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,608,6006,4998
+2,"Bern / Berne",68,"68 Activités immobilières",2023,1661,7261,3973
+2,"Bern / Berne",69,"69 Activités juridiques et comptables",2023,2074,8653,6211
+2,"Bern / Berne",70,"70 Activités des sièges sociaux, conseil de gestion",2023,2277,11770,9112
+2,"Bern / Berne",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,2441,16451,13255
+2,"Bern / Berne",72,"72 Recherche-développement scientifique",2023,138,1857,1571
+2,"Bern / Berne",73,"73 Publicité et études de marché",2023,451,2304,1593
+2,"Bern / Berne",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,2278,3817,2308
+2,"Bern / Berne",75,"75 Activités vétérinaires",2023,208,2121,1587
+2,"Bern / Berne",77,"77 Activités de location et location-bail",2023,227,1185,879
+2,"Bern / Berne",78,"78 Activités liées à l'emploi",2023,220,8984,6710
+2,"Bern / Berne",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,254,1290,849
+2,"Bern / Berne",80,"80 Enquêtes et sécurité",2023,87,2802,1849
+2,"Bern / Berne",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,2058,15415,9509
+2,"Bern / Berne",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,344,2388,1756
+2,"Bern / Berne",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,1115,45648,38361
+2,"Bern / Berne",85,"85 Enseignement",2023,4251,48827,29354
+2,"Bern / Berne",86,"86 Activités pour la santé humaine",2023,7867,59037,40665
+2,"Bern / Berne",87,"87 Hébergement médico-social et social",2023,642,31660,21355
+2,"Bern / Berne",88,"88 Action sociale sans hébergement",2023,1629,17055,10093
+2,"Bern / Berne",90,"90 Activités créatives, artistiques et de spectacle",2023,1995,3973,1807
+2,"Bern / Berne",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,167,2135,1256
+2,"Bern / Berne",92,"92 Organisation de jeux de hasard et d'argent",2023,9,262,200
+2,"Bern / Berne",93,"93 Activités sportives, récréatives et de loisirs",2023,1318,9003,4755
+2,"Bern / Berne",94,"94 Activités des organisations associatives",2023,2067,19964,11455
+2,"Bern / Berne",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,333,661,487
+2,"Bern / Berne",96,"96 Autres services personnels",2023,5005,8383,5253
+3,"Luzern",999,"Division économique - total",2023,33840,272217,204270
+3,"Luzern",1,"01 Culture et production animale, chasse et services annexes",2023,4393,13061,8327
+3,"Luzern",2,"02 Sylviculture et exploitation forestière",2023,59,195,157
+3,"Luzern",3,"03 Pêche et aquaculture",2023,9,27,23
+3,"Luzern",5,"05 Extraction de houille et de lignite",2023,0,0,0
+3,"Luzern",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+3,"Luzern",7,"07 Extraction de minerais métalliques",2023,0,0,0
+3,"Luzern",8,"08 Autres industries extractives",2023,11,142,127
+3,"Luzern",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+3,"Luzern",10,"10 Industries alimentaires",2023,253,5729,4728
+3,"Luzern",11,"11 Fabrication de boissons",2023,37,561,481
+3,"Luzern",12,"12 Fabrication de produits à base de tabac",2023,,449,427
+3,"Luzern",13,"13 Fabrication de textiles",2023,45,312,242
+3,"Luzern",14,"14 Industrie de l'habillement",2023,84,172,104
+3,"Luzern",15,"15 Industrie du cuir et de la chaussure",2023,13,42,28
+3,"Luzern",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,368,3738,3379
+3,"Luzern",17,"17 Industrie du papier et du carton",2023,10,557,530
+3,"Luzern",18,"18 Imprimerie et reproduction d'enregistrements",2023,83,784,634
+3,"Luzern",19,"19 Cokéfaction et raffinage",2023,0,0,0
+3,"Luzern",20,"20 Industrie chimique",2023,48,1204,1099
+3,"Luzern",21,"21 Industrie pharmaceutique",2023,9,1343,1244
+3,"Luzern",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,35,1022,933
+3,"Luzern",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,67,1206,1103
+3,"Luzern",24,"24 Métallurgie",2023,5,1068,1029
+3,"Luzern",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,289,3658,3259
+3,"Luzern",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,45,2096,1952
+3,"Luzern",27,"27 Fabrication d'équipements électriques",2023,46,1646,1516
+3,"Luzern",28,"28 Fabrication de machines et équipements n.c.a.",2023,119,5774,5405
+3,"Luzern",29,"29 Industrie automobile",2023,15,265,243
+3,"Luzern",30,"30 Fabrication d'autres matériels de transport",2023,11,416,395
+3,"Luzern",31,"31 Fabrication de meubles",2023,51,800,729
+3,"Luzern",32,"32 Autres industries manufacturières",2023,171,1929,1715
+3,"Luzern",33,"33 Réparation et installation de machines et d'équipements",2023,170,1757,1611
+3,"Luzern",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,50,736,631
+3,"Luzern",36,"36 Captage, traitement et distribution d'eau",2023,47,488,372
+3,"Luzern",37,"37 Collecte et traitement des eaux usées",2023,19,174,148
+3,"Luzern",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,52,690,602
+3,"Luzern",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+3,"Luzern",41,"41 Construction de bâtiments",2023,421,5259,4842
+3,"Luzern",42,"42 Génie civil",2023,71,1155,1072
+3,"Luzern",43,"43 Travaux de construction spécialisés",2023,1993,14440,12926
+3,"Luzern",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,886,5296,4645
+3,"Luzern",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,1044,13401,11158
+3,"Luzern",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,2303,16100,11777
+3,"Luzern",49,"49 Transports terrestres et transport par conduites",2023,470,5741,4783
+3,"Luzern",50,"50 Transports par eau",2023,4,147,135
+3,"Luzern",51,"51 Transports aériens",2023,,11,6
+3,"Luzern",52,"52 Entreposage et services auxiliaires des transports",2023,81,3338,2926
+3,"Luzern",53,"53 Activités de poste et de courrier",2023,101,2050,1256
+3,"Luzern",55,"55 Hébergement",2023,219,4484,3507
+3,"Luzern",56,"56 Restauration",2023,962,8172,5538
+3,"Luzern",58,"58 Édition",2023,55,551,382
+3,"Luzern",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,165,368,208
+3,"Luzern",60,"60 Programmation et diffusion",2023,7,98,58
+3,"Luzern",61,"61 Télécommunications",2023,31,682,647
+3,"Luzern",62,"62 Programmation, conseil et autres activités informatiques",2023,784,4928,4261
+3,"Luzern",63,"63 Services d'information",2023,52,268,218
+3,"Luzern",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,353,3195,2638
+3,"Luzern",65,"65 Assurance",2023,86,5027,4237
+3,"Luzern",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,325,2154,1752
+3,"Luzern",68,"68 Activités immobilières",2023,1239,3984,2108
+3,"Luzern",69,"69 Activités juridiques et comptables",2023,888,3334,2481
+3,"Luzern",70,"70 Activités des sièges sociaux, conseil de gestion",2023,1176,7655,6252
+3,"Luzern",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,1186,6667,5465
+3,"Luzern",72,"72 Recherche-développement scientifique",2023,65,1113,905
+3,"Luzern",73,"73 Publicité et études de marché",2023,269,1703,1006
+3,"Luzern",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,1040,1846,1202
+3,"Luzern",75,"75 Activités vétérinaires",2023,55,420,301
+3,"Luzern",77,"77 Activités de location et location-bail",2023,115,618,503
+3,"Luzern",78,"78 Activités liées à l'emploi",2023,95,3935,3061
+3,"Luzern",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,113,960,663
+3,"Luzern",80,"80 Enquêtes et sécurité",2023,29,837,493
+3,"Luzern",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,762,5610,3589
+3,"Luzern",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,143,689,501
+3,"Luzern",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,327,9032,6600
+3,"Luzern",85,"85 Enseignement",2023,1653,21118,11984
+3,"Luzern",86,"86 Activités pour la santé humaine",2023,2945,22022,15649
+3,"Luzern",87,"87 Hébergement médico-social et social",2023,158,10237,7198
+3,"Luzern",88,"88 Action sociale sans hébergement",2023,575,6776,3782
+3,"Luzern",90,"90 Activités créatives, artistiques et de spectacle",2023,843,1941,896
+3,"Luzern",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,44,741,411
+3,"Luzern",92,"92 Organisation de jeux de hasard et d'argent",2023,,286,188
+3,"Luzern",93,"93 Activités sportives, récréatives et de loisirs",2023,472,2812,1365
+3,"Luzern",94,"94 Activités des organisations associatives",2023,593,5088,2903
+3,"Luzern",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,105,270,216
+3,"Luzern",96,"96 Autres services personnels",2023,1916,3617,2405
+4,"Uri",999,"Division économique - total",2023,2833,19586,14600
+4,"Uri",1,"01 Culture et production animale, chasse et services annexes",2023,525,1327,766
+4,"Uri",2,"02 Sylviculture et exploitation forestière",2023,11,63,50
+4,"Uri",3,"03 Pêche et aquaculture",2023,,37,30
+4,"Uri",5,"05 Extraction de houille et de lignite",2023,0,0,0
+4,"Uri",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+4,"Uri",7,"07 Extraction de minerais métalliques",2023,0,0,0
+4,"Uri",8,"08 Autres industries extractives",2023,8,109,95
+4,"Uri",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+4,"Uri",10,"10 Industries alimentaires",2023,25,178,132
+4,"Uri",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+4,"Uri",13,"13 Fabrication de textiles",2023,,7,
+4,"Uri",14,"14 Industrie de l'habillement",2023,8,15,9
+4,"Uri",15,"15 Industrie du cuir et de la chaussure",2023,,21,15
+4,"Uri",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,38,227,195
+4,"Uri",17,"17 Industrie du papier et du carton",2023,0,0,0
+4,"Uri",18,"18 Imprimerie et reproduction d'enregistrements",2023,10,76,58
+4,"Uri",19,"19 Cokéfaction et raffinage",2023,0,0,0
+4,"Uri",20,"20 Industrie chimique",2023,,7,
+4,"Uri",21,"21 Industrie pharmaceutique",2023,,108,106
+4,"Uri",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,7,569,530
+4,"Uri",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,,,38
+4,"Uri",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,37,603,546
+4,"Uri",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,,131,122
+4,"Uri",27,"27 Fabrication d'équipements électriques",2023,,266,259
+4,"Uri",28,"28 Fabrication de machines et équipements n.c.a.",2023,7,289,267
+4,"Uri",29,"29 Industrie automobile",2023,0,0,0
+4,"Uri",30,"30 Fabrication d'autres matériels de transport",2023,0,0,0
+4,"Uri",31,"31 Fabrication de meubles",2023,7,48,43
+4,"Uri",32,"32 Autres industries manufacturières",2023,10,26,18
+4,"Uri",33,"33 Réparation et installation de machines et d'équipements",2023,11,67,61
+4,"Uri",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,12,362,317
+4,"Uri",36,"36 Captage, traitement et distribution d'eau",2023,6,14,7
+4,"Uri",37,"37 Collecte et traitement des eaux usées",2023,,24,18
+4,"Uri",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,6,136,130
+4,"Uri",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+4,"Uri",41,"41 Construction de bâtiments",2023,37,792,723
+4,"Uri",42,"42 Génie civil",2023,10,210,196
+4,"Uri",43,"43 Travaux de construction spécialisés",2023,133,855,742
+4,"Uri",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,63,380,321
+4,"Uri",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,42,238,199
+4,"Uri",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,174,1138,740
+4,"Uri",49,"49 Transports terrestres et transport par conduites",2023,63,857,701
+4,"Uri",51,"51 Transports aériens",2023,,24,23
+4,"Uri",52,"52 Entreposage et services auxiliaires des transports",2023,8,34,20
+4,"Uri",53,"53 Activités de poste et de courrier",2023,7,90,70
+4,"Uri",55,"55 Hébergement",2023,85,820,686
+4,"Uri",56,"56 Restauration",2023,147,942,667
+4,"Uri",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,,16,
+4,"Uri",60,"60 Programmation et diffusion",2023,0,0,0
+4,"Uri",62,"62 Programmation, conseil et autres activités informatiques",2023,38,195,168
+4,"Uri",63,"63 Services d'information",2023,6,45,39
+4,"Uri",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,33,275,213
+4,"Uri",65,"65 Assurance",2023,7,17,14
+4,"Uri",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,20,142,115
+4,"Uri",68,"68 Activités immobilières",2023,70,153,69
+4,"Uri",69,"69 Activités juridiques et comptables",2023,66,170,110
+4,"Uri",70,"70 Activités des sièges sociaux, conseil de gestion",2023,54,108,78
+4,"Uri",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,98,454,368
+4,"Uri",72,"72 Recherche-développement scientifique",2023,,5,
+4,"Uri",73,"73 Publicité et études de marché",2023,8,29,22
+4,"Uri",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,54,123,83
+4,"Uri",75,"75 Activités vétérinaires",2023,5,28,19
+4,"Uri",77,"77 Activités de location et location-bail",2023,7,28,17
+4,"Uri",78,"78 Activités liées à l'emploi",2023,,287,235
+4,"Uri",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,,67,43
+4,"Uri",80,"80 Enquêtes et sécurité",2023,6,60,30
+4,"Uri",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,50,466,319
+4,"Uri",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,6,10,6
+4,"Uri",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,53,1017,767
+4,"Uri",85,"85 Enseignement",2023,127,1134,658
+4,"Uri",86,"86 Activités pour la santé humaine",2023,164,1203,843
+4,"Uri",87,"87 Hébergement médico-social et social",2023,11,872,599
+4,"Uri",88,"88 Action sociale sans hébergement",2023,40,538,320
+4,"Uri",90,"90 Activités créatives, artistiques et de spectacle",2023,45,64,28
+4,"Uri",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,6,29,18
+4,"Uri",92,"92 Organisation de jeux de hasard et d'argent",2023,0,0,0
+4,"Uri",93,"93 Activités sportives, récréatives et de loisirs",2023,60,186,93
+4,"Uri",94,"94 Activités des organisations associatives",2023,83,421,228
+4,"Uri",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,10,15,12
+4,"Uri",96,"96 Autres services personnels",2023,149,280,158
+5,"Schwyz",999,"Division économique - total",2023,16521,92155,70000
+5,"Schwyz",1,"01 Culture et production animale, chasse et services annexes",2023,1509,3984,2480
+5,"Schwyz",2,"02 Sylviculture et exploitation forestière",2023,40,103,84
+5,"Schwyz",3,"03 Pêche et aquaculture",2023,6,,18
+5,"Schwyz",5,"05 Extraction de houille et de lignite",2023,0,0,0
+5,"Schwyz",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+5,"Schwyz",7,"07 Extraction de minerais métalliques",2023,0,0,0
+5,"Schwyz",8,"08 Autres industries extractives",2023,7,106,96
+5,"Schwyz",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+5,"Schwyz",10,"10 Industries alimentaires",2023,111,1639,1248
+5,"Schwyz",11,"11 Fabrication de boissons",2023,13,96,77
+5,"Schwyz",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+5,"Schwyz",13,"13 Fabrication de textiles",2023,21,141,107
+5,"Schwyz",14,"14 Industrie de l'habillement",2023,31,85,56
+5,"Schwyz",15,"15 Industrie du cuir et de la chaussure",2023,12,32,22
+5,"Schwyz",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,172,1242,1110
+5,"Schwyz",17,"17 Industrie du papier et du carton",2023,4,59,49
+5,"Schwyz",18,"18 Imprimerie et reproduction d'enregistrements",2023,34,159,123
+5,"Schwyz",19,"19 Cokéfaction et raffinage",2023,0,0,0
+5,"Schwyz",20,"20 Industrie chimique",2023,28,1010,954
+5,"Schwyz",21,"21 Industrie pharmaceutique",2023,15,161,129
+5,"Schwyz",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,24,554,505
+5,"Schwyz",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,30,206,180
+5,"Schwyz",24,"24 Métallurgie",2023,5,75,70
+5,"Schwyz",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,171,2999,2732
+5,"Schwyz",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,42,808,739
+5,"Schwyz",27,"27 Fabrication d'équipements électriques",2023,24,376,347
+5,"Schwyz",28,"28 Fabrication de machines et équipements n.c.a.",2023,61,1679,1553
+5,"Schwyz",29,"29 Industrie automobile",2023,7,71,65
+5,"Schwyz",30,"30 Fabrication d'autres matériels de transport",2023,9,38,31
+5,"Schwyz",31,"31 Fabrication de meubles",2023,19,316,278
+5,"Schwyz",32,"32 Autres industries manufacturières",2023,83,308,242
+5,"Schwyz",33,"33 Réparation et installation de machines et d'équipements",2023,100,582,508
+5,"Schwyz",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,25,612,525
+5,"Schwyz",36,"36 Captage, traitement et distribution d'eau",2023,19,77,42
+5,"Schwyz",37,"37 Collecte et traitement des eaux usées",2023,14,100,86
+5,"Schwyz",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,21,239,171
+5,"Schwyz",41,"41 Construction de bâtiments",2023,266,2086,1903
+5,"Schwyz",42,"42 Génie civil",2023,37,735,692
+5,"Schwyz",43,"43 Travaux de construction spécialisés",2023,1089,6114,5456
+5,"Schwyz",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,414,1704,1465
+5,"Schwyz",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,676,4053,3462
+5,"Schwyz",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,892,5337,3865
+5,"Schwyz",49,"49 Transports terrestres et transport par conduites",2023,226,1963,1590
+5,"Schwyz",50,"50 Transports par eau",2023,5,,
+5,"Schwyz",51,"51 Transports aériens",2023,7,121,106
+5,"Schwyz",52,"52 Entreposage et services auxiliaires des transports",2023,37,399,350
+5,"Schwyz",53,"53 Activités de poste et de courrier",2023,38,287,233
+5,"Schwyz",55,"55 Hébergement",2023,99,1569,1188
+5,"Schwyz",56,"56 Restauration",2023,552,2995,2029
+5,"Schwyz",58,"58 Édition",2023,35,285,208
+5,"Schwyz",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,47,77,46
+5,"Schwyz",60,"60 Programmation et diffusion",2023,0,0,0
+5,"Schwyz",61,"61 Télécommunications",2023,23,105,91
+5,"Schwyz",62,"62 Programmation, conseil et autres activités informatiques",2023,634,2071,1728
+5,"Schwyz",63,"63 Services d'information",2023,33,102,81
+5,"Schwyz",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,409,1911,1502
+5,"Schwyz",65,"65 Assurance",2023,25,130,98
+5,"Schwyz",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,470,2434,2065
+5,"Schwyz",68,"68 Activités immobilières",2023,708,1660,961
+5,"Schwyz",69,"69 Activités juridiques et comptables",2023,529,1473,1068
+5,"Schwyz",70,"70 Activités des sièges sociaux, conseil de gestion",2023,1138,2533,1978
+5,"Schwyz",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,591,2704,2187
+5,"Schwyz",72,"72 Recherche-développement scientifique",2023,51,368,301
+5,"Schwyz",73,"73 Publicité et études de marché",2023,128,295,218
+5,"Schwyz",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,347,577,383
+5,"Schwyz",75,"75 Activités vétérinaires",2023,38,318,227
+5,"Schwyz",77,"77 Activités de location et location-bail",2023,53,119,78
+5,"Schwyz",78,"78 Activités liées à l'emploi",2023,70,3936,3024
+5,"Schwyz",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,51,972,456
+5,"Schwyz",80,"80 Enquêtes et sécurité",2023,28,250,141
+5,"Schwyz",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,446,1801,1269
+5,"Schwyz",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,87,468,334
+5,"Schwyz",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,126,2520,2009
+5,"Schwyz",85,"85 Enseignement",2023,620,4643,2721
+5,"Schwyz",86,"86 Activités pour la santé humaine",2023,1003,6071,4083
+5,"Schwyz",87,"87 Hébergement médico-social et social",2023,46,3139,2268
+5,"Schwyz",88,"88 Action sociale sans hébergement",2023,216,1650,960
+5,"Schwyz",90,"90 Activités créatives, artistiques et de spectacle",2023,209,293,142
+5,"Schwyz",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,11,131,48
+5,"Schwyz",92,"92 Organisation de jeux de hasard et d'argent",2023,,128,115
+5,"Schwyz",93,"93 Activités sportives, récréatives et de loisirs",2023,231,937,478
+5,"Schwyz",94,"94 Activités des organisations associatives",2023,194,1427,861
+5,"Schwyz",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,43,106,87
+5,"Schwyz",96,"96 Autres services personnels",2023,882,1255,799
+6,"Obwalden",999,"Division économique - total",2023,3772,23646,18015
+6,"Obwalden",1,"01 Culture et production animale, chasse et services annexes",2023,613,1572,973
+6,"Obwalden",2,"02 Sylviculture et exploitation forestière",2023,19,153,136
+6,"Obwalden",3,"03 Pêche et aquaculture",2023,0,0,0
+6,"Obwalden",5,"05 Extraction de houille et de lignite",2023,0,0,0
+6,"Obwalden",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+6,"Obwalden",7,"07 Extraction de minerais métalliques",2023,0,0,0
+6,"Obwalden",8,"08 Autres industries extractives",2023,4,101,96
+6,"Obwalden",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+6,"Obwalden",10,"10 Industries alimentaires",2023,43,788,626
+6,"Obwalden",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+6,"Obwalden",13,"13 Fabrication de textiles",2023,8,9,
+6,"Obwalden",14,"14 Industrie de l'habillement",2023,10,12,5
+6,"Obwalden",15,"15 Industrie du cuir et de la chaussure",2023,,7,
+6,"Obwalden",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,47,417,371
+6,"Obwalden",17,"17 Industrie du papier et du carton",2023,0,0,0
+6,"Obwalden",18,"18 Imprimerie et reproduction d'enregistrements",2023,,118,101
+6,"Obwalden",19,"19 Cokéfaction et raffinage",2023,0,0,0
+6,"Obwalden",20,"20 Industrie chimique",2023,7,38,29
+6,"Obwalden",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,,182,169
+6,"Obwalden",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,8,80,74
+6,"Obwalden",24,"24 Métallurgie",2023,,8,6
+6,"Obwalden",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,34,366,326
+6,"Obwalden",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,7,18,14
+6,"Obwalden",27,"27 Fabrication d'équipements électriques",2023,8,1213,1073
+6,"Obwalden",28,"28 Fabrication de machines et équipements n.c.a.",2023,7,534,484
+6,"Obwalden",29,"29 Industrie automobile",2023,5,61,51
+6,"Obwalden",30,"30 Fabrication d'autres matériels de transport",2023,,151,143
+6,"Obwalden",31,"31 Fabrication de meubles",2023,13,176,160
+6,"Obwalden",32,"32 Autres industries manufacturières",2023,18,47,36
+6,"Obwalden",33,"33 Réparation et installation de machines et d'équipements",2023,13,44,36
+6,"Obwalden",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,12,147,111
+6,"Obwalden",36,"36 Captage, traitement et distribution d'eau",2023,5,43,20
+6,"Obwalden",37,"37 Collecte et traitement des eaux usées",2023,4,33,30
+6,"Obwalden",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,,14,9
+6,"Obwalden",41,"41 Construction de bâtiments",2023,41,548,497
+6,"Obwalden",42,"42 Génie civil",2023,7,321,280
+6,"Obwalden",43,"43 Travaux de construction spécialisés",2023,213,1470,1299
+6,"Obwalden",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,91,400,348
+6,"Obwalden",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,110,611,516
+6,"Obwalden",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,202,969,665
+6,"Obwalden",49,"49 Transports terrestres et transport par conduites",2023,56,796,629
+6,"Obwalden",51,"51 Transports aériens",2023,,56,50
+6,"Obwalden",52,"52 Entreposage et services auxiliaires des transports",2023,6,16,
+6,"Obwalden",53,"53 Activités de poste et de courrier",2023,10,61,52
+6,"Obwalden",55,"55 Hébergement",2023,84,1292,1054
+6,"Obwalden",56,"56 Restauration",2023,113,797,542
+6,"Obwalden",58,"58 Édition",2023,8,18,11
+6,"Obwalden",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,9,,11
+6,"Obwalden",62,"62 Programmation, conseil et autres activités informatiques",2023,86,488,418
+6,"Obwalden",63,"63 Services d'information",2023,7,10,6
+6,"Obwalden",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,91,456,351
+6,"Obwalden",65,"65 Assurance",2023,10,33,22
+6,"Obwalden",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,36,129,106
+6,"Obwalden",68,"68 Activités immobilières",2023,114,289,149
+6,"Obwalden",69,"69 Activités juridiques et comptables",2023,91,234,158
+6,"Obwalden",70,"70 Activités des sièges sociaux, conseil de gestion",2023,168,372,277
+6,"Obwalden",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,133,736,615
+6,"Obwalden",72,"72 Recherche-développement scientifique",2023,8,64,57
+6,"Obwalden",73,"73 Publicité et études de marché",2023,20,58,40
+6,"Obwalden",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,75,134,88
+6,"Obwalden",75,"75 Activités vétérinaires",2023,,23,14
+6,"Obwalden",77,"77 Activités de location et location-bail",2023,15,342,308
+6,"Obwalden",78,"78 Activités liées à l'emploi",2023,7,137,93
+6,"Obwalden",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,17,89,55
+6,"Obwalden",80,"80 Enquêtes et sécurité",2023,,,8
+6,"Obwalden",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,83,521,383
+6,"Obwalden",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,7,11,7
+6,"Obwalden",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,49,876,698
+6,"Obwalden",85,"85 Enseignement",2023,139,1370,756
+6,"Obwalden",86,"86 Activités pour la santé humaine",2023,280,1258,875
+6,"Obwalden",87,"87 Hébergement médico-social et social",2023,13,858,615
+6,"Obwalden",88,"88 Action sociale sans hébergement",2023,53,419,282
+6,"Obwalden",90,"90 Activités créatives, artistiques et de spectacle",2023,53,74,32
+6,"Obwalden",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,7,27,13
+6,"Obwalden",92,"92 Organisation de jeux de hasard et d'argent",2023,0,0,0
+6,"Obwalden",93,"93 Activités sportives, récréatives et de loisirs",2023,90,284,164
+6,"Obwalden",94,"94 Activités des organisations associatives",2023,63,357,200
+6,"Obwalden",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,11,22,17
+6,"Obwalden",96,"96 Autres services personnels",2023,176,240,149
+7,"Nidwalden",999,"Division économique - total",2023,4269,25421,19263
+7,"Nidwalden",1,"01 Culture et production animale, chasse et services annexes",2023,404,1110,676
+7,"Nidwalden",2,"02 Sylviculture et exploitation forestière",2023,12,66,58
+7,"Nidwalden",5,"05 Extraction de houille et de lignite",2023,0,0,0
+7,"Nidwalden",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+7,"Nidwalden",7,"07 Extraction de minerais métalliques",2023,0,0,0
+7,"Nidwalden",8,"08 Autres industries extractives",2023,6,63,60
+7,"Nidwalden",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+7,"Nidwalden",10,"10 Industries alimentaires",2023,33,245,186
+7,"Nidwalden",11,"11 Fabrication de boissons",2023,,13,11
+7,"Nidwalden",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+7,"Nidwalden",13,"13 Fabrication de textiles",2023,8,32,20
+7,"Nidwalden",14,"14 Industrie de l'habillement",2023,7,15,11
+7,"Nidwalden",15,"15 Industrie du cuir et de la chaussure",2023,4,6,5
+7,"Nidwalden",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,45,398,347
+7,"Nidwalden",17,"17 Industrie du papier et du carton",2023,,58,49
+7,"Nidwalden",18,"18 Imprimerie et reproduction d'enregistrements",2023,9,144,112
+7,"Nidwalden",19,"19 Cokéfaction et raffinage",2023,0,0,0
+7,"Nidwalden",20,"20 Industrie chimique",2023,4,56,50
+7,"Nidwalden",21,"21 Industrie pharmaceutique",2023,4,7,5
+7,"Nidwalden",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,,41,33
+7,"Nidwalden",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,8,241,225
+7,"Nidwalden",24,"24 Métallurgie",2023,,4,
+7,"Nidwalden",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,36,441,389
+7,"Nidwalden",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,6,116,99
+7,"Nidwalden",27,"27 Fabrication d'équipements électriques",2023,6,36,27
+7,"Nidwalden",28,"28 Fabrication de machines et équipements n.c.a.",2023,9,65,53
+7,"Nidwalden",29,"29 Industrie automobile",2023,4,35,31
+7,"Nidwalden",30,"30 Fabrication d'autres matériels de transport",2023,9,2667,2543
+7,"Nidwalden",31,"31 Fabrication de meubles",2023,4,24,22
+7,"Nidwalden",32,"32 Autres industries manufacturières",2023,19,44,32
+7,"Nidwalden",33,"33 Réparation et installation de machines et d'équipements",2023,34,397,360
+7,"Nidwalden",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,10,137,113
+7,"Nidwalden",37,"37 Collecte et traitement des eaux usées",2023,4,14,10
+7,"Nidwalden",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,5,33,27
+7,"Nidwalden",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+7,"Nidwalden",41,"41 Construction de bâtiments",2023,59,302,251
+7,"Nidwalden",42,"42 Génie civil",2023,5,137,130
+7,"Nidwalden",43,"43 Travaux de construction spécialisés",2023,226,1397,1252
+7,"Nidwalden",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,85,407,359
+7,"Nidwalden",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,178,926,775
+7,"Nidwalden",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,254,1513,1063
+7,"Nidwalden",49,"49 Transports terrestres et transport par conduites",2023,51,736,581
+7,"Nidwalden",50,"50 Transports par eau",2023,,28,24
+7,"Nidwalden",51,"51 Transports aériens",2023,4,13,12
+7,"Nidwalden",52,"52 Entreposage et services auxiliaires des transports",2023,23,135,102
+7,"Nidwalden",53,"53 Activités de poste et de courrier",2023,6,68,56
+7,"Nidwalden",55,"55 Hébergement",2023,44,838,694
+7,"Nidwalden",56,"56 Restauration",2023,114,778,593
+7,"Nidwalden",58,"58 Édition",2023,9,25,18
+7,"Nidwalden",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,13,25,18
+7,"Nidwalden",60,"60 Programmation et diffusion",2023,0,0,0
+7,"Nidwalden",61,"61 Télécommunications",2023,5,32,27
+7,"Nidwalden",62,"62 Programmation, conseil et autres activités informatiques",2023,111,238,190
+7,"Nidwalden",63,"63 Services d'information",2023,7,33,30
+7,"Nidwalden",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,130,575,444
+7,"Nidwalden",65,"65 Assurance",2023,9,72,53
+7,"Nidwalden",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,74,230,176
+7,"Nidwalden",68,"68 Activités immobilières",2023,206,488,280
+7,"Nidwalden",69,"69 Activités juridiques et comptables",2023,152,352,236
+7,"Nidwalden",70,"70 Activités des sièges sociaux, conseil de gestion",2023,216,647,498
+7,"Nidwalden",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,199,838,674
+7,"Nidwalden",72,"72 Recherche-développement scientifique",2023,12,24,19
+7,"Nidwalden",73,"73 Publicité et études de marché",2023,35,404,180
+7,"Nidwalden",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,90,259,148
+7,"Nidwalden",75,"75 Activités vétérinaires",2023,5,24,19
+7,"Nidwalden",77,"77 Activités de location et location-bail",2023,18,118,102
+7,"Nidwalden",78,"78 Activités liées à l'emploi",2023,13,305,265
+7,"Nidwalden",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,19,49,31
+7,"Nidwalden",80,"80 Enquêtes et sécurité",2023,,26,9
+7,"Nidwalden",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,94,387,261
+7,"Nidwalden",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,27,72,36
+7,"Nidwalden",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,57,870,674
+7,"Nidwalden",85,"85 Enseignement",2023,174,1352,754
+7,"Nidwalden",86,"86 Activités pour la santé humaine",2023,331,1618,1140
+7,"Nidwalden",87,"87 Hébergement médico-social et social",2023,13,916,620
+7,"Nidwalden",88,"88 Action sociale sans hébergement",2023,57,362,205
+7,"Nidwalden",90,"90 Activités créatives, artistiques et de spectacle",2023,68,106,49
+7,"Nidwalden",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,,14,6
+7,"Nidwalden",93,"93 Activités sportives, récréatives et de loisirs",2023,71,259,130
+7,"Nidwalden",94,"94 Activités des organisations associatives",2023,78,494,233
+7,"Nidwalden",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,14,49,39
+7,"Nidwalden",96,"96 Autres services personnels",2023,205,368,248
+8,"Glarus",999,"Division économique - total",2023,3420,23131,17864
+8,"Glarus",1,"01 Culture et production animale, chasse et services annexes",2023,346,926,601
+8,"Glarus",2,"02 Sylviculture et exploitation forestière",2023,11,66,55
+8,"Glarus",5,"05 Extraction de houille et de lignite",2023,0,0,0
+8,"Glarus",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+8,"Glarus",7,"07 Extraction de minerais métalliques",2023,0,0,0
+8,"Glarus",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+8,"Glarus",10,"10 Industries alimentaires",2023,44,1012,852
+8,"Glarus",11,"11 Fabrication de boissons",2023,,51,47
+8,"Glarus",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+8,"Glarus",13,"13 Fabrication de textiles",2023,9,167,152
+8,"Glarus",14,"14 Industrie de l'habillement",2023,7,9,6
+8,"Glarus",15,"15 Industrie du cuir et de la chaussure",2023,0,0,0
+8,"Glarus",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,45,266,235
+8,"Glarus",17,"17 Industrie du papier et du carton",2023,5,84,72
+8,"Glarus",18,"18 Imprimerie et reproduction d'enregistrements",2023,10,66,56
+8,"Glarus",19,"19 Cokéfaction et raffinage",2023,0,0,0
+8,"Glarus",20,"20 Industrie chimique",2023,4,31,30
+8,"Glarus",21,"21 Industrie pharmaceutique",2023,4,121,111
+8,"Glarus",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,11,851,742
+8,"Glarus",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,12,504,485
+8,"Glarus",24,"24 Métallurgie",2023,,208,198
+8,"Glarus",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,43,414,371
+8,"Glarus",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,6,58,52
+8,"Glarus",27,"27 Fabrication d'équipements électriques",2023,4,51,47
+8,"Glarus",28,"28 Fabrication de machines et équipements n.c.a.",2023,17,754,707
+8,"Glarus",29,"29 Industrie automobile",2023,,8,7
+8,"Glarus",30,"30 Fabrication d'autres matériels de transport",2023,,101,96
+8,"Glarus",31,"31 Fabrication de meubles",2023,9,162,142
+8,"Glarus",32,"32 Autres industries manufacturières",2023,23,92,70
+8,"Glarus",33,"33 Réparation et installation de machines et d'équipements",2023,22,116,103
+8,"Glarus",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,20,301,236
+8,"Glarus",37,"37 Collecte et traitement des eaux usées",2023,,16,15
+8,"Glarus",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,10,208,188
+8,"Glarus",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+8,"Glarus",41,"41 Construction de bâtiments",2023,67,1013,948
+8,"Glarus",42,"42 Génie civil",2023,11,152,139
+8,"Glarus",43,"43 Travaux de construction spécialisés",2023,248,1153,1032
+8,"Glarus",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,98,392,325
+8,"Glarus",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,90,795,696
+8,"Glarus",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,249,1508,1101
+8,"Glarus",49,"49 Transports terrestres et transport par conduites",2023,60,536,437
+8,"Glarus",50,"50 Transports par eau",2023,0,0,0
+8,"Glarus",51,"51 Transports aériens",2023,,30,25
+8,"Glarus",52,"52 Entreposage et services auxiliaires des transports",2023,9,268,228
+8,"Glarus",53,"53 Activités de poste et de courrier",2023,15,169,119
+8,"Glarus",55,"55 Hébergement",2023,58,302,219
+8,"Glarus",56,"56 Restauration",2023,137,599,405
+8,"Glarus",58,"58 Édition",2023,5,43,32
+8,"Glarus",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,10,22,12
+8,"Glarus",61,"61 Télécommunications",2023,,14,13
+8,"Glarus",62,"62 Programmation, conseil et autres activités informatiques",2023,56,193,161
+8,"Glarus",63,"63 Services d'information",2023,,8,4
+8,"Glarus",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,41,597,521
+8,"Glarus",65,"65 Assurance",2023,9,134,104
+8,"Glarus",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,31,158,131
+8,"Glarus",68,"68 Activités immobilières",2023,91,246,124
+8,"Glarus",69,"69 Activités juridiques et comptables",2023,84,276,191
+8,"Glarus",70,"70 Activités des sièges sociaux, conseil de gestion",2023,57,156,116
+8,"Glarus",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,129,539,442
+8,"Glarus",72,"72 Recherche-développement scientifique",2023,,7,5
+8,"Glarus",73,"73 Publicité et études de marché",2023,23,67,45
+8,"Glarus",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,59,71,39
+8,"Glarus",75,"75 Activités vétérinaires",2023,4,34,24
+8,"Glarus",77,"77 Activités de location et location-bail",2023,12,40,29
+8,"Glarus",78,"78 Activités liées à l'emploi",2023,7,93,72
+8,"Glarus",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,12,40,22
+8,"Glarus",80,"80 Enquêtes et sécurité",2023,,24,11
+8,"Glarus",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,91,568,426
+8,"Glarus",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,13,79,63
+8,"Glarus",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,36,630,509
+8,"Glarus",85,"85 Enseignement",2023,156,1458,915
+8,"Glarus",86,"86 Activités pour la santé humaine",2023,250,1592,1033
+8,"Glarus",87,"87 Hébergement médico-social et social",2023,26,1026,701
+8,"Glarus",88,"88 Action sociale sans hébergement",2023,67,420,215
+8,"Glarus",90,"90 Activités créatives, artistiques et de spectacle",2023,56,80,37
+8,"Glarus",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,7,45,21
+8,"Glarus",92,"92 Organisation de jeux de hasard et d'argent",2023,0,0,0
+8,"Glarus",93,"93 Activités sportives, récréatives et de loisirs",2023,51,279,154
+8,"Glarus",94,"94 Activités des organisations associatives",2023,71,293,145
+8,"Glarus",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,9,12,9
+8,"Glarus",96,"96 Autres services personnels",2023,224,308,178
+9,"Zug",999,"Division économique - total",2023,20321,131705,105650
+9,"Zug",1,"01 Culture et production animale, chasse et services annexes",2023,554,1742,1115
+9,"Zug",2,"02 Sylviculture et exploitation forestière",2023,17,79,69
+9,"Zug",3,"03 Pêche et aquaculture",2023,4,7,6
+9,"Zug",5,"05 Extraction de houille et de lignite",2023,0,0,0
+9,"Zug",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+9,"Zug",7,"07 Extraction de minerais métalliques",2023,0,0,0
+9,"Zug",8,"08 Autres industries extractives",2023,5,33,31
+9,"Zug",10,"10 Industries alimentaires",2023,84,1232,1017
+9,"Zug",11,"11 Fabrication de boissons",2023,15,87,74
+9,"Zug",12,"12 Fabrication de produits à base de tabac",2023,,4,
+9,"Zug",13,"13 Fabrication de textiles",2023,12,31,22
+9,"Zug",14,"14 Industrie de l'habillement",2023,33,124,94
+9,"Zug",15,"15 Industrie du cuir et de la chaussure",2023,,4,
+9,"Zug",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,105,905,810
+9,"Zug",17,"17 Industrie du papier et du carton",2023,,35,33
+9,"Zug",18,"18 Imprimerie et reproduction d'enregistrements",2023,35,291,250
+9,"Zug",19,"19 Cokéfaction et raffinage",2023,0,0,0
+9,"Zug",20,"20 Industrie chimique",2023,33,175,139
+9,"Zug",21,"21 Industrie pharmaceutique",2023,40,728,693
+9,"Zug",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,13,141,124
+9,"Zug",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,24,192,163
+9,"Zug",24,"24 Métallurgie",2023,9,93,82
+9,"Zug",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,95,656,588
+9,"Zug",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,59,5692,5433
+9,"Zug",27,"27 Fabrication d'équipements électriques",2023,31,1345,1266
+9,"Zug",28,"28 Fabrication de machines et équipements n.c.a.",2023,64,988,909
+9,"Zug",29,"29 Industrie automobile",2023,5,10,8
+9,"Zug",30,"30 Fabrication d'autres matériels de transport",2023,7,30,27
+9,"Zug",31,"31 Fabrication de meubles",2023,15,115,105
+9,"Zug",32,"32 Autres industries manufacturières",2023,91,613,539
+9,"Zug",33,"33 Réparation et installation de machines et d'équipements",2023,48,246,207
+9,"Zug",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,33,620,533
+9,"Zug",36,"36 Captage, traitement et distribution d'eau",2023,8,38,22
+9,"Zug",37,"37 Collecte et traitement des eaux usées",2023,6,118,113
+9,"Zug",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,21,161,137
+9,"Zug",41,"41 Construction de bâtiments",2023,251,1731,1527
+9,"Zug",42,"42 Génie civil",2023,26,479,461
+9,"Zug",43,"43 Travaux de construction spécialisés",2023,727,5077,4561
+9,"Zug",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,285,2365,2138
+9,"Zug",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,1579,14693,13213
+9,"Zug",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,921,5277,3959
+9,"Zug",49,"49 Transports terrestres et transport par conduites",2023,187,1872,1591
+9,"Zug",50,"50 Transports par eau",2023,52,1072,938
+9,"Zug",51,"51 Transports aériens",2023,4,31,26
+9,"Zug",52,"52 Entreposage et services auxiliaires des transports",2023,87,1718,1445
+9,"Zug",53,"53 Activités de poste et de courrier",2023,33,372,327
+9,"Zug",55,"55 Hébergement",2023,47,620,467
+9,"Zug",56,"56 Restauration",2023,371,4537,3391
+9,"Zug",58,"58 Édition",2023,57,464,340
+9,"Zug",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,79,316,233
+9,"Zug",60,"60 Programmation et diffusion",2023,7,65,50
+9,"Zug",61,"61 Télécommunications",2023,35,135,116
+9,"Zug",62,"62 Programmation, conseil et autres activités informatiques",2023,1584,7093,6238
+9,"Zug",63,"63 Services d'information",2023,114,433,362
+9,"Zug",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,1234,4946,3890
+9,"Zug",65,"65 Assurance",2023,31,315,240
+9,"Zug",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,895,4710,4012
+9,"Zug",68,"68 Activités immobilières",2023,882,2516,1583
+9,"Zug",69,"69 Activités juridiques et comptables",2023,1004,3302,2500
+9,"Zug",70,"70 Activités des sièges sociaux, conseil de gestion",2023,2121,7781,6468
+9,"Zug",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,704,3338,2819
+9,"Zug",72,"72 Recherche-développement scientifique",2023,147,1858,1701
+9,"Zug",73,"73 Publicité et études de marché",2023,223,1513,945
+9,"Zug",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,552,977,683
+9,"Zug",75,"75 Activités vétérinaires",2023,26,205,153
+9,"Zug",77,"77 Activités de location et location-bail",2023,113,845,699
+9,"Zug",78,"78 Activités liées à l'emploi",2023,211,4721,3913
+9,"Zug",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,82,498,399
+9,"Zug",80,"80 Enquêtes et sécurité",2023,27,304,169
+9,"Zug",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,373,3493,2227
+9,"Zug",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,152,689,526
+9,"Zug",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,116,2505,2102
+9,"Zug",85,"85 Enseignement",2023,661,6363,4090
+9,"Zug",86,"86 Activités pour la santé humaine",2023,1155,6205,4327
+9,"Zug",87,"87 Hébergement médico-social et social",2023,41,2343,1687
+9,"Zug",88,"88 Action sociale sans hébergement",2023,224,2069,1324
+9,"Zug",90,"90 Activités créatives, artistiques et de spectacle",2023,198,353,168
+9,"Zug",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,24,211,119
+9,"Zug",92,"92 Organisation de jeux de hasard et d'argent",2023,0,0,0
+9,"Zug",93,"93 Activités sportives, récréatives et de loisirs",2023,266,1380,756
+9,"Zug",94,"94 Activités des organisations associatives",2023,248,1984,1153
+9,"Zug",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,50,227,199
+9,"Zug",96,"96 Autres services personnels",2023,638,1163,800
+10,"Fribourg / Freiburg",999,"Division économique - total",2023,24121,166675,126970
+10,"Fribourg / Freiburg",1,"01 Culture et production animale, chasse et services annexes",2023,2646,8270,6016
+10,"Fribourg / Freiburg",2,"02 Sylviculture et exploitation forestière",2023,56,292,256
+10,"Fribourg / Freiburg",3,"03 Pêche et aquaculture",2023,10,18,14
+10,"Fribourg / Freiburg",5,"05 Extraction de houille et de lignite",2023,0,0,0
+10,"Fribourg / Freiburg",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+10,"Fribourg / Freiburg",7,"07 Extraction de minerais métalliques",2023,0,0,0
+10,"Fribourg / Freiburg",8,"08 Autres industries extractives",2023,19,144,129
+10,"Fribourg / Freiburg",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+10,"Fribourg / Freiburg",10,"10 Industries alimentaires",2023,306,6535,5783
+10,"Fribourg / Freiburg",11,"11 Fabrication de boissons",2023,19,78,58
+10,"Fribourg / Freiburg",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+10,"Fribourg / Freiburg",13,"13 Fabrication de textiles",2023,26,236,202
+10,"Fribourg / Freiburg",14,"14 Industrie de l'habillement",2023,60,117,71
+10,"Fribourg / Freiburg",15,"15 Industrie du cuir et de la chaussure",2023,11,26,19
+10,"Fribourg / Freiburg",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,301,1588,1430
+10,"Fribourg / Freiburg",17,"17 Industrie du papier et du carton",2023,5,46,36
+10,"Fribourg / Freiburg",18,"18 Imprimerie et reproduction d'enregistrements",2023,49,471,399
+10,"Fribourg / Freiburg",19,"19 Cokéfaction et raffinage",2023,0,0,0
+10,"Fribourg / Freiburg",20,"20 Industrie chimique",2023,33,487,440
+10,"Fribourg / Freiburg",21,"21 Industrie pharmaceutique",2023,12,1206,1130
+10,"Fribourg / Freiburg",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,14,450,417
+10,"Fribourg / Freiburg",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,67,679,632
+10,"Fribourg / Freiburg",24,"24 Métallurgie",2023,12,366,343
+10,"Fribourg / Freiburg",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,255,3264,3013
+10,"Fribourg / Freiburg",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,46,3003,2843
+10,"Fribourg / Freiburg",27,"27 Fabrication d'équipements électriques",2023,18,258,232
+10,"Fribourg / Freiburg",28,"28 Fabrication de machines et équipements n.c.a.",2023,64,2914,2770
+10,"Fribourg / Freiburg",29,"29 Industrie automobile",2023,5,80,76
+10,"Fribourg / Freiburg",30,"30 Fabrication d'autres matériels de transport",2023,10,38,32
+10,"Fribourg / Freiburg",31,"31 Fabrication de meubles",2023,42,375,334
+10,"Fribourg / Freiburg",32,"32 Autres industries manufacturières",2023,107,463,380
+10,"Fribourg / Freiburg",33,"33 Réparation et installation de machines et d'équipements",2023,116,490,415
+10,"Fribourg / Freiburg",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,29,867,789
+10,"Fribourg / Freiburg",36,"36 Captage, traitement et distribution d'eau",2023,15,132,91
+10,"Fribourg / Freiburg",37,"37 Collecte et traitement des eaux usées",2023,26,271,238
+10,"Fribourg / Freiburg",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,49,476,367
+10,"Fribourg / Freiburg",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+10,"Fribourg / Freiburg",41,"41 Construction de bâtiments",2023,371,3962,3663
+10,"Fribourg / Freiburg",42,"42 Génie civil",2023,33,559,537
+10,"Fribourg / Freiburg",43,"43 Travaux de construction spécialisés",2023,1619,10096,9203
+10,"Fribourg / Freiburg",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,692,3206,2804
+10,"Fribourg / Freiburg",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,575,5954,5165
+10,"Fribourg / Freiburg",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,1624,10372,7403
+10,"Fribourg / Freiburg",49,"49 Transports terrestres et transport par conduites",2023,266,3535,3031
+10,"Fribourg / Freiburg",50,"50 Transports par eau",2023,,34,29
+10,"Fribourg / Freiburg",51,"51 Transports aériens",2023,,21,13
+10,"Fribourg / Freiburg",52,"52 Entreposage et services auxiliaires des transports",2023,50,1243,1098
+10,"Fribourg / Freiburg",53,"53 Activités de poste et de courrier",2023,73,1028,867
+10,"Fribourg / Freiburg",55,"55 Hébergement",2023,158,1335,991
+10,"Fribourg / Freiburg",56,"56 Restauration",2023,850,5641,3809
+10,"Fribourg / Freiburg",58,"58 Édition",2023,49,540,334
+10,"Fribourg / Freiburg",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,91,289,148
+10,"Fribourg / Freiburg",60,"60 Programmation et diffusion",2023,6,163,108
+10,"Fribourg / Freiburg",61,"61 Télécommunications",2023,28,611,523
+10,"Fribourg / Freiburg",62,"62 Programmation, conseil et autres activités informatiques",2023,403,1892,1567
+10,"Fribourg / Freiburg",63,"63 Services d'information",2023,22,133,109
+10,"Fribourg / Freiburg",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,251,1933,1601
+10,"Fribourg / Freiburg",65,"65 Assurance",2023,26,334,284
+10,"Fribourg / Freiburg",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,250,1624,1327
+10,"Fribourg / Freiburg",68,"68 Activités immobilières",2023,574,2038,1204
+10,"Fribourg / Freiburg",69,"69 Activités juridiques et comptables",2023,620,1981,1390
+10,"Fribourg / Freiburg",70,"70 Activités des sièges sociaux, conseil de gestion",2023,545,2466,1988
+10,"Fribourg / Freiburg",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,745,3888,3143
+10,"Fribourg / Freiburg",72,"72 Recherche-développement scientifique",2023,59,645,527
+10,"Fribourg / Freiburg",73,"73 Publicité et études de marché",2023,88,441,320
+10,"Fribourg / Freiburg",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,650,1055,676
+10,"Fribourg / Freiburg",75,"75 Activités vétérinaires",2023,70,321,236
+10,"Fribourg / Freiburg",77,"77 Activités de location et location-bail",2023,73,334,263
+10,"Fribourg / Freiburg",78,"78 Activités liées à l'emploi",2023,55,3457,2810
+10,"Fribourg / Freiburg",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,66,464,311
+10,"Fribourg / Freiburg",80,"80 Enquêtes et sécurité",2023,23,455,276
+10,"Fribourg / Freiburg",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,536,4659,2955
+10,"Fribourg / Freiburg",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,106,387,283
+10,"Fribourg / Freiburg",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,392,7589,5837
+10,"Fribourg / Freiburg",85,"85 Enseignement",2023,1149,14390,9499
+10,"Fribourg / Freiburg",86,"86 Activités pour la santé humaine",2023,2746,11941,8440
+10,"Fribourg / Freiburg",87,"87 Hébergement médico-social et social",2023,150,7896,5343
+10,"Fribourg / Freiburg",88,"88 Action sociale sans hébergement",2023,475,5089,2875
+10,"Fribourg / Freiburg",90,"90 Activités créatives, artistiques et de spectacle",2023,493,917,372
+10,"Fribourg / Freiburg",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,48,555,279
+10,"Fribourg / Freiburg",92,"92 Organisation de jeux de hasard et d'argent",2023,7,67,46
+10,"Fribourg / Freiburg",93,"93 Activités sportives, récréatives et de loisirs",2023,272,1558,790
+10,"Fribourg / Freiburg",94,"94 Activités des organisations associatives",2023,468,3198,1776
+10,"Fribourg / Freiburg",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,80,108,78
+10,"Fribourg / Freiburg",96,"96 Autres services personnels",2023,1759,2631,1683
+11,"Solothurn",999,"Division économique - total",2023,18820,151879,116758
+11,"Solothurn",1,"01 Culture et production animale, chasse et services annexes",2023,1305,3868,2449
+11,"Solothurn",2,"02 Sylviculture et exploitation forestière",2023,42,157,126
+11,"Solothurn",3,"03 Pêche et aquaculture",2023,,7,
+11,"Solothurn",5,"05 Extraction de houille et de lignite",2023,0,0,0
+11,"Solothurn",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+11,"Solothurn",7,"07 Extraction de minerais métalliques",2023,0,0,0
+11,"Solothurn",8,"08 Autres industries extractives",2023,11,128,113
+11,"Solothurn",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+11,"Solothurn",10,"10 Industries alimentaires",2023,121,2163,1875
+11,"Solothurn",11,"11 Fabrication de boissons",2023,14,57,44
+11,"Solothurn",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+11,"Solothurn",13,"13 Fabrication de textiles",2023,15,177,155
+11,"Solothurn",14,"14 Industrie de l'habillement",2023,31,35,19
+11,"Solothurn",15,"15 Industrie du cuir et de la chaussure",2023,8,41,25
+11,"Solothurn",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,186,936,821
+11,"Solothurn",17,"17 Industrie du papier et du carton",2023,5,425,409
+11,"Solothurn",18,"18 Imprimerie et reproduction d'enregistrements",2023,51,481,426
+11,"Solothurn",19,"19 Cokéfaction et raffinage",2023,0,0,0
+11,"Solothurn",20,"20 Industrie chimique",2023,28,393,361
+11,"Solothurn",21,"21 Industrie pharmaceutique",2023,7,474,462
+11,"Solothurn",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,34,1130,1032
+11,"Solothurn",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,58,381,348
+11,"Solothurn",24,"24 Métallurgie",2023,14,877,851
+11,"Solothurn",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,344,4597,4181
+11,"Solothurn",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,63,4603,4316
+11,"Solothurn",27,"27 Fabrication d'équipements électriques",2023,42,2099,1947
+11,"Solothurn",28,"28 Fabrication de machines et équipements n.c.a.",2023,130,3050,2837
+11,"Solothurn",29,"29 Industrie automobile",2023,14,522,489
+11,"Solothurn",30,"30 Fabrication d'autres matériels de transport",2023,8,196,177
+11,"Solothurn",31,"31 Fabrication de meubles",2023,25,239,213
+11,"Solothurn",32,"32 Autres industries manufacturières",2023,115,2259,2092
+11,"Solothurn",33,"33 Réparation et installation de machines et d'équipements",2023,93,548,463
+11,"Solothurn",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,41,1641,1435
+11,"Solothurn",36,"36 Captage, traitement et distribution d'eau",2023,16,146,115
+11,"Solothurn",37,"37 Collecte et traitement des eaux usées",2023,20,203,170
+11,"Solothurn",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,38,411,365
+11,"Solothurn",39,"39 Dépollution et autres services de gestion des déchets",2023,,5,5
+11,"Solothurn",41,"41 Construction de bâtiments",2023,227,1894,1731
+11,"Solothurn",42,"42 Génie civil",2023,45,1030,962
+11,"Solothurn",43,"43 Travaux de construction spécialisés",2023,1271,7354,6597
+11,"Solothurn",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,613,2649,2293
+11,"Solothurn",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,590,6357,5550
+11,"Solothurn",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,1352,8155,5867
+11,"Solothurn",49,"49 Transports terrestres et transport par conduites",2023,276,7197,6460
+11,"Solothurn",51,"51 Transports aériens",2023,0,0,0
+11,"Solothurn",52,"52 Entreposage et services auxiliaires des transports",2023,78,4148,3736
+11,"Solothurn",53,"53 Activités de poste et de courrier",2023,72,2195,1955
+11,"Solothurn",55,"55 Hébergement",2023,80,1065,804
+11,"Solothurn",56,"56 Restauration",2023,711,3955,2594
+11,"Solothurn",58,"58 Édition",2023,44,297,205
+11,"Solothurn",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,77,168,88
+11,"Solothurn",60,"60 Programmation et diffusion",2023,0,0,0
+11,"Solothurn",61,"61 Télécommunications",2023,39,1062,938
+11,"Solothurn",62,"62 Programmation, conseil et autres activités informatiques",2023,424,2387,1959
+11,"Solothurn",63,"63 Services d'information",2023,15,347,317
+11,"Solothurn",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,164,1681,1331
+11,"Solothurn",65,"65 Assurance",2023,19,361,276
+11,"Solothurn",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,166,1250,1026
+11,"Solothurn",68,"68 Activités immobilières",2023,457,1456,854
+11,"Solothurn",69,"69 Activités juridiques et comptables",2023,514,1677,1229
+11,"Solothurn",70,"70 Activités des sièges sociaux, conseil de gestion",2023,497,1915,1385
+11,"Solothurn",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,654,3423,2745
+11,"Solothurn",72,"72 Recherche-développement scientifique",2023,35,500,426
+11,"Solothurn",73,"73 Publicité et études de marché",2023,105,250,181
+11,"Solothurn",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,437,682,424
+11,"Solothurn",75,"75 Activités vétérinaires",2023,39,227,149
+11,"Solothurn",77,"77 Activités de location et location-bail",2023,59,192,131
+11,"Solothurn",78,"78 Activités liées à l'emploi",2023,81,4176,3417
+11,"Solothurn",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,35,146,101
+11,"Solothurn",80,"80 Enquêtes et sécurité",2023,26,725,489
+11,"Solothurn",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,560,5390,3205
+11,"Solothurn",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,89,379,238
+11,"Solothurn",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,254,4830,3726
+11,"Solothurn",85,"85 Enseignement",2023,950,10301,5637
+11,"Solothurn",86,"86 Activités pour la santé humaine",2023,1682,10359,7179
+11,"Solothurn",87,"87 Hébergement médico-social et social",2023,155,8598,6179
+11,"Solothurn",88,"88 Action sociale sans hébergement",2023,386,2633,1584
+11,"Solothurn",90,"90 Activités créatives, artistiques et de spectacle",2023,394,748,370
+11,"Solothurn",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,32,272,150
+11,"Solothurn",93,"93 Activités sportives, récréatives et de loisirs",2023,265,1541,706
+11,"Solothurn",94,"94 Activités des organisations associatives",2023,422,3328,1756
+11,"Solothurn",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,103,178,125
+11,"Solothurn",96,"96 Autres services personnels",2023,1442,2148,1357
+12,"Basel-Stadt",999,"Division économique - total",2023,18419,199745,155657
+12,"Basel-Stadt",1,"01 Culture et production animale, chasse et services annexes",2023,20,80,62
+12,"Basel-Stadt",2,"02 Sylviculture et exploitation forestière",2023,4,27,23
+12,"Basel-Stadt",3,"03 Pêche et aquaculture",2023,0,0,0
+12,"Basel-Stadt",5,"05 Extraction de houille et de lignite",2023,0,0,0
+12,"Basel-Stadt",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+12,"Basel-Stadt",7,"07 Extraction de minerais métalliques",2023,0,0,0
+12,"Basel-Stadt",8,"08 Autres industries extractives",2023,,14,13
+12,"Basel-Stadt",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+12,"Basel-Stadt",10,"10 Industries alimentaires",2023,73,1888,1649
+12,"Basel-Stadt",11,"11 Fabrication de boissons",2023,8,46,32
+12,"Basel-Stadt",13,"13 Fabrication de textiles",2023,15,17,11
+12,"Basel-Stadt",14,"14 Industrie de l'habillement",2023,63,114,69
+12,"Basel-Stadt",15,"15 Industrie du cuir et de la chaussure",2023,12,22,12
+12,"Basel-Stadt",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,75,335,292
+12,"Basel-Stadt",17,"17 Industrie du papier et du carton",2023,,17,15
+12,"Basel-Stadt",18,"18 Imprimerie et reproduction d'enregistrements",2023,51,198,163
+12,"Basel-Stadt",19,"19 Cokéfaction et raffinage",2023,0,0,0
+12,"Basel-Stadt",20,"20 Industrie chimique",2023,20,623,592
+12,"Basel-Stadt",21,"21 Industrie pharmaceutique",2023,33,17688,16922
+12,"Basel-Stadt",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,4,11,9
+12,"Basel-Stadt",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,30,111,98
+12,"Basel-Stadt",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,52,232,202
+12,"Basel-Stadt",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,18,875,832
+12,"Basel-Stadt",27,"27 Fabrication d'équipements électriques",2023,8,282,266
+12,"Basel-Stadt",28,"28 Fabrication de machines et équipements n.c.a.",2023,19,114,101
+12,"Basel-Stadt",31,"31 Fabrication de meubles",2023,13,62,51
+12,"Basel-Stadt",32,"32 Autres industries manufacturières",2023,132,1393,1218
+12,"Basel-Stadt",33,"33 Réparation et installation de machines et d'équipements",2023,20,1131,1077
+12,"Basel-Stadt",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,,1022,887
+12,"Basel-Stadt",36,"36 Captage, traitement et distribution d'eau",2023,0,0,0
+12,"Basel-Stadt",37,"37 Collecte et traitement des eaux usées",2023,,10,10
+12,"Basel-Stadt",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,9,293,278
+12,"Basel-Stadt",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+12,"Basel-Stadt",41,"41 Construction de bâtiments",2023,152,1436,1331
+12,"Basel-Stadt",42,"42 Génie civil",2023,14,422,388
+12,"Basel-Stadt",43,"43 Travaux de construction spécialisés",2023,669,5325,4952
+12,"Basel-Stadt",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,126,820,729
+12,"Basel-Stadt",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,372,5334,4804
+12,"Basel-Stadt",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,1297,8437,6056
+12,"Basel-Stadt",49,"49 Transports terrestres et transport par conduites",2023,333,4040,3466
+12,"Basel-Stadt",50,"50 Transports par eau",2023,38,2261,1813
+12,"Basel-Stadt",51,"51 Transports aériens",2023,6,182,151
+12,"Basel-Stadt",52,"52 Entreposage et services auxiliaires des transports",2023,134,3860,3465
+12,"Basel-Stadt",53,"53 Activités de poste et de courrier",2023,54,1702,1050
+12,"Basel-Stadt",55,"55 Hébergement",2023,66,1767,1419
+12,"Basel-Stadt",56,"56 Restauration",2023,758,9159,6396
+12,"Basel-Stadt",58,"58 Édition",2023,66,876,570
+12,"Basel-Stadt",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,189,482,278
+12,"Basel-Stadt",60,"60 Programmation et diffusion",2023,13,499,349
+12,"Basel-Stadt",61,"61 Télécommunications",2023,38,575,489
+12,"Basel-Stadt",62,"62 Programmation, conseil et autres activités informatiques",2023,558,3803,3307
+12,"Basel-Stadt",63,"63 Services d'information",2023,40,171,134
+12,"Basel-Stadt",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,234,4522,4003
+12,"Basel-Stadt",65,"65 Assurance",2023,39,4805,4193
+12,"Basel-Stadt",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,238,2644,2238
+12,"Basel-Stadt",68,"68 Activités immobilières",2023,493,2638,1519
+12,"Basel-Stadt",69,"69 Activités juridiques et comptables",2023,703,3164,2416
+12,"Basel-Stadt",70,"70 Activités des sièges sociaux, conseil de gestion",2023,914,6465,5436
+12,"Basel-Stadt",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,815,6947,5873
+12,"Basel-Stadt",72,"72 Recherche-développement scientifique",2023,166,3739,3379
+12,"Basel-Stadt",73,"73 Publicité et études de marché",2023,170,1044,616
+12,"Basel-Stadt",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,989,1513,895
+12,"Basel-Stadt",75,"75 Activités vétérinaires",2023,12,69,50
+12,"Basel-Stadt",77,"77 Activités de location et location-bail",2023,43,562,493
+12,"Basel-Stadt",78,"78 Activités liées à l'emploi",2023,125,7640,6282
+12,"Basel-Stadt",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,65,477,336
+12,"Basel-Stadt",80,"80 Enquêtes et sécurité",2023,23,1413,1040
+12,"Basel-Stadt",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,347,4250,2914
+12,"Basel-Stadt",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,106,667,510
+12,"Basel-Stadt",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,119,6522,5621
+12,"Basel-Stadt",85,"85 Enseignement",2023,1026,14558,9188
+12,"Basel-Stadt",86,"86 Activités pour la santé humaine",2023,2325,23596,17030
+12,"Basel-Stadt",87,"87 Hébergement médico-social et social",2023,148,6271,4451
+12,"Basel-Stadt",88,"88 Action sociale sans hébergement",2023,414,5804,3825
+12,"Basel-Stadt",90,"90 Activités créatives, artistiques et de spectacle",2023,1277,2885,1436
+12,"Basel-Stadt",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,50,1391,854
+12,"Basel-Stadt",92,"92 Organisation de jeux de hasard et d'argent",2023,4,426,302
+12,"Basel-Stadt",93,"93 Activités sportives, récréatives et de loisirs",2023,263,1970,944
+12,"Basel-Stadt",94,"94 Activités des organisations associatives",2023,610,3814,2261
+12,"Basel-Stadt",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,78,134,97
+12,"Basel-Stadt",96,"96 Autres services personnels",2023,1004,2052,1424
+13,"Basel-Landschaft",999,"Division économique - total",2023,19879,160248,125282
+13,"Basel-Landschaft",1,"01 Culture et production animale, chasse et services annexes",2023,892,2862,1833
+13,"Basel-Landschaft",2,"02 Sylviculture et exploitation forestière",2023,46,198,163
+13,"Basel-Landschaft",5,"05 Extraction de houille et de lignite",2023,0,0,0
+13,"Basel-Landschaft",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+13,"Basel-Landschaft",7,"07 Extraction de minerais métalliques",2023,0,0,0
+13,"Basel-Landschaft",8,"08 Autres industries extractives",2023,8,347,319
+13,"Basel-Landschaft",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+13,"Basel-Landschaft",10,"10 Industries alimentaires",2023,102,3281,2872
+13,"Basel-Landschaft",11,"11 Fabrication de boissons",2023,10,74,58
+13,"Basel-Landschaft",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+13,"Basel-Landschaft",13,"13 Fabrication de textiles",2023,15,51,44
+13,"Basel-Landschaft",14,"14 Industrie de l'habillement",2023,44,68,38
+13,"Basel-Landschaft",15,"15 Industrie du cuir et de la chaussure",2023,8,43,36
+13,"Basel-Landschaft",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,181,967,864
+13,"Basel-Landschaft",17,"17 Industrie du papier et du carton",2023,8,189,178
+13,"Basel-Landschaft",18,"18 Imprimerie et reproduction d'enregistrements",2023,59,659,582
+13,"Basel-Landschaft",19,"19 Cokéfaction et raffinage",2023,0,0,0
+13,"Basel-Landschaft",20,"20 Industrie chimique",2023,28,2066,1949
+13,"Basel-Landschaft",21,"21 Industrie pharmaceutique",2023,33,3740,3555
+13,"Basel-Landschaft",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,31,523,479
+13,"Basel-Landschaft",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,50,697,647
+13,"Basel-Landschaft",24,"24 Métallurgie",2023,7,346,331
+13,"Basel-Landschaft",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,238,3292,3028
+13,"Basel-Landschaft",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,45,3169,2997
+13,"Basel-Landschaft",27,"27 Fabrication d'équipements électriques",2023,26,1104,1047
+13,"Basel-Landschaft",28,"28 Fabrication de machines et équipements n.c.a.",2023,73,4544,4334
+13,"Basel-Landschaft",29,"29 Industrie automobile",2023,4,50,46
+13,"Basel-Landschaft",30,"30 Fabrication d'autres matériels de transport",2023,6,14,11
+13,"Basel-Landschaft",31,"31 Fabrication de meubles",2023,35,420,385
+13,"Basel-Landschaft",32,"32 Autres industries manufacturières",2023,91,507,422
+13,"Basel-Landschaft",33,"33 Réparation et installation de machines et d'équipements",2023,76,481,436
+13,"Basel-Landschaft",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,22,726,624
+13,"Basel-Landschaft",36,"36 Captage, traitement et distribution d'eau",2023,14,91,73
+13,"Basel-Landschaft",37,"37 Collecte et traitement des eaux usées",2023,27,283,264
+13,"Basel-Landschaft",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,42,532,464
+13,"Basel-Landschaft",39,"39 Dépollution et autres services de gestion des déchets",2023,,12,12
+13,"Basel-Landschaft",41,"41 Construction de bâtiments",2023,246,2476,2305
+13,"Basel-Landschaft",42,"42 Génie civil",2023,53,1463,1383
+13,"Basel-Landschaft",43,"43 Travaux de construction spécialisés",2023,1502,9484,8663
+13,"Basel-Landschaft",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,582,3169,2782
+13,"Basel-Landschaft",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,727,9313,8204
+13,"Basel-Landschaft",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,1264,7681,5694
+13,"Basel-Landschaft",49,"49 Transports terrestres et transport par conduites",2023,414,3875,3303
+13,"Basel-Landschaft",50,"50 Transports par eau",2023,7,223,217
+13,"Basel-Landschaft",51,"51 Transports aériens",2023,,23,22
+13,"Basel-Landschaft",52,"52 Entreposage et services auxiliaires des transports",2023,126,3243,2986
+13,"Basel-Landschaft",53,"53 Activités de poste et de courrier",2023,66,1517,1394
+13,"Basel-Landschaft",55,"55 Hébergement",2023,61,681,506
+13,"Basel-Landschaft",56,"56 Restauration",2023,584,3365,2340
+13,"Basel-Landschaft",58,"58 Édition",2023,24,106,70
+13,"Basel-Landschaft",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,78,110,57
+13,"Basel-Landschaft",60,"60 Programmation et diffusion",2023,,14,9
+13,"Basel-Landschaft",61,"61 Télécommunications",2023,16,147,125
+13,"Basel-Landschaft",62,"62 Programmation, conseil et autres activités informatiques",2023,544,2667,2231
+13,"Basel-Landschaft",63,"63 Services d'information",2023,16,62,44
+13,"Basel-Landschaft",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,161,1824,1525
+13,"Basel-Landschaft",65,"65 Assurance",2023,20,376,292
+13,"Basel-Landschaft",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,178,1438,1188
+13,"Basel-Landschaft",68,"68 Activités immobilières",2023,498,1712,1017
+13,"Basel-Landschaft",69,"69 Activités juridiques et comptables",2023,599,1538,1037
+13,"Basel-Landschaft",70,"70 Activités des sièges sociaux, conseil de gestion",2023,737,3280,2603
+13,"Basel-Landschaft",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,740,4994,4128
+13,"Basel-Landschaft",72,"72 Recherche-développement scientifique",2023,90,2643,2322
+13,"Basel-Landschaft",73,"73 Publicité et études de marché",2023,97,394,207
+13,"Basel-Landschaft",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,477,798,497
+13,"Basel-Landschaft",75,"75 Activités vétérinaires",2023,38,278,197
+13,"Basel-Landschaft",77,"77 Activités de location et location-bail",2023,63,327,252
+13,"Basel-Landschaft",78,"78 Activités liées à l'emploi",2023,64,2584,2009
+13,"Basel-Landschaft",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,33,121,88
+13,"Basel-Landschaft",80,"80 Enquêtes et sécurité",2023,24,352,258
+13,"Basel-Landschaft",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,716,6354,4105
+13,"Basel-Landschaft",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,101,1181,976
+13,"Basel-Landschaft",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,249,5475,4292
+13,"Basel-Landschaft",85,"85 Enseignement",2023,1137,12222,7596
+13,"Basel-Landschaft",86,"86 Activités pour la santé humaine",2023,2253,13523,9245
+13,"Basel-Landschaft",87,"87 Hébergement médico-social et social",2023,135,7848,5473
+13,"Basel-Landschaft",88,"88 Action sociale sans hébergement",2023,472,3029,1678
+13,"Basel-Landschaft",90,"90 Activités créatives, artistiques et de spectacle",2023,453,653,289
+13,"Basel-Landschaft",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,40,375,210
+13,"Basel-Landschaft",93,"93 Activités sportives, récréatives et de loisirs",2023,322,1663,776
+13,"Basel-Landschaft",94,"94 Activités des organisations associatives",2023,346,2170,1243
+13,"Basel-Landschaft",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,68,135,106
+13,"Basel-Landschaft",96,"96 Autres services personnels",2023,1230,2003,1247
+14,"Schaffhausen",999,"Division économique - total",2023,6731,48550,37577
+14,"Schaffhausen",1,"01 Culture et production animale, chasse et services annexes",2023,510,1727,1081
+14,"Schaffhausen",2,"02 Sylviculture et exploitation forestière",2023,22,86,73
+14,"Schaffhausen",5,"05 Extraction de houille et de lignite",2023,0,0,0
+14,"Schaffhausen",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+14,"Schaffhausen",7,"07 Extraction de minerais métalliques",2023,0,0,0
+14,"Schaffhausen",8,"08 Autres industries extractives",2023,,47,43
+14,"Schaffhausen",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+14,"Schaffhausen",10,"10 Industries alimentaires",2023,53,674,571
+14,"Schaffhausen",11,"11 Fabrication de boissons",2023,10,167,146
+14,"Schaffhausen",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+14,"Schaffhausen",13,"13 Fabrication de textiles",2023,11,38,27
+14,"Schaffhausen",14,"14 Industrie de l'habillement",2023,16,19,9
+14,"Schaffhausen",15,"15 Industrie du cuir et de la chaussure",2023,6,9,6
+14,"Schaffhausen",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,51,197,169
+14,"Schaffhausen",17,"17 Industrie du papier et du carton",2023,,6,6
+14,"Schaffhausen",18,"18 Imprimerie et reproduction d'enregistrements",2023,14,121,100
+14,"Schaffhausen",19,"19 Cokéfaction et raffinage",2023,0,0,0
+14,"Schaffhausen",20,"20 Industrie chimique",2023,14,157,130
+14,"Schaffhausen",21,"21 Industrie pharmaceutique",2023,9,2022,1923
+14,"Schaffhausen",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,22,1941,1850
+14,"Schaffhausen",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,17,164,148
+14,"Schaffhausen",24,"24 Métallurgie",2023,,81,79
+14,"Schaffhausen",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,79,703,639
+14,"Schaffhausen",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,21,1656,1535
+14,"Schaffhausen",27,"27 Fabrication d'équipements électriques",2023,9,321,306
+14,"Schaffhausen",28,"28 Fabrication de machines et équipements n.c.a.",2023,25,1359,1283
+14,"Schaffhausen",29,"29 Industrie automobile",2023,0,0,0
+14,"Schaffhausen",30,"30 Fabrication d'autres matériels de transport",2023,6,91,87
+14,"Schaffhausen",31,"31 Fabrication de meubles",2023,10,33,25
+14,"Schaffhausen",32,"32 Autres industries manufacturières",2023,52,258,217
+14,"Schaffhausen",33,"33 Réparation et installation de machines et d'équipements",2023,38,304,276
+14,"Schaffhausen",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,13,266,245
+14,"Schaffhausen",36,"36 Captage, traitement et distribution d'eau",2023,,18,13
+14,"Schaffhausen",37,"37 Collecte et traitement des eaux usées",2023,7,38,30
+14,"Schaffhausen",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,10,77,66
+14,"Schaffhausen",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+14,"Schaffhausen",41,"41 Construction de bâtiments",2023,94,608,541
+14,"Schaffhausen",42,"42 Génie civil",2023,15,170,160
+14,"Schaffhausen",43,"43 Travaux de construction spécialisés",2023,365,2032,1827
+14,"Schaffhausen",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,204,735,632
+14,"Schaffhausen",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,247,2000,1781
+14,"Schaffhausen",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,490,2804,2016
+14,"Schaffhausen",49,"49 Transports terrestres et transport par conduites",2023,123,1269,1068
+14,"Schaffhausen",50,"50 Transports par eau",2023,4,46,40
+14,"Schaffhausen",51,"51 Transports aériens",2023,0,0,0
+14,"Schaffhausen",52,"52 Entreposage et services auxiliaires des transports",2023,56,756,618
+14,"Schaffhausen",53,"53 Activités de poste et de courrier",2023,18,294,270
+14,"Schaffhausen",55,"55 Hébergement",2023,29,264,196
+14,"Schaffhausen",56,"56 Restauration",2023,244,1265,880
+14,"Schaffhausen",58,"58 Édition",2023,23,266,183
+14,"Schaffhausen",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,30,88,51
+14,"Schaffhausen",60,"60 Programmation et diffusion",2023,,40,26
+14,"Schaffhausen",61,"61 Télécommunications",2023,6,72,67
+14,"Schaffhausen",62,"62 Programmation, conseil et autres activités informatiques",2023,185,796,683
+14,"Schaffhausen",63,"63 Services d'information",2023,,20,17
+14,"Schaffhausen",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,84,782,656
+14,"Schaffhausen",65,"65 Assurance",2023,10,52,42
+14,"Schaffhausen",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,58,391,328
+14,"Schaffhausen",68,"68 Activités immobilières",2023,157,631,340
+14,"Schaffhausen",69,"69 Activités juridiques et comptables",2023,161,557,365
+14,"Schaffhausen",70,"70 Activités des sièges sociaux, conseil de gestion",2023,222,1320,1127
+14,"Schaffhausen",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,237,1195,987
+14,"Schaffhausen",72,"72 Recherche-développement scientifique",2023,19,122,97
+14,"Schaffhausen",73,"73 Publicité et études de marché",2023,59,215,174
+14,"Schaffhausen",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,169,258,156
+14,"Schaffhausen",75,"75 Activités vétérinaires",2023,8,63,43
+14,"Schaffhausen",77,"77 Activités de location et location-bail",2023,24,81,63
+14,"Schaffhausen",78,"78 Activités liées à l'emploi",2023,19,642,494
+14,"Schaffhausen",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,19,136,92
+14,"Schaffhausen",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,191,1408,971
+14,"Schaffhausen",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,40,214,172
+14,"Schaffhausen",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,130,2167,1670
+14,"Schaffhausen",85,"85 Enseignement",2023,353,2802,1700
+14,"Schaffhausen",86,"86 Activités pour la santé humaine",2023,557,3549,2348
+14,"Schaffhausen",87,"87 Hébergement médico-social et social",2023,32,2047,1526
+14,"Schaffhausen",88,"88 Action sociale sans hébergement",2023,169,1428,783
+14,"Schaffhausen",90,"90 Activités créatives, artistiques et de spectacle",2023,114,195,81
+14,"Schaffhausen",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,10,98,59
+14,"Schaffhausen",92,"92 Organisation de jeux de hasard et d'argent",2023,,70,50
+14,"Schaffhausen",93,"93 Activités sportives, récréatives et de loisirs",2023,99,583,310
+14,"Schaffhausen",94,"94 Activités des organisations associatives",2023,165,728,349
+14,"Schaffhausen",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,19,47,36
+14,"Schaffhausen",96,"96 Autres services personnels",2023,429,657,418
+15,"Appenzell Ausserrhoden",999,"Division économique - total",2023,4982,27891,20840
+15,"Appenzell Ausserrhoden",1,"01 Culture et production animale, chasse et services annexes",2023,655,1536,1015
+15,"Appenzell Ausserrhoden",2,"02 Sylviculture et exploitation forestière",2023,16,53,45
+15,"Appenzell Ausserrhoden",3,"03 Pêche et aquaculture",2023,0,0,0
+15,"Appenzell Ausserrhoden",5,"05 Extraction de houille et de lignite",2023,0,0,0
+15,"Appenzell Ausserrhoden",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+15,"Appenzell Ausserrhoden",7,"07 Extraction de minerais métalliques",2023,0,0,0
+15,"Appenzell Ausserrhoden",8,"08 Autres industries extractives",2023,0,0,0
+15,"Appenzell Ausserrhoden",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+15,"Appenzell Ausserrhoden",10,"10 Industries alimentaires",2023,29,186,141
+15,"Appenzell Ausserrhoden",11,"11 Fabrication de boissons",2023,,5,
+15,"Appenzell Ausserrhoden",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+15,"Appenzell Ausserrhoden",13,"13 Fabrication de textiles",2023,18,772,714
+15,"Appenzell Ausserrhoden",14,"14 Industrie de l'habillement",2023,7,12,6
+15,"Appenzell Ausserrhoden",15,"15 Industrie du cuir et de la chaussure",2023,7,18,14
+15,"Appenzell Ausserrhoden",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,96,704,641
+15,"Appenzell Ausserrhoden",17,"17 Industrie du papier et du carton",2023,,26,25
+15,"Appenzell Ausserrhoden",18,"18 Imprimerie et reproduction d'enregistrements",2023,15,114,93
+15,"Appenzell Ausserrhoden",19,"19 Cokéfaction et raffinage",2023,0,0,0
+15,"Appenzell Ausserrhoden",20,"20 Industrie chimique",2023,14,266,237
+15,"Appenzell Ausserrhoden",21,"21 Industrie pharmaceutique",2023,8,216,186
+15,"Appenzell Ausserrhoden",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,8,165,151
+15,"Appenzell Ausserrhoden",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,14,32,
+15,"Appenzell Ausserrhoden",24,"24 Métallurgie",2023,,137,129
+15,"Appenzell Ausserrhoden",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,65,506,464
+15,"Appenzell Ausserrhoden",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,10,904,855
+15,"Appenzell Ausserrhoden",27,"27 Fabrication d'équipements électriques",2023,6,713,685
+15,"Appenzell Ausserrhoden",28,"28 Fabrication de machines et équipements n.c.a.",2023,9,203,185
+15,"Appenzell Ausserrhoden",29,"29 Industrie automobile",2023,,5,5
+15,"Appenzell Ausserrhoden",30,"30 Fabrication d'autres matériels de transport",2023,,12,10
+15,"Appenzell Ausserrhoden",31,"31 Fabrication de meubles",2023,7,119,108
+15,"Appenzell Ausserrhoden",32,"32 Autres industries manufacturières",2023,35,89,71
+15,"Appenzell Ausserrhoden",33,"33 Réparation et installation de machines et d'équipements",2023,29,196,172
+15,"Appenzell Ausserrhoden",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,13,78,59
+15,"Appenzell Ausserrhoden",36,"36 Captage, traitement et distribution d'eau",2023,11,35,26
+15,"Appenzell Ausserrhoden",37,"37 Collecte et traitement des eaux usées",2023,5,28,25
+15,"Appenzell Ausserrhoden",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,5,10,7
+15,"Appenzell Ausserrhoden",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+15,"Appenzell Ausserrhoden",41,"41 Construction de bâtiments",2023,77,540,480
+15,"Appenzell Ausserrhoden",42,"42 Génie civil",2023,8,58,53
+15,"Appenzell Ausserrhoden",43,"43 Travaux de construction spécialisés",2023,324,1262,1127
+15,"Appenzell Ausserrhoden",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,86,313,265
+15,"Appenzell Ausserrhoden",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,174,1021,820
+15,"Appenzell Ausserrhoden",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,259,1248,843
+15,"Appenzell Ausserrhoden",49,"49 Transports terrestres et transport par conduites",2023,50,790,672
+15,"Appenzell Ausserrhoden",50,"50 Transports par eau",2023,0,0,0
+15,"Appenzell Ausserrhoden",51,"51 Transports aériens",2023,0,0,0
+15,"Appenzell Ausserrhoden",52,"52 Entreposage et services auxiliaires des transports",2023,7,35,29
+15,"Appenzell Ausserrhoden",53,"53 Activités de poste et de courrier",2023,15,106,86
+15,"Appenzell Ausserrhoden",55,"55 Hébergement",2023,44,632,455
+15,"Appenzell Ausserrhoden",56,"56 Restauration",2023,164,680,449
+15,"Appenzell Ausserrhoden",58,"58 Édition",2023,8,37,24
+15,"Appenzell Ausserrhoden",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,16,22,13
+15,"Appenzell Ausserrhoden",60,"60 Programmation et diffusion",2023,0,0,0
+15,"Appenzell Ausserrhoden",61,"61 Télécommunications",2023,0,0,0
+15,"Appenzell Ausserrhoden",62,"62 Programmation, conseil et autres activités informatiques",2023,128,520,427
+15,"Appenzell Ausserrhoden",63,"63 Services d'information",2023,8,9,7
+15,"Appenzell Ausserrhoden",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,59,219,160
+15,"Appenzell Ausserrhoden",65,"65 Assurance",2023,8,39,26
+15,"Appenzell Ausserrhoden",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,53,258,204
+15,"Appenzell Ausserrhoden",68,"68 Activités immobilières",2023,165,313,165
+15,"Appenzell Ausserrhoden",69,"69 Activités juridiques et comptables",2023,99,222,149
+15,"Appenzell Ausserrhoden",70,"70 Activités des sièges sociaux, conseil de gestion",2023,202,350,242
+15,"Appenzell Ausserrhoden",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,165,566,444
+15,"Appenzell Ausserrhoden",72,"72 Recherche-développement scientifique",2023,5,24,17
+15,"Appenzell Ausserrhoden",73,"73 Publicité et études de marché",2023,31,75,55
+15,"Appenzell Ausserrhoden",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,111,173,104
+15,"Appenzell Ausserrhoden",75,"75 Activités vétérinaires",2023,9,68,48
+15,"Appenzell Ausserrhoden",77,"77 Activités de location et location-bail",2023,7,50,29
+15,"Appenzell Ausserrhoden",78,"78 Activités liées à l'emploi",2023,7,28,21
+15,"Appenzell Ausserrhoden",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,13,62,41
+15,"Appenzell Ausserrhoden",80,"80 Enquêtes et sécurité",2023,,9,7
+15,"Appenzell Ausserrhoden",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,143,577,427
+15,"Appenzell Ausserrhoden",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,25,37,18
+15,"Appenzell Ausserrhoden",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,75,1069,863
+15,"Appenzell Ausserrhoden",85,"85 Enseignement",2023,237,1834,1070
+15,"Appenzell Ausserrhoden",86,"86 Activités pour la santé humaine",2023,475,3569,2399
+15,"Appenzell Ausserrhoden",87,"87 Hébergement médico-social et social",2023,52,2136,1529
+15,"Appenzell Ausserrhoden",88,"88 Action sociale sans hébergement",2023,85,665,368
+15,"Appenzell Ausserrhoden",90,"90 Activités créatives, artistiques et de spectacle",2023,104,110,49
+15,"Appenzell Ausserrhoden",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,14,50,24
+15,"Appenzell Ausserrhoden",92,"92 Organisation de jeux de hasard et d'argent",2023,0,0,0
+15,"Appenzell Ausserrhoden",93,"93 Activités sportives, récréatives et de loisirs",2023,65,235,104
+15,"Appenzell Ausserrhoden",94,"94 Activités des organisations associatives",2023,75,380,205
+15,"Appenzell Ausserrhoden",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,,11,
+15,"Appenzell Ausserrhoden",96,"96 Autres services personnels",2023,226,349,213
+16,"Appenzell Innerrhoden",999,"Division économique - total",2023,1862,9580,7173
+16,"Appenzell Innerrhoden",1,"01 Culture et production animale, chasse et services annexes",2023,420,986,672
+16,"Appenzell Innerrhoden",2,"02 Sylviculture et exploitation forestière",2023,8,34,17
+16,"Appenzell Innerrhoden",3,"03 Pêche et aquaculture",2023,0,0,0
+16,"Appenzell Innerrhoden",5,"05 Extraction de houille et de lignite",2023,0,0,0
+16,"Appenzell Innerrhoden",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+16,"Appenzell Innerrhoden",7,"07 Extraction de minerais métalliques",2023,0,0,0
+16,"Appenzell Innerrhoden",8,"08 Autres industries extractives",2023,0,0,0
+16,"Appenzell Innerrhoden",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+16,"Appenzell Innerrhoden",10,"10 Industries alimentaires",2023,30,357,250
+16,"Appenzell Innerrhoden",11,"11 Fabrication de boissons",2023,6,376,314
+16,"Appenzell Innerrhoden",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+16,"Appenzell Innerrhoden",13,"13 Fabrication de textiles",2023,,31,25
+16,"Appenzell Innerrhoden",14,"14 Industrie de l'habillement",2023,7,14,7
+16,"Appenzell Innerrhoden",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,27,237,214
+16,"Appenzell Innerrhoden",17,"17 Industrie du papier et du carton",2023,0,0,0
+16,"Appenzell Innerrhoden",18,"18 Imprimerie et reproduction d'enregistrements",2023,,47,33
+16,"Appenzell Innerrhoden",20,"20 Industrie chimique",2023,,14,
+16,"Appenzell Innerrhoden",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,,61,54
+16,"Appenzell Innerrhoden",24,"24 Métallurgie",2023,0,0,0
+16,"Appenzell Innerrhoden",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,15,228,215
+16,"Appenzell Innerrhoden",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,,236,191
+16,"Appenzell Innerrhoden",27,"27 Fabrication d'équipements électriques",2023,,185,168
+16,"Appenzell Innerrhoden",28,"28 Fabrication de machines et équipements n.c.a.",2023,8,149,139
+16,"Appenzell Innerrhoden",29,"29 Industrie automobile",2023,0,0,0
+16,"Appenzell Innerrhoden",30,"30 Fabrication d'autres matériels de transport",2023,0,0,0
+16,"Appenzell Innerrhoden",31,"31 Fabrication de meubles",2023,6,37,31
+16,"Appenzell Innerrhoden",32,"32 Autres industries manufacturières",2023,10,23,18
+16,"Appenzell Innerrhoden",33,"33 Réparation et installation de machines et d'équipements",2023,8,28,24
+16,"Appenzell Innerrhoden",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,,26,23
+16,"Appenzell Innerrhoden",37,"37 Collecte et traitement des eaux usées",2023,0,0,0
+16,"Appenzell Innerrhoden",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,,12,9
+16,"Appenzell Innerrhoden",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+16,"Appenzell Innerrhoden",41,"41 Construction de bâtiments",2023,34,187,167
+16,"Appenzell Innerrhoden",42,"42 Génie civil",2023,14,141,132
+16,"Appenzell Innerrhoden",43,"43 Travaux de construction spécialisés",2023,122,662,592
+16,"Appenzell Innerrhoden",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,32,213,181
+16,"Appenzell Innerrhoden",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,67,380,323
+16,"Appenzell Innerrhoden",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,100,543,376
+16,"Appenzell Innerrhoden",49,"49 Transports terrestres et transport par conduites",2023,22,223,164
+16,"Appenzell Innerrhoden",50,"50 Transports par eau",2023,0,0,0
+16,"Appenzell Innerrhoden",51,"51 Transports aériens",2023,0,0,0
+16,"Appenzell Innerrhoden",52,"52 Entreposage et services auxiliaires des transports",2023,6,7,
+16,"Appenzell Innerrhoden",53,"53 Activités de poste et de courrier",2023,5,43,33
+16,"Appenzell Innerrhoden",55,"55 Hébergement",2023,31,514,392
+16,"Appenzell Innerrhoden",56,"56 Restauration",2023,54,340,229
+16,"Appenzell Innerrhoden",60,"60 Programmation et diffusion",2023,0,0,0
+16,"Appenzell Innerrhoden",61,"61 Télécommunications",2023,0,0,0
+16,"Appenzell Innerrhoden",62,"62 Programmation, conseil et autres activités informatiques",2023,38,94,73
+16,"Appenzell Innerrhoden",63,"63 Services d'information",2023,8,26,23
+16,"Appenzell Innerrhoden",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,43,204,158
+16,"Appenzell Innerrhoden",65,"65 Assurance",2023,4,19,11
+16,"Appenzell Innerrhoden",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,26,107,85
+16,"Appenzell Innerrhoden",68,"68 Activités immobilières",2023,48,86,43
+16,"Appenzell Innerrhoden",69,"69 Activités juridiques et comptables",2023,28,179,131
+16,"Appenzell Innerrhoden",70,"70 Activités des sièges sociaux, conseil de gestion",2023,79,115,85
+16,"Appenzell Innerrhoden",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,51,245,199
+16,"Appenzell Innerrhoden",72,"72 Recherche-développement scientifique",2023,,5,
+16,"Appenzell Innerrhoden",73,"73 Publicité et études de marché",2023,14,44,34
+16,"Appenzell Innerrhoden",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,35,50,32
+16,"Appenzell Innerrhoden",75,"75 Activités vétérinaires",2023,,20,12
+16,"Appenzell Innerrhoden",77,"77 Activités de location et location-bail",2023,5,9,8
+16,"Appenzell Innerrhoden",78,"78 Activités liées à l'emploi",2023,,10,7
+16,"Appenzell Innerrhoden",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,,40,20
+16,"Appenzell Innerrhoden",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,21,99,79
+16,"Appenzell Innerrhoden",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,8,10,5
+16,"Appenzell Innerrhoden",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,51,302,218
+16,"Appenzell Innerrhoden",85,"85 Enseignement",2023,63,407,249
+16,"Appenzell Innerrhoden",86,"86 Activités pour la santé humaine",2023,82,322,187
+16,"Appenzell Innerrhoden",87,"87 Hébergement médico-social et social",2023,7,309,213
+16,"Appenzell Innerrhoden",88,"88 Action sociale sans hébergement",2023,13,85,39
+16,"Appenzell Innerrhoden",90,"90 Activités créatives, artistiques et de spectacle",2023,42,55,23
+16,"Appenzell Innerrhoden",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,,22,13
+16,"Appenzell Innerrhoden",93,"93 Activités sportives, récréatives et de loisirs",2023,24,73,36
+16,"Appenzell Innerrhoden",94,"94 Activités des organisations associatives",2023,27,182,95
+16,"Appenzell Innerrhoden",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,,4,
+16,"Appenzell Innerrhoden",96,"96 Autres services personnels",2023,64,99,63
+17,"St. Gallen",999,"Division économique - total",2023,39458,318271,244477
+17,"St. Gallen",1,"01 Culture et production animale, chasse et services annexes",2023,3784,10751,7169
+17,"St. Gallen",2,"02 Sylviculture et exploitation forestière",2023,83,359,291
+17,"St. Gallen",3,"03 Pêche et aquaculture",2023,8,8,7
+17,"St. Gallen",5,"05 Extraction de houille et de lignite",2023,0,0,0
+17,"St. Gallen",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+17,"St. Gallen",7,"07 Extraction de minerais métalliques",2023,0,0,0
+17,"St. Gallen",8,"08 Autres industries extractives",2023,21,307,278
+17,"St. Gallen",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+17,"St. Gallen",10,"10 Industries alimentaires",2023,335,7137,6106
+17,"St. Gallen",11,"11 Fabrication de boissons",2023,28,587,517
+17,"St. Gallen",12,"12 Fabrication de produits à base de tabac",2023,,8,7
+17,"St. Gallen",13,"13 Fabrication de textiles",2023,94,1467,1287
+17,"St. Gallen",14,"14 Industrie de l'habillement",2023,96,697,575
+17,"St. Gallen",15,"15 Industrie du cuir et de la chaussure",2023,16,44,35
+17,"St. Gallen",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,481,3214,2899
+17,"St. Gallen",17,"17 Industrie du papier et du carton",2023,26,752,688
+17,"St. Gallen",18,"18 Imprimerie et reproduction d'enregistrements",2023,125,1582,1387
+17,"St. Gallen",20,"20 Industrie chimique",2023,56,1957,1823
+17,"St. Gallen",21,"21 Industrie pharmaceutique",2023,8,650,607
+17,"St. Gallen",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,93,3904,3638
+17,"St. Gallen",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,88,1827,1721
+17,"St. Gallen",24,"24 Métallurgie",2023,19,1728,1623
+17,"St. Gallen",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,562,10196,9561
+17,"St. Gallen",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,106,6667,6219
+17,"St. Gallen",27,"27 Fabrication d'équipements électriques",2023,70,2350,2200
+17,"St. Gallen",28,"28 Fabrication de machines et équipements n.c.a.",2023,210,10815,10275
+17,"St. Gallen",29,"29 Industrie automobile",2023,24,731,682
+17,"St. Gallen",30,"30 Fabrication d'autres matériels de transport",2023,20,1712,1635
+17,"St. Gallen",31,"31 Fabrication de meubles",2023,63,1004,930
+17,"St. Gallen",32,"32 Autres industries manufacturières",2023,218,2238,1979
+17,"St. Gallen",33,"33 Réparation et installation de machines et d'équipements",2023,245,1469,1300
+17,"St. Gallen",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,88,1635,1414
+17,"St. Gallen",36,"36 Captage, traitement et distribution d'eau",2023,56,289,139
+17,"St. Gallen",37,"37 Collecte et traitement des eaux usées",2023,55,399,359
+17,"St. Gallen",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,58,908,811
+17,"St. Gallen",41,"41 Construction de bâtiments",2023,520,4558,4161
+17,"St. Gallen",42,"42 Génie civil",2023,105,2174,2052
+17,"St. Gallen",43,"43 Travaux de construction spécialisés",2023,2697,16519,14929
+17,"St. Gallen",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,1110,5937,5232
+17,"St. Gallen",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,1325,10301,9003
+17,"St. Gallen",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,2943,18131,13140
+17,"St. Gallen",49,"49 Transports terrestres et transport par conduites",2023,490,6936,5857
+17,"St. Gallen",50,"50 Transports par eau",2023,5,125,93
+17,"St. Gallen",51,"51 Transports aériens",2023,12,40,31
+17,"St. Gallen",52,"52 Entreposage et services auxiliaires des transports",2023,126,3506,3002
+17,"St. Gallen",53,"53 Activités de poste et de courrier",2023,129,4064,1877
+17,"St. Gallen",55,"55 Hébergement",2023,248,2953,2218
+17,"St. Gallen",56,"56 Restauration",2023,1522,9632,6304
+17,"St. Gallen",58,"58 Édition",2023,80,615,451
+17,"St. Gallen",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,120,322,172
+17,"St. Gallen",60,"60 Programmation et diffusion",2023,7,95,70
+17,"St. Gallen",61,"61 Télécommunications",2023,52,1044,968
+17,"St. Gallen",62,"62 Programmation, conseil et autres activités informatiques",2023,880,5741,4956
+17,"St. Gallen",63,"63 Services d'information",2023,53,323,261
+17,"St. Gallen",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,394,6137,5153
+17,"St. Gallen",65,"65 Assurance",2023,74,2643,2323
+17,"St. Gallen",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,403,2889,2391
+17,"St. Gallen",68,"68 Activités immobilières",2023,1203,4188,2408
+17,"St. Gallen",69,"69 Activités juridiques et comptables",2023,1171,3938,2871
+17,"St. Gallen",70,"70 Activités des sièges sociaux, conseil de gestion",2023,1155,6002,4913
+17,"St. Gallen",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,1506,8473,7087
+17,"St. Gallen",72,"72 Recherche-développement scientifique",2023,47,449,401
+17,"St. Gallen",73,"73 Publicité et études de marché",2023,269,1289,852
+17,"St. Gallen",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,877,1503,971
+17,"St. Gallen",75,"75 Activités vétérinaires",2023,68,390,276
+17,"St. Gallen",77,"77 Activités de location et location-bail",2023,123,554,440
+17,"St. Gallen",78,"78 Activités liées à l'emploi",2023,147,5727,4475
+17,"St. Gallen",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,123,550,361
+17,"St. Gallen",80,"80 Enquêtes et sécurité",2023,55,1055,589
+17,"St. Gallen",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,980,7567,4461
+17,"St. Gallen",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,183,1162,886
+17,"St. Gallen",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,347,9349,7687
+17,"St. Gallen",85,"85 Enseignement",2023,1945,22545,13138
+17,"St. Gallen",86,"86 Activités pour la santé humaine",2023,3148,25723,18205
+17,"St. Gallen",87,"87 Hébergement médico-social et social",2023,223,13074,9267
+17,"St. Gallen",88,"88 Action sociale sans hébergement",2023,643,6211,3395
+17,"St. Gallen",90,"90 Activités créatives, artistiques et de spectacle",2023,720,1734,933
+17,"St. Gallen",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,67,738,378
+17,"St. Gallen",92,"92 Organisation de jeux de hasard et d'argent",2023,,152,114
+17,"St. Gallen",93,"93 Activités sportives, récréatives et de loisirs",2023,521,3249,1565
+17,"St. Gallen",94,"94 Activités des organisations associatives",2023,703,5904,2951
+17,"St. Gallen",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,133,249,192
+17,"St. Gallen",96,"96 Autres services personnels",2023,2664,4412,2848
+18,"Graubünden / Grigioni / Grischun",999,"Division économique - total",2023,21073,141221,107719
+18,"Graubünden / Grigioni / Grischun",1,"01 Culture et production animale, chasse et services annexes",2023,2165,6148,3856
+18,"Graubünden / Grigioni / Grischun",2,"02 Sylviculture et exploitation forestière",2023,133,773,671
+18,"Graubünden / Grigioni / Grischun",3,"03 Pêche et aquaculture",2023,10,51,46
+18,"Graubünden / Grigioni / Grischun",5,"05 Extraction de houille et de lignite",2023,0,0,0
+18,"Graubünden / Grigioni / Grischun",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+18,"Graubünden / Grigioni / Grischun",7,"07 Extraction de minerais métalliques",2023,0,0,0
+18,"Graubünden / Grigioni / Grischun",8,"08 Autres industries extractives",2023,25,305,279
+18,"Graubünden / Grigioni / Grischun",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+18,"Graubünden / Grigioni / Grischun",10,"10 Industries alimentaires",2023,199,1898,1579
+18,"Graubünden / Grigioni / Grischun",11,"11 Fabrication de boissons",2023,35,355,311
+18,"Graubünden / Grigioni / Grischun",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+18,"Graubünden / Grigioni / Grischun",13,"13 Fabrication de textiles",2023,25,38,24
+18,"Graubünden / Grigioni / Grischun",14,"14 Industrie de l'habillement",2023,32,46,27
+18,"Graubünden / Grigioni / Grischun",15,"15 Industrie du cuir et de la chaussure",2023,9,,
+18,"Graubünden / Grigioni / Grischun",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,326,1636,1445
+18,"Graubünden / Grigioni / Grischun",17,"17 Industrie du papier et du carton",2023,4,265,248
+18,"Graubünden / Grigioni / Grischun",18,"18 Imprimerie et reproduction d'enregistrements",2023,38,165,129
+18,"Graubünden / Grigioni / Grischun",19,"19 Cokéfaction et raffinage",2023,0,0,0
+18,"Graubünden / Grigioni / Grischun",20,"20 Industrie chimique",2023,20,1000,945
+18,"Graubünden / Grigioni / Grischun",21,"21 Industrie pharmaceutique",2023,,235,227
+18,"Graubünden / Grigioni / Grischun",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,8,42,37
+18,"Graubünden / Grigioni / Grischun",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,44,439,402
+18,"Graubünden / Grigioni / Grischun",24,"24 Métallurgie",2023,4,36,33
+18,"Graubünden / Grigioni / Grischun",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,155,1134,1012
+18,"Graubünden / Grigioni / Grischun",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,20,1702,1598
+18,"Graubünden / Grigioni / Grischun",27,"27 Fabrication d'équipements électriques",2023,14,195,174
+18,"Graubünden / Grigioni / Grischun",28,"28 Fabrication de machines et équipements n.c.a.",2023,44,1672,1591
+18,"Graubünden / Grigioni / Grischun",29,"29 Industrie automobile",2023,5,18,14
+18,"Graubünden / Grigioni / Grischun",30,"30 Fabrication d'autres matériels de transport",2023,,33,30
+18,"Graubünden / Grigioni / Grischun",31,"31 Fabrication de meubles",2023,35,174,155
+18,"Graubünden / Grigioni / Grischun",32,"32 Autres industries manufacturières",2023,80,215,161
+18,"Graubünden / Grigioni / Grischun",33,"33 Réparation et installation de machines et d'équipements",2023,80,1066,987
+18,"Graubünden / Grigioni / Grischun",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,67,1349,1168
+18,"Graubünden / Grigioni / Grischun",36,"36 Captage, traitement et distribution d'eau",2023,13,,44
+18,"Graubünden / Grigioni / Grischun",37,"37 Collecte et traitement des eaux usées",2023,40,136,122
+18,"Graubünden / Grigioni / Grischun",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,33,282,251
+18,"Graubünden / Grigioni / Grischun",41,"41 Construction de bâtiments",2023,372,4489,4187
+18,"Graubünden / Grigioni / Grischun",42,"42 Génie civil",2023,54,1049,981
+18,"Graubünden / Grigioni / Grischun",43,"43 Travaux de construction spécialisés",2023,1183,8232,7474
+18,"Graubünden / Grigioni / Grischun",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,469,2301,2011
+18,"Graubünden / Grigioni / Grischun",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,462,3156,2701
+18,"Graubünden / Grigioni / Grischun",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,1607,9194,6704
+18,"Graubünden / Grigioni / Grischun",49,"49 Transports terrestres et transport par conduites",2023,366,5816,4914
+18,"Graubünden / Grigioni / Grischun",50,"50 Transports par eau",2023,,690,493
+18,"Graubünden / Grigioni / Grischun",51,"51 Transports aériens",2023,7,92,82
+18,"Graubünden / Grigioni / Grischun",52,"52 Entreposage et services auxiliaires des transports",2023,65,907,813
+18,"Graubünden / Grigioni / Grischun",53,"53 Activités de poste et de courrier",2023,73,790,601
+18,"Graubünden / Grigioni / Grischun",55,"55 Hébergement",2023,820,12994,11140
+18,"Graubünden / Grigioni / Grischun",56,"56 Restauration",2023,946,6408,5038
+18,"Graubünden / Grigioni / Grischun",58,"58 Édition",2023,38,264,188
+18,"Graubünden / Grigioni / Grischun",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,74,175,109
+18,"Graubünden / Grigioni / Grischun",60,"60 Programmation et diffusion",2023,10,283,225
+18,"Graubünden / Grigioni / Grischun",61,"61 Télécommunications",2023,16,358,328
+18,"Graubünden / Grigioni / Grischun",62,"62 Programmation, conseil et autres activités informatiques",2023,304,1347,1135
+18,"Graubünden / Grigioni / Grischun",63,"63 Services d'information",2023,19,147,77
+18,"Graubünden / Grigioni / Grischun",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,224,1778,1434
+18,"Graubünden / Grigioni / Grischun",65,"65 Assurance",2023,49,590,472
+18,"Graubünden / Grigioni / Grischun",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,225,1192,956
+18,"Graubünden / Grigioni / Grischun",68,"68 Activités immobilières",2023,732,1922,1035
+18,"Graubünden / Grigioni / Grischun",69,"69 Activités juridiques et comptables",2023,567,1982,1475
+18,"Graubünden / Grigioni / Grischun",70,"70 Activités des sièges sociaux, conseil de gestion",2023,546,1261,907
+18,"Graubünden / Grigioni / Grischun",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,977,4155,3359
+18,"Graubünden / Grigioni / Grischun",72,"72 Recherche-développement scientifique",2023,41,544,460
+18,"Graubünden / Grigioni / Grischun",73,"73 Publicité et études de marché",2023,126,385,281
+18,"Graubünden / Grigioni / Grischun",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,500,809,517
+18,"Graubünden / Grigioni / Grischun",75,"75 Activités vétérinaires",2023,41,205,152
+18,"Graubünden / Grigioni / Grischun",77,"77 Activités de location et location-bail",2023,53,161,120
+18,"Graubünden / Grigioni / Grischun",78,"78 Activités liées à l'emploi",2023,32,720,541
+18,"Graubünden / Grigioni / Grischun",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,112,605,420
+18,"Graubünden / Grigioni / Grischun",80,"80 Enquêtes et sécurité",2023,14,301,210
+18,"Graubünden / Grigioni / Grischun",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,562,3240,2191
+18,"Graubünden / Grigioni / Grischun",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,75,168,111
+18,"Graubünden / Grigioni / Grischun",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,397,4829,3871
+18,"Graubünden / Grigioni / Grischun",85,"85 Enseignement",2023,978,10190,5798
+18,"Graubünden / Grigioni / Grischun",86,"86 Activités pour la santé humaine",2023,1444,11468,7828
+18,"Graubünden / Grigioni / Grischun",87,"87 Hébergement médico-social et social",2023,100,5198,3485
+18,"Graubünden / Grigioni / Grischun",88,"88 Action sociale sans hébergement",2023,285,1957,1031
+18,"Graubünden / Grigioni / Grischun",90,"90 Activités créatives, artistiques et de spectacle",2023,386,658,285
+18,"Graubünden / Grigioni / Grischun",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,62,433,211
+18,"Graubünden / Grigioni / Grischun",92,"92 Organisation de jeux de hasard et d'argent",2023,,88,79
+18,"Graubünden / Grigioni / Grischun",93,"93 Activités sportives, récréatives et de loisirs",2023,446,1769,995
+18,"Graubünden / Grigioni / Grischun",94,"94 Activités des organisations associatives",2023,469,2613,1530
+18,"Graubünden / Grigioni / Grischun",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,80,180,134
+18,"Graubünden / Grigioni / Grischun",96,"96 Autres services personnels",2023,992,1655,1059
+19,"Aargau",999,"Division économique - total",2023,46890,363288,278394
+19,"Aargau",1,"01 Culture et production animale, chasse et services annexes",2023,3022,9370,5952
+19,"Aargau",2,"02 Sylviculture et exploitation forestière",2023,91,501,400
+19,"Aargau",3,"03 Pêche et aquaculture",2023,4,12,9
+19,"Aargau",5,"05 Extraction de houille et de lignite",2023,0,0,0
+19,"Aargau",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+19,"Aargau",7,"07 Extraction de minerais métalliques",2023,0,0,0
+19,"Aargau",8,"08 Autres industries extractives",2023,29,427,398
+19,"Aargau",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+19,"Aargau",10,"10 Industries alimentaires",2023,314,6857,5844
+19,"Aargau",11,"11 Fabrication de boissons",2023,46,797,703
+19,"Aargau",12,"12 Fabrication de produits à base de tabac",2023,,53,49
+19,"Aargau",13,"13 Fabrication de textiles",2023,65,512,408
+19,"Aargau",14,"14 Industrie de l'habillement",2023,117,307,207
+19,"Aargau",15,"15 Industrie du cuir et de la chaussure",2023,19,67,50
+19,"Aargau",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,434,2668,2381
+19,"Aargau",17,"17 Industrie du papier et du carton",2023,21,1178,1112
+19,"Aargau",18,"18 Imprimerie et reproduction d'enregistrements",2023,146,1722,1507
+19,"Aargau",19,"19 Cokéfaction et raffinage",2023,,40,36
+19,"Aargau",20,"20 Industrie chimique",2023,59,2864,2712
+19,"Aargau",21,"21 Industrie pharmaceutique",2023,20,8181,7828
+19,"Aargau",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,82,3323,3109
+19,"Aargau",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,106,1765,1643
+19,"Aargau",24,"24 Métallurgie",2023,16,1140,1101
+19,"Aargau",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,581,6874,6287
+19,"Aargau",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,113,6554,6196
+19,"Aargau",27,"27 Fabrication d'équipements électriques",2023,88,3424,3265
+19,"Aargau",28,"28 Fabrication de machines et équipements n.c.a.",2023,211,7608,7171
+19,"Aargau",29,"29 Industrie automobile",2023,10,100,89
+19,"Aargau",30,"30 Fabrication d'autres matériels de transport",2023,9,110,99
+19,"Aargau",31,"31 Fabrication de meubles",2023,66,712,637
+19,"Aargau",32,"32 Autres industries manufacturières",2023,260,1284,1069
+19,"Aargau",33,"33 Réparation et installation de machines et d'équipements",2023,227,1202,1083
+19,"Aargau",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,118,4847,4302
+19,"Aargau",36,"36 Captage, traitement et distribution d'eau",2023,25,71,39
+19,"Aargau",37,"37 Collecte et traitement des eaux usées",2023,57,548,507
+19,"Aargau",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,79,1273,1129
+19,"Aargau",39,"39 Dépollution et autres services de gestion des déchets",2023,4,47,46
+19,"Aargau",41,"41 Construction de bâtiments",2023,590,5500,5066
+19,"Aargau",42,"42 Génie civil",2023,99,2099,1983
+19,"Aargau",43,"43 Travaux de construction spécialisés",2023,3278,19012,17145
+19,"Aargau",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,1504,7682,6632
+19,"Aargau",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,1583,18945,16552
+19,"Aargau",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,3365,23079,16986
+19,"Aargau",49,"49 Transports terrestres et transport par conduites",2023,776,8046,6879
+19,"Aargau",50,"50 Transports par eau",2023,7,592,438
+19,"Aargau",51,"51 Transports aériens",2023,7,16,11
+19,"Aargau",52,"52 Entreposage et services auxiliaires des transports",2023,163,9313,8193
+19,"Aargau",53,"53 Activités de poste et de courrier",2023,157,2678,2127
+19,"Aargau",55,"55 Hébergement",2023,153,1981,1477
+19,"Aargau",56,"56 Restauration",2023,1487,9119,6097
+19,"Aargau",58,"58 Édition",2023,84,1084,809
+19,"Aargau",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,192,567,322
+19,"Aargau",60,"60 Programmation et diffusion",2023,6,84,49
+19,"Aargau",61,"61 Télécommunications",2023,58,664,599
+19,"Aargau",62,"62 Programmation, conseil et autres activités informatiques",2023,1213,6246,5244
+19,"Aargau",63,"63 Services d'information",2023,68,304,250
+19,"Aargau",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,347,4299,3618
+19,"Aargau",65,"65 Assurance",2023,74,1416,1101
+19,"Aargau",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,413,2921,2375
+19,"Aargau",68,"68 Activités immobilières",2023,1462,4060,2334
+19,"Aargau",69,"69 Activités juridiques et comptables",2023,1306,3661,2509
+19,"Aargau",70,"70 Activités des sièges sociaux, conseil de gestion",2023,1508,6298,4946
+19,"Aargau",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,1700,8789,7080
+19,"Aargau",72,"72 Recherche-développement scientifique",2023,72,4067,3710
+19,"Aargau",73,"73 Publicité et études de marché",2023,318,814,573
+19,"Aargau",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,1195,2006,1263
+19,"Aargau",75,"75 Activités vétérinaires",2023,108,778,543
+19,"Aargau",77,"77 Activités de location et location-bail",2023,159,1209,1026
+19,"Aargau",78,"78 Activités liées à l'emploi",2023,169,8241,6462
+19,"Aargau",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,144,931,620
+19,"Aargau",80,"80 Enquêtes et sécurité",2023,47,430,210
+19,"Aargau",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,1664,11113,7176
+19,"Aargau",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,259,1019,611
+19,"Aargau",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,541,10462,8353
+19,"Aargau",85,"85 Enseignement",2023,2708,26020,13810
+19,"Aargau",86,"86 Activités pour la santé humaine",2023,4153,30966,21676
+19,"Aargau",87,"87 Hébergement médico-social et social",2023,223,13925,9438
+19,"Aargau",88,"88 Action sociale sans hébergement",2023,1099,8002,4617
+19,"Aargau",90,"90 Activités créatives, artistiques et de spectacle",2023,975,1700,697
+19,"Aargau",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,78,790,394
+19,"Aargau",92,"92 Organisation de jeux de hasard et d'argent",2023,7,317,218
+19,"Aargau",93,"93 Activités sportives, récréatives et de loisirs",2023,610,2897,1338
+19,"Aargau",94,"94 Activités des organisations associatives",2023,726,6046,3204
+19,"Aargau",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,199,595,456
+19,"Aargau",96,"96 Autres services personnels",2023,3392,6067,3812
+20,"Thurgau",999,"Division économique - total",2023,22004,148637,113427
+20,"Thurgau",1,"01 Culture et production animale, chasse et services annexes",2023,2486,8714,6020
+20,"Thurgau",2,"02 Sylviculture et exploitation forestière",2023,51,190,160
+20,"Thurgau",3,"03 Pêche et aquaculture",2023,7,29,26
+20,"Thurgau",5,"05 Extraction de houille et de lignite",2023,0,0,0
+20,"Thurgau",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+20,"Thurgau",7,"07 Extraction de minerais métalliques",2023,0,0,0
+20,"Thurgau",8,"08 Autres industries extractives",2023,12,136,117
+20,"Thurgau",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+20,"Thurgau",10,"10 Industries alimentaires",2023,191,3857,3324
+20,"Thurgau",11,"11 Fabrication de boissons",2023,17,244,198
+20,"Thurgau",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+20,"Thurgau",13,"13 Fabrication de textiles",2023,47,292,243
+20,"Thurgau",14,"14 Industrie de l'habillement",2023,27,126,89
+20,"Thurgau",15,"15 Industrie du cuir et de la chaussure",2023,15,73,60
+20,"Thurgau",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,291,1936,1729
+20,"Thurgau",17,"17 Industrie du papier et du carton",2023,5,533,508
+20,"Thurgau",18,"18 Imprimerie et reproduction d'enregistrements",2023,59,317,259
+20,"Thurgau",19,"19 Cokéfaction et raffinage",2023,0,0,0
+20,"Thurgau",20,"20 Industrie chimique",2023,38,995,917
+20,"Thurgau",21,"21 Industrie pharmaceutique",2023,12,582,508
+20,"Thurgau",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,42,1436,1332
+20,"Thurgau",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,52,872,805
+20,"Thurgau",24,"24 Métallurgie",2023,14,839,801
+20,"Thurgau",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,348,4772,4345
+20,"Thurgau",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,44,1538,1376
+20,"Thurgau",27,"27 Fabrication d'équipements électriques",2023,32,1528,1427
+20,"Thurgau",28,"28 Fabrication de machines et équipements n.c.a.",2023,112,2692,2493
+20,"Thurgau",29,"29 Industrie automobile",2023,12,896,862
+20,"Thurgau",30,"30 Fabrication d'autres matériels de transport",2023,23,2098,2017
+20,"Thurgau",31,"31 Fabrication de meubles",2023,48,1039,966
+20,"Thurgau",32,"32 Autres industries manufacturières",2023,103,827,735
+20,"Thurgau",33,"33 Réparation et installation de machines et d'équipements",2023,153,1083,962
+20,"Thurgau",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,54,656,522
+20,"Thurgau",36,"36 Captage, traitement et distribution d'eau",2023,5,,
+20,"Thurgau",37,"37 Collecte et traitement des eaux usées",2023,28,163,145
+20,"Thurgau",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,41,467,420
+20,"Thurgau",39,"39 Dépollution et autres services de gestion des déchets",2023,,,6
+20,"Thurgau",41,"41 Construction de bâtiments",2023,293,2636,2406
+20,"Thurgau",42,"42 Génie civil",2023,53,1037,977
+20,"Thurgau",43,"43 Travaux de construction spécialisés",2023,1397,8170,7338
+20,"Thurgau",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,782,3190,2768
+20,"Thurgau",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,744,6761,5808
+20,"Thurgau",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,1441,7955,5707
+20,"Thurgau",49,"49 Transports terrestres et transport par conduites",2023,292,2979,2487
+20,"Thurgau",50,"50 Transports par eau",2023,4,90,79
+20,"Thurgau",51,"51 Transports aériens",2023,4,,
+20,"Thurgau",52,"52 Entreposage et services auxiliaires des transports",2023,68,1605,1255
+20,"Thurgau",53,"53 Activités de poste et de courrier",2023,58,1275,1166
+20,"Thurgau",55,"55 Hébergement",2023,105,1136,856
+20,"Thurgau",56,"56 Restauration",2023,720,3138,2098
+20,"Thurgau",58,"58 Édition",2023,42,196,139
+20,"Thurgau",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,66,131,74
+20,"Thurgau",60,"60 Programmation et diffusion",2023,,,9
+20,"Thurgau",61,"61 Télécommunications",2023,22,169,152
+20,"Thurgau",62,"62 Programmation, conseil et autres activités informatiques",2023,521,1907,1572
+20,"Thurgau",63,"63 Services d'information",2023,27,219,182
+20,"Thurgau",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,212,1859,1516
+20,"Thurgau",65,"65 Assurance",2023,34,203,138
+20,"Thurgau",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,210,1168,929
+20,"Thurgau",68,"68 Activités immobilières",2023,663,1705,1009
+20,"Thurgau",69,"69 Activités juridiques et comptables",2023,541,1368,953
+20,"Thurgau",70,"70 Activités des sièges sociaux, conseil de gestion",2023,676,2178,1708
+20,"Thurgau",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,713,3603,2941
+20,"Thurgau",72,"72 Recherche-développement scientifique",2023,36,636,558
+20,"Thurgau",73,"73 Publicité et études de marché",2023,161,595,341
+20,"Thurgau",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,488,915,582
+20,"Thurgau",75,"75 Activités vétérinaires",2023,48,301,218
+20,"Thurgau",77,"77 Activités de location et location-bail",2023,65,331,259
+20,"Thurgau",78,"78 Activités liées à l'emploi",2023,77,1934,1542
+20,"Thurgau",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,47,345,232
+20,"Thurgau",80,"80 Enquêtes et sécurité",2023,23,578,194
+20,"Thurgau",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,673,3593,2487
+20,"Thurgau",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,92,1072,789
+20,"Thurgau",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,270,4667,3545
+20,"Thurgau",85,"85 Enseignement",2023,1102,9972,5956
+20,"Thurgau",86,"86 Activités pour la santé humaine",2023,1691,12818,8661
+20,"Thurgau",87,"87 Hébergement médico-social et social",2023,115,6849,4661
+20,"Thurgau",88,"88 Action sociale sans hébergement",2023,426,3366,1819
+20,"Thurgau",90,"90 Activités créatives, artistiques et de spectacle",2023,370,581,262
+20,"Thurgau",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,30,218,120
+20,"Thurgau",92,"92 Organisation de jeux de hasard et d'argent",2023,4,17,6
+20,"Thurgau",93,"93 Activités sportives, récréatives et de loisirs",2023,307,1400,697
+20,"Thurgau",94,"94 Activités des organisations associatives",2023,380,2475,1374
+20,"Thurgau",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,74,113,80
+20,"Thurgau",96,"96 Autres services personnels",2023,1466,2221,1400
+21,"Ticino",999,"Division économique - total",2023,40669,252486,203267
+21,"Ticino",1,"01 Culture et production animale, chasse et services annexes",2023,1052,2989,1929
+21,"Ticino",2,"02 Sylviculture et exploitation forestière",2023,84,456,414
+21,"Ticino",3,"03 Pêche et aquaculture",2023,5,5,5
+21,"Ticino",5,"05 Extraction de houille et de lignite",2023,0,0,0
+21,"Ticino",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+21,"Ticino",7,"07 Extraction de minerais métalliques",2023,0,0,0
+21,"Ticino",8,"08 Autres industries extractives",2023,19,242,234
+21,"Ticino",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+21,"Ticino",10,"10 Industries alimentaires",2023,221,2373,2049
+21,"Ticino",11,"11 Fabrication de boissons",2023,50,276,239
+21,"Ticino",12,"12 Fabrication de produits à base de tabac",2023,,56,53
+21,"Ticino",13,"13 Fabrication de textiles",2023,22,131,117
+21,"Ticino",14,"14 Industrie de l'habillement",2023,124,1519,1384
+21,"Ticino",15,"15 Industrie du cuir et de la chaussure",2023,21,338,309
+21,"Ticino",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,247,1155,1070
+21,"Ticino",17,"17 Industrie du papier et du carton",2023,11,243,231
+21,"Ticino",18,"18 Imprimerie et reproduction d'enregistrements",2023,86,438,376
+21,"Ticino",19,"19 Cokéfaction et raffinage",2023,,16,15
+21,"Ticino",20,"20 Industrie chimique",2023,47,554,449
+21,"Ticino",21,"21 Industrie pharmaceutique",2023,32,2418,2272
+21,"Ticino",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,29,895,835
+21,"Ticino",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,89,720,665
+21,"Ticino",24,"24 Métallurgie",2023,15,1732,1649
+21,"Ticino",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,324,3806,3508
+21,"Ticino",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,101,4265,3915
+21,"Ticino",27,"27 Fabrication d'équipements électriques",2023,34,1470,1377
+21,"Ticino",28,"28 Fabrication de machines et équipements n.c.a.",2023,67,1631,1545
+21,"Ticino",29,"29 Industrie automobile",2023,15,230,222
+21,"Ticino",30,"30 Fabrication d'autres matériels de transport",2023,20,186,172
+21,"Ticino",31,"31 Fabrication de meubles",2023,29,99,89
+21,"Ticino",32,"32 Autres industries manufacturières",2023,196,3128,2919
+21,"Ticino",33,"33 Réparation et installation de machines et d'équipements",2023,160,670,602
+21,"Ticino",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,60,1824,1708
+21,"Ticino",36,"36 Captage, traitement et distribution d'eau",2023,16,87,78
+21,"Ticino",37,"37 Collecte et traitement des eaux usées",2023,25,317,301
+21,"Ticino",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,59,624,576
+21,"Ticino",39,"39 Dépollution et autres services de gestion des déchets",2023,,16,14
+21,"Ticino",41,"41 Construction de bâtiments",2023,875,6760,6373
+21,"Ticino",42,"42 Génie civil",2023,65,1038,999
+21,"Ticino",43,"43 Travaux de construction spécialisés",2023,2403,12578,11730
+21,"Ticino",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,1058,4729,4277
+21,"Ticino",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,2065,12449,11081
+21,"Ticino",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,3100,15244,11840
+21,"Ticino",49,"49 Transports terrestres et transport par conduites",2023,730,6632,6070
+21,"Ticino",50,"50 Transports par eau",2023,21,155,148
+21,"Ticino",51,"51 Transports aériens",2023,11,106,87
+21,"Ticino",52,"52 Entreposage et services auxiliaires des transports",2023,245,2795,2525
+21,"Ticino",53,"53 Activités de poste et de courrier",2023,119,1560,1312
+21,"Ticino",55,"55 Hébergement",2023,466,3922,3287
+21,"Ticino",56,"56 Restauration",2023,1702,9088,7089
+21,"Ticino",58,"58 Édition",2023,75,524,393
+21,"Ticino",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,222,732,455
+21,"Ticino",60,"60 Programmation et diffusion",2023,8,1378,1232
+21,"Ticino",61,"61 Télécommunications",2023,51,734,668
+21,"Ticino",62,"62 Programmation, conseil et autres activités informatiques",2023,1088,5584,4877
+21,"Ticino",63,"63 Services d'information",2023,70,746,637
+21,"Ticino",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,512,6327,5771
+21,"Ticino",65,"65 Assurance",2023,50,1105,953
+21,"Ticino",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,825,4945,4207
+21,"Ticino",68,"68 Activités immobilières",2023,1219,3318,1971
+21,"Ticino",69,"69 Activités juridiques et comptables",2023,1545,5679,4257
+21,"Ticino",70,"70 Activités des sièges sociaux, conseil de gestion",2023,1804,4621,3658
+21,"Ticino",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,1982,7457,6179
+21,"Ticino",72,"72 Recherche-développement scientifique",2023,157,1158,972
+21,"Ticino",73,"73 Publicité et études de marché",2023,298,1055,747
+21,"Ticino",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,1275,1985,1352
+21,"Ticino",75,"75 Activités vétérinaires",2023,77,344,246
+21,"Ticino",77,"77 Activités de location et location-bail",2023,126,577,469
+21,"Ticino",78,"78 Activités liées à l'emploi",2023,84,6819,5449
+21,"Ticino",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,203,900,710
+21,"Ticino",80,"80 Enquêtes et sécurité",2023,67,1278,943
+21,"Ticino",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,1267,7067,4763
+21,"Ticino",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,239,1062,820
+21,"Ticino",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,649,10314,8695
+21,"Ticino",85,"85 Enseignement",2023,1518,15801,9623
+21,"Ticino",86,"86 Activités pour la santé humaine",2023,3750,21191,15693
+21,"Ticino",87,"87 Hébergement médico-social et social",2023,140,9158,7223
+21,"Ticino",88,"88 Action sociale sans hébergement",2023,383,4825,3170
+21,"Ticino",90,"90 Activités créatives, artistiques et de spectacle",2023,612,1244,587
+21,"Ticino",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,56,554,378
+21,"Ticino",92,"92 Organisation de jeux de hasard et d'argent",2023,4,533,465
+21,"Ticino",93,"93 Activités sportives, récréatives et de loisirs",2023,571,3285,1968
+21,"Ticino",94,"94 Activités des organisations associatives",2023,692,3409,2159
+21,"Ticino",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,148,260,209
+21,"Ticino",96,"96 Autres services personnels",2023,2777,4552,3229
+22,"Vaud",999,"Division économique - total",2023,66791,494652,396501
+22,"Vaud",1,"01 Culture et production animale, chasse et services annexes",2023,3590,12401,8534
+22,"Vaud",2,"02 Sylviculture et exploitation forestière",2023,126,573,504
+22,"Vaud",3,"03 Pêche et aquaculture",2023,43,84,74
+22,"Vaud",5,"05 Extraction de houille et de lignite",2023,0,0,0
+22,"Vaud",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+22,"Vaud",7,"07 Extraction de minerais métalliques",2023,0,0,0
+22,"Vaud",8,"08 Autres industries extractives",2023,21,277,262
+22,"Vaud",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+22,"Vaud",10,"10 Industries alimentaires",2023,462,6444,5639
+22,"Vaud",11,"11 Fabrication de boissons",2023,80,746,646
+22,"Vaud",12,"12 Fabrication de produits à base de tabac",2023,,20,16
+22,"Vaud",13,"13 Fabrication de textiles",2023,56,117,86
+22,"Vaud",14,"14 Industrie de l'habillement",2023,150,194,108
+22,"Vaud",15,"15 Industrie du cuir et de la chaussure",2023,22,39,27
+22,"Vaud",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,628,2694,2490
+22,"Vaud",17,"17 Industrie du papier et du carton",2023,13,211,196
+22,"Vaud",18,"18 Imprimerie et reproduction d'enregistrements",2023,132,808,716
+22,"Vaud",19,"19 Cokéfaction et raffinage",2023,0,0,0
+22,"Vaud",20,"20 Industrie chimique",2023,90,1681,1573
+22,"Vaud",21,"21 Industrie pharmaceutique",2023,28,3556,3446
+22,"Vaud",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,39,554,524
+22,"Vaud",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,131,1232,1156
+22,"Vaud",24,"24 Métallurgie",2023,12,268,260
+22,"Vaud",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,571,4027,3731
+22,"Vaud",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,204,9650,9123
+22,"Vaud",27,"27 Fabrication d'équipements électriques",2023,70,1378,1289
+22,"Vaud",28,"28 Fabrication de machines et équipements n.c.a.",2023,63,3031,2923
+22,"Vaud",29,"29 Industrie automobile",2023,13,291,278
+22,"Vaud",30,"30 Fabrication d'autres matériels de transport",2023,34,857,804
+22,"Vaud",31,"31 Fabrication de meubles",2023,77,432,395
+22,"Vaud",32,"32 Autres industries manufacturières",2023,313,2338,2134
+22,"Vaud",33,"33 Réparation et installation de machines et d'équipements",2023,224,1107,1014
+22,"Vaud",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,72,2684,2461
+22,"Vaud",36,"36 Captage, traitement et distribution d'eau",2023,47,353,303
+22,"Vaud",37,"37 Collecte et traitement des eaux usées",2023,73,534,474
+22,"Vaud",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,119,1220,1049
+22,"Vaud",39,"39 Dépollution et autres services de gestion des déchets",2023,,28,26
+22,"Vaud",41,"41 Construction de bâtiments",2023,1017,6986,6506
+22,"Vaud",42,"42 Génie civil",2023,46,1781,1734
+22,"Vaud",43,"43 Travaux de construction spécialisés",2023,3800,22485,20889
+22,"Vaud",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,1495,7839,7176
+22,"Vaud",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,1782,18157,16616
+22,"Vaud",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,4851,29500,22479
+22,"Vaud",49,"49 Transports terrestres et transport par conduites",2023,1161,12048,10751
+22,"Vaud",50,"50 Transports par eau",2023,9,336,313
+22,"Vaud",51,"51 Transports aériens",2023,8,87,74
+22,"Vaud",52,"52 Entreposage et services auxiliaires des transports",2023,176,2928,2683
+22,"Vaud",53,"53 Activités de poste et de courrier",2023,181,2913,2516
+22,"Vaud",55,"55 Hébergement",2023,378,5631,4841
+22,"Vaud",56,"56 Restauration",2023,2562,16662,12714
+22,"Vaud",58,"58 Édition",2023,216,1894,1535
+22,"Vaud",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,473,1113,703
+22,"Vaud",60,"60 Programmation et diffusion",2023,11,820,678
+22,"Vaud",61,"61 Télécommunications",2023,95,2442,2311
+22,"Vaud",62,"62 Programmation, conseil et autres activités informatiques",2023,1666,11557,10496
+22,"Vaud",63,"63 Services d'information",2023,97,667,596
+22,"Vaud",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,561,6953,6233
+22,"Vaud",65,"65 Assurance",2023,96,5275,4392
+22,"Vaud",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,1051,6489,5610
+22,"Vaud",68,"68 Activités immobilières",2023,1686,6918,4743
+22,"Vaud",69,"69 Activités juridiques et comptables",2023,2059,7696,6216
+22,"Vaud",70,"70 Activités des sièges sociaux, conseil de gestion",2023,2591,14703,12720
+22,"Vaud",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,2163,12159,10424
+22,"Vaud",72,"72 Recherche-développement scientifique",2023,347,5390,4905
+22,"Vaud",73,"73 Publicité et études de marché",2023,365,1672,1232
+22,"Vaud",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,2599,4891,3405
+22,"Vaud",75,"75 Activités vétérinaires",2023,142,757,575
+22,"Vaud",77,"77 Activités de location et location-bail",2023,206,1119,914
+22,"Vaud",78,"78 Activités liées à l'emploi",2023,235,14981,11830
+22,"Vaud",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,223,1012,789
+22,"Vaud",80,"80 Enquêtes et sécurité",2023,75,2786,2178
+22,"Vaud",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,1761,15988,10841
+22,"Vaud",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,309,1426,1036
+22,"Vaud",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,1037,18449,15107
+22,"Vaud",85,"85 Enseignement",2023,3786,43635,31970
+22,"Vaud",86,"86 Activités pour la santé humaine",2023,8381,52004,39210
+22,"Vaud",87,"87 Hébergement médico-social et social",2023,343,16919,12384
+22,"Vaud",88,"88 Action sociale sans hébergement",2023,1335,19536,13180
+22,"Vaud",90,"90 Activités créatives, artistiques et de spectacle",2023,1363,3331,1769
+22,"Vaud",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,129,1653,1126
+22,"Vaud",92,"92 Organisation de jeux de hasard et d'argent",2023,5,500,416
+22,"Vaud",93,"93 Activités sportives, récréatives et de loisirs",2023,1026,7117,4631
+22,"Vaud",94,"94 Activités des organisations associatives",2023,1143,8431,5673
+22,"Vaud",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,250,556,458
+22,"Vaud",96,"96 Autres services personnels",2023,3992,6631,4662
+23,"Valais / Wallis",999,"Division économique - total",2023,32000,198758,155176
+23,"Valais / Wallis",1,"01 Culture et production animale, chasse et services annexes",2023,2690,10021,5675
+23,"Valais / Wallis",2,"02 Sylviculture et exploitation forestière",2023,57,476,425
+23,"Valais / Wallis",3,"03 Pêche et aquaculture",2023,9,75,67
+23,"Valais / Wallis",5,"05 Extraction de houille et de lignite",2023,0,0,0
+23,"Valais / Wallis",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+23,"Valais / Wallis",7,"07 Extraction de minerais métalliques",2023,0,0,0
+23,"Valais / Wallis",8,"08 Autres industries extractives",2023,12,138,126
+23,"Valais / Wallis",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+23,"Valais / Wallis",10,"10 Industries alimentaires",2023,227,1978,1666
+23,"Valais / Wallis",11,"11 Fabrication de boissons",2023,96,837,682
+23,"Valais / Wallis",12,"12 Fabrication de produits à base de tabac",2023,0,0,0
+23,"Valais / Wallis",13,"13 Fabrication de textiles",2023,28,39,23
+23,"Valais / Wallis",14,"14 Industrie de l'habillement",2023,83,91,47
+23,"Valais / Wallis",15,"15 Industrie du cuir et de la chaussure",2023,7,14,8
+23,"Valais / Wallis",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,485,2355,2149
+23,"Valais / Wallis",17,"17 Industrie du papier et du carton",2023,5,21,13
+23,"Valais / Wallis",18,"18 Imprimerie et reproduction d'enregistrements",2023,81,437,369
+23,"Valais / Wallis",19,"19 Cokéfaction et raffinage",2023,0,0,0
+23,"Valais / Wallis",20,"20 Industrie chimique",2023,50,1878,1814
+23,"Valais / Wallis",21,"21 Industrie pharmaceutique",2023,11,5994,5829
+23,"Valais / Wallis",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,16,159,139
+23,"Valais / Wallis",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,51,375,344
+23,"Valais / Wallis",24,"24 Métallurgie",2023,12,1193,1172
+23,"Valais / Wallis",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,240,2270,2092
+23,"Valais / Wallis",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,34,792,719
+23,"Valais / Wallis",27,"27 Fabrication d'équipements électriques",2023,22,465,421
+23,"Valais / Wallis",28,"28 Fabrication de machines et équipements n.c.a.",2023,32,1492,1424
+23,"Valais / Wallis",29,"29 Industrie automobile",2023,5,30,27
+23,"Valais / Wallis",30,"30 Fabrication d'autres matériels de transport",2023,8,72,64
+23,"Valais / Wallis",31,"31 Fabrication de meubles",2023,51,229,207
+23,"Valais / Wallis",32,"32 Autres industries manufacturières",2023,119,509,431
+23,"Valais / Wallis",33,"33 Réparation et installation de machines et d'équipements",2023,109,499,443
+23,"Valais / Wallis",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,84,2541,2297
+23,"Valais / Wallis",36,"36 Captage, traitement et distribution d'eau",2023,15,42,33
+23,"Valais / Wallis",37,"37 Collecte et traitement des eaux usées",2023,31,162,151
+23,"Valais / Wallis",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,75,559,503
+23,"Valais / Wallis",41,"41 Construction de bâtiments",2023,617,4808,4495
+23,"Valais / Wallis",42,"42 Génie civil",2023,50,794,759
+23,"Valais / Wallis",43,"43 Travaux de construction spécialisés",2023,2109,12120,11106
+23,"Valais / Wallis",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,825,3817,3408
+23,"Valais / Wallis",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,676,4125,3588
+23,"Valais / Wallis",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,2516,14475,10869
+23,"Valais / Wallis",49,"49 Transports terrestres et transport par conduites",2023,524,7670,6656
+23,"Valais / Wallis",51,"51 Transports aériens",2023,11,358,285
+23,"Valais / Wallis",52,"52 Entreposage et services auxiliaires des transports",2023,72,892,787
+23,"Valais / Wallis",53,"53 Activités de poste et de courrier",2023,104,1146,961
+23,"Valais / Wallis",55,"55 Hébergement",2023,958,8846,7521
+23,"Valais / Wallis",56,"56 Restauration",2023,1796,10185,8097
+23,"Valais / Wallis",58,"58 Édition",2023,41,179,133
+23,"Valais / Wallis",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,146,223,132
+23,"Valais / Wallis",60,"60 Programmation et diffusion",2023,6,194,135
+23,"Valais / Wallis",61,"61 Télécommunications",2023,40,525,476
+23,"Valais / Wallis",62,"62 Programmation, conseil et autres activités informatiques",2023,460,1498,1224
+23,"Valais / Wallis",63,"63 Services d'information",2023,28,63,46
+23,"Valais / Wallis",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,266,2147,1817
+23,"Valais / Wallis",65,"65 Assurance",2023,40,283,228
+23,"Valais / Wallis",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,349,3378,2816
+23,"Valais / Wallis",68,"68 Activités immobilières",2023,1276,3067,1906
+23,"Valais / Wallis",69,"69 Activités juridiques et comptables",2023,787,2517,1824
+23,"Valais / Wallis",70,"70 Activités des sièges sociaux, conseil de gestion",2023,643,1524,1144
+23,"Valais / Wallis",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,1050,5052,4173
+23,"Valais / Wallis",72,"72 Recherche-développement scientifique",2023,69,1402,1260
+23,"Valais / Wallis",73,"73 Publicité et études de marché",2023,154,529,350
+23,"Valais / Wallis",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,878,1259,803
+23,"Valais / Wallis",75,"75 Activités vétérinaires",2023,40,204,146
+23,"Valais / Wallis",77,"77 Activités de location et location-bail",2023,78,261,204
+23,"Valais / Wallis",78,"78 Activités liées à l'emploi",2023,70,4346,3489
+23,"Valais / Wallis",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,164,1096,761
+23,"Valais / Wallis",80,"80 Enquêtes et sécurité",2023,41,572,356
+23,"Valais / Wallis",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,806,4290,3110
+23,"Valais / Wallis",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,150,462,326
+23,"Valais / Wallis",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,467,7207,5698
+23,"Valais / Wallis",85,"85 Enseignement",2023,1509,11855,7619
+23,"Valais / Wallis",86,"86 Activités pour la santé humaine",2023,2708,15638,11213
+23,"Valais / Wallis",87,"87 Hébergement médico-social et social",2023,137,8236,5936
+23,"Valais / Wallis",88,"88 Action sociale sans hébergement",2023,361,5085,3383
+23,"Valais / Wallis",90,"90 Activités créatives, artistiques et de spectacle",2023,665,935,428
+23,"Valais / Wallis",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,59,400,253
+23,"Valais / Wallis",92,"92 Organisation de jeux de hasard et d'argent",2023,5,68,61
+23,"Valais / Wallis",93,"93 Activités sportives, récréatives et de loisirs",2023,780,2467,1455
+23,"Valais / Wallis",94,"94 Activités des organisations associatives",2023,513,3081,1832
+23,"Valais / Wallis",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,81,129,94
+23,"Valais / Wallis",96,"96 Autres services personnels",2023,2128,3604,2451
+24,"Neuchâtel",999,"Division économique - total",2023,14333,114700,91932
+24,"Neuchâtel",1,"01 Culture et production animale, chasse et services annexes",2023,762,2196,1648
+24,"Neuchâtel",2,"02 Sylviculture et exploitation forestière",2023,48,181,164
+24,"Neuchâtel",3,"03 Pêche et aquaculture",2023,10,15,12
+24,"Neuchâtel",5,"05 Extraction de houille et de lignite",2023,0,0,0
+24,"Neuchâtel",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+24,"Neuchâtel",7,"07 Extraction de minerais métalliques",2023,0,0,0
+24,"Neuchâtel",8,"08 Autres industries extractives",2023,,34,34
+24,"Neuchâtel",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+24,"Neuchâtel",10,"10 Industries alimentaires",2023,99,906,724
+24,"Neuchâtel",11,"11 Fabrication de boissons",2023,28,86,61
+24,"Neuchâtel",12,"12 Fabrication de produits à base de tabac",2023,,1374,1348
+24,"Neuchâtel",13,"13 Fabrication de textiles",2023,13,18,11
+24,"Neuchâtel",14,"14 Industrie de l'habillement",2023,32,48,26
+24,"Neuchâtel",15,"15 Industrie du cuir et de la chaussure",2023,10,218,192
+24,"Neuchâtel",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,195,779,697
+24,"Neuchâtel",17,"17 Industrie du papier et du carton",2023,5,152,136
+24,"Neuchâtel",18,"18 Imprimerie et reproduction d'enregistrements",2023,38,150,123
+24,"Neuchâtel",19,"19 Cokéfaction et raffinage",2023,,302,298
+24,"Neuchâtel",20,"20 Industrie chimique",2023,16,145,132
+24,"Neuchâtel",21,"21 Industrie pharmaceutique",2023,9,1583,1530
+24,"Neuchâtel",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,9,61,53
+24,"Neuchâtel",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,34,506,478
+24,"Neuchâtel",24,"24 Métallurgie",2023,6,504,484
+24,"Neuchâtel",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,264,3368,3141
+24,"Neuchâtel",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,337,17307,16360
+24,"Neuchâtel",27,"27 Fabrication d'équipements électriques",2023,29,838,801
+24,"Neuchâtel",28,"28 Fabrication de machines et équipements n.c.a.",2023,37,1767,1686
+24,"Neuchâtel",29,"29 Industrie automobile",2023,,13,10
+24,"Neuchâtel",30,"30 Fabrication d'autres matériels de transport",2023,4,,
+24,"Neuchâtel",31,"31 Fabrication de meubles",2023,15,15,10
+24,"Neuchâtel",32,"32 Autres industries manufacturières",2023,116,1776,1651
+24,"Neuchâtel",33,"33 Réparation et installation de machines et d'équipements",2023,65,242,209
+24,"Neuchâtel",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,15,578,540
+24,"Neuchâtel",36,"36 Captage, traitement et distribution d'eau",2023,8,17,15
+24,"Neuchâtel",37,"37 Collecte et traitement des eaux usées",2023,12,73,66
+24,"Neuchâtel",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,18,197,176
+24,"Neuchâtel",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+24,"Neuchâtel",41,"41 Construction de bâtiments",2023,175,1372,1274
+24,"Neuchâtel",42,"42 Génie civil",2023,14,252,242
+24,"Neuchâtel",43,"43 Travaux de construction spécialisés",2023,831,4143,3791
+24,"Neuchâtel",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,351,1629,1430
+24,"Neuchâtel",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,318,2710,2397
+24,"Neuchâtel",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,1063,5709,4186
+24,"Neuchâtel",49,"49 Transports terrestres et transport par conduites",2023,141,1577,1373
+24,"Neuchâtel",50,"50 Transports par eau",2023,,28,26
+24,"Neuchâtel",52,"52 Entreposage et services auxiliaires des transports",2023,41,398,339
+24,"Neuchâtel",53,"53 Activités de poste et de courrier",2023,48,627,465
+24,"Neuchâtel",55,"55 Hébergement",2023,82,723,547
+24,"Neuchâtel",56,"56 Restauration",2023,660,3420,2363
+24,"Neuchâtel",58,"58 Édition",2023,28,156,110
+24,"Neuchâtel",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,73,219,140
+24,"Neuchâtel",60,"60 Programmation et diffusion",2023,,87,63
+24,"Neuchâtel",61,"61 Télécommunications",2023,18,171,162
+24,"Neuchâtel",62,"62 Programmation, conseil et autres activités informatiques",2023,250,796,659
+24,"Neuchâtel",63,"63 Services d'information",2023,15,51,38
+24,"Neuchâtel",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,104,837,742
+24,"Neuchâtel",65,"65 Assurance",2023,23,423,342
+24,"Neuchâtel",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,165,983,832
+24,"Neuchâtel",68,"68 Activités immobilières",2023,251,1299,689
+24,"Neuchâtel",69,"69 Activités juridiques et comptables",2023,455,1435,1025
+24,"Neuchâtel",70,"70 Activités des sièges sociaux, conseil de gestion",2023,348,1473,1200
+24,"Neuchâtel",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,407,2013,1639
+24,"Neuchâtel",72,"72 Recherche-développement scientifique",2023,80,1389,1249
+24,"Neuchâtel",73,"73 Publicité et études de marché",2023,73,327,194
+24,"Neuchâtel",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,464,737,487
+24,"Neuchâtel",75,"75 Activités vétérinaires",2023,38,192,139
+24,"Neuchâtel",77,"77 Activités de location et location-bail",2023,32,131,87
+24,"Neuchâtel",78,"78 Activités liées à l'emploi",2023,59,4196,3445
+24,"Neuchâtel",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,28,139,92
+24,"Neuchâtel",80,"80 Enquêtes et sécurité",2023,18,1277,965
+24,"Neuchâtel",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,322,3181,2024
+24,"Neuchâtel",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,68,211,148
+24,"Neuchâtel",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,274,5520,4680
+24,"Neuchâtel",85,"85 Enseignement",2023,765,6931,4586
+24,"Neuchâtel",86,"86 Activités pour la santé humaine",2023,1730,8948,6376
+24,"Neuchâtel",87,"87 Hébergement médico-social et social",2023,105,4580,3241
+24,"Neuchâtel",88,"88 Action sociale sans hébergement",2023,284,3617,2281
+24,"Neuchâtel",90,"90 Activités créatives, artistiques et de spectacle",2023,294,682,286
+24,"Neuchâtel",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,47,538,327
+24,"Neuchâtel",92,"92 Organisation de jeux de hasard et d'argent",2023,5,73,69
+24,"Neuchâtel",93,"93 Activités sportives, récréatives et de loisirs",2023,202,953,468
+24,"Neuchâtel",94,"94 Activités des organisations associatives",2023,268,1511,882
+24,"Neuchâtel",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,73,96,68
+24,"Neuchâtel",96,"96 Autres services personnels",2023,997,1480,938
+25,"Genève",999,"Division économique - total",2023,45503,396090,329190
+25,"Genève",1,"01 Culture et production animale, chasse et services annexes",2023,410,1994,1493
+25,"Genève",2,"02 Sylviculture et exploitation forestière",2023,13,41,35
+25,"Genève",3,"03 Pêche et aquaculture",2023,8,12,11
+25,"Genève",5,"05 Extraction de houille et de lignite",2023,0,0,0
+25,"Genève",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+25,"Genève",7,"07 Extraction de minerais métalliques",2023,0,0,0
+25,"Genève",8,"08 Autres industries extractives",2023,9,90,86
+25,"Genève",9,"09 Services de soutien aux industries extractives",2023,,18,18
+25,"Genève",10,"10 Industries alimentaires",2023,170,1792,1622
+25,"Genève",11,"11 Fabrication de boissons",2023,24,91,68
+25,"Genève",13,"13 Fabrication de textiles",2023,24,55,45
+25,"Genève",14,"14 Industrie de l'habillement",2023,96,148,102
+25,"Genève",15,"15 Industrie du cuir et de la chaussure",2023,20,345,314
+25,"Genève",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,285,1079,993
+25,"Genève",17,"17 Industrie du papier et du carton",2023,6,21,18
+25,"Genève",18,"18 Imprimerie et reproduction d'enregistrements",2023,100,362,321
+25,"Genève",19,"19 Cokéfaction et raffinage",2023,0,0,0
+25,"Genève",20,"20 Industrie chimique",2023,57,2719,2631
+25,"Genève",21,"21 Industrie pharmaceutique",2023,23,465,431
+25,"Genève",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,11,42,36
+25,"Genève",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,57,455,430
+25,"Genève",24,"24 Métallurgie",2023,7,91,87
+25,"Genève",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,256,1729,1628
+25,"Genève",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,173,13224,12818
+25,"Genève",27,"27 Fabrication d'équipements électriques",2023,24,799,769
+25,"Genève",28,"28 Fabrication de machines et équipements n.c.a.",2023,24,487,471
+25,"Genève",29,"29 Industrie automobile",2023,,7,6
+25,"Genève",30,"30 Fabrication d'autres matériels de transport",2023,12,308,295
+25,"Genève",31,"31 Fabrication de meubles",2023,34,142,130
+25,"Genève",32,"32 Autres industries manufacturières",2023,274,2030,1858
+25,"Genève",33,"33 Réparation et installation de machines et d'équipements",2023,80,957,920
+25,"Genève",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,10,1644,1565
+25,"Genève",36,"36 Captage, traitement et distribution d'eau",2023,,6,5
+25,"Genève",37,"37 Collecte et traitement des eaux usées",2023,16,348,335
+25,"Genève",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,34,685,654
+25,"Genève",41,"41 Construction de bâtiments",2023,761,6010,5642
+25,"Genève",42,"42 Génie civil",2023,25,597,575
+25,"Genève",43,"43 Travaux de construction spécialisés",2023,2306,15389,14521
+25,"Genève",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,677,3776,3523
+25,"Genève",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,1497,19153,17985
+25,"Genève",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,3260,20023,16066
+25,"Genève",49,"49 Transports terrestres et transport par conduites",2023,1607,8602,7249
+25,"Genève",50,"50 Transports par eau",2023,23,1193,1157
+25,"Genève",51,"51 Transports aériens",2023,39,1691,1518
+25,"Genève",52,"52 Entreposage et services auxiliaires des transports",2023,228,6187,5578
+25,"Genève",53,"53 Activités de poste et de courrier",2023,117,2662,2121
+25,"Genève",55,"55 Hébergement",2023,153,4629,4264
+25,"Genève",56,"56 Restauration",2023,2230,15647,12623
+25,"Genève",58,"58 Édition",2023,110,866,699
+25,"Genève",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,301,988,687
+25,"Genève",60,"60 Programmation et diffusion",2023,12,1560,1359
+25,"Genève",61,"61 Télécommunications",2023,67,1327,1262
+25,"Genève",62,"62 Programmation, conseil et autres activités informatiques",2023,1186,9989,9283
+25,"Genève",63,"63 Services d'information",2023,89,526,454
+25,"Genève",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,663,19201,18326
+25,"Genève",65,"65 Assurance",2023,42,1028,900
+25,"Genève",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,1661,10942,9742
+25,"Genève",68,"68 Activités immobilières",2023,1149,8165,5767
+25,"Genève",69,"69 Activités juridiques et comptables",2023,2348,10292,8724
+25,"Genève",70,"70 Activités des sièges sociaux, conseil de gestion",2023,1919,10498,9163
+25,"Genève",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,1318,8016,7067
+25,"Genève",72,"72 Recherche-développement scientifique",2023,164,1941,1750
+25,"Genève",73,"73 Publicité et études de marché",2023,341,1172,958
+25,"Genève",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,1644,2911,2132
+25,"Genève",75,"75 Activités vétérinaires",2023,50,306,225
+25,"Genève",77,"77 Activités de location et location-bail",2023,174,1210,1010
+25,"Genève",78,"78 Activités liées à l'emploi",2023,244,17248,13934
+25,"Genève",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,168,1314,1125
+25,"Genève",80,"80 Enquêtes et sécurité",2023,105,4792,3874
+25,"Genève",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,893,14666,9792
+25,"Genève",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,239,1525,1260
+25,"Genève",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,557,16054,14324
+25,"Genève",85,"85 Enseignement",2023,2120,28521,20414
+25,"Genève",86,"86 Activités pour la santé humaine",2023,6143,33866,26638
+25,"Genève",87,"87 Hébergement médico-social et social",2023,254,10315,8089
+25,"Genève",88,"88 Action sociale sans hébergement",2023,1046,14301,9594
+25,"Genève",90,"90 Activités créatives, artistiques et de spectacle",2023,846,3361,1870
+25,"Genève",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,96,1247,961
+25,"Genève",92,"92 Organisation de jeux de hasard et d'argent",2023,,152,123
+25,"Genève",93,"93 Activités sportives, récréatives et de loisirs",2023,648,4199,2726
+25,"Genève",94,"94 Activités des organisations associatives",2023,1291,11047,8409
+25,"Genève",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,157,294,226
+25,"Genève",96,"96 Autres services personnels",2023,2265,4500,3306
+26,"Jura",999,"Division économique - total",2023,6840,48533,38154
+26,"Jura",1,"01 Culture et production animale, chasse et services annexes",2023,1007,2842,2003
+26,"Jura",2,"02 Sylviculture et exploitation forestière",2023,35,109,94
+26,"Jura",3,"03 Pêche et aquaculture",2023,,9,7
+26,"Jura",5,"05 Extraction de houille et de lignite",2023,0,0,0
+26,"Jura",6,"06 Extraction d'hydrocarbures",2023,0,0,0
+26,"Jura",7,"07 Extraction de minerais métalliques",2023,0,0,0
+26,"Jura",9,"09 Services de soutien aux industries extractives",2023,0,0,0
+26,"Jura",10,"10 Industries alimentaires",2023,49,384,306
+26,"Jura",11,"11 Fabrication de boissons",2023,11,63,39
+26,"Jura",12,"12 Fabrication de produits à base de tabac",2023,,164,157
+26,"Jura",13,"13 Fabrication de textiles",2023,6,82,74
+26,"Jura",14,"14 Industrie de l'habillement",2023,16,21,14
+26,"Jura",15,"15 Industrie du cuir et de la chaussure",2023,4,15,10
+26,"Jura",16,"16 Travail du bois et fabrication d'articles en bois et en liège, à l'exception des meubles, fabrication d'articles en vannerie et sparterie",2023,126,593,523
+26,"Jura",17,"17 Industrie du papier et du carton",2023,0,0,0
+26,"Jura",18,"18 Imprimerie et reproduction d'enregistrements",2023,15,92,76
+26,"Jura",19,"19 Cokéfaction et raffinage",2023,0,0,0
+26,"Jura",20,"20 Industrie chimique",2023,8,49,42
+26,"Jura",21,"21 Industrie pharmaceutique",2023,5,177,159
+26,"Jura",22,"22 Fabrication de produits en caoutchouc et en plastique",2023,7,383,355
+26,"Jura",23,"23 Fabrication d'autres produits minéraux non métalliques",2023,22,369,338
+26,"Jura",24,"24 Métallurgie",2023,4,152,142
+26,"Jura",25,"25 Fabrication de produits métalliques, à l'exception des machines et des équipements",2023,170,3194,2937
+26,"Jura",26,"26 Fabrication de produits informatiques, électroniques et optiques",2023,145,7358,6806
+26,"Jura",27,"27 Fabrication d'équipements électriques",2023,6,209,202
+26,"Jura",28,"28 Fabrication de machines et équipements n.c.a.",2023,23,1404,1330
+26,"Jura",31,"31 Fabrication de meubles",2023,5,10,8
+26,"Jura",32,"32 Autres industries manufacturières",2023,27,249,227
+26,"Jura",33,"33 Réparation et installation de machines et d'équipements",2023,39,279,246
+26,"Jura",35,"35 Production et distribution d'électricité, de gaz, de vapeur et d'air conditionné",2023,18,151,128
+26,"Jura",36,"36 Captage, traitement et distribution d'eau",2023,7,20,9
+26,"Jura",37,"37 Collecte et traitement des eaux usées",2023,8,43,33
+26,"Jura",38,"38 Collecte, traitement et élimination des déchets, récupération",2023,17,72,57
+26,"Jura",39,"39 Dépollution et autres services de gestion des déchets",2023,0,0,0
+26,"Jura",41,"41 Construction de bâtiments",2023,102,697,644
+26,"Jura",42,"42 Génie civil",2023,12,272,256
+26,"Jura",43,"43 Travaux de construction spécialisés",2023,385,1812,1632
+26,"Jura",45,"45 Commerce et réparation d'automobiles et de motocycles",2023,198,856,743
+26,"Jura",46,"46 Commerce de gros, à l'exception des automobiles et des motocycles",2023,137,838,710
+26,"Jura",47,"47 Commerce de détail, à l'exception des automobiles et des motocycles",2023,482,2445,1765
+26,"Jura",49,"49 Transports terrestres et transport par conduites",2023,81,677,561
+26,"Jura",50,"50 Transports par eau",2023,0,0,0
+26,"Jura",51,"51 Transports aériens",2023,0,0,0
+26,"Jura",52,"52 Entreposage et services auxiliaires des transports",2023,13,88,82
+26,"Jura",53,"53 Activités de poste et de courrier",2023,29,251,210
+26,"Jura",55,"55 Hébergement",2023,74,424,298
+26,"Jura",56,"56 Restauration",2023,228,1109,770
+26,"Jura",58,"58 Édition",2023,8,76,56
+26,"Jura",59,"59 Production de films cinématographiques, de vidéo et de programmes de télévision, enregistrement sonore et édition musicale",2023,29,120,73
+26,"Jura",60,"60 Programmation et diffusion",2023,,10,9
+26,"Jura",61,"61 Télécommunications",2023,10,66,63
+26,"Jura",62,"62 Programmation, conseil et autres activités informatiques",2023,90,427,355
+26,"Jura",63,"63 Services d'information",2023,5,6,4
+26,"Jura",64,"64 Activités des services financiers, hors assurance et caisses de retraite",2023,50,555,439
+26,"Jura",65,"65 Assurance",2023,11,141,86
+26,"Jura",66,"66 Activités auxiliaires de services financiers et d'assurance",2023,64,402,330
+26,"Jura",68,"68 Activités immobilières",2023,180,355,168
+26,"Jura",69,"69 Activités juridiques et comptables",2023,144,410,282
+26,"Jura",70,"70 Activités des sièges sociaux, conseil de gestion",2023,84,185,130
+26,"Jura",71,"71 Activités d'architecture et d'ingénierie, activités de contrôle et analyses techniques",2023,176,772,599
+26,"Jura",72,"72 Recherche-développement scientifique",2023,15,359,337
+26,"Jura",73,"73 Publicité et études de marché",2023,22,39,24
+26,"Jura",74,"74 Autres activités spécialisées, scientifiques et techniques",2023,141,303,166
+26,"Jura",75,"75 Activités vétérinaires",2023,20,117,86
+26,"Jura",77,"77 Activités de location et location-bail",2023,16,49,33
+26,"Jura",78,"78 Activités liées à l'emploi",2023,21,2164,1660
+26,"Jura",79,"79 Activités des agences de voyage, voyagistes, services de réservation et activités connexes",2023,21,75,53
+26,"Jura",80,"80 Enquêtes et sécurité",2023,10,154,90
+26,"Jura",81,"81 Services relatifs aux bâtiments et aménagement paysager",2023,159,711,481
+26,"Jura",82,"82 Activités administratives et autres activités de soutien aux entreprises",2023,25,46,30
+26,"Jura",84,"84 Administration publique et défense, sécurité sociale obligatoire",2023,152,1689,1322
+26,"Jura",85,"85 Enseignement",2023,243,2438,1610
+26,"Jura",86,"86 Activités pour la santé humaine",2023,610,3453,2418
+26,"Jura",87,"87 Hébergement médico-social et social",2023,35,2018,1346
+26,"Jura",88,"88 Action sociale sans hébergement",2023,97,1321,764
+26,"Jura",90,"90 Activités créatives, artistiques et de spectacle",2023,138,198,84
+26,"Jura",91,"91 Bibliothèques, archives, musées et autres activités culturelles",2023,17,95,59
+26,"Jura",92,"92 Organisation de jeux de hasard et d'argent",2023,,44,33
+26,"Jura",93,"93 Activités sportives, récréatives et de loisirs",2023,93,421,194
+26,"Jura",94,"94 Activités des organisations associatives",2023,149,702,383
+26,"Jura",95,"95 Réparation d'ordinateurs et de biens personnels et domestiques",2023,26,37,25
+26,"Jura",96,"96 Autres services personnels",2023,446,606,362
