@@ -10,23 +10,16 @@ import {
 const sections = getSections();
 const all = loadNoga2025();
 
-// Données pour la recherche client-side : SEO codes uniquement (allégé).
-const searchIndex = all
-  .filter(
-    (r) =>
-      r.level === "section" ||
-      r.level === "division" ||
-      r.level === "group" ||
-      r.level === "class",
-  )
-  .map((r) => ({
-    code: r.code,
-    label: r.label_fr,
-    level: r.level,
-    dotted: dottedCode(r.code),
-  }));
-
-const totalSeoCodes = searchIndex.length;
+// Counts for hero — derived without inlining the full search index. The
+// search payload (~300 KB) is now lazy-loaded from /codes/search-index.json
+// at the first keystroke, shrinking this page from 396 KB to ~70 KB.
+const totalSeoCodes = all.filter(
+  (r) =>
+    r.level === "section" ||
+    r.level === "division" ||
+    r.level === "group" ||
+    r.level === "class",
+).length;
 const totalAllCodes = all.length;
 
 const sectionsWithChildren = sections.map((s) => ({
@@ -327,7 +320,10 @@ for (const row of all) {
     }
   </style>
 
-  <script define:vars={{ searchIndex }}>
+  <script>
+    // Search index is lazy-loaded on first focus or keystroke to keep the
+    // initial HTML payload at ~70 KB instead of ~400 KB. Once loaded, it's
+    // cached by the browser and reused for the rest of the session.
     const input = document.getElementById("noga-search");
     const results = document.getElementById("noga-results");
     const countEl = document.getElementById("noga-search-count");
@@ -337,6 +333,28 @@ for (const row of all) {
       group: "groupe",
       class: "classe",
     };
+
+    let searchIndex = null;
+    let loadingPromise = null;
+
+    function loadIndex() {
+      if (searchIndex) return Promise.resolve(searchIndex);
+      if (loadingPromise) return loadingPromise;
+      countEl.textContent = "Chargement de l'index…";
+      loadingPromise = fetch("/codes/search-index.json")
+        .then((r) => r.json())
+        .then((data) => {
+          searchIndex = data;
+          countEl.textContent = "";
+          return data;
+        })
+        .catch((err) => {
+          countEl.textContent = "Erreur de chargement de l'index.";
+          loadingPromise = null;
+          throw err;
+        });
+      return loadingPromise;
+    }
 
     function render(matches) {
       if (matches.length === 0) {
@@ -372,15 +390,20 @@ for (const row of all) {
         .replace(/[̀-ͯ]/g, "");
     }
 
-    input?.addEventListener("input", (e) => {
+    // Pre-load the index as soon as the user shows interest (focus on input).
+    // This avoids a noticeable lag between first keystroke and first results.
+    input?.addEventListener("focus", () => loadIndex().catch(() => {}), { once: true });
+
+    input?.addEventListener("input", async (e) => {
       const q = normalize(e.target.value.trim());
       if (q.length === 0) {
         results.style.display = "none";
         countEl.textContent = "";
         return;
       }
+      const idx = await loadIndex();
       const qNoDot = q.replace(/\./g, "");
-      const matches = searchIndex.filter((r) => {
+      const matches = idx.filter((r) => {
         if (r.code.startsWith(qNoDot)) return true;
         if (r.dotted.startsWith(q)) return true;
         if (normalize(r.label).includes(q)) return true;
