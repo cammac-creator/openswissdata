@@ -83,6 +83,14 @@ import TrustStrip from "../../components/TrustStrip.astro";
 
 <section class="v4-datasets ds-page">
   <div class="container-v4">
+    <div class="finma-status-banner reveal-v4">
+      <div class="finma-status-icon">⚖️</div>
+      <div class="finma-status-text">
+        <strong>Données publiques republiées sous Art. 5 LDA suisse</strong>
+        <span>FINMA publie ses 10 listes d'autorisation comme données ouvertes. Nous les normalisons, signons cryptographiquement (Ed25519 + RFC-3161) et redistribuons avec changelog 90 jours. Permission de redistribution écrite demandée le 2026-04-17. <strong>Politique de takedown 24h sur demande FINMA</strong> — voir <a href="/legal/sdr-policy">SDR Policy</a>.</span>
+      </div>
+    </div>
+
     <div class="ds-meta-grid">
       <div class="ds-meta-card reveal-v4">
         <div class="ds-meta-label">Formats inclus</div>
@@ -218,4 +226,45 @@ import TrustStrip from "../../components/TrustStrip.astro";
     </div>
   </div>
 </section>
+
+<style>
+  .finma-status-banner {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px 22px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--teal);
+    border-radius: 10px;
+    margin-bottom: 32px;
+  }
+  .finma-status-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .finma-status-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .finma-status-text strong {
+    display: block;
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+  .finma-status-text span strong {
+    display: inline;
+    margin: 0;
+    font-size: 13px;
+  }
+  .finma-status-text a {
+    color: var(--teal);
+    text-decoration: underline;
+  }
+</style>
 </BaseLayout>
