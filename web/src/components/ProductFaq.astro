@@ -1,0 +1,57 @@
+---
+interface Props {
+  productName: string;
+  refundClause?: string;
+  formatNote?: string;
+}
+const {
+  productName,
+  refundClause = "Remboursement intégral dans les 14 jours, sans condition.",
+  formatNote = "CSV, JSON, Parquet et SQL inclus dans tous les achats.",
+} = Astro.props;
+---
+<section class="ds-section reveal-v4">
+  <div class="v4-section-eyebrow">
+    <strong>FAQ</strong>
+    <span class="sep">/</span>
+    <span>5 questions avant l'achat</span>
+  </div>
+  <h2 class="v4-section-h2">Avant de cliquer <span class="serif">acheter</span>.</h2>
+
+  <div class="v4-faq-list">
+    <details class="v4-faq-item reveal-v4">
+      <summary>Est-ce un dataset officiel ?</summary>
+      <p>
+        Non, pas au sens juridique. Les <strong>sources</strong> sont officielles (BAZG pour TARES, BFS pour Classifications, FINMA pour le registre). Nous, on republie ces données après normalisation, signature cryptographique Ed25519 et horodatage RFC-3161. Pour toute question juridique, seules les publications de la Chancellerie fédérale et du BAZG/BFS/FINMA font foi. Voir <a href="/compliance">Sources &amp; compliance</a>.
+      </p>
+    </details>
+
+    <details class="v4-faq-item reveal-v4">
+      <summary>Quel format ? Mon Excel peut l'ouvrir ?</summary>
+      <p>
+        Oui — <strong>{formatNote}</strong> Le CSV s'ouvre directement dans Excel, Google Sheets, Numbers ou n'importe quel tableur. Le Parquet est pour la data science (DuckDB, Python pandas), le SQL pour brancher dans une base relationnelle, le JSON pour applications web. Vous prenez le format qui vous arrange.
+      </p>
+    </details>
+
+    <details class="v4-faq-item reveal-v4">
+      <summary>Comment je reçois ma commande ?</summary>
+      <p>
+        Après le paiement Stripe, vous recevez immédiatement un email avec un <strong>lien de téléchargement</strong> (ZIP signé Ed25519, hébergé sur Cloudflare R2 Frankfurt). Pas de compte à créer, pas de mot de passe. Le lien fonctionne 48 heures et reste accessible plus tard depuis votre <a href="/account">espace client</a> via lien magique.
+      </p>
+    </details>
+
+    <details class="v4-faq-item reveal-v4">
+      <summary>Le refund 14 jours, comment ça marche ?</summary>
+      <p>
+        {refundClause} Vous écrivez à <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a> dans les 14 jours, on rembourse Stripe en quelques minutes — pas de question, pas de justificatif. Voir les <a href="/legal/cgv">CGV</a>.
+      </p>
+    </details>
+
+    <details class="v4-faq-item reveal-v4">
+      <summary>Les mises à jour sont incluses ?</summary>
+      <p>
+        Oui — <strong>360 jours de mises à jour</strong> incluses dans le prix d'achat. TARES et FINMA reçoivent un delta hebdomadaire, Classifications un refresh annuel + révisions majeures (NOGA 2025, NACE 2.1). Au-delà des 360 jours, vous gardez les versions que vous avez ou vous renouvelez (120-160 CHF/an selon le dataset). Pas d'auto-renouvellement.
+      </p>
+    </details>
+  </div>
+</section>
