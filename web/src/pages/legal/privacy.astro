@@ -50,6 +50,8 @@ const lastUpdated = new Date().toISOString().split("T")[0];
         <tr><td class="px-3 py-2">Railway</td><td class="px-3 py-2">Hébergement de l'application</td><td class="px-3 py-2">Europe (Frankfurt)</td></tr>
         <tr><td class="px-3 py-2">Cloudflare R2</td><td class="px-3 py-2">Stockage des Datasets</td><td class="px-3 py-2">Europe (Frankfurt)</td></tr>
         <tr><td class="px-3 py-2">Plausible Analytics</td><td class="px-3 py-2">Statistiques anonymes (sans cookies)</td><td class="px-3 py-2">Allemagne (UE)</td></tr>
+        <tr><td class="px-3 py-2">Sentry</td><td class="px-3 py-2">Capture des erreurs serveur (logs techniques)</td><td class="px-3 py-2">États-Unis (clauses contractuelles types)</td></tr>
+        <tr><td class="px-3 py-2">UptimeRobot</td><td class="px-3 py-2">Monitoring de disponibilité (ping HTTP, pas de données personnelles)</td><td class="px-3 py-2">États-Unis</td></tr>
       </tbody>
     </table>
 
@@ -71,7 +73,7 @@ const lastUpdated = new Date().toISOString().split("T")[0];
     <p>Pour exercer ces droits : <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>.</p>
 
     <h2 class="text-2xl font-semibold mt-8 mb-3">7. Transferts internationaux</h2>
-    <p>Les données sont principalement stockées en Europe (Frankfurt pour Railway et R2). Resend est basé aux États-Unis ; le transfert est encadré par les <strong>Clauses Contractuelles Types (SCC) 2021/914/UE</strong> de la Commission européenne pour le transfert vers Resend (États-Unis).</p>
+    <p>Les données sont principalement stockées en Europe (Frankfurt pour Railway et R2). Trois sous-traitants sont basés aux États-Unis : <strong>Resend</strong> (envoi d'emails), <strong>Sentry</strong> (capture d'erreurs techniques) et <strong>UptimeRobot</strong> (monitoring HTTP — aucune donnée personnelle). Les transferts vers Resend et Sentry sont encadrés par les <strong>Clauses Contractuelles Types (SCC) 2021/914/UE</strong> de la Commission européenne. Sentry applique en outre un filtrage automatique côté serveur (`beforeSend` hook) qui retire les en-têtes d'autorisation, cookies et tokens des stack traces avant envoi.</p>
 
     <h2 class="text-2xl font-semibold mt-8 mb-3">8. Cookies et traceurs</h2>
     <p>Nous utilisons uniquement un cookie technique (<code>osd_session</code>) strictement nécessaire à la connexion de l'espace client. Aucun cookie publicitaire ou de suivi tiers n'est posé. Plausible Analytics fonctionne sans cookies.</p>
