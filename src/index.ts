@@ -173,6 +173,20 @@ export function createApp() {
         },
       }),
     );
+
+    // 404 fallback — serve the Astro-built /404/index.html with HTTP 404 status.
+    // Without this, Hono returns a default text/plain "404 Not Found" body that
+    // bypasses the Astro 404.astro page entirely (bad UX + bad SEO signal).
+    app.notFound(async (c) => {
+      const path = "/404/index.html";
+      try {
+        const fs = await import("node:fs/promises");
+        const html = await fs.readFile(`${webRoot}${path}`, "utf-8");
+        return c.html(html, 404);
+      } catch {
+        return c.text("404 Not Found", 404);
+      }
+    });
   } else {
     console.warn(
       "[app] web/dist not found — frontend will not be served. Run 'npm run web:build'.",
