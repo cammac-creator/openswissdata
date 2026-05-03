@@ -7,9 +7,14 @@ interface Props {
   title: string;
   description?: string;
   image?: string;
+  /**
+   * Optional Product/Offer JSON-LD to inject in <head> on product pages.
+   * Shape: { name, description, price, priceCurrency, sku, ... }
+   */
+  productJsonLd?: Record<string, unknown>;
 }
 
-const { title, description = "Datasets officiels suisses normalisés — TARES (douanes), classifications NOGA/NACE/ISIC, registre FINMA. Format JSON, Parquet, SQL.", image = "/og-default.png" } = Astro.props;
+const { title, description = "Datasets officiels suisses normalisés — TARES (douanes), classifications NOGA/NACE/ISIC, registre FINMA. Format JSON, Parquet, SQL.", image = "/og-default.png", productJsonLd } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 ---
 <!DOCTYPE html>
@@ -64,6 +69,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
         "https://github.com/cammac-creator/openswissdata",
       ],
     })} />
+
+    {productJsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(productJsonLd)} />
+    )}
 
     {Astro.url.hostname === "www.openswissdata.com" && (
       <script is:inline defer data-domain="openswissdata.com" src="https://plausible.io/js/script.js"></script>

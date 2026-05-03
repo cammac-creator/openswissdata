@@ -2,10 +2,31 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import FinmaLookup from "../../components/FinmaLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "FINMA Registry — Conformité financière suisse",
+  description: "Les 10 listes publiques d'autorisations FINMA consolidées sous un schéma unique. Banques, assurances, PSPs, gestionnaires d'actifs, SRO. Enrichi UID + LEI.",
+  image: "https://www.openswissdata.com/og-default.png",
+  url: "https://www.openswissdata.com/datasets/finma",
+  brand: { "@type": "Brand", name: "openswissdata" },
+  category: "Reference data — financial supervision registry",
+  offers: {
+    "@type": "Offer",
+    price: "299",
+    priceCurrency: "CHF",
+    availability: "https://schema.org/InStock",
+    url: "https://www.openswissdata.com/datasets/finma#acheter",
+    priceValidUntil: "2026-12-31",
+    seller: { "@type": "Organization", name: "openswissdata" },
+  },
+};
 ---
 <BaseLayout
   title="Registre FINMA unifié — Conformité financière suisse | openswissdata"
   description="Les 10 listes publiques d'autorisations FINMA consolidées sous un schéma unique. Banques, assurances, PSPs, gestionnaires d'actifs, SRO. Enrichi UID + LEI. 299 CHF one-shot."
+  productJsonLd={productJsonLd}
 >
 <div class="bg-grid"></div>
 
