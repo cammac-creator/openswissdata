@@ -109,6 +109,18 @@ export function createApp() {
       c.res.headers.set("Cache-Control", "public, max-age=31536000, immutable");
       return;
     }
+    // Static JSON data shipped by Astro pre-render (codes/search-index.json,
+    // .well-known assets) — long cache because they only change on rebuild.
+    if (
+      path === "/codes/search-index.json" ||
+      path.startsWith("/.well-known/")
+    ) {
+      c.res.headers.set(
+        "Cache-Control",
+        "public, max-age=604800, s-maxage=2592000, stale-while-revalidate=31536000",
+      );
+      return;
+    }
     // HTML pages — fresh-ish but cacheable at edge with SWR fallback
     c.res.headers.set(
       "Cache-Control",

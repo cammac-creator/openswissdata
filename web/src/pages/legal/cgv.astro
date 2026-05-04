@@ -47,6 +47,17 @@ const lastUpdated = new Date().toISOString().split("T")[0];
     <h2 class="text-2xl font-semibold mt-8 mb-3">5. Livraison</h2>
     <p>Après paiement validé, l'Acquéreur reçoit sous 5 minutes un email contenant un lien de téléchargement signé valable 48 heures. Un accès permanent à ses Datasets est également disponible via l'espace client (<a href="/account" class="text-indigo-600 hover:underline">/account</a>, connexion par lien magique).</p>
 
+    <h2 class="text-2xl font-semibold mt-8 mb-3">5bis. Livrables techniques garantis</h2>
+    <p>Chaque achat de Dataset comprend les artefacts techniques suivants, garantis dans le ZIP livré :</p>
+    <ul class="list-disc pl-6">
+      <li><strong>Données normalisées</strong> dans les formats CSV, JSON, Parquet et SQL — schéma stable documenté dans <code>schema.json</code> du ZIP.</li>
+      <li><strong>Signature cryptographique Ed25519</strong> couvrant l'ensemble des fichiers du ZIP (hash SHA-256 puis signature). La clé publique de vérification est publiée à l'URL <a href="/.well-known/openswissdata-pubkey.pem" class="text-indigo-600 hover:underline"><code>/.well-known/openswissdata-pubkey.pem</code></a> et committée dans le repository public de référence.</li>
+      <li><strong>Manifest signé</strong> (<code>manifest.json</code>) listant chaque fichier avec son SHA-256, sa taille et sa date de génération.</li>
+      <li><strong>Horodatage RFC 3161</strong> via Time-Stamping Authority (TSA) <code>freetsa.org</code>, attestant l'instant de signature de manière indépendante de l'Éditeur.</li>
+      <li><strong>Provenance documentée</strong> (<code>provenance.json</code>) : URL source officielle, date de capture, hash de la version source, identifiant de la permission BAZG le cas échéant.</li>
+    </ul>
+    <p>Si l'un de ces livrables est manquant ou cryptographiquement invalide à la livraison, l'Acquéreur peut exercer son droit au refund 14 jours (section 6) ou demander une nouvelle livraison sous 48 heures sans frais. Voir <a href="/legal/provenance" class="text-indigo-600 hover:underline">/legal/provenance</a> pour la procédure de vérification.</p>
+
     <h2 class="text-2xl font-semibold mt-8 mb-3">6. Remboursement et droit de rétractation</h2>
     <p><strong>Refund 14 jours sans condition.</strong> Refund intégral garanti dans les 14 jours après achat, sans condition, sauf si l'Acquéreur a redistribué le ZIP à un tiers (CGV §2 et §2bis). Les demandes se font par email à <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>.</p>
     <p><strong>Droit de rétractation B2B inapplicable.</strong> L'art. 40a du Code des obligations ne s'applique qu'aux relations consommateurs. Aucun remboursement après téléchargement du Dataset, sauf cas exceptionnels (voir section 7) ou dans le cadre du refund 14 jours mentionné ci-dessus.</p>
