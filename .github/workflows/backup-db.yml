@@ -1,41 +1,44 @@
 name: Daily SQLite backup → R2
 
+# Triggers a server-side backup on Railway via the /api/admin/backup-to-r2
+# endpoint. The endpoint snapshots the live SQLite DB (mounted on Railway's
+# persistent volume) and uploads to R2 under `backups/db-YYYY-MM-DD.sqlite`,
+# then prunes backups older than 30 days.
+#
+# This workflow does NOT have direct access to the Railway DB volume — that's
+# why it just fires a curl. The actual work happens server-side, where the
+# DB file is reachable.
+
 on:
   schedule:
-    # Daily at 03:15 UTC (05:15 CEST). 15 min after the typical Railway redeploy
+    # Daily at 03:15 UTC (05:15 CEST), 15 min after the typical Railway redeploy
     # window so we don't snapshot during a deploy.
     - cron: "15 3 * * *"
   workflow_dispatch:
 
 jobs:
-  backup:
+  trigger-backup:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: npm ci
-
-      # The backup script reads the LIVE Railway DB by mounting it via a
-      # short-lived `railway run` command. Requires RAILWAY_TOKEN secret.
-      # Alternative: run this workflow on Railway's scheduled service
-      # directly (no GitHub Actions needed) — that is the recommended path
-      # if the Railway CLI fails in CI.
-      - name: Run backup against production DB
+      - name: Trigger Railway backup endpoint
         env:
-          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_BUCKET: ${{ secrets.R2_BUCKET }}
-          DATABASE_PATH: ./data/openswissdata.sqlite
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
         run: |
-          # Pull latest DB from Railway via scp/rsync if available, otherwise
-          # fall back to running this workflow on Railway directly.
-          # For now, this workflow assumes the DB is checked out via Railway
-          # volume snapshot or run on Railway scheduled service.
-          npm run backup:db
+          if [ -z "$ADMIN_SECRET" ]; then
+            echo "::error::ADMIN_SECRET secret not configured"
+            exit 1
+          fi
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "x-admin-secret: $ADMIN_SECRET" \
+            -H "content-type: application/json" \
+            https://www.openswissdata.com/api/admin/backup-to-r2)
+          body=$(echo "$response" | head -n -1)
+          status=$(echo "$response" | tail -n 1)
+          echo "Body: $body"
+          echo "Status: $status"
+          if [ "$status" != "200" ]; then
+            echo "::error::Backup failed with HTTP $status"
+            exit 1
+          fi
+          echo "::notice::Backup OK — $body"
