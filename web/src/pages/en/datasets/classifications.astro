@@ -1,0 +1,332 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ClassificationsLookup from "../../../components/ClassificationsLookup.astro";
+import TrustStrip from "../../../components/TrustStrip.astro";
+import ProductFaq from "../../../components/ProductFaq.astro";
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Classifications NOGA + NACE + ISIC",
+  description: "5 unified economic activity classifications: NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Bidirectional cross-walks, 4 languages. JSON / Parquet / SQL.",
+  image: "https://www.openswissdata.com/og-default.png",
+  url: "https://www.openswissdata.com/en/datasets/classifications",
+  brand: { "@type": "Brand", name: "openswissdata" },
+  category: "Reference data — economic activity classifications",
+  offers: {
+    "@type": "Offer",
+    price: "399",
+    priceCurrency: "CHF",
+    availability: "https://schema.org/InStock",
+    url: "https://www.openswissdata.com/en/datasets/classifications#buy",
+    priceValidUntil: "2026-12-31",
+    seller: { "@type": "Organization", name: "openswissdata" },
+  },
+};
+---
+<BaseLayout
+  title="Economic classifications NOGA + NACE + ISIC | openswissdata"
+  description="5 unified economic activity classifications: NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Bidirectional cross-walks, 4 languages. JSON / Parquet / SQL. 399 CHF one-shot."
+  productJsonLd={productJsonLd}
+>
+<div class="bg-grid"></div>
+
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href="/en/">home</a>
+      <span class="sep">·</span>
+      <a href="/en/bundle">datasets</a>
+      <span class="sep">·</span>
+      <span class="current">Classifications</span>
+    </nav>
+
+    <div class="v4-hero-grid">
+      <div>
+        <div class="v4-eyebrow reveal-v4">
+          <span>Classifications · 5 standards</span>
+          <span style="opacity:.4">·</span>
+          <span>BFS · permission requested 2026-04-17</span>
+        </div>
+
+        <h1 class="v4-h1 reveal-v4" data-delay="1">
+          NOGA, NACE, ISIC<br>
+          <span class="accent">aligned.</span>
+        </h1>
+
+        <p class="v4-lede reveal-v4" data-delay="2">
+          Five unified nomenclatures (NOGA 2008, NOGA 2025, NACE Rev 2, NACE Rev 2.1, ISIC Rev 4) with their <strong>bidirectional cross-walks</strong>.
+          Descriptions in FR/DE/IT/EN. Ideal for multi-jurisdiction reporting and time-series continuity.
+        </p>
+
+        <div class="v4-spec-row reveal-v4" data-delay="3">
+          <div class="v4-spec">
+            <div class="v4-spec-label">Standards</div>
+            <div class="v4-spec-value">5 unified</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Codes</div>
+            <div class="v4-spec-value">~3,800</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Cross-walks</div>
+            <div class="v4-spec-value">5-way</div>
+          </div>
+        </div>
+
+        <div class="v4-cta-row reveal-v4" data-delay="4">
+          <a href="#buy" class="v4-btn v4-btn-primary">Buy — 399 CHF <span class="arrow">→</span></a>
+          <a href="/samples/classifications-sample.csv" download class="v4-btn v4-btn-secondary">CSV sample</a>
+        </div>
+
+        <div class="v4-permission-line reveal-v4" data-delay="5">
+          <span><strong>Sources:</strong> BFS · Eurostat · UN Statistics</span>
+          <span style="opacity:.4">·</span>
+          <span>NOGA 2025 + NACE 2.1 included</span>
+        </div>
+      </div>
+
+      <div class="ds-price-box reveal-v4" data-delay="2">
+        <div class="ds-price-box-label">One-shot Standard</div>
+        <div class="ds-price-box-amount">399<span class="ds-price-box-currency">CHF</span></div>
+        <div class="ds-price-box-renew">+160 CHF/year for updates (optional) · 360 days of updates included</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<TrustStrip
+  sources={["BFS / OFS", "Eurostat", "UN Statistics"]}
+  badges={["5 unified nomenclatures", "5-way cross-walks", "Ed25519-signed manifest"]}
+/>
+
+<section class="v4-datasets ds-page">
+  <div class="container-v4">
+    <div class="ds-meta-grid">
+      <div class="ds-meta-card reveal-v4">
+        <div class="ds-meta-label">Contents</div>
+        <div class="ds-meta-value">5 nomenclatures + 5-way cross-walks · 4 languages · CSV, JSON, Parquet, SQL · ~8-12 MB total</div>
+      </div>
+      <div class="ds-meta-card reveal-v4" data-delay="1">
+        <div class="ds-meta-label">Updates</div>
+        <div class="ds-meta-value">Annual refresh + major revisions · 360 days included · 160 CHF/year renewal</div>
+      </div>
+    </div>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Scope</strong>
+        <span class="sep">/</span>
+        <span>5 official standards</span>
+      </div>
+      <h2 class="v4-section-h2">Five <span class="serif">standards</span> in a single bundle.</h2>
+      <p class="v4-section-intro">
+        All standards are normalised to the same table format, with the same fields (code, label_fr/de/it/en, parent, level).
+        You can switch between them via a single SQL join.
+      </p>
+
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr><th>Standard</th><th>Scope</th><th>Issuer</th><th>Languages</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>NOGA 2008</strong></td><td class="dim">Swiss economic activities (legacy)</td><td class="dim">BFS</td><td class="mono">FR/DE/IT</td></tr>
+            <tr><td><strong>NOGA 2025</strong></td><td class="dim">Swiss economic activities (current, January 2026)</td><td class="dim">BFS</td><td class="mono">FR/DE/IT/EN</td></tr>
+            <tr><td><strong>NACE Rev 2</strong></td><td class="dim">European economic activities</td><td class="dim">Eurostat</td><td class="mono">EN</td></tr>
+            <tr><td><strong>NACE Rev 2.1</strong></td><td class="dim">European economic activities (revision)</td><td class="dim">Eurostat</td><td class="mono">EN</td></tr>
+            <tr><td><strong>ISIC Rev 4</strong></td><td class="dim">Worldwide economic activities (UN)</td><td class="dim">UN Statistics</td><td class="mono">EN</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Cross-walks</strong>
+        <span class="sep">/</span>
+        <span>One join is enough</span>
+      </div>
+      <h2 class="v4-section-h2"><span class="serif">5-way</span> cross-walks.</h2>
+      <p class="v4-section-intro">
+        A canonical table links each code to its equivalent in the other standards.
+        Example: a Swiss bank classified <code class="mono" style="background: var(--color-bg-alt); padding: 2px 6px; border-radius: 4px;">NOGA 2025 64.11</code> maps to:
+      </p>
+
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr><th>Standard</th><th>Code</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>NOGA 2025</strong></td><td class="mono">64.11</td><td class="dim">Central banking activities</td></tr>
+            <tr><td>NOGA 2008</td><td class="mono">64.11</td><td class="dim">Central banking activities</td></tr>
+            <tr><td>NACE Rev 2.1</td><td class="mono">64.11</td><td class="dim">Central banking</td></tr>
+            <tr><td>NACE Rev 2</td><td class="mono">64.11</td><td class="dim">Central banking</td></tr>
+            <tr><td>ISIC Rev 4</td><td class="mono">6411</td><td class="dim">Central banking</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Live demo</strong>
+        <span class="sep">/</span>
+        <span>No sign-up</span>
+      </div>
+      <h2 class="v4-section-h2">Try it <span class="serif">for real</span>.</h2>
+      <p class="v4-section-intro">Search for an economic activity and instantly see its code in all 5 standards.</p>
+      <ClassificationsLookup />
+    </section>
+
+    <div class="ds-sample reveal-v4">
+      <h3>Free sample — 30 NOGA 2025 codes + 20 cross-walks</h3>
+      <p>Curated preview on the Finance + Public Administration sectors. Contains the 5 standards and the bridges between them.</p>
+      <a href="/samples/classifications-sample.csv" download class="ds-sample-dl">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 7l4 4 4-4M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download classifications-sample.csv
+      </a>
+    </div>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Use cases</strong>
+        <span class="sep">/</span>
+        <span>4 typical profiles</span>
+      </div>
+      <h2 class="v4-section-h2">Who <span class="serif">it's for</span>.</h2>
+      <div class="ds-audience-grid">
+        <div class="ds-audience-item">
+          <strong>Data teams at Swiss banks &amp; insurers</strong>
+          <span>Sectoral reporting, credit risk by activity, ESG file by regulatory sector.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>ERP &amp; CRM integrators</strong>
+          <span>Code mapping in Bexio, SAP, Salesforce — clients and suppliers categorised correctly.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Swiss subsidiaries of EU groups</strong>
+          <span>Consolidation with the parent's NACE reporting without manual rework.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Economic consultants &amp; researchers</strong>
+          <span>Time-series continuity across NOGA revisions. Comparative sectoral studies.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Pro tier</strong>
+        <span class="sep">/</span>
+        <span>For AI pipelines &amp; serious integrations</span>
+      </div>
+      <div class="cls-pro-card">
+        <span class="cls-pro-tag">New · Pro tier</span>
+        <h2 class="v4-section-h2" style="margin-top:8px;">Classifications <span class="serif">Pro</span>.</h2>
+        <p class="v4-section-intro" style="margin-bottom:24px;">
+          All Standard content <strong>+ 3 value-adds</strong> that save your data or compliance teams days of work:
+        </p>
+
+        <div class="cls-pro-grid">
+          <div class="cls-pro-item">
+            <div class="cls-pro-num">01 · DE/IT/EN embeddings</div>
+            <strong>Pre-computed multilingual 768d vectors</strong>
+            <p>On all 1,845 NOGA 2025 codes × 4 languages (FR + DE + IT + EN). Instant semantic search in your UI's language, no GPU. 7,380 Parquet vectors.</p>
+          </div>
+          <div class="cls-pro-item">
+            <div class="cls-pro-num">02 · NAICS 2022 cross-walks</div>
+            <strong>US NAICS ↔ ISIC ↔ NACE/NOGA</strong>
+            <p>Official US Census Bureau concordance (Public Domain) pivoted via ISIC Rev 4. Compatible reporting for US subsidiaries, Salesforce NAICS and Census data.</p>
+          </div>
+          <div class="cls-pro-item">
+            <div class="cls-pro-num">03 · EN labels NACE Rev 2.1</div>
+            <strong>Official Eurostat English labels</strong>
+            <p>Standalone projection of the 1,047 NACE Rev 2.1 codes in English (SKOS Eurostat re-use policy). Stand-alone CSV/Parquet — for compliance exports to international parent companies, no JOIN required.</p>
+          </div>
+        </div>
+
+        <a href="https://buy.stripe.com/00w9AVbls2tq0CHgKbes000" class="v4-btn v4-btn-primary" style="background:var(--ink);">
+          Buy Classifications Pro — 999 CHF
+          <span class="arrow">→</span>
+        </a>
+        <p class="ds-cta-sub" style="margin-top:16px;">Secure Stripe payment · Ed25519 + RFC-3161 signed manifest · 14-day refund if not downloaded</p>
+      </div>
+    </section>
+
+    <ProductFaq productName="Classifications" />
+
+    <div class="ds-cta" id="buy">
+      <form method="POST" action="/api/checkout/start" class="ds-cta-form">
+        <input type="hidden" name="dataset_ids" value="classifications" />
+        <button type="submit" class="v4-btn v4-btn-primary v4-btn-cta">
+          Buy Classifications Standard — 399 CHF
+          <span class="arrow">→</span>
+        </button>
+      </form>
+      <p class="ds-cta-sub">Secure Stripe payment · Immediate download by email · 14-day refund, no questions asked</p>
+      <p class="ds-cta-alt">Or take the <a href="/en/bundle">complete bundle (TARES + Classifications + FINMA) for 797 CHF</a> — save 200 CHF (20%).</p>
+    </div>
+  </div>
+</section>
+</BaseLayout>
+
+<style>
+  .cls-pro-card {
+    padding: 36px;
+    background: var(--bg-card);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    position: relative;
+  }
+  .cls-pro-tag {
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .cls-pro-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 880px) {
+    .cls-pro-grid { grid-template-columns: 1fr; }
+  }
+  .cls-pro-item {
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+  }
+  .cls-pro-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .cls-pro-item strong {
+    display: block;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .cls-pro-item p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin: 0;
+  }
+</style>
