@@ -1,0 +1,223 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import HSLookup from "../../../components/HSLookup.astro";
+import TrustStrip from "../../../components/TrustStrip.astro";
+import ProductFaq from "../../../components/ProductFaq.astro";
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "TARES — Schweizer Zolltarif normalisiert",
+  description: "~7 500 aktuelle HS8-Codes, Bezeichnungen DE/FR/IT/EN, MFN-Zollansätze, 30+ Präferenzregimes (EU/EFTA/UK/China/Japan…), ZFA-Erleichterungscodes. JSON / Parquet / SQL.",
+  image: "https://www.openswissdata.com/og-default.png",
+  url: "https://www.openswissdata.com/de/datasets/tares",
+  brand: { "@type": "Brand", name: "openswissdata" },
+  category: "Reference data — customs tariff",
+  offers: {
+    "@type": "Offer",
+    price: "299",
+    priceCurrency: "CHF",
+    availability: "https://schema.org/InStock",
+    url: "https://www.openswissdata.com/de/datasets/tares#kaufen",
+    priceValidUntil: "2026-12-31",
+    seller: { "@type": "Organization", name: "openswissdata" },
+  },
+};
+---
+<BaseLayout
+  title="TARES — Schweizer Zolltarif normalisiert | openswissdata"
+  description="Vollständiger Schweizer Zolltarif: ~7 500 aktuelle HS8-Codes, Bezeichnungen DE/FR/IT/EN, MFN-Zollansätze, 30+ Präferenzregimes (EU/EFTA/UK/China/Japan…), ZFA-Erleichterungscodes. JSON / Parquet / SQL. 299 CHF einmalig."
+  productJsonLd={productJsonLd}
+>
+<div class="bg-grid"></div>
+
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href="/de/">Startseite</a>
+      <span class="sep">·</span>
+      <a href="/de/bundle">Datasets</a>
+      <span class="sep">·</span>
+      <span class="current">TARES</span>
+    </nav>
+
+    <div class="v4-hero-grid">
+      <div>
+        <div class="v4-eyebrow reveal-v4">
+          <span>TARES · Schweizer Zolltarif</span>
+          <span style="opacity:.4">·</span>
+          <span class="check">BAZG-Bewilligung · 2026-04-21</span>
+        </div>
+
+        <h1 class="v4-h1 reveal-v4" data-delay="1">
+          Der Schweizer Zolltarif,<br>
+          <span class="accent">sauber.</span>
+        </h1>
+
+        <p class="v4-lede reveal-v4" data-delay="2">
+          ~7 500 aktuelle HS8-Codes, Bezeichnungen in 4 Sprachen (DE/FR/IT/EN),
+          MFN-Zollansätze mit Wert + Einheit, bis zu <strong>30+ Präferenzregimes pro Code</strong>
+          (EU, EFTA, UK, China, Japan, Korea…). Wöchentliche Updates aus den offiziellen BAZG-XLSX.
+        </p>
+
+        <div class="v4-spec-row reveal-v4" data-delay="3">
+          <div class="v4-spec">
+            <div class="v4-spec-label">HS8-Codes</div>
+            <div class="v4-spec-value">~7 500</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Sprachen</div>
+            <div class="v4-spec-value">DE · FR · IT · EN</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Updates</div>
+            <div class="v4-spec-value">Wöchentlich</div>
+          </div>
+        </div>
+
+        <div class="v4-cta-row reveal-v4" data-delay="4">
+          <a href="#kaufen" class="v4-btn v4-btn-primary">Kaufen — 299 CHF <span class="arrow">→</span></a>
+          <a href="/samples/tares-sample.csv" download class="v4-btn v4-btn-secondary">CSV-Muster</a>
+        </div>
+
+        <div class="v4-permission-line reveal-v4" data-delay="5">
+          <span><strong>Quelle:</strong> BAZG · xtares.admin.ch</span>
+          <span style="opacity:.4">·</span>
+          <span class="ok">Bewilligung erteilt 2026-04-21</span>
+          <span style="opacity:.4">·</span>
+          <span><strong>Gerichtsstand:</strong> Bern</span>
+        </div>
+      </div>
+
+      <div class="ds-price-box reveal-v4" data-delay="2">
+        <div class="ds-price-box-label">Einmalig</div>
+        <div class="ds-price-box-amount">299<span class="ds-price-box-currency">CHF</span></div>
+        <div class="ds-price-box-renew">+120 CHF/Jahr Updates (optional) · 360 Tage Updates inklusive</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<TrustStrip
+  sources={["BAZG", "xtares.admin.ch"]}
+  badges={["BAZG-Bewilligung · 2026-04-21", "Ed25519-signiertes Manifest", "RFC-3161 Zeitstempel"]}
+/>
+
+<section class="v4-datasets ds-page">
+  <div class="container-v4">
+    <div class="ds-disclaimer reveal-v4">
+      <p><strong>⚠ Nicht-offiziell · Non-officiel · Non ufficiale · Non-official</strong></p>
+      <p>
+        Massgeblich sind allein die offiziellen Veröffentlichungen der Bundeskanzlei und des BAZG.
+        Autoritative Quelle: <a href="https://xtares.admin.ch/" target="_blank" rel="noopener">xtares.admin.ch</a>.
+        Gerichtsstand für TARES-Streitigkeiten: Bern, Schweiz.
+      </p>
+    </div>
+
+    <div class="ds-meta-grid">
+      <div class="ds-meta-card reveal-v4">
+        <div class="ds-meta-label">Enthaltene Formate</div>
+        <div class="ds-meta-value">CSV · JSON · Parquet · SQL · JSON Schema · README · Checksums SHA-256 · LICENSE</div>
+      </div>
+      <div class="ds-meta-card reveal-v4" data-delay="1">
+        <div class="ds-meta-label">Updates</div>
+        <div class="ds-meta-value">Wöchentliches Delta gemäss BAZG-Veröffentlichungen · 360 Tage inklusive · Erneuerung 120 CHF/Jahr</div>
+      </div>
+    </div>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>TARES-Schema</strong>
+        <span class="sep">/</span>
+        <span>17 normalisierte Spalten</span>
+      </div>
+      <h2 class="v4-section-h2">Das <span class="serif">Schema</span> auf einen Blick.</h2>
+      <p class="v4-section-intro">
+        Jede Zeile repräsentiert einen 8-stelligen HS-Code mit seinen mehrsprachigen Bezeichnungen, anwendbaren Zollansätzen und Präferenzabkommen.
+      </p>
+
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr><th>Feld</th><th>Typ</th><th>Beispiel</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">hs8</td><td class="dim">string (8 digits)</td><td class="mono">84820010</td></tr>
+            <tr><td class="mono">hs6</td><td class="dim">string (6 digits)</td><td class="mono">848200</td></tr>
+            <tr><td class="mono">designation_fr</td><td class="dim">string</td><td>Roulements à billes, à contact radial</td></tr>
+            <tr><td class="mono">designation_de</td><td class="dim">string</td><td>Kugellager, mit radialer Berührung</td></tr>
+            <tr><td class="mono">designation_it</td><td class="dim">string</td><td>Cuscinetti a sfere, contatto radiale</td></tr>
+            <tr><td class="mono">unit_stat</td><td class="dim">string</td><td>per 100 kg gross</td></tr>
+            <tr><td class="mono">duty_mfn_value</td><td class="dim">number</td><td class="mono">0.00</td></tr>
+            <tr><td class="mono">duty_mfn_unit</td><td class="dim">string</td><td>je 100 kg brutto</td></tr>
+            <tr><td class="mono">duty_mfn_currency</td><td class="dim">string</td><td class="mono">CHF</td></tr>
+            <tr><td class="mono">preferential_regimes</td><td class="dim">object</td><td class="mono" is:raw>{"eu":"free","efta":"free","japan":"free"}</td></tr>
+            <tr><td class="mono">customs_relief_codes</td><td class="dim">string[]</td><td class="mono">["01"]</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Live-Demo</strong>
+        <span class="sep">/</span>
+        <span>Ohne Anmeldung</span>
+      </div>
+      <h2 class="v4-section-h2">Probieren Sie es <span class="serif">live</span> aus.</h2>
+      <p class="v4-section-intro">Suchen Sie ein Produkt oder einen HS-Code und sehen Sie das Ergebnis — genau wie Ihr ERP es über unsere API tun würde.</p>
+      <HSLookup />
+    </section>
+
+    <div class="ds-sample reveal-v4">
+      <h3>Kostenloses Muster — 100 Zeilen (CSV)</h3>
+      <p>Kuratierter Auszug, der verschiedene Kapitel abdeckt (Lebensmittel, Mechanik, Elektronik, Textil). Um vor dem Kauf zu validieren, dass Ihnen das Format passt.</p>
+      <a href="/samples/tares-sample.csv" download class="ds-sample-dl">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 7l4 4 4-4M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        tares-sample.csv herunterladen
+      </a>
+    </div>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Anwendungsfälle</strong>
+        <span class="sep">/</span>
+        <span>4 typische Profile</span>
+      </div>
+      <h2 class="v4-section-h2">An <span class="serif">wen</span> es sich richtet.</h2>
+      <div class="ds-audience-grid">
+        <div class="ds-audience-item">
+          <strong>Zollagenten &amp; Anmelder</strong>
+          <span>Klassifizierung der Importe/Exporte CH-EU kohärent und auditierbar.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>ERP-Zollmodule</strong>
+          <span>Integrationen SAP GTS, Descartes, Thomson Reuters ONESOURCE für Schweizer Filialen.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Cross-Border-E-Commerce</strong>
+          <span>HS8-Auflösung beim Checkout für DDP/DAP CH-EU — keine Zollblockade.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Daten- &amp; Finance-Teams</strong>
+          <span>Referenztabellen für Analytics, Steuerreporting, Kontrolle der Importkosten.</span>
+        </div>
+      </div>
+    </section>
+
+    <ProductFaq productName="TARES" formatNote="CSV (100 Zeilen Sample), JSON, Parquet und SQL in allen Käufen enthalten." />
+
+    <div class="ds-cta" id="kaufen">
+      <form method="POST" action="/api/checkout/start" class="ds-cta-form">
+        <input type="hidden" name="dataset_ids" value="tares" />
+        <button type="submit" class="v4-btn v4-btn-primary v4-btn-cta">
+          TARES kaufen — 299 CHF
+          <span class="arrow">→</span>
+        </button>
+      </form>
+      <p class="ds-cta-sub">Sichere Stripe-Zahlung · Sofortiger Download per E-Mail · 14-Tage-Rückerstattung ohne Bedingungen</p>
+      <p class="ds-cta-alt">Oder nehmen Sie das <a href="/de/bundle">Komplett-Bundle (TARES + Classifications + FINMA) für 797 CHF</a> — Ersparnis 200 CHF (20 %).</p>
+    </div>
+  </div>
+</section>
+</BaseLayout>

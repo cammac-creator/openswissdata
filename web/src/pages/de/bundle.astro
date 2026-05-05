@@ -1,0 +1,348 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import TrustStrip from "../../components/TrustStrip.astro";
+import ProductFaq from "../../components/ProductFaq.astro";
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "openswissdata Bundle — TARES + Classifications + FINMA",
+  description: "Die 3 openswissdata-Datasets in einem einzigen Kauf. Ersparnis 200 CHF (20 %) gegenüber Einzelkauf. 360 Tage Updates inklusive.",
+  image: "https://www.openswissdata.com/og-default.png",
+  url: "https://www.openswissdata.com/de/bundle",
+  brand: { "@type": "Brand", name: "openswissdata" },
+  category: "Reference data bundle",
+  offers: {
+    "@type": "Offer",
+    price: "797",
+    priceCurrency: "CHF",
+    availability: "https://schema.org/InStock",
+    url: "https://www.openswissdata.com/de/bundle#kaufen",
+    priceValidUntil: "2026-12-31",
+    seller: { "@type": "Organization", name: "openswissdata" },
+  },
+  isRelatedTo: [
+    { "@type": "Product", name: "TARES", url: "https://www.openswissdata.com/de/datasets/tares" },
+    { "@type": "Product", name: "Classifications", url: "https://www.openswissdata.com/de/datasets/classifications" },
+    { "@type": "Product", name: "FINMA Registry", url: "https://www.openswissdata.com/de/datasets/finma" },
+  ],
+};
+---
+<BaseLayout
+  title="Komplett-Bundle — TARES + Classifications + FINMA | openswissdata"
+  description="Die 3 openswissdata-Datasets in einem einzigen Kauf (TARES Zoll, Classifications NOGA/NACE/ISIC, FINMA Register) für 797 CHF. Sparen Sie 200 CHF (20 %) gegenüber Einzelkauf."
+  productJsonLd={productJsonLd}
+>
+<div class="bg-grid"></div>
+
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href="/de/">Startseite</a>
+      <span class="sep">·</span>
+      <span class="current">Komplett-Bundle</span>
+    </nav>
+
+    <div class="v4-hero-grid">
+      <div>
+        <div class="v4-eyebrow reveal-v4">
+          <span>Bundle 3-in-1 · Am beliebtesten</span>
+          <span style="opacity:.4">·</span>
+          <span class="check">200 CHF gespart</span>
+        </div>
+
+        <h1 class="v4-h1 reveal-v4" data-delay="1">
+          Alles von openswissdata,<br>
+          <span class="accent">in einem Kauf.</span>
+        </h1>
+
+        <p class="v4-lede reveal-v4" data-delay="2">
+          Die drei Datasets für Teams, die einen vollständigen Überblick über die regulatorischen Schweizer Daten benötigen.
+          <strong>Ein einziger Checkout, drei Werkzeugkästen.</strong> Compliance, Finanzen, Zoll — abgedeckt.
+        </p>
+
+        <div class="v4-spec-row reveal-v4" data-delay="3">
+          <div class="v4-spec">
+            <div class="v4-spec-label">Datasets</div>
+            <div class="v4-spec-value">3 enthalten</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Ersparnis</div>
+            <div class="v4-spec-value">200 CHF (−20 %)</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Updates</div>
+            <div class="v4-spec-value">360 Tage inklusive</div>
+          </div>
+        </div>
+
+        <div class="v4-cta-row reveal-v4" data-delay="4">
+          <a href="#kaufen" class="v4-btn v4-btn-primary">Bundle kaufen — 797 CHF <span class="arrow">→</span></a>
+          <a href="#detail-ersparnis" class="v4-btn v4-btn-secondary">Details ansehen</a>
+        </div>
+
+        <div class="v4-permission-line reveal-v4" data-delay="5">
+          <span><strong>Quellen:</strong> BAZG · BFS · FINMA</span>
+          <span style="opacity:.4">·</span>
+          <span class="ok">BAZG-Bewilligung erteilt 2026-04-21</span>
+          <span style="opacity:.4">·</span>
+          <span><strong>Gerichtsstand:</strong> Bern</span>
+        </div>
+      </div>
+
+      <div class="ds-price-box reveal-v4" data-delay="2">
+        <div class="ds-price-box-label">Komplett-Bundle</div>
+        <div class="bundle-price-strike">997 CHF</div>
+        <div class="ds-price-box-amount accent">797<span class="ds-price-box-currency">CHF</span></div>
+        <div class="ds-price-box-renew">200 CHF gespart · 360 Tage Updates inklusive</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<TrustStrip
+  sources={["BAZG", "BFS", "FINMA"]}
+  badges={["BAZG-Bewilligung · 2026-04-21", "3 Datasets vereint", "Ed25519-signiertes Manifest"]}
+/>
+
+<section class="v4-datasets ds-page">
+  <div class="container-v4">
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Bundle-Inhalt</strong>
+        <span class="sep">/</span>
+        <span>3 autoritative Datasets</span>
+      </div>
+      <h2 class="v4-section-h2">Drei <span class="serif">Datasets</span> im Bundle.</h2>
+      <div class="ds-bundle-grid">
+        <a href="/de/datasets/tares" class="ds-bundle-card">
+          <div class="ds-bundle-meta">Zoll · BAZG ✓</div>
+          <h3>TARES</h3>
+          <p>~7 500 aktuelle HS8-Codes (4 Sprachen), MFN-Zollansätze, bis zu 30+ Präferenzregimes pro Code.</p>
+          <div class="ds-bundle-price">299 CHF einzeln</div>
+          <span class="ds-bundle-cta">Details ansehen →</span>
+        </a>
+        <a href="/de/datasets/classifications" class="ds-bundle-card">
+          <div class="ds-bundle-meta">Classifications · BFS</div>
+          <h3>NOGA + NACE + ISIC</h3>
+          <p>5 Nomenklaturen + bidirektionale Cross-Walks, 4 Sprachen.</p>
+          <div class="ds-bundle-price">399 CHF einzeln</div>
+          <span class="ds-bundle-cta">Details ansehen →</span>
+        </a>
+        <a href="/de/datasets/finma" class="ds-bundle-card">
+          <div class="ds-bundle-meta">Compliance · FINMA</div>
+          <h3>FINMA Registry</h3>
+          <p>10 Bewilligungslisten vereint, angereichert mit UID + LEI.</p>
+          <div class="ds-bundle-price">299 CHF einzeln</div>
+          <span class="ds-bundle-cta">Details ansehen →</span>
+        </a>
+      </div>
+
+      <div style="margin-top: 20px; padding: 16px 20px; background: var(--bg-card); border: 1px solid var(--line); border-radius: 10px; font-size: 13px; color: var(--ink-soft); line-height: 1.55;">
+        <strong style="color: var(--ink);">+ Im Bundle inklusive:</strong> Standard-Zugriff zum MCP-Server (1 000 Req/Monat während 12 Monaten auf den 9 Basis-Tools — <code style="font-size: 12px;">tariff_lookup</code>, <code style="font-size: 12px;">kyc_check</code>, <code style="font-size: 12px;">cross_walk</code>, <code style="font-size: 12px;">finma_search</code>, <code style="font-size: 12px;">tariff_changelog</code>, <code style="font-size: 12px;">entity_history</code>, <code style="font-size: 12px;">classify_text</code>, <code style="font-size: 12px;">tariff_semantic_search</code>, <code style="font-size: 12px;">statent_lookup</code>). Siehe <a href="/de/mcp" style="color: var(--accent);">MCP-Seite</a> für Details.
+      </div>
+    </section>
+
+    <section class="ds-section reveal-v4" id="detail-ersparnis">
+      <div class="v4-section-eyebrow">
+        <strong>Ersparnis</strong>
+        <span class="sep">/</span>
+        <span>Preisdetails vs. Bundle</span>
+      </div>
+      <h2 class="v4-section-h2">Die <span class="serif">Details</span> der Ersparnis.</h2>
+      <div class="ds-saving-table">
+        <div class="ds-saving-row">
+          <span>TARES</span>
+          <span class="mono">299 CHF</span>
+        </div>
+        <div class="ds-saving-row">
+          <span>Classifications Bundle</span>
+          <span class="mono">399 CHF</span>
+        </div>
+        <div class="ds-saving-row">
+          <span>FINMA Registry</span>
+          <span class="mono">299 CHF</span>
+        </div>
+        <div class="ds-saving-row separator">
+          <span>Total einzeln</span>
+          <span class="mono">997 CHF</span>
+        </div>
+        <div class="ds-saving-row highlight">
+          <span>Komplett-Bundle</span>
+          <span class="mono">797 CHF</span>
+        </div>
+        <div class="ds-saving-row save">
+          <span>Sie sparen</span>
+          <span class="mono">−200 CHF (20 %)</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Updates</strong>
+        <span class="sep">/</span>
+        <span>Keine Bindung</span>
+      </div>
+      <h2 class="v4-section-h2">Die <span class="serif">Updates</span>.</h2>
+      <p class="v4-section-intro">
+        360 Tage Updates für die 3 Datasets im Preis inbegriffen.
+        Danach: Erneuerung pro Dataset (120 CHF/Jahr für TARES und FINMA, 160 CHF/Jahr für Classifications) oder Sie behalten die Versionen, die Sie haben.
+        <strong>Keine Bindung, keine automatische Verlängerung.</strong>
+      </p>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Anwendungsfälle</strong>
+        <span class="sep">/</span>
+        <span>4 typische Profile</span>
+      </div>
+      <h2 class="v4-section-h2">Für <span class="serif">wen</span> ist das Bundle?</h2>
+      <div class="ds-audience-grid">
+        <div class="ds-audience-item">
+          <strong>Vollständige Datenteams</strong>
+          <span>Banken, Versicherungen, FinTech, B2B-Plattformen. Alles unter einem Dach, dieselben Formate, dieselbe Versionierung.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Schweizer SaaS-Anbieter</strong>
+          <span>ERP, CRM, Buchhaltung: die 3 Datasets einmal integrieren, um alle Branchen zu bedienen.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Beratungs- &amp; Anwaltskanzleien</strong>
+          <span>Vollständige Toolbox für Due Diligence, KYC, Zollaudit, Branchenstudien.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Alle, die die DIY-Option abwägen</strong>
+          <span>Wenn Sie schon angefangen haben, eine dieser Quellen zu scrapen, kennen Sie die versteckten Kosten. Das Bundle amortisiert seinen ROI in weniger als einer Woche.</span>
+        </div>
+      </div>
+    </section>
+
+    <ProductFaq productName="Bundle 3-in-1" refundClause="Vollständige Rückerstattung innerhalb von 14 Tagen, sofern keines der 3 ZIP heruntergeladen wurde." />
+
+    <div class="ds-cta" id="kaufen">
+      <form method="POST" action="/api/checkout/start" class="ds-cta-form">
+        <input type="hidden" name="dataset_ids" value="bundle" />
+        <button type="submit" class="v4-btn v4-btn-primary v4-btn-cta">
+          Komplett-Bundle kaufen — 797 CHF
+          <span class="arrow">→</span>
+        </button>
+      </form>
+      <p class="ds-cta-sub">Sichere Zahlung Stripe · 3 sofortige Downloads per E-Mail · Rückerstattung 14 Tage falls keines heruntergeladen · Prioritärer E-Mail-Support inklusive</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bundle-price-strike {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-mute);
+    text-decoration: line-through;
+    margin-bottom: 4px;
+  }
+  .v4-hero.ds-page .ds-price-box .ds-price-box-amount.accent { color: var(--accent); }
+
+  .ds-bundle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 880px) { .ds-bundle-grid { grid-template-columns: 1fr; } }
+
+  .ds-bundle-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    display: block;
+  }
+  .ds-bundle-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+  }
+  .ds-bundle-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--color-ink-mute);
+    margin-bottom: 12px;
+  }
+  .ds-bundle-card h3 {
+    font-size: 18px;
+    margin: 0 0 8px;
+  }
+  .ds-bundle-card p {
+    font-size: 13px;
+    color: var(--color-ink-soft);
+    line-height: 1.55;
+    margin: 0 0 16px;
+  }
+  .ds-bundle-price {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-ink-mute);
+    padding-top: 12px;
+    border-top: 1px solid var(--color-line-soft);
+  }
+  .ds-bundle-cta {
+    display: block;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--color-accent);
+    font-weight: 500;
+  }
+
+  .ds-saving-table {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 8px 24px;
+  }
+  .ds-saving-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    font-size: 14px;
+    color: var(--color-ink-soft);
+  }
+  .ds-saving-row .mono {
+    font-family: var(--font-mono);
+    color: var(--color-ink-soft);
+  }
+  .ds-saving-row.separator {
+    border-top: 1px solid var(--color-line);
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+  .ds-saving-row.separator .mono { color: var(--color-ink); }
+  .ds-saving-row.highlight {
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 16px;
+  }
+  .ds-saving-row.highlight .mono { color: var(--color-ink); font-weight: 600; }
+  .ds-saving-row.save {
+    color: var(--color-accent);
+    font-weight: 600;
+    background: var(--color-accent-soft);
+    margin: 4px -24px -8px;
+    padding: 14px 24px;
+    border-radius: 0 0 14px 14px;
+  }
+  .ds-saving-row.save .mono { color: var(--color-accent); font-weight: 700; }
+  @media (max-width: 540px) {
+    .ds-saving-table { padding: 8px 16px; }
+    .ds-saving-row.save { margin: 4px -16px -8px; padding: 14px 16px; }
+    .ds-saving-row { font-size: 13px; }
+  }
+</style>
+</BaseLayout>

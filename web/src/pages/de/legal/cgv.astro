@@ -1,0 +1,100 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+const lastUpdated = new Date().toISOString().split("T")[0];
+---
+<BaseLayout
+  title="Allgemeine Geschäftsbedingungen — openswissdata.com"
+  description="Allgemeine Geschäftsbedingungen für die Datasets von openswissdata.com (AGB auf Deutsch)."
+>
+  <div class="bg-grid"></div>
+  <section class="legal-page">
+    <div class="container-v4">
+      <div class="legal-content">
+    <nav class="text-sm text-slate-500 mb-4 not-prose">
+      <a href="/de/" class="hover:underline">Startseite</a> · <span>Allgemeine Geschäftsbedingungen</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold mb-2">Allgemeine Geschäftsbedingungen</h1>
+    <p class="text-sm text-slate-500 mb-8">Version 1.1 · Letzte Aktualisierung: {lastUpdated}</p>
+
+    <div class="not-prose rounded-lg border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700 mb-10">
+      <strong>Präambel.</strong> openswissdata.com ist ein unabhängiger privater Dienst. Es bestehen keine Verbindung, keine Partnerschaft und kein Mandatsverhältnis mit BAZG, BFS, FINMA, Eurostat oder den Vereinten Nationen. Die Daten stammen aus öffentlichen Registern und werden mit einem Mehrwert durch Normalisierung, Formatierung und Versionierung republiziert.
+    </div>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">1. Herausgeber und Gegenstand</h2>
+    <p>openswissdata.com wird herausgegeben von Claude-Alain Martin, Einzelunternehmen, Rue de l'Église 23, 1045 Ogens, Schweiz (nachfolgend „der Herausgeber"). Die Website bietet, in Form digitaler Lizenzen, Datasets zum Verkauf an, die aus offiziellen Schweizer und internationalen Quellen abgeleitet sind (nachfolgend „die Datasets").</p>
+    <p>Die vorliegenden Allgemeinen Geschäftsbedingungen („AGB") regeln jede Bestellung eines professionellen Kunden („der Käufer") auf openswissdata.com.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">2. Art der Lizenz</h2>
+    <p>Der Kauf eines Datasets gewährt dem Käufer eine <strong>nicht-exklusive, nicht-übertragbare, perpetuelle Lizenz auf der heruntergeladenen Version</strong>, für interne kommerzielle Zwecke seiner Organisation.</p>
+    <ul class="list-disc pl-6">
+      <li>Der Käufer darf das Dataset in seinen internen Produkten oder Dienstleistungen nutzen, transformieren und integrieren.</li>
+      <li>Der Käufer darf das Dataset <strong>nicht</strong> öffentlich weiterverteilen, weiterverkaufen oder auf Drittplattformen veröffentlichen (Kaggle, data.world, Marktplätze, etc.).</li>
+      <li>Der Käufer darf den Inhalt der Daten (Werte, Codes, Bezeichnungen) <strong>nicht</strong> verändern. Nur die Form (Format, Codierung, Indexierung) kann angepasst werden.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">2bis. Verbot von Unterlizenzen und Wiederverkauf</h2>
+    <p>Der Käufer darf weder eine Unterlizenz, Vermietung, Leihgabe noch eine Bereitstellung des Datasets (ganz oder teilweise) an Dritte gewähren, weder kostenlos noch entgeltlich. Der Wiederverkauf durch Aufteilung ist strikt untersagt. Jede Verletzung dieser Klausel führt zur sofortigen Beendigung der Lizenz ohne Rückerstattung und setzt den Käufer zivilrechtlichen Forderungen für den vom Herausgeber erlittenen Schaden aus.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">3. Updates</h2>
+    <p>Jeder Kauf eines Datasets beinhaltet <strong>360 Tage Zugang zu späteren Versionen</strong> („Updates") ab Kaufdatum. Nach Ablauf dieser Frist kann der Käufer ein jährliches Erneuerungsabonnement abschliessen (Tarif auf jeder Produktseite angegeben, typischerweise 40 % des ursprünglichen Kaufpreises).</p>
+    <p>Der Herausgeber bemüht sich, Updates gemäss der auf der Produktseite angegebenen Kadenz zu veröffentlichen. Es wird keine Garantie für eine genaue Frequenz gegeben.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">4. Preis und Zahlung</h2>
+    <p>Die Preise sind in Schweizer Franken (CHF) angegeben, ohne MWST gegebenenfalls (der Herausgeber ist nicht mehrwertsteuerpflichtig, Art. 10 MWSTG). Die Zahlung wird von Stripe verarbeitet (Kreditkarten, Apple Pay, Google Pay). Bankinformationen werden ausschliesslich über Stripe übertragen und niemals vom Herausgeber gespeichert.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">5. Lieferung</h2>
+    <p>Nach validierter Zahlung erhält der Käufer innerhalb von 5 Minuten eine E-Mail mit einem <strong>signierten Download-Link, gültig 48 Stunden</strong>, für den initialen Download des ZIP. Ein dauerhafter Zugang zu seinen Datasets bleibt zudem jederzeit verfügbar über den Kundenbereich (<a href="/account">/account</a>) per <strong>Magic-Link-Verbindung</strong> (Login-Link per E-Mail, gültig 15 Minuten pro Sitzung, ohne Passwort).</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">5bis. Garantierte technische Lieferungen</h2>
+    <p>Jeder Kauf eines Datasets umfasst die folgenden technischen Artefakte, im gelieferten ZIP garantiert:</p>
+    <ul class="list-disc pl-6">
+      <li><strong>Normalisierte Daten</strong> in den Formaten CSV, JSON, Parquet und SQL — stabiles Schema dokumentiert in <code>schema.json</code> des ZIP.</li>
+      <li><strong>Kryptografische Ed25519-Signatur</strong>, die alle Dateien des ZIP abdeckt (SHA-256-Hash dann Signatur). Der öffentliche Verifizierungsschlüssel ist unter der URL <a href="/.well-known/openswissdata-pubkey.pem" class="text-indigo-600 hover:underline"><code>/.well-known/openswissdata-pubkey.pem</code></a> veröffentlicht und im öffentlichen Referenz-Repository committed.</li>
+      <li><strong>Signiertes Manifest</strong> (<code>manifest.json</code>), das jede Datei mit ihrem SHA-256, ihrer Grösse und ihrem Erzeugungsdatum auflistet.</li>
+      <li><strong>RFC-3161 Zeitstempel</strong> über Time-Stamping Authority (TSA) <code>freetsa.org</code>, der den Zeitpunkt der Signatur unabhängig vom Herausgeber bezeugt.</li>
+      <li><strong>Dokumentierte Provenienz</strong> (<code>provenance.json</code>): URL der offiziellen Quelle, Erfassungsdatum, Hash der Quellversion, Identifikator der BAZG-Bewilligung gegebenenfalls.</li>
+    </ul>
+    <p>Falls eine dieser Lieferungen bei der Auslieferung fehlt oder kryptografisch ungültig ist, kann der Käufer sein Recht auf 14-Tage-Refund ausüben (Abschnitt 6) oder eine neue Lieferung innerhalb von 48 Stunden ohne Kosten verlangen. Siehe <a href="/de/legal/provenance" class="text-indigo-600 hover:underline">/de/legal/provenance</a> für das Verifizierungsverfahren.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">6. Rückerstattung und Widerrufsrecht</h2>
+    <p><strong>14-Tage-Refund ohne Bedingungen.</strong> Vollständige Rückerstattung garantiert innerhalb von 14 Tagen nach Kauf, ohne Bedingungen, ausser wenn der Käufer das ZIP an einen Dritten weitergegeben hat (AGB §2 und §2bis). Anfragen erfolgen per E-Mail an <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>.</p>
+    <p><strong>Widerrufsrecht B2B nicht anwendbar.</strong> Art. 40a OR gilt nur für Verbraucherbeziehungen. Keine Rückerstattung nach Download des Datasets, ausser in Ausnahmefällen (siehe Abschnitt 7) oder im Rahmen des oben erwähnten 14-Tage-Refunds.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">7. Haftungsbeschränkung</h2>
+    <p>Die Datasets werden „wie besehen" (AS-IS) bereitgestellt. Der Herausgeber normalisiert und formatiert Daten aus offiziellen Quellen, <strong>garantiert aber weder die Richtigkeit noch die Vollständigkeit</strong> des Inhalts, der jener der Originalquellen bleibt.</p>
+    <p>Die Haftung des Herausgebers ist strikt auf den <strong>Bestellbetrag</strong> beschränkt. Es wird keine Haftung übernommen für indirekte Schäden, Gewinnausfall oder Folgen von Entscheidungen, die auf Grundlage der Datasets getroffen wurden.</p>
+    <p><strong>Diese Haftungsbeschränkung gilt nicht im Falle von Vorsatz oder grober Fahrlässigkeit des Herausgebers (Art. 100 Abs. 1 OR).</strong></p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">8. Spezielle Bedingungen für das TARES-Dataset</h2>
+    <p>Gemäss der Vereinbarung des Bundesamtes für Zoll und Grenzsicherheit (BAZG) vom 21. April 2026:</p>
+    <ul class="list-disc pl-6">
+      <li>Das TARES-Dataset ist eine <strong>nicht-offizielle Veröffentlichung</strong>. Massgeblich sind allein die Veröffentlichungen der Bundeskanzlei und des BAZG.</li>
+      <li>Der Hinweis <em>„Dies ist keine offizielle Veröffentlichung"</em> ist obligatorisch und steht im README und im LICENSE.txt des Bundles.</li>
+      <li>Das BAZG bietet keine Gewähr und keinen Support für die Interpretation der Daten.</li>
+      <li><strong>Gerichtsstand für jeden Rechtsstreit zum TARES-Dataset: Gerichte in Bern.</strong></li>
+      <li>Die „Erläuterungen" und „Entscheide" des BAZG sind ausdrücklich vom Dataset ausgeschlossen.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">9. Datenschutz</h2>
+    <p>Die erhobenen personenbezogenen Daten (nur E-Mail) werden gemäss der Datenschutzerklärung verarbeitet, verfügbar unter <a href="/de/legal/privacy" class="text-indigo-600 hover:underline">/de/legal/privacy</a>.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">10. Änderung der AGB</h2>
+    <p>Der Herausgeber behält sich das Recht vor, die vorliegenden AGB jederzeit zu ändern. Käufer mit einem laufenden Kauf werden per E-Mail über jede wesentliche Änderung benachrichtigt. Die fortgesetzte Nutzung des Dienstes gilt als Annahme der neuen AGB.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">11. Takedown und Rückzug</h2>
+    <p>openswissdata behält sich das Recht vor, Daten ohne Vorankündigung auf Anfrage einer Quellbehörde (BAZG, BFS, FINMA, Eurostat, Vereinte Nationen) zurückzuziehen, mit anteiliger Rückerstattung an die betroffenen Käufer. Eine öffentliche Verpflichtung zum Rückzug innerhalb von 24 Stunden auf Anfrage einer Quellbehörde ist unter <a href="/de/compliance" class="text-indigo-600 hover:underline">/de/compliance</a> dokumentiert.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">12. Anwendbares Recht und Gerichtsstand</h2>
+    <p>Die vorliegenden AGB unterliegen <strong>Schweizer Recht</strong>. Mit Ausnahme von Streitigkeiten zum TARES-Dataset (Gerichtsstand Bern, siehe Abschnitt 8) fällt jeder Streitfall in die Zuständigkeit des Wohnsitzes des Herausgebers in der Schweiz.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">12bis. Höhere Gewalt</h2>
+    <p>Der Herausgeber kann nicht haftbar gemacht werden für eine vorübergehende Nichtverfügbarkeit des Dienstes im Falle höherer Gewalt, insbesondere: Nichtverfügbarkeit von Stripe oder Resend, Ausfall von Cloudflare R2 oder Railway, Änderung oder Aussetzung der offiziellen Quellen BAZG/BFS/FINMA, Rückzugsanfrage durch eine Quellbehörde, Naturkatastrophe.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">13. Kontakt</h2>
+    <p>Für jede Frage zu den vorliegenden AGB: <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a></p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
