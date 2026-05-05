@@ -3,5 +3,6 @@ Allow: /
 
 Disallow: /account
 Disallow: /api/
+Disallow: /pour-toi/
 
 Sitemap: https://www.openswissdata.com/sitemap-index.xml

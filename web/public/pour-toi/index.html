@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dis-moi franchement ce que tu en penses</title>
+<meta name="description" content="Deux outils suisses pour fiduciaire — j'aimerais ton avis franc avant de continuer.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<style>
+  :root{
+    --ink:#0b1220; --ink-2:#243044; --muted:#5b6678;
+    --bg:#f7f5ef; --card:#ffffff; --line:#e7e2d4;
+    --gold:#b8860b; --gold-2:#8a6508;
+    --red:#b83227; --green:#2e7d32; --blue:#1f4f8a; --beer:#c98a1a;
+    --shadow:0 4px 24px rgba(15,20,30,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:48px 24px 96px}
+  header{text-align:center;padding:24px 0 8px}
+  .badge{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--gold-2);background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:999px}
+  h1{font-size:40px;line-height:1.15;margin:18px 0 10px;font-weight:800;letter-spacing:-.02em}
+  h1 em{font-style:normal;color:var(--gold)}
+  .lede{font-size:18px;color:var(--ink-2);max-width:680px;margin:0 auto}
+  .meta{font-size:13px;color:var(--muted);margin-top:18px}
+
+  .perso{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:14px;padding:22px 24px;margin:36px 0 8px;box-shadow:var(--shadow)}
+  .perso h2{margin:0 0 8px;font-size:19px}
+  .perso p{margin:0 0 8px;color:var(--ink-2);font-size:15.5px}
+  .perso p:last-child{margin:0}
+  .perso .sig{margin-top:10px;font-size:14px;color:var(--muted)}
+
+  /* shock stats */
+  .shock{margin-top:36px;padding:28px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+  .shock h2{margin:0 0 4px;font-size:22px}
+  .shock .sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .stat{background:#fbf8ee;border-left:3px solid var(--red);padding:14px 16px;border-radius:6px}
+  .stat .big{font-size:26px;font-weight:800;color:var(--red);line-height:1.1}
+  .stat .lbl{font-size:13.5px;color:var(--ink-2);margin-top:6px}
+  .stat .src{font-size:11px;color:var(--muted);margin-top:8px}
+  .stat .src a{color:var(--muted)}
+
+  .hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:36px 0 8px}
+  .tool{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+  .tool h3{margin:0 0 6px;font-size:18px}
+  .tool p{margin:0;color:var(--ink-2);font-size:14.5px}
+  .tool .ic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+  .tool.a .ic{background:#fff7e6}
+  .tool.b .ic{background:#eaf3ff}
+
+  /* tier blocks */
+  section.tier{margin-top:56px}
+  section.tier > h2{font-size:26px;margin:0 0 4px}
+  section.tier > .sub{color:var(--muted);margin:0 0 22px}
+  .tlabel{display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    background:#0b1220;color:#fff;padding:4px 10px;border-radius:999px;margin-bottom:8px}
+  .tlabel.t2{background:#3d4a63}
+  .tlabel.t3{background:#7a857a}
+
+  .case{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:14px;
+    display:grid;grid-template-columns:54px 1fr;gap:16px;box-shadow:var(--shadow)}
+  .case .icon{width:46px;height:46px;border-radius:10px;background:#fff7e6;display:flex;align-items:center;justify-content:center}
+  .case h3{margin:0 0 6px;font-size:17.5px}
+  .case .tag{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gold-2);margin-right:8px}
+  .case p{margin:6px 0;color:var(--ink-2);font-size:14.5px}
+  .case .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .case .box{padding:10px 12px;border-radius:6px;font-size:13.5px}
+  .case .box.now{background:#fbf2f0;border-left:3px solid var(--red)}
+  .case .box.with{background:#eef7ee;border-left:3px solid var(--green)}
+  .case .box strong{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
+  .case .tools{margin-top:10px;font-size:12.5px;color:var(--muted)}
+  .case .tools b{color:var(--ink-2);font-weight:600}
+
+  /* déjà chez toi */
+  .deja{margin-top:56px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow)}
+  .deja h2{margin:0 0 6px;font-size:22px}
+  .deja .sub{color:var(--muted);margin:0 0 18px}
+  .deja-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .deja-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fbf8ee}
+  .deja-card h4{margin:0 0 6px;font-size:15px}
+  .deja-card p{margin:0;color:var(--ink-2);font-size:14px}
+  .deja-card.diff{background:#eef7ee;border-color:#cbe2cc}
+
+  /* intégration */
+  .integ{margin-top:56px}
+  .integ h2{margin:0 0 6px;font-size:26px}
+  .integ .sub{color:var(--muted);margin:0 0 22px}
+  .integ-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .integ-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);position:relative}
+  .integ-card .lvl{position:absolute;top:-10px;right:14px;background:#0b1220;color:#fff;font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;padding:4px 10px;border-radius:999px}
+  .integ-card h4{margin:0 0 6px;font-size:16px}
+  .integ-card .who{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+  .integ-card p{margin:0;color:var(--ink-2);font-size:14px}
+  .integ-card ul{margin:8px 0 0 18px;padding:0;color:var(--ink-2);font-size:13.5px}
+
+  /* honnêteté */
+  .truth{margin-top:48px;background:#fbf8ee;border:1px dashed var(--gold);border-radius:16px;padding:28px}
+  .truth h2{margin:0 0 6px;font-size:22px;color:var(--gold-2)}
+  .truth p{color:var(--ink-2);margin:0 0 12px;font-size:15px}
+  .truth ul{margin:8px 0 0 22px;padding:0;color:var(--ink-2);font-size:14.5px}
+  .truth li{margin-bottom:6px}
+
+  /* avis franc */
+  .avis{margin-top:48px;background:#0b1220;color:#fff;border-radius:16px;padding:32px}
+  .avis h2{margin:0 0 8px;font-size:24px}
+  .avis p{margin:0 0 14px;color:#cdd5e0;font-size:15.5px}
+  .avis ul{margin:0 0 16px 22px;padding:0;color:#e3e8f0}
+  .avis ul li{margin-bottom:6px}
+  .avis em{color:#fff;font-style:normal;font-weight:600}
+
+  /* CTA bière */
+  .cta{margin-top:32px;text-align:center;padding:32px 24px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:var(--shadow)}
+  .cta .beer{font-size:48px;line-height:1;margin-bottom:8px}
+  .cta h2{margin:0 0 6px;font-size:22px}
+  .cta p{margin:0;color:var(--ink-2);max-width:560px;margin-left:auto;margin-right:auto}
+
+  footer{margin-top:48px;text-align:center;color:var(--muted);font-size:13px}
+  footer a{color:var(--ink-2)}
+
+  @media (max-width:640px){
+    h1{font-size:30px}
+    .hero,.stat-grid,.deja-grid,.integ-row{grid-template-columns:1fr}
+    .case{grid-template-columns:1fr}
+    .case .icon{width:40px;height:40px}
+    .case .row2{grid-template-columns:1fr}
+    .wrap{padding:28px 18px 64px}
+  }
+  @media print{
+    body{background:#fff}
+    .case,.tool,.shock,.cta,.avis,.perso,.deja,.integ-card,.truth{box-shadow:none;break-inside:avoid}
+    .avis{background:#fff;color:#000;border:1px solid #000}
+    .avis p,.avis ul{color:#222}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge">Salut — j'aimerais ton avis</span>
+  <h1>Deux outils que j'ai construits<br><em>— et toi qui es du métier, tu en penses quoi ?</em></h1>
+  <p class="lede">Je t'envoie ce résumé pour que tu puisses lire tranquille, et qu'on en parle autour d'une bière au village.</p>
+  <p class="meta">Lecture : 6 minutes · Tout est en français · Cas vérifiés contre les vraies capacités</p>
+</header>
+
+<!-- Note personnelle -->
+<div class="perso">
+  <h2>Pourquoi je te demande à toi</h2>
+  <p>Je sais que tu n'as pas attendu mes outils pour faire tourner ta boîte. Tu as déjà ton logiciel comptable, tes process, ton équipe formée, tes habitudes. Et c'est exactement pour ça que j'aimerais ton retour : <strong>est-ce que ce que je décris ici a un sens dans la vraie vie d'une fiduciaire</strong>, ou est-ce que je rame dans la semoule ?</p>
+  <p>J'ai même fait challenger mes propres pages par mes outils techniques pour vérifier que je ne survends pas. Trois cas que je présentais ne sont pas encore vraiment livrables — je te les ai mis dans une section "ce qui est encore en construction" plus bas, en toute transparence.</p>
+  <p>Je préfère que tu me dises franchement "ça sert à rien chez nous" plutôt que tu sois poli. Tu me connais.</p>
+  <p class="sig">— Claude-Alain</p>
+</div>
+
+<!-- SHOCK STATS -->
+<div class="shock">
+  <h2>Le contexte chiffré (Suisse, 2024-2025)</h2>
+  <p class="sub">Pas de bullshit, sources cliquables.</p>
+  <div class="stat-grid">
+    <div class="stat">
+      <div class="big">17 M€</div>
+      <div class="lbl">volés à des PME romandes par la seule fraude « au président » depuis 2022 — dont 6,5 M€ rien que dans le canton de Vaud (36 cas), 6 M€ à Neuchâtel.</div>
+      <div class="src">État de Vaud, mai 2025</div>
+    </div>
+    <div class="stat">
+      <div class="big">+35 %</div>
+      <div class="lbl">de fraude CEO en un an au niveau suisse : 971 cas signalés à l'OFCS en 2025 contre 719 en 2024. Un seul cas schwytzois = plusieurs millions perdus via deepfake audio.</div>
+      <div class="src">OFCS / NCSC, semaine 4 / 2026</div>
+    </div>
+    <div class="stat">
+      <div class="big">&lt; 1 %</div>
+      <div class="lbl">des montants détournés sont récupérés. L'argent part sur des comptes relais à l'étranger et est blanchi en 48 h.</div>
+      <div class="src">Police cantonale Vaud / Europol</div>
+    </div>
+  </div>
+</div>
+
+<!-- Hero : les 2 outils -->
+<div class="hero">
+  <div class="tool a">
+    <div class="ic">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 7l9-4 9 4-9 4-9-4z" stroke="#b8860b" stroke-width="1.8"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4" stroke="#b8860b" stroke-width="1.8"/></svg>
+    </div>
+    <h3>openswissdata</h3>
+    <p>Données fédérales suisses normalisées : codes douaniers TARES, registre FINMA, classifications NOGA/NACE. Disponibles en API live (l'IA les interroge à la volée) ou en dataset téléchargeable signé numériquement (intégration interne, à jour 360 jours).</p>
+  </div>
+  <div class="tool b">
+    <div class="ic">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="#1f4f8a" stroke-width="1.8"/><path d="M3 10h18M7 15h4" stroke="#1f4f8a" stroke-width="1.8"/></svg>
+    </div>
+    <h3>IBANforge</h3>
+    <p>API IBAN/BIC + clearing suisse (BC-Nummer 1 190 entrées SIX, unique au monde) + bundle compliance : sanctions OFAC/UE/ONU/SECO, FATF, vérification SEPA, risk score 0-100. Temps de réponse moyen : 200 ms.</p>
+  </div>
+</div>
+
+<!-- TIER 1 -->
+<section class="tier">
+  <span class="tlabel">Tier 1 — Fit fort, fréquence élevée</span>
+  <h2>Les 5 cas qui devraient te parler en premier</h2>
+  <p class="sub">Ceux où le produit existe vraiment, pas de roadmap.</p>
+
+  <!-- Cas 1 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke="#b83227" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="#b83227" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Anti-fraude · Cas massue 2026</span>
+      <h3>1. Bouclier contre la fraude au faux fournisseur</h3>
+      <p>La fraude au faux RIB explose : <strong>+44 %</strong> en un an. La VoP (correspondance nom-IBAN) est obligatoire dans la zone euro depuis le 9 octobre 2025, mais la Suisse n'est couverte qu'à partir de juillet 2027. Pendant ces 21 mois, ton e-banking ne vérifie pas que l'IBAN appartient bien au fournisseur indiqué sur la facture.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Mail "nouveau RIB" reçu par la compta du client → on saisit dans Bexio → la banque exécute. Le faux IBAN passe.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Copier-coller l'IBAN dans Claude/ChatGPT → réponse en 2 sec : risk score, pays, banque, statut sanctions. Coût d'une seule fraude évitée = des années d'abonnement.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> IBANforge — validate + compliance bundle (sanctions, SEPA, risk score)</div>
+    </div>
+  </div>
+
+  <!-- Cas 2 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="#1f4f8a" stroke-width="1.8"/><path d="M3 10h18M8 3v4M16 3v4" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Reprise de mandat</span>
+      <h3>2. Nettoyer la base fournisseurs d'un nouveau client en 10 minutes</h3>
+      <p>Quand tu reprends une compta, tu hérites d'une base fournisseurs souvent saisie à la main, sans validation. Pour 100-400 fournisseurs typiques, c'est 1-2 jours de travail à un junior pour vérifier à la main.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Junior qui vérifie à la main les IBAN un par un, sans pouvoir détecter les sanctions ni les BIC manquants. 1-2 jours.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Export Bexio/Abacus → batch de 100 IBANs en un appel → liste propre + BIC manquants récupérés + flags sanctions. 10 minutes.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> IBANforge — batch (max 100 IBANs/appel) + lookup BIC GLEIF</div>
+    </div>
+  </div>
+
+  <!-- Cas 3 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke="#b8860b" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="#b8860b" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">LBA · Onboarding contrepartie</span>
+      <h3>3. Vérifier qu'un gestionnaire de fortune mandaté est bien autorisé FINMA</h3>
+      <p>Cas vécu fréquent : ton client industriel vend sa boîte, encaisse plusieurs millions, te demande de jeter un œil au "gestionnaire de fortune" qu'on lui a recommandé. Sur 1 864 demandes LEFin déposées, 1 532 ont été approuvées au 28 février 2025 — il en reste plus de 300 refusées, retirées ou en cours.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>3 recherches manuelles : registre FINMA + OAR d'affiliation + warning list. 15-20 min, copie d'écran datée pour le dossier KYC.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Saisie du nom ou IDE → statut consolidé + date d'autorisation + OAR + historique des changements 2020-2026. 30 secondes.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> openswissdata — kyc_check + finma_search + entity_history (MCP live ou dataset offline)</div>
+    </div>
+  </div>
+
+  <!-- Cas 4 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 12l9-9 9 9M5 10v10h14V10" stroke="#b8860b" stroke-width="1.8"/><path d="M9 20v-6h6v6" stroke="#b8860b" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Salaires · Run paie mensuel</span>
+      <h3>4. Détecter un IBAN salarial modifié juste avant la paie</h3>
+      <p>Schéma de fraude documenté par UBS : usurpation d'employé, mail au RH demandant changement de coordonnées bancaires juste avant la paie. Pour un client avec 30-80 employés, le détournement coûte 5-15 K CHF par cas, et ton équipe paie pour ses clients.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>L'export DTA/ISO 20022 part sans contrôle. La banque exécute. La fraude se découvre quand l'employé légitime appelle le 28 du mois.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Avant l'export, batch de 80 IBANs → flag automatique sur ceux modifiés depuis le mois précédent. Tu valides à la main les seuls suspects.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> IBANforge — batch + comparaison historique côté client</div>
+    </div>
+  </div>
+
+  <!-- Cas 5 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="#1f4f8a" stroke-width="1.8"/><path d="M8 22h8M12 18v4" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Productivité · Levier IA</span>
+      <h3>5. Donner à ton équipe un assistant IA qui sait vraiment</h3>
+      <p>Tes collaborateurs utilisent peut-être déjà ChatGPT/Claude pour rédiger ou résumer. Mais quand ils demandent "vérifie cet IBAN" ou "trouve le code douanier de ce produit", l'IA <em>invente</em>. Avec mes outils branchés via le protocole MCP, l'IA appelle pour de vrai les bonnes sources et te donne une réponse vérifiée.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>L'équipe utilise l'IA pour rédiger, mais doit toujours vérifier les chiffres et données ailleurs.</div>
+        <div class="box with"><strong>Avec l'outil</strong>"Vérifie ces 80 IBAN du fichier Excel et trouve-moi le code douanier de ces 4 produits" → l'IA fait tout et cite les sources. 0 jargon, 0 logiciel à installer.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> MCP servers IBANforge (5 outils) + openswissdata (9 outils) — branchés à ChatGPT Pro/Team ou Claude</div>
+    </div>
+  </div>
+</section>
+
+<!-- TIER 2 -->
+<section class="tier">
+  <span class="tlabel t2">Tier 2 — Fit moyen, ponctuel mais valorisant</span>
+  <h2>4 cas qui te font passer pour le pro de la branche</h2>
+  <p class="sub">Pas chaque jour, mais quand le client appelle, tu as la réponse en 2 minutes au lieu de 30.</p>
+
+  <!-- Cas 6 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b8860b" stroke-width="1.8"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18" stroke="#b8860b" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Douane · TVA importation</span>
+      <h3>6. Trancher entre 2,6 % et 8,1 % de TVA importation</h3>
+      <p>Le levier réel post-2024 (les droits industriels sont à 0 %) c'est <strong>la TVA importation</strong>. Exemple concret : ton client importe des compléments alimentaires d'Allemagne, en gélules ou en boisson à diluer. Le mauvais code = 5,5 points de TVA d'écart sur la valeur CIF, et un audit BAZG qui remonte 3-4 ans.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Junior dans tares.bazg.admin.ch, navigation manuelle dans les chapitres 21 et 22, 25-40 min. Souvent il escalade au patron parce qu'il n'ose pas trancher.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Description produit → top 3 codes HS8 candidats avec taux TVA correspondant + lien vers la décision BAZG la plus récente. Le junior tranche seul, le patron valide.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> openswissdata — tariff_semantic_search + tariff_lookup HS8 (permission BAZG validée)</div>
+    </div>
+  </div>
+
+  <!-- Cas 7 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#1f4f8a" stroke-width="1.8"/><path d="M3 12h18" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Douane · ALE · Conseil</span>
+      <h3>7. Vérifier l'origine préférentielle pour les réexports vers l'UE</h3>
+      <p>Ta cliente PME assemble en Suisse à partir de composants chinois et hongrois, puis réexporte en France. Une erreur d'origine = redressement TVA français + droits de douane rétroactifs. La Suisse a 34 ALE, beaucoup de PME ne les utilisent pas par méconnaissance.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Vérification cas par cas dans TARES + accord ALE Suisse-UE + règles de cumul. 1-2 h, le comptable finit par appeler la centrale BAZG (058 467 15 15) ou délègue au transitaire.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Code HS + pays d'origine des composants → réponse oui/non sur l'éligibilité préférentielle + seuil de transformation. Le contrôle reste interne, tu factures la prestation.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> openswissdata — tariff_lookup HS8 + régimes préférentiels (30+ accords)</div>
+    </div>
+  </div>
+
+  <!-- Cas 8 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V10l7-5 7 5v11" stroke="#1f4f8a" stroke-width="1.8"/><path d="M10 21v-6h4v6" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Constitution · SUVA · NACE</span>
+      <h3>8. Choisir le bon code NOGA pour éviter une surprime SUVA pendant 3 ans</h3>
+      <p>Cas peu connu : le code NOGA décide la classe de risque LAA. Code 4333 (revêtements de sols) ≠ 4719 (commerce de détail) : à masse salariale égale, l'écart de prime accident professionnel se chiffre <strong>en milliers de CHF/an</strong>. Si la création est mal libellée, la surprime tourne pendant 3 ans avant qu'on s'en rende compte.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Recherche manuelle dans la doc OFS NOGA 2008 (PDF 200+ pages), arbitrage "au feeling". La SUVA classe, le client paie.</div>
+        <div class="box with"><strong>Avec l'outil</strong>"pose carrelage + petit commerce produits entretien" → top 3 codes NOGA + correspondance NACE pour les filiales UE. Choix documenté, justifiable face à la SUVA.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> openswissdata — classify_text + cross_walk NOGA ↔ NACE ↔ ISIC</div>
+    </div>
+  </div>
+
+  <!-- Cas 9 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18" stroke="#2e7d32" stroke-width="1.8"/><path d="M7 15l4-4 3 3 5-7" stroke="#2e7d32" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Diff TARES · Acte commercial annuel</span>
+      <h3>9. Le rituel "ce qui a changé sur tes codes douaniers en 2026"</h3>
+      <p>Pas une alerte automatique (ça je ne sais pas faire encore), mais un <strong>rituel manuel à valeur ajoutée</strong> : en janvier, tu passes 30 min sur tes 5-10 clients import/export et tu génères un diff TARES année N vs N-1 sur leurs codes habituels. Note de 1 page par client : "voici ce qui a bougé, voici l'impact sur ta marge".</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Personne ne lit les ordonnances DEFR/OFAG. Le client découvre l'écart en avril quand les factures de transitaire arrivent.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Liste des codes HS du client → diff année N/N-1 en 5 lignes. Tu factures 250 CHF la note, le client adore.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> openswissdata — tariff_changelog (lecture du diff entre versions)</div>
+    </div>
+  </div>
+</section>
+
+<!-- TIER 3 -->
+<section class="tier">
+  <span class="tlabel t3">Tier 3 — Cas plus rares mais utiles</span>
+  <h2>2 cas en bonus</h2>
+  <p class="sub">Si tu vois passer ces situations, tu sais que c'est traité.</p>
+
+  <!-- Cas 10 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="#1f4f8a" stroke-width="1.8"/><path d="M8 8h8v8H8z" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">QR-facture suspecte</span>
+      <h3>10. Authentifier un QR-IBAN inhabituel reçu par un client</h3>
+      <p>Les QR-factures suisses utilisent un préfixe IBAN spécifique. Tes clients t'appellent : "ce QR-code dans ma boîte aux lettres ressemble bizarre, je paie ?". L'OFCS a documenté des fausses factures postales jusqu'à 5 400 CHF avec QR manipulé.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Appel banque + recherche manuelle + doute. 20 min, et parfois on paie en croisant les doigts.</div>
+        <div class="box with"><strong>Avec l'outil</strong>QR-IBAN → identification de l'établissement via BC-Nummer/QR-IID (1 190 entrées SIX, unique au monde). 2 minutes, certitude.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> IBANforge — lookup_ch_clearing (BC-Nummer SIX, le seul produit public au monde)</div>
+    </div>
+  </div>
+
+  <!-- Cas 11 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b8860b" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="#b8860b" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Audit OAR annuel</span>
+      <h3>11. Reconstituer l'historique d'autorisation FINMA d'un mandataire</h3>
+      <p>Quand l'auditeur OAR débarque, il faut prouver qu'à la date du mandat (parfois 2022), la contrepartie était bien autorisée. Le registre FINMA n'expose que l'état actuel — sans historique tu perds la traçabilité, et l'auditeur s'en contente trop souvent.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Remonter les communiqués FINMA un par un, ou demander au gestionnaire (qui répond ce qu'il veut). En pratique, traçabilité perdue.</div>
+        <div class="box with"><strong>Avec l'outil</strong>IDE → timeline 2020-2026 (date d'autorisation, changements d'OAR, retraits). Preuve datable au dossier.</div>
+      </div>
+      <div class="tools"><b>Capacités utilisées :</b> openswissdata — entity_history</div>
+    </div>
+  </div>
+</section>
+
+<!-- Honnêteté -->
+<div class="truth">
+  <h2>⚠ Ce qui n'est PAS encore livrable (transparence totale)</h2>
+  <p>J'ai fait challenger ma propre page par mes outils techniques. Trois fonctionnalités que j'avais imprudemment listées dans la première version ne sont <strong>pas encore disponibles</strong> aujourd'hui :</p>
+  <ul>
+    <li><strong>Surveillance continue automatique</strong> de ton portefeuille clients (re-check quotidien FINMA + sanctions). Ça nécessite un système d'alertes côté serveur que je n'ai pas implémenté. Pour l'instant : lookup à la demande uniquement.</li>
+    <li><strong>Newsletter automatique des changements TARES par branche</strong>. Je peux faire le diff (cas 9), mais l'envoi automatisé n'existe pas encore.</li>
+    <li><strong>Benchmarks statistiques fédéraux BFS</strong> (vs. la branche, vs. le canton). Permission BFS demandée le 17 avril 2026, en attente. Pas avant Q3 2026 au mieux.</li>
+  </ul>
+  <p style="margin-top:14px"><em>Si tu vois autre chose qui ne te semble pas crédible dans les cas 1 à 11, dis-le moi. C'est précisément pour ça que je te demande ton avis avant de mettre ça en mains commerciales.</em></p>
+</div>
+
+<!-- Tu utilises déjà... -->
+<div class="deja">
+  <h2>"Mais on a déjà des outils, non ?"</h2>
+  <p class="sub">Oui, tu utilises sûrement déjà certains. Voilà précisément ce que mes outils ajoutent — et ce qu'ils n'ajoutent pas.</p>
+  <div class="deja-grid">
+    <div class="deja-card">
+      <h4>E-banking (UBS, Raiffeisen, PostFinance, BCV…)</h4>
+      <p>Vérifie le format mathématique de l'IBAN. <em>Aucun contrôle sanctions visible côté client.</em> VoP zone euro depuis oct. 2025 chez certaines banques, mais <em>aucune obligation pour les paiements CHF intra-suisses</em> avant juillet 2027.</p>
+    </div>
+    <div class="deja-card">
+      <h4>Bexio, Abacus, Crésus, Topal, WinBIZ</h4>
+      <p>Stocke la fiche fournisseur. <em>Aucune détection si l'IBAN d'un fournisseur connu change silencieusement</em>. Aucun screening sanctions natif. Aucune correspondance nom titulaire ↔ nom facture.</p>
+    </div>
+    <div class="deja-card">
+      <h4>Zefix / Moneyhouse</h4>
+      <p>Top pour le RC, mais <em>pas de croisement automatique</em> avec FINMA + sanctions OFAC/UE/SECO + warnings + classifications européennes. Pas d'historique d'autorisation FINMA.</p>
+    </div>
+    <div class="deja-card">
+      <h4>Outils LBA pro (World-Check, Trustpair, KYC Spider…)</h4>
+      <p>Très complets mais prix gros corporate <em>(5 000 - 30 000 CHF/an)</em>, contrats annuels, intégration ERP lourde. Mes outils visent le coût d'un café par jour pour ta taille.</p>
+    </div>
+    <div class="deja-card diff">
+      <h4>✓ Ce que mes outils ajoutent vraiment</h4>
+      <p>Le <em>croisement automatique</em> entre 4 sources publiques officielles (FINMA + sanctions + douane + classifications) en un seul appel, accessible directement dans le ChatGPT/Claude que ton équipe utilise déjà — pas de logiciel à installer.</p>
+    </div>
+    <div class="deja-card diff">
+      <h4>✓ Le truc unique au monde</h4>
+      <p>Le numéro de clearing suisse (BC-Nummer / QR-IID, <em>1 190 entrées SIX</em>) — aucune autre solution publique ne le propose. Utile pour les QR-factures et la conformité SIC.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Comment ça s'intègre -->
+<section class="integ">
+  <h2>"OK, mais comment je l'utilise concrètement ?"</h2>
+  <p class="sub">Trois niveaux d'intégration possibles, du plus simple au plus poussé. Tu choisis selon ton appétit.</p>
+  <div class="integ-row">
+    <div class="integ-card">
+      <span class="lvl">Niveau 1</span>
+      <h4>Site web public</h4>
+      <p class="who">Pour ton équipe, zéro installation</p>
+      <p>Ton équipe ouvre une page web, colle un IBAN ou une description produit, obtient la réponse. Comme un Google spécialisé fiduciaire. Utilisable demain matin.</p>
+      <ul>
+        <li>Aucune installation</li>
+        <li>Formation : 5 minutes</li>
+        <li>Coût : abonnement mensuel</li>
+      </ul>
+    </div>
+    <div class="integ-card">
+      <span class="lvl">Niveau 2</span>
+      <h4>Branché à ChatGPT / Claude</h4>
+      <p class="who">Si ton équipe utilise déjà l'IA</p>
+      <p>L'équipe parle en français à son IA habituelle ("vérifie ces 80 IBAN"), l'IA appelle automatiquement les bons outils et te ressort un tableau vérifié. Pas inventé.</p>
+      <ul>
+        <li>Configuration : 10 min (Claude Pro, ChatGPT Team)</li>
+        <li>L'équipe garde son interface habituelle</li>
+        <li>Coût : abonnement mensuel</li>
+      </ul>
+    </div>
+    <div class="integ-card">
+      <span class="lvl">Niveau 3</span>
+      <h4>Intégré dans ton logiciel</h4>
+      <p class="who">Idéal long terme</p>
+      <p>Mes outils sont branchés dans Bexio / Abacus / votre app interne. La vérification se déclenche automatiquement à la saisie d'une facture ou d'un nouveau client.</p>
+      <ul>
+        <li>Demande un développeur (1-3 jours de travail)</li>
+        <li>Aucun changement pour l'équipe</li>
+        <li>Coût : abonnement + intégration ponctuelle</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Avis franc -->
+<div class="avis">
+  <h2>Ce que j'attends de toi (vraiment)</h2>
+  <p>Pas un avis poli. Un avis de patron de fiduciaire qui tourne avec une équipe et une vraie réalité de terrain.</p>
+  <ul>
+    <li><em>Lesquels des 11 cas</em> te parlent vraiment, et lesquels sont à côté de la plaque ou résolus depuis longtemps chez toi ?</li>
+    <li><em>Qu'est-ce qui manque</em> et que tu vois passer chaque semaine sans solution propre ?</li>
+  </ul>
+  <p>Si la réponse est "rien de tout ça ne sert", je préfère le savoir maintenant.</p>
+</div>
+
+<!-- CTA bière -->
+<div class="cta">
+  <div class="beer">🍺</div>
+  <h2>On en parle autour d'une bière ?</h2>
+</div>
+
+<footer>
+  Document préparé pour un avis entre amis · Mai 2026 · openswissdata.com · ibanforge.com<br>
+  Sources des chiffres : État de Vaud, OFCS/NCSC, Swiss Banking, FINMA, BAZG. Toutes les capacités listées sont vérifiables en live.
+</footer>
+
+</div>
+</body>
+</html>
