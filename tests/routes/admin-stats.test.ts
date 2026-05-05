@@ -27,8 +27,12 @@ describe("GET /api/admin/stats", () => {
       .run(token, cid, now + 3600_000, now);
     db.prepare("INSERT INTO datasets (id, name, slug, price_chf, stripe_price_id, current_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
       .run("tares", "TARES", "tares", 29900, "p_t", "2026.04.22", now);
+    // Live order
     const order = db.prepare("INSERT INTO orders (customer_id, stripe_session_id, amount_chf, items_json, status, created_at) VALUES (?, ?, ?, ?, 'paid', ?)")
-      .run(cid, "cs_t", 29900, JSON.stringify(["tares"]), now);
+      .run(cid, "cs_live_abc", 29900, JSON.stringify(["tares"]), now);
+    // Test-mode order — must NOT be counted in live revenue.
+    db.prepare("INSERT INTO orders (customer_id, stripe_session_id, amount_chf, items_json, status, created_at) VALUES (?, ?, ?, ?, 'paid', ?)")
+      .run(cid, "cs_test_xyz", 29900, JSON.stringify(["tares"]), now);
     db.prepare("INSERT INTO entitlements (customer_id, dataset_id, order_id, updates_until, created_at) VALUES (?, ?, ?, ?, ?)")
       .run(cid, "tares", Number(order.lastInsertRowid), now + 360 * 24 * 3600 * 1000, now);
     db.prepare(`INSERT INTO events (kind, name, status, duration_ms, ts, country, ua_class, visitor_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
@@ -60,9 +64,13 @@ describe("GET /api/admin/stats", () => {
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body.window.days).toBe(30);
-    // Revenue from the seeded paid order
+    // Revenue split: 1 live + 1 test. Live KPI must show only the live one.
     expect(body.revenue.orders_count).toBe(1);
     expect(body.revenue.revenue_chf).toBe(29900);
+    expect(body.revenue.test_orders_count).toBe(1);
+    expect(body.revenue.test_revenue_chf).toBe(29900);
+    expect(body.revenueAllTime.revenue_chf).toBe(29900);
+    expect(body.revenueAllTime.test_revenue_chf).toBe(29900);
     expect(body.customers.total).toBeGreaterThanOrEqual(1);
     expect(body.entitlementsPerDataset.find((d: { id: string }) => d.id === "tares").count).toBe(1);
     expect(body.apiTraffic.total_requests).toBeGreaterThanOrEqual(1);

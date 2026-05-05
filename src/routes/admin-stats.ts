@@ -30,32 +30,49 @@ adminStatsRoute.get("/", async (c) => {
   const db = getDb();
 
   // --- Revenue / orders ---
+  // Stripe distinguishes test vs live by the session ID prefix:
+  //   cs_test_*  → test-mode dashboard (fake money)
+  //   cs_live_*  → production (real money)
+  // We split the rollup so a pre-launch dashboard isn't drowned in fake revenue.
+  const isTest = `stripe_session_id LIKE 'cs_test_%'`;
+  const isLive = `stripe_session_id LIKE 'cs_live_%'`;
+
   const revenue = db.prepare(`
     SELECT
-      COUNT(*)                 AS orders_count,
-      COALESCE(SUM(amount_chf),0) AS revenue_chf,
-      COUNT(DISTINCT customer_id) AS paying_customers
+      SUM(CASE WHEN ${isLive} THEN 1 ELSE 0 END)                         AS orders_count,
+      COALESCE(SUM(CASE WHEN ${isLive} THEN amount_chf ELSE 0 END),0)    AS revenue_chf,
+      COUNT(DISTINCT CASE WHEN ${isLive} THEN customer_id END)           AS paying_customers,
+      SUM(CASE WHEN ${isTest} THEN 1 ELSE 0 END)                         AS test_orders_count,
+      COALESCE(SUM(CASE WHEN ${isTest} THEN amount_chf ELSE 0 END),0)    AS test_revenue_chf
     FROM orders
     WHERE created_at >= ? AND status = 'paid'
-  `).get(since) as { orders_count: number; revenue_chf: number; paying_customers: number };
+  `).get(since) as {
+    orders_count: number; revenue_chf: number; paying_customers: number;
+    test_orders_count: number; test_revenue_chf: number;
+  };
 
   const revenueAllTime = db.prepare(`
     SELECT
-      COUNT(*) AS orders_count,
-      COALESCE(SUM(amount_chf),0) AS revenue_chf,
-      COUNT(DISTINCT customer_id) AS paying_customers
+      SUM(CASE WHEN ${isLive} THEN 1 ELSE 0 END)                         AS orders_count,
+      COALESCE(SUM(CASE WHEN ${isLive} THEN amount_chf ELSE 0 END),0)    AS revenue_chf,
+      COUNT(DISTINCT CASE WHEN ${isLive} THEN customer_id END)           AS paying_customers,
+      SUM(CASE WHEN ${isTest} THEN 1 ELSE 0 END)                         AS test_orders_count,
+      COALESCE(SUM(CASE WHEN ${isTest} THEN amount_chf ELSE 0 END),0)    AS test_revenue_chf
     FROM orders
     WHERE status = 'paid'
-  `).get() as { orders_count: number; revenue_chf: number; paying_customers: number };
+  `).get() as {
+    orders_count: number; revenue_chf: number; paying_customers: number;
+    test_orders_count: number; test_revenue_chf: number;
+  };
 
-  // Daily revenue for the bar chart
+  // Daily revenue for the bar chart — live only (test mode would distort it).
   const revenueDaily = db.prepare(`
     SELECT
       strftime('%Y-%m-%d', datetime(created_at/1000, 'unixepoch')) AS day,
       COUNT(*)              AS orders,
       SUM(amount_chf)       AS revenue_chf
     FROM orders
-    WHERE created_at >= ? AND status = 'paid'
+    WHERE created_at >= ? AND status = 'paid' AND ${isLive}
     GROUP BY day
     ORDER BY day ASC
   `).all(since) as Array<{ day: string; orders: number; revenue_chf: number }>;
