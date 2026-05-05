@@ -1,41 +1,55 @@
+# === noga_2025 (30 codes — section K Finance + section O Administration publique) ===
 scheme,code,level,parent,label_fr,label_de,label_it,label_en
-NOGA_2025,K,section,,Activités financières et d'assurance,Finanz- und Versicherungsdienstleistungen,Attività finanziarie e assicurative,
-NOGA_2025,64,division,K,"Activités des services financiers, hors assurance","Erbringung von Finanzdienstleistungen, ohne Versicherungen",Servizi finanziari (esclusi assicurazioni),
-NOGA_2025,641,group,64,Intermédiation monétaire,Zentralbanken und Kreditinstitute,Intermediazione monetaria,
-NOGA_2025,6411,class,641,Activités de banque centrale,Zentralbanken,Attività della banca centrale,
-NOGA_2025,6412,class,641,Autres intermédiations monétaires,Kreditinstitute (ohne Spezialkreditinstitute),Altre intermediazioni monetarie,
-NOGA_2025,642,group,64,Activités des sociétés holding,Holdinggesellschaften,Attività delle società di partecipazione,
-NOGA_2025,6420,class,642,Activités des sociétés holding,Holdinggesellschaften,Attività delle società di partecipazione,
-NOGA_2025,O,section,,Administration publique,Öffentliche Verwaltung,Amministrazione pubblica,
-NOGA_2025,84,division,O,Administration publique et défense,Öffentliche Verwaltung und Landesverteidigung,Amministrazione pubblica e difesa,
-NOGA_2025,841,group,84,Administration générale de l'Etat,Allgemeine öffentliche Verwaltung,Amministrazione generale dello Stato,
-NOGA_2025,8411,class,841,Administration générale de l'Etat,Allgemeine öffentliche Verwaltung des Staates,Amministrazione generale dello Stato,
-NOGA_2008,K,section,,Activités financières et d'assurance,Erbringung von Finanz- und Versicherungsdienstleistungen,Attività finanziarie e assicurative,
-NOGA_2008,64,division,K,"Activités des services financiers, hors assurance et caisses de retraite","Erbringung von Finanzdienstleistungen, ohne Versicherungen und Pensionskassen",Servizi finanziari (esclusi assicurazioni e fondi pensione),
-NOGA_2008,641,group,64,Intermédiation monétaire,Zentralbanken und Kreditinstitute,Intermediazione monetaria,
-NOGA_2008,6411,class,641,Activités de banque centrale,Zentralbanken,Attività della banca centrale,
-NOGA_2008,6419,class,641,Autres intermédiations monétaires spécialisées,Andere Spezialkreditinstitute,Altre intermediazioni monetarie specializzate,
-NOGA_2008,8411,class,841,Administration générale de l'Etat,Allgemeine öffentliche Verwaltung des Staates,Amministrazione generale dello Stato,
-NACE_2.1,K,section,,,,,Financial and insurance activities
-NACE_2.1,64,division,K,,,,Financial service activities except insurance and pension funding
-NACE_2.1,641,group,64,,,,Monetary intermediation
-NACE_2.1,6411,class,641,,,,Central banking
-NACE_2.1,6412,class,641,,,,Other monetary intermediation
-NACE_2.1,642,group,64,,,,Activities of holding companies
-NACE_2.1,6420,class,642,,,,Activities of holding companies
-NACE_2.1,84,division,O,,,,Public administration and defence
-NACE_2.1,8411,class,841,,,,General public administration activities
-NACE_2.0,K,section,,,,,Financial and insurance activities
-NACE_2.0,64,division,K,,,,Financial service activities except insurance and pension funding
-NACE_2.0,641,group,64,,,,Monetary intermediation
-NACE_2.0,6411,class,641,,,,Central banking
-NACE_2.0,6419,class,641,,,,Other monetary intermediation
-NACE_2.0,8411,class,841,,,,General public administration activities
-ISIC_4,K,section,,,,,Financial and insurance activities
-ISIC_4,64,division,K,,,,"Financial service activities, except insurance and pension funding"
-ISIC_4,641,group,64,,,,Monetary intermediation
-ISIC_4,6411,class,641,,,,Central banking
-ISIC_4,6419,class,641,,,,Other monetary intermediation
-ISIC_4,6420,class,642,,,,Activities of holding companies
-ISIC_4,84,division,O,,,,Public administration and defence
-ISIC_4,8411,class,841,,,,General public administration activities
+NOGA_2025,64,division,L,"Activités de services financiers, hors assurance et fonds de pension",Erbringung von Finanzdienstleistungen,"Attività dei servizi finanziari, escluse le assicurazioni e i fondi pensione","Financial service activities, except insurance and pension funding"
+NOGA_2025,641,group,64,Intermédiation monétaire,Zentralbanken und Kreditinstitute,Intermediazione monetaria,Monetary intermediation
+NOGA_2025,6411,class,641,Activités de banque centrale,Zentralbanken,Attività delle banche centrali,Central banking
+NOGA_2025,641100,subclass,6411,Activités de banque centrale,Zentralbanken,Attività delle banche centrali,Central banking
+NOGA_2025,6419,class,641,Autre intermédiation monétaire,"Kreditinstitute, ohne Spezialkreditinstitute",Altre intermediazioni monetarie,Other monetary intermediation
+NOGA_2025,641901,subclass,6419,Banques cantonales,Kantonalbanken,Banche cantonali,Cantonal banks
+NOGA_2025,641902,subclass,6419,Grandes banques,Grossbanken,Grandi banche,Big banks
+NOGA_2025,641903,subclass,6419,Banques régionales et caisses d'épargne,Regionalbanken und Sparkassen,Banche regionali e casse di risparmio,Regional banks and saving banks
+NOGA_2025,641904,subclass,6419,Banques Raiffeisen,Raiffeisenbanken,Banche Raiffeisen,Raiffeisen banks
+NOGA_2025,641905,subclass,6419,Banques boursières,Börsenbanken,Istituti specializzati nelle operazioni di borsa,Stock exchange banks
+NOGA_2025,641906,subclass,6419,Banques en mains étrangères,Ausländisch beherrschte Banken,Banche controllate da capitale estero,Foreign-controlled banks
+NOGA_2025,641907,subclass,6419,Succursales de banques étrangères,Filialen ausländischer Banken,Filiali di banche estere,Branches of foreign banks
+NOGA_2025,641908,subclass,6419,Banquiers privés,Privatbankiers,Banche private,Private bankers
+NOGA_2025,641909,subclass,6419,Autres banques,Andere Banken,Altre banche,Other banking institutions
+NOGA_2025,641919,subclass,6419,Autres intermédiations monétaires n.c.a.,Andere monetäre Finanzintermediäre a. n. g.,Altre intermediazioni monetarie n.c.a.,Other monetary intermediation n.e.c.
+NOGA_2025,84,division,P,Administration publique et défense; sécurité sociale obligatoire,"Öffentliche Verwaltung, Verteidigung; Sozialversicherung",Amministrazione pubblica e difesa; assicurazione sociale obbligatoria,Public administration and defence; compulsory social security
+NOGA_2025,841,group,84,"Administration générale, économique et sociale et environnementale",Öffentliche Verwaltung,"Amministrazione dello Stato e delle politiche economiche, sociali e ambientali della comunità","Administration of the State and the economic, social and environmental policies of the community"
+NOGA_2025,8411,class,841,Activités d’administration publique générale,Allgemeine öffentliche Verwaltung,Attività generali di amministrazione pubblica,General public administration activities
+NOGA_2025,841100,subclass,8411,Activités d’administration publique générale,Allgemeine öffentliche Verwaltung,Attività generali di amministrazione pubblica,General public administration activities
+NOGA_2025,8412,class,841,"Réglementation des soins de santé, de l’enseignement, des services culturels et des autres services sociaux","Öffentliche Verwaltung auf den Gebieten Gesundheitswesen, Bildung, Kultur und Sozialwesen","Regolamentazione dei servizi di assistenza sanitaria, istruzione, servizi culturali e di altri servizi sociali","Regulation of health care, education, cultural services and other social services"
+NOGA_2025,841200,subclass,8412,"Réglementation des soins de santé, de l’enseignement, des services culturels et des autres services sociaux","Öffentliche Verwaltung auf den Gebieten Gesundheitswesen, Bildung, Kultur und Sozialwesen","Regolamentazione dei servizi di assistenza sanitaria, istruzione, servizi culturali e di altri servizi sociali","Regulation of health care, education, cultural services and other social services"
+NOGA_2025,8413,class,841,Réglementation et contribution à l’amélioration de l’efficacité des activités économiques,"Wirtschaftsförderung, -ordnung und -aufsicht",Regolamentazione delle attività che contribuiscono a una più efficiente gestione delle attività economiche,Regulation of and contribution to more efficient operation of businesses
+NOGA_2025,841300,subclass,8413,Réglementation et contribution à l’amélioration de l’efficacité des activités économiques,"Wirtschaftsförderung, -ordnung und -aufsicht",Regolamentazione delle attività che contribuiscono a una più efficiente gestione delle attività economiche,Regulation of and contribution to more efficient operation of businesses
+NOGA_2025,842,group,84,Services de prérogative publique,"Auswärtige Angelegenheiten, Verteidigung, Rechtspflege/Justiz, öffentliche Sicherheit und Ordnung",Erogazione di servizi collettivi,Provision of services to the community as a whole
+NOGA_2025,8421,class,842,Affaires étrangères,Auswärtige Angelegenheiten,Affari esteri,Foreign affairs
+NOGA_2025,842100,subclass,8421,Affaires étrangères,Auswärtige Angelegenheiten,Affari esteri,Foreign affairs
+NOGA_2025,8422,class,842,Défense,Verteidigung,Difesa nazionale,Defence activities
+NOGA_2025,842201,subclass,8422,Défense,Verteidigung,Difesa,National defence
+NOGA_2025,842202,subclass,8422,Protection civile,Zivilschutz,Protezione civile,Civil defence
+NOGA_2025,8423,class,842,Justice,Rechtspflege/Justiz,Giustizia e attività giudiziarie,Justice and judicial activities
+
+# === crosswalks (20 mappings NOGA 2025 → NOGA 2008 / NACE 2.0 / NACE 2.1 / ISIC 4) ===
+noga_2008,noga_2025,nace_2_0,nace_2_1,isic_4,mapping_type,notes
+64,64,64,64,64,exact,
+641,641,641,641,641,exact,
+6411,6411,6411,6411,6411,exact,
+,641100,,,,derived,CH-specific subclass — no NACE counterpart
+6419,6419,6419,6419,6419,exact,
+,641901,,,,derived,CH-specific subclass — no NACE counterpart
+,641902,,,,derived,CH-specific subclass — no NACE counterpart
+,641903,,,,derived,CH-specific subclass — no NACE counterpart
+,641904,,,,derived,CH-specific subclass — no NACE counterpart
+,641905,,,,derived,CH-specific subclass — no NACE counterpart
+,641906,,,,derived,CH-specific subclass — no NACE counterpart
+,641907,,,,derived,CH-specific subclass — no NACE counterpart
+,641908,,,,derived,CH-specific subclass — no NACE counterpart
+,641909,,,,derived,CH-specific subclass — no NACE counterpart
+,641919,,,,derived,CH-specific subclass — no NACE counterpart
+93,84,93,84,84,exact,
+84,84,84,84,84,exact,
+841,841,841,841,841,exact,
+8411,8411,8411,8411,8411,exact,
+,841100,,,,derived,CH-specific subclass — no NACE counterpart
