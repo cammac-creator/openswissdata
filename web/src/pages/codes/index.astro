@@ -40,40 +40,53 @@ for (const row of all) {
   title="Tous les codes NOGA 2025 — Nomenclature suisse | openswissdata.com"
   description="Index complet des codes NOGA 2025 (nomenclature générale des activités économiques suisse) : 22 sections, 87 divisions, 287 groupes, 651 classes. Recherche, hiérarchie et cross-walks NACE 2.1 et ISIC."
 >
-  <section class="ds-container">
-    <div class="container-tight">
+  <div class="bg-grid"></div>
+  <section class="v4-hero ds-page">
+    <div class="container-v4">
       <nav class="ds-breadcrumb">
         <a href="/">accueil</a>
         <span class="sep">·</span>
         <span class="current">codes NOGA</span>
       </nav>
 
-      <div class="ds-hero">
+      <div class="v4-hero-grid">
         <div>
-          <span class="ds-badge green reveal">
-            NOGA 2025 · OFS / BFS
-          </span>
-          <h1 class="ds-hero-title reveal" data-delay="1">
-            Tous les codes <span class="serif">NOGA 2025</span>
+          <div class="v4-eyebrow reveal-v4">
+            <span>NOGA 2025</span>
+            <span style="opacity:.4">·</span>
+            <span class="check">OFS / BFS</span>
+          </div>
+          <h1 class="v4-h1 reveal-v4" data-delay="1">
+            Tous les codes<br>
+            <span class="accent">NOGA 2025.</span>
           </h1>
-          <p class="ds-hero-lede reveal" data-delay="2">
+          <p class="v4-lede reveal-v4" data-delay="2">
             Nomenclature générale des activités économiques suisse, version 2025.
-            {totalSeoCodes} codes indexés (sections, divisions, groupes, classes), avec leurs équivalents NACE 2.1 et ISIC Rev 4.
+            <strong>{totalSeoCodes} codes</strong> indexés (sections, divisions, groupes, classes), avec leurs équivalents NACE 2.1 et ISIC Rev 4. Le dataset complet est inclus avec <a href="/datasets/classifications">Classifications (399 CHF)</a>.
           </p>
         </div>
-        <div class="ds-price-box reveal" data-delay="2">
-          <div class="ds-price-box-label">Codes</div>
+        <div class="ds-price-box reveal-v4" data-delay="2">
+          <div class="ds-price-box-label">Codes indexés</div>
           <div class="ds-price-box-amount" style="font-size: 36px;">
             {totalAllCodes}
           </div>
-          <div class="ds-price-box-renew">version officielle 2025</div>
+          <div class="ds-price-box-renew">version officielle BFS 2025</div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <section class="ds-section reveal">
-        <h2 class="ds-section-title">Recherche <span class="serif">rapide</span></h2>
-        <p class="ds-section-intro">
-          Tapez un code (ex. <code class="mono">62.01</code>), une activité (ex. « banque ») ou un mot-clé.
+  <section class="v4-datasets ds-page">
+    <div class="container-v4">
+      <section class="ds-section reveal-v4">
+        <div class="v4-section-eyebrow">
+          <strong>Recherche</strong>
+          <span class="sep">/</span>
+          <span>{totalSeoCodes} codes en quelques caractères</span>
+        </div>
+        <h2 class="v4-section-h2">Recherche <span class="serif">rapide</span>.</h2>
+        <p class="v4-section-intro">
+          Tapez un code (ex. <code style="font-family: var(--font-mono); background: var(--bg-soft); padding: 1px 6px; border-radius: 3px;">62.01</code>), une activité (ex. « banque ») ou un mot-clé.
         </p>
         <input
           type="search"
@@ -87,8 +100,13 @@ for (const row of all) {
         <p id="noga-search-count" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
       </section>
 
-      <section class="ds-section reveal">
-        <h2 class="ds-section-title">Hiérarchie <span class="serif">complète</span></h2>
+      <section class="ds-section reveal-v4">
+        <div class="v4-section-eyebrow">
+          <strong>Hiérarchie</strong>
+          <span class="sep">/</span>
+          <span>{sections.length} sections (A-U)</span>
+        </div>
+        <h2 class="v4-section-h2">Hiérarchie <span class="serif">complète</span>.</h2>
         <p class="ds-section-intro">
           NOGA 2025 est organisée en {sections.length} sections (lettres A à V), elles-mêmes subdivisées en divisions, groupes et classes.
         </p>
@@ -143,18 +161,23 @@ for (const row of all) {
         </div>
       </section>
 
-      <section class="ds-section reveal">
-        <h2 class="ds-section-title">Données <span class="serif">complètes</span></h2>
-        <p class="ds-section-intro">
-          Besoin du dataset complet (1 845 codes incluant les sous-classes, 5 nomenclatures alignées, cross-walks 5-way, formats CSV / JSON / Parquet / SQL) ?
+      <section class="ds-section reveal-v4">
+        <div class="v4-section-eyebrow">
+          <strong>Dataset complet</strong>
+          <span class="sep">/</span>
+          <span>1 845 codes + cross-walks 5 standards</span>
+        </div>
+        <h2 class="v4-section-h2">Le <span class="serif">dataset</span> complet.</h2>
+        <p class="v4-section-intro">
+          Besoin de tous les codes (1 845 incluant les sous-classes), 5 nomenclatures alignées (NOGA 2008/2025, NACE 2.0/2.1, ISIC 4), cross-walks 5-way, et formats CSV / JSON / Parquet / SQL ?
         </p>
-        <a href="/datasets/classifications" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; background: var(--color-ink); color: var(--color-bg); border-radius: 10px; text-decoration: none; font-weight: 500; font-size: 15px;">
-          Voir le bundle Classifications
-          <span style="opacity:.7;">→</span>
-        </a>
+        <div class="v4-cta-row">
+          <a href="/datasets/classifications" class="v4-btn v4-btn-primary">Voir Classifications — 399 CHF <span class="arrow">→</span></a>
+          <a href="/bundle" class="v4-btn v4-btn-secondary">Bundle 3-en-1 — 797 CHF</a>
+        </div>
       </section>
 
-      <footer style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--color-line); font-size: 12px; line-height: 1.6; color: var(--color-ink-mute);">
+      <footer style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 12px; line-height: 1.6; color: var(--ink-mute);">
         Index généré à partir de la nomenclature NOGA 2025 publiée par l'Office fédéral de la statistique. openswissdata.com n'est pas affilié à l'OFS. Source officielle : <a href="https://www.bfs.admin.ch/bfs/fr/home/statistiques/industrie-services/nomenclatures/noga.html" target="_blank" rel="noopener">bfs.admin.ch</a>.
       </footer>
     </div>
