@@ -4,5 +4,6 @@ Allow: /
 Disallow: /account
 Disallow: /api/
 Disallow: /pour-toi/
+Disallow: /pour-electricien/
 
 Sitemap: https://www.openswissdata.com/sitemap-index.xml

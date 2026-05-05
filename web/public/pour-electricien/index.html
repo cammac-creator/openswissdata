@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Patron de 2 boîtes d'électriciens — ce que j'ai vu en creusant ton métier</title>
+<meta name="description" content="11 cas concrets pour un patron suisse romand de 2 PME d'électricité. Anti-fraude factures, douane VE/PV, séparation 2 sociétés.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<style>
+  :root{
+    --ink:#0b1220; --ink-2:#243044; --muted:#5b6678;
+    --bg:#f7f5ef; --card:#ffffff; --line:#e7e2d4;
+    --gold:#b8860b; --gold-2:#8a6508;
+    --red:#b83227; --green:#2e7d32; --blue:#1f4f8a; --beer:#c98a1a;
+    --shadow:0 4px 24px rgba(15,20,30,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:48px 24px 96px}
+  header{text-align:center;padding:24px 0 8px}
+  .badge{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--gold-2);background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:999px}
+  h1{font-size:38px;line-height:1.15;margin:18px 0 10px;font-weight:800;letter-spacing:-.02em}
+  h1 em{font-style:normal;color:var(--gold)}
+  .lede{font-size:18px;color:var(--ink-2);max-width:680px;margin:0 auto}
+  .meta{font-size:13px;color:var(--muted);margin-top:18px}
+
+  .perso{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:14px;padding:22px 24px;margin:36px 0 8px;box-shadow:var(--shadow)}
+  .perso h2{margin:0 0 8px;font-size:19px}
+  .perso p{margin:0 0 8px;color:var(--ink-2);font-size:15.5px}
+  .perso p:last-child{margin:0}
+  .perso .sig{margin-top:10px;font-size:14px;color:var(--muted)}
+
+  .shock{margin-top:36px;padding:28px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+  .shock h2{margin:0 0 4px;font-size:22px}
+  .shock .sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .stat{background:#fbf2f0;border-left:3px solid var(--red);padding:14px 16px;border-radius:6px}
+  .stat .big{font-size:24px;font-weight:800;color:var(--red);line-height:1.1}
+  .stat .lbl{font-size:13.5px;color:var(--ink-2);margin-top:6px}
+  .stat .src{font-size:11px;color:var(--muted);margin-top:8px}
+
+  .hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:36px 0 8px}
+  .tool{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+  .tool h3{margin:0 0 6px;font-size:18px}
+  .tool p{margin:0;color:var(--ink-2);font-size:14.5px}
+  .tool .ic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+  .tool.a .ic{background:#fff7e6}
+  .tool.b .ic{background:#eaf3ff}
+
+  section.tier{margin-top:56px}
+  section.tier > h2{font-size:26px;margin:0 0 4px}
+  section.tier > .sub{color:var(--muted);margin:0 0 22px}
+  .tlabel{display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    background:#0b1220;color:#fff;padding:4px 10px;border-radius:999px;margin-bottom:8px}
+  .tlabel.t2{background:#3d4a63}
+  .tlabel.t3{background:#7a857a}
+
+  .case{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:14px;
+    display:grid;grid-template-columns:54px 1fr;gap:16px;box-shadow:var(--shadow)}
+  .case .icon{width:46px;height:46px;border-radius:10px;background:#fff7e6;display:flex;align-items:center;justify-content:center}
+  .case h3{margin:0 0 6px;font-size:17.5px}
+  .case .tag{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gold-2);margin-right:8px}
+  .case p{margin:6px 0;color:var(--ink-2);font-size:14.5px}
+  .case .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .case .box{padding:10px 12px;border-radius:6px;font-size:13.5px}
+  .case .box.now{background:#fbf2f0;border-left:3px solid var(--red)}
+  .case .box.with{background:#eef7ee;border-left:3px solid var(--green)}
+  .case .box strong{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
+  .case .num{margin-top:10px;padding:8px 12px;border-radius:6px;background:#fbf8ee;border-left:3px solid var(--gold);font-size:13px;color:var(--ink-2)}
+  .case .num strong{color:var(--ink)}
+
+  .deja{margin-top:56px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow)}
+  .deja h2{margin:0 0 6px;font-size:22px}
+  .deja .sub{color:var(--muted);margin:0 0 18px}
+  .deja-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .deja-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fbf8ee}
+  .deja-card h4{margin:0 0 6px;font-size:15px}
+  .deja-card p{margin:0;color:var(--ink-2);font-size:14px}
+  .deja-card.diff{background:#eef7ee;border-color:#cbe2cc}
+
+  .integ{margin-top:56px}
+  .integ h2{margin:0 0 6px;font-size:26px}
+  .integ .sub{color:var(--muted);margin:0 0 22px}
+  .integ-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .integ-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);position:relative}
+  .integ-card .lvl{position:absolute;top:-10px;right:14px;background:#0b1220;color:#fff;font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;padding:4px 10px;border-radius:999px}
+  .integ-card h4{margin:0 0 6px;font-size:16px}
+  .integ-card .who{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+  .integ-card p{margin:0;color:var(--ink-2);font-size:14px}
+  .integ-card ul{margin:8px 0 0 18px;padding:0;color:var(--ink-2);font-size:13.5px}
+
+  .truth{margin-top:48px;background:#fbf8ee;border:1px dashed var(--gold);border-radius:16px;padding:28px}
+  .truth h2{margin:0 0 6px;font-size:22px;color:var(--gold-2)}
+  .truth p{color:var(--ink-2);margin:0 0 12px;font-size:15px}
+  .truth ul{margin:8px 0 0 22px;padding:0;color:var(--ink-2);font-size:14.5px}
+  .truth li{margin-bottom:6px}
+
+  .avis{margin-top:48px;background:#0b1220;color:#fff;border-radius:16px;padding:32px}
+  .avis h2{margin:0 0 8px;font-size:24px}
+  .avis p{margin:0 0 14px;color:#cdd5e0;font-size:15.5px}
+  .avis ul{margin:0 0 16px 22px;padding:0;color:#e3e8f0}
+  .avis ul li{margin-bottom:6px}
+  .avis em{color:#fff;font-style:normal;font-weight:600}
+
+  .cta{margin-top:32px;text-align:center;padding:32px 24px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:var(--shadow)}
+  .cta .beer{font-size:48px;line-height:1;margin-bottom:8px}
+  .cta h2{margin:0 0 6px;font-size:22px}
+
+  footer{margin-top:48px;text-align:center;color:var(--muted);font-size:13px}
+
+  @media (max-width:640px){
+    h1{font-size:28px}
+    .hero,.stat-grid,.deja-grid,.integ-row{grid-template-columns:1fr}
+    .case{grid-template-columns:1fr}
+    .case .icon{width:40px;height:40px}
+    .case .row2{grid-template-columns:1fr}
+    .wrap{padding:28px 18px 64px}
+  }
+  @media print{
+    body{background:#fff}
+    .case,.tool,.shock,.cta,.avis,.perso,.deja,.integ-card,.truth{box-shadow:none;break-inside:avoid}
+    .avis{background:#fff;color:#000;border:1px solid #000}
+    .avis p,.avis ul{color:#222}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge">Pour toi · Patron de 2 boîtes d'électriciens</span>
+  <h1>11 cas concrets que j'ai trouvés<br><em>en creusant ton métier</em></h1>
+  <p class="lede">Anti-fraude factures fournisseurs, douane bornes VE et PV, gestion 2 sociétés, frontaliers, sous-traitants détachés. J'aimerais savoir ce qui te parle vraiment et ce que je n'ai pas compris.</p>
+  <p class="meta">Lecture : 7 minutes · Tout en français · 11 cas vérifiés contre les vraies capacités</p>
+</header>
+
+<!-- Note personnelle -->
+<div class="perso">
+  <h2>Pourquoi je te demande à toi</h2>
+  <p>Je sais que tu n'as pas attendu mes outils pour faire tourner deux PME d'électriciens. Tu as déjà tes process, ton équipe formée, tes logiciels métier (PEP, ElektroForm, SORBA, Bexio…), tes habitudes de patron qui ne dort pas beaucoup. Et c'est exactement pour ça que j'aimerais ton retour : <strong>est-ce que ce que je décris ici a un sens dans la vraie vie d'un patron qui paie 200 factures fournisseurs par mois et gère 50 personnes</strong>, ou est-ce que je tape à côté ?</p>
+  <p>J'ai construit deux outils suisses (un sur les données fédérales — TARES douanes, registre FINMA, classifications NOGA — l'autre sur la vérification IBAN/sanctions). Les électriciens ne sont pas ma cible évidente, mais en creusant je suis tombé sur des points qui doivent te ressembler.</p>
+  <p>Dis-moi franchement "ça sert à rien chez nous" plutôt que d'être poli. Tu me connais.</p>
+  <p class="sig">— Claude-Alain</p>
+</div>
+
+<!-- SHOCK STATS -->
+<div class="shock">
+  <h2>Le BTP est cible n°1 en Suisse romande</h2>
+  <p class="sub">Pas du marketing, des cas documentés.</p>
+  <div class="stat-grid">
+    <div class="stat">
+      <div class="big">300 000 CHF</div>
+      <div class="lbl">perdus par une PME valaisanne en 90 minutes via une arnaque au président. Faux mail du patron + faux conseiller "Maître Muller". Argent jamais récupéré.</div>
+      <div class="src">Le Temps, 2024</div>
+    </div>
+    <div class="stat">
+      <div class="big">+35 %</div>
+      <div class="lbl">de fraude CEO en un an au niveau suisse : 970 cas signalés à l'OFCS en 2025 contre 719 en 2024.</div>
+      <div class="src">OFCS / NCSC, 2026</div>
+    </div>
+    <div class="stat">
+      <div class="big">SIMAP</div>
+      <div class="lbl">Schéma 2025 : les escrocs surveillent les adjudications publiques, appellent l'entreprise gagnante en se faisant passer pour le maître d'ouvrage. Préjudices à 6 chiffres.</div>
+      <div class="src">Watson, juin 2025</div>
+    </div>
+  </div>
+  <p style="margin-top:18px;font-size:14.5px;color:var(--ink-2)"><strong>Pourquoi le BTP est ciblé n°1 :</strong> volume de factures élevé (200-300/mois pour 50 personnes) → noyade de l'œil humain. Fournisseurs récurrents identifiables (Otto Fischer, EM, Bugnard, Winterhalter+Fenner) → faciles à usurper. Sous-traitance multi-niveaux avec changements d'IBAN légitimes fréquents → le faux IBAN passe inaperçu dans le bruit. Et marges serrées : <em>une fraude = annulation directe du bénéfice de plusieurs chantiers</em>.</p>
+</div>
+
+<!-- Hero : les 2 outils -->
+<div class="hero">
+  <div class="tool a">
+    <div class="ic">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 7l9-4 9 4-9 4-9-4z" stroke="#b8860b" stroke-width="1.8"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4" stroke="#b8860b" stroke-width="1.8"/></svg>
+    </div>
+    <h3>openswissdata</h3>
+    <p>Codes douaniers TARES (matériel électrique chap. 85), registre FINMA, classifications NOGA suisses. Accessible via API live ou dataset téléchargeable signé Ed25519. Permission BAZG officielle.</p>
+  </div>
+  <div class="tool b">
+    <div class="ic">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="#1f4f8a" stroke-width="1.8"/><path d="M3 10h18M7 15h4" stroke="#1f4f8a" stroke-width="1.8"/></svg>
+    </div>
+    <h3>IBANforge</h3>
+    <p>API IBAN/BIC + clearing suisse (BC-Nummer 1 190 SIX, unique au monde) + bundle compliance : sanctions OFAC/UE/SECO, FATF, vérification SEPA, risk score 0-100. Réponse en 200 ms.</p>
+  </div>
+</div>
+
+<!-- TIER 1 -->
+<section class="tier">
+  <span class="tlabel">Tier 1 — L'anti-fraude paiements</span>
+  <h2>Les 4 cas qui justifient l'abonnement à eux seuls</h2>
+  <p class="sub">Une seule fraude évitée = des années d'abonnement. Pour ta taille (200-300 factures/mois, 50 collaborateurs), c'est statistique.</p>
+
+  <!-- Cas 1 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke="#b83227" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="#b83227" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Anti-fraude · Cas massue</span>
+      <h3>1. Détecter le faux IBAN d'Otto Fischer / EM / Bugnard</h3>
+      <p>Le schéma BEC classique en Suisse : un fraudeur envoie une "vraie" facture d'un fournisseur que tu connais (logo, format, montants cohérents) avec un IBAN légèrement modifié, souvent une banque baltique ou un IBAN belge en LU. Ton e-banking ne le voit pas — il vérifie juste que la suite de chiffres est mathématiquement valide. La VoP UE n'est obligatoire que dès juillet 2027 en Suisse.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Comptable saisit l'IBAN dans Bexio/Abacus, rarement un contre-appel pour les "petits" montants &lt;5 000 CHF. Tu signes en bloc le matin via e-banking.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Avant chaque virement &gt; 5 000 CHF : IBAN validé + screening sanctions + détection si le fournisseur encaissait jusqu'ici sur un autre IBAN. Alerte automatique avant le clic.</div>
+      </div>
+      <div class="num"><strong>Ordre de grandeur :</strong> 1 fraude moyenne en Romandie = 80-150 K CHF. Ta marge nette BTP ≈ 8 %, donc pour récupérer 100 K CHF il faut refacturer 1,25 M CHF de chantiers, soit ~13 000 heures de monteur. <em>Une seule attaque évitée par an justifie 10 ans d'abonnement.</em></div>
+    </div>
+  </div>
+
+  <!-- Cas 2 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b8860b" stroke-width="1.8"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18" stroke="#b8860b" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Sous-traitance détachée</span>
+      <h3>2. Vérifier l'IBAN du sous-traitant roumain/polonais sur ton chantier data center</h3>
+      <p>Quand tu fais venir une équipe câblage RO/PL/BG via détachement, le SECO et la commission paritaire surveillent. Le donneur d'ordre suisse a une <strong>obligation de vérifier</strong> que le sous-traitant respecte les conditions CCT. En cas d'infraction : amende solidaire + interdiction de prestation 1-5 ans. Et l'IBAN de la SARL roumaine ouverte la semaine d'avant ? Personne ne contrôle.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Demande d'attestation A1, déclaration SECO 8 jours avant. IBAN du sous-traitant : on paie ce qu'il y a sur la facture, sans vérification réelle.</div>
+        <div class="box with"><strong>Avec l'outil</strong>IBAN sous-traitant → check pays + banque + sanctions + risk score. Documentation au dossier — preuve de devoir de diligence si SECO contrôle.</div>
+      </div>
+      <div class="num"><strong>Risque :</strong> amende solidaire + chantier perdu + image. Le donneur d'ordre principal peut être mis en cause — pas juste le sous-traitant.</div>
+    </div>
+  </div>
+
+  <!-- Cas 3 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="#1f4f8a" stroke-width="1.8"/><path d="M3 10h18M8 3v4M16 3v4" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Salaires · Frontaliers FR</span>
+      <h3>3. Sécuriser la paie de tes 15-25 frontaliers français</h3>
+      <p>Sur 50 collaborateurs en Romandie, typiquement 30-50 % de frontaliers. Beaucoup ont un IBAN FR (BNP, Crédit Agricole, Crédit Mutuel) pour éviter les frais de change. Erreur de saisie = paie bloquée, employé furieux, 2-5h de gestion par cas. Et le schéma fraude UBS documenté : usurpation d'employé, mail au RH demandant changement de RIB juste avant la paie.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Saisie manuelle dans Crésus Salaires / SwissSalary / Abacus. Aucune détection si l'IBAN d'un employé connu change "discrètement". Export ISO 20022 part sans contrôle.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Avant l'export DTA : batch de 50 IBANs en un appel → flag automatique sur ceux modifiés depuis le mois précédent + validation FR/CH/IT.</div>
+      </div>
+      <div class="num"><strong>Volume :</strong> 50 employés × 12 paies = 600 virements/an, ~5-10 incidents/an. Fraude employé fictif détournée = 5-15 K CHF/cas, et c'est ta boîte qui paie pour récupérer la confiance de l'équipe.</div>
+    </div>
+  </div>
+
+  <!-- Cas 4 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 12l9-9 9 9M5 10v10h14V10" stroke="#b8860b" stroke-width="1.8"/><path d="M9 20v-6h6v6" stroke="#b8860b" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Adjudication SIMAP</span>
+      <h3>4. Bloquer l'arnaque "j'ai vu sur SIMAP que vous avez gagné le marché"</h3>
+      <p>Schéma confirmé par la police cantonale en 2025 : les escrocs surveillent les publications SIMAP, appellent l'entreprise gagnante en se faisant passer pour le maître d'ouvrage, demandent à un employé d'envoyer une "copie de facture" à une adresse mail proche de la vraie. Ils renvoient la facture avec leur IBAN au vrai MO. Particulièrement vicieux car ils connaissent le nom du chantier, le montant, le MO.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>L'employé est flatté qu'on l'appelle "directement", il transmet. Le faux MO récupère la facture, change l'IBAN, renvoie au vrai MO. Personne ne s'en aperçoit avant 30 jours.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Toute facture sortante avec changement d'IBAN par rapport à la dernière → contrôle automatique. Aussi : vérification que l'IBAN MO communiqué par téléphone correspond bien à l'établissement nommé.</div>
+      </div>
+      <div class="num"><strong>Préjudice typique :</strong> 200-500 K CHF par cas. La taille des marchés publics en infrastructure électrique en fait un schéma très rentable pour les fraudeurs.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TIER 2 -->
+<section class="tier">
+  <span class="tlabel t2">Tier 2 — Douane TARES sur ton matériel</span>
+  <h2>4 cas où la classification douanière coûte cher si elle est fausse</h2>
+  <p class="sub">Depuis le 1er janvier 2024, les droits industriels CH sont à 0 % — donc le risque n'est plus le droit de douane, mais <strong>la TVA importation à 8,1 % sur valeur fausse</strong>, redressements rétroactifs sur 5 ans + intérêts moratoires 4 % + amendes pénales BAZG.</p>
+
+  <!-- Cas 5 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="6" width="16" height="14" rx="2" stroke="#1f4f8a" stroke-width="1.8"/><path d="M9 14l2-2 2 2 4-4" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Bornes de recharge VE</span>
+      <h3>5. Wallbox MID : 8504 (chargeur) ou 8537 (tableau de commande) ?</h3>
+      <p>Avec le "droit à la borne" qui s'applique en Suisse depuis 2026 (locataires + PPE), tu vas voir exploser les commandes Zaptec, Easee, Wallbox Pulsar, Hager Witty. Une wallbox simple = 8504.40. Une wallbox avec écran + compteur MID + RFID + contrôle de charge dynamique = 8537.10. Tous les fabricants ne classent pas pareil.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Le distributeur livre avec un code, le transitaire tamponne. Si BAZG audite et requalifie, intérêts 4 %/an + risque sur la déclaration d'origine préférentielle.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Description produit ("wallbox 22 kW MID écran") → comparatif 8504 vs 8537 + jurisprudence BAZG/UE. Sécurité juridique sur les commandes &gt; 50 K CHF.</div>
+      </div>
+      <div class="num"><strong>Cadre 2026 :</strong> ~14 200 bornes publiques en Suisse, 22,8 % de part de marché VE. Subventions VD jusqu'à 100 K CHF/immeuble (≥3 places, construit avant 2021). GE : 500 CHF/place + 2 000 CHF/borne mutualisée. Volume qui explose chez les électriciens.</div>
+    </div>
+  </div>
+
+  <!-- Cas 6 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b8860b" stroke-width="1.8"/><path d="M12 3v18M3 12h18" stroke="#b8860b" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">PV résidentiel · Arbitrage CH/UE</span>
+      <h3>6. Module PV avec micro-onduleur intégré : 8541 ou 8501 ?</h3>
+      <p>Cas piégeux : un module Enphase IQ 8+ avec micro-onduleur AC intégré n'est plus un module 8541.43, il bascule en 8501.80 (générateur) selon la Note de chapitre 85. Et l'UE a réinstauré en 2025 des droits anti-dumping définitifs sur les modules chinois — <strong>la Suisse ne les applique pas</strong> (ALE Suisse-Chine 2014). Importer direct en CH plutôt que via Allemagne peut représenter une vraie économie.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Tu importes via un grossiste UE qui a déjà payé l'antidumping. Tu paies sa marge + ses droits que tu n'aurais pas eus en direct.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Recherche "module PV + micro-onduleur" → bon code HS + comparatif route Allemagne/CH-direct/Asie/CH. Calcul de marge réel en 30 sec au lieu de 30 min sur le portail BAZG.</div>
+      </div>
+      <div class="num"><strong>Cadre 2026 :</strong> 8,2 GW installés en Suisse fin 2024. Tarif PV national unique dès 2026 (chute de 17,6 → 10,15 ct/kWh max). Obligation PV en rénovation lourde dès le 1er juillet 2026 (MoPEC durci). Marges sous pression — l'arbitrage TARES devient un levier direct.</div>
+    </div>
+  </div>
+
+  <!-- Cas 7 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="#1f4f8a" stroke-width="1.8"/><path d="M8 8h8v8H8z" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Domotique · RGI 3b</span>
+      <h3>7. Kit Loxone / KNX en boîte unique : quel code ?</h3>
+      <p>Sur 12 villas neuves avec kit Loxone (Miniserver + 8 extensions + 30 capteurs/actionneurs) à 15 K CHF par villa, soit 180 K CHF de matos. Les Règles générales d'interprétation 3b imposent de classer selon "l'élément qui confère le caractère essentiel". Mauvais réflexe : tout en 8517 (communication). Bon : 8537.10 (tableau de contrôle).</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Le déclarant met au feeling. En cas de requalification statistique BAZG, audit complet sur 3 ans d'historique d'imports peut tomber.</div>
+        <div class="box with"><strong>Avec l'outil</strong>"Kit domotique avec contrôleur central + capteurs + actionneurs" → top 3 codes + note RGI 3b + décisions BAZG comparables. 2 minutes au lieu de 2h chez un juriste douanier.</div>
+      </div>
+      <div class="num"><strong>Économie sur 1 cas :</strong> 600 CHF/cas de juriste douanier économisés. Multiplié par 5-10 commandes domotique mixtes/an = 3 000-6 000 CHF.</div>
+    </div>
+  </div>
+
+  <!-- Cas 8 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 7h18v10H3z" stroke="#b8860b" stroke-width="1.8"/><path d="M7 11h10M7 14h6" stroke="#b8860b" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Lampes LED rétrofit</span>
+      <h3>8. Lampe LED E27 ou luminaire LED ? L'écart fait redresser</h3>
+      <p>Commande typique mixte : 1 200 lampes LED E27 rétrofit + 800 luminaires LED encastrés. Les rétrofits doivent être en 8539.52, les luminaires complets en 9405.41. Un agent transit qui met tout en 9405.41 par défaut → redressement BAZG sur poids et statistique, amende 500-2 000 CHF + risque enquête sur 5 ans.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Tu fais confiance au transitaire qui ne connaît pas la nuance Note 5(b) chap. 85. Il met tout dans la même case "luminaires LED".</div>
+        <div class="box with"><strong>Avec l'outil</strong>"Lampe LED E27 remplacement" → 8539.52. "Spot LED encastré" → 9405.41. Différenciation immédiate avec note explicative SH.</div>
+      </div>
+      <div class="num"><strong>Gain :</strong> 30 min de tri par commande mixte + sécurité conformité. Sur 5-10 commandes mixtes/an, tu sauves de quoi te payer un week-end ski en famille.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TIER 3 -->
+<section class="tier">
+  <span class="tlabel t3">Tier 3 — Tes 2 sociétés en parallèle</span>
+  <h2>3 cas spécifiques au patron multi-entités</h2>
+  <p class="sub">Tu as deux raisons sociales distinctes — c'est une structure puissante, mais qui demande des contrôles que personne d'autre ne fait.</p>
+
+  <!-- Cas 9 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="8" height="12" stroke="#1f4f8a" stroke-width="1.8"/><rect x="13" y="6" width="8" height="12" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Séparation NOGA · OIBT</span>
+      <h3>9. Code NOGA distinct entre installation et contrôle indépendant</h3>
+      <p>Schéma fréquent en Romandie : société d'installation (NOGA 4321 / Installation électrique) + société de contrôle OIBT indépendante (NOGA 71.20A). L'OIBT exige indépendance entre celui qui pose et celui qui contrôle pour les contrôles finaux. Si les 2 sociétés sont mal séparées sur le NOGA, tu perds l'argument d'indépendance face à l'ESTI.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Le NOGA est attribué par le RC à la création, basé sur le but social. Si mal libellé, la SUVA peut surclasser → surprime LAA pendant 3 ans avant qu'on s'en rende compte.</div>
+        <div class="box with"><strong>Avec l'outil</strong>"Pose installations électriques + commerce détail produits entretien" → top 3 codes NOGA + impact prévu sur la classe SUVA + correspondance NACE pour clients UE.</div>
+      </div>
+      <div class="num"><strong>Bonus :</strong> dossier bancaire propre quand tu vas voir BCV/Raiffeisen pour une ligne de crédit camions/stock — la banque demande le NOGA précis, comparaison avec moyennes sectorielles BFS.</div>
+    </div>
+  </div>
+
+  <!-- Cas 10 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 4l4 4M21 4l-4 4M3 20l4-4M21 20l-4-4" stroke="#b8860b" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="#b8860b" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Consolidation factures</span>
+      <h3>10. La facture Otto Fischer est arrivée sur la mauvaise société</h3>
+      <p>Cas vécu typique : Otto Fischer / Bugnard / EM facturent parfois sur la mauvaise entité juridique (la société d'installation reçoit la facture du contrôle OIBT, ou vice-versa). Sans contrôle automatisé, c'est ta fiduciaire qui re-ventile en fin de mois (150-200 CHF/h facturé).</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>4-6h/mois de fiduciaire facturées rien que pour re-ventiler des factures mal adressées. Soit ~1 000 CHF/mois × 12 = 12 000 CHF/an.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Validation IBAN fournisseur + ventilation automatique vers la bonne entité selon NOGA. Ta fiduciaire fait du conseil, pas de la saisie.</div>
+      </div>
+      <div class="num"><strong>ROI :</strong> 12 000 CHF/an récupérés sur les honoraires fiduciaire. Tu paies ta secrétaire 6 mois rien qu'avec ça.</div>
+    </div>
+  </div>
+
+  <!-- Cas 11 -->
+  <div class="case">
+    <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V10l7-5 7 5v11" stroke="#1f4f8a" stroke-width="1.8"/><path d="M10 21v-6h4v6" stroke="#1f4f8a" stroke-width="1.8"/></svg></div>
+    <div>
+      <span class="tag">Préparation cession · Due diligence</span>
+      <h3>11. Donner un dossier propre à un repreneur ou un fonds</h3>
+      <p>Si tu envisages de revendre l'une des 2 sociétés (ou les deux), un dossier de due diligence avec preuves documentées de contrôle KYC fournisseurs/sous-traitants/clients vaut très cher pour un repreneur. C'est un levier de valorisation : tu vends la qualité de tes process, pas juste ton carnet de commandes.</p>
+      <div class="row2">
+        <div class="box now"><strong>Aujourd'hui</strong>Le repreneur ouvre l'audit en mode "tout à vérifier". Il découvre des trous, négocie le prix à la baisse de 10-20 %.</div>
+        <div class="box with"><strong>Avec l'outil</strong>Tu sors un PDF "compliance vivante" sur 12 mois : chaque virement &gt; 5 K CHF a été screené, chaque sous-traitant validé, manifest signé Ed25519 horodaté. Argument de vente concret.</div>
+      </div>
+      <div class="num"><strong>Effet :</strong> 5 % de valorisation gagnée sur une PME 50 personnes ≈ plusieurs centaines de milliers de CHF. Pour un patron qui prépare sa succession sur 3-5 ans, c'est <em>le</em> levier.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Honnêteté -->
+<div class="truth">
+  <h2>⚠ Ce qui n'est PAS encore livrable (transparence totale)</h2>
+  <p>Trois choses que j'aimerais te vendre mais que je ne peux pas encore livrer aujourd'hui — autant te le dire :</p>
+  <ul>
+    <li><strong>Surveillance continue automatique</strong> de tes fournisseurs avec re-check hebdo + alerte mail. Le système d'alertes côté serveur n'est pas implémenté. Pour l'instant : lookup à la demande.</li>
+    <li><strong>Newsletter automatique des changements TARES</strong> sur tes codes habituels (matériel électrique). Je peux faire le diff à la main — automatisé non.</li>
+    <li><strong>Benchmarks sectoriels BFS</strong> (CA/employé branche 4321 vs ta boîte). Permission BFS demandée le 17 avril 2026, en attente. Pas avant Q3 2026 au mieux.</li>
+  </ul>
+  <p style="margin-top:14px"><em>Si tu vois autre chose qui ne te semble pas crédible dans les cas 1 à 11, dis-le moi sans détour.</em></p>
+</div>
+
+<!-- Tu utilises déjà... -->
+<div class="deja">
+  <h2>"Mais on a déjà nos outils, non ?"</h2>
+  <p class="sub">Oui. Voici précisément ce que mes outils ajoutent à ce que tu utilises déjà — et ce qu'ils n'ajoutent pas.</p>
+  <div class="deja-grid">
+    <div class="deja-card">
+      <h4>E-banking entreprise (BCV, BCGE, Raiffeisen, UBS, PostFinance)</h4>
+      <p>Vérifie le format mathématique de l'IBAN. <em>Aucun screening sanctions visible côté client.</em> VoP zone euro depuis oct. 2025 chez certaines banques — aucune obligation pour les paiements CHF intra-suisses avant juillet 2027.</p>
+    </div>
+    <div class="deja-card">
+      <h4>Bexio, Abacus, Crésus (compta + paie)</h4>
+      <p>Stocke les fiches fournisseurs et employés. <em>Aucune détection si l'IBAN d'un connu change silencieusement</em>. Pas de screening sanctions. Pas de correspondance nom titulaire ↔ nom facture.</p>
+    </div>
+    <div class="deja-card">
+      <h4>ElektroForm, SORBA, BAUBIT PRO, PEP-7</h4>
+      <p>Excellent pour les rapports OIBT, devis CFE, planning chantier, saisie heures mobile. Aucun lien avec la douane TARES, le registre FINMA, ou le screening compliance fournisseurs.</p>
+    </div>
+    <div class="deja-card">
+      <h4>Outils LBA/KYC pro (World-Check, Trustpair…)</h4>
+      <p>Très complets mais prix gros corporate <em>(5 000 - 30 000 CHF/an)</em>, contrats annuels, intégration ERP lourde — adapté aux banques, pas au patron BTP de 50 personnes.</p>
+    </div>
+    <div class="deja-card diff">
+      <h4>✓ Ce que mes outils ajoutent vraiment</h4>
+      <p>Le <em>croisement automatique</em> entre 4 sources publiques officielles (FINMA + sanctions + douane + classifications) en un seul appel, accessible directement dans le ChatGPT/Claude que ton équipe utilise déjà — pas de logiciel à installer.</p>
+    </div>
+    <div class="deja-card diff">
+      <h4>✓ L'unique au monde</h4>
+      <p>Le numéro de clearing suisse (BC-Nummer / QR-IID, <em>1 190 entrées SIX</em>) — aucune autre solution publique ne le propose. Utile pour authentifier un QR-IBAN reçu sur facture papier (cas postal documenté par l'OFCS).</p>
+    </div>
+  </div>
+</div>
+
+<!-- Comment ça s'intègre -->
+<section class="integ">
+  <h2>"OK, mais comment je l'utilise concrètement ?"</h2>
+  <p class="sub">Trois niveaux d'intégration possibles, du plus simple au plus poussé.</p>
+  <div class="integ-row">
+    <div class="integ-card">
+      <span class="lvl">Niveau 1</span>
+      <h4>Site web public</h4>
+      <p class="who">Pour ton équipe, zéro installation</p>
+      <p>Page web où ta comptable/secrétaire colle un IBAN ou une description produit, obtient la réponse. Comme un Google spécialisé.</p>
+      <ul>
+        <li>Aucune installation</li>
+        <li>Formation : 5 min</li>
+        <li>Coût : abonnement mensuel</li>
+      </ul>
+    </div>
+    <div class="integ-card">
+      <span class="lvl">Niveau 2</span>
+      <h4>Branché à ChatGPT / Claude</h4>
+      <p class="who">Si ton équipe utilise déjà l'IA</p>
+      <p>Ta secrétaire dit en français à ChatGPT : "vérifie ces 80 IBAN du fichier Excel" → l'IA appelle automatiquement les bons outils et te ressort un tableau vérifié.</p>
+      <ul>
+        <li>Configuration : 10 min</li>
+        <li>Garde l'interface IA actuelle</li>
+        <li>Coût : abonnement mensuel</li>
+      </ul>
+    </div>
+    <div class="integ-card">
+      <span class="lvl">Niveau 3</span>
+      <h4>Branché à Bexio / Abacus / SORBA</h4>
+      <p class="who">Idéal long terme</p>
+      <p>La vérification se déclenche automatiquement à la saisie d'une facture fournisseur ou d'un nouveau sous-traitant. Aucun changement pour l'équipe.</p>
+      <ul>
+        <li>Demande un développeur (1-3 jours)</li>
+        <li>Pas de changement utilisateur</li>
+        <li>Coût : abonnement + intégration ponctuelle</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Avis franc -->
+<div class="avis">
+  <h2>Ce que j'attends de toi (vraiment)</h2>
+  <p>Pas un avis poli. Un avis de patron de 2 boîtes BTP qui paie 200 factures par mois.</p>
+  <ul>
+    <li><em>Lesquels des 11 cas</em> te parlent vraiment, et lesquels sont à côté ou résolus depuis longtemps chez toi ?</li>
+    <li><em>Qu'est-ce qui manque</em> et que tu vois passer chaque semaine sans solution propre ?</li>
+  </ul>
+  <p>Si la réponse est "rien de tout ça ne sert dans une boîte d'électriciens", je préfère le savoir maintenant.</p>
+</div>
+
+<!-- CTA bière -->
+<div class="cta">
+  <div class="beer">🍺</div>
+  <h2>On en parle autour d'une bière ?</h2>
+</div>
+
+<footer>
+  Document préparé pour un avis entre amis · Mai 2026 · openswissdata.com · ibanforge.com<br>
+  Sources des chiffres : Le Temps, OFCS/NCSC, Watson, BAZG, EIT.swiss, État de Vaud, SECO. Toutes les capacités listées sont vérifiables en live.
+</footer>
+
+</div>
+</body>
+</html>
