@@ -1,0 +1,294 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import FinmaLookup from "../../../components/FinmaLookup.astro";
+import TrustStrip from "../../../components/TrustStrip.astro";
+import ProductFaq from "../../../components/ProductFaq.astro";
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "FINMA Registry — Swiss financial compliance",
+  description: "FINMA's 10 public authorisation lists consolidated under a single schema. Banks, insurers, PSPs, asset managers, SROs. Enriched with UID + LEI.",
+  image: "https://www.openswissdata.com/og-default.png",
+  url: "https://www.openswissdata.com/en/datasets/finma",
+  brand: { "@type": "Brand", name: "openswissdata" },
+  category: "Reference data — financial supervision registry",
+  offers: {
+    "@type": "Offer",
+    price: "299",
+    priceCurrency: "CHF",
+    availability: "https://schema.org/InStock",
+    url: "https://www.openswissdata.com/en/datasets/finma#buy",
+    priceValidUntil: "2026-12-31",
+    seller: { "@type": "Organization", name: "openswissdata" },
+  },
+};
+---
+<BaseLayout
+  title="Unified FINMA registry — Swiss financial compliance | openswissdata"
+  description="FINMA's 10 public authorisation lists consolidated under a single schema. Banks, insurers, PSPs, asset managers, SROs. Enriched with UID + LEI. 299 CHF one-shot."
+  productJsonLd={productJsonLd}
+>
+<div class="bg-grid"></div>
+
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href="/en/">home</a>
+      <span class="sep">·</span>
+      <a href="/en/bundle">datasets</a>
+      <span class="sep">·</span>
+      <span class="current">FINMA Registry</span>
+    </nav>
+
+    <div class="v4-hero-grid">
+      <div>
+        <div class="v4-eyebrow reveal-v4">
+          <span>FINMA · Unified registry</span>
+          <span style="opacity:.4">·</span>
+          <span>Permission requested 2026-04-17</span>
+        </div>
+
+        <h1 class="v4-h1 reveal-v4" data-delay="1">
+          10 FINMA lists,<br>
+          <span class="accent">a single registry.</span>
+        </h1>
+
+        <p class="v4-lede reveal-v4" data-delay="2">
+          All FINMA-authorised financial institutions, consolidated under a unified schema:
+          banks, insurers, PSPs, asset managers, brokers, SROs. <strong>Enriched with Swiss UID + international LEI.</strong>
+          Weekly updates with 90-day changelog.
+        </p>
+
+        <div class="v4-spec-row reveal-v4" data-delay="3">
+          <div class="v4-spec">
+            <div class="v4-spec-label">Lists</div>
+            <div class="v4-spec-value">10 unified</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Entities</div>
+            <div class="v4-spec-value">~2,912</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Updates</div>
+            <div class="v4-spec-value">Weekly</div>
+          </div>
+        </div>
+
+        <div class="v4-cta-row reveal-v4" data-delay="4">
+          <a href="#buy" class="v4-btn v4-btn-primary">Buy — 299 CHF <span class="arrow">→</span></a>
+          <a href="/samples/finma-sample.csv" download class="v4-btn v4-btn-secondary">CSV sample</a>
+        </div>
+
+        <div class="v4-permission-line reveal-v4" data-delay="5">
+          <span><strong>Source:</strong> FINMA</span>
+          <span style="opacity:.4">·</span>
+          <span>Official public lists</span>
+          <span style="opacity:.4">·</span>
+          <span><strong>Legal venue:</strong> Berne</span>
+        </div>
+      </div>
+
+      <div class="ds-price-box reveal-v4" data-delay="2">
+        <div class="ds-price-box-label">One-shot</div>
+        <div class="ds-price-box-amount">299<span class="ds-price-box-currency">CHF</span></div>
+        <div class="ds-price-box-renew">+120 CHF/year for updates (optional) · 360 days of updates included</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<TrustStrip
+  sources={["FINMA", "UID Registry", "GLEIF (LEI)"]}
+  badges={["10 consolidated lists", "Ed25519-signed manifest", "RFC-3161 timestamp"]}
+/>
+
+<section class="v4-datasets ds-page">
+  <div class="container-v4">
+    <div class="finma-status-banner reveal-v4">
+      <div class="finma-status-icon">⚖️</div>
+      <div class="finma-status-text">
+        <strong>Public data republished under Swiss Copyright Act art. 5</strong>
+        <span>FINMA publishes its 10 authorisation lists as open data. We normalise them, sign them cryptographically (Ed25519 + RFC-3161) and redistribute them with a 90-day changelog. Written redistribution permission requested on 2026-04-17. <strong>24-hour takedown policy on FINMA request</strong> — see <a href="/legal/sdr-policy">SDR Policy</a>.</span>
+      </div>
+    </div>
+
+    <div class="ds-meta-grid">
+      <div class="ds-meta-card reveal-v4">
+        <div class="ds-meta-label">Included formats</div>
+        <div class="ds-meta-value">CSV (unified + by type) · JSON · Parquet · SQL · 90-day changelog · JSON Schema · README · LICENSE · SHA-256</div>
+      </div>
+      <div class="ds-meta-card reveal-v4" data-delay="1">
+        <div class="ds-meta-label">Updates</div>
+        <div class="ds-meta-value">Weekly diff + 90-day changelog · 360 days included · 120 CHF/year renewal</div>
+      </div>
+    </div>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Scope</strong>
+        <span class="sep">/</span>
+        <span>10 FINMA entity types</span>
+      </div>
+      <h2 class="v4-section-h2">10 <span class="serif">entity types</span> covered.</h2>
+      <p class="v4-section-intro">
+        All FINMA public lists are retrieved, normalised and merged under a common schema with an <code class="mono" style="background: var(--color-bg-alt); padding: 2px 6px; border-radius: 4px;">entity_type</code> field for distinction.
+      </p>
+
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr><th>Entity type</th><th>Corresponding FINMA list</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Banks</strong></td><td class="dim">Full + cantonal + private banking licences</td></tr>
+            <tr><td><strong>Insurers</strong></td><td class="dim">Life + non-life + reinsurance + health</td></tr>
+            <tr><td><strong>PSP / FinTech</strong></td><td class="dim">Payment institutions, e-money, FinTech licence</td></tr>
+            <tr><td><strong>Collective asset managers</strong></td><td class="dim">Fund managers under CISA</td></tr>
+            <tr><td><strong>Individual asset managers</strong></td><td class="dim">Authorised under FinIA</td></tr>
+            <tr><td><strong>Securities firms</strong></td><td class="dim">Brokers, market makers</td></tr>
+            <tr><td><strong>Fund representatives</strong></td><td class="dim">Distribution in CH of foreign funds</td></tr>
+            <tr><td><strong>SRO members</strong></td><td class="dim">Directly supervised financial intermediaries (DSFI)</td></tr>
+            <tr><td><strong>Supervisory bodies</strong></td><td class="dim">FinSA supervisory bodies</td></tr>
+            <tr><td><strong>Insurance intermediaries</strong></td><td class="dim">FINMA-registered brokers &amp; agents</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Schema</strong>
+        <span class="sep">/</span>
+        <span>Common fields across all 10 lists</span>
+      </div>
+      <h2 class="v4-section-h2"><span class="serif">Unified</span> schema across all 10 lists.</h2>
+      <p class="v4-section-intro">
+        All records share the same fields. You can filter by <code class="mono" style="background: var(--color-bg-alt); padding: 2px 6px; border-radius: 4px;">entity_type</code> or query all institutions in one go.
+      </p>
+
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr><th>Field</th><th>Type</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">entity_type</td><td class="dim">enum (10 values)</td><td class="mono">bank</td></tr>
+            <tr><td class="mono">name</td><td class="dim">string</td><td>UBS Switzerland AG</td></tr>
+            <tr><td class="mono">uid</td><td class="dim">string (CHE format)</td><td class="mono">CHE-101.329.561</td></tr>
+            <tr><td class="mono">lei</td><td class="dim">string (20 chars)</td><td class="mono">506700LOLO53LDMTHY00</td></tr>
+            <tr><td class="mono">licence_type</td><td class="dim">string</td><td>fintech licence</td></tr>
+            <tr><td class="mono">licence_date</td><td class="dim">string (ISO)</td><td class="mono">2019-08-27</td></tr>
+            <tr><td class="mono">status</td><td class="dim">string</td><td class="mono">active</td></tr>
+            <tr><td class="mono">canton</td><td class="dim">string (2 letters)</td><td class="mono">ZH</td></tr>
+            <tr><td class="mono">address</td><td class="dim">string</td><td>Bahnhofstrasse 45, 8001 Zürich</td></tr>
+            <tr><td class="mono">source_list</td><td class="dim">string</td><td class="mono">finma-banks</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Live demo</strong>
+        <span class="sep">/</span>
+        <span>No sign-up</span>
+      </div>
+      <h2 class="v4-section-h2">Try it <span class="serif">for real</span>.</h2>
+      <p class="v4-section-intro">Search for a Swiss institution and immediately see its FINMA type, UID and LEI.</p>
+      <FinmaLookup />
+    </section>
+
+    <div class="ds-sample reveal-v4">
+      <h3>Free sample — 143 entities across the 9 covered types</h3>
+      <p>Balanced preview (up to 20 per entity type, depending on available volumes) to validate the format. The 16 columns of the full dataset are present (entity_type, name, uid, lei, licence_type FR/DE/IT, licence_date, status, canton, city, address, source_list, source_url, is_warning_listed).</p>
+      <a href="/samples/finma-sample.csv" download class="ds-sample-dl">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 7l4 4 4-4M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download finma-sample.csv
+      </a>
+    </div>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow">
+        <strong>Use cases</strong>
+        <span class="sep">/</span>
+        <span>4 typical profiles</span>
+      </div>
+      <h2 class="v4-section-h2">Who <span class="serif">it's for</span>.</h2>
+      <div class="ds-audience-grid">
+        <div class="ds-audience-item">
+          <strong>FinTech &amp; bank compliance officers</strong>
+          <span>Daily counterparty checks, KYC due diligence, anti-money-laundering screening.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>B2B platforms (payments, lending)</strong>
+          <span>Automated onboarding: verify a partner is FINMA-regulated in a single API call.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Financial law firms</strong>
+          <span>Entity research, accelerated due diligence, audit of FINMA authorisations over time.</span>
+        </div>
+        <div class="ds-audience-item">
+          <strong>Regulators &amp; researchers</strong>
+          <span>Time-series on the evolution of the Swiss financial landscape, comparative studies by canton.</span>
+        </div>
+      </div>
+    </section>
+
+    <ProductFaq productName="FINMA Registry" />
+
+    <div class="ds-cta" id="buy">
+      <form method="POST" action="/api/checkout/start" class="ds-cta-form">
+        <input type="hidden" name="dataset_ids" value="finma" />
+        <button type="submit" class="v4-btn v4-btn-primary v4-btn-cta">
+          Buy FINMA Registry — 299 CHF
+          <span class="arrow">→</span>
+        </button>
+      </form>
+      <p class="ds-cta-sub">Secure Stripe payment · Immediate download by email · 14-day refund, no questions asked</p>
+      <p class="ds-cta-alt">Or take the <a href="/en/bundle">complete bundle (TARES + Classifications + FINMA) for 797 CHF</a> — save 200 CHF (20%).</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .finma-status-banner {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px 22px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--teal);
+    border-radius: 10px;
+    margin-bottom: 32px;
+  }
+  .finma-status-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .finma-status-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .finma-status-text strong {
+    display: block;
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+  .finma-status-text span strong {
+    display: inline;
+    margin: 0;
+    font-size: 13px;
+  }
+  .finma-status-text a {
+    color: var(--teal);
+    text-decoration: underline;
+  }
+</style>
+</BaseLayout>

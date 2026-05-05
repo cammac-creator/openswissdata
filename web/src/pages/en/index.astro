@@ -1,0 +1,435 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Terminal from "../../components/Terminal.astro";
+import InstallBar from "../../components/InstallBar.astro";
+import TrustStrip from "../../components/TrustStrip.astro";
+import PersonaTile from "../../components/PersonaTile.astro";
+import Fiche from "../../components/Fiche.astro";
+import Step from "../../components/Step.astro";
+import Quote from "../../components/Quote.astro";
+---
+<BaseLayout
+  title="openswissdata — Swiss federal data, normalised"
+  description="Official Swiss datasets, normalised (TARES, NOGA/NACE/ISIC, FINMA Registry) in JSON, Parquet and SQL. BAZG permission granted. Versioned, Ed25519-signed, ready to plug in."
+>
+
+<div class="bg-grid"></div>
+
+<!-- ========== HERO ========== -->
+<section class="v4-hero">
+  <div class="container-v4">
+    <div class="v4-hero-grid">
+      <div>
+        <div class="v4-eyebrow reveal-v4">
+          <span>Official Swiss data</span>
+          <span style="opacity:.4">·</span>
+          <span class="check">BAZG permission</span>
+        </div>
+
+        <h1 class="v4-h1 reveal-v4" data-delay="1">
+          Swiss federal data,<br>
+          <span class="accent">normalised.</span>
+        </h1>
+
+        <p class="v4-lede reveal-v4" data-delay="2">
+          TARES, NOGA·NACE·ISIC, FINMA Registry — extracted from authoritative federal sources, delivered <strong>normalised, versioned and Ed25519-signed</strong>. For your pipelines, your audits and your ERP integrations.
+        </p>
+
+        <div class="v4-spec-row reveal-v4" data-delay="3">
+          <div class="v4-spec">
+            <div class="v4-spec-label">Datasets</div>
+            <div class="v4-spec-value">3 + bundle</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Codes</div>
+            <div class="v4-spec-value" data-count="12800">~12,800</div>
+          </div>
+          <div class="v4-spec">
+            <div class="v4-spec-label">Formats</div>
+            <div class="v4-spec-value">Parquet · JSON · SQL</div>
+          </div>
+        </div>
+
+        <div class="v4-cta-row reveal-v4" data-delay="4">
+          <a href="#datasets" class="v4-btn v4-btn-primary">See the datasets <span class="arrow">→</span></a>
+          <InstallBar command="npx @osd/cli pull tares" />
+        </div>
+
+        <div class="v4-permission-line reveal-v4" data-delay="5">
+          <span><strong>Sources:</strong> BAZG · OFS · FINMA</span>
+          <span style="opacity:.4">·</span>
+          <span class="ok">Permission granted 2026-04-21</span>
+          <span style="opacity:.4">·</span>
+          <span><strong>Legal venue:</strong> Berne</span>
+        </div>
+
+        <div class="v4-hero-chain reveal-v4" data-delay="5" aria-label="Cryptographic provenance chain">
+          <div class="v4-chain-node" data-step="1"><span class="dot"></span><strong>BAZG</strong></div>
+          <div class="v4-chain-link" data-step="1"></div>
+          <div class="v4-chain-node" data-step="2">SHA-256</div>
+          <div class="v4-chain-link" data-step="2"></div>
+          <div class="v4-chain-node" data-step="3">Ed25519</div>
+          <div class="v4-chain-link" data-step="3"></div>
+          <div class="v4-chain-node" data-step="4">RFC-3161</div>
+          <div class="v4-chain-link" data-step="4"></div>
+          <div class="v4-chain-node" data-step="5"><span class="dot"></span><strong>Verified</strong></div>
+        </div>
+      </div>
+
+      <div class="reveal-v4" data-delay="2">
+        <Terminal title="~/erp-integration — zsh" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<TrustStrip
+  sources={["BAZG", "OFS", "FINMA"]}
+  badges={["BAZG permission · 2026-04-21", "Ed25519-signed manifest", "RFC-3161 timestamp"]}
+/>
+
+<!-- ========== PERSONAS ========== -->
+<section class="v4-personas">
+  <div class="container-v4">
+    <div class="v4-section-eyebrow reveal-v4">
+      <strong>Three ways to use openswissdata</strong>
+      <span class="sep">/</span>
+      <span>1 stack, 3 angles</span>
+    </div>
+    <h2 class="v4-section-h2 reveal-v4" data-delay="1">One dataset. Three teams that win with it.</h2>
+    <p class="v4-section-intro reveal-v4" data-delay="2">
+      Whether you plug the API into your ERP, defend an audit or write code — the same foundation aligns with your needs.
+    </p>
+
+    <div class="v4-persona-grid">
+      <PersonaTile
+        letter="A"
+        tag="For data engineers"
+        title="A real dataset. A real API. An MCP server."
+        description="Ed25519-signed Parquet, pre-computed multilingual embeddings, free-text classifier → top-3 NOGA. And 9 native tools in Claude Code & Cursor via MCP."
+        proof={{ text: "9 tools live · mcp.openswissdata.com", prompt: ">_" }}
+        link="MCP & docs"
+        href="/en/mcp"
+        delay={1}
+      />
+      <PersonaTile
+        letter="B"
+        tag="For compliance"
+        title="When the audit hits, you have the evidence."
+        description="Written commercial permission from BAZG. Legal venue Berne. SHA-256 + Ed25519 manifest + RFC-3161 timestamp — everything is traceable."
+        proof={{ text: "BAZG · permission 2026-04-21", variant: "green" }}
+        link="See the evidence"
+        href="/legal/provenance"
+        delay={2}
+      />
+      <PersonaTile
+        letter="C"
+        tag="For ERP integrators"
+        title="~5 person-days saved per release."
+        description="Compatible with SAP, Odoo, Sage, Dynamics and ERPNext. Updates included: TARES & FINMA weekly, Classifications annually. The 3-in-1 bundle pays back its first year as soon as the first release ships."
+        proof={{ text: "~5 person-days × release · = ~6,000 CHF", variant: "teal" }}
+        link="See the bundle"
+        href="/en/bundle"
+        delay={3}
+      />
+    </div>
+  </div>
+</section>
+
+<!-- ========== DATASETS ========== -->
+<section class="v4-datasets" id="datasets">
+  <div class="container-v4">
+    <div class="v4-section-eyebrow reveal-v4">
+      <strong>Available datasets</strong>
+      <span class="sep">/</span>
+      <span>ED. 2026.04</span>
+      <span class="sep">/</span>
+      <span>3 + 1 bundle</span>
+    </div>
+    <h2 class="v4-section-h2 reveal-v4" data-delay="1">Everything a Swiss ERP should already have.</h2>
+    <p class="v4-section-intro reveal-v4" data-delay="2">
+      Three independent federal datasets, or the complete bundle at a discount. All delivered in Parquet, JSON and SQL, Ed25519-signed and versioned.
+    </p>
+
+    <div class="v4-dataset-grid">
+      <Fiche
+        ribbonLabel="TARES"
+        ribbonSource="BAZG"
+        pillText="v2026.04.30"
+        title="Customs tariff"
+        sub="~7,500 codes · DE/FR/IT"
+        desc="The Swiss customs tariff, trilingual descriptions, duty rates, HS hierarchy. Cross-walks HS6 and CN8."
+        formats={["PARQUET", "JSON", "SQL"]}
+        price="299"
+        href="/en/datasets/tares"
+        delay={1}
+      />
+      <Fiche
+        ribbonLabel="CLASSIFICATIONS"
+        ribbonSource="OFS"
+        pillText="v2026.04.30"
+        title="NOGA · NACE · ISIC"
+        sub="~3,800 codes · 4 languages"
+        desc="Swiss and international economic classifications with complete cross-walks between standards. New: NOGA 2025 + NACE 2.1."
+        formats={["PARQUET", "JSON", "SQL"]}
+        price="399"
+        href="/en/datasets/classifications"
+        delay={2}
+      />
+      <Fiche
+        ribbonLabel="FINMA"
+        ribbonSource="FINMA"
+        pillText="v2026.04.30"
+        title="Registry + Warnings"
+        sub="2,912 entities · 2,182 warnings"
+        desc="FINMA-supervised entities + the complete warnings list, unified in a single pack with cross-ref is_warning_listed."
+        formats={["PARQUET", "JSON", "SQL"]}
+        price="299"
+        href="/en/datasets/finma"
+        delay={3}
+      />
+      <Fiche
+        ribbonLabel="3-IN-1 BUNDLE"
+        ribbonSource="All datasets"
+        pillText="−20%"
+        title="Complete bundle"
+        sub="TARES + Classifications + FINMA"
+        desc="One licence, one invoice, updates included (TARES & FINMA weekly, Classifications annually). ~15 person-days saved per year."
+        formats={["PARQUET", "JSON", "SQL", "SDK"]}
+        price="797"
+        href="/en/bundle"
+        ctaLabel="Buy"
+        theme="bundle"
+        roiText="<strong>~15 person-days saved / year</strong> · ~18,000 CHF in-house"
+        strikePrice="997"
+        delay={4}
+      />
+    </div>
+  </div>
+</section>
+
+<!-- ========== HOW IT WORKS ========== -->
+<section class="v4-how" id="how">
+  <div class="container-v4">
+    <div class="v4-section-eyebrow reveal-v4">
+      <strong>How it works</strong>
+      <span class="sep">/</span>
+      <span>15 minutes from payment to production</span>
+    </div>
+    <h2 class="v4-section-h2 reveal-v4" data-delay="1">Four steps. No support to call.</h2>
+
+    <div class="v4-steps">
+      <Step num="01" tag="Purchase" title="Stripe Checkout" text="Payment in CHF, invoiced to your registered company. SAP/Odoo OK for expensing." delay={1} />
+      <Step num="02" tag="Access" title="Magic-link" text="Signed download link sent by email (valid 48h for the ZIP, +15 min per session for the customer area). No password to remember." delay={2} />
+      <Step num="03" tag="Download" title="Signed ZIP" text="Ed25519-signed ZIP + RFC-3161 timestamp, delivered from Cloudflare R2 (Frankfurt)." delay={3} />
+      <Step num="04" tag="Integration" title="SDK or raw" text="Import the Parquet, or use the TypeScript / Python SDK." delay={4} />
+    </div>
+  </div>
+</section>
+
+<!-- ========== QUOTE BAZG ========== -->
+<Quote
+  source="BAZG"
+  date="2026-04-21"
+  text="Permission granted for the commercial distribution of TARES data under your offering, subject to the usual attribution and exclusion conditions."
+  author="Michael Beer"
+  role="Head of Tariff Foundations, BAZG"
+  affiliation="Bundesamt für Zoll und Grenzsicherheit"
+  ctas={[
+    { label: "See full BAZG terms", href: "/legal/cgv#bazg" },
+    { label: "See Provenance page", href: "/legal/provenance" }
+  ]}
+/>
+
+<!-- ========== WHY NOT DIY ========== -->
+<section class="v4-diy">
+  <div class="container-v4">
+    <span class="v4-eyebrow reveal-v4">PRE-EMPTIVE OBJECTIONS</span>
+    <h2 class="v4-section-h2 reveal-v4" data-delay="1">"I can do it myself with opendata.swiss."</h2>
+    <p class="v4-section-lead reveal-v4" data-delay="2">
+      You could. Here's why our customers prefer to pay 299 CHF.
+    </p>
+
+    <div class="v4-diy-grid">
+      <div class="v4-diy-item reveal-v4" data-delay="3">
+        <div class="v4-diy-num">1</div>
+        <h3>The format changes without warning</h3>
+        <p>BAZG switches from XLSX to XML, adds a column, drops a tab. You find out when your pipeline breaks in production on a Tuesday at 5 pm. We absorb these changes for you.</p>
+      </div>
+      <div class="v4-diy-item reveal-v4" data-delay="4">
+        <div class="v4-diy-num">2</div>
+        <h3>Normalisation takes ~5 person-days</h3>
+        <p>The BAZG XLSX files have 30+ preferential regimes in concatenated string columns. Doing the job <em>once</em> is easy, maintaining it 12 months later is painful.</p>
+      </div>
+      <div class="v4-diy-item reveal-v4" data-delay="5">
+        <div class="v4-diy-num">3</div>
+        <h3>Swiss UCA art. 5 protects you poorly in B2B</h3>
+        <p>Scraping opendata.swiss for internal use = OK. Plugging it into a product you bill = grey area. An openswissdata buyer receives a documented chain of rights.</p>
+      </div>
+      <div class="v4-diy-item reveal-v4" data-delay="6">
+        <div class="v4-diy-num">4</div>
+        <h3>The hidden cost is ~6,000 CHF/release</h3>
+        <p>At 1,200 CHF/day in-house × 5 days per release. The complete bundle (797 CHF) pays back its ROI as soon as the first release.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FAQ ========== -->
+<section class="v4-faq">
+  <div class="container-v4">
+    <span class="v4-eyebrow reveal-v4">FREQUENTLY ASKED QUESTIONS</span>
+    <h2 class="v4-section-h2 reveal-v4" data-delay="1">Before you click "Buy".</h2>
+
+    <div class="v4-faq-list">
+      <details class="v4-faq-item reveal-v4" data-delay="2">
+        <summary>Who are your sources?</summary>
+        <p>BAZG (customs, written commercial permission obtained on 2026-04-21 — Michael Beer, BAZG Tarifgrundlagen), OFS / BFS (statistics, permission request sent on 2026-04-17, awaiting reply), FINMA (financial supervision, permission request sent on 2026-04-17, pending). Republication of OFS and FINMA data is grounded on the freedom to reuse official works (Swiss Copyright Act art. 5) with a public 24-hour takedown policy on request from the source authority. All official, all verifiable. See <code>provenance.json</code> in each ZIP.</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>Is it legal to resell public data?</summary>
+        <p>Yes. We do not sell the data — it is public. We sell the normalisation work, the documented chain of rights, the cryptographic signature and the updates. Swiss UCA art. 5 protects this work. <a href="/en/compliance">See the Compliance page</a>.</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>How often is it updated?</summary>
+        <p>TARES and FINMA: weekly delta following official publications, with a 90-day changelog. Classifications: annual refresh + major revisions (NOGA 2025, NACE 2.1).</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>What happens if the official format changes?</summary>
+        <p>We absorb it. Our schema has been stable from the start, regardless of what BAZG does internally. We monitor upstream sources continuously (daily canary on URLs and file structures) — if a breakage forces a schema change on your side, you are notified by email and changelog as soon as we detect it, with the effective date.</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>How do I verify that the ZIP has not been tampered with?</summary>
+        <p>Each ZIP contains a <code>provenance.json</code> file with SHA-256 hash + Ed25519 signature + RFC-3161 timestamp. Quick CLI check: <code>openssl dgst -sha256 tares-2026.04.zip</code> and compare with the <code>sha256</code> field in <code>provenance.json</code>. Details and public key on the <a href="/legal/provenance">Provenance page</a>. An official SDK <code>@openswissdata/sdk verify-provenance</code> will be released shortly after launch (release tracked on GitHub).</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>Is it usable in an existing ERP (SAP, Odoo, Sage)?</summary>
+        <p>Yes. Parquet, JSON and SQL formats (DuckDB / SQLite / Postgres dump). Schemas are standard tabular. A senior developer integrates TARES into a SAP module in 2-4 hours.</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>What exactly does the 14-day refund cover?</summary>
+        <p>If within 14 days of purchase the dataset does not meet your needs, we refund in full, no questions asked. One rule: do not redistribute the ZIP elsewhere in the meantime (T&Cs §2bis).</p>
+      </details>
+      <details class="v4-faq-item reveal-v4" data-delay="3">
+        <summary>Do you do custom work?</summary>
+        <p>Yes, for enterprise needs: additional fields, specific formats, contractual SLA, dedicated ERP integration. Email <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a> with your use case and we will come back with a quote.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FINAL CTA ========== -->
+<section class="v4-cta-final">
+  <div class="container-v4">
+    <h2 class="reveal-v4">Ready to plug in Swiss data?</h2>
+    <p class="reveal-v4" data-delay="1">
+      299–399 CHF per dataset, 797 CHF for the bundle. Weekly updates (TARES, FINMA) or annual updates (Classifications) included. No commitment, 14-day refund, no questions asked.
+    </p>
+    <div class="v4-cta-final-row reveal-v4" data-delay="2">
+      <a href="#datasets" class="v4-btn v4-btn-primary">See the datasets <span class="arrow">→</span></a>
+      <a href="/legal/provenance" class="v4-btn v4-btn-secondary">See signed provenance</a>
+      <a href="mailto:contact@openswissdata.com" class="v4-btn-mono">Sales contact</a>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  // ===== Count-up =====
+  function osdCountUp(el) {
+    const target = +el.dataset.count;
+    const dur = 1400; const start = performance.now();
+    const fmt = new Intl.NumberFormat('en-GB');
+    function tick(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = '~' + fmt.format(Math.round(target * eased));
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  if ('IntersectionObserver' in window) {
+    const countObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          osdCountUp(e.target);
+          countObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('[data-count]').forEach(el => countObs.observe(el));
+  }
+
+  // ===== Terminal typewriter =====
+  const termLines = [
+    { text: '$ npx @osd/cli pull tares@latest', cls: 'cmd', prompt: true, delay: 600 },
+    { text: '✓ Verified Ed25519 signature openswissdata.com', cls: 'ok', delay: 400 },
+    { text: '✓ Pulled tares.parquet (1.8 MB · 7,511 rows · v2026.04.30)', cls: 'ok', delay: 350 },
+    { text: '✓ Cross-walks: HS6, CN8', cls: 'ok', delay: 300 },
+    { text: '✓ Manifest SHA-256 + RFC-3161 timestamp', cls: 'ok', delay: 350 },
+    { text: '', cls: '', delay: 250 },
+    { text: '$ npx @osd/cli query tares "0901.10"', cls: 'cmd', prompt: true, delay: 700 },
+    { text: 'hs_code      "0901.10.10"', cls: 'json-red', delay: 250 },
+    { text: 'description  {', cls: 'dim', delay: 200 },
+    { text: '  de  "Kaffee, nicht geröstet"', cls: 'json-str', delay: 250 },
+    { text: '  fr  "Café non torréfié"', cls: 'json-str', delay: 250 },
+    { text: '  it  "Caffè non torrefatto"', cls: 'json-str', delay: 250 },
+    { text: '}', cls: 'dim', delay: 200 },
+    { text: 'duty_chf     0.00', cls: 'json-yellow', delay: 250 },
+    { text: 'source       "BAZG · 2026.04.30"', cls: 'json-blue', delay: 300 },
+  ];
+  const termBody = document.getElementById('v4-termBody');
+  function osdRenderTermLine(line) {
+    const span = document.createElement('span');
+    span.className = 'v4-term-line';
+    if (line.text === '') {
+      span.innerHTML = '&nbsp;';
+    } else if (line.prompt) {
+      span.innerHTML = '<span class="prompt">$ </span><span class="cmd">' + line.text.replace(/^\$\s*/, '') + '</span>';
+    } else if (line.cls === 'ok') {
+      span.innerHTML = line.text.replace(/^✓/, '<span class="ok">✓</span>')
+        .replace(/(tares\.parquet|HS6, CN8|openswissdata\.com|2026\.04\.30|SHA-256 \+ RFC-3161 timestamp|Ed25519 signature)/, '<span class="val">$1</span>');
+    } else if (line.cls === 'json-red') {
+      const m = line.text.match(/^(\S+)\s+(.*)$/);
+      if (m) span.innerHTML = '<span class="key">' + m[1] + '</span>      <span class="red">' + m[2] + '</span>';
+    } else if (line.cls === 'json-str') {
+      const m = line.text.match(/^(\s*)(\S+)\s+(.*)$/);
+      if (m) span.innerHTML = m[1] + '<span class="key">' + m[2] + '</span>  <span class="green">' + m[3] + '</span>';
+    } else if (line.cls === 'json-yellow') {
+      const m = line.text.match(/^(\S+)\s+(.*)$/);
+      if (m) span.innerHTML = '<span class="key">' + m[1] + '</span>     <span class="yellow">' + m[2] + '</span>';
+    } else if (line.cls === 'json-blue') {
+      const m = line.text.match(/^(\S+)\s+(.*)$/);
+      if (m) span.innerHTML = '<span class="key">' + m[1] + '</span>       <span class="blue">' + m[2] + '</span>';
+    } else if (line.cls === 'dim') {
+      span.innerHTML = '<span class="dim">' + line.text + '</span>';
+    } else {
+      span.textContent = line.text;
+    }
+    termBody.appendChild(span);
+  }
+  async function osdRunTerminal() {
+    if (!termBody) return;
+    for (const line of termLines) {
+      osdRenderTermLine(line);
+      termBody.scrollTop = termBody.scrollHeight;
+      await new Promise(r => setTimeout(r, line.delay));
+    }
+    const cur = document.createElement('span');
+    cur.className = 'v4-term-line';
+    cur.innerHTML = '<span class="prompt">$ </span><span class="v4-cursor"></span>';
+    termBody.appendChild(cur);
+  }
+  if (termBody && 'IntersectionObserver' in window) {
+    const termObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          setTimeout(osdRunTerminal, 400);
+          termObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    termObs.observe(termBody);
+  }
+</script>
+
+</BaseLayout>

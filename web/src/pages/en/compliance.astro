@@ -1,0 +1,195 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const lastUpdated = new Date().toISOString().split("T")[0];
+---
+<BaseLayout
+  title="Sources and compliance — openswissdata.com"
+  description="Official sources, legal basis for republication, pending permission requests, 24-hour takedown commitment. Institutional page of openswissdata."
+>
+  <div class="bg-grid"></div>
+  <section class="legal-page">
+    <div class="container-v4">
+      <nav class="ds-breadcrumb">
+        <a href="/en/">home</a>
+        <span class="sep">·</span>
+        <span class="current">Sources &amp; compliance</span>
+      </nav>
+
+      <div class="legal-content">
+        <h1>Sources and compliance</h1>
+        <div class="legal-meta">Institutional page · Last updated {lastUpdated}</div>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--line); border-left: 3px solid var(--ink); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0 28px; font-size: 13px; line-height: 1.55;">
+          <strong style="display:block; margin-bottom: 4px;">Legal identity of the publisher</strong>
+          <span style="color: var(--ink-soft);">Claude-Alain Martin · sole proprietorship (Switzerland) · not registered in the Commercial Register (<strong>art. 36 ORC</strong>, turnover &lt; 100,000 CHF) · not subject to VAT (<strong>art. 10 para. 2 LTVA</strong>) · legal venue <strong>Berne</strong> for TARES, Ogens (Publisher's location) for other datasets · contact: <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a></span>
+        </div>
+
+    <p class="lead text-lg">
+      This page documents the official sources used by openswissdata.com, the legal basis for republication, the permission requests submitted to federal authorities and the takedown procedure on request from a source authority.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">1. Official sources</h2>
+    <div class="not-prose my-4" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <table class="w-full text-sm border border-slate-300" style="min-width:560px;">
+      <thead>
+        <tr>
+          <th class="text-left px-3 py-2 border-b border-slate-300">Dataset</th>
+          <th class="text-left px-3 py-2 border-b border-slate-300">Official source</th>
+          <th class="text-left px-3 py-2 border-b border-slate-300">URL</th>
+          <th class="text-left px-3 py-2 border-b border-slate-300">Refresh</th>
+          <th class="text-left px-3 py-2 border-b border-slate-300">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="px-3 py-2 align-top">TARES (customs)</td>
+          <td class="px-3 py-2 align-top">BAZG — Swiss Federal Office for Customs and Border Security</td>
+          <td class="px-3 py-2 align-top"><a href="https://www.bazg.admin.ch/" target="_blank" rel="noopener" class="text-indigo-600 hover:underline">bazg.admin.ch</a></td>
+          <td class="px-3 py-2 align-top">Weekly</td>
+          <td class="px-3 py-2 align-top">Written commercial permission obtained (2026-04-21, Mr Michael Beer, ref. <code>BAZG-PERMISSION-2026-04-21-MICHAEL-BEER</code>)</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2 align-top">NOGA / NACE / ISIC classifications</td>
+          <td class="px-3 py-2 align-top">OFS — Federal Statistical Office (NOGA) · Eurostat (NACE) · United Nations (ISIC)</td>
+          <td class="px-3 py-2 align-top"><a href="https://www.bfs.admin.ch/" target="_blank" rel="noopener" class="text-indigo-600 hover:underline">bfs.admin.ch</a></td>
+          <td class="px-3 py-2 align-top">Annual</td>
+          <td class="px-3 py-2 align-top">Request sent 2026-04-17 · Awaiting OFS reply</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2 align-top">FINMA Registry</td>
+          <td class="px-3 py-2 align-top">FINMA — Swiss Financial Market Supervisory Authority</td>
+          <td class="px-3 py-2 align-top"><a href="https://www.finma.ch/" target="_blank" rel="noopener" class="text-indigo-600 hover:underline">finma.ch</a></td>
+          <td class="px-3 py-2 align-top">Weekly</td>
+          <td class="px-3 py-2 align-top">Request sent 2026-04-17 · Awaiting FINMA reply</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="legal-meta" style="margin: 8px 0; padding: 0; border: none;">
+      Source files are downloaded from the public portals of the issuing authorities, hashed in SHA-256, normalised (stable schema, multilingual FR/DE/IT/EN, NACE/ISIC cross-walks), versioned and Ed25519-signed. For technical details: <a href="/legal/provenance" class="text-indigo-600 hover:underline">/legal/provenance</a>.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">2. Pending permission requests</h2>
+    <div class="not-prose my-4" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <table class="w-full text-sm border border-slate-300" style="min-width:560px;">
+      <thead>
+        <tr>
+          <th class="text-left px-3 py-2 border-b border-slate-300">Recipient</th>
+          <th class="text-left px-3 py-2 border-b border-slate-300">Subject</th>
+          <th class="text-left px-3 py-2 border-b border-slate-300">Sent on</th>
+          <th class="text-left px-3 py-2 border-b border-slate-300">Status</th>
+          <th class="text-left px-3 py-2 border-b border-slate-300">Reminder</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="px-3 py-2 align-top">BAZG — Tarifgrundlagen (Mr Michael Beer)</td>
+          <td class="px-3 py-2 align-top">Commercial republication of the TARES dataset with normalisation value-added</td>
+          <td class="px-3 py-2 align-top">2026-04-17</td>
+          <td class="px-3 py-2 align-top"><strong>Written permission obtained</strong> 2026-04-21</td>
+          <td class="px-3 py-2 align-top">—</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2 align-top">OFS — Federal Statistical Office</td>
+          <td class="px-3 py-2 align-top">Republication of NOGA classifications and NACE / ISIC cross-walks</td>
+          <td class="px-3 py-2 align-top">2026-04-17</td>
+          <td class="px-3 py-2 align-top">Pending</td>
+          <td class="px-3 py-2 align-top">—</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2 align-top">FINMA — Swiss Financial Market Supervisory Authority</td>
+          <td class="px-3 py-2 align-top">Republication of the registry of supervised entities</td>
+          <td class="px-3 py-2 align-top">2026-04-17</td>
+          <td class="px-3 py-2 align-top">Pending</td>
+          <td class="px-3 py-2 align-top">—</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">3. Legal basis for republication</h2>
+    <p>
+      The republication, by openswissdata.com, of data from official Swiss public registries rests on three complementary foundations of Swiss law.
+    </p>
+
+    <h3 class="text-xl font-semibold mt-6 mb-2">3.1 Freedom to reuse official works (Swiss Copyright Act art. 5)</h3>
+    <p>
+      <strong>Article 5 of the Swiss Federal Copyright Act (LDA)</strong> explicitly excludes official works from copyright protection. Federal, cantonal and communal laws, ordinances, decisions and official publications are not protected and may therefore be freely reproduced, transformed and distributed, including for commercial purposes. Economic classifications (NOGA, NACE, ISIC), customs nomenclatures (TARES) and public registries (FINMA) fall within this category.
+    </p>
+
+    <h3 class="text-xl font-semibold mt-6 mb-2">3.2 Unfair competition and amortisation (Swiss UCA art. 5 lit. c)</h3>
+    <p>
+      The <strong>Swiss Federal Act against Unfair Competition (UCA), article 5 lit. c</strong>, sanctions the systematic reuse of another party's marketable performance without sufficient own contribution. Doctrine and Federal Supreme Court case law interpret this article in light of the <em>amortisation</em> principle: reuse is unfair only if the source performance has not had a reasonable period to amortise its investment.
+    </p>
+    <p>
+      Three Federal Supreme Court rulings frame this interpretation:
+    </p>
+    <ul class="list-disc pl-6">
+      <li><strong>BGE 135 III 446 (Maltesers)</strong> — The reuse of a commercial presentation after a reasonable amortisation period is not unfair.</li>
+      <li><strong>BGE 131 III 384 (Such Spider)</strong> — Scraping a public database for commercial use is not unfair in the absence of specific investment not amortised by the producer.</li>
+      <li><strong>BGE 139 IV 17</strong> — UCA protection does not constitute a sui generis right over databases; it is limited to sanctioning objectively unfair practices.</li>
+    </ul>
+    <p>
+      Swiss federal authorities (BAZG, OFS, FINMA) publish their registries for public use and finance their production with public funds. The amortisation period is effectively moot — public investment is meant to be reused.
+    </p>
+
+    <h3 class="text-xl font-semibold mt-6 mb-2">3.3 No sui generis right on databases in Switzerland</h3>
+    <p>
+      Unlike the European Union (Directive 96/9/EC), Switzerland <strong>has not adopted a sui generis right on databases</strong>. A Swiss database is protected only if its structure constitutes an intellectual creation within the meaning of the LDA (art. 4) — protection that covers the structure, never the factual content. The normalisation, formatting, cross-walks and cryptographic signature added by openswissdata.com themselves constitute a protectable creation, but rest on no appropriation of the underlying factual data.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">4. 24-hour takedown commitment</h2>
+    <p>
+      openswissdata.com publicly commits to handle any takedown request within the following deadlines:
+    </p>
+    <ul class="list-disc pl-6">
+      <li><strong>Acknowledgement of receipt</strong> within 2 hours (Swiss business days).</li>
+      <li><strong>Effective takedown</strong> within 24 hours (suspension of downloads, removal of public links, deactivation of SDK access).</li>
+      <li><strong>Pro-rata refund</strong> to affected purchasers, calculated pro rata to the time remaining on the 360-day update period.</li>
+    </ul>
+    <p>
+      Dedicated address: <a href="mailto:takedown@openswissdata.com" class="text-indigo-600 hover:underline">takedown@openswissdata.com</a>
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">5. FINMA disclaimer</h2>
+    <blockquote style="border-left: 3px solid var(--line-strong); padding-left: 16px; color: var(--ink-soft); margin: 16px 0;">
+      "Source: FINMA. No warranty as to accuracy, reliability or timeliness. openswissdata.com is not affiliated with FINMA, does not represent FINMA, and its data does not substitute for direct consultation of finma.ch."
+    </blockquote>
+    <p>
+      This disclaimer appears in the README and LICENSE.txt of every delivery of the FINMA Registry dataset, as well as at the top of the corresponding API and MCP documentation.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">6. Watermarking and traceability</h2>
+    <p>
+      Each delivered ZIP contains a unique <em>canary record</em> HMAC, derived from the customer identifier. This record allows file traceability in the event of unauthorised redistribution and constitutes technical evidence in case of breach of the no-sublicensing clause (T&Cs §2bis).
+    </p>
+    <p>
+      The canary record alters neither business values nor official codes — it is an identifiable ancillary record, in line with the commitment of non-alteration of content (T&Cs §2). The method and key are auditable on motivated request from a purchaser.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">7. Takedown policy</h2>
+    <p>
+      openswissdata.com publicly commits to remove any dataset, without contestation and without notice, on simple written request from a source authority — BAZG, OFS, FINMA, Eurostat, United Nations — sent to <a href="mailto:takedown@openswissdata.com" class="text-indigo-600 hover:underline">takedown@openswissdata.com</a>.
+    </p>
+    <p>
+      This commitment provides two-way protection: it guarantees issuing authorities a fast response mechanism in case of disagreement, and it signals to professional purchasers that the chain of rights is kept up to date proactively.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">8. Compliance contact</h2>
+    <p>
+      For any legal question, audit request, request for a copy of the BAZG permission, or question about the sources:
+      <br /><a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>
+    </p>
+    <p>
+      For any takedown request from a source authority:
+      <br /><a href="mailto:takedown@openswissdata.com" class="text-indigo-600 hover:underline">takedown@openswissdata.com</a>
+    </p>
+
+        <p class="legal-meta" style="margin-top: 48px; padding-top: 16px; border-top: 1px dashed var(--line-strong); border-bottom: none;">
+          Page updated {lastUpdated}. openswissdata.com is an independent private service. No affiliation with opendata.swiss, BAZG, BFS, FINMA, Eurostat or the United Nations.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
