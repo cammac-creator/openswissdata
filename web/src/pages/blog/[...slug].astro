@@ -12,26 +12,227 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+
+const datasetLabels: Record<string, string> = {
+  tares: "TARES — 299 CHF",
+  classifications: "Classifications — 399 CHF",
+  finma: "FINMA Registry — 299 CHF",
+  all: "Bundle complet — 797 CHF",
+};
+const ctaTarget = post.data.dataset === "all" ? "/bundle" : post.data.dataset ? `/datasets/${post.data.dataset}` : "/bundle";
+const ctaLabel = post.data.dataset && datasetLabels[post.data.dataset]
+  ? datasetLabels[post.data.dataset]
+  : "Voir le bundle complet — 797 CHF";
+
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.publishedAt.toISOString(),
+  ...(post.data.updatedAt ? { dateModified: post.data.updatedAt.toISOString() } : {}),
+  author: {
+    "@type": "Person",
+    name: "Claude-Alain Martin",
+    url: "https://www.openswissdata.com/",
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "openswissdata",
+    url: "https://www.openswissdata.com/",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://www.openswissdata.com/favicon.svg",
+    },
+  },
+  image: "https://www.openswissdata.com/og-default.png",
+  mainEntityOfPage: {
+    "@type": "WebPage",
+    "@id": `https://www.openswissdata.com/blog/${post.id}`,
+  },
+  keywords: post.data.keywords.join(", "),
+};
 ---
 <BaseLayout
   title={`${post.data.title} — openswissdata.com`}
   description={post.data.description}
+  productJsonLd={articleJsonLd}
 >
-  <article class="max-w-3xl mx-auto px-6 py-16 prose prose-slate">
-    <nav class="text-sm text-slate-500 mb-4 not-prose">
-      <a href="/" class="hover:underline">Home</a> · <a href="/blog" class="hover:underline">Blog</a> · <span>{post.data.title}</span>
-    </nav>
-    <h1 class="text-4xl font-bold mb-2 not-prose">{post.data.title}</h1>
-    <p class="text-sm text-slate-500 mb-8 not-prose">
-      Published {post.data.publishedAt.toISOString().slice(0, 10)}
-      {post.data.updatedAt && ` · Updated ${post.data.updatedAt.toISOString().slice(0, 10)}`}
-    </p>
-    <Content />
+<div class="bg-grid"></div>
 
-    <hr class="my-12">
-    <footer class="not-prose text-sm text-slate-600">
-      <p class="mb-2">Written by Alain Martin · Solo founder of openswissdata.com</p>
-      <p>Also check: <a href="/bundle" class="text-indigo-600 hover:underline">openswissdata.com/bundle</a></p>
-    </footer>
-  </article>
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href="/">accueil</a>
+      <span class="sep">·</span>
+      <a href="/blog">blog</a>
+      <span class="sep">·</span>
+      <span class="current">{post.data.title}</span>
+    </nav>
+
+    <article class="blog-article">
+      <div class="v4-eyebrow">
+        <span>Blog</span>
+        <span style="opacity:.4">·</span>
+        <time datetime={post.data.publishedAt.toISOString()}>{post.data.publishedAt.toISOString().slice(0, 10)}</time>
+        {post.data.updatedAt && (
+          <>
+            <span style="opacity:.4">·</span>
+            <span>mis à jour {post.data.updatedAt.toISOString().slice(0, 10)}</span>
+          </>
+        )}
+      </div>
+
+      <h1 class="v4-h1">{post.data.title}</h1>
+      <p class="v4-lede">{post.data.description}</p>
+
+      {post.data.tldr && (
+        <div class="blog-tldr">
+          <div class="blog-tldr-label">TL;DR</div>
+          <p>{post.data.tldr}</p>
+        </div>
+      )}
+
+      <div class="blog-content">
+        <Content />
+      </div>
+
+      <div class="blog-cta">
+        <div class="blog-cta-label">Le dataset complet</div>
+        <h3>{ctaLabel}</h3>
+        <p>Téléchargement immédiat · ZIP signé Ed25519 + manifest RFC-3161 · 360 jours de mises à jour incluses · refund 14 jours sans condition.</p>
+        <div class="blog-cta-row">
+          <a href={ctaTarget} class="v4-btn v4-btn-primary">Voir le dataset <span class="arrow">→</span></a>
+          <a href="/bundle" class="v4-btn v4-btn-secondary">Bundle 3-en-1 — 797 CHF (économie 200 CHF)</a>
+        </div>
+      </div>
+
+      <footer class="blog-footer">
+        <p>Écrit par <strong>Claude-Alain Martin</strong> · founder solo openswissdata.com</p>
+        <p>Questions ou suggestions ? <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a></p>
+      </footer>
+    </article>
+  </div>
+</section>
 </BaseLayout>
+
+<style>
+  .blog-article { max-width: 720px; margin: 0 auto; padding: 24px 0; }
+  .blog-tldr {
+    margin: 32px 0;
+    padding: 18px 22px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+  }
+  .blog-tldr-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .blog-tldr p { font-size: 15px; line-height: 1.6; color: var(--ink); margin: 0; }
+
+  .blog-content { font-size: 16px; line-height: 1.7; color: var(--ink-soft); }
+  .blog-content h2 {
+    font-size: clamp(22px, 2.4vw, 28px);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -.02em;
+    margin: 48px 0 14px;
+    line-height: 1.2;
+  }
+  .blog-content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 32px 0 10px;
+  }
+  .blog-content p { margin: 0 0 16px; }
+  .blog-content a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(220,31,45,.25);
+  }
+  .blog-content a:hover { border-bottom-color: var(--accent); }
+  .blog-content code {
+    font-family: var(--font-mono);
+    background: var(--bg-soft);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .92em;
+  }
+  .blog-content pre {
+    font-family: var(--font-mono);
+    background: var(--bg-soft);
+    padding: 14px 18px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 13px;
+    overflow-x: auto;
+    margin: 18px 0;
+  }
+  .blog-content pre code { background: transparent; padding: 0; }
+  .blog-content ul, .blog-content ol { margin: 0 0 18px; padding-left: 24px; }
+  .blog-content li { margin-bottom: 6px; }
+  .blog-content blockquote {
+    margin: 16px 0;
+    padding: 8px 18px;
+    border-left: 3px solid var(--line-strong);
+    color: var(--ink-mute);
+    font-style: italic;
+  }
+  .blog-content table {
+    width: 100%;
+    font-size: 14px;
+    border-collapse: collapse;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  .blog-content table th, .blog-content table td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  .blog-content table th { background: var(--bg-soft); font-weight: 600; color: var(--ink); }
+  .blog-content table tr:last-child td { border-bottom: none; }
+  .blog-content strong { color: var(--ink); font-weight: 600; }
+
+  .blog-cta {
+    margin: 56px 0 24px;
+    padding: 28px 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  .blog-cta-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .blog-cta h3 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--ink);
+    margin: 0 0 8px;
+  }
+  .blog-cta p { font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 18px; }
+  .blog-cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .blog-footer {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--line-strong);
+    font-size: 13px;
+    color: var(--ink-mute);
+  }
+  .blog-footer p { margin: 0 0 6px; }
+  .blog-footer a { color: var(--accent); }
+</style>
