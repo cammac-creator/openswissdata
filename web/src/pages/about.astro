@@ -1,0 +1,151 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout
+  title="À propos · openswissdata"
+  description="Qui est derrière openswissdata. Solo founder suisse, raison individuelle (Ogens, Vaud), permission BAZG écrite, code source ETL public."
+>
+<div class="bg-grid"></div>
+
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href="/">accueil</a>
+      <span class="sep">·</span>
+      <span class="current">À propos</span>
+    </nav>
+
+    <div class="v4-hero-grid">
+      <div>
+        <div class="v4-eyebrow reveal-v4">
+          <span>À propos</span>
+          <span style="opacity:.4">·</span>
+          <span class="check">Solo founder · raison individuelle CH</span>
+        </div>
+
+        <h1 class="v4-h1 reveal-v4" data-delay="1">
+          Une personne,<br>
+          <span class="accent">un site, un email.</span>
+        </h1>
+
+        <p class="v4-lede reveal-v4" data-delay="2">
+          openswissdata est porté par <strong>Claude-Alain Martin</strong>, builder suisse, raison individuelle (1045 Ogens, Vaud). Pas d'équipe cachée, pas de ticket support de niveau 1. Vous écrivez à <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a> et je réponds sous 24h.
+        </p>
+
+        <div class="about-creds reveal-v4" data-delay="3">
+          <div class="cred">
+            <div class="cred-label">Statut juridique</div>
+            <div class="cred-value">Raison individuelle (Suisse)</div>
+            <div class="cred-detail">art. 36 ORC · art. 10 al. 2 LTVA · for Berne (TARES) / Ogens (autres)</div>
+          </div>
+          <div class="cred">
+            <div class="cred-label">Permission BAZG</div>
+            <div class="cred-value">Acquise 2026-04-21</div>
+            <div class="cred-detail">Référence BAZG-PERMISSION-2026-04-21-MICHAEL-BEER · vérifiable auprès du BAZG</div>
+          </div>
+          <div class="cred">
+            <div class="cred-label">Code source</div>
+            <div class="cred-value">100 % public</div>
+            <div class="cred-detail">github.com/cammac-creator/openswissdata · workflows ETL + tests vérifiables</div>
+          </div>
+          <div class="cred">
+            <div class="cred-label">Contact</div>
+            <div class="cred-value"><a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a></div>
+            <div class="cred-detail">Réponse personnelle sous 24h ouvrées · pas de helpdesk</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-aside reveal-v4" data-delay="2">
+        <div class="aside-card">
+          <div class="aside-label">Pourquoi ce projet</div>
+          <p>
+            J'ai passé sept ans dans la data B2B, à voir des équipes compliance et data engineering perdre des jours à scraper, normaliser et signer des datasets fédéraux suisses qui auraient pu venir prêts à l'emploi.
+          </p>
+          <p>
+            openswissdata est ma réponse : extraits, normalisés, signés Ed25519 + RFC-3161, livrés en CSV/JSON/Parquet/SQL, branchés à Claude/Cursor via MCP. Une seule personne derrière, mais le code et les workflows ETL sont publics — vous pouvez les lire avant d'acheter.
+          </p>
+        </div>
+
+        <div class="aside-links">
+          <a href="/legal/provenance">Provenance &amp; vérification cryptographique →</a>
+          <a href="/compliance">Sources &amp; base légale →</a>
+          <a href="/legal/cgv">CGV · refund 14j →</a>
+          <a href="https://github.com/cammac-creator/openswissdata" target="_blank" rel="noopener">Code source GitHub →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-creds {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 32px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 720px) { .about-creds { grid-template-columns: 1fr; } }
+  .cred {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .cred-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .cred-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .cred-value a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(220,31,45,.25); }
+  .cred-detail { font-size: 11px; color: var(--ink-soft); line-height: 1.5; }
+
+  .about-aside { padding-top: 32px; }
+  .aside-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+  .aside-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .aside-card p { font-size: 14px; line-height: 1.6; color: var(--ink-soft); margin: 0 0 10px; }
+  .aside-card p:last-child { margin-bottom: 0; }
+
+  .aside-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 22px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+  }
+  .aside-links a {
+    font-size: 13px;
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--font-mono);
+  }
+  .aside-links a:hover { color: var(--accent); }
+</style>
+</BaseLayout>
