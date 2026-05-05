@@ -1,0 +1,61 @@
+---
+import { LANGS, LANG_LABELS, LANG_NAMES, getLangFromPath, localizePath } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
+interface Props {
+  variant?: "compact" | "footer";
+}
+
+const { variant = "compact" } = Astro.props;
+const currentLang: Lang = getLangFromPath(Astro.url.pathname);
+---
+<div class={`lang-switcher lang-switcher-${variant}`} role="group" aria-label="Language">
+  {LANGS.map((lang) => (
+    <a
+      href={localizePath(Astro.url.pathname, lang)}
+      class={`lang-link${lang === currentLang ? " is-current" : ""}`}
+      hreflang={lang}
+      aria-current={lang === currentLang ? "true" : undefined}
+      aria-label={LANG_NAMES[lang]}
+    >
+      {LANG_LABELS[lang]}
+    </a>
+  ))}
+</div>
+
+<style>
+  .lang-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .lang-link {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: var(--color-ink-mute);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .lang-link:hover {
+    color: var(--color-ink);
+  }
+  .lang-link.is-current {
+    color: var(--color-ink);
+    border-color: var(--color-line);
+    background: rgba(0,0,0,.02);
+  }
+
+  /* Footer variant: slightly larger, sits in the bottom row */
+  .lang-switcher-footer .lang-link {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  @media (max-width: 720px) {
+    .lang-switcher-compact .lang-link { padding: 2px 6px; }
+  }
+</style>

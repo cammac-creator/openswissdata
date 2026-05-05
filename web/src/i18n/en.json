@@ -1,0 +1,62 @@
+{
+  "nav": {
+    "datasets": "Datasets",
+    "how": "How it works",
+    "blog": "Blog",
+    "mcp": "MCP",
+    "bundle": "Bundle",
+    "compliance": "Compliance",
+    "about": "About",
+    "account": "Account"
+  },
+  "statusbar": {
+    "live": "3 datasets · live",
+    "edition": "ED.",
+    "version": "v",
+    "for": "Berne · CH"
+  },
+  "footer": {
+    "tagline_line1": "Swiss public data,",
+    "tagline_line2": "finally usable.",
+    "operational": "Service operational · Switzerland / EU",
+    "col_datasets": "Datasets",
+    "col_account": "Account",
+    "col_legal": "Legal",
+    "link_tares": "TARES (customs)",
+    "link_classifications": "Classifications NOGA/NACE/ISIC",
+    "link_finma": "FINMA Registry",
+    "link_bundle": "Complete bundle",
+    "link_account": "Account area",
+    "link_blog": "Journal",
+    "link_cgv": "Sales terms",
+    "link_privacy": "Privacy",
+    "link_provenance": "Provenance & signature",
+    "link_sdr": "Outreach policy",
+    "link_compliance": "Sources & compliance",
+    "link_impressum": "Imprint",
+    "affiliation": "openswissdata.com is an independent private service. Not affiliated with opendata.swiss, BAZG, BFS, or FINMA.",
+    "disclaimer_title": "Disclaimer.",
+    "disclaimer_body": "openswissdata provides products derived from official Swiss public data. The TARES dataset is delivered with written commercial permission from BAZG (reference BAZG-PERMISSION-2026-04-21-MICHAEL-BEER). The Classifications and FINMA datasets are republished with normalisation value-add, under a public 24-hour takedown procedure upon source authority request. These products are reformulations intended for business use. They do not replace the official publications; in case of discrepancy, the original sources prevail. Legal venue: Berne, Switzerland, for TARES datasets (per BAZG condition).",
+    "studio": "Part of the IBANforge studio →",
+    "skip_link": "Skip to main content"
+  },
+  "lang": {
+    "label": "Language",
+    "switch_to": "Switch to"
+  },
+  "common": {
+    "buy": "Buy",
+    "discover": "Discover",
+    "see_more": "See more",
+    "back": "Back",
+    "loading": "Loading…",
+    "permission_bazg": "BAZG permission",
+    "permission_granted": "Permission granted 2026-04-21",
+    "ed25519_signed": "Ed25519-signed",
+    "rfc3161": "RFC-3161 timestamped",
+    "currency": "CHF",
+    "per_year": "/ year",
+    "per_month": "/ month",
+    "one_shot": "one-time payment"
+  }
+}

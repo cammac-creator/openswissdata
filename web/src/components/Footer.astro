@@ -1,5 +1,10 @@
 ---
+import { getLangFromPath, t, localizePath } from "../i18n/utils";
+import LangSwitcher from "./LangSwitcher.astro";
+
 const year = new Date().getFullYear();
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => localizePath(path, lang);
 ---
 <footer class="site-footer">
   <div class="container-wide">
@@ -10,53 +15,54 @@ const year = new Date().getFullYear();
           <span class="logo-text">openswissdata</span>
         </div>
         <p class="footer-tag">
-          Les données publiques suisses,<br>
-          <span class="serif">enfin utilisables.</span>
+          {t("footer.tagline_line1", lang)}<br>
+          <span class="serif">{t("footer.tagline_line2", lang)}</span>
         </p>
         <div class="footer-status">
           <span class="status-dot"></span>
-          Service opérationnel · Suisse / EU
+          {t("footer.operational", lang)}
         </div>
       </div>
 
       <div class="footer-cols">
         <div>
-          <div class="footer-col-title">Datasets</div>
-          <a href="/datasets/tares">TARES (douanes)</a>
-          <a href="/datasets/classifications">Classifications NOGA/NACE/ISIC</a>
-          <a href="/datasets/finma">Registre FINMA</a>
-          <a href="/bundle">Bundle complet</a>
+          <div class="footer-col-title">{t("footer.col_datasets", lang)}</div>
+          <a href={L("/datasets/tares")}>{t("footer.link_tares", lang)}</a>
+          <a href={L("/datasets/classifications")}>{t("footer.link_classifications", lang)}</a>
+          <a href={L("/datasets/finma")}>{t("footer.link_finma", lang)}</a>
+          <a href={L("/bundle")}>{t("footer.link_bundle", lang)}</a>
         </div>
         <div>
-          <div class="footer-col-title">Compte</div>
-          <a href="/account">Espace client</a>
-          <a href="/blog">Journal</a>
+          <div class="footer-col-title">{t("footer.col_account", lang)}</div>
+          <a href="/account">{t("footer.link_account", lang)}</a>
+          <a href="/blog">{t("footer.link_blog", lang)}</a>
           <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a>
         </div>
         <div>
-          <div class="footer-col-title">Légal</div>
-          <a href="/legal/cgv">Conditions de vente</a>
-          <a href="/legal/privacy">Confidentialité</a>
-          <a href="/legal/provenance">Provenance &amp; signature</a>
-          <a href="/legal/sdr-policy">Politique prospection</a>
-          <a href="/compliance">Sources &amp; compliance</a>
-          <a href="/legal/impressum">Impressum</a>
+          <div class="footer-col-title">{t("footer.col_legal", lang)}</div>
+          <a href={L("/legal/cgv")}>{t("footer.link_cgv", lang)}</a>
+          <a href={L("/legal/privacy")}>{t("footer.link_privacy", lang)}</a>
+          <a href={L("/legal/provenance")}>{t("footer.link_provenance", lang)}</a>
+          <a href={L("/legal/sdr-policy")}>{t("footer.link_sdr", lang)}</a>
+          <a href={L("/compliance")}>{t("footer.link_compliance", lang)}</a>
+          <a href={L("/legal/impressum")}>{t("footer.link_impressum", lang)}</a>
         </div>
       </div>
     </div>
 
     <div class="footer-affiliation">
-      openswissdata.com est un service privé indépendant. Non affilié à opendata.swiss, BAZG, BFS, FINMA.
+      {t("footer.affiliation", lang)}
     </div>
 
     <div class="footer-disclaimer">
-      <strong>Avertissement.</strong> openswissdata propose des produits dérivés des données publiques officielles suisses. Le dataset TARES est livré avec permission commerciale écrite du BAZG (référence BAZG-PERMISSION-2026-04-21-MICHAEL-BEER). Les datasets Classifications et FINMA sont republiés avec valeur ajoutée de normalisation, sous procédure publique de takedown sous 24 heures sur demande d'autorité source. Ces produits sont des reformulations à des fins d'utilisation par des entreprises. Ils ne remplacent pas les publications officielles ; en cas de divergence, les sources originales font foi. For juridique : Berne, Suisse, pour les datasets TARES (selon condition BAZG).
+      <strong>{t("footer.disclaimer_title", lang)}</strong> {t("footer.disclaimer_body", lang)}
     </div>
 
     <div class="footer-bottom">
       <div>© {year} · Claude-Alain Martin · openswissdata.com</div>
       <div class="footer-bottom-right">
-        <a href="https://ibanforge.com" rel="noopener">Part of the IBANforge studio →</a>
+        <LangSwitcher variant="footer" />
+        <a href="https://ibanforge.com" rel="noopener">{t("footer.studio", lang)}</a>
       </div>
     </div>
   </div>
@@ -174,6 +180,12 @@ const year = new Date().getFullYear();
     gap: 16px;
     font-size: 13px;
     color: var(--color-ink-mute);
+  }
+  .footer-bottom-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
   }
   .footer-bottom a {
     color: var(--color-ink-soft);
