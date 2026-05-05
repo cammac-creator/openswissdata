@@ -1,5 +1,13 @@
 name: Cleanup expired rows
 
+# Triggers a server-side cleanup on Railway via the /api/admin/cleanup-expired
+# endpoint. The endpoint deletes expired sessions, magic_links, download_tokens,
+# mcp_oauth_codes, and prunes old request_log/events rows.
+#
+# This workflow does NOT have direct access to the Railway DB volume — that's
+# why it just fires a curl. The actual work happens server-side, where the
+# DB file is reachable.
+
 on:
   schedule:
     - cron: "0 */6 * * *"  # every 6 hours
@@ -10,14 +18,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run cleanup:expired
+      - name: Trigger Railway cleanup endpoint
         env:
-          # Reads DATABASE_PATH from env. Adjust to whatever Railway exposes
-          # if running this from Railway scheduled service instead of GH Actions.
-          DATABASE_PATH: ${{ secrets.DATABASE_PATH || './data/openswissdata.sqlite' }}
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+        run: |
+          if [ -z "$ADMIN_SECRET" ]; then
+            echo "::error::ADMIN_SECRET secret not configured"
+            exit 1
+          fi
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "x-admin-secret: $ADMIN_SECRET" \
+            -H "content-type: application/json" \
+            https://www.openswissdata.com/api/admin/cleanup-expired)
+          body=$(echo "$response" | head -n -1)
+          status=$(echo "$response" | tail -n 1)
+          echo "Body: $body"
+          echo "Status: $status"
+          if [ "$status" != "200" ]; then
+            echo "::error::Cleanup failed with HTTP $status"
+            exit 1
+          fi
+          echo "::notice::Cleanup OK — $body"

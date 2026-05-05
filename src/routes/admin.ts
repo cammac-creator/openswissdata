@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getDb } from "../lib/db.js";
 import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
+import { runCleanup } from "../lib/cleanup.js";
 import {
   S3Client,
   PutObjectCommand,
@@ -121,6 +122,24 @@ adminRoute.post("/backup-to-r2", async (c) => {
     pruned_count: prunedCount,
     backed_up_at: new Date().toISOString(),
   });
+});
+
+/**
+ * POST /api/admin/cleanup-expired
+ *
+ * Deletes expired ephemeral rows (sessions, magic_links, download_tokens,
+ * mcp_oauth_codes, old request_log/events). Runs ON Railway where the DB
+ * volume is mounted — the GitHub Actions cron only fires a curl with
+ * ADMIN_SECRET because the runner has no access to the Railway volume.
+ */
+adminRoute.post("/cleanup-expired", async (c) => {
+  const secret = c.req.header("x-admin-secret");
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) {
+    return c.json({ error: "unauthorized" }, 401);
+  }
+  const db = getDb();
+  const result = runCleanup(db);
+  return c.json({ ok: true, ...result, ran_at: new Date().toISOString() });
 });
 
 adminRoute.post("/release", async (c) => {
