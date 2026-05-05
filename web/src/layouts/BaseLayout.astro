@@ -15,9 +15,14 @@ interface Props {
   productJsonLd?: Record<string, unknown>;
   /** When true, emits <meta name="robots" content="noindex,nofollow">. */
   noindex?: boolean;
+  /**
+   * When true, skips hreflang alternates — used for pages that exist
+   * only in French (codes, blog, account, admin, famille, 404).
+   */
+  monolingual?: boolean;
 }
 
-const { title, description, image = "/og-default.png", productJsonLd, noindex = false } = Astro.props;
+const { title, description, image = "/og-default.png", productJsonLd, noindex = false, monolingual = false } = Astro.props;
 const lang = getLangFromPath(Astro.url.pathname);
 const htmlLang = lang === "de" ? "de-CH" : lang === "fr" ? "fr-CH" : "en";
 
@@ -46,18 +51,20 @@ const orgDescription = lang === "de"
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex,nofollow" />}
 
-    {hreflangs.map(({ lang: l, url }) => (
+    {!monolingual && hreflangs.map(({ lang: l, url }) => (
       <link
         rel="alternate"
         hreflang={l === "fr" ? "fr-CH" : l === "de" ? "de-CH" : "en"}
         href={new URL(url, Astro.site).toString()}
       />
     ))}
-    <link
-      rel="alternate"
-      hreflang="x-default"
-      href={new URL(hreflangs.find(h => h.lang === "fr")!.url, Astro.site).toString()}
-    />
+    {!monolingual && (
+      <link
+        rel="alternate"
+        hreflang="x-default"
+        href={new URL(hreflangs.find(h => h.lang === "fr")!.url, Astro.site).toString()}
+      />
+    )}
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -114,9 +121,9 @@ const orgDescription = lang === "de"
   </head>
   <body>
     <a href="#main" class="skip-to-content">{t("footer.skip_link", lang)}</a>
-    <StatusBar />
+    <StatusBar monolingual={monolingual} />
     <main id="main" tabindex="-1"><slot /></main>
-    <Footer />
+    <Footer monolingual={monolingual} />
 
     <script is:inline>
       // Nav scroll state

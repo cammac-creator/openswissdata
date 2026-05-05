@@ -4,23 +4,41 @@ import type { Lang } from "../i18n/utils";
 
 interface Props {
   variant?: "compact" | "footer";
+  /**
+   * When true, the page only exists in French. The switcher
+   * still appears, but DE/EN links point to the home of those
+   * languages instead of producing a 404.
+   */
+  monolingual?: boolean;
 }
 
-const { variant = "compact" } = Astro.props;
+const { variant = "compact", monolingual = false } = Astro.props;
 const currentLang: Lang = getLangFromPath(Astro.url.pathname);
 ---
 <div class={`lang-switcher lang-switcher-${variant}`} role="group" aria-label="Language">
-  {LANGS.map((lang) => (
-    <a
-      href={localizePath(Astro.url.pathname, lang)}
-      class={`lang-link${lang === currentLang ? " is-current" : ""}`}
-      hreflang={lang}
-      aria-current={lang === currentLang ? "true" : undefined}
-      aria-label={LANG_NAMES[lang]}
-    >
-      {LANG_LABELS[lang]}
-    </a>
-  ))}
+  {LANGS.map((lang) => {
+    const isCurrent = lang === currentLang;
+    const targetMissing = monolingual && lang !== "fr" && lang !== currentLang;
+    const href = targetMissing ? `/${lang}/` : localizePath(Astro.url.pathname, lang);
+    const ariaLabel = targetMissing
+      ? `${LANG_NAMES[lang]} — page non disponible, retour à l'accueil`
+      : LANG_NAMES[lang];
+    const cls = ["lang-link"];
+    if (isCurrent) cls.push("is-current");
+    if (targetMissing) cls.push("is-fallback");
+    return (
+      <a
+        href={href}
+        class={cls.join(" ")}
+        hreflang={lang}
+        aria-current={isCurrent ? "true" : undefined}
+        aria-label={ariaLabel}
+        title={targetMissing ? `${LANG_NAMES[lang]} (home)` : LANG_NAMES[lang]}
+      >
+        {LANG_LABELS[lang]}
+      </a>
+    );
+  })}
 </div>
 
 <style>
@@ -47,6 +65,12 @@ const currentLang: Lang = getLangFromPath(Astro.url.pathname);
     color: var(--color-ink);
     border-color: var(--color-line);
     background: rgba(0,0,0,.02);
+  }
+  .lang-link.is-fallback {
+    opacity: .55;
+  }
+  .lang-link.is-fallback:hover {
+    opacity: 1;
   }
 
   /* Footer variant: slightly larger, sits in the bottom row */
