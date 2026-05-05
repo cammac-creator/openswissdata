@@ -1,0 +1,62 @@
+{
+  "nav": {
+    "datasets": "Datensätze",
+    "how": "So funktioniert's",
+    "blog": "Blog",
+    "mcp": "MCP",
+    "bundle": "Bundle",
+    "compliance": "Compliance",
+    "about": "Über uns",
+    "account": "Kundenbereich"
+  },
+  "statusbar": {
+    "live": "3 Datensätze · live",
+    "edition": "ED.",
+    "version": "v",
+    "for": "Bern · CH"
+  },
+  "footer": {
+    "tagline_line1": "Schweizer öffentliche Daten,",
+    "tagline_line2": "endlich nutzbar.",
+    "operational": "Service operativ · Schweiz / EU",
+    "col_datasets": "Datensätze",
+    "col_account": "Konto",
+    "col_legal": "Rechtliches",
+    "link_tares": "TARES (Zoll)",
+    "link_classifications": "Klassifikationen NOGA/NACE/ISIC",
+    "link_finma": "FINMA-Register",
+    "link_bundle": "Komplett-Bundle",
+    "link_account": "Kundenbereich",
+    "link_blog": "Journal",
+    "link_cgv": "Verkaufsbedingungen",
+    "link_privacy": "Datenschutz",
+    "link_provenance": "Herkunft & Signatur",
+    "link_sdr": "Akquisepolitik",
+    "link_compliance": "Quellen & Compliance",
+    "link_impressum": "Impressum",
+    "affiliation": "openswissdata.com ist ein unabhängiger privater Dienst. Nicht mit opendata.swiss, BAZG, BFS oder FINMA verbunden.",
+    "disclaimer_title": "Hinweis.",
+    "disclaimer_body": "openswissdata stellt abgeleitete Produkte aus offiziellen öffentlichen Schweizer Daten zur Verfügung. Der TARES-Datensatz wird mit schriftlicher kommerzieller Bewilligung des BAZG geliefert (Referenz BAZG-PERMISSION-2026-04-21-MICHAEL-BEER). Die Datensätze Klassifikationen und FINMA werden mit Normalisierungs-Mehrwert republiziert, unter einem öffentlichen Takedown-Verfahren binnen 24 Stunden auf Anfrage einer Quellbehörde. Diese Produkte sind Reformulierungen für die unternehmerische Nutzung. Sie ersetzen nicht die offiziellen Veröffentlichungen; bei Abweichungen sind die Originalquellen massgebend. Gerichtsstand: Bern, Schweiz, für die TARES-Datensätze (gemäss BAZG-Bedingung).",
+    "studio": "Teil des IBANforge-Studios →",
+    "skip_link": "Zum Hauptinhalt springen"
+  },
+  "lang": {
+    "label": "Sprache",
+    "switch_to": "Wechseln zu"
+  },
+  "common": {
+    "buy": "Kaufen",
+    "discover": "Entdecken",
+    "see_more": "Mehr anzeigen",
+    "back": "Zurück",
+    "loading": "Lädt…",
+    "permission_bazg": "BAZG-Bewilligung",
+    "permission_granted": "Bewilligung erteilt 2026-04-21",
+    "ed25519_signed": "Ed25519-signiert",
+    "rfc3161": "RFC-3161-zeitgestempelt",
+    "currency": "CHF",
+    "per_year": "/ Jahr",
+    "per_month": "/ Monat",
+    "one_shot": "Einmalzahlung"
+  }
+}

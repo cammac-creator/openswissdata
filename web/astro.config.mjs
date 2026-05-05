@@ -7,6 +7,13 @@ import sitemap from '@astrojs/sitemap';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.openswissdata.com',
+  i18n: {
+    defaultLocale: 'fr',
+    locales: ['fr', 'de', 'en'],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   vite: {
     plugins: [tailwindcss()]
   },
@@ -19,6 +26,10 @@ export default defineConfig({
       changefreq: 'weekly',
       priority: 0.7,
       lastmod: new Date(),
+      i18n: {
+        defaultLocale: 'fr',
+        locales: { fr: 'fr-CH', de: 'de-CH', en: 'en' },
+      },
     }),
   ],
 });

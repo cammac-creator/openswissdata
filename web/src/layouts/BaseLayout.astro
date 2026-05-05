@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import StatusBar from "../components/StatusBar.astro";
 import Footer from "../components/Footer.astro";
+import { getLangFromPath, getHreflangAlternates, t } from "../i18n/utils";
 
 interface Props {
   title: string;
@@ -16,18 +17,47 @@ interface Props {
   noindex?: boolean;
 }
 
-const { title, description = "Datasets officiels suisses normalisés — TARES (douanes), classifications NOGA/NACE/ISIC, registre FINMA. Format JSON, Parquet, SQL.", image = "/og-default.png", productJsonLd, noindex = false } = Astro.props;
+const { title, description, image = "/og-default.png", productJsonLd, noindex = false } = Astro.props;
+const lang = getLangFromPath(Astro.url.pathname);
+const htmlLang = lang === "de" ? "de-CH" : lang === "fr" ? "fr-CH" : "en";
+
+const defaultDescription = lang === "de"
+  ? "Offizielle Schweizer Datensätze normalisiert — TARES (Zoll), Klassifikationen NOGA/NACE/ISIC, FINMA-Register. JSON-, Parquet-, SQL-Format."
+  : lang === "en"
+    ? "Official Swiss datasets normalized — TARES (customs), NOGA/NACE/ISIC classifications, FINMA registry. JSON, Parquet, SQL formats."
+    : "Datasets officiels suisses normalisés — TARES (douanes), classifications NOGA/NACE/ISIC, registre FINMA. Format JSON, Parquet, SQL.";
+
+const finalDescription = description ?? defaultDescription;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const hreflangs = getHreflangAlternates(Astro.url.pathname);
+const orgDescription = lang === "de"
+  ? "Offizielle Schweizer Datensätze normalisiert — TARES (Zoll), NOGA/NACE/ISIC, FINMA-Register. Multi-Format (CSV, Parquet, JSON, SQL), Ed25519-Signatur, automatische Updates."
+  : lang === "en"
+    ? "Official Swiss datasets normalized — TARES (customs), NOGA/NACE/ISIC, FINMA registry. Multi-format (CSV, Parquet, JSON, SQL), Ed25519 signature, automatic updates."
+    : "Datasets officiels suisses normalisés — TARES (douanes), NOGA/NACE/ISIC, registre FINMA. Format multi (CSV, Parquet, JSON, SQL), signature Ed25519, mises à jour automatiques.";
 ---
 <!DOCTYPE html>
-<html lang="fr">
+<html lang={htmlLang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={finalDescription} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex,nofollow" />}
+
+    {hreflangs.map(({ lang: l, url }) => (
+      <link
+        rel="alternate"
+        hreflang={l === "fr" ? "fr-CH" : l === "de" ? "de-CH" : "en"}
+        href={new URL(url, Astro.site).toString()}
+      />
+    ))}
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={new URL(hreflangs.find(h => h.lang === "fr")!.url, Astro.site).toString()}
+    />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -37,10 +67,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     />
 
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={finalDescription} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={new URL(image, Astro.site).toString()} />
+    <meta property="og:locale" content={htmlLang.replace("-", "_")} />
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -54,7 +85,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
       name: "openswissdata",
       url: "https://www.openswissdata.com",
       logo: "https://www.openswissdata.com/favicon.svg",
-      description: "Datasets officiels suisses normalisés — TARES (douanes), classifications NOGA/NACE/ISIC, registre FINMA. Format multi (CSV, Parquet, JSON, SQL), signature Ed25519, mises à jour automatiques.",
+      description: orgDescription,
       address: {
         "@type": "PostalAddress",
         streetAddress: "Rue de l'Église 23",
@@ -82,7 +113,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     )}
   </head>
   <body>
-    <a href="#main" class="skip-to-content">Aller au contenu principal</a>
+    <a href="#main" class="skip-to-content">{t("footer.skip_link", lang)}</a>
     <StatusBar />
     <main id="main" tabindex="-1"><slot /></main>
     <Footer />

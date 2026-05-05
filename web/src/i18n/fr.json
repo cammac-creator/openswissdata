@@ -1,0 +1,62 @@
+{
+  "nav": {
+    "datasets": "Datasets",
+    "how": "Comment ça marche",
+    "blog": "Blog",
+    "mcp": "MCP",
+    "bundle": "Bundle",
+    "compliance": "Compliance",
+    "about": "À propos",
+    "account": "Espace client"
+  },
+  "statusbar": {
+    "live": "3 datasets · live",
+    "edition": "ED.",
+    "version": "v",
+    "for": "Berne · CH"
+  },
+  "footer": {
+    "tagline_line1": "Les données publiques suisses,",
+    "tagline_line2": "enfin utilisables.",
+    "operational": "Service opérationnel · Suisse / EU",
+    "col_datasets": "Datasets",
+    "col_account": "Compte",
+    "col_legal": "Légal",
+    "link_tares": "TARES (douanes)",
+    "link_classifications": "Classifications NOGA/NACE/ISIC",
+    "link_finma": "Registre FINMA",
+    "link_bundle": "Bundle complet",
+    "link_account": "Espace client",
+    "link_blog": "Journal",
+    "link_cgv": "Conditions de vente",
+    "link_privacy": "Confidentialité",
+    "link_provenance": "Provenance & signature",
+    "link_sdr": "Politique prospection",
+    "link_compliance": "Sources & compliance",
+    "link_impressum": "Impressum",
+    "affiliation": "openswissdata.com est un service privé indépendant. Non affilié à opendata.swiss, BAZG, BFS, FINMA.",
+    "disclaimer_title": "Avertissement.",
+    "disclaimer_body": "openswissdata propose des produits dérivés des données publiques officielles suisses. Le dataset TARES est livré avec permission commerciale écrite du BAZG (référence BAZG-PERMISSION-2026-04-21-MICHAEL-BEER). Les datasets Classifications et FINMA sont republiés avec valeur ajoutée de normalisation, sous procédure publique de takedown sous 24 heures sur demande d'autorité source. Ces produits sont des reformulations à des fins d'utilisation par des entreprises. Ils ne remplacent pas les publications officielles ; en cas de divergence, les sources originales font foi. For juridique : Berne, Suisse, pour les datasets TARES (selon condition BAZG).",
+    "studio": "Part of the IBANforge studio →",
+    "skip_link": "Aller au contenu principal"
+  },
+  "lang": {
+    "label": "Langue",
+    "switch_to": "Passer en"
+  },
+  "common": {
+    "buy": "Acheter",
+    "discover": "Découvrir",
+    "see_more": "Voir plus",
+    "back": "Retour",
+    "loading": "Chargement…",
+    "permission_bazg": "Permission BAZG",
+    "permission_granted": "Permission accordée 2026-04-21",
+    "ed25519_signed": "Signé Ed25519",
+    "rfc3161": "Horodaté RFC-3161",
+    "currency": "CHF",
+    "per_year": "/ an",
+    "per_month": "/ mois",
+    "one_shot": "paiement unique"
+  }
+}
