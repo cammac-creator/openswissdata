@@ -95,16 +95,45 @@ const lastUpdated = new Date().toISOString().split("T")[0];
 
     <h3 class="text-xl font-semibold mt-6 mb-2">Comment vérifier la signature</h3>
     <p>
-      Notre clé publique Ed25519 est disponible publiquement à <a href="/openswissdata.pubkey.ed25519" class="text-indigo-600 hover:underline"><code>openswissdata.com/openswissdata.pubkey.ed25519</code></a> et également dans chaque ZIP. Pour la vérifier :
+      Notre clé publique Ed25519 est publiée à <a href="/.well-known/openswissdata-pubkey.pem"><code>openswissdata.com/.well-known/openswissdata-pubkey.pem</code></a> et également incluse dans chaque ZIP. Vous avez le choix entre deux méthodes de vérification :
     </p>
-    <pre class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs overflow-x-auto"><code>{`# Avec le SDK officiel (TypeScript ou Python)
-$ npx @osd/sdk verify-provenance ./tares-2026.04.zip
+
+    <h4 class="text-base font-semibold mt-5 mb-2">Méthode 1 — Ligne de commande standard (sans Node.js)</h4>
+    <p>
+      Pour un compliance officer ou un auditeur sans environnement de développement, <code>openssl</code> et <code>shasum</code> suffisent :
+    </p>
+    <pre><code>{`# 1. Récupérer notre clé publique (à faire une seule fois)
+curl -O https://www.openswissdata.com/.well-known/openswissdata-pubkey.pem
+
+# 2. Décompresser le ZIP du dataset
+unzip tares-2026.04.zip -d tares/
+cd tares/
+
+# 3. Vérifier la signature Ed25519 du manifest
+openssl pkeyutl -verify \\
+  -pubin -inkey ../openswissdata-pubkey.pem \\
+  -rawin -in manifest.json \\
+  -sigfile manifest.json.sig
+# → Signature Verified Successfully
+
+# 4. Vérifier que chaque fichier correspond au SHA-256 listé dans manifest.json
+shasum -a 256 -c manifest-sha256.txt
+# → tares.csv: OK · tares.parquet: OK · ...
+
+# 5. (Optionnel) Vérifier l'horodatage RFC-3161 freetsa.org
+openssl ts -verify -data manifest.json -in manifest.json.tsr \\
+  -CAfile freetsa-cacert.pem
+# → Verification: OK`}</code></pre>
+
+    <h4 class="text-base font-semibold mt-5 mb-2">Méthode 2 — SDK officiel (TypeScript/Python, plus rapide)</h4>
+    <p>Si vous utilisez déjà Node.js :</p>
+    <pre><code>{`$ npx @osd/sdk verify-provenance ./tares-2026.04.zip
 ✓ Signature Ed25519 valide
 ✓ Horodatage RFC-3161 valide (2026-04-29T15:30:00Z, freetsa.org)
 ✓ Hash SHA-256 du fichier source vérifié
 ✓ Permission BAZG-PERMISSION-2026-04-21-MICHAEL-BEER référencée`}</code></pre>
     <p>
-      Toute modification du contenu du ZIP (même un seul caractère) invalide la signature. Toute date d'émission falsifiée invalide l'horodatage RFC-3161 puisque le token est émis par une TSA tierce indépendante.
+      Toute modification du contenu du ZIP (même un seul caractère) invalide la signature. Toute date d'émission falsifiée invalide l'horodatage RFC-3161 puisque le token est émis par une TSA tierce indépendante (freetsa.org).
     </p>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">5. Limites assumées</h2>
