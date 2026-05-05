@@ -22,3 +22,9 @@ presentation
 *.db
 *.db-journal
 *.db-wal
+
+# SDKs (sdk-ts, sdk-py, mcp-server) are published independently to npm/PyPI;
+# they are not loaded by the Hono runtime, so excluding them keeps the
+# Railway upload under a few hundred MB (was timing out on slow uplinks).
+sdks
+.design-preview
