@@ -299,11 +299,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       function render(d) {
         setText("header-meta", "Fenêtre : " + d.window.days + " jours · depuis " + new Date(d.window.since_iso).toLocaleDateString("fr-CH"));
 
-        // KPIs
-        setText("kpi-revenue", chf((d.revenue.revenue_chf || 0)));
-        setText("kpi-revenue-sub", "Total all-time : " + chf((d.revenueAllTime.revenue_chf || 0)));
-        setText("kpi-orders", fmt(d.revenue.orders_count) + " (window)");
-        setText("kpi-orders-sub", fmt(d.revenueAllTime.orders_count) + " all-time · " + fmt(d.revenue.paying_customers) + " clients payants");
+        // KPIs — live revenue only; test mode shown as a smaller note so a
+        // pre-launch dashboard isn't drowned in fake Stripe-test money.
+        var liveRev = d.revenue.revenue_chf || 0;
+        var liveOrders = d.revenue.orders_count || 0;
+        var testRev = d.revenue.test_revenue_chf || 0;
+        var testOrders = d.revenue.test_orders_count || 0;
+        var liveAllRev = d.revenueAllTime.revenue_chf || 0;
+        var testAllOrders = d.revenueAllTime.test_orders_count || 0;
+        var testAllRev = d.revenueAllTime.test_revenue_chf || 0;
+
+        setText("kpi-revenue", chf(liveRev));
+        var revSub = "Total all-time live : " + chf(liveAllRev);
+        if (testAllRev > 0) revSub += " · Test mode : " + chf(testAllRev) + " (" + fmt(testAllOrders) + ")";
+        setText("kpi-revenue-sub", revSub);
+        setText("kpi-orders", fmt(liveOrders) + " (window)");
+        var ordSub = fmt(d.revenueAllTime.orders_count || 0) + " all-time · " + fmt(d.revenue.paying_customers || 0) + " clients payants live";
+        if (testOrders > 0) ordSub += " · " + fmt(testOrders) + " test orders sur la période";
+        setText("kpi-orders-sub", ordSub);
         setText("kpi-customers", fmt(d.customers.total));
         setText("kpi-customers-sub", "+" + fmt(d.customers.new_in_window) + " sur la période · " + fmt(d.customers.active_sessions) + " sessions actives");
         setText("kpi-api", fmt(d.apiTraffic.total_requests));
