@@ -75,11 +75,19 @@ const tools = [
     status: "live",
     scope: "finma:history",
   },
+  {
+    pack: "Classifications",
+    name: "statent_lookup",
+    desc: "Swiss enterprise statistics (BFS STATENT 2023) for a NOGA division × canton: number of establishments, jobs, and full-time equivalents (FTE). 2 270 rows of pre-aggregated public-domain BFS data.",
+    args: { noga_division: "62", canton_code: "1" },
+    status: "live",
+    scope: "statent:read",
+  },
 ];
 ---
 <BaseLayout
   title="MCP server openswissdata — datasets fédéraux suisses pour Claude Code & Cursor"
-  description="Premier MCP server suisse pour AI agents. 8 tools : tariff_lookup, semantic_search, classify_text, kyc_check, finma_search, entity_history… Standard JSON-RPC 2.0. Free tier 100 req/jour."
+  description="Premier MCP server suisse pour AI agents. 9 tools : tariff_lookup, semantic_search, classify_text, kyc_check, finma_search, entity_history, statent_lookup… Standard JSON-RPC 2.0. Free tier 100 req/jour."
 >
 
 <div class="bg-grid"></div>
@@ -91,7 +99,7 @@ const tools = [
       <div class="v4-eyebrow">
         <span>Model Context Protocol</span>
         <span style="opacity:.4">·</span>
-        <span class="check">v0.2.0 · 8 tools live</span>
+        <span class="check">v0.2.0 · 9 tools live</span>
       </div>
 
       <h1 class="v4-h1" style="max-width:24ch;">
@@ -105,7 +113,7 @@ const tools = [
       <div class="v4-spec-row">
         <div class="v4-spec">
           <div class="v4-spec-label">Endpoints</div>
-          <div class="v4-spec-value">8 tools</div>
+          <div class="v4-spec-value">9 tools</div>
         </div>
         <div class="v4-spec">
           <div class="v4-spec-label">URL</div>
@@ -167,13 +175,13 @@ const tools = [
 <section class="v4-datasets" id="tools">
   <div class="container-v4">
     <div class="v4-section-eyebrow">
-      <strong>8 tools disponibles</strong>
+      <strong>9 tools disponibles</strong>
       <span class="sep">/</span>
       <span>JSON-RPC 2.0</span>
       <span class="sep">/</span>
       <span>spec 2025-06-18</span>
     </div>
-    <h2 class="v4-section-h2">Trois packs de données. Huit endpoints.</h2>
+    <h2 class="v4-section-h2">Trois packs de données. Neuf endpoints.</h2>
 
     {["TARES", "Classifications", "FINMA"].map(packName => (
       <div style="margin-bottom:32px;">
@@ -253,7 +261,7 @@ const tools = [
         <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">0 CHF</div>
         <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;">100 req/jour par IP. Aucun compte requis. Disclaimer non-officiel obligatoire dans la réponse.</p>
         <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);">
-          <li style="padding:3px 0;">✓ 8 tools</li>
+          <li style="padding:3px 0;">✓ 9 tools</li>
           <li style="padding:3px 0;">✓ Pas d'auth requis</li>
           <li style="padding:3px 0;">✗ Pas de SLA</li>
         </ul>
@@ -263,7 +271,7 @@ const tools = [
         <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">Inclus<small style="font-size:13px;font-weight:500;color:var(--ink-mute);"> avec ZIP</small></div>
         <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;">Aucun coût additionnel après achat d'un dataset (TARES 299 / Classifications 399 / FINMA 299 CHF). 1 000 req/mois pendant 12 mois.</p>
         <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);">
-          <li style="padding:3px 0;">✓ 8 tools de base</li>
+          <li style="padding:3px 0;">✓ 9 tools de base</li>
           <li style="padding:3px 0;">✓ Bearer token persistant</li>
           <li style="padding:3px 0;">✓ Email support sous 48 h</li>
         </ul>
@@ -285,7 +293,7 @@ const tools = [
         <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">49 CHF<small style="font-size:13px;font-weight:500;color:var(--ink-mute);">/mois</small></div>
         <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;">Abonnement récurrent. 5 000 req/mois renouvelé chaque mois. MCP only — pas de ZIP raw. Pour use cases API uniquement.</p>
         <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);">
-          <li style="padding:3px 0;">✓ 8 tools de base</li>
+          <li style="padding:3px 0;">✓ 9 tools de base</li>
           <li style="padding:3px 0;">✓ Annulable mensuellement</li>
           <li style="padding:3px 0;">✗ Pas de ZIP téléchargeable</li>
           <li style="padding:3px 0;">✗ Pas d'embeddings DE/IT/EN</li>
@@ -339,7 +347,8 @@ const tools = [
     "classify_text": { text: "vente de café en grain et torréfaction", top_k: 3 },
     "kyc_check": { name: "UBS Switzerland AG" },
     "finma_search": { name: "Vontobel", top_k: 5 },
-    "entity_history": { uid: "CHE-101.329.561" }
+    "entity_history": { uid: "CHE-101.329.561" },
+    "statent_lookup": { noga_division: "62", canton_code: "1" }
   };
   const sel = document.getElementById('pg-tool');
   const args = document.getElementById('pg-args');
