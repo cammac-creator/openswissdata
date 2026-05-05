@@ -281,23 +281,28 @@ const tools = [
         <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Pro</div>
         <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">999 CHF</div>
         <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;">Inclus avec Classifications Pro. 10 000 req/mois pendant 12 mois. Accès aux tools avancés <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg-soft);padding:1px 5px;border-radius:3px;">tariff_semantic_search</code>, <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg-soft);padding:1px 5px;border-radius:3px;">classify_text</code>, <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg-soft);padding:1px 5px;border-radius:3px;">entity_history</code>.</p>
-        <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);">
+        <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);margin-bottom:16px;">
           <li style="padding:3px 0;">✓ Embeddings DE/IT/EN (1 845 codes NOGA)</li>
           <li style="padding:3px 0;">✓ Cross-walks NAICS 2022 (~1 700)</li>
           <li style="padding:3px 0;">✓ EN labels NACE Rev 2.1</li>
           <li style="padding:3px 0;">✓ Priority support sous 12 h</li>
         </ul>
+        <a href="/datasets/classifications#acheter" class="v4-btn v4-btn-primary" style="width:100%;justify-content:center;font-size:13px;padding:10px;">Acheter Classifications Pro <span class="arrow">→</span></a>
       </div>
       <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:22px;">
         <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Standalone</div>
         <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">49 CHF<small style="font-size:13px;font-weight:500;color:var(--ink-mute);">/mois</small></div>
         <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;">Abonnement récurrent. 5 000 req/mois renouvelé chaque mois. MCP only — pas de ZIP raw. Pour use cases API uniquement.</p>
-        <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);">
+        <ul style="list-style:none;font-size:12px;color:var(--ink-soft);font-family:var(--font-mono);margin-bottom:16px;">
           <li style="padding:3px 0;">✓ 9 tools de base</li>
           <li style="padding:3px 0;">✓ Annulable mensuellement</li>
           <li style="padding:3px 0;">✗ Pas de ZIP téléchargeable</li>
           <li style="padding:3px 0;">✗ Pas d'embeddings DE/IT/EN</li>
         </ul>
+        <form method="POST" action="/api/checkout/start" style="margin:0;">
+          <input type="hidden" name="dataset_ids" value="mcp_standalone" />
+          <button type="submit" class="v4-btn v4-btn-secondary" style="width:100%;justify-content:center;font-size:13px;padding:10px;">S'abonner — 49 CHF/mois <span class="arrow">→</span></button>
+        </form>
       </div>
     </div>
   </div>
