@@ -1,56 +1,64 @@
 ---
+import { getLangFromPath, t, localizePath, localizePathOrFallback } from "../i18n/utils";
+
 interface Props {
   productName: string;
   refundClause?: string;
   formatNote?: string;
 }
+
+const lang = getLangFromPath(Astro.url.pathname);
 const {
   productName,
-  refundClause = "Remboursement intégral dans les 14 jours, sans condition.",
-  formatNote = "CSV, JSON, Parquet et SQL inclus dans tous les achats.",
+  refundClause = t("faq.default_refund", lang),
+  formatNote = t("faq.default_format", lang),
 } = Astro.props;
+
+const L = (path: string) => localizePath(path, lang);
+// Pages legal n'existent qu'en FR + DE (EN fallback DE)
+const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]);
 ---
 <section class="ds-section reveal-v4">
   <div class="v4-section-eyebrow">
-    <strong>FAQ</strong>
+    <strong>{t("faq.eyebrow_label", lang)}</strong>
     <span class="sep">/</span>
-    <span>5 questions avant l'achat</span>
+    <span>{t("faq.eyebrow_sep", lang)}</span>
   </div>
-  <h2 class="v4-section-h2">Avant de cliquer <span class="serif">acheter</span>.</h2>
+  <h2 class="v4-section-h2">{t("faq.title_main", lang)} <span class="serif">{t("faq.title_accent", lang)}</span>.</h2>
 
   <div class="v4-faq-list">
     <details class="v4-faq-item reveal-v4">
-      <summary>Est-ce un dataset officiel ?</summary>
+      <summary>{t("faq.q1", lang)}</summary>
       <p>
-        Non, pas au sens juridique. Les <strong>sources</strong> sont officielles (BAZG pour TARES, BFS pour Classifications, FINMA pour le registre). Nous, on republie ces données après normalisation, signature cryptographique Ed25519 et horodatage RFC-3161. Pour toute question juridique, seules les publications de la Chancellerie fédérale et du BAZG/BFS/FINMA font foi. Voir <a href="/compliance">Sources &amp; compliance</a>.
+        {t("faq.a1_part1", lang)}<strong>{t("faq.a1_sources", lang)}</strong>{t("faq.a1_part2", lang)}<a href={L("/compliance")}>{t("faq.a1_link_label", lang)}</a>{t("faq.a1_part3", lang)}
       </p>
     </details>
 
     <details class="v4-faq-item reveal-v4">
-      <summary>Quel format ? Mon Excel peut l'ouvrir ?</summary>
+      <summary>{t("faq.q2", lang)}</summary>
       <p>
-        Oui — <strong>{formatNote}</strong> Le CSV s'ouvre directement dans Excel, Google Sheets, Numbers ou n'importe quel tableur. Le Parquet est pour la data science (DuckDB, Python pandas), le SQL pour brancher dans une base relationnelle, le JSON pour applications web. Vous prenez le format qui vous arrange.
+        {t("faq.a2_part1", lang)}<strong>{formatNote}</strong>{t("faq.a2_part2", lang)}
       </p>
     </details>
 
     <details class="v4-faq-item reveal-v4">
-      <summary>Comment je reçois ma commande ?</summary>
+      <summary>{t("faq.q3", lang)}</summary>
       <p>
-        Après le paiement Stripe, vous recevez immédiatement un email avec un <strong>lien de téléchargement</strong> (ZIP signé Ed25519, hébergé sur Cloudflare R2 Frankfurt). Pas de compte à créer, pas de mot de passe. Le lien fonctionne 48 heures et reste accessible plus tard depuis votre <a href="/account">espace client</a> via lien magique.
+        {t("faq.a3_part1", lang)}<strong>{t("faq.a3_link1", lang)}</strong>{t("faq.a3_part2", lang)}<a href="/account">{t("faq.a3_link2", lang)}</a>{t("faq.a3_part3", lang)}
       </p>
     </details>
 
     <details class="v4-faq-item reveal-v4">
-      <summary>Le refund 14 jours, comment ça marche ?</summary>
+      <summary>{t("faq.q4", lang)}</summary>
       <p>
-        {refundClause} Vous écrivez à <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a> dans les 14 jours, on rembourse Stripe en quelques minutes — pas de question, pas de justificatif. Voir les <a href="/legal/cgv">CGV</a>.
+        {refundClause}{t("faq.a4_part1", lang)}<a href={`mailto:${t("faq.a4_email", lang)}`}>{t("faq.a4_email", lang)}</a>{t("faq.a4_part2", lang)}<a href={Llegal("/legal/cgv")}>{t("faq.a4_link", lang)}</a>{t("faq.a4_part3", lang)}
       </p>
     </details>
 
     <details class="v4-faq-item reveal-v4">
-      <summary>Les mises à jour sont incluses ?</summary>
+      <summary>{t("faq.q5", lang)}</summary>
       <p>
-        Oui — <strong>360 jours de mises à jour</strong> incluses dans le prix d'achat. TARES et FINMA reçoivent un delta hebdomadaire, Classifications un refresh annuel + révisions majeures (NOGA 2025, NACE 2.1). Au-delà des 360 jours, vous gardez les versions que vous avez ou vous renouvelez (120-160 CHF/an selon le dataset). Pas d'auto-renouvellement.
+        {t("faq.a5_part1", lang)}<strong>{t("faq.a5_strong", lang)}</strong>{t("faq.a5_part2", lang)}
       </p>
     </details>
   </div>

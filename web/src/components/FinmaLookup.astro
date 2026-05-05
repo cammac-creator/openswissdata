@@ -1,5 +1,6 @@
 ---
-// Démo recherche entité FINMA avec entity_type, UID suisse, LEI international
+import { getLangFromPath, t, localizePath } from "../i18n/utils";
+const lang = getLangFromPath(Astro.url.pathname);
 ---
 <div class="hs-lookup">
   <div class="hs-lookup-header">
@@ -53,7 +54,7 @@
 
   <div class="hs-lookup-footer">
     <span>Dataset complet : 2 911 entités FINMA · 13 catégories d'autorisation · UID + ville + type DE/FR/IT/EN · refresh quotidien</span>
-    <a href="/datasets/finma">Voir le dataset complet →</a>
+    <a href={localizePath("/datasets/finma", lang)}>{t("lookup.see_dataset", lang)}</a>
   </div>
 </div>
 

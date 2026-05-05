@@ -1,6 +1,6 @@
 ---
-// Démo live : recherche d'un code HS avec quelques exemples préchargés.
-// Note: en attendant l'endpoint /api/lookup/tares, on travaille avec un mini-dataset embarqué.
+import { getLangFromPath, t, localizePath } from "../i18n/utils";
+const lang = getLangFromPath(Astro.url.pathname);
 ---
 <div class="hs-lookup">
   <div class="hs-lookup-header">
@@ -54,7 +54,7 @@
 
   <div class="hs-lookup-footer">
     <span>Dataset complet : ~10 000 codes · 4 langues · 8 champs structurés</span>
-    <a href="/datasets/tares">Voir le dataset complet →</a>
+    <a href={localizePath("/datasets/tares", lang)}>{t("lookup.see_dataset", lang)}</a>
   </div>
 </div>
 
