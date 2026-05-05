@@ -4,6 +4,7 @@ description: "Why the cross-walk between Swiss NOGA and international NACE/ISIC 
 publishedAt: 2026-04-22
 keywords: ["NOGA 2025", "NACE 2.1", "ISIC 4", "Swiss classifications", "cross-walk"]
 dataset: "classifications"
+tldr: "Vous opérez en Suisse, votre maison-mère reporte en NACE 2.1 / ISIC 4 ESG. Maintenir un cross-walk NOGA 2025 → NACE 2.1 → ISIC 4 manuellement = ~3 j/an minimum, jamais à jour. Notre dataset Classifications (399 CHF) livre les 5 nomenclatures + cross-walks 5-way en CSV/JSON/Parquet/SQL, signés Ed25519. Bundle 797 CHF avec TARES + FINMA."
 ---
 
 You work in finance at a Swiss subsidiary of a German parent. Head office asks you to produce a quarterly sector report. Your customer master is classified under NOGA 2025 (the fresh Swiss economic activities nomenclature released January 2025). Head office reports in NACE Rev 2.1 and needs its own ISIC 4 view for the group's ESG disclosures.

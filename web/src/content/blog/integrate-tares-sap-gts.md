@@ -4,6 +4,7 @@ description: "A step-by-step guide for ERP integrators bringing Swiss HS8 tariff
 publishedAt: 2026-04-22
 keywords: ["SAP GTS", "TARES", "HS8", "Swiss customs", "ERP integration"]
 dataset: "tares"
+tldr: "SAP GTS standard HS reference tables lag the Swiss BAZG by weeks and skip CH-specific HS8 granularity. Cost of building TARES yourself: ~5 j-h × 6 releases/year ≈ 6 000 CHF/release. Our TARES dataset (299 CHF) ships ~7 500 codes signed Ed25519, refreshed weekly. Bundle 797 CHF if you also need Classifications + FINMA."
 ---
 
 If you run SAP GTS in a Swiss subsidiary of a multinational, you've probably hit this friction point: the standard delivered HS reference tables lag behind the Swiss Federal Office for Customs and Border Security (BAZG) by weeks, and none of them cover the CH-specific HS8 granularity that the Swiss tariff uses.
