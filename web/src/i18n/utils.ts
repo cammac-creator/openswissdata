@@ -74,6 +74,24 @@ export function localizePath(pathname: string, target: Lang): string {
 }
 
 /**
+ * Like localizePath but takes an explicit list of locales the path is
+ * available in. If the target lang is missing, falls back to the first
+ * available lang in priority order: target → de → fr.
+ *
+ * Used for legal pages (FR + DE only — EN visitors get DE) and similar
+ * partial-coverage sections.
+ */
+export function localizePathOrFallback(
+  pathname: string,
+  target: Lang,
+  available: Lang[],
+): string {
+  const order: Lang[] = [target, "de", "fr"];
+  const chosen = order.find((l) => available.includes(l)) ?? "fr";
+  return localizePath(pathname, chosen);
+}
+
+/**
  * Returns the list of hreflang alternates for a given pathname.
  * Used to render <link rel="alternate"> tags in <head>.
  */

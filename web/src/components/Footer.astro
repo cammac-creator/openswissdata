@@ -1,5 +1,5 @@
 ---
-import { getLangFromPath, t, localizePath } from "../i18n/utils";
+import { getLangFromPath, t, localizePath, localizePathOrFallback } from "../i18n/utils";
 import LangSwitcher from "./LangSwitcher.astro";
 
 interface Props {
@@ -10,6 +10,9 @@ const { monolingual = false } = Astro.props;
 const year = new Date().getFullYear();
 const lang = getLangFromPath(Astro.url.pathname);
 const L = (path: string) => localizePath(path, lang);
+// Pages legal are only available in FR + DE — EN visitors get DE.
+const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]);
+// /compliance is available in FR + DE + EN.
 ---
 <footer class="site-footer">
   <div class="container-wide">
@@ -45,12 +48,12 @@ const L = (path: string) => localizePath(path, lang);
         </div>
         <div>
           <div class="footer-col-title">{t("footer.col_legal", lang)}</div>
-          <a href={L("/legal/cgv")}>{t("footer.link_cgv", lang)}</a>
-          <a href={L("/legal/privacy")}>{t("footer.link_privacy", lang)}</a>
-          <a href={L("/legal/provenance")}>{t("footer.link_provenance", lang)}</a>
-          <a href={L("/legal/sdr-policy")}>{t("footer.link_sdr", lang)}</a>
+          <a href={Llegal("/legal/cgv")}>{t("footer.link_cgv", lang)}</a>
+          <a href={Llegal("/legal/privacy")}>{t("footer.link_privacy", lang)}</a>
+          <a href={Llegal("/legal/provenance")}>{t("footer.link_provenance", lang)}</a>
+          <a href={Llegal("/legal/sdr-policy")}>{t("footer.link_sdr", lang)}</a>
           <a href={L("/compliance")}>{t("footer.link_compliance", lang)}</a>
-          <a href={L("/legal/impressum")}>{t("footer.link_impressum", lang)}</a>
+          <a href={Llegal("/legal/impressum")}>{t("footer.link_impressum", lang)}</a>
         </div>
       </div>
     </div>

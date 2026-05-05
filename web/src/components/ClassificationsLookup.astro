@@ -1,5 +1,6 @@
 ---
-// Démo NOGA 2025 + cross-walks vers NOGA 2008, NACE Rev 2, ISIC Rev 4
+import { getLangFromPath, t, localizePath } from "../i18n/utils";
+const lang = getLangFromPath(Astro.url.pathname);
 ---
 <div class="hs-lookup">
   <div class="hs-lookup-header">
@@ -53,7 +54,7 @@
 
   <div class="hs-lookup-footer">
     <span>Dataset complet : 1 047 codes NACE Rev 2 (24 langues UE) + 1 047 NOGA 2008 + 766 codes ISIC Rev 4 (FR/EN/ES) + 1 025 cross-walks</span>
-    <a href="/bundle">Voir le bundle complet →</a>
+    <a href={localizePath("/bundle", lang)}>{t("lookup.see_bundle", lang)}</a>
   </div>
 </div>
 
