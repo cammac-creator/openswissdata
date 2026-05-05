@@ -1,0 +1,379 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout title="Dashboard admin — openswissdata" noindex={true}>
+  <section class="max-w-7xl mx-auto px-6 py-12">
+
+    <div id="banner" class="hidden mb-6 rounded-lg px-4 py-3 text-sm" role="status" aria-live="polite"></div>
+
+    <!-- Loading -->
+    <div id="loading-view" class="text-slate-500 text-sm">Chargement du dashboard…</div>
+
+    <!-- Forbidden / not logged in -->
+    <div id="forbidden-view" class="hidden">
+      <h1 class="text-3xl font-bold mb-3">Accès refusé</h1>
+      <p class="text-slate-600 mb-4">Cette page est réservée aux administrateurs. Connectez-vous d'abord avec un compte autorisé.</p>
+      <a href="/account" class="text-indigo-600 hover:underline">→ Aller à la page de connexion</a>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard-view" class="hidden">
+
+      <header class="flex items-baseline justify-between flex-wrap gap-3 mb-8">
+        <div>
+          <h1 class="text-3xl font-bold">Dashboard</h1>
+          <p class="text-sm text-slate-500 mt-1" id="header-meta"></p>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+          <label for="period-select" class="text-slate-500">Période :</label>
+          <select id="period-select" class="border border-slate-300 rounded-md px-2 py-1">
+            <option value="7">7 jours</option>
+            <option value="30" selected>30 jours</option>
+            <option value="90">90 jours</option>
+            <option value="365">12 mois</option>
+          </select>
+          <button id="refresh-btn" class="ml-2 px-3 py-1 text-slate-600 border border-slate-300 rounded-md hover:bg-slate-50">↻</button>
+        </div>
+      </header>
+
+      <!-- KPI cards -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <div class="text-xs uppercase tracking-wide text-slate-500">Revenus (CHF)</div>
+          <div id="kpi-revenue" class="text-2xl font-bold mt-1">—</div>
+          <div id="kpi-revenue-sub" class="text-xs text-slate-500 mt-1">—</div>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <div class="text-xs uppercase tracking-wide text-slate-500">Commandes</div>
+          <div id="kpi-orders" class="text-2xl font-bold mt-1">—</div>
+          <div id="kpi-orders-sub" class="text-xs text-slate-500 mt-1">—</div>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <div class="text-xs uppercase tracking-wide text-slate-500">Clients (total)</div>
+          <div id="kpi-customers" class="text-2xl font-bold mt-1">—</div>
+          <div id="kpi-customers-sub" class="text-xs text-slate-500 mt-1">—</div>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <div class="text-xs uppercase tracking-wide text-slate-500">Requêtes API</div>
+          <div id="kpi-api" class="text-2xl font-bold mt-1">—</div>
+          <div id="kpi-api-sub" class="text-xs text-slate-500 mt-1">—</div>
+        </div>
+      </section>
+
+      <!-- Charts row -->
+      <section class="grid lg:grid-cols-2 gap-6 mb-8">
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <h2 class="text-sm font-semibold mb-3">Revenus par jour</h2>
+          <div id="chart-revenue" class="h-40"></div>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <h2 class="text-sm font-semibold mb-3">Requêtes API & visiteurs uniques par jour</h2>
+          <div id="chart-api" class="h-40"></div>
+        </div>
+      </section>
+
+      <!-- Plausible -->
+      <section id="plausible-section" class="border border-slate-200 rounded-lg p-4 bg-white mb-8">
+        <h2 class="text-sm font-semibold mb-3">Trafic web (Plausible)</h2>
+        <div id="plausible-content" class="text-sm text-slate-600">Chargement…</div>
+      </section>
+
+      <!-- Two-column tables -->
+      <section class="grid lg:grid-cols-2 gap-6 mb-8">
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <h2 class="text-sm font-semibold mb-3">Top paths API</h2>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-500 text-xs uppercase">
+              <th class="py-1">Path</th><th class="py-1 text-right">Hits</th><th class="py-1 text-right">Latence ⌀</th>
+            </tr></thead>
+            <tbody id="tbl-paths"></tbody>
+          </table>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <h2 class="text-sm font-semibold mb-3">Top pays</h2>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-500 text-xs uppercase">
+              <th class="py-1">Pays</th><th class="py-1 text-right">Requêtes</th>
+            </tr></thead>
+            <tbody id="tbl-countries"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="grid lg:grid-cols-2 gap-6 mb-8">
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <h2 class="text-sm font-semibold mb-3">Top referers</h2>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-500 text-xs uppercase">
+              <th class="py-1">Origine</th><th class="py-1 text-right">Hits</th>
+            </tr></thead>
+            <tbody id="tbl-referers"></tbody>
+          </table>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <h2 class="text-sm font-semibold mb-3">Type d'appareil</h2>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-500 text-xs uppercase">
+              <th class="py-1">Type</th><th class="py-1 text-right">Hits</th>
+            </tr></thead>
+            <tbody id="tbl-ua"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="grid lg:grid-cols-2 gap-6 mb-8">
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <h2 class="text-sm font-semibold mb-3">Entitlements par dataset</h2>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-500 text-xs uppercase">
+              <th class="py-1">Dataset</th><th class="py-1 text-right">Détenteurs</th>
+            </tr></thead>
+            <tbody id="tbl-entitlements"></tbody>
+          </table>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <h2 class="text-sm font-semibold mb-3">Events custom</h2>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-500 text-xs uppercase">
+              <th class="py-1">Event</th><th class="py-1 text-right">Compte</th>
+            </tr></thead>
+            <tbody id="tbl-custom"></tbody>
+          </table>
+          <p class="mt-2 text-xs text-slate-400">Aucun event ? Appelle <code>POST /api/events/track</code> depuis le front avec <code>{"{"}name:"cta_pricing"{"}"}</code>.</p>
+        </div>
+      </section>
+
+      <section class="border border-slate-200 rounded-lg p-4 bg-white mb-8">
+        <h2 class="text-sm font-semibold mb-3">MCP — top clients</h2>
+        <table class="w-full text-sm">
+          <thead><tr class="text-left text-slate-500 text-xs uppercase">
+            <th class="py-1">Client ID</th>
+            <th class="py-1 text-right">Aujourd'hui</th>
+            <th class="py-1 text-right">Ce mois</th>
+            <th class="py-1 text-right">Total</th>
+          </tr></thead>
+          <tbody id="tbl-mcp"></tbody>
+        </table>
+      </section>
+
+      <p class="text-xs text-slate-400">Données rafraîchies : <span id="last-refresh">—</span></p>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      var loadingEl = document.getElementById("loading-view");
+      var dashEl = document.getElementById("dashboard-view");
+      var forbiddenEl = document.getElementById("forbidden-view");
+      var bannerEl = document.getElementById("banner");
+      var periodSel = document.getElementById("period-select");
+      var refreshBtn = document.getElementById("refresh-btn");
+
+      function setText(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+      function chf(n) { return new Intl.NumberFormat("fr-CH", { style: "currency", currency: "CHF", maximumFractionDigits: 0 }).format(n); }
+      function fmt(n) { return new Intl.NumberFormat("fr-CH").format(n); }
+
+      function renderBarChart(elId, rows, opts) {
+        var el = document.getElementById(elId);
+        if (!el) return;
+        el.innerHTML = "";
+        if (!rows.length) {
+          el.innerHTML = '<p class="text-xs text-slate-400">Aucune donnée</p>';
+          return;
+        }
+        var max = Math.max.apply(null, rows.map(function (r) { return r.value; })) || 1;
+        var wrap = document.createElement("div");
+        wrap.className = "flex items-end gap-px h-full";
+        rows.forEach(function (r) {
+          var col = document.createElement("div");
+          col.className = "flex-1 flex flex-col justify-end items-stretch group relative";
+          col.title = (opts && opts.tooltip) ? opts.tooltip(r) : (r.label + ": " + fmt(r.value));
+          var bar = document.createElement("div");
+          bar.className = "w-full bg-indigo-500 hover:bg-indigo-600 transition-colors";
+          var pct = (r.value / max) * 100;
+          bar.style.height = (pct < 1 && r.value > 0 ? 1 : pct) + "%";
+          bar.style.minHeight = "1px";
+          col.appendChild(bar);
+          wrap.appendChild(col);
+        });
+        el.appendChild(wrap);
+
+        // X-axis labels — first/middle/last
+        if (rows.length >= 3) {
+          var axis = document.createElement("div");
+          axis.className = "flex justify-between text-[10px] text-slate-400 mt-1";
+          var first = document.createElement("span"); first.textContent = rows[0].label;
+          var mid = document.createElement("span"); mid.textContent = rows[Math.floor(rows.length/2)].label;
+          var last = document.createElement("span"); last.textContent = rows[rows.length-1].label;
+          axis.appendChild(first); axis.appendChild(mid); axis.appendChild(last);
+          el.appendChild(axis);
+        }
+      }
+
+      function fillTable(tbodyId, rows, mapper, emptyMsg) {
+        var tb = document.getElementById(tbodyId);
+        if (!tb) return;
+        tb.innerHTML = "";
+        if (!rows || !rows.length) {
+          var tr = document.createElement("tr");
+          var td = document.createElement("td");
+          td.colSpan = 4;
+          td.className = "py-3 text-xs text-slate-400";
+          td.textContent = emptyMsg || "Aucune donnée sur la période.";
+          tr.appendChild(td);
+          tb.appendChild(tr);
+          return;
+        }
+        rows.forEach(function (r) {
+          var tr = document.createElement("tr");
+          tr.className = "border-t border-slate-100";
+          var cells = mapper(r);
+          cells.forEach(function (c) {
+            var td = document.createElement("td");
+            td.className = c.cls || "py-1.5";
+            td.textContent = c.text;
+            tr.appendChild(td);
+          });
+          tb.appendChild(tr);
+        });
+      }
+
+      function renderPlausible(p) {
+        var el = document.getElementById("plausible-content");
+        if (!el) return;
+        if (!p || p.available === false) {
+          var reason = p && p.reason ? p.reason : "indisponible";
+          el.innerHTML =
+            '<p>Statistiques web non chargées (<code>' + reason + '</code>). ' +
+            'Configure <code>PLAUSIBLE_API_KEY</code> sur Railway pour les afficher ici, ' +
+            'ou ouvre <a class="text-indigo-600 hover:underline" href="https://plausible.io/openswissdata.com" target="_blank" rel="noopener">le dashboard Plausible</a>.</p>';
+          return;
+        }
+        var topSrc = (p.top_sources || []).map(function (s) {
+          return '<li class="flex justify-between"><span class="truncate">' + (s.source || "(direct)") + '</span><span class="ml-2 text-slate-500">' + fmt(s.visitors) + '</span></li>';
+        }).join("");
+        var topPg = (p.top_pages || []).map(function (s) {
+          return '<li class="flex justify-between"><span class="truncate">' + s.page + '</span><span class="ml-2 text-slate-500">' + fmt(s.visitors) + '</span></li>';
+        }).join("");
+        var topCty = (p.top_countries || []).map(function (s) {
+          return '<li class="flex justify-between"><span>' + s.country + '</span><span class="ml-2 text-slate-500">' + fmt(s.visitors) + '</span></li>';
+        }).join("");
+        el.innerHTML =
+          '<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">' +
+            '<div><div class="text-xs uppercase text-slate-500">Visiteurs</div><div class="text-xl font-semibold">' + fmt(p.visitors) + '</div></div>' +
+            '<div><div class="text-xs uppercase text-slate-500">Pages vues</div><div class="text-xl font-semibold">' + fmt(p.pageviews) + '</div></div>' +
+            '<div><div class="text-xs uppercase text-slate-500">Bounce rate</div><div class="text-xl font-semibold">' + p.bounce_rate + '%</div></div>' +
+            '<div><div class="text-xs uppercase text-slate-500">Durée ⌀</div><div class="text-xl font-semibold">' + p.visit_duration + 's</div></div>' +
+          '</div>' +
+          '<div class="grid lg:grid-cols-3 gap-4 text-sm">' +
+            '<div><div class="text-xs uppercase text-slate-500 mb-1">Sources</div><ul class="space-y-0.5">' + (topSrc || '<li class="text-slate-400">Aucune</li>') + '</ul></div>' +
+            '<div><div class="text-xs uppercase text-slate-500 mb-1">Pages</div><ul class="space-y-0.5">' + (topPg || '<li class="text-slate-400">Aucune</li>') + '</ul></div>' +
+            '<div><div class="text-xs uppercase text-slate-500 mb-1">Pays</div><ul class="space-y-0.5">' + (topCty || '<li class="text-slate-400">Aucun</li>') + '</ul></div>' +
+          '</div>';
+      }
+
+      async function load() {
+        loadingEl.classList.remove("hidden");
+        dashEl.classList.add("hidden");
+        forbiddenEl.classList.add("hidden");
+        bannerEl.classList.add("hidden");
+
+        var days = periodSel.value || "30";
+        try {
+          var res = await fetch("/api/admin/stats?days=" + days, { credentials: "include" });
+          if (res.status === 401 || res.status === 403 || res.status === 503) {
+            loadingEl.classList.add("hidden");
+            forbiddenEl.classList.remove("hidden");
+            return;
+          }
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          var d = await res.json();
+          render(d);
+          loadingEl.classList.add("hidden");
+          dashEl.classList.remove("hidden");
+        } catch (e) {
+          loadingEl.textContent = "Échec du chargement : " + (e && e.message ? e.message : String(e));
+        }
+      }
+
+      function render(d) {
+        setText("header-meta", "Fenêtre : " + d.window.days + " jours · depuis " + new Date(d.window.since_iso).toLocaleDateString("fr-CH"));
+
+        // KPIs
+        setText("kpi-revenue", chf((d.revenue.revenue_chf || 0)));
+        setText("kpi-revenue-sub", "Total all-time : " + chf((d.revenueAllTime.revenue_chf || 0)));
+        setText("kpi-orders", fmt(d.revenue.orders_count) + " (window)");
+        setText("kpi-orders-sub", fmt(d.revenueAllTime.orders_count) + " all-time · " + fmt(d.revenue.paying_customers) + " clients payants");
+        setText("kpi-customers", fmt(d.customers.total));
+        setText("kpi-customers-sub", "+" + fmt(d.customers.new_in_window) + " sur la période · " + fmt(d.customers.active_sessions) + " sessions actives");
+        setText("kpi-api", fmt(d.apiTraffic.total_requests));
+        var avg = Math.round(d.apiTraffic.avg_ms || 0);
+        setText("kpi-api-sub", fmt(d.apiTraffic.unique_visitors) + " visiteurs uniques · " + avg + " ms ⌀ · " + d.apiTraffic.errors_5xx + " 5xx, " + d.apiTraffic.errors_4xx + " 4xx");
+
+        // Charts
+        renderBarChart("chart-revenue", (d.revenueDaily || []).map(function (r) {
+          return { label: r.day.slice(5), value: r.revenue_chf };
+        }), { tooltip: function (r) { return r.label + ": " + chf(r.value); } });
+
+        renderBarChart("chart-api", (d.apiDaily || []).map(function (r) {
+          return { label: r.day.slice(5), value: r.requests };
+        }), { tooltip: function (r) { return r.label + ": " + fmt(r.value); } });
+
+        // Tables
+        fillTable("tbl-paths", d.topPaths, function (r) {
+          return [
+            { text: r.path, cls: "py-1.5 truncate max-w-xs" },
+            { text: fmt(r.hits), cls: "py-1.5 text-right" },
+            { text: Math.round(r.avg_ms) + " ms", cls: "py-1.5 text-right text-slate-500" },
+          ];
+        });
+        fillTable("tbl-countries", d.topCountries, function (r) {
+          return [
+            { text: r.country },
+            { text: fmt(r.hits), cls: "py-1.5 text-right" },
+          ];
+        });
+        fillTable("tbl-referers", d.topReferers, function (r) {
+          return [
+            { text: r.referer, cls: "py-1.5 truncate max-w-xs" },
+            { text: fmt(r.hits), cls: "py-1.5 text-right" },
+          ];
+        });
+        fillTable("tbl-ua", d.uaSplit, function (r) {
+          return [
+            { text: r.ua },
+            { text: fmt(r.hits), cls: "py-1.5 text-right" },
+          ];
+        });
+        fillTable("tbl-entitlements", d.entitlementsPerDataset, function (r) {
+          return [
+            { text: r.name },
+            { text: fmt(r.count), cls: "py-1.5 text-right" },
+          ];
+        });
+        fillTable("tbl-custom", d.customEvents, function (r) {
+          return [
+            { text: r.name },
+            { text: fmt(r.count), cls: "py-1.5 text-right" },
+          ];
+        });
+        fillTable("tbl-mcp", d.mcpUsage, function (r) {
+          return [
+            { text: r.client_id, cls: "py-1.5 truncate max-w-xs font-mono text-xs" },
+            { text: fmt(r.day_count), cls: "py-1.5 text-right" },
+            { text: fmt(r.month_count), cls: "py-1.5 text-right" },
+            { text: fmt(r.total_count), cls: "py-1.5 text-right" },
+          ];
+        });
+
+        renderPlausible(d.plausible);
+
+        setText("last-refresh", new Date().toLocaleString("fr-CH"));
+      }
+
+      periodSel.addEventListener("change", load);
+      refreshBtn.addEventListener("click", load);
+      load();
+    })();
+  </script>
+</BaseLayout>
