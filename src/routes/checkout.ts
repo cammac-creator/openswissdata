@@ -23,7 +23,11 @@ checkoutRoute.use("/start", async (c, next) => {
   return next();
 });
 
-const DATASET_IDS = ["tares", "classifications", "finma", "bundle"] as const;
+// `mcp_standalone` is a special "subscription" SKU (49 CHF/month, 5k req/mo).
+// It uses Stripe's `mode: "subscription"` and CANNOT be combined with the
+// one-off ZIP datasets in the same Checkout Session — Stripe disallows
+// mixing one-time and recurring line items.
+const DATASET_IDS = ["tares", "classifications", "finma", "bundle", "mcp_standalone"] as const;
 type DatasetId = (typeof DATASET_IDS)[number];
 
 const CheckoutSchema = z.object({
@@ -46,14 +50,32 @@ async function buildSession(
   const db = getDb();
   const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
+  // mcp_standalone is a recurring subscription SKU and must be sold alone.
+  const hasStandalone = dataset_ids.includes("mcp_standalone");
+  if (hasStandalone && dataset_ids.length > 1) {
+    return {
+      ok: false,
+      status: 400,
+      error: "mcp_standalone_cannot_be_combined_with_other_skus",
+    };
+  }
+
   const hasBundle = dataset_ids.includes("bundle");
-  const individualIds = dataset_ids.filter((id) => id !== "bundle");
+  const individualIds = dataset_ids.filter((id) => id !== "bundle" && id !== "mcp_standalone");
   if (hasBundle && individualIds.length > 0) {
     return { ok: false, status: 400, error: "bundle_cannot_be_combined_with_individual_datasets" };
   }
 
   const line_items: Array<{ price: string; quantity: number }> = [];
-  if (hasBundle) {
+  let mode: Stripe.Checkout.SessionCreateParams.Mode = "payment";
+
+  if (hasStandalone) {
+    const standalonePrice = process.env.STRIPE_PRICE_MCP_STANDALONE;
+    if (!standalonePrice)
+      return { ok: false, status: 500, error: "mcp_standalone_price_not_configured" };
+    line_items.push({ price: standalonePrice, quantity: 1 });
+    mode = "subscription";
+  } else if (hasBundle) {
     const bundlePrice = process.env.STRIPE_PRICE_BUNDLE;
     if (!bundlePrice) return { ok: false, status: 500, error: "bundle_price_not_configured" };
     line_items.push({ price: bundlePrice, quantity: 1 });
@@ -70,10 +92,10 @@ async function buildSession(
   }
 
   const params: Stripe.Checkout.SessionCreateParams = {
-    mode: "payment",
+    mode,
     line_items,
     success_url: `${baseUrl}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${baseUrl}/bundle?checkout=cancelled`,
+    cancel_url: `${baseUrl}/${hasStandalone ? "mcp" : "bundle"}?checkout=cancelled`,
     metadata: { dataset_ids: dataset_ids.join(",") },
     allow_promotion_codes: true,
   };
@@ -111,6 +133,12 @@ checkoutRoute.post("/session", async (c) => {
       return c.json({ error: "dataset_missing_stripe_price_id", dataset_id: result.error.split(":")[1] }, 500);
     }
     if (result.error === "bundle_price_not_configured") {
+      return c.json({ error: result.error }, 500);
+    }
+    if (result.error === "mcp_standalone_cannot_be_combined_with_other_skus") {
+      return c.json({ error: result.error }, 400);
+    }
+    if (result.error === "mcp_standalone_price_not_configured") {
       return c.json({ error: result.error }, 500);
     }
     if (result.error === "checkout_failed" || result.error.startsWith("stripe_error:")) {
