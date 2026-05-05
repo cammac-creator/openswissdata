@@ -53,6 +53,7 @@ const lastUpdated = new Date().toISOString().split("T")[0];
         <tr><td class="px-3 py-2">Railway</td><td class="px-3 py-2">Hébergement de l'application</td><td class="px-3 py-2">Europe (Frankfurt)</td></tr>
         <tr><td class="px-3 py-2">Cloudflare R2</td><td class="px-3 py-2">Stockage des Datasets</td><td class="px-3 py-2">Europe (Frankfurt)</td></tr>
         <tr><td class="px-3 py-2">Plausible Analytics</td><td class="px-3 py-2">Statistiques anonymes (sans cookies)</td><td class="px-3 py-2">Allemagne (UE)</td></tr>
+        <tr><td class="px-3 py-2">Journal interne (Railway)</td><td class="px-3 py-2">Mesure de performance API + comptage d'usage. Identifiant visiteur pseudonymisé (hash SHA-256 salé, rotation quotidienne) — aucune adresse IP ni donnée personnelle stockée en clair.</td><td class="px-3 py-2">Europe (Frankfurt)</td></tr>
         <tr><td class="px-3 py-2">Sentry</td><td class="px-3 py-2">Capture des erreurs serveur (logs techniques)</td><td class="px-3 py-2">États-Unis (clauses contractuelles types)</td></tr>
         <tr><td class="px-3 py-2">UptimeRobot</td><td class="px-3 py-2">Monitoring de disponibilité (ping HTTP, pas de données personnelles)</td><td class="px-3 py-2">États-Unis</td></tr>
       </tbody>
@@ -63,6 +64,7 @@ const lastUpdated = new Date().toISOString().split("T")[0];
       <li>Email + compte client : tant que le compte est actif, ou 10 ans après le dernier achat (obligation comptable CH).</li>
       <li>Sessions de connexion : 30 jours maximum, renouvelables à chaque connexion.</li>
       <li>Tokens de téléchargement : 48 heures.</li>
+      <li>Journal d'analytics interne (events) : 180 jours, puis suppression automatique.</li>
     </ul>
 
     <h2 class="text-2xl font-semibold mt-8 mb-3">6. Vos droits (nLPD art. 25 + RGPD art. 15-22)</h2>

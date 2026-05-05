@@ -20,6 +20,9 @@
 import { getDb } from "../src/lib/db.js";
 
 const REQUEST_LOG_RETENTION_MS = 30 * 24 * 3600 * 1000;
+// Analytics events: keep 180 days for year-over-year-ish window comparisons,
+// drop older. Tunable; aligned with /legal/privacy retention claim.
+const EVENTS_RETENTION_MS = 180 * 24 * 3600 * 1000;
 
 function main() {
   const db = getDb();
@@ -76,6 +79,17 @@ function main() {
     total += result.changes;
   } catch {
     // Silent.
+  }
+
+  // Analytics events: prune older than EVENTS_RETENTION_MS. Without this the
+  // events table is unbounded. Idempotent.
+  try {
+    const cutoff = now - EVENTS_RETENTION_MS;
+    const result = db.prepare("DELETE FROM events WHERE ts < ?").run(cutoff);
+    console.log(`[cleanup] events: deleted ${result.changes} rows older than 180d`);
+    total += result.changes;
+  } catch {
+    // Silent: table absent on first deploys before migration 002.
   }
 
   console.log(`[cleanup] done. Total rows deleted: ${total}`);

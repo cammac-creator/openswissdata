@@ -171,3 +171,32 @@ CREATE TABLE IF NOT EXISTS dataset_snapshots (
 
 CREATE INDEX IF NOT EXISTS idx_snapshots_lookup
   ON dataset_snapshots(dataset_id, entity_key, field, recorded_at);
+
+-- =====================================================================
+-- Events log (Phase 3 / dashboard analytics)
+-- =====================================================================
+-- Mirrored from src/db/migrations/002_events.sql. Powers the /admin
+-- dashboard: per-route latency, top countries, conversion funnel,
+-- custom front-end CTA tracking. See migration file for the full
+-- design rationale.
+
+-- customer_id is a soft-link (no FK constraint) — see 002_events.sql for why.
+CREATE TABLE IF NOT EXISTS events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind TEXT NOT NULL CHECK (kind IN ('api_request', 'custom', 'conversion')),
+  name TEXT,
+  status INTEGER,
+  duration_ms INTEGER,
+  customer_id INTEGER,
+  visitor_hash TEXT,
+  country TEXT,
+  referer TEXT,
+  ua_class TEXT,
+  meta_json TEXT,
+  ts INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_events_kind_ts ON events(kind, ts DESC);
+CREATE INDEX IF NOT EXISTS idx_events_name_ts ON events(name, ts DESC);
+CREATE INDEX IF NOT EXISTS idx_events_customer ON events(customer_id, ts DESC);
+CREATE INDEX IF NOT EXISTS idx_events_country_ts ON events(country, ts DESC);

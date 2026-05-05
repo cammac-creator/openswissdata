@@ -41,6 +41,12 @@ const EnvSchema = z.object({
   OAUTH_SIGNING_SECRET: isProd
     ? z.string().min(32)
     : z.string().min(16).default("dev-oauth-signing-secret-change-me"),
+  // Comma-separated allowlist of admin emails. Empty = /admin disabled (503).
+  ADMIN_EMAILS: z.string().optional(),
+  // Plausible Stats API token (optional — if missing, /admin shows a link
+  // to the Plausible dashboard instead of inlining the numbers).
+  PLAUSIBLE_API_KEY: z.string().optional(),
+  PLAUSIBLE_SITE_ID: z.string().default("openswissdata.com"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

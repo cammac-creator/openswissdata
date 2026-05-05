@@ -12,9 +12,11 @@ interface Props {
    * Shape: { name, description, price, priceCurrency, sku, ... }
    */
   productJsonLd?: Record<string, unknown>;
+  /** When true, emits <meta name="robots" content="noindex,nofollow">. */
+  noindex?: boolean;
 }
 
-const { title, description = "Datasets officiels suisses normalisés — TARES (douanes), classifications NOGA/NACE/ISIC, registre FINMA. Format JSON, Parquet, SQL.", image = "/og-default.png", productJsonLd } = Astro.props;
+const { title, description = "Datasets officiels suisses normalisés — TARES (douanes), classifications NOGA/NACE/ISIC, registre FINMA. Format JSON, Parquet, SQL.", image = "/og-default.png", productJsonLd, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 ---
 <!DOCTYPE html>
@@ -25,6 +27,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
