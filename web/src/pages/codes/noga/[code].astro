@@ -161,8 +161,9 @@ const jsonLd = {
 };
 ---
 <BaseLayout title={pageTitle} description={pageDescription}>
-  <section class="ds-container">
-    <div class="container-tight">
+  <div class="bg-grid"></div>
+  <section class="v4-hero ds-page">
+    <div class="container-v4">
       <nav class="ds-breadcrumb">
         <a href="/">accueil</a>
         <span class="sep">·</span>
@@ -173,22 +174,32 @@ const jsonLd = {
         <span class="current">{dotted}</span>
       </nav>
 
-      <div class="ds-hero">
+      <div class="v4-hero-grid">
         <div>
-          <span class="ds-badge green reveal">NOGA 2025 · {levelLabel[row.level]}</span>
-          <h1 class="ds-hero-title reveal" data-delay="1">
-            Code NOGA <span class="serif">{dotted}</span> — {row.label_fr}
+          <div class="v4-eyebrow reveal-v4">
+            <span>NOGA 2025</span>
+            <span style="opacity:.4">·</span>
+            <span>{levelLabel[row.level]}</span>
+          </div>
+          <h1 class="v4-h1 reveal-v4" data-delay="1">
+            <span style="display:block;font-family:var(--font-mono);font-size:.55em;color:var(--accent);font-weight:700;letter-spacing:.04em;margin-bottom:6px;">NOGA {dotted}</span>
+            {row.label_fr}
           </h1>
-          <p class="ds-hero-lede reveal" data-delay="2">
-            Activité de la nomenclature générale des activités économiques suisse (NOGA 2025), publiée par l'Office fédéral de la statistique (OFS).
+          <p class="v4-lede reveal-v4" data-delay="2">
+            Activité de la nomenclature générale des activités économiques suisse (NOGA 2025), publiée par l'Office fédéral de la statistique (OFS). Le dataset complet (cross-walks NACE 2.1 + ISIC 4) est inclus dans <a href="/datasets/classifications">Classifications (399 CHF)</a>.
           </p>
         </div>
-        <div class="ds-price-box reveal" data-delay="2">
+        <div class="ds-price-box reveal-v4" data-delay="2">
           <div class="ds-price-box-label">Niveau</div>
           <div class="ds-price-box-amount" style="font-size: 28px;">{levelLabel[row.level]}</div>
           <div class="ds-price-box-renew">Code brut : <code style="font-family: var(--font-mono);">{row.code}</code></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="v4-datasets ds-page">
+    <div class="container-v4">
 
       <div class="ds-meta-grid">
         <div class="ds-meta-card reveal">
