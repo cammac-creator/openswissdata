@@ -1,0 +1,96 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+const lastUpdated = new Date().toISOString().split("T")[0];
+---
+<BaseLayout
+  title="Datenschutzerklärung — openswissdata.com"
+  description="Datenschutzerklärung konform mit DSG (revDSG) + DSGVO für openswissdata.com."
+>
+  <div class="bg-grid"></div>
+  <section class="legal-page">
+    <div class="container-v4">
+      <div class="legal-content">
+    <nav class="text-sm text-slate-500 mb-4 not-prose">
+      <a href="/de/" class="hover:underline">Startseite</a> · <span>Datenschutzerklärung</span>
+    </nav>
+
+    <h1>Datenschutzerklärung</h1>
+    <div class="legal-meta">Version 1.1 · Letzte Aktualisierung: {lastUpdated} · Konform DSG (revDSG, Schweiz) + DSGVO (EU)</div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--line); border-left: 3px solid var(--ink); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0 28px; font-size: 13px; line-height: 1.55;">
+      <strong style="display:block; margin-bottom: 4px;">Verantwortlicher der Bearbeitung</strong>
+      <span style="color: var(--ink-soft);">Claude-Alain Martin · Einzelunternehmen (Schweiz), Rue de l'Église 23, 1045 Ogens · nicht im HReg eingetragen (Art. 36 HRegV) · nicht MWST-pflichtig (Art. 10 Abs. 2 MWSTG) · Gerichtsstand Bern (TARES) / Ogens (übrige) · <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a></span>
+    </div>
+
+    <h2>1. Angaben zum Verantwortlichen der Bearbeitung</h2>
+    <p>Claude-Alain Martin, Einzelunternehmen, Rue de l'Église 23, 1045 Ogens, Schweiz · <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a></p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">2. Erhobene Daten</h2>
+    <p>Wir erheben ausschliesslich:</p>
+    <ul class="list-disc pl-6">
+      <li>Ihre <strong>E-Mail-Adresse</strong>, angegeben beim Kauf eines Datasets und für die Verbindung zum Kundenbereich.</li>
+      <li>Ihre <strong>Stripe-Zahlungs-Identifikator</strong> (stripe_customer_id), zur Verknüpfung Ihrer Bestellungen.</li>
+      <li>Den <strong>Verlauf Ihrer Bestellungen</strong> (Datum, Betrag, gekaufte Datasets).</li>
+    </ul>
+    <p>Wir erheben <strong>niemals</strong> Passwörter (Authentifizierung per Magic-Link), Bankdaten (von Stripe verwaltet) noch detaillierte Navigationsdaten.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">2bis. Kommerzielle Akquise</h2>
+    <p>Für unsere B2B-Akquisetätigkeit, siehe unsere dedizierte Politik: <a href="/de/legal/sdr-policy" class="text-indigo-600 hover:underline">/de/legal/sdr-policy</a>.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">3. Zwecke</h2>
+    <ul class="list-disc pl-6">
+      <li>Erfüllung des Kaufvertrags (Lieferung des Datasets)</li>
+      <li>Verwaltung des Kundenbereichs (Verbindung, Downloads)</li>
+      <li>Benachrichtigungen über Updates der von Ihnen gekauften Datasets</li>
+      <li>Aufbewahrung der Buchhaltungsbelege (CH-Pflicht: 10 Jahre)</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">4. Auftragsbearbeiter</h2>
+    <p>Die Daten werden über folgende Auftragsbearbeiter übermittelt, alle vertraglich an Vertraulichkeitspflichten gebunden, die unseren entsprechen:</p>
+    <table class="w-full text-sm border border-slate-300 my-4 not-prose">
+      <thead class="bg-slate-50">
+        <tr><th class="text-left px-3 py-2 border-b border-slate-300">Auftragsbearbeiter</th><th class="text-left px-3 py-2 border-b border-slate-300">Zweck</th><th class="text-left px-3 py-2 border-b border-slate-300">Hosting</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="px-3 py-2">Stripe</td><td class="px-3 py-2">Zahlungsabwicklung</td><td class="px-3 py-2">Irland (EU)</td></tr>
+        <tr><td class="px-3 py-2">Resend</td><td class="px-3 py-2">Versand transaktionaler E-Mails</td><td class="px-3 py-2">Vereinigte Staaten (Standardvertragsklauseln)</td></tr>
+        <tr><td class="px-3 py-2">Railway</td><td class="px-3 py-2">Hosting der Anwendung</td><td class="px-3 py-2">Europa (Frankfurt)</td></tr>
+        <tr><td class="px-3 py-2">Cloudflare R2</td><td class="px-3 py-2">Speicherung der Datasets</td><td class="px-3 py-2">Europa (Frankfurt)</td></tr>
+        <tr><td class="px-3 py-2">Plausible Analytics</td><td class="px-3 py-2">Anonyme Statistiken (ohne Cookies)</td><td class="px-3 py-2">Deutschland (EU)</td></tr>
+        <tr><td class="px-3 py-2">Internes Journal (Railway)</td><td class="px-3 py-2">API-Performance-Messung + Nutzungszählung. Pseudonymisierter Besucher-Identifikator (gesalzener SHA-256-Hash, tägliche Rotation) — keine IP-Adresse oder personenbezogenen Daten im Klartext gespeichert.</td><td class="px-3 py-2">Europa (Frankfurt)</td></tr>
+        <tr><td class="px-3 py-2">Sentry</td><td class="px-3 py-2">Erfassung von Server-Fehlern (technische Logs)</td><td class="px-3 py-2">Vereinigte Staaten (Standardvertragsklauseln)</td></tr>
+        <tr><td class="px-3 py-2">UptimeRobot</td><td class="px-3 py-2">Verfügbarkeitsüberwachung (HTTP-Ping, keine personenbezogenen Daten)</td><td class="px-3 py-2">Vereinigte Staaten</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">5. Aufbewahrungsdauer</h2>
+    <ul class="list-disc pl-6">
+      <li>E-Mail + Kundenkonto: solange das Konto aktiv ist, oder 10 Jahre nach dem letzten Kauf (CH-Buchhaltungspflicht).</li>
+      <li>Login-Sitzungen: maximal 30 Tage, bei jedem Login erneuerbar.</li>
+      <li>Download-Tokens: 48 Stunden.</li>
+      <li>Internes Analytics-Journal (Events): 180 Tage, dann automatische Löschung.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">6. Ihre Rechte (DSG Art. 25 + DSGVO Art. 15-22)</h2>
+    <p>Sie können jederzeit:</p>
+    <ul class="list-disc pl-6">
+      <li>Auf Ihre Daten zugreifen (vom Kundenbereich oder auf Anfrage)</li>
+      <li>Berichtigung oder Löschung Ihres Kontos verlangen</li>
+      <li>Ihre Daten exportieren (Recht auf Datenübertragbarkeit)</li>
+      <li>Einer Bearbeitung widersprechen</li>
+    </ul>
+    <p>Zur Ausübung dieser Rechte: <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">7. Internationale Übermittlungen</h2>
+    <p>Die Daten werden hauptsächlich in Europa gespeichert (Frankfurt für Railway und R2). Drei Auftragsbearbeiter haben ihren Sitz in den Vereinigten Staaten: <strong>Resend</strong> (E-Mail-Versand), <strong>Sentry</strong> (Erfassung technischer Fehler) und <strong>UptimeRobot</strong> (HTTP-Monitoring — keine personenbezogenen Daten). Übermittlungen an Resend und Sentry sind durch die <strong>Standardvertragsklauseln (SCC) 2021/914/EU</strong> der Europäischen Kommission abgesichert. Sentry wendet zudem eine automatische serverseitige Filterung an (`beforeSend` Hook), die Autorisierungs-Header, Cookies und Tokens aus den Stack Traces vor dem Versand entfernt.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">8. Cookies und Tracker</h2>
+    <p>Wir verwenden ausschliesslich ein technisches Cookie (<code>osd_session</code>), das streng notwendig für die Verbindung zum Kundenbereich ist. Es werden keine Werbe- oder Drittanbieter-Tracking-Cookies gesetzt. Plausible Analytics funktioniert ohne Cookies.</p>
+
+    <h2 class="text-2xl font-semibold mt-8 mb-3">9. Eidgenössischer Datenschutzbeauftragter (EDÖB)</h2>
+    <p>Falls Sie der Meinung sind, dass Ihre Rechte nicht respektiert werden, können Sie sich an den EDÖB wenden: <a href="https://www.edoeb.admin.ch/" target="_blank" rel="noopener" class="text-indigo-600 hover:underline">edoeb.admin.ch</a>.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

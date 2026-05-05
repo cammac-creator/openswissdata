@@ -1,0 +1,167 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+const lastUpdated = new Date().toISOString().split("T")[0];
+---
+<BaseLayout
+  title="Provenienz & rechtlicher Moat — openswissdata.com"
+  description="Wie openswissdata die Provenienz der Daten garantiert: BAZG-Bewilligung, Ed25519-signiertes Manifest, RFC-3161 Zeitstempel, UWG-Konformität."
+>
+  <div class="bg-grid"></div>
+  <section class="legal-page">
+    <div class="container-v4">
+      <div class="legal-content">
+    <nav class="text-sm text-slate-500 mb-4 not-prose">
+      <a href="/de/" class="hover:underline">Startseite</a> · <a href="/de/legal/cgv" class="hover:underline">Rechtliches</a> · <span>Provenienz</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold mb-2">Provenienz &amp; rechtlicher Moat</h1>
+    <p class="text-sm text-slate-500 mb-8">Version 1.1 · Letzte Aktualisierung: {lastUpdated}</p>
+
+    <p class="lead text-lg">
+      Diese Seite erklärt, <strong>warum ein Käufer von openswissdata rechtlich besser geschützt ist als ein Konsument gescrapter Daten</strong>, und <strong>wie die Provenienz</strong> jedes gelieferten ZIP <strong>technisch verifiziert</strong> werden kann.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">1. Der rechtliche Moat in einem Satz</h2>
+    <p>
+      openswissdata verkauft die Daten nicht — sie sind öffentlich. Wir verkaufen die <strong>dokumentierte Rechtekette</strong>, die einem professionellen Käufer ermöglicht, sie <em>zu vermarkten, in ein Produkt zu integrieren oder in einem Audit zu zitieren</em>, ohne sich einem Risiko des Schweizer Rechts gegen unlauteren Wettbewerb (UWG Art. 5) auszusetzen.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">2. Kommerzielle Bewilligungen und Status</h2>
+    <ul class="list-disc pl-6">
+      <li>
+        <strong>BAZG (Bundesamt für Zoll und Grenzsicherheit)</strong> — schriftliche kommerzielle Bewilligung erhalten am <strong>21. April 2026</strong> von Hr. Michael Beer, Leiter Tarifgrundlagen, für das TARES-Dataset. Referenz: <code>BAZG-PERMISSION-2026-04-21-MICHAEL-BEER</code>. Volltext auf Anfrage verfügbar bei <a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>.
+      </li>
+      <li>
+        <strong>BFS (Bundesamt für Statistik)</strong> — Antrag versendet am 17. April 2026 für die aus NOGA / Klassifikationen abgeleiteten Datasets. Nachfassung geplant. Die verwendeten Wirtschaftsklassifikationen sind offene internationale Standards (NACE, ISIC, NOGA), wiederverwendbar aufgrund des öffentlichen Charakters ihrer Veröffentlichung.
+      </li>
+      <li>
+        <strong>FINMA (Eidgenössische Finanzmarktaufsicht)</strong> — Antrag versendet am 17. April 2026 für das vereinte Register der beaufsichtigten Entitäten. Nachfassung geplant.
+      </li>
+    </ul>
+    <p>
+      Für die vollständigen Details zu Quellen, Nachfassungen und Takedown-Verpflichtungen, siehe <a href="/de/compliance" class="text-indigo-600 hover:underline">/de/compliance</a>.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">3. Warum Scraping den Kauf nicht ersetzt</h2>
+    <p>
+      Das <strong>Bundesgesetz gegen den unlauteren Wettbewerb (UWG), Artikel 5</strong>, sanktioniert <em>„die unrechtmässige Verwertung des Arbeitsergebnisses eines Dritten"</em>. Die Schweizer Rechtsprechung hat diesen Artikel auf aggressives kommerzielles Scraping angewendet, wenn das Arbeitsergebnis (Formatierung, Normalisierung, Verifizierung) ohne Einverständnis des Originalproduzenten zu Erwerbszwecken übernommen wird.
+    </p>
+    <p>
+      Konkret:
+    </p>
+    <ul class="list-disc pl-6">
+      <li>Ein Entwickler kann <strong>BAZG, BFS, FINMA für seinen persönlichen oder internen Gebrauch scrapen</strong> ohne erhebliches Risiko.</li>
+      <li>Ein Unternehmen, das <strong>ein Produkt vermarktet, das mit diesen gescrapten Daten betrieben wird</strong>, setzt sich einem UWG-Risiko aus — vor allem, wenn es die Daten unverändert weitergibt.</li>
+      <li>Ein Käufer von openswissdata <strong>kauft eine klare Lizenz</strong> mit dokumentierter Rechtekette. Das eliminiert das UWG-Risiko auf der Käuferseite, da unsere BAZG-Bewilligung als Lizenz in der Kette wirkt.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">4. Ed25519-signiertes Manifest + RFC-3161 Zeitstempel</h2>
+    <p>
+      Jedes gelieferte ZIP enthält eine Datei <code>provenance.json</code>, die belegt:
+    </p>
+    <ol class="list-decimal pl-6">
+      <li><strong>Den offiziellen Ursprung</strong> (URL der Quelle BAZG/BFS/FINMA + SHA-256-Hash der Quelldatei zum Zeitpunkt der Extraktion).</li>
+      <li><strong>Die Integrität des Inhalts</strong> über kryptografische Ed25519-Signatur, ausgestellt von <code>openswissdata.com</code>.</li>
+      <li><strong>Das nicht-rückwirkende Lieferdatum</strong> über RFC-3161 Zeitstempel einer unabhängigen Drittpartei-Timestamping-Autorität (<a href="https://freetsa.org" class="text-indigo-600 hover:underline">freetsa.org</a>).</li>
+    </ol>
+
+    <h3 class="text-xl font-semibold mt-6 mb-2">Format der <code>provenance.json</code></h3>
+    <pre class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs overflow-x-auto"><code>{`{
+  "version": "1.0",
+  "issued_at": "2026-04-29T15:30:00Z",
+  "issued_by": "openswissdata.com",
+  "permission_reference": "BAZG-PERMISSION-2026-04-21-MICHAEL-BEER",
+  "permission_authority": "BAZG",
+  "permission_date": "2026-04-21",
+  "jurisdiction": "Berne, Switzerland",
+  "dataset": "tares",
+  "dataset_version": "v1.0.0",
+  "source_url": "https://www.bazg.admin.ch/...",
+  "files": [
+    { "name": "tares.parquet", "size": 1457893, "sha256": "a3f9e2..." }
+  ],
+  "signature": {
+    "algorithm": "Ed25519",
+    "public_key": "<base64>",
+    "signed_at": "2026-04-29T15:30:00Z",
+    "signature": "<base64>"
+  },
+  "timestamp_authority": {
+    "name": "freetsa.org",
+    "rfc3161_timestamp": "<base64 RFC-3161 token>"
+  }
+}`}</code></pre>
+
+    <h3 class="text-xl font-semibold mt-6 mb-2">Wie die Signatur verifiziert wird</h3>
+    <p>
+      Unser öffentlicher Ed25519-Schlüssel ist veröffentlicht unter <a href="/.well-known/openswissdata-pubkey.pem"><code>openswissdata.com/.well-known/openswissdata-pubkey.pem</code></a> und auch in jedem ZIP enthalten. Sie haben die Wahl zwischen zwei Verifizierungsmethoden:
+    </p>
+
+    <h4 class="text-base font-semibold mt-5 mb-2">Methode 1 — Standard-Kommandozeile (ohne Node.js)</h4>
+    <p>
+      Für einen Compliance Officer oder Auditor ohne Entwicklungsumgebung genügen <code>openssl</code> und <code>shasum</code>:
+    </p>
+    <pre><code>{`# 1. Unseren öffentlichen Schlüssel abrufen (einmalig)
+curl -O https://www.openswissdata.com/.well-known/openswissdata-pubkey.pem
+
+# 2. Das Dataset-ZIP entpacken
+unzip tares-2026.04.zip -d tares/
+cd tares/
+
+# 3. Ed25519-Signatur des Manifests verifizieren
+openssl pkeyutl -verify \\
+  -pubin -inkey ../openswissdata-pubkey.pem \\
+  -rawin -in manifest.json \\
+  -sigfile manifest.json.sig
+# → Signature Verified Successfully
+
+# 4. Verifizieren, dass jede Datei mit dem in manifest.json gelisteten SHA-256 übereinstimmt
+shasum -a 256 -c manifest-sha256.txt
+# → tares.csv: OK · tares.parquet: OK · ...
+
+# 5. (Optional) Den RFC-3161 Zeitstempel von freetsa.org verifizieren
+openssl ts -verify -data manifest.json -in manifest.json.tsr \\
+  -CAfile freetsa-cacert.pem
+# → Verification: OK`}</code></pre>
+
+    <h4 class="text-base font-semibold mt-5 mb-2">Methode 2 — Offizielles SDK (TypeScript/Python, schneller)</h4>
+    <p>Wenn Sie bereits Node.js verwenden:</p>
+    <pre><code>{`$ npx @osd/sdk verify-provenance ./tares-2026.04.zip
+✓ Ed25519-Signatur gültig
+✓ RFC-3161 Zeitstempel gültig (2026-04-29T15:30:00Z, freetsa.org)
+✓ SHA-256-Hash der Quelldatei verifiziert
+✓ Bewilligung BAZG-PERMISSION-2026-04-21-MICHAEL-BEER referenziert`}</code></pre>
+    <p>
+      Jede Änderung am Inhalt des ZIP (auch nur ein einziges Zeichen) macht die Signatur ungültig. Jedes gefälschte Ausstellungsdatum macht den RFC-3161 Zeitstempel ungültig, da das Token von einer unabhängigen Drittpartei-TSA (freetsa.org) ausgestellt wird.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">5. Eingestandene Grenzen</h2>
+    <ul class="list-disc pl-6">
+      <li>
+        <strong>Kein Rechtsgutachten.</strong> Unsere Datasets sind Referenz- und Entscheidungshilfe-Werkzeuge. Für jede verbindliche Zollklassifizierung kann nur das BAZG eine <em>verbindliche Tarifauskunft</em> (vTA) erteilen. Für jede Frage zur FINMA-Bewilligung ist nur die FINMA massgeblich.
+      </li>
+      <li>
+        <strong>Erläuterungen und Entscheide BAZG ausgeschlossen.</strong> Gemäss Bedingung 3 unserer BAZG-Bewilligung sind die Erläuterungen und Entscheide des BAZG ausdrücklich von unserem TARES-Dataset ausgeschlossen.
+      </li>
+      <li>
+        <strong>BFS- und FINMA-Bewilligungen ausstehend.</strong> Die aus diesen Quellen abgeleiteten Datasets werden aufgrund des Mehrwerts der Normalisierung und des öffentlichen Charakters der Quellregister republiziert. Jede Einschränkung, die sich aus einer schriftlichen Antwort der Behörden ergeben würde, würde den Käufern mit Rückerstattungsoption und 24-Stunden-Takedown-Verfahren mitgeteilt (siehe <a href="/de/compliance" class="text-indigo-600 hover:underline">/de/compliance</a>).
+      </li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">6. Kontakt</h2>
+    <p>
+      Für jede Rechtsfrage, zur Anforderung einer Kopie des BAZG-Bewilligungstextes oder zur Meldung eines Provenienzproblems:
+      <br /><a href="mailto:contact@openswissdata.com" class="text-indigo-600 hover:underline">contact@openswissdata.com</a>
+    </p>
+    <p>
+      Für jede Rückzugsanfrage durch eine Quellbehörde: <a href="mailto:takedown@openswissdata.com" class="text-indigo-600 hover:underline">takedown@openswissdata.com</a>
+    </p>
+
+    <p class="text-xs text-slate-400 mt-12 not-prose">
+      openswissdata · Herausgegeben in Ogens, VD, Schweiz · Gerichtsstand: Bern · Nicht-offizielle Ausgabe.
+    </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
