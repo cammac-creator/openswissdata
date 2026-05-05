@@ -2,6 +2,11 @@
 import { getLangFromPath, t, localizePath } from "../i18n/utils";
 import LangSwitcher from "./LangSwitcher.astro";
 
+interface Props {
+  monolingual?: boolean;
+}
+
+const { monolingual = false } = Astro.props;
 const lang = getLangFromPath(Astro.url.pathname);
 const homeHref = localizePath("/", lang);
 const blogHref = localizePath("/blog", lang);
@@ -24,7 +29,7 @@ const blogHref = localizePath("/blog", lang);
       <a href={`${homeHref}#how`}>{t("nav.how", lang)}</a>
       <a href={blogHref}>{t("nav.blog", lang)}</a>
     </nav>
-    <LangSwitcher variant="compact" />
+    <LangSwitcher variant="compact" monolingual={monolingual} />
     <span><span class="v4-status-dot"></span>{t("statusbar.live", lang)}</span>
   </div>
 </div>
