@@ -5,7 +5,7 @@
  * Why standalone:
  *   - Claude Desktop / Cursor / Cline launch MCP servers as a child process
  *     speaking JSON-RPC over STDIO. They don't talk HTTP directly.
- *   - This binary is the bridge: it advertises the same 8 tools as the
+ *   - This binary is the bridge: it advertises the same 9 tools as the
  *     remote, but delegates `tools/call` over HTTP behind the scenes.
  *
  * Usage:
