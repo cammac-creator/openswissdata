@@ -1,0 +1,395 @@
+email,prenom,nom,entreprise,segment,source,base_legale,domaine_site,opt_in_pending,notes
+info@akb.ch,,,Aargauische Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,akb.ch,yes,banque cantonale AG
+compliance@akb.ch,,,Aargauische Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,akb.ch,yes,banque cantonale AG
+info@appkb.ch,,,Appenzeller Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,appkb.ch,yes,banque cantonale AI
+info@bancastato.ch,,,Banca dello Stato del Cantone Ticino,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bancastato.ch,yes,banque cantonale TI
+info@bcf.ch,,,Banque Cantonale de Fribourg,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bcf.ch,yes,banque cantonale FR
+info@bcge.ch,,,Banque Cantonale de Genève,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bcge.ch,yes,banque cantonale GE
+compliance@bcge.ch,,,Banque Cantonale de Genève,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bcge.ch,yes,banque cantonale GE
+info@bcj.ch,,,Banque Cantonale du Jura,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bcj.ch,yes,banque cantonale JU
+info@bcvs.ch,,,Banque Cantonale du Valais,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bcvs.ch,yes,banque cantonale VS
+info@bcn.ch,,,Banque Cantonale Neuchâteloise,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bcn.ch,yes,banque cantonale NE
+info@bcv.ch,,,Banque Cantonale Vaudoise,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bcv.ch,yes,banque cantonale VD
+compliance@bcv.ch,,,Banque Cantonale Vaudoise,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bcv.ch,yes,banque cantonale VD
+info@blkb.ch,,,Basellandschaftliche Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,blkb.ch,yes,banque cantonale BL
+info@bkb.ch,,,Basler Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bkb.ch,yes,banque cantonale BS
+info@bekb.ch,,,Berner Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bekb.ch,yes,banque cantonale BE
+info@glkb.ch,,,Glarner Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,glkb.ch,yes,banque cantonale GL
+info@gkb.ch,,,Graubündner Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,gkb.ch,yes,banque cantonale GR
+info@lukb.ch,,,Luzerner Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,lukb.ch,yes,banque cantonale LU
+info@nkb.ch,,,Nidwaldner Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,nkb.ch,yes,banque cantonale NW
+info@owkb.ch,,,Obwaldner Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,owkb.ch,yes,banque cantonale OW
+info@shkb.ch,,,Schaffhauser Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,shkb.ch,yes,banque cantonale SH
+info@szkb.ch,,,Schwyzer Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,szkb.ch,yes,banque cantonale SZ
+info@sgkb.ch,,,St. Galler Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,sgkb.ch,yes,banque cantonale SG
+info@tkb.ch,,,Thurgauer Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,tkb.ch,yes,banque cantonale TG
+info@urkb.ch,,,Urner Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,urkb.ch,yes,banque cantonale UR
+info@zugerkb.ch,,,Zuger Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,zugerkb.ch,yes,banque cantonale ZG
+info@zkb.ch,,,Zürcher Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,zkb.ch,yes,banque cantonale ZH
+compliance@zkb.ch,,,Zürcher Kantonalbank,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,zkb.ch,yes,banque cantonale ZH
+info@ubs.com,,,UBS Switzerland AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,ubs.com,yes,banque universelle ZH
+info@juliusbaer.com,,,Bank Julius Bär & Co. AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,juliusbaer.com,yes,banque privée ZH
+info@vontobel.com,,,Bank Vontobel AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,vontobel.com,yes,banque privée ZH
+info@group.pictet,,,Banque Pictet & Cie SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,group.pictet,yes,banque privée GE
+info@lombardodier.com,,,Bank Lombard Odier & Co Ltd,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,lombardodier.com,yes,banque privée GE
+info@mirabaud.com,,,Mirabaud & Cie SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,mirabaud.com,yes,banque privée GE
+info@bordier.com,,,Bordier & Cie SCmA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bordier.com,yes,banque privée GE
+info@efginternational.com,,,EFG Bank AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,efginternational.com,yes,banque privée ZH
+info@bonhote.ch,,,Banque Bonhôte & Cie SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bonhote.ch,yes,banque privée NE
+info@rahnbodmer.ch,,,Rahn+Bodmer Co.,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,rahnbodmer.ch,yes,banque privée ZH
+info@reichmuthco.ch,,,Reichmuth & Co Privatbankiers,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,reichmuthco.ch,yes,banque privée LU
+info@maerki-baumann.ch,,,Maerki Baumann & Co. AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,maerki-baumann.ch,yes,banque privée ZH
+info@gonet.ch,,,Banque Gonet SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,gonet.ch,yes,banque privée GE
+info@cic.ch,,,Banque CIC (Suisse) SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,cic.ch,yes,banque privée BS
+info@valiant.ch,,,Valiant Bank AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,valiant.ch,yes,banque universelle BE
+info@migrosbank.ch,,,Migros Bank AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,migrosbank.ch,yes,banque universelle ZH
+info@postfinance.ch,,,PostFinance AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,postfinance.ch,yes,banque universelle BE
+info@hbl.ch,,,Hypothekarbank Lenzburg AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,hbl.ch,yes,banque régionale AG
+info@bsibank.com,,,EFG Bank European Financial Group SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bsibank.com,yes,banque privée GE
+info@aekbank.ch,,,AEK BANK 1826 Genossenschaft,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,aekbank.ch,yes,banque régionale BE
+info@abs.ch,,,Alternative Bank Schweiz AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,abs.ch,yes,banque éthique SO
+info@acrevis.ch,,,acrevis Bank AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,acrevis.ch,yes,banque régionale SG
+info@baloise.ch,,,Baloise Bank AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,baloise.ch,yes,banque BFA SO
+info@raiffeisen.ch,,,Raiffeisen Schweiz Genossenschaft,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,raiffeisen.ch,yes,groupe Raiffeisen SG
+info@swissquote.com,,,Swissquote Bank SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,swissquote.com,yes,banque online VD
+info@dukascopy.com,,,Dukascopy Bank SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,dukascopy.com,yes,banque online GE
+info@cembra.ch,,,Cembra Money Bank AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,cembra.ch,yes,banque conso ZH
+info@bcp.ch,,,Banque de Commerce et de Placements SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,bcp.ch,yes,banque commerciale GE
+info@safrasarasin.com,,,Bank J. Safra Sarasin AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,safrasarasin.com,yes,banque privée BS
+info@piguetgalland.ch,,,Banque Piguet Galland & Cie SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,piguetgalland.ch,yes,banque privée VD
+info@cler.ch,,,Bank Cler AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,cler.ch,yes,banque universelle BS
+info@hypovbg.li,,,Hypo Vorarlberg Bank AG succursale Saint-Gallen,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,hypovbg.li,yes,banque AT-CH SG
+info@alpian.com,,,Alpian SA,compliance_psp,FINMA-banques,interet_legitime_B2B_fonction_publique,alpian.com,yes,néobanque GE
+info@aminagroup.com,,,AMINA Bank AG,compliance_psp,FINMA-banques,interet_legitime_B2B_fonction_publique,aminagroup.com,yes,banque crypto ZG
+info@sygnum.com,,,Sygnum Bank AG,compliance_psp,FINMA-banques,interet_legitime_B2B_fonction_publique,sygnum.com,yes,banque crypto ZH
+info@seba.swiss,,,SEBA Bank AG,compliance_psp,FINMA-banques,interet_legitime_B2B_fonction_publique,seba.swiss,yes,banque crypto ZG
+info@yapeal.ch,,,Yapeal AG,compliance_psp,FINMA-fintech,interet_legitime_B2B_fonction_publique,yapeal.ch,yes,fintech autorisée art 1b LB
+info@relio.ch,,,Relio AG,compliance_psp,FINMA-fintech,interet_legitime_B2B_fonction_publique,relio.ch,yes,fintech autorisée art 1b LB
+info@bivial.com,,,Bivial AG,compliance_psp,FINMA-fintech,interet_legitime_B2B_fonction_publique,bivial.com,yes,fintech autorisée art 1b LB
+info@allianz.ch,,,Allianz Suisse,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,allianz.ch,yes,assureur dommage CH
+info@axa.ch,,,AXA Versicherungen AG,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,axa.ch,yes,assureur dommage CH
+info@baloise.com,,,Baloise Versicherung AG,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,baloise.com,yes,assureur dommage BS
+info@helvetia.ch,,,Helvetia Schweizerische Versicherungsgesellschaft AG,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,helvetia.ch,yes,assureur SG
+info@swisslife.ch,,,Swiss Life AG,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,swisslife.ch,yes,assureur vie ZH
+info@mobiliar.ch,,,Schweizerische Mobiliar Versicherungsgesellschaft AG,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,mobiliar.ch,yes,assureur dommage BE
+info@zurich.ch,,,Zurich Insurance Company Ltd,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,zurich.ch,yes,assureur ZH
+info@swissre.com,,,Swiss Re Ltd,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,swissre.com,yes,réassureur ZH
+info@vaudoise.ch,,,Vaudoise Assurances,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,vaudoise.ch,yes,assureur VD
+info@css.ch,,,CSS Versicherung AG,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,css.ch,yes,assureur maladie LU
+info@helsana.ch,,,Helsana Versicherungen AG,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,helsana.ch,yes,assureur maladie ZH
+info@groupemutuel.ch,,,Groupe Mutuel,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,groupemutuel.ch,yes,assureur maladie VS
+info@visana.ch,,,Visana Services AG,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,visana.ch,yes,assureur maladie BE
+info@sanitas.com,,,Sanitas Krankenversicherung,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,sanitas.com,yes,assureur maladie ZH
+info@assura.ch,,,Assura SA,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,assura.ch,yes,assureur maladie VD
+info@swissmedical.com,,,Swiss Medical Network,compliance_bank,FINMA-assureurs,interet_legitime_B2B_fonction_publique,swissmedical.com,yes,assureur maladie GE
+info@pwc.ch,,,PricewaterhouseCoopers AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,pwc.ch,yes,SBRU - audit banques (Big4)
+ch_contact@pwc.ch,,,PricewaterhouseCoopers AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,pwc.ch,yes,SBRU - audit banques (Big4)
+info@kpmg.ch,,,KPMG AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,kpmg.ch,yes,SBRU - audit banques (Big4)
+ch-fminfo@kpmg.com,,,KPMG AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,kpmg.ch,yes,SBRU - audit banques (Big4)
+info@ch.ey.com,,,Ernst & Young AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,ey.com,yes,SBRU - audit banques (Big4)
+info@deloitte.ch,,,Deloitte AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,deloitte.ch,yes,SBRU - audit banques (Big4)
+info@bdo.ch,,,BDO AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,bdo.ch,yes,SBRU - audit banques
+info@mazars.ch,,,FORVIS MAZARS SA,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,mazars.ch,yes,SBRU - audit banques
+info@grantthornton.ch,,,Grant Thornton AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,grantthornton.ch,yes,SBRU - audit banques
+info@obt.ch,,,OBT AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,obt.ch,yes,SBRU - audit banques (St. Gallen)
+info@balmer-etienne.ch,,,Balmer-Etienne AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,balmer-etienne.ch,yes,SBRU - audit banques (Luzern)
+info@avanta-audit.ch,,,Avanta Audit AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,avanta-audit.ch,yes,SBRU - audit banques (Baar)
+info@berneyassocies.com,,,Berney Associés Audit SA,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,berneyassocies.com,yes,SBRU - audit banques (Genève)
+info@bfb.ch,,,BfB Audit SA,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,bfb.ch,yes,SBRU - audit banques (Renens)
+info@feraxtreuhand.ch,,,Ferax Treuhand AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,feraxtreuhand.ch,yes,SBRU - audit banques (Zürich)
+info@pkfcertifica.ch,,,PKF CERTIFICA SA,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,pkfcertifica.ch,yes,SBRU - audit banques (Lugano)
+info@swa-auditors.ch,,,SWA Swiss Auditors AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,swa-auditors.ch,yes,SBRU - audit banques (Pfäffikon SZ)
+info@trag.ch,,,T + R AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,trag.ch,yes,SBRU - audit banques (Gümligen BE)
+info@mattig.ch,,,Mattig-Suter und Partner,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,mattig.ch,yes,SBRU - audit banques (Schwyz)
+info@asma.ch,,,ASMA Asset Management Audit & Compliance SA,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,asma.ch,yes,SBRU - audit asset mgmt (Genève)
+info@1875finance.com,,,1875 Finance SA,compliance_asset,FINMA-fund-managers,interet_legitime_B2B_fonction_publique,1875finance.com,yes,gestionnaire collectif GE
+info@aquila.ch,,,Aquila AG,compliance_asset,FINMA-banques,interet_legitime_B2B_fonction_publique,aquila.ch,yes,banque pour gérants ZH
+info@vp.com,,,VP Bank (Schweiz) AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,vp.com,yes,banque privée LI-CH ZH
+info@hyposwiss.ch,,,Hyposwiss Private Bank Genève SA,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,hyposwiss.ch,yes,banque privée GE
+info@notenstein-laroche.ch,,,Notenstein La Roche Privatbank AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,notenstein-laroche.ch,yes,banque privée SG
+info@arabbank.ch,,,Arab Bank (Switzerland) Ltd.,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,arabbank.ch,yes,banque privée GE
+info@frankfurter-bankgesellschaft.com,,,Frankfurter Bankgesellschaft (Schweiz) AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,frankfurter-bankgesellschaft.com,yes,banque privée ZH
+info@globalance-bank.com,,,Globalance Bank AG,compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,globalance-bank.com,yes,banque privée durable ZH
+info@quintet.com,,,Quintet Private Bank (Switzerland),compliance_bank,FINMA-banques,interet_legitime_B2B_fonction_publique,quintet.com,yes,banque privée
+info@vontobel.ch,,,Vontobel Asset Management AG,compliance_asset,FINMA-banques,interet_legitime_B2B_fonction_publique,vontobel.com,yes,asset mgmt ZH
+info@gam.com,,,GAM Investment Management,compliance_asset,FINMA-fund-managers,interet_legitime_B2B_fonction_publique,gam.com,yes,asset mgmt ZH
+info@swisscanto.com,,,Swisscanto Invest by Zürcher Kantonalbank,compliance_asset,FINMA-fund-managers,interet_legitime_B2B_fonction_publique,swisscanto.com,yes,asset mgmt ZH
+info@ubs-am.com,,,UBS Asset Management Switzerland AG,compliance_asset,FINMA-fund-managers,interet_legitime_B2B_fonction_publique,ubs.com,yes,asset mgmt ZH
+info@partnersgroup.com,,,Partners Group AG,compliance_asset,FINMA-fund-managers,interet_legitime_B2B_fonction_publique,partnersgroup.com,yes,private equity ZG
+info@avanir.ch,,,Avanir Treuhand AG,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,avanir.ch,yes,fiduciaire RU agréée
+info@treuhand-suisse.ch,,,Treuhand Suisse,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,treuhand-suisse.ch,yes,association faîtière fiduciaires
+info@expertsuisse.ch,,,EXPERTsuisse,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,expertsuisse.ch,yes,association experts comptables/auditeurs
+info@fidacor.ch,,,Fidacor SA,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,fidacor.ch,yes,fiduciaire VD
+info@multifiduciaire.com,,,Multifiduciaire SA,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,multifiduciaire.com,yes,fiduciaire GE
+info@bdr-sa.ch,,,BDR SA,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,bdr-sa.ch,yes,fiduciaire VD
+info@duepuntozero.ch,,,DuePuntoZero Audit GmbH,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,duepuntozero.ch,yes,fiduciaire ZH
+info@multifiduciaire-fribourg.ch,,,Multifiduciaire Fribourg SA,audit_finance,ASR-registre,interet_legitime_B2B_fonction_publique,multifiduciaire-fribourg.ch,yes,fiduciaire FR
+info@alpharheintalbank.ch,,,Alpha RHEINTAL Bank,bank_cantonal,swissbanking,interet_legitime_B2B_email_public,alpharheintalbank.ch,yes,Banque regionale SG - cible compliance
+info@axionbank.ch,,,Axion Swiss Bank,bank_private,swissbanking,interet_legitime_B2B_email_public,axionbank.ch,yes,Banque privee Tessin
+info@credinvest.ch,,,Banca Credinvest,bank_private,swissbanking,interet_legitime_B2B_email_public,credinvest.ch,yes,Banque privee Lugano
+info@bancadelsempione.ch,,,Banca del Sempione,bank_private,swissbanking,interet_legitime_B2B_email_public,bancadelsempione.ch,yes,Banque privee Tessin
+info@bank-avera.ch,,,Bank Avera,bank_cantonal,swissbanking,interet_legitime_B2B_email_public,bank-avera.ch,yes,Banque regionale ZH
+info@bankbsu.ch,,,Bank BSU,bank_cantonal,swissbanking,interet_legitime_B2B_email_public,bankbsu.ch,yes,Banque regionale Uster
+info@eek.ch,,,Bank EEK,bank_cantonal,swissbanking,interet_legitime_B2B_email_public,eek.ch,yes,Caisse epargne BE
+info@jsafrasarasin.ch,,,Bank J Safra Sarasin,bank_private,swissbanking,interet_legitime_B2B_email_public,jsafrasarasin.ch,yes,Banque privee internationale BS
+info@juliusbaer.ch,,,Bank Julius Baer,bank_private,swissbanking,interet_legitime_B2B_email_public,juliusbaer.ch,yes,Banque privee internationale - tres gros volumes ETL
+info@bankslm.ch,,,Bank SLM,bank_cantonal,swissbanking,interet_legitime_B2B_email_public,bankslm.ch,yes,Banque regionale BE
+info@bankthalwil.ch,,,Bank Thalwil,bank_cantonal,swissbanking,interet_legitime_B2B_email_public,bankthalwil.ch,yes,Banque regionale ZH
+info@bankvonroll.ch,,,Bank von Roll,bank_private,swissbanking,interet_legitime_B2B_email_public,bankvonroll.ch,yes,Banque privee ZH
+info@bankzweiplus.ch,,,Bank Zweiplus,bank_private,swissbanking,interet_legitime_B2B_email_public,bankzweiplus.ch,yes,Plateforme gestion fortune ZH
+info@fkb.ch,,,Banque Cantonale Fribourg,bank_cantonal,swissbanking,interet_legitime_B2B_email_public,fkb.ch,yes,Banque cantonale FR
+info@banquecramer.ch,,,Banque Cramer,bank_private,swissbanking,interet_legitime_B2B_email_public,banquecramer.ch,yes,Banque privee GE
+info@banque-es.ch,,,Banque Eric Sturdza,bank_private,swissbanking,interet_legitime_B2B_email_public,banque-es.ch,yes,Banque privee GE
+info@heritage.ch,,,Banque Heritage,bank_private,swissbanking,interet_legitime_B2B_email_public,heritage.ch,yes,Banque privee GE
+info@syzgroup.com,,,Banque SYZ,bank_private,swissbanking,interet_legitime_B2B_email_public,syzgroup.com,yes,Banque privee GE
+info@bernerlandbank.ch,,,Bernerland Bank,bank_cantonal,swissbanking,interet_legitime_B2B_email_public,bernerlandbank.ch,yes,Banque regionale BE
+info@bnpparibas.ch,,,BNP Paribas Suisse,bank_private,swissbanking,interet_legitime_B2B_email_public,bnpparibas.ch,yes,Banque internationale ZH
+info@bxswiss.com,,,BX Swiss,bank_private,swissbanking,interet_legitime_B2B_email_public,bxswiss.com,yes,Bourse suisse alternative
+info@clientis.ch,,,Clientis,bank_cantonal,swissbanking,interet_legitime_B2B_email_public,clientis.ch,yes,Groupe banques regionales
+info@commerzbank.ch,,,Commerzbank Schweiz,bank_private,swissbanking,interet_legitime_B2B_email_public,commerzbank.ch,yes,Banque commerciale internationale
+info@corner.ch,,,Corner Banca,bank_private,swissbanking,interet_legitime_B2B_email_public,corner.ch,yes,Banque privee TI
+info@cryptofinance.ch,,,Crypto Finance,fintech_data,swissbanking,interet_legitime_B2B_email_public,cryptofinance.ch,yes,FINMA-licenced crypto - cible Sygnum/AMINA-style
+info@efgbank.com,,,EFG Bank,bank_private,swissbanking,interet_legitime_B2B_email_public,efgbank.com,yes,Banque privee internationale ZH
+info@six-group.com,,,SIX Group,bank_private,swissbanking,interet_legitime_B2B_email_public,six-group.com,yes,Infrastructure marche financier suisse
+info@gutzwiller.ch,,,E Gutzwiller et Cie Banquiers,bank_private,swissbanking,interet_legitime_B2B_email_public,gutzwiller.ch,yes,Banquier prive Bale - membre ABPS
+info@21analytics.ch,,,21 Analytics,fintech_data,SFTA-membres,interet_legitime_B2B_email_public,21analytics.ch,yes,Banking infra - reporting reglementaire
+info@21.finance,,,21finance,fintech_data,SFTA-membres,interet_legitime_B2B_email_public,21.finance,yes,Banking infra digital
+info@21shares.com,,,21Shares,fintech_wealth,SFTA-membres,interet_legitime_B2B_email_public,21shares.com,yes,Crypto ETPs - reporting fiscal et reglementaire
+info@3rd-eyes.com,,,3rd-eyes analytics,fintech_wealth,SFTA-membres,interet_legitime_B2B_email_public,3rd-eyes.com,yes,Wealth analytics - cible donnees BFS/SECO
+info@abrantix.com,,,Abrantix,fintech_payments,SFTA-membres,interet_legitime_B2B_email_public,abrantix.com,yes,Payment terminals & POS testing
+info@accounto.ch,,,Accounto,fintech_data,SFTA-membres,interet_legitime_B2B_email_public,accounto.ch,yes,Comptabilite automatisee PME suisses
+info@acredius.ch,,,Acredius,fintech_payments,SFTA-membres,interet_legitime_B2B_email_public,acredius.ch,yes,Plateforme prets PME
+info@actusag.ch,,,Actus AG,fintech_data,SFTA-membres,interet_legitime_B2B_email_public,actusag.ch,yes,Banking infrastructure
+info@additiv.com,,,additiv,fintech_data,SFTA-membres,interet_legitime_B2B_email_public,additiv.com,yes,Embedded finance platform - reseau B2B large
+info@adviscent.com,,,Adviscent,fintech_wealth,SFTA-membres,interet_legitime_B2B_email_public,adviscent.com,yes,Investment content & insights pour banques
+info@aequitec.com,,,Aequitec,fintech_wealth,SFTA-membres,interet_legitime_B2B_email_public,aequitec.com,yes,Cap table digital
+info@aionite.com,,,Aionite Capital,fintech_wealth,SFTA-membres,interet_legitime_B2B_email_public,aionite.com,yes,Investment management
+info@aisot.io,,,Aisot,fintech_wealth,SFTA-membres,interet_legitime_B2B_email_public,aisot.io,yes,AI for asset managers - cible directe data feeds
+info@aixigo.com,,,aixigo,fintech_wealth,SFTA-membres,interet_legitime_B2B_email_public,aixigo.com,yes,Wealth tech platform pour banques
+info@apiax.com,,,Apiax,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,apiax.com,yes,Regtech compliance regles digitales - cible directe
+info@netguardians.com,,,NetGuardians,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,netguardians.com,yes,AI fraud prevention 80+ banques
+info@avaloq.com,,,Avaloq,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,avaloq.com,yes,Core banking software - cible majeure
+info@swissborg.com,,,SwissBorg,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,swissborg.com,yes,Crypto wealth management
+info@wefox.com,,,Wefox,fintech_insurtech,fintechnewsch,interet_legitime_B2B_email_public,wefox.com,yes,Insurtech europeen base CH
+info@advanon.com,,,Advanon,fintech_payments,fintechnewsch,interet_legitime_B2B_email_public,advanon.com,yes,Plateforme financement factures PME
+info@aktionariat.com,,,Aktionariat,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,aktionariat.com,yes,Tokenisation actions PME suisses
+info@amnistreasury.com,,,Amnis,fintech_payments,fintechnewsch,interet_legitime_B2B_email_public,amnistreasury.com,yes,Cross-border payments PME suisses - cible angle
+info@evorest.ch,,,Evorest,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,evorest.ch,yes,Pillar 3a digital
+info@gentwo.com,,,GenTwo,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,gentwo.com,yes,Securitization platform
+info@neon-free.ch,,,Neon,fintech_payments,fintechnewsch,interet_legitime_B2B_email_public,neon-free.ch,yes,Neobank ZH - reseau de partenaires
+info@neur-on.ai,,,Neuron,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,neur-on.ai,yes,AI banking automation
+info@opercredits.com,,,Oper Credits,fintech_payments,fintechnewsch,interet_legitime_B2B_email_public,opercredits.com,yes,Mortgage tech
+info@pelt8.com,,,Pelt8,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,pelt8.com,yes,ESG reporting - cible donnees federales/cantonales
+info@selma.com,,,Selma Finance,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,selma.com,yes,Robo-advisor ZH grand public
+info@unique.ai,,,Unique,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,unique.ai,yes,AI agent banking
+info@viac.ch,,,VIAC,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,viac.ch,yes,Pillar 3a 100 percent digital - cible majeure
+info@yuh.com,,,Yuh,fintech_payments,fintechnewsch,interet_legitime_B2B_email_public,yuh.com,yes,Joint Swissquote/PostFinance - banque mobile
+info@truewealth.ch,,,True Wealth,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,truewealth.ch,yes,Premier robo-advisor suisse
+info@bitcoinsuisse.com,,,Bitcoin Suisse,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,bitcoinsuisse.com,yes,Crypto financial services Zug
+info@taurushq.com,,,Taurus,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,taurushq.com,yes,Digital asset infrastructure GE
+info@metaco.com,,,Metaco,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,metaco.com,yes,Custody crypto institutionnel - VD
+info@dfinity.org,,,DFINITY,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,dfinity.org,yes,Internet Computer ZH - data infra
+info@web3.foundation,,,Web3 Foundation,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,web3.foundation,yes,Polkadot ecosystem Zug
+info@knip.com,,,Knip,fintech_insurtech,fintechnewsch,interet_legitime_B2B_email_public,knip.com,yes,Mobile insurance manager
+info@smartie.ch,,,Smartie,fintech_insurtech,fintechnewsch,interet_legitime_B2B_email_public,smartie.ch,yes,Comparateur assurances Suisse
+info@anivo.ch,,,Anivo,fintech_insurtech,fintechnewsch,interet_legitime_B2B_email_public,anivo.ch,yes,Conseil assurance digital Zug
+info@financefox.ch,,,FinanceFox,fintech_insurtech,fintechnewsch,interet_legitime_B2B_email_public,financefox.ch,yes,Insurance digital ZH
+info@aaaccell.com,,,AAAccell,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,aaaccell.com,yes,AI risk asset management
+info@algotrader.com,,,AlgoTrader,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,algotrader.com,yes,Algorithmic trading software ZH
+info@clevercircles.ch,,,Clevercircles,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,clevercircles.ch,yes,Robo-advisor social par Bank CIC
+info@descartes.finance,,,Descartes Finance,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,descartes.finance,yes,Wealth manager digital ZH
+info@nviso.ai,,,NVISO,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,nviso.ai,yes,AI human behavior visual
+info@simplewealth.ch,,,Simplewealth,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,simplewealth.ch,yes,Investment platform ZH
+info@meetinvest.com,,,Meetinvest,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,meetinvest.com,yes,B2B2C investment Baar
+info@whitebox.eu,,,Whitebox,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,whitebox.eu,yes,Robo-advisor digital
+info@finfox.com,,,Finfox,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,finfox.com,yes,Investment advisory tech
+info@polixis.com,,,Polixis,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,polixis.com,yes,AML KYC regtech - cible directe
+info@fiat24.com,,,Fiat24,fintech_payments,fintechnewsch,interet_legitime_B2B_email_public,fiat24.com,yes,Crypto-fiat banking FINMA
+info@mtpelerin.com,,,Mt Pelerin,fintech_payments,fintechnewsch,interet_legitime_B2B_email_public,mtpelerin.com,yes,Bridge crypto-fiat GE
+info@nexo.com,,,Nexo,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,nexo.com,yes,Digital asset finance ZG
+info@1875.ch,,,1875 Finance,wealth_management,alliancefinance,interet_legitime_B2B_email_public,1875.ch,yes,Multi-Family Office GE - cible directe ETL federal
+info@emcge.com,,,EMC Gestion de Fortune,wealth_management,alliancefinance,interet_legitime_B2B_email_public,emcge.com,yes,Top 50 GFI Suisse Citywire
+info@vermoegenszentrum.ch,,,VZ VermoegensZentrum,wealth_management,alliancefinance,interet_legitime_B2B_email_public,vermoegenszentrum.ch,yes,Wealth manager national multi-bureau
+info@rescadsa.ch,,,RESCAD,wealth_management,alliancefinance,interet_legitime_B2B_email_public,rescadsa.ch,yes,GFI independant 2 bureaux Suisse
+info@probuspleion.ch,,,Probus Pleion Suisse,wealth_management,alliancefinance,interet_legitime_B2B_email_public,probuspleion.ch,yes,Wealth manager 7 bureaux Suisse
+info@bt-finance.com,,,BT Finance,wealth_management,alliancefinance,interet_legitime_B2B_email_public,bt-finance.com,yes,Wealth manager prive entre GE et ZH 1998
+info@zugerberg-finanz.ch,,,Zugerberg Finanz,wealth_management,alliancefinance,interet_legitime_B2B_email_public,zugerberg-finanz.ch,yes,Best asset manager Suisse Bilanz 2023
+info@grolimund-finanzinvest.ch,,,Grolimund Finanzinvest,wealth_management,alliancefinance,interet_legitime_B2B_email_public,grolimund-finanzinvest.ch,yes,Wealth manager ZH - membre comite Alliance Finance
+info@ecofin.ch,,,Groupe Ecofin,wealth_management,alliancefinance,interet_legitime_B2B_email_public,ecofin.ch,yes,Cabinet conseil financier ZH - membre comite Alliance Finance
+info@treuhandsuisse.ch,,,TREUHAND SUISSE,wealth_management,alliancefinance,interet_legitime_B2B_email_public,treuhandsuisse.ch,yes,Federation fiduciaires Reinach BL
+info@1788capital.ch,,,1788 Capital,wealth_management,alliancefinance,interet_legitime_B2B_email_public,1788capital.ch,yes,Wealth manager GE membre SAM
+info@1959advisors.ch,,,1959 Advisors,wealth_management,alliancefinance,interet_legitime_B2B_email_public,1959advisors.ch,yes,Wealth manager Tannay membre SAM
+info@3tfo.ch,,,3T Family Office,wealth_management,alliancefinance,interet_legitime_B2B_email_public,3tfo.ch,yes,Family office GE membre SAM
+info@edmond-de-rothschild.com,,,Edmond de Rothschild Suisse,bank_private,alliancefinance,interet_legitime_B2B_email_public,edmond-de-rothschild.com,yes,Banque privee historique GE
+info@vsv-asg.ch,,,VSV-ASG,wealth_management,alliancefinance,interet_legitime_B2B_email_public,vsv-asg.ch,yes,Association suisse gestionnaires fortune 2500+ membres
+info@alliance-finance.ch,,,Alliance Finance,wealth_management,alliancefinance,interet_legitime_B2B_email_public,alliance-finance.ch,yes,Association GFI/fiduciaires Zollikon
+info@asv-aswm.ch,,,Allianz Schweizer Vermoegensverwalter ASV,wealth_management,alliancefinance,interet_legitime_B2B_email_public,asv-aswm.ch,yes,Association alternative gestionnaires fortune
+info@access-sfg.ch,,,Access SFG Club GFI,wealth_management,alliancefinance,interet_legitime_B2B_email_public,access-sfg.ch,yes,Club Geneve gestionnaires fortune independants
+contact@swissborg.com,,,SwissBorg Wealth Tech,fintech_wealth,SFTA-membres,interet_legitime_B2B_email_public,swissborg.com,yes,Membre SFTA - autre point de contact
+info@aragon.org,,,Aragon,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,aragon.org,yes,DAO infrastructure CH
+info@cardano.org,,,Cardano,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,cardano.org,yes,Smart contract platform ZG
+info@casper.network,,,Casper Network,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,casper.network,yes,PoS blockchain
+info@concordium.com,,,Concordium,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,concordium.com,yes,Regulatory-compliant blockchain
+info@cosmos.network,,,Cosmos / Interchain Foundation,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,cosmos.network,yes,Interchain Foundation Swiss non-profit
+info@solana.com,,,Solana,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,solana.com,yes,DeFi platform Geneva HQ
+info@status.im,,,Status,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,status.im,yes,Decentralized tech stack ZG
+info@tezos.com,,,Tezos Foundation,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,tezos.com,yes,PoS blockchain - foundation Crypto Valley
+info@4artechnologies.com,,,4ARTechnologies,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,4artechnologies.com,yes,Blockchain art authentication ZH
+info@axedras.com,,,Axedras,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,axedras.com,yes,Precious metals blockchain
+info@enzyme.finance,,,Enzyme,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,enzyme.finance,yes,Onchain investment platform
+info@adcubum.com,,,Adcubum,fintech_insurtech,fintechnewsch,interet_legitime_B2B_email_public,adcubum.com,yes,Insurance core software
+info@celsiuspro.com,,,CelsiusPro,fintech_insurtech,fintechnewsch,interet_legitime_B2B_email_public,celsiuspro.com,yes,Climate insurance ZH
+info@dgtal.ch,,,DGTAL,fintech_insurtech,fintechnewsch,interet_legitime_B2B_email_public,dgtal.ch,yes,InsurTech SaaS Suisse
+info@enterprisebot.com,,,Enterprise Bot,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,enterprisebot.com,yes,AI conversational banking
+info@innoveo.com,,,Innoveo,fintech_insurtech,fintechnewsch,interet_legitime_B2B_email_public,innoveo.com,yes,No-code insurance platform
+info@leonteq.com,,,Leonteq,fintech_wealth,fintechnewsch,interet_legitime_B2B_email_public,leonteq.com,yes,Structured products tech ZH
+info@calvin-risk.com,,,Calvin Risk,fintech_data,fintechnewsch,interet_legitime_B2B_email_public,calvin-risk.com,yes,AI risk top100 startups 2025
+info@relai.ch,,,Relai,fintech_payments,fintechnewsch,interet_legitime_B2B_email_public,relai.ch,yes,Bitcoin app top100 startups 2025
+info@leaseteq.com,,,LeaseTeq,fintech_payments,fintechnewsch,interet_legitime_B2B_email_public,leaseteq.com,yes,Auto leasing digital top100 startups 2025
+info@gfms.com,,,GF Machining Solutions,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,gfms.com,yes,EDM/fraisage haute précision exportateur
+info@georgfischer.com,,,Georg Fischer,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,georgfischer.com,yes,Pipelines/manufacturing/machinery exportateur
+info@buhlergroup.com,,,Bühler Group,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,buhlergroup.com,yes,Plant equipment manufacturer
+info@schindler.com,,,Schindler Group,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,schindler.com,yes,Escalators/elevators
+info@rieter.com,,,Rieter,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,rieter.com,yes,Textile machinery
+info@mt.com,,,Mettler Toledo,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,mt.com,yes,Scientific instruments
+info@leica-geosystems.com,,,Leica Geosystems,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,leica-geosystems.com,yes,Surveying equipment
+info@burckhardt.com,,,Burckhardt Compression,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,burckhardt.com,yes,Reciprocating compressor
+info@staubli.com,,,Stäubli,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,staubli.com,yes,Textile machinery/connectors/robotics
+info@kudelski.com,,,Kudelski Group,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,kudelski.com,yes,Electronic media systems
+info@tornos.com,,,Tornos SA,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,tornos.com,yes,Machine-outils décolletage
+info@mikron.com,,,Mikron Switzerland AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,mikron.com,yes,Machines transfert/assemblage horlogerie
+info@mikrontool.com,,,Mikron Tool,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,mikrontool.com,yes,Outils coupe précision
+info@fehlmann.ch,,,Fehlmann AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,fehlmann.ch,yes,Fraiseuses haute précision
+info@precitrame.com,,,Precitrame Machines SA,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,precitrame.com,yes,Centres usinage horlogerie/médical
+info@starrag.com,,,Starrag Group,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,starrag.com,yes,Machine-outils précision
+info@mz-lw.ch,,,MONNIER + ZAHNER AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,mz-lw.ch,yes,Machines décolletage
+info@urma.ch,,,URMA AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,urma.ch,yes,Outils précision alésage
+info@blaser.com,,,Blaser Swisslube AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,blaser.com,yes,Lubrifiants industriels
+info@agathon.ch,,,Agathon AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,agathon.ch,yes,Outils précision/guides linéaires
+info@heule.com,,,HEULE Precision Tools,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,heule.com,yes,Outils ébavurage
+info@sphinx-tools.ch,,,Sphinx Tools Ltd.,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,sphinx-tools.ch,yes,Micro-outils précision
+info@reiden.ch,,,Reiden Technik AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,reiden.ch,yes,Centres usinage 5-axes
+info@triag.ch,,,Triag International AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,triag.ch,yes,Systèmes serrage CNC
+info@motorex.com,,,MOTOREX AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,motorex.com,yes,Lubrifiants industriels
+info@affolter.ch,,,Affolter Group SA,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,affolter.ch,yes,Machines tailler engrenages
+info@kunz-precision.ch,,,Kunz precision AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,kunz-precision.ch,yes,Composants précision
+info@bernex.com,,,IHI-Bernex AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,bernex.com,yes,Traitements thermochimiques
+info@regofix.com,,,REGO-FIX Switzerland,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,regofix.com,yes,Systèmes serrage outils
+info@studer.com,,,Fritz Studer AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,studer.com,yes,Rectifieuses cylindriques
+info@abarisk.ch,,,ABARISK SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,abarisk.ch,yes,Mécanique précision GIM
+info@aficor.ch,,,AFICOR SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,aficor.ch,yes,Mécanique précision GIM
+info@allega.ch,,,ALLEGA Sàrl,pme_exportatrice,gim,interet_legitime_B2B_email_public,allega.ch,yes,Mécanique précision GIM
+info@alpin-mecanique.ch,,,Alpin Mécanique Sàrl,pme_exportatrice,gim,interet_legitime_B2B_email_public,alpin-mecanique.ch,yes,Mécanique précision GIM
+info@altair-consulting.com,,,Altair Consulting SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,altair-consulting.com,yes,Mécanique consulting GIM
+info@amg-sa.ch,,,AMG Patrick Henchoz SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,amg-sa.ch,yes,Mécanique précision GIM
+info@andenmatten-freres.ch,,,Andenmatten Frères SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,andenmatten-freres.ch,yes,Mécanique précision GIM
+info@frei-andre.ch,,,André Frei & Fils SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,frei-andre.ch,yes,Mécanique précision GIM
+info@anotec.ch,,,ANOTEC SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,anotec.ch,yes,Traitement surface anodisation GIM
+info@apco-technologies.com,,,APCO Technologies SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,apco-technologies.com,yes,Ingénierie/space/énergie GIM
+info@apimec.ch,,,APIMEC SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,apimec.ch,yes,Mécanique précision GIM
+info@arcm.ch,,,ARCM,pme_exportatrice,gim,interet_legitime_B2B_email_public,arcm.ch,yes,Mécanique précision GIM
+info@arcofil.ch,,,ARCOFIL SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,arcofil.ch,yes,Filage métal précision GIM
+info@arp-mecanique.ch,,,ARP Mécanique et électronique SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,arp-mecanique.ch,yes,Mécanique électronique GIM
+info@desiebenthal.ch,,,Atelier de Siebenthal SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,desiebenthal.ch,yes,Mécanique précision GIM
+info@asth.ch,,,Ateliers St-Hubert Granges,pme_exportatrice,gim,interet_legitime_B2B_email_public,asth.ch,yes,Mécanique formation GIM
+info@gotec.ch,,,Gotec SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,gotec.ch,yes,Pompes Sion VS
+info@hydro-exploitation.ch,,,Hydro Exploitation SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,hydro-exploitation.ch,yes,Centrales hydrauliques VS
+info@lemco.ch,,,Lemco Précision SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,lemco.ch,yes,Décolletage Vionnaz VS
+info@mgtech.ch,,,MGTech Sàrl,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,mgtech.ch,yes,Mécanique Saxon VS
+info@mullertechnology.com,,,Muller Technology,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,mullertechnology.com,yes,Plasturgie Conthey VS
+info@soprod.ch,,,Soprod SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,soprod.ch,yes,Mouvements horlogers Sion VS
+info@tmrsa.ch,,,TMR SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,tmrsa.ch,yes,Transports/maintenance VS
+info@valelectric.ch,,,Valélectric Farner SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,valelectric.ch,yes,Électrotechnique VS
+info@valprecision.ch,,,Valprécision SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,valprecision.ch,yes,Décolletage Chalais VS
+info@biar.ch,,,Biar SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,biar.ch,yes,Mécanique Sembrancher VS
+info@burgener.ch,,,Burgener AG,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,burgener.ch,yes,Mécanique Visp VS
+info@chiron-group.com,,,Chiron Group,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,chiron-group.com,yes,Centres usinage VS
+info@farronato.ch,,,Farronato,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,farronato.ch,yes,Mécanique Evionnaz VS
+info@jacquier-luisier.ch,,,Jacquier-Luisier SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,jacquier-luisier.ch,yes,Mécanique Evionnaz VS
+info@swissmem.ch,,,Acrotec,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,acrotec.ch,yes,Composants horlogers groupe
+info@mimotec.ch,,,Mimotec SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,mimotec.ch,yes,Microcomposants horlogerie LIGA
+info@easydec.ch,,,easyDec SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,easydec.ch,yes,Décolletage horlogerie haute précision
+info@decovi.ch,,,Décovi SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,decovi.ch,yes,Décolletage horlogerie/médical
+info@smsa.ch,,,Schaublin Machines SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,smsa.ch,yes,Tours haute précision
+info@luthymac.ch,,,Luthy Machines SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,luthymac.ch,yes,Machines outils
+info@schleuniger.com,,,Schleuniger AG,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,schleuniger.com,yes,Machines traitement câbles
+info@rolex.com,,,Rolex,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,rolex.com,yes,Horlogerie de luxe
+info@patek.com,,,Patek Philippe,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,patek.com,yes,Horlogerie haute gamme
+info@breitling.com,,,Breitling,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,breitling.com,yes,Horlogerie
+info@aandarta.ch,,,Aandarta Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,aandarta.ch,yes,Intégrateur Abacus ERP
+info@abacus-solutions.ch,,,Abacus Business Solutions Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,abacus-solutions.ch,yes,Intégrateur Abacus ERP
+info@abraxas.ch,,,Abraxas Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,abraxas.ch,yes,Intégrateur Abacus + multi-ERP
+info@acribia.ch,,,Acribia Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,acribia.ch,yes,Intégrateur Abacus ERP
+info@ademis.ch,,,Ademis GmbH,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,ademis.ch,yes,Intégrateur Abacus ERP
+info@adista-it.ch,,,ADISTA IT Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,adista-it.ch,yes,Intégrateur Abacus ERP
+info@advice.ch,,,ADVICE Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,advice.ch,yes,Intégrateur Abacus ERP
+info@agm-alliance.ch,,,AGM Alliance Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,agm-alliance.ch,yes,Intégrateur Abacus ERP CH romande
+info@all-consulting.ch,,,ALL CONSULTING Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,all-consulting.ch,yes,Intégrateur Abacus ERP
+info@alteosys.ch,,,Alteo Business Systems GmbH,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,alteosys.ch,yes,Intégrateur Abacus ERP
+info@altrimo.ch,,,altrimo Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,altrimo.ch,yes,Intégrateur Abacus ERP
+info@arc.ch,,,ARC Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,arc.ch,yes,Intégrateur Abacus ERP
+info@arcon.ch,,,ARCON Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,arcon.ch,yes,Intégrateur Abacus ERP
+info@artaris-solutions.ch,,,ARTARIS SOLUTIONS Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,artaris-solutions.ch,yes,Intégrateur Abacus ERP
+info@axept.ch,,,Axept Business Software Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,axept.ch,yes,Intégrateur Abacus ERP
+info@b2go.ch,,,b2go.ch Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,b2go.ch,yes,Intégrateur Abacus ERP
+info@bewida.ch,,,Bewida Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,bewida.ch,yes,Intégrateur Abacus ERP
+info@bsbit.ch,,,bsb.info.partner Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,bsbit.ch,yes,Intégrateur Abacus ERP
+info@bsi-partner.ch,,,bsi partner Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,bsi-partner.ch,yes,Intégrateur Abacus ERP
+info@bullinger.ch,,,Bullinger Software Systems Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,bullinger.ch,yes,Intégrateur Abacus ERP
+info@customize.ch,,,Customize Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,customize.ch,yes,Intégrateur Abacus ERP
+info@dorean.ch,,,Dorean Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,dorean.ch,yes,Intégrateur Abacus ERP
+info@fidinam.com,,,Fidigit (Schweiz) Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,fidinam.com,yes,Intégrateur Abacus ERP
+info@interbit.ch,,,InterBit Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,interbit.ch,yes,Intégrateur Abacus ERP
+info@o-i.ch,,,OFISA Informatique Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,o-i.ch,yes,Intégrateur Abacus ERP romande
+info@projekt7.ch,,,projekt7 Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,projekt7.ch,yes,Intégrateur Abacus ERP
+info@talus.ch,,,Talus Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,talus.ch,yes,Intégrateur Abacus ERP
+info@onepartner.ch,,,One Partner SA,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,onepartner.ch,yes,RH/salaires Abacus CH romande
+info@abacus-services.ch,,,Abacus Services SA,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,abacus-services.ch,yes,Implémentation Abacus CH romande
+info@ciges.ch,,,CIGES,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,ciges.ch,yes,Abacus admin publiques
+info@camptocamp.com,,,Camptocamp SA,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,camptocamp.com,yes,Odoo Gold Partner CH/FR/DE
+info@open-net.ch,,,Open Net Sàrl,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,open-net.ch,yes,Odoo Gold Partner Lausanne
+info@nalios.com,,,Nalios Sàrl,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,nalios.com,yes,Odoo Gold Partner CH
+info@dynapps.ch,,,Dynapps SA,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,dynapps.ch,yes,Odoo Gold Partner CH
+info@d4e.ch,,,D4E Digital4Efficiency Sàrl,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,d4e.ch,yes,Odoo Gold Partner CH
+info@braintec.ch,,,braintec Schweiz,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,braintec.ch,yes,Odoo Gold Partner CH
+info@twio.tech,,,twio.tech AG,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,twio.tech,yes,Odoo Gold Partner CH
+info@simpit.ch,,,simpit GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,simpit.ch,yes,Odoo Gold Partner CH
+info@sword-group.com,,,Sword Technologies SA,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,sword-group.com,yes,Odoo Gold Partner CH
+info@simplidoo.com,,,Simplidoo Sàrl,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,simplidoo.com,yes,Odoo Silver Partner CH
+info@onesolutions.ch,,,OneSolutions Klevia SA,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,onesolutions.ch,yes,Odoo Silver Partner CH
+info@nivels.ch,,,nivels GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,nivels.ch,yes,Odoo Silver Partner CH
+info@latus.ch,,,Latus GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,latus.ch,yes,Odoo Silver Partner CH
+info@consenso.ch,,,consenso GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,consenso.ch,yes,Odoo Silver Partner CH
+info@abilium.com,,,Abilium GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,abilium.com,yes,Odoo Silver Partner CH
+info@beonesolutions.com,,,be one solutions,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,beonesolutions.com,yes,SAP Partner Zug rollouts internationaux
+info@msg-global.com,,,msg global solutions,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,msg-global.com,yes,SAP Partner Pinnacle Award Regensdorf
+info@elca.ch,,,ELCA Informatique SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,elca.ch,yes,SAP/Microsoft/multi-ERP CH
+info@swisscom.ch,,,Swisscom (Schweiz) AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,swisscom.ch,yes,SAP Full Service Provider CH
+info@bechtle.com,,,Bechtle Suisse,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,bechtle.com,yes,Intégrateur multi-ERP CH
+info@trivadis.com,,,Trivadis (Accenture),erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,trivadis.com,yes,SAP/Oracle CH (Accenture)
+info@accenture.com,,,Accenture Switzerland,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,accenture.com,yes,SAP Platinum Partner CH
+info@deloitte.com,,,Deloitte Switzerland,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,deloitte.com,yes,SAP Platinum Partner CH
+info@capgemini.com,,,Capgemini Switzerland,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,capgemini.com,yes,SAP Platinum Partner CH
+info@aproda.ch,,,Aproda AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,aproda.ch,yes,Microsoft Dynamics 365 St-Gall
+info@isolutions.ch,,,iSolutions AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,isolutions.ch,yes,Microsoft Dynamics 365 Bern
+info@bossinfo.ch,,,Boss Info AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,bossinfo.ch,yes,Microsoft Dynamics 365 Farnern
+info@bs-team.ch,,,BS-Team SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,bs-team.ch,yes,Microsoft Dynamics 365 Morges VD
+info@ioz.ch,,,IOZ AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,ioz.ch,yes,Microsoft Dynamics 365 Sursee
+info@bucher-suter.com,,,Bucher + Suter,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,bucher-suter.com,yes,Microsoft Dynamics 365 Bern
+info@ambit-group.com,,,Ambit Group AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,ambit-group.com,yes,Microsoft Dynamics 365 Winterthur
+info@dbe.ch,,,DBE SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,dbe.ch,yes,Microsoft Dynamics 365 Bienne
+info@datadynamic.ch,,,Data Dynamic AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,datadynamic.ch,yes,Microsoft Dynamics 365 Bern
+info@joker-it.ch,,,Joker IT AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,joker-it.ch,yes,Microsoft Dynamics 365 Goldau
+info@softwareone.com,,,SoftwareONE AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,softwareone.com,yes,Microsoft Dynamics 365 Stans
+info@arvato-systems.ch,,,Arvato Systems Digital,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,arvato-systems.ch,yes,Microsoft Dynamics 365 Zürich
+info@prisma-informatik.ch,,,PRISMA Informatik AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,prisma-informatik.ch,yes,Microsoft Dynamics 365 Dietlikon
+info@aventit.ch,,,aventit AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,aventit.ch,yes,Microsoft Dynamics 365 Zürich
+info@erp-services.ch,,,ERP Services SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,erp-services.ch,yes,Microsoft Dynamics 365 Puidoux VD
+info@logico.ch,,,Logico SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,logico.ch,yes,Microsoft Dynamics 365 Bienne
+info@delphisoft.ch,,,Delphisoft SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,delphisoft.ch,yes,Microsoft Dynamics 365 Satigny GE
+info@erpxperts.ch,,,ERPXperts SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,erpxperts.ch,yes,Microsoft Dynamics 365 Givisiez FR
+info@foxdata.ch,,,fox data gmbh,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,foxdata.ch,yes,Microsoft Dynamics 365 Bern
+info@axians.ch,,,Axians Infoma Schweiz AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,axians.ch,yes,Microsoft Dynamics 365 Schlieren
+info@logol.ch,,,logol AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,logol.ch,yes,Microsoft Dynamics 365 Steinhausen
+info@kcs.net,,,KCS.net (Avanade),erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,kcs.net,yes,Microsoft Dynamics AX leader DACH
+info@almakom.ch,,,Almakom,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,almakom.ch,yes,Microsoft Dynamics 365 CH romande
