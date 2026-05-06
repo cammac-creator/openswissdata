@@ -10,25 +10,23 @@ const { monolingual = false } = Astro.props;
 const year = new Date().getFullYear();
 const lang = getLangFromPath(Astro.url.pathname);
 const L = (path: string) => localizePath(path, lang);
-// Pages legal are only available in FR + DE — EN visitors get DE.
 const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]);
-// /compliance is available in FR + DE + EN.
 ---
 <footer class="site-footer">
-  <div class="container-wide">
-    <div class="footer-top">
+  <div class="footer-split">
+    <div class="footer-split-left">
       <div class="footer-brand">
-        <div class="footer-logo">
-          <span class="logo-mark">o</span>
-          <span class="logo-text">openswissdata</span>
-        </div>
-        <p class="footer-tag">
-          {t("footer.tagline_line1", lang)}<br>
-          <span class="serif">{t("footer.tagline_line2", lang)}</span>
-        </p>
-        <div class="footer-status">
-          <span class="status-dot"></span>
-          {t("footer.operational", lang)}
+        <div class="footer-mark"><img src="/logo.png" alt="" width="64" height="64" /></div>
+        <div>
+          <div class="footer-name">openswissdata</div>
+          <p class="footer-tag">
+            {t("footer.tagline_line1", lang)}<br>
+            <span class="serif">{t("footer.tagline_line2", lang)}</span>
+          </p>
+          <div class="footer-status">
+            <span class="status-dot"></span>
+            {t("footer.operational", lang)}
+          </div>
         </div>
       </div>
 
@@ -58,19 +56,25 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
       </div>
     </div>
 
-    <div class="footer-affiliation">
-      {t("footer.affiliation", lang)}
+    <div class="footer-split-right" aria-hidden="true">
+      <img src="/og-tares.png" alt="" />
     </div>
+  </div>
 
-    <div class="footer-disclaimer">
-      <strong>{t("footer.disclaimer_title", lang)}</strong> {t("footer.disclaimer_body", lang)}
-    </div>
-
-    <div class="footer-bottom">
-      <div>© {year} · Claude-Alain Martin · openswissdata.com</div>
-      <div class="footer-bottom-right">
-        <LangSwitcher variant="footer" monolingual={monolingual} />
-        <a href="https://ibanforge.com" rel="noopener">{t("footer.studio", lang)}</a>
+  <div class="footer-legal">
+    <div class="container-wide">
+      <div class="footer-affiliation">
+        {t("footer.affiliation", lang)}
+      </div>
+      <div class="footer-disclaimer">
+        <strong>{t("footer.disclaimer_title", lang)}</strong> {t("footer.disclaimer_body", lang)}
+      </div>
+      <div class="footer-bottom">
+        <div>© {year} · Claude-Alain Martin · openswissdata.com</div>
+        <div class="footer-bottom-right">
+          <LangSwitcher variant="footer" monolingual={monolingual} />
+          <a href="https://ibanforge.com" rel="noopener">{t("footer.studio", lang)}</a>
+        </div>
       </div>
     </div>
   </div>
@@ -78,61 +82,79 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
 
 <style>
   .site-footer {
-    background: var(--color-bg);
-    border-top: 1px solid var(--color-line);
-    padding: 80px 0 40px;
     margin-top: 80px;
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-ink);
   }
 
-  .footer-top {
+  /* ===== Split section: brand+cols / flipped banner ===== */
+  .footer-split {
     display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 80px;
-    padding-bottom: 56px;
+    grid-template-columns: 1.5fr 1fr;
+    min-height: 480px;
   }
 
-  .footer-brand .footer-logo {
+  .footer-split-left {
+    padding: 72px 56px 40px;
     display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 700;
-    font-size: 17px;
-    margin-bottom: 18px;
+    flex-direction: column;
+    gap: 48px;
   }
-  .footer-logo .logo-mark {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-    background: var(--color-ink);
-    color: var(--color-bg);
-    display: grid;
-    place-items: center;
-    font-family: var(--font-serif);
-    font-size: 18px;
-    font-style: italic;
-    transform: rotate(-4deg);
+
+  .footer-brand {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .footer-mark {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+  }
+  .footer-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .footer-name {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -.025em;
+    line-height: 1;
+    margin-bottom: 10px;
   }
   .footer-tag {
     font-family: var(--font-serif);
     font-style: italic;
-    font-size: 22px;
-    line-height: 1.3;
+    font-size: 18px;
+    line-height: 1.4;
     color: var(--color-ink);
-    margin: 0 0 24px;
+    margin: 0 0 14px;
+    max-width: 36ch;
   }
   .footer-status {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
-    color: var(--color-ink-soft);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #22C55E;
+    font-weight: 500;
   }
   .status-dot {
-    width: 8px; height: 8px;
+    width: 7px;
+    height: 7px;
     background: #22C55E;
     border-radius: 50%;
     box-shadow: 0 0 0 3px rgba(34,197,94,.15);
-    animation: pulse 2.4s ease-in-out infinite;
+    animation: footer-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes footer-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,.15); }
+    50% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
   }
 
   .footer-cols {
@@ -140,25 +162,72 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
     grid-template-columns: repeat(3, 1fr);
     gap: 32px;
   }
-
   .footer-col-title {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 10px;
+    letter-spacing: .1em;
     text-transform: uppercase;
-    letter-spacing: .08em;
     color: var(--color-ink-mute);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
-
   .footer-cols a {
     display: block;
-    padding: 6px 0;
+    padding: 5px 0;
     color: var(--color-ink-soft);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
     transition: color .15s ease;
   }
-  .footer-cols a:hover { color: var(--color-ink); }
+  .footer-cols a:hover { color: var(--accent); }
+
+  /* Banner side — flipped horizontally so red square sits left */
+  .footer-split-right {
+    position: relative;
+    background: var(--bg-soft, #F4F4F0);
+    overflow: hidden;
+  }
+  .footer-split-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    transform: scaleX(-1);
+    animation: footer-banner-pan 18s ease-in-out infinite alternate;
+    display: block;
+  }
+  @keyframes footer-banner-pan {
+    0%   { transform: scaleX(-1) scale(1.02); }
+    100% { transform: scaleX(-1) scale(1.05); }
+  }
+  /* Left fade — bannière fond se mêle doucement avec le contenu cream */
+  .footer-split-right::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 60px;
+    background: linear-gradient(90deg, var(--color-bg) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
+  }
+  /* Right fade — bord externe adouci */
+  .footer-split-right::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 120px;
+    background: linear-gradient(270deg, var(--bg-soft, #F4F4F0) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ===== Legal section: full-width below split ===== */
+  .footer-legal {
+    border-top: 1px solid var(--color-line);
+    background: var(--color-bg);
+  }
+  .footer-legal .container-wide {
+    padding: 24px 36px 32px;
+  }
 
   .footer-affiliation {
     padding: 12px 0 16px;
@@ -166,7 +235,6 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
     color: var(--color-ink-mute);
     line-height: 1.55;
     font-style: italic;
-    border-top: 1px solid var(--color-line);
   }
 
   .footer-disclaimer {
@@ -201,11 +269,20 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
   }
   .footer-bottom a:hover { color: var(--color-ink); }
 
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .footer-split { grid-template-columns: 1fr; }
+    .footer-split-right { height: 280px; order: 2; }
+    .footer-split-left { padding: 48px 36px 32px; gap: 36px; }
+  }
   @media (max-width: 880px) {
-    .footer-top { grid-template-columns: 1fr; gap: 48px; }
-    .footer-cols { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .footer-cols { grid-template-columns: 1fr 1fr; gap: 28px; }
   }
   @media (max-width: 540px) {
     .footer-cols { grid-template-columns: 1fr; }
+    .footer-brand { flex-direction: column; gap: 14px; }
+    .footer-mark { width: 56px; height: 56px; }
+    .footer-name { font-size: 22px; }
+    .footer-tag { font-size: 16px; }
   }
 </style>

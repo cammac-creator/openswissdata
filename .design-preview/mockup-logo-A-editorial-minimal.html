@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maquette A — Editorial Minimal · openswissdata</title>
+<style>
+  :root{
+    --bg:#FBFBF8;--bg-soft:#F4F4F0;--bg-card:#FFFFFF;
+    --ink:#0A0A0C;--ink-soft:#4A4D55;--ink-mute:#6B6E76;
+    --line:rgba(10,10,12,.08);--line-strong:rgba(10,10,12,.14);
+    --accent:#DC1F2D;--accent-soft:rgba(220,31,45,.06);--green:#15803D;
+    --font-sans:Geist,-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
+    --font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;
+    --t-fast:.2s;--t-med:.4s;--t-slow:.8s;
+    --ease-out:cubic-bezier(0.16,1,0.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+
+  /* Annotation flag */
+  .mockup-flag{position:fixed;top:12px;right:12px;z-index:200;background:var(--ink);color:var(--bg);font-family:var(--font-mono);font-size:10px;padding:6px 10px;border-radius:4px;letter-spacing:.08em;text-transform:uppercase}
+
+  /* Nav */
+  .nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 36px;background:rgba(251,251,248,.85);backdrop-filter:saturate(180%) blur(16px);font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);border-bottom:1px solid var(--line)}
+  .nav-left{display:flex;align-items:center;gap:14px}
+  .nav-mark{width:22px;height:22px}
+  .nav-mark img{width:100%;height:100%;object-fit:contain}
+  .nav-meta{display:flex;gap:14px}
+  .nav-meta strong{color:var(--ink);font-weight:600}
+  .nav-right{display:flex;align-items:center;gap:18px;font-size:12px}
+  .nav-right a{color:var(--ink-soft);transition:color var(--t-fast) var(--ease-out)}
+  .nav-right a:hover{color:var(--ink)}
+  .nav-live{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:500}
+  .nav-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(21,128,61,.4)}50%{box-shadow:0 0 0 5px rgba(21,128,61,0)}}
+
+  /* Container */
+  .container{max-width:1200px;margin:0 auto;padding:0 36px}
+
+  /* Section divider */
+  .section-divider{height:1px;background:var(--line-strong);margin:0;width:100%}
+  .section-label{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);padding:48px 36px 20px;max-width:1200px;margin:0 auto}
+
+  /* HOME HERO — A : Editorial */
+  .hero-a{padding:88px 0 56px}
+  .hero-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:32px;display:flex;align-items:center;gap:14px}
+  .hero-eyebrow::after{content:'';flex:1;height:1px;background:var(--line);max-width:120px}
+  .hero-eyebrow .check{color:var(--green);display:inline-flex;align-items:center;gap:6px}
+  .hero-eyebrow .check::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%}
+  .hero-title{font-size:clamp(48px,6vw,72px);font-weight:600;line-height:1.02;letter-spacing:-.035em;max-width:18ch;margin-bottom:24px}
+  .hero-title .accent{color:var(--accent)}
+  .hero-lede{font-size:19px;color:var(--ink-soft);max-width:60ch;line-height:1.55;margin-bottom:36px}
+  .hero-cta{display:flex;gap:12px;margin-bottom:80px}
+  .btn{padding:14px 22px;border-radius:8px;font-family:var(--font-sans);font-weight:500;font-size:14px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;border:1px solid transparent;transition:transform var(--t-fast) var(--ease-out)}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-secondary{background:var(--bg-card);color:var(--ink);border-color:var(--line-strong)}
+  .btn-secondary:hover{background:var(--bg-soft)}
+  .btn .arr{font-family:var(--font-mono);transition:transform var(--t-fast) var(--ease-out)}
+  .btn:hover .arr{transform:translateX(3px)}
+
+  /* Banner signature — A : sous le titre, full container, 280px height */
+  .signature-banner{position:relative;height:280px;width:100%;border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);overflow:hidden}
+  .signature-banner img{width:100%;height:100%;object-fit:cover;object-position:center;filter:contrast(1.05);animation:scintillate 7s ease-in-out infinite}
+  @keyframes scintillate{0%,100%{opacity:1}50%{opacity:.93}}
+  .signature-caption{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.1em;padding:14px 0 0;display:flex;justify-content:space-between}
+
+  /* TARES section preview */
+  .tares-section{padding:96px 0 0;border-top:1px solid var(--line)}
+  .breadcrumb{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin-bottom:28px}
+  .breadcrumb a{color:var(--ink-mute)}
+  .breadcrumb .current{color:var(--ink)}
+  .breadcrumb .sep{margin:0 8px;opacity:.4}
+  .tares-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:start;margin-bottom:48px}
+  .tares-h1{font-size:clamp(40px,5vw,56px);font-weight:600;line-height:1.05;letter-spacing:-.03em;max-width:14ch;margin-bottom:20px}
+  .tares-h1 .accent{color:var(--accent)}
+  .tares-lede{font-size:17px;color:var(--ink-soft);line-height:1.55;margin-bottom:28px}
+  .tares-specs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:28px}
+  .tares-spec{padding:18px 16px 18px 0;border-right:1px solid var(--line)}
+  .tares-spec:last-child{border-right:none;padding-right:0}
+  .spec-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px}
+  .spec-value{font-family:var(--font-mono);font-size:13px;font-weight:500}
+  .price-box{background:var(--bg-card);border:1px solid var(--line-strong);border-radius:14px;padding:32px}
+  .price-label{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:16px}
+  .price-amount{font-size:64px;font-weight:600;letter-spacing:-.03em;line-height:1}
+  .price-currency{font-size:18px;color:var(--ink-mute);margin-left:6px;font-weight:400}
+  .price-renew{font-size:13px;color:var(--ink-soft);margin-top:14px}
+
+  /* TARES banner — A : full-width signature après hero */
+  .tares-banner{position:relative;width:100%;height:340px;overflow:hidden;border-top:1px solid var(--line-strong);margin-top:36px}
+  .tares-banner img{width:100%;height:100%;object-fit:cover;object-position:center;animation:slow-pulse 9s ease-in-out infinite}
+  @keyframes slow-pulse{0%,100%{transform:scale(1.005)}50%{transform:scale(1.025)}}
+  .tares-banner-meta{position:absolute;bottom:18px;left:36px;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);background:rgba(251,251,248,.85);padding:6px 10px;backdrop-filter:blur(8px);border:1px solid var(--line)}
+
+  footer{padding:80px 36px 48px;font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);text-align:center}
+</style>
+</head>
+<body>
+
+<div class="mockup-flag">Maquette A · Editorial Minimal</div>
+
+<!-- ====================== NAV ====================== -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="nav-mark"><img src="../web/public/logo.png" alt=""></span>
+    <span class="nav-meta">
+      <span>Edition <strong>2026.05</strong></span>
+      <span>Version <strong>1.0.0</strong></span>
+      <span>For Berne</span>
+    </span>
+  </div>
+  <div class="nav-right">
+    <a href="#">Datasets</a>
+    <a href="#">How</a>
+    <a href="#">Blog</a>
+    <span class="nav-live"><span class="nav-dot"></span>LIVE</span>
+  </div>
+</nav>
+
+<div class="section-label">01 — Home hero</div>
+
+<!-- ====================== HOME HERO ====================== -->
+<section class="hero-a">
+  <div class="container">
+    <div class="hero-eyebrow">
+      <span>Données fédérales suisses · TARES · NOGA · FINMA</span>
+      <span class="check">Permission BAZG · 21 avril</span>
+      <span class="check">Permission FINMA · 6 mai</span>
+    </div>
+    <h1 class="hero-title">Données fédérales suisses, <span class="accent">normalisées.</span></h1>
+    <p class="hero-lede">TARES, NOGA / NACE / ISIC, registre FINMA. JSON, Parquet, SQL. Manifest signé Ed25519, horodatage RFC-3161, changelog 90 jours. Une seule chaîne de droits.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary">Voir les datasets <span class="arr">→</span></button>
+      <button class="btn btn-secondary">Échantillon CSV</button>
+    </div>
+  </div>
+
+  <!-- Bannière "signature" — full container width, sous CTA -->
+  <div class="container">
+    <div class="signature-banner">
+      <img src="../web/public/og-tares.png" alt="">
+    </div>
+    <div class="signature-caption">
+      <span>Signature visuelle · TARES dataset</span>
+      <span>Pixels noirs converging → carré accent #DC1F2D</span>
+    </div>
+  </div>
+</section>
+
+<div class="section-label">02 — Page produit /datasets/tares</div>
+
+<!-- ====================== TARES PAGE ====================== -->
+<section class="tares-section">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="#">accueil</a><span class="sep">·</span>
+      <a href="#">datasets</a><span class="sep">·</span>
+      <span class="current">TARES</span>
+    </nav>
+    <div class="tares-grid">
+      <div>
+        <h1 class="tares-h1">Le tarif douanier suisse, <span class="accent">propre.</span></h1>
+        <p class="tares-lede">~7 500 codes HS8 actuels, désignations DE/FR/IT/EN, droits MFN, 30+ régimes préférentiels (UE/AELE/UK/Chine/Japon…), codes ZCO d'allègement. JSON, Parquet, SQL.</p>
+        <div class="tares-specs">
+          <div class="tares-spec"><div class="spec-label">Codes HS8</div><div class="spec-value">~7 500</div></div>
+          <div class="tares-spec"><div class="spec-label">Régimes</div><div class="spec-value">30+</div></div>
+          <div class="tares-spec"><div class="spec-label">Mises à jour</div><div class="spec-value">Hebdomadaires</div></div>
+        </div>
+        <div class="hero-cta" style="margin-bottom:0">
+          <button class="btn btn-primary">Acheter — 299 CHF <span class="arr">→</span></button>
+          <button class="btn btn-secondary">Échantillon</button>
+        </div>
+      </div>
+      <div class="price-box">
+        <div class="price-label">One-shot</div>
+        <div><span class="price-amount">299</span><span class="price-currency">CHF</span></div>
+        <div class="price-renew">+120 CHF/an mises à jour (optionnel) · 360 jours d'updates inclus.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bannière sub-hero -->
+  <div class="tares-banner">
+    <img src="../web/public/og-tares.png" alt="">
+    <div class="tares-banner-meta">og:image · /og-tares.png · 1200×630</div>
+  </div>
+</section>
+
+<footer>
+  Maquette A — Editorial Minimal. Logo 22px sans wordmark dans la nav · bannière TARES en signature plein container après le titre · animation discrète scintillate 7s.
+</footer>
+
+</body>
+</html>

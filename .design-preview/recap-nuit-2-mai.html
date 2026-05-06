@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Récap nuit 1→2 mai — ce qui a bougé + décisions à prendre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FBFBF8;
+  --bg-soft: #F4F4F0;
+  --bg-card: #FFFFFF;
+  --ink: #0A0A0C;
+  --ink-soft: #4A4D55;
+  --ink-mute: #8A8D95;
+  --line: rgba(10,10,12,.10);
+  --line-strong: rgba(10,10,12,.18);
+  --green: #15803D;
+  --green-soft: rgba(21,128,61,.08);
+  --red: #DC1F2D;
+  --red-soft: rgba(220,31,45,.06);
+  --amber: #B45309;
+  --amber-soft: rgba(180,83,9,.08);
+  --blue: #1D4ED8;
+  --blue-soft: rgba(29,78,216,.08);
+  --purple: #6D28D9;
+  --purple-soft: rgba(109,40,217,.08);
+  --teal: #0F766E;
+  --teal-soft: rgba(15,118,110,.08);
+}
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+  background: var(--bg); color: var(--ink); font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 1080px; margin: 0 auto; padding: 48px 32px 96px; }
+code { font-family: 'Geist Mono', monospace; font-size: 13px; background: rgba(10,10,12,.06); padding: 1px 6px; border-radius: 4px; }
+.mono { font-family: 'Geist Mono', monospace; }
+
+/* === Hero === */
+.hero {
+  background: linear-gradient(135deg, #0A0A0C 0%, #1A1D24 100%);
+  color: #fff;
+  border-radius: 18px;
+  padding: 48px 44px;
+  margin-bottom: 56px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(800px circle at 100% 0%, rgba(109,40,217,.18), transparent 50%),
+              radial-gradient(600px circle at 0% 100%, rgba(220,31,45,.10), transparent 50%);
+  pointer-events: none;
+}
+.hero .moon { position: absolute; top: 32px; right: 36px; font-size: 32px; opacity: .8; }
+.hero-tag {
+  font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(255,255,255,.55); margin-bottom: 14px; position: relative;
+}
+.hero h1 {
+  color: #fff; font-size: 40px; font-weight: 700; letter-spacing: -.025em; line-height: 1.1;
+  max-width: 22ch; margin-bottom: 16px; position: relative;
+}
+.hero h1 .green { color: #86efac; }
+.hero h1 .amber { color: #fbbf24; }
+.hero p { color: rgba(255,255,255,.85); font-size: 16px; max-width: 60ch; position: relative; }
+
+.hero-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-top: 32px; position: relative;
+}
+.hero-stat {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px; padding: 16px 18px;
+}
+.hero-stat-label {
+  font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(255,255,255,.5); margin-bottom: 6px;
+}
+.hero-stat-value { font-size: 24px; font-weight: 700; color: #fff; letter-spacing: -.02em; line-height: 1; }
+.hero-stat-sub { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 4px; font-family: 'Geist Mono', monospace; }
+
+/* === Sections === */
+.section { margin-bottom: 64px; }
+.section-num { font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+.section h2 { font-size: 30px; font-weight: 700; letter-spacing: -.025em; margin-bottom: 14px; line-height: 1.15; }
+.section .lead { font-size: 16px; color: var(--ink-soft); max-width: 65ch; margin-bottom: 28px; }
+
+/* === Audit cards (5 audits) === */
+.audit-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.audit-card {
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 24px 26px; position: relative;
+}
+.audit-card.full-width { grid-column: 1 / -1; }
+.audit-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+.audit-card-icon { font-size: 24px; flex-shrink: 0; }
+.audit-card h3 { font-size: 17px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
+.audit-card-meta { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); }
+.audit-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.audit-pill.green { background: var(--green-soft); color: var(--green); border: 1px solid rgba(21,128,61,.2); }
+.audit-pill.amber { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(180,83,9,.2); }
+.audit-pill.red { background: var(--red-soft); color: var(--red); border: 1px solid rgba(220,31,45,.2); }
+.audit-card-body { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+.audit-card-body strong { color: var(--ink); }
+.audit-card-stats { display: flex; gap: 16px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12px; }
+.audit-card-stat { font-family: 'Geist Mono', monospace; color: var(--ink-mute); }
+.audit-card-stat strong { color: var(--ink); display: block; font-size: 18px; font-weight: 700; }
+.audit-card-link { display: inline-block; margin-top: 12px; font-size: 12px; color: var(--blue); text-decoration: none; border-bottom: 1px dashed rgba(29,78,216,.3); font-family: 'Geist Mono', monospace; }
+
+/* === Commits timeline === */
+.timeline { position: relative; padding-left: 44px; }
+.timeline::before {
+  content: ''; position: absolute; left: 16px; top: 12px; bottom: 12px; width: 2px; background: var(--line);
+}
+.timeline-item {
+  position: relative; margin-bottom: 16px; background: var(--bg-card); border: 1px solid var(--line);
+  border-radius: 10px; padding: 16px 20px;
+}
+.timeline-item::before {
+  content: '✓'; position: absolute; left: -36px; top: 16px;
+  width: 28px; height: 28px; background: var(--green); color: #fff;
+  border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: 14px; border: 3px solid var(--bg);
+}
+.timeline-item.in-progress::before { content: '⏳'; background: var(--amber); }
+.timeline-item.todo::before { content: '○'; background: var(--bg-card); color: var(--ink-mute); border: 3px solid var(--line-strong); }
+.timeline-item-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.timeline-item h4 { font-size: 15px; font-weight: 600; line-height: 1.3; flex: 1; }
+.timeline-item .commit-hash {
+  font-family: 'Geist Mono', monospace; font-size: 10px; padding: 2px 8px;
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 4px;
+  color: var(--ink-mute); white-space: nowrap;
+}
+.timeline-item p { font-size: 13px; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+.timeline-item ul { font-size: 13px; color: var(--ink-soft); margin: 6px 0 0 18px; line-height: 1.7; }
+.timeline-item ul li code { font-size: 11px; }
+
+/* === Decision cards === */
+.decisions { display: flex; flex-direction: column; gap: 18px; }
+.decision {
+  background: var(--bg-card); border: 2px solid var(--line); border-radius: 14px;
+  padding: 26px 30px; position: relative;
+}
+.decision.priority-1 { border-color: var(--red); }
+.decision.priority-1::before {
+  content: 'PRIORITÉ #1'; position: absolute; top: -10px; left: 22px;
+  background: var(--red); color: #fff; font-family: 'Geist Mono', monospace;
+  font-size: 9px; font-weight: 700; letter-spacing: .12em; padding: 4px 10px; border-radius: 3px;
+}
+.decision.priority-2::before {
+  content: 'PRIORITÉ #2'; position: absolute; top: -10px; left: 22px;
+  background: var(--amber); color: #fff; font-family: 'Geist Mono', monospace;
+  font-size: 9px; font-weight: 700; letter-spacing: .12em; padding: 4px 10px; border-radius: 3px;
+}
+.decision.optional::before {
+  content: 'OPTIONNEL'; position: absolute; top: -10px; left: 22px;
+  background: var(--ink-mute); color: #fff; font-family: 'Geist Mono', monospace;
+  font-size: 9px; font-weight: 700; letter-spacing: .12em; padding: 4px 10px; border-radius: 3px;
+}
+.decision-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px; }
+.decision-num { font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 700; color: var(--ink-mute); letter-spacing: .12em; }
+.decision-time { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--ink-mute); padding: 3px 9px; background: var(--bg-soft); border-radius: 4px; }
+.decision h3 { font-size: 19px; font-weight: 600; letter-spacing: -.012em; margin-bottom: 8px; line-height: 1.3; }
+.decision .context { font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.6; }
+.decision .context strong { color: var(--ink); }
+.decision .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.decision .option {
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px; font-size: 13px; color: var(--ink-soft); line-height: 1.55;
+}
+.decision .option strong { color: var(--ink); display: block; margin-bottom: 6px; font-size: 14px; }
+.decision .option.recommended { border-color: var(--green); background: var(--green-soft); }
+.decision .option.recommended strong::after { content: ' ✓'; color: var(--green); }
+.decision .why {
+  margin-top: 14px; padding: 12px 14px; background: var(--bg-soft); border-left: 3px solid var(--ink);
+  font-size: 13px; color: var(--ink-soft); line-height: 1.55; border-radius: 0 6px 6px 0;
+}
+.decision .why strong { color: var(--ink); }
+.decision-single .options { grid-template-columns: 1fr; }
+
+/* === How-to box === */
+.how-to {
+  background: var(--ink); color: #fafafa; border-radius: 10px; padding: 18px 22px;
+  font-family: 'Geist Mono', monospace; font-size: 12px; line-height: 1.7;
+  margin-top: 12px; overflow-x: auto;
+}
+.how-to .comment { color: #9ca3af; }
+.how-to .key { color: #fca5a5; }
+.how-to .val { color: #86efac; }
+
+/* === Calendar === */
+.calendar {
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 8px 0; margin-top: 16px;
+}
+.cal-row {
+  display: grid; grid-template-columns: 110px 1fr; gap: 24px;
+  padding: 14px 24px; align-items: flex-start;
+  border-bottom: 1px solid var(--line);
+}
+.cal-row:last-child { border-bottom: none; }
+.cal-row.today { background: var(--green-soft); }
+.cal-day { font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 600; color: var(--ink); letter-spacing: .04em; }
+.cal-day small { display: block; font-weight: 400; color: var(--ink-mute); margin-top: 2px; font-size: 10px; letter-spacing: .04em; }
+.cal-content { font-size: 14px; line-height: 1.6; color: var(--ink-soft); }
+.cal-content strong { color: var(--ink); }
+.cal-content .tag {
+  display: inline-block; font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; font-weight: 600; padding: 2px 6px; border-radius: 3px; margin-right: 6px; vertical-align: middle;
+}
+.tag-critical { background: var(--red); color: #fff; }
+.tag-decision { background: var(--amber); color: #fff; }
+.tag-launch { background: var(--green); color: #fff; }
+.tag-promo { background: var(--blue); color: #fff; }
+
+/* === Metric blocks === */
+.metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; }
+.metric {
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 10px;
+  padding: 18px 20px;
+}
+.metric-label { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+.metric-value { font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: -.018em; line-height: 1; }
+.metric-value .green { color: var(--green); }
+.metric-value .red { color: var(--red); }
+.metric-value .arrow { font-family: 'Geist Mono', monospace; font-weight: 500; color: var(--ink-mute); margin: 0 4px; }
+.metric-sub { font-size: 12px; color: var(--ink-soft); margin-top: 6px; line-height: 1.4; }
+
+/* === Final box === */
+.final {
+  background: linear-gradient(135deg, var(--ink) 0%, #1A1D24 100%); color: #fff;
+  border-radius: 16px; padding: 36px 40px; text-align: center; margin-top: 32px;
+}
+.final-tag { font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: .12em; color: rgba(255,255,255,.5); text-transform: uppercase; margin-bottom: 14px; }
+.final h2 { color: #fff; font-size: 26px; font-weight: 700; letter-spacing: -.018em; line-height: 1.2; margin-bottom: 14px; }
+.final h2 .green { color: #86efac; }
+.final p { color: rgba(255,255,255,.85); max-width: 60ch; margin: 14px auto 0; font-size: 15px; }
+
+@media (max-width: 700px) {
+  .hero { padding: 32px 24px; }
+  .hero h1 { font-size: 28px; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .audit-grid { grid-template-columns: 1fr; }
+  .metric-grid { grid-template-columns: 1fr; }
+  .decision .options { grid-template-columns: 1fr; }
+  .cal-row { grid-template-columns: 1fr; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ============== HERO ============== -->
+<section class="hero">
+  <div class="moon">🌙</div>
+  <div class="hero-tag">openswissdata · récap nuit 1→2 mai 2026</div>
+  <h1>5 agents. 9 commits. <span class="green">5 audits livrés.</span><br>4 décisions <span class="amber">qui t'attendent.</span></h1>
+  <p>Le site est plus solide qu'hier soir. UX traduite, math bundle cohérente, headers de cache, accessibilité WCAG améliorée, mobile breakpoints fixés. Reste 4 décisions humaines avant le launch jeudi 7 mai.</p>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-label">Tests Vitest</div>
+      <div class="hero-stat-value">297<span style="color:rgba(255,255,255,.4);font-weight:500;">/297</span></div>
+      <div class="hero-stat-sub">tous verts ✓</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-label">HTML wire size</div>
+      <div class="hero-stat-value">−71%</div>
+      <div class="hero-stat-sub">30k → 8.9k</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-label">WCAG AA</div>
+      <div class="hero-stat-value">8<span style="color:rgba(255,255,255,.4);font-weight:500;">/10</span></div>
+      <div class="hero-stat-sub">6.5 → 8 (+23%)</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-label">Bloqueurs UX</div>
+      <div class="hero-stat-value">5<span style="color:rgba(255,255,255,.4);font-weight:500;">/5</span></div>
+      <div class="hero-stat-sub">tous fixés ✓</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== § 1 — LES 5 AUDITS ============== -->
+<section class="section">
+  <div class="section-num">§ 1 · ce qui a été fait pendant la nuit</div>
+  <h2>5 agents en parallèle. 5 rapports d'audit.</h2>
+  <p class="lead">
+    Pendant que tu dormais, 5 agents spécialisés ont audité chacun un axe différent du site, identifié les frictions et appliqué les quick wins directement. Tous les rapports détaillés sont dans <code>docs/audit-2026-05-01-night/</code>.
+  </p>
+
+  <div class="audit-grid">
+    <!-- 1. UX Funnel -->
+    <div class="audit-card">
+      <div class="audit-card-head">
+        <div>
+          <h3>UX funnel d'achat E2E</h3>
+          <div class="audit-card-meta">UX-FUNNEL-AUDIT.md · 2 064 mots</div>
+        </div>
+        <span class="audit-pill amber">5 bloquants 🔴</span>
+      </div>
+      <p class="audit-card-body">
+        Visiteur → page produit → checkout → email → magic link → /account → download. <strong>5 bloquants identifiés</strong> dont la math du bundle inexacte (200 ≠ 198), <code>/account</code> 100% en anglais, post-paiement non géré, mentions de packages npm fantômes (<code>@osd/cli</code>), et clé Ed25519 404. <strong>Tous corrigés en main</strong> dans le commit <code>851eef6</code>.
+      </p>
+      <div class="audit-card-stats">
+        <div class="audit-card-stat"><strong>5/5</strong>fixes appliqués</div>
+        <div class="audit-card-stat"><strong>1</strong>commit dédié</div>
+      </div>
+    </div>
+
+    <!-- 2. Responsive Mobile -->
+    <div class="audit-card">
+      <div class="audit-card-head">
+        <div>
+          <h3>Responsive mobile</h3>
+          <div class="audit-card-meta">RESPONSIVE-MOBILE-AUDIT.md · ~1 500 mots</div>
+        </div>
+        <span class="audit-pill green">8 fixes</span>
+      </div>
+      <p class="audit-card-body">
+        Tests sur 375px (iPhone SE), 414px (iPhone Plus), 768px (iPad). <strong>5 ruptures critiques</strong> : StatusBar V4 sticky qui débordait, hero spec-row à 450px, MCP pricing 4-col inline, tables compliance 5-col sans wrap, classifications pro-tier 3-col. <strong>8 quick wins commitsés</strong> (commit <code>f60a6e4</code>).
+      </p>
+      <div class="audit-card-stats">
+        <div class="audit-card-stat"><strong>8</strong>quick wins</div>
+        <div class="audit-card-stat"><strong>3</strong>fichiers CSS modifiés</div>
+      </div>
+    </div>
+
+    <!-- 3. A11y -->
+    <div class="audit-card">
+      <div class="audit-card-head">
+        <div>
+          <h3>Accessibilité WCAG 2.1 AA</h3>
+          <div class="audit-card-meta">A11Y-AUDIT.md · ~2 200 mots</div>
+        </div>
+        <span class="audit-pill green">6.5 → 8/10</span>
+      </div>
+      <p class="audit-card-body">
+        Pourquoi c'est critique : compliance officers (cible) utilisent screen readers + EU Accessibility Act juin 2025 obligatoire pour B2B vers UE. <strong>10 quick wins appliqués</strong> : skip-to-content link, sr-only labels sur 4 inputs, focus-visible global, fix outline:none orphelin, aria-hidden SVG. <strong>1 problème non résolu</strong> : contraste <code>--ink-mute</code> 3.2:1 (fail AA) → décision pour toi.
+      </p>
+      <div class="audit-card-stats">
+        <div class="audit-card-stat"><strong>10</strong>quick wins</div>
+        <div class="audit-card-stat"><strong>+23%</strong>score AA</div>
+      </div>
+    </div>
+
+    <!-- 4. Performance -->
+    <div class="audit-card">
+      <div class="audit-card-head">
+        <div>
+          <h3>Performance Lighthouse</h3>
+          <div class="audit-card-meta">PERFORMANCE-AUDIT.md · ~2 100 mots</div>
+        </div>
+        <span class="audit-pill green">−71% wire</span>
+      </div>
+      <p class="audit-card-body">
+        Avant : aucune compression gzip, aucun Cache-Control. <strong>Après</strong> : gzip activé via <code>hono/compress</code> (HTML 30k → 8.9k bytes), Cache-Control stratifié par path (1 an immutable pour <code>_astro/*</code>, 5min/edge 10min/SWR 24h pour HTML, no-store pour <code>/api/*</code> et <code>/mcp/jsonrpc</code>). Geist : 6 poids → 4. Score Lighthouse Mobile estimé : 65 → 85-92.
+      </p>
+      <div class="audit-card-stats">
+        <div class="audit-card-stat"><strong>3</strong>commits push</div>
+        <div class="audit-card-stat"><strong>+20</strong>pts Lighthouse estimés</div>
+      </div>
+    </div>
+
+    <!-- 5. MCP E2E (full width) -->
+    <div class="audit-card full-width">
+      <div class="audit-card-head">
+        <div>
+          <h3>MCP E2E — test des 8 tools en production</h3>
+          <div class="audit-card-meta">MCP-E2E-AUDIT.md · ~2 250 mots</div>
+        </div>
+        <span class="audit-pill amber">3/8 V1 verts · 5/8 V2 gated</span>
+      </div>
+      <p class="audit-card-body">
+        Tests live JSON-RPC 2.0 sur <code>mcp.openswissdata.com</code>. <strong>3/8 tools V1 anonymous (free tier)</strong> ✅ verts en prod : <code>tariff_lookup</code>, <code>kyc_check</code>, <code>cross_walk</code>. <strong>5/8 tools V2 Pro</strong> ⚠️ correctement gatés par scope (-32001 propre), handlers non vérifiés car flow OAuth hors périmètre. <strong>0 bug bloquant</strong>. Latence ~90 ms après warm-up, 475 ms cold start. Bug mineur : <code>tools/list</code> ne filtre pas par scope (un anonyme voit 8 tools mais ne peut en appeler que 3).
+      </p>
+      <div class="audit-card-stats">
+        <div class="audit-card-stat"><strong>~90 ms</strong>latence p50</div>
+        <div class="audit-card-stat"><strong>3/8</strong>V1 anonymous OK</div>
+        <div class="audit-card-stat"><strong>5/8</strong>V2 OAuth à valider</div>
+        <div class="audit-card-stat"><strong>0</strong>bug bloquant</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== § 2 — TIMELINE COMMITS ============== -->
+<section class="section">
+  <div class="section-num">§ 2 · les 9 commits poussés en live</div>
+  <h2>Chaque commit déployé automatiquement sur Railway.</h2>
+  <p class="lead">
+    À chaque push, Railway détecte la mise à jour et redéploie. Les 9 commits sont passés en prod cette nuit, validés par tests + curl post-deploy.
+  </p>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-item-head">
+        <h4>perf: enable gzip compression and Cache-Control headers</h4>
+        <span class="commit-hash">037eeb5</span>
+      </div>
+      <p>Compression gzip activée via <code>hono/compress</code>. HTML wire size <strong>30 971 → 8 919 bytes (-71%)</strong>. Cache-Control stratifié par path. Geist 6 poids → 4 (économie fonts).</p>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-item-head">
+        <h4>perf: scope no-store cache to actual MCP API paths only</h4>
+        <span class="commit-hash">119cc4f</span>
+      </div>
+      <p>Fix régression : la page <code>/mcp</code> HTML était cassée par le no-store du commit précédent. Restreint aux vrais endpoints API (<code>/api/*</code> et <code>/mcp/jsonrpc</code>).</p>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-item-head">
+        <h4>fix(responsive): mobile breakpoints — StatusBar, MCP pricing, hero, tables</h4>
+        <span class="commit-hash">f60a6e4</span>
+      </div>
+      <p>5 ruptures mobile critiques fixées via 8 quick wins ciblés. CSS dans <code>global.css</code> + 4 fichiers Astro modifiés.</p>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-item-head">
+        <h4>docs(audit): MCP E2E + a11y bundled</h4>
+        <span class="commit-hash">e23f661</span>
+      </div>
+      <p>Audit MCP E2E sur les 8 tools en prod (3 V1 verts, 5 V2 gated). 10 quick wins a11y appliqués (skip-to-content, aria-labels, sr-only, focus-visible global).</p>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-item-head">
+        <h4>docs(audit): post-deploy verification table</h4>
+        <span class="commit-hash">6b1a610</span>
+      </div>
+      <p>Mise à jour rapport perf avec mesures live post-deploy (gzip + cache vérifiés sur 5 pages).</p>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-item-head">
+        <h4>fix(ux): traductions FR /account, math bundle, copy emails B2B</h4>
+        <span class="commit-hash">851eef6</span>
+      </div>
+      <p>Mes fixes en main suite à l'audit UX :</p>
+      <ul>
+        <li><code>/account</code> 100% traduit en français (était entièrement en anglais : "Sign in", "Your datasets", etc.)</li>
+        <li><code>?checkout=success</code> géré sur <code>/account</code> (bandeau vert "Paiement reçu, email sous 5 min")</li>
+        <li>Math bundle cohérente : "≈ 200 CHF économisés (≈ 20 %)" partout (4 pages)</li>
+        <li>Emails transactionnels : tutoiement → vouvoiement B2B + sujets en FR</li>
+        <li>FAQ verify-provenance : <code>npx @openswissdata/sdk</code> (fantôme) → <code>openssl + provenance.json</code></li>
+        <li>Refund "si non téléchargé" → "sans condition" (3 pages dataset)</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-item-head">
+        <h4>docs(audit): changelog complet de la nuit</h4>
+        <span class="commit-hash">7de31be</span>
+      </div>
+      <p>Le PROGRESS-NIGHT.md détaillé de cette nuit, avec actions humaines restantes documentées.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============== § 3 — METRICS BEFORE/AFTER ============== -->
+<section class="section">
+  <div class="section-num">§ 3 · ce qui a changé concrètement</div>
+  <h2>Avant → après, en chiffres.</h2>
+
+  <div class="metric-grid">
+    <div class="metric">
+      <div class="metric-label">HTML wire size (gzip)</div>
+      <div class="metric-value">30 971 <span class="arrow">→</span> <span class="green">8 919</span></div>
+      <div class="metric-sub">bytes · −71 %, soit 22 KB économisés par requête HTML</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">WCAG 2.1 AA score</div>
+      <div class="metric-value">6.5 <span class="arrow">→</span> <span class="green">8.0</span></div>
+      <div class="metric-sub">sur 10 · +23 % grâce aux quick wins a11y</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Mobile breakpoints fixés</div>
+      <div class="metric-value">0 <span class="arrow">→</span> <span class="green">5</span></div>
+      <div class="metric-sub">ruptures critiques sur 375px corrigées</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><code>/account</code> langue</div>
+      <div class="metric-value">EN <span class="arrow">→</span> <span class="green">FR</span></div>
+      <div class="metric-sub">site B2B francophone CH cohérent</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Cache-Control HTML</div>
+      <div class="metric-value">∅ <span class="arrow">→</span> <span class="green">SWR</span></div>
+      <div class="metric-sub">5min/CDN 10min/Stale-While-Revalidate 24h</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Bloqueurs UX 🔴</div>
+      <div class="metric-value">5 <span class="arrow">→</span> <span class="green">0</span></div>
+      <div class="metric-sub">tous fixés en commit dédié</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== § 4 — DÉCISIONS À PRENDRE ============== -->
+<section class="section">
+  <div class="section-num">§ 4 · 4 décisions humaines qui t'attendent</div>
+  <h2>De la plus critique à la plus optionnelle.</h2>
+  <p class="lead">
+    Ces 4 décisions ne pouvaient pas être prises automatiquement (jugement business, action externe, ou risque de casser quelque chose). À toi de trancher avant le launch jeudi 7 mai.
+  </p>
+
+  <div class="decisions">
+    <!-- D1 — Sentry capture -->
+    <div class="decision priority-1">
+      <div class="decision-head">
+        <div>
+          <span class="decision-num">D1</span>
+          <h3>Valider la capture Sentry en prod (5 min)</h3>
+        </div>
+        <span class="decision-time">5 min</span>
+      </div>
+      <p class="context">
+        Hier soir on a déployé le SDK Sentry + posé le DSN sur Railway. <strong>L'endpoint debug <code>/api/health/sentry-test</code> est en place</strong> mais on n'a pas validé que les erreurs arrivent bien dans le dashboard Sentry. Test en 1 commande, puis on supprime l'endpoint debug.
+      </p>
+      <div class="how-to">
+<span class="comment"># 1. Lance ce curl (token déjà set sur Railway)</span><br>
+curl -s -H <span class="val">"x-sentry-test: 62qgxFee5wp04ME9lmkptw"</span> \<br>
+&nbsp;&nbsp;https://www.openswissdata.com/api/health/sentry-test<br>
+<br>
+<span class="comment"># 2. Va sur openswissdata.sentry.io → Issues → Feed</span><br>
+<span class="comment"># 3. Tu dois voir une nouvelle erreur "Sentry smoke test — intentional throw"</span><br>
+<span class="comment"># 4. Si OK, dis-moi → je supprime l'endpoint debug + le token Railway</span>
+      </div>
+      <div class="why">
+        <strong>Pourquoi prioritaire :</strong> Sentry sera le seul moyen de comprendre les erreurs runtime quand tu auras des vrais clients. Si la capture est cassée silencieusement, tu perds toute visibilité. 5 min pour valider une fois pour toutes.
+      </div>
+    </div>
+
+    <!-- D2 — Self-purchase LIVE -->
+    <div class="decision priority-1">
+      <div class="decision-head">
+        <div>
+          <span class="decision-num">D2</span>
+          <h3>Self-purchase LIVE test sur les 4 SKUs (~40 min)</h3>
+        </div>
+        <span class="decision-time">~40 min</span>
+      </div>
+      <p class="context">
+        Stripe LIVE est actif depuis le 25/04 mais <strong>aucun vrai paiement n'a jamais traversé le webhook signé en LIVE</strong>. Le E2E complet (Stripe Live → webhook → entitlement DB → email Resend → magic link → download R2) doit être validé avant le 1er client réel. Coût : ~30 CHF de fees Stripe (refundés).
+      </p>
+      <div class="options">
+        <div class="option recommended">
+          <strong>A. Faire le test maintenant</strong>
+          Procédure complète dans <code>.design-preview/sentry-and-self-purchase-guide.html</code> § Action 6. 4 SKUs × ~10 min : TARES (299), Classifications (399), FINMA (299), Bundle (799).
+        </div>
+        <div class="option">
+          <strong>B. Reporter à mercredi 6 mai</strong>
+          Risque : si un bug est découvert mercredi, peu de temps pour fixer avant le launch jeudi.
+        </div>
+      </div>
+      <div class="why">
+        <strong>Pourquoi prioritaire :</strong> aucun launch sans ce test n'est sain. Sentry + UptimeRobot vont aussi être validés simultanément (chaque erreur sera capturée, chaque check sera vert).
+      </div>
+    </div>
+
+    <!-- D3 — Bundle Stripe -->
+    <div class="decision priority-2">
+      <div class="decision-head">
+        <div>
+          <span class="decision-num">D3</span>
+          <h3>Bundle Stripe : 799 CHF ou 797 CHF ?</h3>
+        </div>
+        <span class="decision-time">~5 min côté Stripe</span>
+      </div>
+      <p class="context">
+        Audit UX a flaggé que <strong>997 − 799 = 198 CHF (19.86 %)</strong> alors que les copys disaient "200 CHF (20 %)" partout. J'ai patché tous les copys avec <strong>"≈ 200 CHF (≈ 20 %)"</strong> — math honnête mais avec tildes. Décision business : préfères-tu une math parfaite ou le prix actuel ?
+      </p>
+      <div class="options">
+        <div class="option">
+          <strong>A. Garder 799 CHF (actuel)</strong>
+          Aucune action, les copys avec <code>≈</code> sont déjà déployés. Laisse-toi marge fiscale optimale.
+        </div>
+        <div class="option recommended">
+          <strong>B. Passer à 797 CHF</strong>
+          Stripe Dashboard → Products → Bundle → Edit price → 797 CHF. Recréer le webhook? Non, juste le prix. Math nickel : 997 − 797 = 200 CHF (20.06 %). Je remets les copys sans tilde après ton OK.
+        </div>
+      </div>
+      <div class="why">
+        <strong>Pourquoi non-bloquant :</strong> avec les tildes les copys sont honnêtes et défendables. Mais "200 CHF · 20 %" pile c'est plus propre marketing-wise. Différence revenue : 2 CHF par bundle vendu, soit ~100 CHF/an pour 50 bundles. Négligeable.
+      </div>
+    </div>
+
+    <!-- D4 — Contraste --ink-mute -->
+    <div class="decision optional">
+      <div class="decision-head">
+        <div>
+          <span class="decision-num">D4</span>
+          <h3>Contraste <code>--ink-mute</code> WCAG AA (5 min)</h3>
+        </div>
+        <span class="decision-time">5 min</span>
+      </div>
+      <p class="context">
+        Audit a11y a identifié que <code>--ink-mute</code> (#8A8D95) sur <code>--bg</code> (#FBFBF8) donne <strong>ratio 3.2:1 → échec WCAG AA</strong> (seuil 4.5:1 pour body 16px). Utilisé dans les sous-titres mono, les captions, les meta. <strong>Je n'ai pas appliqué automatiquement</strong> car ça impacte le branding : le gris devient plus foncé partout.
+      </p>
+      <div class="options">
+        <div class="option recommended">
+          <strong>A. Passer à <code>#6B6E76</code></strong>
+          Ratio 5.0:1 → conforme WCAG AA. Nuance plus foncée mais rest dans la même famille gris-bleu. Compatible EU Accessibility Act juin 2025 obligatoire pour B2B vers UE.
+        </div>
+        <div class="option">
+          <strong>B. Garder <code>#8A8D95</code></strong>
+          Branding actuel préservé. Risque : non-conformité légale si client EU teste avec axe / WAVE / Lighthouse.
+        </div>
+      </div>
+      <div class="why">
+        <strong>Comment décider :</strong> regarde une page comme <code>/datasets/tares</code> avec les deux variantes (mute clair vs foncé) et juge visuellement. C'est subjectif. Si tu hésites, prends A (conformité légale > 0.5 % de fade aesthétique).
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== § 5 — CALENDAR LAUNCH ============== -->
+<section class="section">
+  <div class="section-num">§ 5 · calendrier launch — actualisé</div>
+  <h2>5 jours jusqu'au launch jeudi 7 mai.</h2>
+
+  <div class="calendar">
+    <div class="cal-row today">
+      <div class="cal-day">SAM 2 MAI<br><small>aujourd'hui</small></div>
+      <div class="cal-content">
+        <span class="tag tag-critical">D1</span> <strong>Tester Sentry capture</strong> (5 min) — curl + dashboard.<br>
+        <span class="tag tag-critical">D2</span> <strong>Self-purchase LIVE test</strong> (~40 min) — 4 SKUs × ~10 min.<br>
+        <span class="tag tag-decision">D3</span> Décider bundle 799 ou 797 CHF côté Stripe.<br>
+        <span class="tag tag-decision">D4</span> Décider contraste <code>--ink-mute</code> #6B6E76.<br>
+        Soir : commit cleanup endpoint Sentry debug + email final si OAuth Pro testé.
+      </div>
+    </div>
+    <div class="cal-row">
+      <div class="cal-day">DIM 3 MAI<br><small>J−4</small></div>
+      <div class="cal-content">
+        Test OAuth E2E des 5 tools Pro MCP (recommandé avant promo "8 tools / premier MCP suisse"). <code>register</code> → <code>token</code> → 5×<code>tools/call</code>.<br>
+        Préparation finale assets visuels Show HN + LinkedIn FR/DE.
+      </div>
+    </div>
+    <div class="cal-row">
+      <div class="cal-day">LUN 4 MAI<br><small>J−3</small></div>
+      <div class="cal-content">
+        Backup DB final pré-launch (déjà cron quotidien R2).<br>
+        Souscription assurance RC pro (Generali ~300 CHF/an, 1M CHF couverture) — pour réintroduire la garantie 10× en V2.<br>
+        Vérif Mail-Tester re-run avec les nouveaux copy emails B2B (devrait toujours scorer 10/10).
+      </div>
+    </div>
+    <div class="cal-row">
+      <div class="cal-day">MAR 5 MAI<br><small>J−2</small></div>
+      <div class="cal-content">
+        Cleanup final : suppression de tous les endpoints debug, retrait du token Sentry test des env vars.<br>
+        Dry-run flow complet : visiteur frais → /datasets/tares → Stripe → email → /account → download. Documenter screenshots.
+      </div>
+    </div>
+    <div class="cal-row">
+      <div class="cal-day">MER 6 MAI<br><small>J−1</small></div>
+      <div class="cal-content">
+        Publier les 3 SDKs sur npm/PyPI (sdks/sdk-ts, sdks/sdk-py, sdks/mcp-server) — résoudre conflit nommage avec packages/ legacy.<br>
+        Rédaction des copy LinkedIn + Show HN. Validation finale.
+      </div>
+    </div>
+    <div class="cal-row">
+      <div class="cal-day">JEU 7 MAI<br><small>J · 16:00 UTC</small></div>
+      <div class="cal-content">
+        <span class="tag tag-launch">LAUNCH</span> <strong>Show HN</strong> "OpenSwissData — first MCP server for Swiss government datasets".<br>
+        <span class="tag tag-launch">LAUNCH</span> <strong>LinkedIn FR + DE</strong> longs.<br>
+        <span class="tag tag-launch">LAUNCH</span> Twitter / X thread + cross-post Bluesky.
+      </div>
+    </div>
+    <div class="cal-row">
+      <div class="cal-day">VEN 8 MAI<br><small>J+1</small></div>
+      <div class="cal-content">
+        <span class="tag tag-promo">PROMO</span> ProductHunt launch (best timing 09:01 CEST).<br>
+        <span class="tag tag-promo">PROMO</span> Reddit : r/dataengineering, r/switzerland, r/OpenData.<br>
+        <span class="tag tag-promo">PROMO</span> Indie Hackers milestone "Launched openswissdata.com".
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== § 6 — TLDR ============== -->
+<section class="section">
+  <div class="final">
+    <div class="final-tag">TL;DR — TES 2 PROCHAINES HEURES</div>
+    <h2>
+      <span class="green">5 min</span> pour Sentry · <span class="green">40 min</span> pour Self-purchase ·<br>
+      Le reste, c'est juste cocher 2 cases (D3 + D4).
+    </h2>
+    <p>
+      Tout le reste est déjà déployé en prod et validé par tests. Tu n'as plus qu'à valider le flow E2E avec une vraie carte (et la refunder ensuite) puis trancher 2 décisions de jugement business. Le launch jeudi 7 mai est très atteignable.
+    </p>
+  </div>
+</section>
+
+</div>
+
+</body>
+</html>

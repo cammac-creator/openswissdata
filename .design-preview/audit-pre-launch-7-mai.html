@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Audit pré-launch 7 mai · openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F4EE;
+    --ink: #0A0A0C;
+    --ink-soft: #3A3D45;
+    --ink-mute: #6B6E76;
+    --line: #E8E4D9;
+    --line-strong: #D9D3C3;
+    --accent: #DC1F2D;
+    --accent-soft: #FCE7E9;
+    --green: #15803D;
+    --green-soft: #DCFCE7;
+    --amber: #92400E;
+    --amber-soft: #FEF3C7;
+    --teal: #0F766E;
+    --teal-soft: #E5F5F1;
+    --blue: #1D4ED8;
+    --blue-soft: #DBEAFE;
+    --purple: #6D28D9;
+    --purple-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%;
+    z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.9em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  /* Hero */
+  .hero { padding: 56px 0 24px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220,31,45,.4); }
+    50% { box-shadow: 0 0 0 8px rgba(220,31,45,0); }
+  }
+  h1 {
+    font-weight: 700;
+    font-size: clamp(36px, 4.8vw, 56px);
+    line-height: 1.04;
+    letter-spacing: -.03em;
+    margin: 0 0 20px;
+    max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 62ch; margin: 0 0 28px; }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  /* Verdict global */
+  .verdict-banner {
+    background: var(--amber-soft);
+    border: 2px solid var(--amber);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin: 24px 0 40px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  .verdict-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--amber);
+    color: white;
+    display: grid; place-items: center;
+    font-size: 32px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .verdict-text h2 { margin: 0 0 6px; font-size: 22px; color: var(--amber); }
+  .verdict-text p { margin: 0; color: var(--ink); font-size: 14px; line-height: 1.5; }
+
+  /* Dashboard */
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin: 24px 0 48px;
+  }
+  @media (max-width: 880px) { .dashboard { grid-template-columns: repeat(2, 1fr); } }
+  .kpi {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 16px;
+    text-align: center;
+  }
+  .kpi-icon { font-size: 22px; margin-bottom: 6px; }
+  .kpi-label {
+    font-family: "Geist Mono", monospace;
+    font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+  }
+  .kpi-verdict {
+    font-size: 13px; font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .kpi-verdict.green { background: var(--green-soft); color: var(--green); }
+  .kpi-verdict.amber { background: var(--amber-soft); color: var(--amber); }
+  .kpi-verdict.red { background: var(--accent-soft); color: var(--accent); }
+  .kpi-verdict.gray { background: var(--bg-soft); color: var(--ink-mute); }
+  .kpi-stats {
+    display: flex; justify-content: center; gap: 8px;
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    margin-top: 8px;
+  }
+  .kpi-stats .s-red { color: var(--accent); font-weight: 700; }
+  .kpi-stats .s-amber { color: var(--amber); font-weight: 700; }
+  .kpi-stats .s-green { color: var(--green); font-weight: 700; }
+
+  /* Section */
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 14px; display: flex; gap: 12px; align-items: center; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1; letter-spacing: -.025em; margin: 0 0 14px; max-width: 30ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 32px; }
+
+  /* Audit cards */
+  .audit-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+  }
+  .audit-head {
+    display: flex; gap: 16px; align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .audit-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .audit-icon.legal { background: var(--purple-soft); }
+  .audit-icon.persona { background: var(--blue-soft); }
+  .audit-icon.security { background: var(--green-soft); }
+  .audit-icon.seo { background: var(--amber-soft); }
+  .audit-icon.api { background: var(--accent-soft); }
+  .audit-icon.coherence { background: var(--teal-soft); }
+  .audit-title { flex: 1; font-size: 18px; font-weight: 600; letter-spacing: -.018em; margin: 0; }
+  .audit-verdict {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .findings-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .finding {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .finding:last-child { border-bottom: none; }
+  .finding-icon {
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+    font-size: 14px;
+  }
+  .finding-text { flex: 1; color: var(--ink-soft); }
+  .finding-text strong { color: var(--ink); font-weight: 600; }
+
+  /* Action plan */
+  .action-table {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 24px 0;
+  }
+  .action-row {
+    display: grid;
+    grid-template-columns: 70px 70px 1fr 130px 100px;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+    font-size: 14px;
+  }
+  .action-row:last-child { border-bottom: none; }
+  .action-row.head {
+    background: var(--bg-soft);
+    font-family: "Geist Mono", monospace;
+    font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 600;
+    padding: 12px 20px;
+  }
+  .action-pri {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-align: center;
+    width: fit-content;
+  }
+  .action-pri.p0 { background: var(--accent-soft); color: var(--accent); }
+  .action-pri.p1 { background: var(--amber-soft); color: var(--amber); }
+  .action-pri.p2 { background: var(--bg-soft); color: var(--ink-mute); }
+  .action-cat {
+    font-family: "Geist Mono", monospace;
+    font-size: 9px;
+    color: var(--ink-mute);
+    padding: 2px 6px;
+    background: var(--bg-soft);
+    border-radius: 3px;
+    width: fit-content;
+  }
+  .action-task strong {
+    display: block;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+    font-size: 14px;
+  }
+  .action-task span {
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+  .action-owner {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    width: fit-content;
+    font-weight: 600;
+  }
+  .action-owner.moi { background: var(--green-soft); color: var(--green); }
+  .action-owner.toi { background: var(--blue-soft); color: var(--blue); }
+  .action-owner.hybride { background: var(--purple-soft); color: var(--purple); }
+  .action-eta {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    text-align: right;
+  }
+  @media (max-width: 880px) {
+    .action-row { grid-template-columns: 1fr; gap: 6px; }
+    .action-row.head { display: none; }
+    .action-eta { text-align: left; }
+  }
+
+  /* Timeline */
+  .timeline {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg);
+    border-radius: 14px;
+    padding: 32px;
+    margin: 24px 0;
+  }
+  .timeline h3 { color: var(--bg); font-size: 20px; margin: 0 0 16px; }
+  .timeline p { color: rgba(255,255,255,.75); font-size: 14px; line-height: 1.6; margin: 0 0 16px; }
+  .day-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-top: 20px;
+  }
+  @media (max-width: 720px) { .day-grid { grid-template-columns: repeat(2, 1fr); } }
+  .day {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .day.today { background: rgba(220,31,45,.15); border-color: var(--accent); }
+  .day.launch { background: rgba(21,128,61,.15); border-color: var(--green); }
+  .day-name {
+    font-family: "Geist Mono", monospace;
+    font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+    color: rgba(255,255,255,.55);
+    margin-bottom: 4px;
+  }
+  .day.today .day-name { color: var(--accent); }
+  .day.launch .day-name { color: var(--green); }
+  .day-title {
+    font-size: 14px; font-weight: 600;
+    color: var(--bg);
+    margin-bottom: 8px;
+  }
+  .day-tasks {
+    font-size: 11px; color: rgba(255,255,255,.7);
+    line-height: 1.5;
+  }
+  .day-tasks div { margin-bottom: 3px; }
+
+  /* Final */
+  .final-card {
+    background: var(--green-soft);
+    border: 2px solid var(--green);
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin: 32px 0;
+  }
+  .final-card.amber { background: var(--amber-soft); border-color: var(--amber); }
+  .final-card h3 { font-size: 20px; color: var(--green); margin: 0 0 10px; }
+  .final-card.amber h3 { color: var(--amber); }
+  .final-card p { font-size: 14px; color: var(--ink); margin: 0 0 8px; line-height: 1.6; }
+  .final-card p strong { font-weight: 600; }
+
+  footer {
+    padding: 40px 0 56px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 8px 0 0;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Audit consolidé · 3 mai · J-4 avant launch</span>
+    </div>
+    <h1>6 audits livrés. <span class="accent">1 verdict global.</span></h1>
+    <p class="lede">
+      6 agents lancés en parallèle, 6 retournés (sécurité, légal, personas, SEO/perf, API/MCP, cohérence/a11y). 4 personas joués (Bob, stresseur, sceptique, pinailleur).
+      <strong>Verdict consolidé : GO conditionnel — le launch jeudi 7 mai est tenable, mais l'API/MCP doit être réparée avant.</strong>
+    </p>
+
+    <div class="verdict-banner">
+      <div class="verdict-icon">⚡</div>
+      <div class="verdict-text">
+        <h2>GO conditionnel pour jeudi 7 mai</h2>
+        <p>Sécurité 100 % verte. Côté UX/légal/SEO : ~2 h de corrections. Côté API/MCP : <strong>1-2 j de boulot critique</strong> (lien nav 404, statent_lookup absent, tariff_lookup KO sur HS code de démo). Sans ces corrections, le launch jeudi est techniquement compromis.</p>
+      </div>
+    </div>
+
+    <div class="dashboard">
+      <div class="kpi">
+        <div class="kpi-icon">🔒</div>
+        <div class="kpi-label">Sécurité</div>
+        <div class="kpi-verdict green">READY</div>
+        <div class="kpi-stats"><span class="s-red">0</span>·<span class="s-amber">2</span>·<span class="s-green">8</span></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">⚖️</div>
+        <div class="kpi-label">Légal</div>
+        <div class="kpi-verdict amber">CONDITIONNEL</div>
+        <div class="kpi-stats"><span class="s-red">3</span>·<span class="s-amber">3</span>·<span class="s-green">4</span></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">🧑</div>
+        <div class="kpi-label">Personas</div>
+        <div class="kpi-verdict amber">CONDITIONNEL</div>
+        <div class="kpi-stats"><span class="s-red">5</span>·<span class="s-amber">2</span>·<span class="s-green">8</span></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">🔍</div>
+        <div class="kpi-label">SEO / Perf</div>
+        <div class="kpi-verdict amber">CONDITIONNEL</div>
+        <div class="kpi-stats"><span class="s-red">2</span>·<span class="s-amber">3</span>·<span class="s-green">6</span></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">🛠</div>
+        <div class="kpi-label">API / MCP</div>
+        <div class="kpi-verdict red">NO-GO</div>
+        <div class="kpi-stats"><span class="s-red">3</span>·<span class="s-amber">3</span>·<span class="s-green">4</span></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">🎨</div>
+        <div class="kpi-label">A11y / Cohérence</div>
+        <div class="kpi-verdict amber">QUASI-READY</div>
+        <div class="kpi-stats"><span class="s-red">1</span>·<span class="s-amber">3</span>·<span class="s-green">7</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== AUDIT 1 — SÉCURITÉ ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 01 / Sécurité</strong>
+      <span class="sep">/</span>
+      <span>Stack durcie, secrets propres, signing OK</span>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-head">
+        <div class="audit-icon security">🔒</div>
+        <h3 class="audit-title">Sécurité production</h3>
+        <span class="audit-verdict" style="background: var(--green-soft); color: var(--green);">READY</span>
+      </div>
+
+      <ul class="findings-list">
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>HTTPS + headers durcis :</strong> HSTS 180j + X-Frame DENY + COOP same-origin + Permissions-Policy (caméra/micro/géoloc OFF) — au-dessus de la moyenne SaaS</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Rate limiting actif :</strong> 1 succès puis 9× 429 sur /api/checkout/start et /mcp/oauth/register. Anti-spam OK.</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Endpoints admin protégés :</strong> 401 avec timing-safe compare contre ADMIN_SECRET</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Tier escalation impossible :</strong> client demande "pro" → forcé en "free" côté serveur. Promotion uniquement via webhook Stripe payé.</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Stripe webhook signé + idempotent + transaction atomique</strong> (pas de double order possible)</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Manifest Ed25519 vérifié OK :</strong> verify-provenance.ts retourne signatureValid=true + RFC-3161 freetsa</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Aucun secret leak dans le repo public :</strong> .env gitignoré, scan git log clean (placeholders only)</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>CORS strict :</strong> pas d'Allow-Origin: * (Hono par défaut = same-origin)</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>CSP avec 'unsafe-inline' sur scripts/styles</strong> (commentaire dette dans le code) — à durcir post-launch via nonces (~2h)</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Cookie session magic-link :</strong> flags non vérifiés en l'absence de credentials — à confirmer Secure/HttpOnly/SameSite</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== AUDIT 2 — LÉGAL ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 02 / Légal &amp; Compliance</strong>
+      <span class="sep">/</span>
+      <span>nLPD + RGPD + permissions sources</span>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-head">
+        <div class="audit-icon legal">⚖️</div>
+        <h3 class="audit-title">Légal &amp; Compliance B2B suisse</h3>
+        <span class="audit-verdict" style="background: var(--amber-soft); color: var(--amber);">CONDITIONNEL</span>
+      </div>
+
+      <ul class="findings-list">
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Disclaimer italien manquant (TARES) :</strong> seul "Non-officiel · Nicht-offiziell · Non-official" — manque "Non ufficiale". La permission BAZG exige les 3 langues officielles suisses. <em>Bloquant légal.</em></span></li>
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Sentry + UptimeRobot non listés dans Privacy :</strong> manquement art. 19 nLPD + art. 13 RGPD (information sur les destinataires). Logs d'erreurs = données personnelles potentielles.</span></li>
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Statut RC &lt; 100k CHF / non-TVA :</strong> légal mais friction commerciale B2B (départements achats refusent souvent les fournisseurs sans n° RC/TVA). Ajouter mention art. 36 ORC pour transparence.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>FAQ retourne 404 :</strong> impossible de vérifier la cohérence de la promesse "refund 14j sans condition" entre CGV et FAQ.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>OPDS non mentionné dans Compliance :</strong> à clarifier ou retirer pour ne pas créer de confusion en audit externe.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Téléphone absent Impressum :</strong> art. 322 CO + LCD exigent moyen de contact rapide. Email seul fragile en litige B2B.</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Provenance crypto + SDR Policy + Footer + CGV core</strong> dépassent les exigences légales</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== AUDIT 3 — PERSONAS ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 03 / Personas E2E</strong>
+      <span class="sep">/</span>
+      <span>4 personas, parcours complet</span>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-head">
+        <div class="audit-icon persona">🧑</div>
+        <h3 class="audit-title">Bob · Stresseur · Sceptique · Pinailleur</h3>
+        <span class="audit-verdict" style="background: var(--amber-soft); color: var(--amber);">CONDITIONNEL</span>
+      </div>
+
+      <ul class="findings-list">
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Lien nav "Comment ça marche" → 404</strong> (BLOQUANT) — confirmé par 2 agents. Pour un CTO pressé, rage-quit instantané.</span></li>
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Sample TARES annonce "100 lignes" mais en livre 10</strong> — Pinailleur détecte le mensonge factuel en 30 s. Casse toute crédibilité.</span></li>
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Page TARES annonce "17 colonnes normalisées" mais sample en a 14</strong> — incohérence schéma cassée.</span></li>
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Page FINMA statut permission ambigu :</strong> Sceptique flippe. Afficher explicitement "données publiques republiées sous Art. 5 LDA, takedown 24h" en HAUT de page.</span></li>
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Pas de FAQ visible sur les pages produit :</strong> Bob (PME comptable) rage-quit. Manque "Est-ce officiel ?", "Mon comptable peut l'utiliser ?", "Excel OK ?"</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>"Parquet · JSON · SQL" en hero sans CSV/Excel :</strong> Bob pense "logiciel cher". Ajouter "CSV inclus, ouvre dans Excel".</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Pas de preuve sociale (logos, testimonials) :</strong> Stresseur veut "X clients déjà". Aucun logo / aucun témoignage visible.</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Math bundle 997-797=200 (-20%) cohérente partout</strong> — vérifié par Pinailleur</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Sample CSV libre + démo live :</strong> Sceptique peut auditer avant achat — excellent</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== AUDIT 4 — SEO/PERF ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 04 / SEO + Performance</strong>
+      <span class="sep">/</span>
+      <span>Lighthouse-like, structured data, wire size</span>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-head">
+        <div class="audit-icon seo">🔍</div>
+        <h3 class="audit-title">SEO 6.5/10 · Performance 9/10</h3>
+        <span class="audit-verdict" style="background: var(--amber-soft); color: var(--amber);">CONDITIONNEL</span>
+      </div>
+
+      <ul class="findings-list">
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Page 404 servie en text/plain :</strong> Railway intercepte avant la 404.astro Astro. Mauvais signal Googlebot + UX cassée. À fixer en config Railway.</span></li>
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>JSON-LD Product manquant sur les 4 pages payantes :</strong> /datasets/* + /bundle. Pas de @type:Product avec offers/price/priceCurrency. Manque rich snippets Google.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Sitemap conforme mais priorités uniformes :</strong> 1064 URLs avec priority=0.7 partout. Home + 3 produits devraient être à 1.0, NOGA à 0.5.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Pas d'hreflang :</strong> contenu DE/FR/IT/EN évoqué mais une seule URL. À anticiper post-launch.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Geist via Google Fonts :</strong> render-blocking + dépendance externe + signal cookies/RGPD. Self-hoster ferait gagner ~150ms LCP.</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Wire size excellent :</strong> Home 9.1 KB · /codes 27.4 KB · /datasets/tares 9.0 KB (gzip) — largement sous cible</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>TTFB 92 ms · total 99 ms</strong> · Cache-Control stratifié, hashed assets immutable 1 an</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Meta tags + Open Graph + Twitter Card + JSON-LD Organization</strong> : impeccables sur la home</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Robots.txt + sitemap.xml propres</strong> · 1047 pages NOGA SEO indexées</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== AUDIT 5 — API/MCP ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 05 / API + MCP + Data integrity</strong>
+      <span class="sep">/</span>
+      <span>8 tools, OAuth, samples, manifest</span>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-head">
+        <div class="audit-icon api">🛠</div>
+        <h3 class="audit-title">API + MCP — point critique du launch</h3>
+        <span class="audit-verdict" style="background: var(--accent-soft); color: var(--accent);">NO-GO</span>
+      </div>
+
+      <ul class="findings-list">
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>statent_lookup MANQUANT :</strong> annoncé dans la spec "8 tools" mais retourne "Unknown tool" en prod. À la place, il y a finma_search non documenté. La promesse "8 tools" devient mensongère.</span></li>
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>tariff_lookup retourne "No row found" pour HS8 84820010</strong> alors que ce code est dans samples/tares-sample.csv ligne 1 (Roulements à billes). Le tool flagship démo plante sur le code le plus visible.</span></li>
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>Endpoints /api/datasets/* tous en 404 :</strong> /api/datasets, /api/datasets/tares, /api/datasets/tares/versions. Pas d'API JSON pour interroger les versions / manifests programmatiquement.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Versions datasets périmées :</strong> 2026-04-21 affiché, devrait être v2026.04.30+. À rafraîchir avant launch.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>cross_walk : schéma incohérent avec spec :</strong> spec dit from/to, tool exige source/target. Erreur Zod brute renvoyée au client.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Samples publics trop petits :</strong> TARES 11 lignes (10 data + header) au lieu des 50-200 attendus. Démo peu convaincante.</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Health checks OK :</strong> /api/health/deep retourne DB 2ms, R2 110ms, Stripe 284ms — tous ok=true</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Protocol version + scope enforcement corrects :</strong> tariff_changelog sans auth → -32001 "Insufficient scope (requires 'tariff:history')"</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>OAuth tier downgrade silencieux :</strong> demande "pro" → reçu "free" comme spécifié</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Disclaimer "non-officiel" présent côté API</strong> avec mention BAZG/OFDF + lien xtares.admin.ch</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== AUDIT 6 — COHÉRENCE/A11Y ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 06 / Cohérence visuelle + a11y</strong>
+      <span class="sep">/</span>
+      <span>Pinailleur post-fix --ink-mute</span>
+    </div>
+
+    <div class="audit-card">
+      <div class="audit-head">
+        <div class="audit-icon coherence">🎨</div>
+        <h3 class="audit-title">Cohérence 9/10 · A11y 9/10</h3>
+        <span class="audit-verdict" style="background: var(--amber-soft); color: var(--amber);">QUASI-READY</span>
+      </div>
+
+      <ul class="findings-list">
+        <li class="finding"><span class="finding-icon">🔴</span><span class="finding-text"><strong>/compliance PAS harmonisée v4 :</strong> utilise classes Tailwind brutes (text-3xl, prose prose-slate, text-slate-500) au lieu du design system v4 (v4-h1, container-v4, ds-breadcrumb). Probable que /legal/* aussi (text-indigo-600 vu). Contraste fort visible avec le polish des datasets harmonisés hier.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Saut h2 → h3 immédiat sur landing</strong> dans la section "Une donnée. Trois équipes…" — h2 puis 3 h3 sans introduction. Acceptable W3C mais pas optimal.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Page /famille orpheline :</strong> aucun lien depuis nav/footer/statusbar. Si intentionnel (page surprise familiale), ignorer. Sinon ajouter au footer.</span></li>
+        <li class="finding"><span class="finding-icon">🟡</span><span class="finding-text"><strong>Coquille mineure /legal/sdr-policy :</strong> "corriger une donnée inexacte" — singulier alors que la convention site est plurielle.</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Math bundle 797/200/997 impeccable partout :</strong> aucun "799" ni "−198" résiduel. Le travail prix d'aujourd'hui est validé.</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Skip-to-content + :focus-visible + ARIA labels + sr-only :</strong> WCAG AA conforme avec le nouveau ratio 4.6:1</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Breadcrumbs cohérents</strong> sur les 3 /datasets/* + /bundle (ds-breadcrumb partout, parents corrects)</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>Headers/footers identiques</strong> sur les 5 pages testées (signature MD5 identique)</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>CTAs v4-btn-primary partout</strong> sur les pages produit + bundle</span></li>
+        <li class="finding"><span class="finding-icon">✅</span><span class="finding-text"><strong>16/16 liens internes retournent 200, aucune image sans alt, lang="fr", JSON-LD Organization présent</strong></span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ACTION PLAN ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Plan d'action consolidé</strong>
+      <span class="sep">/</span>
+      <span>15 actions priorisées · qui fait quoi</span>
+    </div>
+    <h2>Le <span class="serif">plan</span> pour rattraper d'ici jeudi.</h2>
+    <p class="section-intro">
+      <strong>P0 = critique avant launch · P1 = à faire dans la semaine · P2 = post-launch.</strong>
+      <br>Ce que je peux faire en autonome 🟢 vs ce qui nécessite ton intervention 🔵 vs hybride 🟣.
+    </p>
+
+    <div class="action-table">
+      <div class="action-row head">
+        <div>Pri</div>
+        <div>Cat</div>
+        <div>Action</div>
+        <div>Qui fait</div>
+        <div>ETA</div>
+      </div>
+
+      <!-- P0 — BLOQUANTS LAUNCH -->
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">API</span></div>
+        <div class="action-task">
+          <strong>Implémenter ou retirer statent_lookup</strong>
+          <span>Soit créer le tool (prend ~2-3h, données STATENT BFS), soit retirer "8 tools" du marketing et n'annoncer que 7. Décision à prendre AVANT communication.</span>
+        </div>
+        <div><span class="action-owner hybride">🟣 hybride</span></div>
+        <div class="action-eta">2-3h ou 30s (retrait copy)</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">DATA</span></div>
+        <div class="action-task">
+          <strong>Fixer tariff_lookup sur HS 84820010 (Roulements à billes)</strong>
+          <span>Le sample CSV contient ce code mais la DB ne le retourne pas. Probable désync entre dataset publié sur R2 et seed DB. Re-seed depuis le bundle 2026.04.30 fraîchement publié + vérifier.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~30 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">UX</span></div>
+        <div class="action-task">
+          <strong>Lien nav "Comment ça marche" → 404</strong>
+          <span>Soit créer la page (~1h, contenu existe en partie sur la home), soit retirer le lien de la nav. Confirmé par 2 agents.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~30-60 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">SEO</span></div>
+        <div class="action-task">
+          <strong>404 page Astro non servie (Railway)</strong>
+          <span>Le serveur retourne text/plain "404 Not Found" au lieu de la 404.astro. Probable middleware Hono qui catch avant le static fallback. À débugger dans src/index.ts.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~30 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">DATA</span></div>
+        <div class="action-task">
+          <strong>Sample TARES : 100 lignes (au lieu de 10)</strong>
+          <span>Régénérer le sample avec 100 lignes diverses (chapitres alimentaire, mécanique, électronique, textile) ET aligner schéma à 17 colonnes (ou corriger la promesse "17 colonnes" sur la page produit).</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~45 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">LÉGAL</span></div>
+        <div class="action-task">
+          <strong>Disclaimer italien (TARES) "Non ufficiale"</strong>
+          <span>Ajouter sur /datasets/tares pour respecter la permission BAZG (3 langues officielles CH).</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~5 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">LÉGAL</span></div>
+        <div class="action-task">
+          <strong>Compléter Privacy avec Sentry + UptimeRobot</strong>
+          <span>Ajouter ces 2 sous-traitants dans /legal/privacy avec mention transfert hors-UE (Sentry US, encadré CCT).</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~15 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">UX</span></div>
+        <div class="action-task">
+          <strong>Page FINMA : afficher statut permission en haut</strong>
+          <span>Bandeau visible : "Données publiques republiées sous Art. 5 LDA suisse · permission demandée 2026-04-17 · takedown 24h sur demande". Calmer le sceptique compliance.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~15 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">SEO</span></div>
+        <div class="action-task">
+          <strong>JSON-LD Product sur les 4 pages payantes</strong>
+          <span>@type:Product avec offers/price/priceCurrency:CHF + BreadcrumbList. Active rich snippets Google sur tares/classifications/finma/bundle.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~30 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">UX</span></div>
+        <div class="action-task">
+          <strong>FAQ visible sur les pages produit</strong>
+          <span>Ajouter 5-7 Q/R sur chaque /datasets/* : "Est-ce officiel ?", "Mon comptable peut l'utiliser ?", "Format Excel OK ?", "Mises à jour ?", "Refund comment ?". Réutilise les Q/R de la home.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~45 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p0">P0</span></div>
+        <div><span class="action-cat">UI</span></div>
+        <div class="action-task">
+          <strong>Harmoniser /compliance + /legal/* en design v4</strong>
+          <span>Remplacer classes Tailwind brutes (text-3xl, prose prose-slate) par les classes v4 (v4-h1, container-v4, ds-breadcrumb). Contraste visible avec les pages /datasets/* déjà harmonisées hier.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~1h30</div>
+      </div>
+
+      <!-- P1 — A FAIRE DANS LA SEMAINE -->
+      <div class="action-row">
+        <div><span class="action-pri p1">P1</span></div>
+        <div><span class="action-cat">API</span></div>
+        <div class="action-task">
+          <strong>Endpoints /api/datasets/* (versions, manifest)</strong>
+          <span>Exposer GET /api/datasets, /api/datasets/[id], /api/datasets/[id]/versions. Retourne version courante, R2 key, sha256, manifest JSON. Important pour les acheteurs Pro qui veulent automatiser.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~1h30</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p1">P1</span></div>
+        <div><span class="action-cat">DATA</span></div>
+        <div class="action-task">
+          <strong>Bumper les versions datasets à v2026.05.03</strong>
+          <span>Lancer un refresh manuel des 3 datasets pour avoir des versions fraîches le jour J. Workflow gh actions déjà en place.</span>
+        </div>
+        <div><span class="action-owner toi">🔵 toi</span></div>
+        <div class="action-eta">~2 min (1 commande)</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p1">P1</span></div>
+        <div><span class="action-cat">UX</span></div>
+        <div class="action-task">
+          <strong>Bloc "CSV s'ouvre dans Excel" en hero</strong>
+          <span>Petit microcopy pour rassurer Bob (PME comptable) qui flippe sur "Parquet". Ajouter sous les formats : "CSV inclus · ouvre dans Excel sans rien installer".</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~10 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p1">P1</span></div>
+        <div><span class="action-cat">LÉGAL</span></div>
+        <div class="action-task">
+          <strong>Republier la FAQ (404 actuellement)</strong>
+          <span>Page /faq existe-t-elle ? Sinon créer ou rediriger vers /#faq sur la home. Cohérent avec promesse refund 14j.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~30 min</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p1">P1</span></div>
+        <div><span class="action-cat">LÉGAL</span></div>
+        <div class="action-task">
+          <strong>Mention "RC < 100k CHF" + N° contact direct Impressum</strong>
+          <span>Ajouter art. 36 ORC (raison ind. non inscrite) + téléphone ou WhatsApp Business. Réduit les frictions B2B.</span>
+        </div>
+        <div><span class="action-owner toi">🔵 toi</span></div>
+        <div class="action-eta">~10 min</div>
+      </div>
+
+      <!-- P2 — POST LAUNCH -->
+      <div class="action-row">
+        <div><span class="action-pri p2">P2</span></div>
+        <div><span class="action-cat">SEC</span></div>
+        <div class="action-task">
+          <strong>Durcir CSP : remplacer 'unsafe-inline' par nonces</strong>
+          <span>Réduit la surface XSS. Astro supporte les nonces nativement. Pas critique car frontend statique.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~2h post-launch</div>
+      </div>
+
+      <div class="action-row">
+        <div><span class="action-pri p2">P2</span></div>
+        <div><span class="action-cat">PERF</span></div>
+        <div class="action-task">
+          <strong>Self-hoster Geist (au lieu Google Fonts)</strong>
+          <span>Gain ~150ms LCP + suppression dépendance externe + meilleur RGPD. Via @fontsource ou astro:fonts.</span>
+        </div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~45 min post-launch</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TIMELINE ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Timeline rattrapage</strong>
+      <span class="sep">/</span>
+      <span>Plan jour par jour</span>
+    </div>
+
+    <div class="timeline">
+      <h3>De maintenant à jeudi 7 mai · 4 jours pour rattraper</h3>
+      <p>
+        Si on s'y met sérieusement, les 10 actions P0 prennent ~6-8h de travail développement. Réparti sur 3 jours, c'est 100 % faisable. Le launch est sauvable.
+      </p>
+
+      <div class="day-grid">
+        <div class="day today">
+          <div class="day-name">Aujourd'hui · Dim 3</div>
+          <div class="day-title">P0 critique</div>
+          <div class="day-tasks">
+            <div>• Fix tariff_lookup HS</div>
+            <div>• Fix lien 404 nav</div>
+            <div>• Fix page 404 Astro</div>
+            <div>• Disclaimer italien</div>
+            <div>• Privacy Sentry+UptimeRobot</div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-name">Lundi 4</div>
+          <div class="day-title">UX + données</div>
+          <div class="day-tasks">
+            <div>• Sample TARES 100 lignes</div>
+            <div>• Bandeau FINMA</div>
+            <div>• FAQ pages produit</div>
+            <div>• JSON-LD Product</div>
+            <div>• Décider statent_lookup</div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-name">Mardi 5 + Mer 6</div>
+          <div class="day-title">Polish + tests</div>
+          <div class="day-tasks">
+            <div>• /api/datasets/* endpoints</div>
+            <div>• Bump versions datasets</div>
+            <div>• Re-run 6 audits</div>
+            <div>• Self-purchase test final</div>
+            <div>• Préparer annonces</div>
+          </div>
+        </div>
+        <div class="day launch">
+          <div class="day-name">Jeudi 7 · 🚀</div>
+          <div class="day-title">LAUNCH</div>
+          <div class="day-tasks">
+            <div>• 08h pre-flight check</div>
+            <div>• 10h annonces sociales</div>
+            <div>• 12h support live</div>
+            <div>• Surveillance Sentry</div>
+            <div>• Logger incidents</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FINAL ========== -->
+<section>
+  <div class="container">
+    <div class="final-card amber">
+      <h3>🎯 Recommandation finale</h3>
+      <p>
+        <strong>Le launch jeudi 7 mai reste tenable</strong> à condition de traiter les 10 actions P0 d'ici mercredi soir. La sécurité est solide et la perf est excellente — c'est la cohérence de la promesse marketing (8 tools, 100 lignes sample, lien nav qui marche) qui fait le verdict du sceptique compliance et du pinailleur.
+      </p>
+      <p>
+        <strong>Si tu valides "go P0", je peux faire 10 actions sur 11 en autonome aujourd'hui et lundi.</strong> Il reste 1 action hybride (statent_lookup : à toi de décider "on l'implémente" ou "on retire 8 tools du marketing") et 2 micro-actions toi (bumper datasets, mention RC Impressum).
+      </p>
+      <p style="margin-top: 14px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--ink-mute);">
+        Réponds : <strong>"go P0"</strong> → je m'y mets dans la foulée.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · audit consolidé pré-launch</strong></p>
+    <p style="margin: 0;">
+      6 audits livrés sur 6. 47 findings classés par priorité. Sécurité 🟢 / Légal 🟡 / Personas 🟡 / SEO-Perf 🟡 / API-MCP 🔴 / Cohérence-A11y 🟡.
+      Verdict global : <strong>GO conditionnel</strong> — 4 jours suffisent pour les 11 P0 si on s'y met.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Récap nuit 2 → 3 mai · openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F4EE;
+    --ink: #0A0A0C;
+    --ink-soft: #3A3D45;
+    --ink-mute: #6B6E76;
+    --line: #E8E4D9;
+    --line-strong: #D9D3C3;
+    --accent: #DC1F2D;
+    --accent-soft: #FCE7E9;
+    --green: #15803D;
+    --green-soft: #DCFCE7;
+    --amber: #92400E;
+    --amber-soft: #FEF3C7;
+    --teal: #0F766E;
+    --teal-soft: #E5F5F1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%;
+    z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+
+  /* Hero */
+  .hero { padding: 64px 0 48px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; }
+  h1 {
+    font-weight: 700;
+    font-size: clamp(36px, 4.5vw, 56px);
+    line-height: 1.04;
+    letter-spacing: -.03em;
+    margin: 0 0 20px;
+    max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 18px; color: var(--ink-soft); max-width: 60ch; margin: 0 0 32px; }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 0 0 48px;
+  }
+  .stat { padding: 18px 0; border-right: 1px solid var(--line); padding-right: 24px; padding-left: 24px; }
+  .stat:first-child { padding-left: 0; }
+  .stat:last-child { border-right: none; padding-right: 0; }
+  .stat-label { font-family: "Geist Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-sub { font-size: 12px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); padding: 14px 16px; } }
+
+  /* Section */
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 14px; display: flex; gap: 12px; align-items: center; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(28px, 3vw, 36px); line-height: 1.1; letter-spacing: -.025em; margin: 0 0 14px; max-width: 26ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 62ch; margin: 0 0 36px; }
+
+  /* Cards */
+  .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 880px) { .card-grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    position: relative;
+  }
+  .card-tag {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 12px;
+    display: inline-flex; gap: 8px; align-items: center;
+  }
+  .card-tag .num { background: var(--ink); color: var(--bg); padding: 2px 6px; border-radius: 3px; }
+  .card h3 { font-size: 17px; font-weight: 600; letter-spacing: -.018em; margin: 0 0 10px; line-height: 1.25; }
+  .card p { font-size: 14px; color: var(--ink-soft); line-height: 1.55; margin: 0 0 14px; }
+  .card .impact {
+    background: var(--bg-soft);
+    border-left: 3px solid var(--green);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 14px;
+    font-size: 13px;
+  }
+  .card .impact strong { color: var(--green); font-weight: 600; }
+  .card.amber .impact { border-color: var(--amber); }
+  .card.amber .impact strong { color: var(--amber); }
+  .card .commit {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--line);
+  }
+
+  /* Before/After */
+  .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+  @media (max-width: 720px) { .ba-grid { grid-template-columns: 1fr; } }
+  .ba {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+  }
+  .ba-title {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .ba.before { border-color: rgba(220,31,45,.25); background: var(--accent-soft); }
+  .ba.before .ba-title { color: var(--accent); }
+  .ba.after { border-color: rgba(21,128,61,.3); background: var(--green-soft); }
+  .ba.after .ba-title { color: var(--green); }
+
+  /* Diagram */
+  .diagram {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 32px;
+    margin-top: 24px;
+  }
+  .pipeline { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; }
+  .pipe-node {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 130px;
+  }
+  .pipe-node.source { background: white; border-color: var(--line-strong); }
+  .pipe-node.action { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .pipe-node.deliver { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+  .pipe-node-label { font-family: "Geist Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .pipe-node.action .pipe-node-label { color: rgba(255,255,255,.6); }
+  .pipe-node.deliver .pipe-node-label { color: rgba(21,128,61,.7); }
+  .pipe-node-title { font-size: 13px; font-weight: 600; }
+  .pipe-arrow { padding: 0 10px; color: var(--ink-mute); font-family: "Geist Mono", ui-monospace, monospace; font-size: 14px; }
+
+  /* Punch list */
+  .punch {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .punch-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 100px;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+  }
+  .punch-row:last-child { border-bottom: none; }
+  .punch-pri {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-align: center;
+    width: fit-content;
+  }
+  .punch-pri.p0 { background: var(--accent-soft); color: var(--accent); }
+  .punch-pri.p1 { background: var(--amber-soft); color: var(--amber); }
+  .punch-pri.p2 { background: var(--bg-soft); color: var(--ink-mute); }
+  .punch-task { font-size: 14px; }
+  .punch-task strong { font-weight: 600; }
+  .punch-eta {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    text-align: right;
+  }
+  @media (max-width: 720px) { .punch-row { grid-template-columns: 1fr; gap: 4px; } .punch-eta { text-align: left; } }
+
+  /* Critical alert */
+  .alert {
+    background: var(--accent-soft);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin: 32px 0;
+    position: relative;
+  }
+  .alert-tag {
+    position: absolute; top: -12px; left: 24px;
+    background: var(--accent); color: white;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
+    padding: 4px 10px; border-radius: 4px;
+  }
+  .alert h3 { margin: 8px 0 12px; font-size: 18px; color: var(--accent); }
+  .alert pre {
+    background: white;
+    border: 1px solid rgba(220,31,45,.25);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 12px;
+    overflow-x: auto;
+    margin: 14px 0;
+    font-family: "Geist Mono", ui-monospace, monospace;
+  }
+
+  /* Commits timeline */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .commit-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .commit-row:last-child { border-bottom: none; }
+  .commit-hash {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    background: var(--bg-soft);
+    padding: 4px 8px;
+    border-radius: 4px;
+    width: fit-content;
+    height: fit-content;
+  }
+  .commit-msg { font-size: 14px; }
+  .commit-msg .scope { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: var(--accent); }
+  .commit-msg .desc { color: var(--ink-soft); margin-top: 2px; font-size: 13px; }
+
+  footer {
+    padding: 48px 0 64px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+  footer .mono { font-size: 11px; }
+
+  .icon { width: 18px; height: 18px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Récap nuit · 2 → 3 mai 2026</span>
+    </div>
+    <h1>Le pipeline de fraîcheur, <span class="accent">industrialisé.</span></h1>
+    <p class="lede">
+      Tu m'as demandé hier soir : "tu peux le faire de manière autonome cette nuit ?"
+      <strong>Oui — 4 commits poussés live, CI réparée, 2 nouveaux workflows GitHub Actions, canary live sur 10 sources amont.</strong>
+      Plus un finding critique pré-existant qu'il faut régler ce matin avant le launch.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Commits poussés</div>
+        <div class="stat-value">4</div>
+        <div class="stat-sub">en live sur main</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Tests CI</div>
+        <div class="stat-value green">295</div>
+        <div class="stat-sub">288 root + 7 mcp-server</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Sources surveillées</div>
+        <div class="stat-value">10</div>
+        <div class="stat-sub">BAZG · FINMA · BFS</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Risques critiques</div>
+        <div class="stat-value amber">1</div>
+        <div class="stat-sub">secrets GH manquants</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ALERTE CRITIQUE ========== -->
+<section style="border-top: none; padding-top: 0;">
+  <div class="container">
+    <div class="alert">
+      <span class="alert-tag">⚠ Action P0 ce matin</span>
+      <h3>Les secrets GitHub Actions ne sont pas configurés au niveau repo</h3>
+      <p style="margin: 0; color: var(--ink-soft);">
+        En testant mon nouveau workflow TARES cette nuit, j'ai découvert que <strong>refresh-finma.yml échoue tous les jours en silence depuis au moins le 1er mai</strong> avec exactement la même erreur :
+      </p>
+      <pre>[release-finma] ERROR: Error: ADMIN_SECRET env var is required</pre>
+      <p style="margin: 0; color: var(--ink-soft);">
+        Donc le cron quotidien FINMA en prod est cassé depuis ~36h, sans alerte. Tes releases manuelles l'ont compensé. À régler en 5-10 min depuis <code class="mono">~/Documents/openswissdata-strategy/credentials.txt</code> (8 secrets <code class="mono">gh secret set ...</code>).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHANTIER 1 — CI REPARÉE ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Chantier 01</strong>
+      <span class="sep">/</span>
+      <span>Fix CI cassée depuis plusieurs commits</span>
+    </div>
+    <h2>D'abord, déboucher la CI rouge.</h2>
+    <p class="section-intro">
+      Avant de produire quoi que ce soit, il fallait que les tests passent. Tes emails GitHub te le rappelaient à chaque commit : <strong>"CI: Some jobs were not successful"</strong>.
+    </p>
+
+    <div class="ba-grid">
+      <div class="ba before">
+        <div class="ba-title">Avant</div>
+        <strong>CI rouge sur 5 derniers commits</strong>
+        <div style="margin-top: 8px; color: var(--ink-soft);">
+          Vitest au root scannait <code class="mono">sdks/mcp-server/tests/server.test.ts</code> mais <code class="mono">@modelcontextprotocol/sdk</code> n'est pas installé au root (pas de npm workspaces).
+        </div>
+      </div>
+      <div class="ba after">
+        <div class="ba-title">Après</div>
+        <strong>CI verte sur 3 jobs</strong>
+        <div style="margin-top: 8px; color: var(--ink-soft);">
+          <code class="mono">test</code> · <code class="mono">build</code> · <code class="mono">mcp-server</code> (job dédié qui <code class="mono">npm install</code> dans le sub-package).
+        </div>
+      </div>
+    </div>
+
+    <div class="card amber" style="margin-top: 20px;">
+      <h3>📊 Bénéfice</h3>
+      <p>
+        Tu ne reçois plus 5 emails d'échec par jour. Chaque commit qui passe est désormais un signal fiable que rien n'est cassé en aval — TypeScript, les 295 tests, et le build Astro 1066 pages.
+        Le sub-package mcp-server est aussi testé en isolation (typecheck + tests), ce qui prépare la publication npm de <code class="mono">@openswissdata/mcp</code>.
+      </p>
+      <div class="commit">commit <strong>f1f1ed3</strong> · vitest.config.ts + .github/workflows/ci.yml</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHANTIER 2 — REFRESH TARES ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Chantier 02</strong>
+      <span class="sep">/</span>
+      <span>Workflow TARES auto</span>
+    </div>
+    <h2>TARES devient <span class="serif">automatique</span> — comme FINMA.</h2>
+    <p class="section-intro">
+      Avant cette nuit, ta promesse "delta hebdomadaire TARES" reposait sur une release manuelle déclenchée par toi.
+      Maintenant, un workflow GitHub Actions s'en charge tous les lundis matin sans que tu n'aies à toucher quoi que ce soit.
+    </p>
+
+    <div class="diagram">
+      <div class="pipeline">
+        <div class="pipe-node source">
+          <div class="pipe-node-label">Source</div>
+          <div class="pipe-node-title">7 XLSX BAZG</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node action">
+          <div class="pipe-node-label">Cron lundi 04:00 UTC</div>
+          <div class="pipe-node-title">refresh-tares.yml</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">
+          <div class="pipe-node-label">ETL</div>
+          <div class="pipe-node-title">Parse + normalize</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">
+          <div class="pipe-node-label">Sécurité</div>
+          <div class="pipe-node-title">Sign Ed25519</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node deliver">
+          <div class="pipe-node-label">Distribution</div>
+          <div class="pipe-node-title">R2 + DB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-grid" style="margin-top: 20px;">
+      <div class="card">
+        <div class="card-tag"><span class="num">A</span>Ce qui change pour toi</div>
+        <h3>Plus de release manuelle hebdomadaire</h3>
+        <p>Tu économises ~20 min × 4 par mois = 80 min/mois sur des tâches répétitives. Le workflow tourne, hash, build, signe et publie sans intervention.</p>
+        <div class="impact"><strong>Bénéfice</strong> · ~16 h économisées par an + zéro risque d'oubli si tu pars en vacances</div>
+      </div>
+      <div class="card">
+        <div class="card-tag"><span class="num">B</span>Ce qui change pour le client</div>
+        <h3>Promesse "hebdomadaire" enfin honorée</h3>
+        <p>Avant : déclaratif. Maintenant : un workflow vérifiable dans <code class="mono">.github/workflows/</code>. Si un client demande "à quelle fréquence", tu pointes le code source.</p>
+        <div class="impact"><strong>Bénéfice</strong> · vendable comme argument compliance, defendable en audit</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 16px; border-color: var(--amber); background: var(--amber-soft);">
+      <h3 style="color: var(--amber);">🔒 Garde-fou</h3>
+      <p style="color: var(--ink);">
+        Le cron est <strong>désactivé par défaut</strong> (gated par variable <code class="mono">TARES_CRON_ENABLED</code>). Tant que tu n'as pas validé un dry-run manuel, il ne tourne pas tout seul. Pour activer après ton dry-run :
+      </p>
+      <pre style="background: white; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-family: 'Geist Mono', monospace; font-size: 11px; margin: 10px 0;">gh variable set TARES_CRON_ENABLED --body "true"</pre>
+    </div>
+
+    <div class="card" style="margin-top: 16px; background: var(--bg-soft); border: none;">
+      <div class="commit" style="border: none; padding: 0;">commit <strong>2c5a148</strong> · .github/workflows/refresh-tares.yml (45 lignes)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHANTIER 3 — CANARY ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Chantier 03</strong>
+      <span class="sep">/</span>
+      <span>Monitoring canary 10 sources</span>
+    </div>
+    <h2>Le <span class="serif">canary</span> qui détecte les ruptures avant les clients.</h2>
+    <p class="section-intro">
+      C'est ici que se joue ta promesse "<strong>on prévient dès qu'on détecte la rupture amont</strong>". Un workflow tourne tous les jours à 09:00 CEST et calcule un hash de chaque source fédérale. Si le hash diverge → issue GitHub auto avec le diff.
+    </p>
+
+    <div class="diagram">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+        <div class="pipe-node">
+          <div class="pipe-node-label">BAZG · TARES</div>
+          <div class="pipe-node-title">7 XLSX</div>
+          <div style="font-size: 10px; color: var(--ink-mute); margin-top: 4px;">tariff_8_digit · tarifstruktur · 4 duty_rates · customs_facilities</div>
+        </div>
+        <div class="pipe-node">
+          <div class="pipe-node-label">FINMA</div>
+          <div class="pipe-node-title">UID CSV</div>
+          <div style="font-size: 10px; color: var(--ink-mute); margin-top: 4px;">consolidated daily csv</div>
+        </div>
+        <div class="pipe-node">
+          <div class="pipe-node-label">BFS · OFS</div>
+          <div class="pipe-node-title">2 NOGA i14y</div>
+          <div style="font-size: 10px; color: var(--ink-mute); margin-top: 4px;">2008 + 2025 (JSON shape hash)</div>
+        </div>
+      </div>
+      <div style="text-align: center; padding: 24px 0; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--ink-mute);">↓ SHA-256 quotidien · comparaison à etl/canary-baseline.json ↓</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="pipe-node deliver">
+          <div class="pipe-node-label">Si match</div>
+          <div class="pipe-node-title">exit 0 · silence</div>
+        </div>
+        <div class="pipe-node" style="background: var(--accent-soft); border-color: var(--accent); color: var(--accent);">
+          <div class="pipe-node-label" style="color: rgba(220,31,45,.7);">Si drift</div>
+          <div class="pipe-node-title">issue GitHub auto</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-grid" style="margin-top: 24px;">
+      <div class="card">
+        <div class="card-tag"><span class="num">A</span>Mode raw (8 sources)</div>
+        <h3>Hash bytes complet</h3>
+        <p>Pour les XLSX BAZG et le CSV FINMA. Sensibilité maximale : tout octet qui change → alerte. Risque de faux positifs sur les métadonnées XLSX, mais on préfère trop sensible que pas assez.</p>
+      </div>
+      <div class="card">
+        <div class="card-tag"><span class="num">B</span>Mode json-shape (2 sources)</div>
+        <h3>Signature structurelle</h3>
+        <p>Pour les API i14y BFS. On hashe les noms de champs et longueurs d'arrays — pas les valeurs. Insensible aux row-updates normales, ne déclenche que si BFS renomme un champ ou change la structure.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 16px;">
+      <h3>📊 Bénéfice opérationnel</h3>
+      <p>
+        Tu pourras désormais répondre honnêtement à un prospect compliance : <em>"comment vous garantissez la fraîcheur ?"</em> → <strong>"on a un canary quotidien sur les 10 sources amont, avec issue tracking automatique si rupture, et un cron de refresh hebdomadaire qui tourne sur les XLSX officiels."</strong>
+      </p>
+      <p>Validation live : 10/10 sources hashées avec succès (BAZG XLSX 232 KB → 11 MB, FINMA CSV 460 KB, NOGA JSON 5.6 MB), 0 drift au 1er run, exit 0. Le job CI a confirmé que ça marche aussi côté serveur GitHub.</p>
+      <div class="commit">commit <strong>2c5a148</strong> · scripts/monitor-sources.ts (218 lignes) + .github/workflows/monitor-sources.yml (114 lignes) + etl/canary-baseline.json</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHANTIER 4 — COPY HONNETE ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Chantier 04</strong>
+      <span class="sep">/</span>
+      <span>Copy aligné sur la réalité</span>
+    </div>
+    <h2>Une promesse, <span class="serif">défendable</span>.</h2>
+    <p class="section-intro">
+      Hier tu m'as demandé "qu'est-ce qui assure ceci" sur les 30 jours d'avance en cas de rupture format. Réponse honnête : rien, à l'époque. Maintenant le canary l'assure techniquement, donc je l'ai écrit dans la FAQ.
+    </p>
+
+    <div class="ba-grid">
+      <div class="ba before">
+        <div class="ba-title">FAQ avant</div>
+        <div style="font-style: italic; color: var(--ink-soft);">
+          "Si une rupture force un changement de schéma chez vous, on prévient <strong style="background: var(--accent); color: white; padding: 1px 6px; border-radius: 3px; font-style: normal;">30 jours avant</strong> via email et changelog."
+        </div>
+        <div style="margin-top: 10px; font-size: 11px; color: var(--accent);">⚠ Pas de mécanisme. Risque litigieux.</div>
+      </div>
+      <div class="ba after">
+        <div class="ba-title">FAQ après</div>
+        <div style="font-style: italic; color: var(--ink-soft);">
+          "On surveille les sources amont en continu (canary quotidien) — vous êtes prévenu par email et changelog <strong style="background: var(--green); color: white; padding: 1px 6px; border-radius: 3px; font-style: normal;">dès qu'on détecte la rupture</strong>, avec la date d'effet."
+        </div>
+        <div style="margin-top: 10px; font-size: 11px; color: var(--green);">✓ Aligné avec le canary qui tourne en CI</div>
+      </div>
+    </div>
+
+    <div class="card-grid" style="margin-top: 24px;">
+      <div class="card">
+        <h3>📊 Bénéfice juridique</h3>
+        <p>
+          Dans un litige B2B, "30 jours avant" est une promesse arbitraire qui peut se retourner contre toi. "Dès qu'on détecte" est défendable — il suffit de produire les logs canary et l'horodatage de l'issue auto.
+        </p>
+      </div>
+      <div class="card">
+        <h3>🎯 Bénéfice commercial</h3>
+        <p>
+          Tu pourras montrer le canary en démo : <em>"voilà comment on surveille FINMA, BAZG, BFS — et voilà la baseline qu'on suit."</em> C'est une preuve d'industrialisation que les concurrents low-cost ne peuvent pas fournir.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 16px; background: var(--bg-soft); border: none;">
+      <div class="commit" style="border: none; padding: 0;">commit <strong>2c5a148</strong> · web/src/pages/index.astro (FAQ section)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHANTIER 5 — DOC ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Chantier 05</strong>
+      <span class="sep">/</span>
+      <span>Documentation opérationnelle</span>
+    </div>
+    <h2>Si je disparais, le pipeline survit.</h2>
+    <p class="section-intro">
+      <code class="mono">docs/operations/refresh-pipeline.md</code> documente les 3 workflows, le canary, les commandes pour lancer dry-runs et procédures en cas de drift. Si tu reviens dans 6 mois ou si quelqu'un d'autre prend le relais, tout est expliqué.
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Sections du doc</h3>
+        <ul style="font-size: 13px; color: var(--ink-soft); padding-left: 20px; line-height: 1.7;">
+          <li><strong>refresh-finma.yml</strong> — quotidien, source FINMA UID CSV</li>
+          <li><strong>refresh-tares.yml</strong> — hebdomadaire, 7 XLSX BAZG</li>
+          <li><strong>monitor-sources.yml</strong> — canary 10 sources</li>
+          <li>Procédure en cas de drift (4 étapes)</li>
+          <li>Pipeline de release manuel (référence)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Commandes utiles</h3>
+        <pre style="background: var(--bg-soft); border-radius: 6px; padding: 12px; font-family: 'Geist Mono', monospace; font-size: 11px; overflow-x: auto;">gh workflow run refresh-tares.yml
+gh workflow run monitor-sources.yml \
+  -f update_baseline=true
+gh issue list --label canary
+npx tsx scripts/monitor-sources.ts</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TIMELINE COMMITS ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Timeline</strong>
+      <span class="sep">/</span>
+      <span>4 commits poussés live cette nuit</span>
+    </div>
+    <h2>Tout est en prod.</h2>
+
+    <div class="timeline" style="margin-top: 24px;">
+      <div class="commit-row">
+        <div class="commit-hash">f1f1ed3</div>
+        <div class="commit-msg">
+          <span class="scope">fix(ci)</span> exclude sdks/mcp-server from root vitest, run it in dedicated job
+          <div class="desc">CI verte pour la première fois depuis plusieurs jours · 288 + 7 tests OK</div>
+        </div>
+      </div>
+      <div class="commit-row">
+        <div class="commit-hash">2c5a148</div>
+        <div class="commit-msg">
+          <span class="scope">feat(ops)</span> TARES auto-refresh + canary quotidien sur sources amont
+          <div class="desc">3 workflows, 1 script canary 218 lignes, 1 doc opérationnel · 600 lignes ajoutées</div>
+        </div>
+      </div>
+      <div class="commit-row">
+        <div class="commit-hash">af7935b</div>
+        <div class="commit-msg">
+          <span class="scope">docs(audit)</span> rapport nuit 2-3 mai — CI fixée, canary live, secrets manquants
+          <div class="desc">PROGRESS-NIGHT-2026-05-03.md avec punch list ordonnée</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PUNCH LIST ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Action ce matin</strong>
+      <span class="sep">/</span>
+      <span>Punch list ordonnée</span>
+    </div>
+    <h2>Ta to-do pour ce matin.</h2>
+    <p class="section-intro">
+      Cinq actions, ~15 min au total. La P0 débloque tout le reste.
+    </p>
+
+    <div class="punch">
+      <div class="punch-row">
+        <div><span class="punch-pri p0">P0</span></div>
+        <div class="punch-task">
+          <strong>Configurer les 8 secrets GitHub Actions</strong>
+          <div style="font-size: 12px; color: var(--ink-mute); margin-top: 4px;">
+            <code class="mono">gh secret set ADMIN_SECRET</code> + R2_*, OSD_SIGNING_KEY_ED25519, RESEND_*. Valeurs dans <code class="mono">~/Documents/openswissdata-strategy/credentials.txt</code>.
+          </div>
+        </div>
+        <div class="punch-eta">5-10 min</div>
+      </div>
+      <div class="punch-row">
+        <div><span class="punch-pri p0">P0</span></div>
+        <div class="punch-task">
+          <strong>Lancer 2 dry-runs pour valider</strong>
+          <div style="font-size: 12px; color: var(--ink-mute); margin-top: 4px;">
+            <code class="mono">gh workflow run refresh-tares.yml</code> puis <code class="mono">gh workflow run refresh-finma.yml</code>. Attendre 5 min, vérifier <code class="mono">gh run list --limit 5</code>.
+          </div>
+        </div>
+        <div class="punch-eta">5 min</div>
+      </div>
+      <div class="punch-row">
+        <div><span class="punch-pri p1">P1</span></div>
+        <div class="punch-task">
+          <strong>Activer le cron TARES si dry-runs OK</strong>
+          <div style="font-size: 12px; color: var(--ink-mute); margin-top: 4px;">
+            <code class="mono">gh variable set TARES_CRON_ENABLED --body "true"</code> · à partir de là, le cron tourne tous les lundis 04:00 UTC.
+          </div>
+        </div>
+        <div class="punch-eta">30 s</div>
+      </div>
+      <div class="punch-row">
+        <div><span class="punch-pri p1">P1</span></div>
+        <div class="punch-task">
+          <strong>Vérifier qu'aucune issue canary n'a été ouverte</strong>
+          <div style="font-size: 12px; color: var(--ink-mute); margin-top: 4px;">
+            <code class="mono">gh issue list --label canary</code> · si vide, le canary n'a rien détecté de bizarre cette nuit.
+          </div>
+        </div>
+        <div class="punch-eta">1 min</div>
+      </div>
+      <div class="punch-row">
+        <div><span class="punch-pri p2">P2</span></div>
+        <div class="punch-task">
+          <strong>Lire la doc pipeline pour avoir la map mentale</strong>
+          <div style="font-size: 12px; color: var(--ink-mute); margin-top: 4px;">
+            <code class="mono">docs/operations/refresh-pipeline.md</code> · 5 minutes pour comprendre les 3 workflows et la procédure drift.
+          </div>
+        </div>
+        <div class="punch-eta">5 min</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · récap de nuit</strong></p>
+    <p style="margin: 0;">
+      Cette nuit a transformé deux promesses marketing déclaratives ("delta hebdomadaire", "30 jours d'avance") en mécanismes opérationnels vérifiables (workflows + canary + issue tracking + documentation).
+      Le seul finding bloquant — les secrets GitHub manquants — est <strong>antérieur à mon travail</strong>, je l'ai mis à jour en testant. C'est probablement la dernière brique avant le launch jeudi.
+    </p>
+    <p style="margin-top: 14px; color: var(--ink-mute);" class="mono">
+      Bonne journée Alain. Le pipeline est plus solide qu'hier soir.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

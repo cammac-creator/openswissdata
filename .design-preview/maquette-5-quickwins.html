@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maquette 5 quick wins · openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F4EE;
+    --ink: #0A0A0C;
+    --ink-soft: #3A3D45;
+    --ink-mute: #6B6E76;
+    --line: #E8E4D9;
+    --line-strong: #D9D3C3;
+    --accent: #DC1F2D;
+    --accent-soft: #FCE7E9;
+    --green: #15803D;
+    --green-soft: #DCFCE7;
+    --amber: #92400E;
+    --amber-soft: #FEF3C7;
+    --teal: #0F766E;
+    --teal-soft: #E5F5F1;
+    --blue: #1D4ED8;
+    --blue-soft: #DBEAFE;
+    --purple: #6D28D9;
+    --purple-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%;
+    z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  /* Hero */
+  .hero { padding: 56px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font-weight: 700;
+    font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -.03em;
+    margin: 0 0 18px;
+    max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  /* Quick win section */
+  .qw-section { padding: 64px 0; border-top: 1px solid var(--line); }
+  .qw-num {
+    font-family: "Geist Mono", monospace;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: .08em;
+    margin-bottom: 8px;
+  }
+  .qw-title {
+    font-weight: 700;
+    font-size: clamp(28px, 3vw, 38px);
+    line-height: 1.1;
+    letter-spacing: -.025em;
+    margin: 0 0 12px;
+    max-width: 26ch;
+  }
+  .qw-tagline {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 0 0 24px;
+  }
+  .qw-meta {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .qw-meta span {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--bg-soft);
+    color: var(--ink-mute);
+    font-weight: 500;
+  }
+  .qw-meta .effort { background: var(--green-soft); color: var(--green); font-weight: 700; }
+  .qw-meta .impact { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+
+  .qw-mockup-label {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .qw-mockup-label::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .qw-mockup {
+    background: var(--bg-card);
+    border: 2px dashed var(--line-strong);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .qw-mockup::after {
+    content: 'MAQUETTE';
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-family: "Geist Mono", monospace;
+    font-size: 8px;
+    letter-spacing: .12em;
+    color: var(--ink-mute);
+    background: var(--bg-soft);
+    padding: 3px 7px;
+    border-radius: 3px;
+  }
+
+  .qw-explain {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 880px) { .qw-explain { grid-template-columns: 1fr; } }
+  .qw-block {
+    padding: 20px 22px;
+    border-radius: 10px;
+  }
+  .qw-block.why { background: var(--bg-soft); border-left: 3px solid var(--accent); }
+  .qw-block.how { background: var(--bg-card); border: 1px solid var(--line); }
+  .qw-block-label {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .qw-block.why .qw-block-label { color: var(--accent); }
+  .qw-block-title { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
+  .qw-block ul { margin: 0; padding-left: 20px; }
+  .qw-block li { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 4px; }
+  .qw-block li strong { color: var(--ink); font-weight: 600; }
+  .qw-block p { font-size: 13px; color: var(--ink-soft); line-height: 1.65; margin: 0 0 8px; }
+
+  /* === Mockup-specific styles === */
+
+  /* QW1 — Bannière refund */
+  .mock-banner {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 22px;
+    background: linear-gradient(135deg, var(--green-soft) 0%, var(--teal-soft) 100%);
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .mock-banner-icon {
+    width: 36px; height: 36px;
+    background: var(--green);
+    color: white;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+  .mock-banner-text { color: var(--ink); line-height: 1.45; }
+  .mock-banner-text strong { color: var(--green); font-weight: 700; }
+  .mock-banner-link {
+    margin-left: auto;
+    color: var(--green);
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    text-decoration: underline;
+    flex-shrink: 0;
+  }
+  .mock-page-frame {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .mock-page-frame-bar {
+    display: flex; gap: 6px; margin-bottom: 12px;
+  }
+  .mock-page-frame-bar span {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--line-strong);
+  }
+  .mock-page-frame-bar span:first-child { background: #ff5f57; }
+  .mock-page-frame-bar span:nth-child(2) { background: #ffbd2e; }
+  .mock-page-frame-bar span:nth-child(3) { background: #28c940; }
+  .mock-page-frame-bar .url {
+    flex: 1;
+    height: 16px;
+    background: var(--bg-soft);
+    border-radius: 4px;
+    margin-left: 8px;
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    padding: 1px 8px;
+    color: var(--ink-mute);
+  }
+
+  /* QW2 — Comparison table */
+  .mock-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .mock-table th, .mock-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+  .mock-table thead {
+    background: var(--bg-soft);
+  }
+  .mock-table th {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 600;
+  }
+  .mock-table td:first-child {
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--bg-soft);
+  }
+  .mock-table td.col-osd { background: rgba(220,252,231,.4); }
+  .mock-table tr:last-child td { border-bottom: none; }
+  .mock-table .col-osd-header { color: var(--green); }
+  .check { color: var(--green); font-weight: 700; }
+  .cross { color: var(--accent); }
+  .partial { color: var(--amber); }
+
+  /* QW3 — Calculator */
+  .mock-calc {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .mock-calc-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 16px;
+  }
+  .mock-calc-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .mock-calc-row label {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .mock-calc-row input {
+    width: 90px;
+    padding: 8px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    font-family: "Geist Mono", monospace;
+    font-size: 14px;
+    text-align: right;
+  }
+  .mock-calc-row input:focus { outline: 2px solid var(--accent); }
+  .mock-calc-result {
+    margin-top: 16px;
+    padding: 18px 20px;
+    background: var(--accent-soft);
+    border-radius: 10px;
+    border: 1px solid var(--accent);
+  }
+  .mock-calc-result-label {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .mock-calc-result-amount {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -.02em;
+  }
+  .mock-calc-result-vs {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+  .mock-calc-result-vs strong { color: var(--green); font-weight: 700; }
+  .mock-calc-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    margin-top: 14px;
+  }
+  .mock-calc-iframe-hint {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--line);
+  }
+
+  /* QW4 — Substack */
+  .mock-email {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .mock-email-header {
+    background: var(--bg-soft);
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-mute);
+    font-family: "Geist Mono", monospace;
+  }
+  .mock-email-header strong { color: var(--ink); font-weight: 600; }
+  .mock-email-body { padding: 24px 28px; }
+  .mock-email-body h3 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .mock-email-body .date {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-bottom: 16px;
+  }
+  .mock-email-body p { font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 12px; }
+  .mock-email-update {
+    display: flex; gap: 12px;
+    padding: 12px 14px;
+    background: var(--bg-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    margin: 8px 0;
+    font-size: 13px;
+  }
+  .mock-email-update-source {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 2px 7px;
+    border-radius: 3px;
+    height: fit-content;
+    flex-shrink: 0;
+  }
+
+  /* QW5 — Diff Watcher */
+  .mock-diff {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .mock-diff-header {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 16px 22px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .mock-diff-header h4 { margin: 0; font-size: 16px; font-weight: 700; }
+  .mock-diff-header .live {
+    display: flex; align-items: center; gap: 6px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,.7);
+  }
+  .mock-diff-header .live::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+  .mock-diff-row {
+    display: grid;
+    grid-template-columns: 90px 90px 1fr 100px;
+    gap: 14px;
+    padding: 12px 22px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    align-items: center;
+  }
+  .mock-diff-row:last-child { border-bottom: none; }
+  .mock-diff-time {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .mock-diff-source {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    width: fit-content;
+    font-weight: 600;
+  }
+  .mock-diff-source.bazg { background: var(--accent-soft); color: var(--accent); }
+  .mock-diff-source.finma { background: var(--blue-soft); color: var(--blue); }
+  .mock-diff-source.bfs { background: var(--purple-soft); color: var(--purple); }
+  .mock-diff-desc { color: var(--ink); }
+  .mock-diff-desc strong { font-weight: 600; }
+  .mock-diff-desc .code-mono { font-family: "Geist Mono", monospace; font-size: 12px; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+  .mock-diff-type {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    text-align: right;
+    color: var(--ink-mute);
+  }
+
+  /* CTA section */
+  .cta-final {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg);
+    border-radius: 14px;
+    padding: 36px 40px;
+    margin: 24px 0;
+    text-align: center;
+  }
+  .cta-final h3 { color: var(--bg); margin: 0 0 10px; font-size: 22px; }
+  .cta-final p { color: rgba(255,255,255,.75); font-size: 14px; line-height: 1.6; margin: 0 0 18px; max-width: 60ch; margin-left: auto; margin-right: auto; }
+  .cta-final code { background: rgba(255,255,255,.1); color: white; }
+
+  footer {
+    padding: 36px 0 56px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Maquette · 5 quick wins vente · J-2 avant launch</span>
+    </div>
+    <h1>5 quick wins. <span class="accent">5 maquettes.</span></h1>
+    <p class="lede">
+      Avant de te lancer dans le code, voici à quoi ressemblera concrètement chacun des 5 quick wins identifiés par l'audit ventes. Chaque section : <strong>maquette visuelle</strong> du résultat attendu + <strong>pourquoi ça marche</strong> + <strong>comment je l'implémente</strong>. Tu valides au cas par cas.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- QUICK WIN #1 — BANNIÈRE REFUND -->
+<!-- ============================================================ -->
+<section class="qw-section">
+  <div class="container">
+    <div class="qw-num">QUICK WIN 01 / 05</div>
+    <h2 class="qw-title">Bannière "Refund 100% si BFS/FINMA refusent"</h2>
+    <p class="qw-tagline">
+      Une bannière persistante en haut du site qui transforme la faiblesse "permission en attente" en argument de vente.
+    </p>
+    <div class="qw-meta">
+      <span class="effort">EFFORT XS · 15 min</span>
+      <span class="impact">IMPACT · Conversion immédiate</span>
+      <span>🟢 Moi</span>
+    </div>
+
+    <div class="qw-mockup-label">Maquette du rendu attendu (bannière en haut de toutes les pages)</div>
+    <div class="qw-mockup">
+      <div class="mock-page-frame">
+        <div class="mock-page-frame-bar">
+          <span></span><span></span><span></span>
+          <span class="url">www.openswissdata.com/datasets/finma</span>
+        </div>
+        <div class="mock-banner">
+          <div class="mock-banner-icon">⚖️</div>
+          <div class="mock-banner-text">
+            <strong>Garantie permission</strong> · Les datasets BFS et FINMA sont en attente de permission écrite (demandée le 2026-04-17). <strong>Si une permission est refusée, refund 100 % automatique sur ce dataset, sans condition.</strong>
+          </div>
+          <a href="#" class="mock-banner-link">Détails →</a>
+        </div>
+        <div style="margin-top: 18px; opacity: .35; font-size: 14px;">
+          [reste de la page produit FINMA…]
+        </div>
+      </div>
+    </div>
+
+    <div class="qw-explain">
+      <div class="qw-block why">
+        <div class="qw-block-label">⚡ Pourquoi ça marche</div>
+        <p>L'objection #1 du sceptique compliance : <em>"et si BFS me poursuit pour avoir acheté un dataset non-autorisé ?"</em>. Tu transformes cette peur en argument commercial.</p>
+        <ul>
+          <li><strong>Anti-FUD radical</strong> — au lieu de cacher la zone grise, tu la commercialises comme garantie.</li>
+          <li><strong>Coût de risque transféré au vendeur</strong> — l'acheteur ne porte plus le risque.</li>
+          <li><strong>Prouve la confiance interne</strong> — un éditeur qui propose ça est sûr d'obtenir les permissions.</li>
+        </ul>
+      </div>
+      <div class="qw-block how">
+        <div class="qw-block-label">🛠 Comment je l'implémente</div>
+        <ul>
+          <li>Composant <code>PermissionGuarantee.astro</code> dans <code>web/src/components/</code></li>
+          <li>Inclus dans <code>BaseLayout.astro</code> — apparaît au-dessus du <code>StatusBar</code> sur toutes les pages</li>
+          <li>Conditionnel : montré uniquement sur <code>/datasets/classifications</code>, <code>/datasets/finma</code>, <code>/bundle</code>. Pas sur TARES (permission OK).</li>
+          <li>Clause refund formalisée dans CGV §6 (paragraphe court, lien depuis "Détails")</li>
+          <li>Bouton dismiss (<code>localStorage.setItem('permission-banner-dismissed', '1')</code>) — discret pour les visiteurs récurrents</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- QUICK WIN #2 — COMPARISON PAGE -->
+<!-- ============================================================ -->
+<section class="qw-section">
+  <div class="container">
+    <div class="qw-num">QUICK WIN 02 / 05</div>
+    <h2 class="qw-title">Page "openswissdata vs scraper TARES"</h2>
+    <p class="qw-tagline">
+      Page dédiée long-form qui capture l'intention d'achat des dev qui googlent <em>"comment scraper xtares.admin.ch"</em>.
+    </p>
+    <div class="qw-meta">
+      <span class="effort">EFFORT S · 2h</span>
+      <span class="impact">IMPACT · SEO long-tail permanent</span>
+      <span>🟢 Moi</span>
+    </div>
+
+    <div class="qw-mockup-label">Maquette du tableau comparatif (cœur de la page /vs-scraper)</div>
+    <div class="qw-mockup">
+      <div style="font-family: 'Geist', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 6px;">Scraper xtares.admin.ch vs openswissdata · le comparatif honnête</div>
+      <p style="font-size: 13px; color: var(--ink-mute); margin: 0 0 18px;">3 approches face au tarif douanier suisse. Voici à quoi vous vous engagez réellement, en heures et en CHF.</p>
+
+      <table class="mock-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Scraper xtares</th>
+            <th>Suite enterprise</th>
+            <th class="col-osd-header">openswissdata</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Coût initial</td>
+            <td><span class="check">Gratuit</span></td>
+            <td>10 000+ CHF/an</td>
+            <td class="col-osd"><strong>299 CHF one-shot</strong></td>
+          </tr>
+          <tr>
+            <td>Maintenance / an</td>
+            <td>~5 j-h × 6 releases ≈ 36 000 CHF</td>
+            <td>Inclus (mais bloqué)</td>
+            <td class="col-osd">120 CHF/an (optionnel)</td>
+          </tr>
+          <tr>
+            <td>Format</td>
+            <td>HTML scrapé (fragile)</td>
+            <td>Format propriétaire</td>
+            <td class="col-osd">CSV · JSON · Parquet · SQL</td>
+          </tr>
+          <tr>
+            <td>Signature crypto</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="partial">Possible (option)</span></td>
+            <td class="col-osd"><strong>Ed25519 + RFC-3161</strong></td>
+          </tr>
+          <tr>
+            <td>Permission BAZG écrite</td>
+            <td><span class="cross">Zone grise (LCD art. 5)</span></td>
+            <td>Inconnue</td>
+            <td class="col-osd"><span class="check">2026-04-21</span></td>
+          </tr>
+          <tr>
+            <td>MCP-ready (Claude/Cursor)</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td class="col-osd"><span class="check">9 tools live</span></td>
+          </tr>
+          <tr>
+            <td>Quand BAZG change le format</td>
+            <td>Pipeline cassé un mardi 17h</td>
+            <td>Roadmap 6-12 mois</td>
+            <td class="col-osd"><strong>Update sous 7j</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 14px; font-size: 12px; color: var(--ink-mute);">→ Suivi de 3 sections : "Pourquoi le DIY semble gratuit", "Le coût caché des 5 j-h × 6 releases", "Comment vérifier nous (en 30s avec openssl)".</p>
+    </div>
+
+    <div class="qw-explain">
+      <div class="qw-block why">
+        <div class="qw-block-label">⚡ Pourquoi ça marche</div>
+        <ul>
+          <li><strong>SEO long-tail très intentionnel</strong> — les mots-clés "scraper xtares.admin.ch", "TARES API gratuite", "BAZG XLSX automation" ont peu de volume mais une intention d'achat brutale.</li>
+          <li><strong>Les ranks sur "vs" sont pérennes</strong> — Google les juge comme du contenu utile (comparison).</li>
+          <li><strong>Le tableau honnête neutralise les concurrents</strong> — tu ne caches pas le DIY, tu en montres le vrai coût.</li>
+          <li><strong>Drainage interne</strong> — la page renvoie vers /datasets/tares, /provenance, et /bundle.</li>
+        </ul>
+      </div>
+      <div class="qw-block how">
+        <div class="qw-block-label">🛠 Comment je l'implémente</div>
+        <ul>
+          <li>Nouvelle page <code>web/src/pages/vs-scraper.astro</code></li>
+          <li>Wrapper en design v4 (cohérent avec /datasets)</li>
+          <li>Sections : intro · tableau comparatif (ci-dessus) · 3 paragraphes "pourquoi DIY semble gratuit / coût caché / comment vérifier" · CTA finale vers /datasets/tares + /bundle</li>
+          <li>Meta SEO : title "TARES — scraper ou acheter ? Le calcul honnête | openswissdata", description avec mots-clés intentionnels</li>
+          <li>JSON-LD <code>FAQPage</code> avec 3 questions/réponses (boost rich snippets Google)</li>
+          <li>Lien depuis le footer "Pour les développeurs" + une mention dans la FAQ home</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- QUICK WIN #3 — CALCULATOR -->
+<!-- ============================================================ -->
+<section class="qw-section">
+  <div class="container">
+    <div class="qw-num">QUICK WIN 03 / 05</div>
+    <h2 class="qw-title">Calculator "Coût TARES interne" embeddable</h2>
+    <p class="qw-tagline">
+      Mini calculator interactif qui chiffre en 3 inputs ce que coûte un pipeline TARES maison. Iframe que les consultants peuvent embarquer sur leur site.
+    </p>
+    <div class="qw-meta">
+      <span class="effort">EFFORT S · 1h</span>
+      <span class="impact">IMPACT · Viral B2B + conversion</span>
+      <span>🟢 Moi</span>
+    </div>
+
+    <div class="qw-mockup-label">Maquette interactive du calculator (essaie de modifier les valeurs !)</div>
+    <div class="qw-mockup">
+      <div class="mock-calc">
+        <div class="mock-calc-title">Combien vous coûte de maintenir TARES en interne ?</div>
+        <div class="mock-calc-row">
+          <label>Tarif horaire de votre dev / consultant (CHF)</label>
+          <input type="number" id="calc-hourly" value="150" min="50" max="500" step="10" />
+        </div>
+        <div class="mock-calc-row">
+          <label>Heures par release (ETL + tests + déploiement)</label>
+          <input type="number" id="calc-hours" value="40" min="5" max="200" step="5" />
+        </div>
+        <div class="mock-calc-row">
+          <label>Nombre de releases BAZG à intégrer / an</label>
+          <input type="number" id="calc-releases" value="6" min="1" max="24" step="1" />
+        </div>
+        <div class="mock-calc-result">
+          <div class="mock-calc-result-label">Votre coût annuel TARES interne</div>
+          <div class="mock-calc-result-amount" id="calc-output">36'000 CHF</div>
+          <div class="mock-calc-result-vs">
+            soit <strong id="calc-multiplier">120×</strong> le prix d'openswissdata TARES (299 CHF/an, mises à jour 360j incluses).
+          </div>
+        </div>
+        <a href="#" class="mock-calc-cta">Acheter TARES — 299 CHF →</a>
+        <div class="mock-calc-iframe-hint">
+          📋 Embeddable : <code>&lt;iframe src="https://www.openswissdata.com/calc?utm=monsite"&gt;</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="qw-explain">
+      <div class="qw-block why">
+        <div class="qw-block-label">⚡ Pourquoi ça marche</div>
+        <ul>
+          <li><strong>Le visiteur fait le calcul lui-même</strong> — l'évidence économique est imparable car c'est SES propres chiffres.</li>
+          <li><strong>Viralisation B2B</strong> — un consultant qui audite un client peut embarquer ce calculator dans son rapport. Il drague ses leads, on récupère du trafic qualifié.</li>
+          <li><strong>Capture leads sans friction</strong> — pas de form email, juste 3 sliders. La conversion suit naturellement.</li>
+          <li><strong>UTM auto-tracké</strong> — chaque embed a son <code>?utm</code>, on sait quelle plateforme/blog ramène le plus.</li>
+        </ul>
+      </div>
+      <div class="qw-block how">
+        <div class="qw-block-label">🛠 Comment je l'implémente</div>
+        <ul>
+          <li>Nouvelle page <code>web/src/pages/calc.astro</code> (auto-contenu, iframe-friendly)</li>
+          <li>Calcul JS inline (3 inputs × multiplication)</li>
+          <li>Variantes pour TARES / FINMA / Classifications (chacun ses inputs spécifiques : par ex. "nb d'audits FINMA/an" pour FINMA)</li>
+          <li>Section dédiée sur la home avec le calculator <strong>intégré</strong> + section "Embed sur votre site" avec le snippet HTML à copier</li>
+          <li>Cookie de tracking minimal (consentement non requis car pas de PII)</li>
+          <li>Headers <code>X-Frame-Options</code> ajustés pour autoriser l'embed (<code>frame-ancestors *</code> sur cette page uniquement)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- QUICK WIN #4 — SUBSTACK -->
+<!-- ============================================================ -->
+<section class="qw-section">
+  <div class="container">
+    <div class="qw-num">QUICK WIN 04 / 05</div>
+    <h2 class="qw-title">Newsletter Substack "ETL Fédéral Suisse" Day 1</h2>
+    <p class="qw-tagline">
+      Une newsletter hebdomadaire gratuite qui résume les 5 changements officiels de la semaine sur BAZG/BFS/FINMA. Lancement même jour que le launch produit.
+    </p>
+    <div class="qw-meta">
+      <span class="effort">EFFORT S · 1h setup + 30 min/sem</span>
+      <span class="impact">IMPACT · Asset cumulatif 12 mois</span>
+      <span>🔵 Toi pour le contenu</span>
+    </div>
+
+    <div class="qw-mockup-label">Maquette de la 1ère newsletter (envoyée jeudi 7 mai à 10h)</div>
+    <div class="qw-mockup">
+      <div class="mock-email">
+        <div class="mock-email-header">
+          📬 <strong>ETL Fédéral Suisse</strong> · openswissdata · Numéro #1 · 2026-05-07
+        </div>
+        <div class="mock-email-body">
+          <h3>5 changements officiels suisses cette semaine</h3>
+          <div class="date">Numéro inaugural · ce que vous avez raté pendant que vous codiez</div>
+
+          <p><strong>Bonjour 👋</strong></p>
+          <p>Cette newsletter recense les changements concrets aux référentiels fédéraux suisses (douanes, classifications économiques, surveillance financière) — sans jargon, sans pub, au format scannable.</p>
+
+          <div class="mock-email-update">
+            <span class="mock-email-update-source">BAZG</span>
+            <div><strong>HS8 84713000 modifié</strong> — droits MFN passent de 0 à 1.50 CHF/100kg. Effet 2026-06-01. Concerne les imports de tablettes.</div>
+          </div>
+
+          <div class="mock-email-update">
+            <span class="mock-email-update-source">FINMA</span>
+            <div><strong>3 nouveaux PSP autorisés</strong> — Sygnum Cards SA, BlueOrca Pay AG, Vontobel Asset Manager Genève (UID + LEI dans la version openswissdata).</div>
+          </div>
+
+          <div class="mock-email-update">
+            <span class="mock-email-update-source">BFS</span>
+            <div><strong>NOGA 2025 v1.2</strong> publiée — 12 sous-classes du secteur 62 (informatique) renommées pour aligner sur NACE 2.1. Impact : votre customer master.</div>
+          </div>
+
+          <p style="margin-top: 18px; font-size: 13px; color: var(--ink-mute);">
+            Vous recevez ces 5 changements chaque jeudi matin. Pour annuler en 1 clic : <a href="#">unsubscribe</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="qw-explain">
+      <div class="qw-block why">
+        <div class="qw-block-label">⚡ Pourquoi ça marche</div>
+        <ul>
+          <li><strong>Tu vends pendant 12 mois sans vendre</strong> — chaque newsletter est utile en soi. Le lecteur compliance/data engineer s'abonne pour le contenu, pas pour le pitch.</li>
+          <li><strong>Asset cumulatif</strong> — 200 inscrits au mois 1 → 800 au mois 6 → 2000 au mois 12 (rythme typique B2B niche). Conversion 2-5 % en achat dataset.</li>
+          <li><strong>Autorité long-terme</strong> — au bout de 6 mois tu es <em>la</em> source de référence pour quiconque suit les changements fédéraux suisses.</li>
+          <li><strong>Capture leads compliance officers</strong> — exactement ta cible idéale. Pas de form download lourd à remplir, juste un email.</li>
+          <li><strong>Substack-native</strong> = 0 setup tech, 0 maintenance, archive publique SEO.</li>
+        </ul>
+      </div>
+      <div class="qw-block how">
+        <div class="qw-block-label">🛠 Comment ça se monte</div>
+        <ul>
+          <li><strong>Setup (toi, 30 min)</strong> : créer compte sur substack.com, choisir nom <code>etl-federal-suisse.substack.com</code>, design simple, 0 setup payment</li>
+          <li><strong>Contenu Day 1</strong> : je drafte le numéro inaugural à partir des données réelles de cette semaine (canary monitor-sources sait ce qui a bougé). 5 entrées, 200 mots chacune.</li>
+          <li><strong>Form d'inscription embed</strong> : code Substack inline en bas de la home + footer + page /blog</li>
+          <li><strong>Cadence</strong> : 1 numéro/jeudi à 10h CEST. 30 min de rédaction si tu as les inputs (canary du repo + 1-2 articles BAZG/FINMA récents).</li>
+          <li><strong>Cross-post</strong> : chaque numéro re-publié comme article de blog 1 semaine plus tard (boost SEO).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- QUICK WIN #5 — DIFF WATCHER -->
+<!-- ============================================================ -->
+<section class="qw-section">
+  <div class="container">
+    <div class="qw-num">QUICK WIN 05 / 05</div>
+    <h2 class="qw-title">Diff Watcher public sur <code style="font-size: .8em;">/diff</code></h2>
+    <p class="qw-tagline">
+      Page publique gratuite qui montre en temps réel les 10 derniers changements détectés par notre canary sur les sources amont. Démo vivante de ce qu'on fait.
+    </p>
+    <div class="qw-meta">
+      <span class="effort">EFFORT M · 4h</span>
+      <span class="impact">IMPACT · SEO + preuve permanente</span>
+      <span>🟢 Moi</span>
+    </div>
+
+    <div class="qw-mockup-label">Maquette du Diff Watcher (page /diff, accessible sans inscription)</div>
+    <div class="qw-mockup">
+      <div class="mock-diff">
+        <div class="mock-diff-header">
+          <h4>Live Diff · Sources fédérales suisses</h4>
+          <div class="live">10 dernières détections</div>
+        </div>
+        <div class="mock-diff-row">
+          <div class="mock-diff-time">il y a 2h</div>
+          <div><span class="mock-diff-source bazg">BAZG</span></div>
+          <div class="mock-diff-desc">XLSX <span class="code-mono">tariff_8_digit.xlsx</span> mis à jour · <strong>+12 nouveaux HS8</strong>, <strong>3 retraits</strong> (chapitre 84)</div>
+          <div class="mock-diff-type">+15 / −3</div>
+        </div>
+        <div class="mock-diff-row">
+          <div class="mock-diff-time">il y a 8h</div>
+          <div><span class="mock-diff-source finma">FINMA</span></div>
+          <div class="mock-diff-desc">CSV <span class="code-mono">uid.csv</span> · <strong>1 nouvelle entité</strong> Sygnum Cards SA · <strong>2 retirées</strong></div>
+          <div class="mock-diff-type">+1 / −2</div>
+        </div>
+        <div class="mock-diff-row">
+          <div class="mock-diff-time">il y a 1j</div>
+          <div><span class="mock-diff-source bfs">BFS</span></div>
+          <div class="mock-diff-desc">i14y <span class="code-mono">noga_2025</span> structure inchangée · cellules confidentialité ↓</div>
+          <div class="mock-diff-type">≈</div>
+        </div>
+        <div class="mock-diff-row">
+          <div class="mock-diff-time">il y a 1j</div>
+          <div><span class="mock-diff-source bazg">BAZG</span></div>
+          <div class="mock-diff-desc">XLSX <span class="code-mono">duty_rates_84_97</span> · <strong>droits MFN modifiés</strong> sur 7 codes (chapitre 90)</div>
+          <div class="mock-diff-type">±7</div>
+        </div>
+        <div class="mock-diff-row">
+          <div class="mock-diff-time">il y a 2j</div>
+          <div><span class="mock-diff-source finma">FINMA</span></div>
+          <div class="mock-diff-desc">Statut "active" → "withdrawn" sur <span class="code-mono">CHE-101.329.561</span> (UBS Switzerland AG · branche fermée)</div>
+          <div class="mock-diff-type">±1</div>
+        </div>
+        <div class="mock-diff-row">
+          <div class="mock-diff-time">il y a 3j</div>
+          <div><span class="mock-diff-source bazg">BAZG</span></div>
+          <div class="mock-diff-desc">Nouveau régime préférentiel "Royaume-Uni 2026-Q3" sur 89 HS8</div>
+          <div class="mock-diff-type">±89</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="qw-explain">
+      <div class="qw-block why">
+        <div class="qw-block-label">⚡ Pourquoi ça marche</div>
+        <ul>
+          <li><strong>Démontre la valeur en temps réel</strong> — un visiteur voit que les sources changent vraiment, et qu'openswissdata les capte automatiquement.</li>
+          <li><strong>SEO killer</strong> — chaque entrée est indexable, génère du contenu frais quotidien sans effort manuel.</li>
+          <li><strong>"Pourquoi pas le faire moi-même ?"</strong> — réponse implicite : <em>"Vous voulez vraiment surveiller 10 sources amont chaque jour ?"</em>.</li>
+          <li><strong>Gratuit = trust gradient</strong> — tu donnes une partie de la valeur sans rien demander en retour. La conversion paie le dataset complet.</li>
+          <li><strong>Argument de presse</strong> — Hacker News / r/Switzerland / LinkedIn aiment ce genre de "live tracker".</li>
+        </ul>
+      </div>
+      <div class="qw-block how">
+        <div class="qw-block-label">🛠 Comment je l'implémente</div>
+        <ul>
+          <li>Le canary <code>monitor-sources.yml</code> existe déjà — il tourne tous les jours et détecte les drifts</li>
+          <li>Modification : ajouter un fichier <code>etl/diff-feed.json</code> qui enregistre chaque détection (au lieu d'ouvrir une issue GitHub)</li>
+          <li>Format : <code>{ ts, source, file, type, summary, count }</code> — limité à 100 entrées (rolling)</li>
+          <li>Endpoint Astro <code>/diff/feed.json</code> + page <code>/diff</code> qui le lit et l'affiche</li>
+          <li>Cache-Control 1h browser, 24h CDN (déjà fresh côté serveur)</li>
+          <li>RSS feed <code>/diff.rss</code> en bonus pour les power-users</li>
+          <li>Cron canary modifié pour pousser dans <code>etl/diff-feed.json</code> + commit auto en CI</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="qw-section">
+  <div class="container">
+    <div class="cta-final">
+      <h3>🚀 Prêt à valider ces 5 quick wins ?</h3>
+      <p>
+        Tu peux dire <code>go all 5</code> pour que je lance les 5 en autonome (~7-9h cumulées sur les 4 que je peux faire seul).
+        Ou tu valides un par un (<code>go 1</code>, <code>go 2</code>, etc.) pour avancer chirurgicalement.
+        Le quick win 04 (Substack) demande ton input de toute façon — créer un compte Substack avec ton email perso prend 5 min, le contenu je peux drafter.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · maquette des 5 quick wins</strong></p>
+    <p style="margin: 0;">
+      5 propositions concrètes avec maquette visuelle, justification ("pourquoi ça marche") et plan d'implémentation détaillé.
+      Total cumulé : ~8h de boulot, faisable d'ici mercredi soir avant le launch jeudi.
+    </p>
+  </div>
+</footer>
+
+<script>
+  // Calculator interactif (QW3)
+  const inputs = {
+    hourly: document.getElementById('calc-hourly'),
+    hours: document.getElementById('calc-hours'),
+    releases: document.getElementById('calc-releases'),
+  };
+  const output = document.getElementById('calc-output');
+  const multiplier = document.getElementById('calc-multiplier');
+
+  function recalc() {
+    const total = inputs.hourly.value * inputs.hours.value * inputs.releases.value;
+    const formatted = new Intl.NumberFormat('fr-CH').format(total);
+    output.textContent = formatted + ' CHF';
+    const ratio = Math.round(total / 299);
+    multiplier.textContent = ratio + '×';
+  }
+  Object.values(inputs).forEach(i => i.addEventListener('input', recalc));
+  recalc();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maquette F3 — Footer Flip horizontal · openswissdata</title>
+<style>
+  :root{
+    --bg:#FBFBF8;--bg-soft:#F4F4F0;--bg-card:#FFFFFF;
+    --ink:#0A0A0C;--ink-soft:#4A4D55;--ink-mute:#6B6E76;
+    --line:rgba(10,10,12,.08);--line-strong:rgba(10,10,12,.14);
+    --accent:#DC1F2D;--green:#15803D;
+    --font-sans:Geist,-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
+    --font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;
+    --t-fast:.2s;--ease-out:cubic-bezier(0.16,1,0.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+
+  .mockup-flag{position:fixed;top:12px;right:12px;z-index:200;background:var(--ink);color:var(--bg);font-family:var(--font-mono);font-size:10px;padding:6px 10px;border-radius:4px;letter-spacing:.08em;text-transform:uppercase}
+
+  .nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 36px;background:rgba(251,251,248,.85);backdrop-filter:saturate(180%) blur(16px);font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);border-bottom:1px solid var(--line)}
+  .nav-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-sans);font-weight:600;font-size:14px;letter-spacing:-.02em;color:var(--ink)}
+  .nav-mark{width:24px;height:24px}
+  .nav-mark img{width:100%;height:100%;object-fit:contain}
+  .nav-right{display:flex;align-items:center;gap:18px;font-size:12px}
+  .nav-live{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:500}
+  .nav-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(21,128,61,.4)}50%{box-shadow:0 0 0 5px rgba(21,128,61,0)}}
+
+  .page-filler{padding:80px 36px 120px;text-align:center;max-width:1320px;margin:0 auto}
+  .page-filler-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:14px}
+  .page-filler h2{font-size:36px;font-weight:600;letter-spacing:-.02em}
+  .page-filler p{color:var(--ink-soft);margin-top:12px}
+
+  /* ===== FOOTER F3 — Flip horizontal pur ===== */
+  .footer-f{position:relative;display:grid;grid-template-columns:1.5fr 1fr;border-top:1px solid var(--ink)}
+  .footer-f-left{background:var(--bg);padding:80px 56px 32px;display:flex;flex-direction:column;justify-content:space-between;min-height:560px}
+  .footer-f-right{position:relative;background:var(--bg-soft);overflow:hidden}
+
+  /* Banner — FLIPPED horizontally so red square sits on the LEFT (close to text content) */
+  .footer-f-right img{
+    width:100%;height:100%;object-fit:cover;
+    object-position:right center;
+    transform:scaleX(-1);
+    animation:slow-pan 18s ease-in-out infinite alternate;
+  }
+  @keyframes slow-pan{
+    0%{transform:scaleX(-1) scale(1.02)}
+    100%{transform:scaleX(-1) scale(1.05)}
+  }
+  /* Left fade — content side gets gentle blend into cream */
+  .footer-f-right::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:60px;
+    background:linear-gradient(90deg,var(--bg) 0%,transparent 100%);
+    pointer-events:none;z-index:2;
+  }
+  /* Right fade — outer edge softens slightly */
+  .footer-f-right::after{
+    content:'';position:absolute;right:0;top:0;bottom:0;width:120px;
+    background:linear-gradient(270deg,var(--bg-soft) 0%,transparent 100%);
+    pointer-events:none;z-index:2;
+  }
+
+  /* Marque + cols (left side) */
+  .footer-f-mark{display:flex;align-items:flex-start;gap:18px;margin-bottom:32px}
+  .footer-f-mark-img{width:64px;height:64px;flex-shrink:0}
+  .footer-f-mark-img img{width:100%;height:100%;object-fit:contain}
+  .footer-f-name{font-size:28px;font-weight:600;letter-spacing:-.025em;line-height:1}
+  .footer-f-tag{font-size:14px;color:var(--ink-soft);margin-top:8px;line-height:1.5}
+  .footer-f-tag em{font-style:italic;color:var(--ink)}
+
+  .footer-f-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin:48px 0}
+  .footer-col-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:14px}
+  .footer-col a{display:block;font-size:13px;color:var(--ink-soft);padding:4px 0;transition:color var(--t-fast)}
+  .footer-col a:hover{color:var(--accent)}
+
+  .footer-f-bottom{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);border-top:1px solid var(--line);padding-top:18px}
+  .footer-f-bottom .status{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+  .footer-f-bottom .status .d{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2.4s ease-in-out infinite}
+  .footer-f-bottom-right{display:flex;gap:14px}
+  .footer-f-bottom-right a{color:var(--ink-soft);transition:color var(--t-fast)}
+  .footer-f-bottom-right a:hover{color:var(--ink)}
+
+  /* Caption — toujours en bas-droite, toolkit */
+  .footer-f-caption{position:absolute;right:36px;bottom:36px;background:rgba(251,251,248,.94);backdrop-filter:blur(8px);border:1px solid var(--line-strong);padding:18px 22px;max-width:280px;font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);line-height:1.55;z-index:3}
+  .footer-f-caption strong{display:block;color:var(--ink);font-family:var(--font-sans);font-weight:600;font-size:13px;margin-bottom:6px;letter-spacing:-.01em}
+  .footer-f-caption .arr{color:var(--accent);margin-left:4px}
+
+  @media (max-width:1024px){
+    .footer-f{grid-template-columns:1fr}
+    .footer-f-right{height:280px}
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-flag">Maquette F3 · Mirror Flip — Carré rouge à gauche</div>
+
+<nav class="nav">
+  <div class="nav-brand"><span class="nav-mark"><img src="../web/public/logo.png" alt=""></span>openswissdata</div>
+  <div class="nav-right">
+    <a href="#">Datasets</a><a href="#">Pricing</a><a href="#">Docs</a><a href="#">Blog</a>
+    <span class="nav-live"><span class="nav-dot"></span>LIVE</span>
+  </div>
+</nav>
+
+<div class="page-filler">
+  <div class="page-filler-eyebrow">— Page exemple, scroll vers le footer ↓</div>
+  <h2>Le contenu principal vit ici.</h2>
+  <p>Variante F3 — bannière simplement flipée horizontalement. Le carré rouge passe côté gauche (proche du contenu textuel), les pixels noirs s'étendent vers le bord droit du footer.</p>
+</div>
+
+<footer class="footer-f">
+  <div class="footer-f-left">
+    <div>
+      <div class="footer-f-mark">
+        <div class="footer-f-mark-img"><img src="../web/public/logo.png" alt=""></div>
+        <div>
+          <div class="footer-f-name">openswissdata</div>
+          <p class="footer-f-tag">Données fédérales suisses normalisées —<br><em>signed, versioned, ready to ship.</em></p>
+        </div>
+      </div>
+
+      <div class="footer-f-cols">
+        <div class="footer-col">
+          <div class="footer-col-title">Datasets</div>
+          <a href="#">TARES</a>
+          <a href="#">Classifications</a>
+          <a href="#">FINMA</a>
+          <a href="#">Bundle</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Resources</div>
+          <a href="#">API Docs</a>
+          <a href="#">SDK</a>
+          <a href="#">MCP</a>
+          <a href="#">Provenance</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Legal</div>
+          <a href="#">CGV</a>
+          <a href="#">Compliance</a>
+          <a href="#">Privacy</a>
+          <a href="#">Takedown 24h</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-f-bottom">
+      <div><span class="status"><span class="d"></span>Operational</span> · © 2026 Claude-Alain Martin</div>
+      <div class="footer-f-bottom-right">
+        <a href="#">FR</a><a href="#">DE</a><a href="#">EN</a>
+        <a href="#">Studio →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-f-right">
+    <img src="../web/public/og-tares.png" alt="">
+    <div class="footer-f-caption">
+      <strong>TARES dataset</strong>
+      Le carré rouge comme point d'origine — les pixels en émanent.<a href="#" class="arr">→</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
