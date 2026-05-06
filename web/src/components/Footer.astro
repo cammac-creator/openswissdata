@@ -226,7 +226,15 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
     background: var(--color-bg);
   }
   .footer-legal .container-wide {
-    padding: 24px 36px 32px;
+    /* override the global container-wide constraints — we want full-bleed
+       horizontally to match the split section above. Padding aligned with
+       .footer-split-left (56px) for visual consistency. */
+    max-width: none;
+    padding: 24px 56px 32px;
+  }
+  .footer-legal .footer-disclaimer {
+    /* keep the long paragraph readable on wide screens */
+    max-width: 90ch;
   }
 
   .footer-affiliation {
@@ -274,6 +282,7 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
     .footer-split { grid-template-columns: 1fr; }
     .footer-split-right { height: 280px; order: 2; }
     .footer-split-left { padding: 48px 36px 32px; gap: 36px; }
+    .footer-legal .container-wide { padding: 20px 36px 28px; }
   }
   @media (max-width: 880px) {
     .footer-cols { grid-template-columns: 1fr 1fr; gap: 28px; }
