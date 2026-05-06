@@ -156,7 +156,8 @@ L'agent a effectué un seul commit consolidé (corrections triviales sécuritair
 
 | Hash | Description | Fichiers |
 |---|---|---|
-| (à venir) | `fix(audit-nuit): corrige Alain Martin → Claude-Alain Martin + 8 tools → 9 tools dans PROMO-DRAFTS` | `packages/schemas/README.md`, `docs/perfectionnement-2026-04-29/PROMO-DRAFTS.md` |
+| `f08092a` | `fix(audit-nuit): typos prénom + 8→9 tools dans drafts promo` | `packages/schemas/README.md` (1 ligne), `docs/perfectionnement-2026-04-29/PROMO-DRAFTS.md` (7 occurrences) |
+| `7ac7553` | `docs(audit-nuit): rapport audit nuit 2026-05-06 — alerte secret Stripe leaké` | `docs/launch/audit-nuit-2026-05-06.md` (ce rapport) |
 
 Aucune autre modification effectuée — toutes les autres trouvailles sont flaggées en Phase 3 pour décision humaine.
 
