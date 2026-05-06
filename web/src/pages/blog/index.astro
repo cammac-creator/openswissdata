@@ -11,6 +11,12 @@ const datasetLabels: Record<string, string> = {
   finma: "FINMA",
   all: "Bundle",
 };
+const datasetCovers: Record<string, string> = {
+  tares: "/og-tares.png",
+  classifications: "/og-classifications.png",
+  finma: "/og-finma.png",
+  all: "/og-default.png",
+};
 ---
 <BaseLayout
   title="Blog — openswissdata"
@@ -38,45 +44,73 @@ const datasetLabels: Record<string, string> = {
     </p>
 
     <ul class="blog-list">
-      {posts.map(post => (
-        <li class="blog-card">
-          <a href={`/blog/${post.id}`} class="blog-card-link">
-            <div class="blog-card-meta">
-              <time datetime={post.data.publishedAt.toISOString()}>{post.data.publishedAt.toISOString().slice(0, 10)}</time>
-              {post.data.dataset && (
-                <>
-                  <span style="opacity:.4">·</span>
-                  <span class="blog-card-dataset">{datasetLabels[post.data.dataset] ?? post.data.dataset}</span>
-                </>
+      {posts.map(post => {
+        const cover = post.data.dataset ? datasetCovers[post.data.dataset] : null;
+        return (
+          <li class="blog-card">
+            <a href={`/blog/${post.id}`} class="blog-card-link">
+              <div class="blog-card-body">
+                <div class="blog-card-meta">
+                  <time datetime={post.data.publishedAt.toISOString()}>{post.data.publishedAt.toISOString().slice(0, 10)}</time>
+                  {post.data.dataset && (
+                    <>
+                      <span style="opacity:.4">·</span>
+                      <span class="blog-card-dataset">{datasetLabels[post.data.dataset] ?? post.data.dataset}</span>
+                    </>
+                  )}
+                </div>
+                <h2 class="blog-card-title">{post.data.title}</h2>
+                <p class="blog-card-desc">{post.data.description}</p>
+                <span class="blog-card-cta">Lire <span class="arrow">→</span></span>
+              </div>
+              {cover && (
+                <div class="blog-card-cover" aria-hidden="true">
+                  <img src={cover} alt="" loading="lazy" />
+                </div>
               )}
-            </div>
-            <h2 class="blog-card-title">{post.data.title}</h2>
-            <p class="blog-card-desc">{post.data.description}</p>
-            <span class="blog-card-cta">Lire <span class="arrow">→</span></span>
-          </a>
-        </li>
-      ))}
+            </a>
+          </li>
+        );
+      })}
     </ul>
   </div>
 </section>
 </BaseLayout>
 
 <style>
-  .blog-list { list-style: none; padding: 0; margin: 32px 0 0; display: flex; flex-direction: column; gap: 16px; }
+  .blog-list { list-style: none; padding: 0; margin: 32px 0 0; display: flex; flex-direction: column; gap: 18px; }
   .blog-card {
     background: var(--bg-card);
     border: 1px solid var(--line);
-    border-radius: 12px;
-    transition: border-color .15s, transform .15s;
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color .2s var(--ease-out), transform .2s var(--ease-out), box-shadow .2s var(--ease-out);
   }
-  .blog-card:hover { border-color: var(--line-strong); transform: translateY(-1px); }
-  .blog-card-link { display: block; padding: 24px 28px; color: inherit; text-decoration: none; }
+  .blog-card:hover {
+    border-color: var(--line-strong);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -16px rgba(10,10,12,.18);
+  }
+  .blog-card-link {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    align-items: stretch;
+    color: inherit;
+    text-decoration: none;
+    min-height: 156px;
+  }
+  .blog-card-body {
+    padding: 26px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   .blog-card-meta {
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: .04em;
     color: var(--ink-mute);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     display: flex;
     gap: 10px;
     align-items: center;
@@ -106,4 +140,42 @@ const datasetLabels: Record<string, string> = {
   }
   .blog-card-cta .arrow { display: inline-block; transition: transform .15s; }
   .blog-card:hover .blog-card-cta .arrow { transform: translateX(3px); }
+
+  /* Cover thumbnail — dataset banner shown on the right of each card */
+  .blog-card-cover {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-soft);
+    border-left: 1px solid var(--line);
+  }
+  .blog-card-cover img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    transition: transform .4s var(--ease-out);
+  }
+  .blog-card:hover .blog-card-cover img { transform: scale(1.03); }
+  .blog-card-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--bg-card) 0%, transparent 12%);
+    pointer-events: none;
+  }
+
+  @media (max-width: 800px) {
+    .blog-card-link { grid-template-columns: 1fr; }
+    .blog-card-cover {
+      order: -1;
+      height: 140px;
+      border-left: none;
+      border-bottom: 1px solid var(--line);
+    }
+    .blog-card-cover::after {
+      background: linear-gradient(180deg, transparent 60%, var(--bg-card) 100%);
+    }
+  }
 </style>

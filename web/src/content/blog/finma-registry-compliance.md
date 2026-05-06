@@ -2,10 +2,17 @@
 title: "Cross-checking counterparties against FINMA: a practical 30-minute playbook"
 description: "How compliance and onboarding teams can automate Swiss counterparty verification against the unified FINMA registry, with PSD3 and FinSA 2026-2027 in mind."
 publishedAt: 2026-04-22
+updatedAt: 2026-05-06
 keywords: ["FINMA", "PSD3", "FinSA", "Swiss compliance", "counterparty verification", "KYC"]
 dataset: "finma"
-tldr: "FINMA publishes 9 separate XLSX lists with drifting schemas. We unify them under a single CSV/JSON/Parquet schema with 16 columns including UID and LEI, refreshed daily via GitHub Actions cron. Skip 30 min of manual lookup per counterparty — buy the FINMA dataset (299 CHF) or the bundle (797 CHF, includes TARES + Classifications)."
+tldr: "FINMA publishes 10 separate XLSX lists with drifting schemas. We unify them under a single CSV/JSON/Parquet schema with 16 columns including UID and LEI, refreshed daily via GitHub Actions cron. Skip 30 min of manual lookup per counterparty — buy the FINMA dataset (299 CHF) or the bundle (797 CHF, includes TARES + Classifications)."
 ---
+
+<div class="update-note">
+
+**Update 2026-05-06 — FINMA permission granted.** FINMA Communication has formally confirmed it has no legal objection to openswissdata republishing the supervised entities registry as a commercial dataset (subject to respecting FINMA copyright and the integrity of source documents). [Read the announcement](/blog/finma-permission-granted) — the FINMA Registry dataset now ships with a documented chain of rights, alongside the BAZG permission for TARES.
+
+</div>
 
 If you run compliance or onboarding at a Swiss or EU fintech, you already know the shape of the problem. Before you wire funds, sign a merchant agreement, or onboard a new banking partner, you need to confirm the counterparty is actually licensed by FINMA for the activity they claim to perform.
 
