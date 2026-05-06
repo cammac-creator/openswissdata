@@ -6,7 +6,7 @@ import TrustStrip from "../../components/TrustStrip.astro";
 import PersonaTile from "../../components/PersonaTile.astro";
 import Fiche from "../../components/Fiche.astro";
 import Step from "../../components/Step.astro";
-import Quote from "../../components/Quote.astro";
+import QuoteCarousel from "../../components/QuoteCarousel.astro";
 ---
 <BaseLayout
   title="openswissdata — Swiss federal data, normalised"
@@ -227,17 +227,36 @@ import Quote from "../../components/Quote.astro";
   </div>
 </section>
 
-<!-- ========== QUOTE BAZG ========== -->
-<Quote
-  source="BAZG"
-  date="2026-04-21"
-  text="Permission granted for the commercial distribution of TARES data under your offering, subject to the usual attribution and exclusion conditions."
-  author="Michael Beer"
-  role="Head of Tariff Foundations, BAZG"
-  affiliation="Bundesamt für Zoll und Grenzsicherheit"
-  ctas={[
-    { label: "See full BAZG terms", href: "/legal/cgv#bazg" },
-    { label: "See Provenance page", href: "/legal/provenance" }
+<!-- ========== QUOTES — BAZG + FINMA ========== -->
+<QuoteCarousel
+  eyebrowLabel="Commercial permission"
+  prevLabel="Previous"
+  nextLabel="Next"
+  quotes={[
+    {
+      source: "BAZG",
+      date: "2026-04-21",
+      text: "Permission granted for the commercial distribution of TARES data under your offering, subject to the usual attribution and exclusion conditions.",
+      author: "Michael Beer",
+      role: "Head of Tariff Foundations, BAZG",
+      affiliation: "Bundesamt für Zoll und Grenzsicherheit",
+      ctas: [
+        { label: "See full BAZG terms", href: "/legal/cgv#bazg" },
+        { label: "See Provenance page", href: "/legal/provenance" }
+      ]
+    },
+    {
+      source: "FINMA",
+      date: "2026-05-06",
+      text: "We have no legal objection to your using publicly accessible FINMA data as a source for your product, subject to respecting FINMA's copyright and the integrity of the source documents.",
+      author: "Nadine Bucher",
+      role: "Communication",
+      affiliation: "Eidgenössische Finanzmarktaufsicht FINMA",
+      ctas: [
+        { label: "See FINMA terms", href: "/legal/provenance" },
+        { label: "See Compliance page", href: "/en/compliance" }
+      ]
+    }
   ]}
 />
 

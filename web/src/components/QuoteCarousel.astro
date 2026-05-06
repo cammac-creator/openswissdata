@@ -1,0 +1,207 @@
+---
+interface QuoteCta {
+  label: string;
+  href: string;
+}
+interface QuoteData {
+  source: string;
+  date: string;
+  text: string;
+  author: string;
+  role: string;
+  affiliation: string;
+  ctas: QuoteCta[];
+}
+interface Props {
+  quotes: QuoteData[];
+  eyebrowLabel?: string;
+  prevLabel?: string;
+  nextLabel?: string;
+}
+const {
+  quotes,
+  eyebrowLabel = "Permission commerciale",
+  prevLabel = "Précédent",
+  nextLabel = "Suivant",
+} = Astro.props;
+---
+<section class="v4-quote-section v4-quote-carousel" data-quote-carousel>
+  <div class="container-v4">
+    <div class="quote-slides">
+      {quotes.map((q, i) => (
+        <article class="quote-slide" data-index={i} aria-hidden={i === 0 ? "false" : "true"}>
+          <div class="v4-quote-eyebrow reveal-v4">
+            <span>{eyebrowLabel}</span>
+            <span style="opacity:.4">·</span>
+            <span class="src">{q.source}</span>
+            <span style="opacity:.4">·</span>
+            <span>{q.date}</span>
+          </div>
+          <p class="v4-quote-text reveal-v4" data-delay="1">{q.text}</p>
+          <div class="v4-quote-author reveal-v4" data-delay="2">
+            <strong>{q.author}</strong>
+            <span style="opacity:.5">·</span>
+            <span>{q.role}</span>
+            <span style="opacity:.5">·</span>
+            <span>{q.affiliation}</span>
+          </div>
+          <div class="v4-quote-cta reveal-v4" data-delay="3">
+            {q.ctas.map(c => <a href={c.href}>{c.label}</a>)}
+          </div>
+        </article>
+      ))}
+    </div>
+
+    {quotes.length > 1 && (
+      <div class="quote-nav">
+        <button type="button" class="quote-nav-btn quote-prev" aria-label={prevLabel}>
+          <span aria-hidden="true">←</span>
+        </button>
+        <div class="quote-dots" role="tablist" aria-label={eyebrowLabel}>
+          {quotes.map((q, i) => (
+            <button
+              type="button"
+              class="quote-dot"
+              data-index={i}
+              role="tab"
+              aria-label={q.source}
+              aria-selected={i === 0 ? "true" : "false"}
+            ></button>
+          ))}
+        </div>
+        <button type="button" class="quote-nav-btn quote-next" aria-label={nextLabel}>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    )}
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    document.querySelectorAll('[data-quote-carousel]').forEach((el) => {
+      const slides = el.querySelectorAll('.quote-slide');
+      const dots = el.querySelectorAll('.quote-dot');
+      const prev = el.querySelector('.quote-prev');
+      const next = el.querySelector('.quote-next');
+      if (slides.length < 2) return;
+      let current = 0;
+      const goTo = (idx) => {
+        const target = ((idx % slides.length) + slides.length) % slides.length;
+        if (target === current) return;
+        slides[current].setAttribute('aria-hidden', 'true');
+        dots[current]?.setAttribute('aria-selected', 'false');
+        slides[target].setAttribute('aria-hidden', 'false');
+        dots[target]?.setAttribute('aria-selected', 'true');
+        current = target;
+      };
+      prev?.addEventListener('click', () => goTo(current - 1));
+      next?.addEventListener('click', () => goTo(current + 1));
+      dots.forEach((d) => {
+        d.addEventListener('click', () => {
+          const i = parseInt(d.getAttribute('data-index') || '0', 10);
+          goTo(i);
+        });
+      });
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') goTo(current - 1);
+        if (e.key === 'ArrowRight') goTo(current + 1);
+      });
+      el.tabIndex = 0;
+    });
+  })();
+</script>
+
+<style>
+  .v4-quote-carousel { padding-bottom: 80px; }
+
+  /* Stack slides on top of each other so the section auto-grows to the
+     tallest slide — avoids layout jumps on switch. */
+  .quote-slides {
+    position: relative;
+    display: grid;
+    grid-template-areas: "stack";
+  }
+  .quote-slide {
+    grid-area: stack;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: opacity .45s var(--ease-out), transform .45s var(--ease-out);
+  }
+  .quote-slide[aria-hidden="false"] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .quote-nav {
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    max-width: 100%;
+  }
+  .quote-nav-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.22);
+    color: rgba(255,255,255,.7);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-family: var(--font-mono);
+    transition: border-color var(--t-fast) var(--ease-out),
+                color var(--t-fast) var(--ease-out),
+                background var(--t-fast) var(--ease-out);
+  }
+  .quote-nav-btn:hover {
+    border-color: var(--accent);
+    color: #fff;
+    background: rgba(220,31,45,.12);
+  }
+  .quote-nav-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .quote-dots {
+    display: flex;
+    gap: 10px;
+  }
+  .quote-dot {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.28);
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    transition: background var(--t-fast) var(--ease-out),
+                border-color var(--t-fast) var(--ease-out),
+                transform var(--t-fast) var(--ease-out);
+  }
+  .quote-dot:hover {
+    border-color: rgba(255,255,255,.6);
+    transform: scale(1.15);
+  }
+  .quote-dot[aria-selected="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .quote-dot:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 540px) {
+    .quote-nav { gap: 16px; }
+    .quote-nav-btn { width: 36px; height: 36px; }
+  }
+</style>

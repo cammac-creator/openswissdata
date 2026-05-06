@@ -6,7 +6,7 @@ import TrustStrip from "../components/TrustStrip.astro";
 import PersonaTile from "../components/PersonaTile.astro";
 import Fiche from "../components/Fiche.astro";
 import Step from "../components/Step.astro";
-import Quote from "../components/Quote.astro";
+import QuoteCarousel from "../components/QuoteCarousel.astro";
 ---
 <BaseLayout
   title="openswissdata — Données fédérales suisses, normalisées"
@@ -227,17 +227,36 @@ import Quote from "../components/Quote.astro";
   </div>
 </section>
 
-<!-- ========== QUOTE BAZG ========== -->
-<Quote
-  source="BAZG"
-  date="2026-04-21"
-  text="Permission accordée pour la diffusion commerciale des données TARES sous votre offre, sous réserve des conditions usuelles d'attribution et d'exclusion."
-  author="Michael Beer"
-  role="Chef Tarifgrundlagen, BAZG"
-  affiliation="Bundesamt für Zoll und Grenzsicherheit"
-  ctas={[
-    { label: "Voir les conditions BAZG complètes", href: "/legal/cgv#bazg" },
-    { label: "Voir la page Provenance", href: "/legal/provenance" }
+<!-- ========== QUOTES — BAZG + FINMA ========== -->
+<QuoteCarousel
+  eyebrowLabel="Permission commerciale"
+  prevLabel="Précédent"
+  nextLabel="Suivant"
+  quotes={[
+    {
+      source: "BAZG",
+      date: "2026-04-21",
+      text: "Permission accordée pour la diffusion commerciale des données TARES sous votre offre, sous réserve des conditions usuelles d'attribution et d'exclusion.",
+      author: "Michael Beer",
+      role: "Chef Tarifgrundlagen, BAZG",
+      affiliation: "Bundesamt für Zoll und Grenzsicherheit",
+      ctas: [
+        { label: "Voir les conditions BAZG complètes", href: "/legal/cgv#bazg" },
+        { label: "Voir la page Provenance", href: "/legal/provenance" }
+      ]
+    },
+    {
+      source: "FINMA",
+      date: "2026-05-06",
+      text: "Nous n'avons aucune objection à ce que vous utilisiez des données de la FINMA accessibles au public comme source de données pour votre produit, sous réserve du respect des droits d'auteur de la FINMA et de l'intégrité des documents sources.",
+      author: "Nadine Bucher",
+      role: "Communication",
+      affiliation: "Eidgenössische Finanzmarktaufsicht FINMA",
+      ctas: [
+        { label: "Voir les conditions FINMA", href: "/legal/provenance" },
+        { label: "Voir la page Compliance", href: "/compliance" }
+      ]
+    }
   ]}
 />
 
