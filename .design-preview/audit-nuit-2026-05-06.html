@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Audit nuit 2026-05-06 · openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8; --bg-card: #FFFFFF; --bg-soft: #F5F4EE;
+    --ink: #0A0A0C; --ink-soft: #3A3D45; --ink-mute: #6B6E76;
+    --line: #E8E4D9; --line-strong: #D9D3C3;
+    --accent: #DC1F2D; --accent-soft: #FCE7E9; --accent-strong: #B91C1C;
+    --green: #15803D; --green-soft: #DCFCE7;
+    --amber: #92400E; --amber-soft: #FEF3C7;
+    --teal: #0F766E; --teal-soft: #E5F5F1;
+    --blue: #1D4ED8; --blue-soft: #DBEAFE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%; z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  /* CRITICAL ALERT BANNER */
+  .alert-banner {
+    background: linear-gradient(135deg, var(--accent-strong) 0%, var(--accent) 100%);
+    color: white; padding: 16px 0;
+    border-bottom: 4px solid var(--ink);
+    position: relative; z-index: 2;
+  }
+  .alert-banner-inner { display: flex; align-items: center; gap: 14px; }
+  .alert-banner .siren {
+    width: 36px; height: 36px; border-radius: 50%; background: white;
+    display: grid; place-items: center; font-size: 18px;
+    flex-shrink: 0; animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  .alert-banner-text { flex: 1; }
+  .alert-banner-text strong { display: block; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+  .alert-banner-text span { font-size: 13px; opacity: .9; }
+  .alert-banner-cta {
+    background: white; color: var(--accent-strong);
+    padding: 10px 18px; border-radius: 8px;
+    font-weight: 700; font-size: 13px;
+    text-decoration: none; flex-shrink: 0;
+    font-family: "Geist Mono", monospace; letter-spacing: .04em; text-transform: uppercase;
+  }
+  @media (max-width: 720px) { .alert-banner-inner { flex-direction: column; align-items: flex-start; } }
+
+  /* Hero */
+  .hero { padding: 56px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line); width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font-weight: 700; font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05; letter-spacing: -.03em;
+    margin: 0 0 18px; max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 24px 0 36px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-value.green { color: var(--green); } .stat-value.red { color: var(--accent); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); } }
+
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1;
+    letter-spacing: -.025em; margin: 0 0 12px; max-width: 30ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  /* CRITICAL incident card */
+  .incident {
+    background: linear-gradient(180deg, var(--accent-soft) 0%, white 100%);
+    border: 2px solid var(--accent);
+    border-radius: 16px; padding: 32px;
+    box-shadow: 0 4px 20px rgba(220,31,45,.08);
+  }
+  .incident h3 {
+    font-size: 22px; margin: 0 0 6px; color: var(--accent-strong);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .incident h3::before { content: "🔥"; font-size: 24px; }
+  .incident-sub { color: var(--ink-soft); font-size: 14px; margin: 0 0 22px; }
+  .incident-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0; }
+  @media (max-width: 720px) { .incident-grid { grid-template-columns: 1fr; } }
+  .incident-card {
+    background: white; border: 1px solid var(--accent-soft); border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .incident-card-label {
+    font-family: "Geist Mono", monospace; font-size: 9px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--accent-strong);
+    margin-bottom: 6px; font-weight: 700;
+  }
+  .incident-card-value { font-size: 13px; color: var(--ink); line-height: 1.5; }
+  .incident-card-value code {
+    font-size: 11px; background: #1a1a1d; color: #fda4af; padding: 2px 6px; border-radius: 3px;
+  }
+
+  /* Plan d'action — checklist */
+  .action-plan {
+    background: white; border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 26px; margin: 20px 0;
+  }
+  .action-step {
+    display: grid; grid-template-columns: 36px 1fr 100px;
+    gap: 16px; padding: 14px 0;
+    border-bottom: 1px dashed var(--line);
+    align-items: start;
+  }
+  .action-step:last-child { border-bottom: none; }
+  .action-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--ink); color: white;
+    display: grid; place-items: center;
+    font-family: "Geist Mono", monospace; font-size: 13px; font-weight: 700;
+  }
+  .action-step.urgent .action-num { background: var(--accent); }
+  .action-content h5 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+  .action-content p { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .action-content code { font-size: 11px; }
+  .action-owner {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; font-weight: 700;
+    padding: 4px 10px; border-radius: 4px; text-align: center; height: fit-content;
+  }
+  .action-owner.you { background: var(--amber-soft); color: var(--amber); }
+  .action-owner.claude { background: var(--blue-soft); color: var(--blue); }
+  .action-owner.done { background: var(--green-soft); color: var(--green); }
+  @media (max-width: 720px) { .action-step { grid-template-columns: 36px 1fr; } .action-owner { grid-column: 2; margin-top: 4px; } }
+
+  /* Greens grid (tout va bien) */
+  .greens-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0;
+  }
+  @media (max-width: 880px) { .greens-grid { grid-template-columns: 1fr; } }
+  .green-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; border-left: 3px solid var(--green);
+  }
+  .green-card .icon {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--green-soft);
+    display: grid; place-items: center; color: var(--green); font-size: 14px; font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .green-card h5 { margin: 0 0 6px; font-size: 14px; font-weight: 700; }
+  .green-card p { margin: 0; font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+
+  /* Tables */
+  .check-table {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; margin: 16px 0;
+  }
+  .check-row {
+    display: grid; grid-template-columns: 1fr 80px 200px;
+    gap: 12px; padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px; align-items: center;
+  }
+  .check-row:last-child { border-bottom: none; }
+  .check-row.head {
+    background: var(--ink); color: white;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
+    padding: 10px 18px;
+  }
+  .check-row.head > div { color: rgba(255,255,255,.85); }
+  .check-cell.url { font-family: "Geist Mono", monospace; font-size: 11px; color: var(--ink-soft); }
+  .check-cell.status {
+    font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px; text-align: center; width: fit-content;
+  }
+  .check-cell.status.ok { background: var(--green-soft); color: var(--green); }
+  .check-cell.status.warn { background: var(--amber-soft); color: var(--amber); }
+  .check-cell.status.fail { background: var(--accent-soft); color: var(--accent); }
+  .check-cell.note { font-size: 12px; color: var(--ink-mute); }
+  @media (max-width: 720px) { .check-row { grid-template-columns: 1fr; } .check-row.head { display: none; } }
+
+  /* Commit cards */
+  .commits {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; margin: 20px 0;
+  }
+  .commit-row {
+    display: grid; grid-template-columns: 100px 1fr;
+    gap: 14px; padding: 16px 22px;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .commit-row:last-child { border-bottom: none; }
+  .commit-hash {
+    font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 700;
+    background: var(--bg-soft); padding: 4px 8px; border-radius: 4px;
+    color: var(--ink); width: fit-content; height: fit-content;
+  }
+  .commit-content h5 { margin: 0 0 4px; font-size: 14px; font-weight: 600; font-family: "Geist Mono", monospace; }
+  .commit-content p { margin: 0; font-size: 12px; color: var(--ink-mute); line-height: 1.5; }
+
+  /* Verdict banner final */
+  .verdict {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg); border-radius: 14px; padding: 32px 36px; margin: 24px 0;
+  }
+  .verdict h3 { color: var(--bg); font-size: 22px; margin: 0 0 14px; }
+  .verdict p { color: rgba(255,255,255,.8); font-size: 14px; line-height: 1.65; margin: 0 0 12px; }
+  .verdict p strong { color: white; font-weight: 600; }
+  .verdict-yes { color: #6ee7b7; }
+  .verdict-no { color: #fda4af; }
+  .verdict ul { color: rgba(255,255,255,.85); padding-left: 20px; margin: 8px 0; line-height: 1.7; font-size: 13px; }
+  .verdict ul li::marker { color: #fda4af; }
+
+  footer {
+    padding: 36px 0 56px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- ALERT BANNER STICKY EN HAUT -->
+<div class="alert-banner">
+  <div class="container alert-banner-inner">
+    <div class="siren">🔥</div>
+    <div class="alert-banner-text">
+      <strong>SECRET WEBHOOK STRIPE LIVE LEAKÉ DANS LE REPO PUBLIC</strong>
+      <span>Exposé depuis 11 jours · Action immédiate requise · Plan en 6 étapes ci-dessous</span>
+    </div>
+    <a href="#plan-rotation" class="alert-banner-cta">Voir le plan</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Audit nuit autonome · 2026-05-06 · sub-agent</span>
+    </div>
+    <h1>L'audit du repo : <span class="accent">1 alerte critique</span> + tout le reste vert.</h1>
+    <p class="lede">
+      Pendant la nuit, un sub-agent a passé le repo openswissdata au crible : tests, build, prod URLs, SEO, MCP server, sécurité, cohérence doc/code. <strong>1 secret Stripe LIVE détecté en clair</strong> — geste à mener avant le café. Le reste est impeccable.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Tests</div>
+        <div class="stat-value green">321 / 322</div>
+        <div class="stat-sub">1 skipped (Pro tier OAuth e2e)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Pages buildées</div>
+        <div class="stat-value green">1 091</div>
+        <div class="stat-sub">Astro build 5.02s</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Prod URLs</div>
+        <div class="stat-value green">10 / 10</div>
+        <div class="stat-sub">toutes en HTTP 200</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Secrets leakés</div>
+        <div class="stat-value red">1</div>
+        <div class="stat-sub">webhook Stripe</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Commits autonomes</div>
+        <div class="stat-value">3</div>
+        <div class="stat-sub">corrections triviales</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INCIDENT CRITIQUE -->
+<section id="plan-rotation">
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Incident critique</strong>
+      <span class="sep">/</span>
+      <span>Webhook Stripe leaké — plan de rotation</span>
+    </div>
+    <h2>Le <span class="serif">webhook signing secret</span> est public.</h2>
+    <p class="section-intro">Quand on a rendu le repo public ce matin, le fichier <code>docs/preflight-14-stripe-live.md</code> contenait depuis le 25 avril des secrets Stripe LIVE. La <code>sk_live_</code> n'est pas concernée (elle reste dans <code>.env</code> + Railway), mais le webhook signing secret est exposé.</p>
+
+    <div class="incident">
+      <h3>Ce qui est exposé sur GitHub depuis 11 jours</h3>
+      <p class="incident-sub">Repo <code>cammac-creator/openswissdata</code> · fichier <code>docs/preflight-14-stripe-live.md</code> · commit <code>6713d38</code> du 25 avril 2026.</p>
+
+      <div class="incident-grid">
+        <div class="incident-card">
+          <div class="incident-card-label">Webhook signing secret 🔥</div>
+          <div class="incident-card-value"><code>whsec_18Kj…</code> (Stripe LIVE)</div>
+        </div>
+        <div class="incident-card">
+          <div class="incident-card-label">Account ID</div>
+          <div class="incident-card-value"><code>acct_1TP3BlRenAUXTSv7</code></div>
+        </div>
+        <div class="incident-card">
+          <div class="incident-card-label">Webhook ID</div>
+          <div class="incident-card-value"><code>we_1TPsh4RenAUXTSv7BFbid4yc</code></div>
+        </div>
+        <div class="incident-card">
+          <div class="incident-card-label">IDs métier sensibles</div>
+          <div class="incident-card-value">7 Price IDs LIVE + 4 Product IDs LIVE</div>
+        </div>
+      </div>
+
+      <h4 style="margin: 20px 0 10px; font-size: 14px;">Risque concret</h4>
+      <p style="margin: 0 0 18px; font-size: 13px; color: var(--ink-soft); line-height: 1.6;">
+        Un attaquant connaissant le webhook secret peut <strong>forger des requêtes</strong> vers <code>/api/webhook/stripe</code> qui passent la vérification de signature, et déclencher des envois de licence sans paiement réel. Pas de vol de fonds direct (la <code>sk_live_</code> n'est pas exposée), mais fraude de provisionnement possible.
+      </p>
+
+      <h4 style="margin: 0 0 10px; font-size: 14px;">Plan d'action — 6 étapes</h4>
+
+      <div class="action-plan" style="margin-top: 0;">
+
+        <div class="action-step urgent">
+          <div class="action-num">1</div>
+          <div class="action-content">
+            <h5>Rotate le webhook secret sur Stripe</h5>
+            <p>Dashboard Stripe → Webhooks → endpoint <code>we_1TPsh4…</code> → "Reveal/Roll signing secret". Copie le nouveau <code>whsec_…</code>. <strong>Le secret leaké devient mort.</strong></p>
+          </div>
+          <div class="action-owner you">TOI · 5 min</div>
+        </div>
+
+        <div class="action-step urgent">
+          <div class="action-num">2</div>
+          <div class="action-content">
+            <h5>Update Railway env var</h5>
+            <p>Sur Railway → Settings → Variables → remplace <code>STRIPE_WEBHOOK_SECRET</code> par le nouveau. Trigger redeploy (auto sur git push, ou manuel).</p>
+          </div>
+          <div class="action-owner you">TOI · 2 min</div>
+        </div>
+
+        <div class="action-step">
+          <div class="action-num">3</div>
+          <div class="action-content">
+            <h5>Audit Stripe events depuis 2026-04-25</h5>
+            <p>Dashboard Stripe → Logs / Events. Cherche les anomalies : signatures rejetées, événements douteux, IPs sources inhabituelles. Si tout est calme, RAS.</p>
+          </div>
+          <div class="action-owner you">TOI · 10 min</div>
+        </div>
+
+        <div class="action-step">
+          <div class="action-num">4</div>
+          <div class="action-content">
+            <h5>Redacter <code>docs/preflight-14-stripe-live.md</code></h5>
+            <p>Remplacer le whsec et tous les IDs LIVE par <code>***REDACTED***</code>. Je peux faire ça en autonome si tu confirmes <code>go redact</code>.</p>
+          </div>
+          <div class="action-owner claude">CLAUDE · 1 min</div>
+        </div>
+
+        <div class="action-step">
+          <div class="action-num">5</div>
+          <div class="action-content">
+            <h5>Optionnel — purger l'historique git</h5>
+            <p>Le secret reste dans l'historique git même après redact du HEAD. Pour effacer définitivement : <code>git filter-repo</code> + force-push. <strong>Pas critique si étape 1 faite</strong> (secret rotaté = inutile pour attaquant). Action destructive — demande ta confirmation.</p>
+          </div>
+          <div class="action-owner you">TOI · 15 min</div>
+        </div>
+
+        <div class="action-step">
+          <div class="action-num">6</div>
+          <div class="action-content">
+            <h5>Optionnel — rotate aussi <code>STRIPE_SECRET_KEY</code></h5>
+            <p>La <code>sk_live_…</code> n'a PAS été leakée mais c'est une bonne hygiène d'audit santé. Pas urgent.</p>
+          </div>
+          <div class="action-owner you">TOI · 5 min</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOUT VA BIEN -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit complet</strong>
+      <span class="sep">/</span>
+      <span>Tout le reste est vert</span>
+    </div>
+    <h2>Ce qui <span class="serif">va bien</span>.</h2>
+
+    <div class="greens-grid">
+
+      <div class="green-card">
+        <div class="icon">✓</div>
+        <h5>Code 100% vert</h5>
+        <p>Typecheck OK, 321/322 tests passent, Astro build 1091 pages générées en 5.02 s. 0 warning bloquant.</p>
+      </div>
+
+      <div class="green-card">
+        <div class="icon">✓</div>
+        <h5>Prod toutes en 200</h5>
+        <p>10 URLs principales testées (homepage, /api/health, mcp.health, /bundle, /blog, /about, /codes, /legal/provenance, favicons) — toutes répondent OK.</p>
+      </div>
+
+      <div class="green-card">
+        <div class="icon">✓</div>
+        <h5>SEO impeccable</h5>
+        <p>Titles + meta descriptions + OG + JSON-LD Organization/Product + hreflang FR/DE/EN + favicons. La page /mcp annonce déjà "9 tools".</p>
+      </div>
+
+      <div class="green-card">
+        <div class="icon">✓</div>
+        <h5>MCP server live</h5>
+        <p><code>@openswissdata/mcp@0.1.1</code> publié sur npm + <code>server.json</code> racine valide schema 2025-12-11 + endpoint mcp.openswissdata.com répond.</p>
+      </div>
+
+      <div class="green-card">
+        <div class="icon">✓</div>
+        <h5>.gitignore propre</h5>
+        <p>Couvre <code>.env*</code>, <code>node_modules/</code>, <code>data/</code>, <code>*.db*</code>, <code>coverage/</code>. Aucun <code>.env</code> tracké par git (sauf <code>.env.example</code>).</p>
+      </div>
+
+      <div class="green-card">
+        <div class="icon">✓</div>
+        <h5>Pas de TODO oublié</h5>
+        <p>0 vrai FIXME/TODO/XXX dans <code>src/</code> ou <code>web/src/</code>. Les 2 occurrences trouvées sont des commentaires explicatifs légitimes.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- VÉRIFICATIONS DÉTAILLÉES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Phase 1 / Vérifications détaillées</strong>
+      <span class="sep">/</span>
+      <span>10 URLs publiques · 322 tests · 1091 pages</span>
+    </div>
+    <h2>Les <span class="serif">vérifications</span> en détail.</h2>
+
+    <h3 style="font-size: 17px; margin: 28px 0 10px;">URLs publiques testées</h3>
+
+    <div class="check-table">
+      <div class="check-row head">
+        <div>URL</div><div>Status</div><div>Notes</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">https://www.openswissdata.com/</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">CSP propre, HTTP/2</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">/api/health</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">JSON, no-store</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">mcp.openswissdata.com/health</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">MCP endpoint up</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">/legal/provenance</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">OK</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">/bundle</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">OK</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">/blog</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">OK</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">/about</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">OK</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">/codes</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">OK</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">/favicon.ico</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">cache 1 an immutable</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">/favicon.svg</div>
+        <div class="check-cell status ok">200</div>
+        <div class="check-cell note">cache 1 an immutable</div>
+      </div>
+    </div>
+
+    <h3 style="font-size: 17px; margin: 32px 0 10px;">Linter / Tests / Build</h3>
+
+    <div class="check-table">
+      <div class="check-row head">
+        <div>Vérification</div><div>Status</div><div>Détail</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">npm run typecheck</div>
+        <div class="check-cell status ok">EXIT 0</div>
+        <div class="check-cell note">tsc --noEmit, TypeScript strict OK</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">npm test (vitest)</div>
+        <div class="check-cell status ok">321/322</div>
+        <div class="check-cell note">1 skipped (Pro tier OAuth e2e — attendu), 12.81s</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">web && npm run build</div>
+        <div class="check-cell status ok">1091 pages</div>
+        <div class="check-cell note">Astro build 5.02s, sitemap-index OK</div>
+      </div>
+    </div>
+
+    <h3 style="font-size: 17px; margin: 32px 0 10px;">Cohérence doc / code</h3>
+
+    <div class="check-table">
+      <div class="check-row head">
+        <div>Pattern recherché</div><div>Trouvé</div><div>Action</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">"8 tools" résiduels</div>
+        <div class="check-cell status warn">7</div>
+        <div class="check-cell note">Corrigés dans PROMO-DRAFTS.md (commit f08092a)</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">"Alain Martin" sans "Claude-Alain"</div>
+        <div class="check-cell status warn">1</div>
+        <div class="check-cell note">Corrigé dans packages/schemas/README.md</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">"Embargo jeudi 7 mai"</div>
+        <div class="check-cell status ok">0</div>
+        <div class="check-cell note">Clean (déjà fait en T7)</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">FIXME / TODO / XXX</div>
+        <div class="check-cell status ok">0</div>
+        <div class="check-cell note">Les 2 hits sont des commentaires explicatifs légitimes</div>
+      </div>
+      <div class="check-row">
+        <div class="check-cell url">Vrais secrets en historique git</div>
+        <div class="check-cell status fail">1</div>
+        <div class="check-cell note">whsec_18Kj... (cf. incident critique ci-dessus)</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- COMMITS APPLIQUÉS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Phase 2 / Corrections appliquées</strong>
+      <span class="sep">/</span>
+      <span>3 commits autonomes pushés sur main</span>
+    </div>
+    <h2>Ce que <span class="serif">le sub-agent</span> a corrigé tout seul.</h2>
+    <p class="section-intro">Uniquement des corrections triviales et sécuritairement neutres : typos, mentions résiduelles obsolètes. Aucune modification de code source, de config ou de schéma SQL.</p>
+
+    <div class="commits">
+
+      <div class="commit-row">
+        <div class="commit-hash">f08092a</div>
+        <div class="commit-content">
+          <h5>fix(audit-nuit): typos prénom + 8→9 tools dans drafts promo</h5>
+          <p><code>packages/schemas/README.md</code> (1 ligne) + <code>docs/perfectionnement-2026-04-29/PROMO-DRAFTS.md</code> (7 occurrences "8 tools" → "9 tools")</p>
+        </div>
+      </div>
+
+      <div class="commit-row">
+        <div class="commit-hash">7ac7553</div>
+        <div class="commit-content">
+          <h5>docs(audit-nuit): rapport audit nuit 2026-05-06 — alerte secret Stripe</h5>
+          <p>Rapport complet créé à <code>docs/launch/audit-nuit-2026-05-06.md</code> avec TL;DR, vérifications détaillées, et flag URGENT sur la fuite Stripe.</p>
+        </div>
+      </div>
+
+      <div class="commit-row">
+        <div class="commit-hash">932b9c0</div>
+        <div class="commit-content">
+          <h5>docs(audit-nuit): backfill commit hashes dans le rapport</h5>
+          <p>Mise à jour cosmétique du rapport pour inclure les hashes de commits effectués.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="font-size: 13px; color: var(--ink-mute); margin-top: 18px; font-style: italic;">
+      Le sub-agent a aussi flaggé sans toucher : <strong>tokens MCP registry</strong> (<code>.mcpregistry_*</code>) à ajouter au <code>.gitignore</code>, et <code>sdks/mcp-server/package-lock.json</code> modifié non committé à reviewer.
+    </p>
+  </div>
+</section>
+
+<!-- À FAIRE AU MATIN -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Phase 3 / À faire au matin</strong>
+      <span class="sep">/</span>
+      <span>Priorisé · 5 actions</span>
+    </div>
+    <h2>Tes <span class="serif">5 actions</span> du matin.</h2>
+
+    <div class="action-plan">
+
+      <div class="action-step urgent">
+        <div class="action-num">1</div>
+        <div class="action-content">
+          <h5>🔥 Rotate Stripe webhook secret + redact + (optionnel) purge git history</h5>
+          <p>Plan détaillé en 6 étapes ci-dessus. À faire avant le café. Une fois rotaté, le secret leaké est mort.</p>
+        </div>
+        <div class="action-owner you">TOI · 30 min</div>
+      </div>
+
+      <div class="action-step">
+        <div class="action-num">2</div>
+        <div class="action-content">
+          <h5>Ajouter <code>.mcpregistry_*</code> au <code>.gitignore</code></h5>
+          <p>Les fichiers <code>.mcpregistry_github_token</code> et <code>.mcpregistry_registry_token</code> sont en mode 0600 untracked. Préventif pour éviter qu'un <code>git add .</code> les commit. Je peux faire si tu confirmes <code>go gitignore</code>.</p>
+        </div>
+        <div class="action-owner claude">CLAUDE · 1 min</div>
+      </div>
+
+      <div class="action-step">
+        <div class="action-num">3</div>
+        <div class="action-content">
+          <h5>Trancher sur <code>sdks/mcp-server/package-lock.json</code> modifié</h5>
+          <p>Probablement dérive <code>npm install</code>. À reviewer puis commit ou revert selon intention.</p>
+        </div>
+        <div class="action-owner you">TOI · 5 min</div>
+      </div>
+
+      <div class="action-step">
+        <div class="action-num">4</div>
+        <div class="action-content">
+          <h5>Relire les drafts promo</h5>
+          <p><code>docs/perfectionnement-2026-04-29/PROMO-DRAFTS.md</code> corrigé en "9 tools" partout par l'agent. Vérifier qu'aucun autre chiffre marketing ne dérive (ex: "100 calls/day", noms de tools cités).</p>
+        </div>
+        <div class="action-owner you">TOI · 10 min</div>
+      </div>
+
+      <div class="action-step">
+        <div class="action-num">5</div>
+        <div class="action-content">
+          <h5>Clean <code>.design-preview/</code></h5>
+          <p>9 fichiers <code>.html</code> untracked dans <code>.design-preview/</code> — soit gitignore le dossier, soit commit ce qui mérite, soit purge.</p>
+        </div>
+        <div class="action-owner you">TOI · 5 min</div>
+      </div>
+
+    </div>
+
+    <div class="verdict" style="margin-top: 28px;">
+      <h3>🎯 La synthèse en 30 secondes</h3>
+      <p>
+        <strong class="verdict-yes">Le repo est en excellente santé technique.</strong> Tests, build, prod, SEO, MCP : tout passe. La mailing-list de 394 contacts est en place. Les 5 tâches launch les plus importantes (T1, T2, T3, T6, T7) sont closes.
+      </p>
+      <p>
+        <strong class="verdict-no">Mais il y a un secret Stripe LIVE à rotater immédiatement.</strong> 11 jours d'exposition publique. Pas de fonds volés (la sk_live_ est intacte), mais possibilité de fraude de provisionnement via webhook forgé. Plan en 6 étapes ci-dessus, dont seulement 2 sont vraiment critiques (rotate + redeploy Railway).
+      </p>
+      <p style="margin-top: 18px;">
+        Une fois la rotation faite, les 4 autres tâches du matin sont du cosmetic. Bon café Claude-Alain.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · audit nuit 2026-05-06</strong></p>
+    <p style="margin: 0;">
+      Audit autonome généré par sub-agent en 5 m 51 s. 0 commande destructive. Toutes les modifications sont des correctifs typographiques dans des fichiers <code>.md</code>. Rapport source : <code>docs/launch/audit-nuit-2026-05-06.md</code>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
