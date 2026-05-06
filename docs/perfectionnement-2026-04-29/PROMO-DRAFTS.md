@@ -40,7 +40,7 @@ I'm a solo founder in Switzerland and I just shipped what I think is the first
 MCP (Model Context Protocol) server for Swiss federal data.
 
 If you use Claude Code, Cursor, or any other MCP-compatible agent, you can
-now plug 8 tools that query Swiss customs (TARES), economic classifications
+now plug 9 tools that query Swiss customs (TARES), economic classifications
 (NOGA / NACE / ISIC), and the FINMA financial registry — natively, without
 copy-pasting CSVs.
 
@@ -55,7 +55,7 @@ Setup is 30 seconds: add this to your ~/.claude/mcp.json:
       }
     }
 
-Restart Claude Code. The 8 tools appear in the picker. Free tier is 100
+Restart Claude Code. The 9 tools appear in the picker. Free tier is 100
 calls/day per IP, no auth needed.
 
 The interesting tools (the ones I think are non-obvious):
@@ -177,7 +177,7 @@ vectors on Apple Silicon), or the GTM as a solo CH founder.
 ```
 🇨🇭 Le premier MCP server suisse pour Claude Code &amp; Cursor.
 
-J'ai shippé openswissdata.com/mcp aujourd'hui — 8 tools natifs pour les
+J'ai shippé openswissdata.com/mcp aujourd'hui — 9 tools natifs pour les
 datasets fédéraux suisses (TARES douanier, NOGA/NACE/ISIC classifications,
 FINMA registry).
 
@@ -358,7 +358,7 @@ working. Token cost = the response only.
   }
 }
 
-Restart Claude Code. The 8 tools appear in the picker. /mcp to confirm.
+Restart Claude Code. The 9 tools appear in the picker. /mcp to confirm.
 ```
 
 ```
@@ -396,7 +396,7 @@ Standalone MCP: 49 CHF/month for 5k calls (no ZIP, API-only)
 
 https://www.openswissdata.com/mcp
 
-The sandbox playground lets you call any of the 8 tools live from your
+The sandbox playground lets you call any of the 9 tools live from your
 browser. No signup, no token, no setup.
 
 Solo founder, Vaud, Switzerland.
@@ -415,7 +415,7 @@ Title: I built an MCP server for Swiss federal data — would love agent builder
 
 Body:
 Solo founder in CH here. Just shipped openswissdata.com/mcp — a public
-MCP server (JSON-RPC 2.0, spec 2025-06-18) with 8 tools for Swiss
+MCP server (JSON-RPC 2.0, spec 2025-06-18) with 9 tools for Swiss
 customs / classifications / financial registry data.
 
 Free tier 100 calls/day per IP, no auth. Sandbox playground at
@@ -506,7 +506,7 @@ it into Cursor:
   }
 }
 
-Free tier 100 calls/day per IP, no auth. 8 tools: tariff_lookup,
+Free tier 100 calls/day per IP, no auth. 9 tools: tariff_lookup,
 tariff_semantic_search, classify_text, kyc_check, etc.
 
 Sandbox playground at https://openswissdata.com/mcp lets you test
