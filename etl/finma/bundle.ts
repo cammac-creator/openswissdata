@@ -93,6 +93,14 @@ Attribution is appreciated but not required. Suggested:
 WARRANTY:
 Provided "AS IS" without warranty. Data is normalized from official FINMA lists.
 openswissdata.com is not responsible for errors in the underlying official sources.
+openswissdata.com is not affiliated with FINMA, does not represent FINMA, and its
+data does not substitute for direct consultation of finma.ch.
+
+SOURCE PERMISSION:
+Republication authorised in writing by FINMA Communication on 2026-05-06
+(ref. FINMA-PERMISSION-2026-05-06-NADINE-BUCHER), subject to respecting FINMA
+copyright and the integrity of source documents. Source: FINMA, www.finma.ch.
+FINMA Terms of Use: https://www.finma.ch/en/terms-and-conditions/
 
 LIABILITY:
 Liability capped at the purchase price of this dataset.
@@ -469,6 +477,12 @@ ${entityTypes.map(t => `- \`finma_${t}.csv\` — ${countByType[t] ?? 0} entries`
 ## Attribution
 
 Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.ch/${includeZefix ? "\nSecondary source (Zefix Sync tier): Federal Office of Justice / EHRA via LINDAS. https://register.ld.admin.ch/" : ""}
+
+Republication authorised in writing by FINMA Communication on 2026-05-06 (ref. \`FINMA-PERMISSION-2026-05-06-NADINE-BUCHER\`), subject to respecting FINMA copyright and the integrity of source documents. FINMA Terms of Use: https://www.finma.ch/en/terms-and-conditions/
+
+## Disclaimer
+
+Source: FINMA. No warranty as to accuracy, reliability or timeliness. openswissdata.com is not affiliated with FINMA, does not represent FINMA, and its data does not substitute for direct consultation of finma.ch.
 
 ## Dataset metadata
 
