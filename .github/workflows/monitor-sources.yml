@@ -51,11 +51,39 @@ jobs:
             echo "DRIFTS=$(jq '.drift' etl/canary-report.json)" >> $GITHUB_OUTPUT
             echo "ERRORS=$(jq '.error' etl/canary-report.json)" >> $GITHUB_OUTPUT
             echo "NEW=$(jq '.new' etl/canary-report.json)" >> $GITHUB_OUTPUT
+            echo "CRASHED=false" >> $GITHUB_OUTPUT
           else
+            echo "::warning::Canary script crashed before writing the report"
             echo "DRIFTS=0" >> $GITHUB_OUTPUT
             echo "ERRORS=0" >> $GITHUB_OUTPUT
             echo "NEW=0" >> $GITHUB_OUTPUT
+            echo "CRASHED=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Open issue on script crash
+        if: steps.report.outputs.CRASHED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          BODY=$(cat <<EOF
+          # 🔥 Canary script crashed — $DATE
+
+          Le script \`scripts/monitor-sources.ts\` n'a pas produit \`etl/canary-report.json\`. Cela signifie que le canary n'a surveillé aucune source aujourd'hui — **point aveugle complet** sur les ruptures amont.
+
+          ## Action attendue
+
+          1. Vérifier les logs du run : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          2. Si erreur Node/dépendance : corriger et redéployer.
+          3. Si erreur réseau transitoire : relancer manuellement avec \`gh workflow run monitor-sources.yml\`.
+          4. Une fois corrigé, vérifier que le run suivant produit bien le report.
+          EOF
+          )
+          gh issue create \
+            --title "🔥 Canary script crashed — $DATE" \
+            --label "canary,priority:high" \
+            --body "$BODY" \
+            --repo ${{ github.repository }}
 
       - name: Open issue on drift
         if: steps.report.outputs.DRIFTS != '0'

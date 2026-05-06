@@ -1,52 +1,52 @@
 {
   "tares.tariff_8_digit": {
     "hash": "1f4f7c12c59c0555326600473ed152d6be7cb5c32a8942da20d9c472d2bb2466",
-    "checked_at": "2026-05-02T20:35:38.959Z",
+    "checked_at": "2026-05-06T09:57:54.976Z",
     "size": 232208
   },
   "tares.tarifstruktur": {
     "hash": "5610cb42ce6aa92e0d8ab40afdebd48d5aab27b6307d3ee2f3ab56da88601126",
-    "checked_at": "2026-05-02T20:35:39.312Z",
+    "checked_at": "2026-05-06T09:57:55.225Z",
     "size": 1183985
   },
   "tares.duty_rates_01_30": {
     "hash": "a435daa9e06ebcfa5a5717dc06233b89051827869daa1638f2cdda04ca13a1ca",
-    "checked_at": "2026-05-02T20:35:40.606Z",
+    "checked_at": "2026-05-06T09:57:56.537Z",
     "size": 10786535
   },
   "tares.duty_rates_31_63": {
     "hash": "0638c42ea8dda88a50e81bb4fa3fbe5ae302ae54f57260ff8290cdc5859c4a30",
-    "checked_at": "2026-05-02T20:35:41.538Z",
+    "checked_at": "2026-05-06T09:57:57.487Z",
     "size": 7866910
   },
   "tares.duty_rates_64_83": {
     "hash": "4f94404cb7d01cba2aa66ac5c71e5741c051c970989f51098bcd7ad1906fba21",
-    "checked_at": "2026-05-02T20:35:42.026Z",
+    "checked_at": "2026-05-06T09:57:58.028Z",
     "size": 3919053
   },
   "tares.duty_rates_84_97": {
     "hash": "eb575541fb15f53761dee6744438ba193f42a32218110d2ef0643d2181409795",
-    "checked_at": "2026-05-02T20:35:42.871Z",
+    "checked_at": "2026-05-06T09:57:58.936Z",
     "size": 6912269
   },
   "tares.customs_facilities": {
     "hash": "ace7c7ccbdaba986ad710f7732cca57845c3215a3a0ad3be82e14e1d8ac41e3c",
-    "checked_at": "2026-05-02T20:35:42.955Z",
+    "checked_at": "2026-05-06T09:57:59.017Z",
     "size": 88883
   },
   "finma.uid_csv": {
-    "hash": "9854c9b3a45632bfc2ada565c4c001fb8cb79329d3073dfc9b774f742243b59e",
-    "checked_at": "2026-05-02T20:35:43.095Z",
-    "size": 460294
+    "hash": "22bda8a64f6bb945eb0fe4467b758a0cc29a91fd8206926a5123e5e0ee8a96a2",
+    "checked_at": "2026-05-06T09:58:00.693Z",
+    "size": 460329
   },
   "bfs.noga_2025": {
-    "hash": "9a3593c5b1e003f2ab36f89ceff3f2db9fe0ae83c335102b6a37454944c7db25",
-    "checked_at": "2026-05-02T20:35:44.310Z",
-    "size": 5613364
+    "hash": "772384ff1821107f478c732fa64dffdcfd1d9d8a6aee39532434d8065ee8ad40",
+    "checked_at": "2026-05-06T09:58:02.075Z",
+    "size": 5613413
   },
   "bfs.noga_2008": {
-    "hash": "8ff5e6e48b70edbdbd111206ff5adc9869d6e285a5e1c87a2cbdbee0fcab1e4c",
-    "checked_at": "2026-05-02T20:35:45.002Z",
+    "hash": "52d4010ddc3c71d216ebb0dd2d973aba2dcfa952a0ec6a059551f271950a6408",
+    "checked_at": "2026-05-06T09:58:03.133Z",
     "size": 3574478
   }
 }
