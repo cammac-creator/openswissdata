@@ -5,7 +5,7 @@
 | Destinataire | Sujet | Envoyé le | Réponse | Statut |
 |--------------|-------|-----------|---------|--------|
 | info@bfs.admin.ch | NOGA 2025 + cross-walks | 2026-04-17 | — | en attente (relance 2026-04-24) |
-| info@finma.ch | FINMA Registry compilation | 2026-04-17 | — | en attente (relance 2026-04-24) |
+| info@finma.ch | FINMA Registry compilation | 2026-04-17 | 2026-05-06 | **✅ GO sans condition particulière** (sous réserve droits d'auteur + intégrité documents) |
 | info@bazg.admin.ch | TARES dérivé normalisé | 2026-04-17 | 2026-04-21 | **✅ GO avec conditions** |
 
 ## Réponse BAZG (TARES) — 2026-04-21
@@ -36,9 +36,45 @@ Répondu par Michael Beer, Chef Tarifgrundlagen, BAZG Zolltarif und Tarifgrundla
 - [ ] Ajouter dans CGV une section spécifique TARES avec for Berne. *(pending — Task 2.5)*
 - [ ] Vérifier que `source_url` pointe sur la fiche HS8 spécifique (ex. `https://xtares.admin.ch/tares/control/searchSimpleTarifNumber?number=84820010`) et pas sur la racine du site. *(pending — Task 2.4 scraping)*
 
-## Réponse FINMA — en attente
+## Réponse FINMA (Registry) — 2026-05-06
 
-Relance prévue 2026-04-24 (7 jours après envoi initial).
+Répondu par Nadine Bucher, Communication, Eidgenössische Finanzmarktaufsicht FINMA, Laupenstrasse 27, CH-3003 Bern (info@finma.ch).
+
+**Texte intégral de l'autorisation :**
+
+> Monsieur,
+>
+> Nous nous référons à votre courriel du 17 avril 2026 et vous remercions pour vos coordonnées.
+>
+> La FINMA publie ses données sur son site Internet (www.finma.ch), où elles peuvent être consultées. Nous vous renvoyons aux conditions d'utilisation qui y sont énoncées (Conditions d'utilisation | FINMA).
+>
+> D'un point de vue juridique, nous n'avons aucune objection à ce que vous utilisiez des données de la FINMA accessibles au public comme source de données pour votre produit, sous réserve du respect des droits d'auteur de la FINMA et de l'intégrité des documents sources, comme indiqué dans votre courriel.
+>
+> Avec nos meilleures salutations.
+>
+> Nadine Bucher · Communication · FINMA
+
+**Conditions implicites à respecter :**
+
+1. **Respect des droits d'auteur FINMA** — copyright revendiqué sur les contenus éditoriaux du site FINMA. La LDA art. 5 exclut toutefois les actes officiels (décisions, listes d'autorisation publiques) de la protection. Les listes du registre des entités sous surveillance entrent dans cette catégorie.
+2. **Intégrité des documents sources** — ne pas altérer le contenu des données (noms d'entités, statuts d'autorisation, dates, références FINMA). La normalisation de forme (schéma unifié sur 10 listes, enrichissement UID/LEI) est compatible avec l'intégrité par enregistrement.
+3. **Logo FINMA strictement interdit** (cf. CGU FINMA : « Using and reproducing the FINMA logo is not permitted »). Texte « FINMA » seul autorisé.
+4. **Disclaimer FINMA répercuté** : aucune garantie d'exactitude / fiabilité / exhaustivité ; aucune affiliation FINMA. Disclaimer déjà dans `LICENSE.txt` du bundle FINMA et dans `web/src/pages/compliance.astro` section 5.
+
+**Référence interne :** `FINMA-PERMISSION-2026-05-06-NADINE-BUCHER`. Email original archivé.
+
+**Actions de mise en conformité :**
+
+- [x] Mettre à jour `web/src/pages/datasets/finma.astro` (FR/DE/EN) — passer de « demandée » à « accordée 2026-05-06 ». *(fait 2026-05-06)*
+- [x] Mettre à jour `web/src/pages/compliance.astro` (FR/DE/EN) — tableau des permissions. *(fait 2026-05-06)*
+- [x] Mettre à jour `web/src/pages/legal/provenance.astro` (FR/DE) — ajouter texte intégral de l'autorisation FINMA + lien CGU FINMA. *(fait 2026-05-06)*
+- [x] Mettre à jour FAQ home (FR/DE/EN). *(fait 2026-05-06)*
+- [ ] Vérifier que `etl/finma/release.ts` n'altère aucune valeur source (noms d'entités, statuts, dates) — audit à planifier.
+- [ ] S'assurer qu'aucun logo FINMA n'apparaît dans le repo / sur le site (texte seul autorisé).
+
+## Réponse BFS — en attente
+
+Relance prévue 2026-04-24.
 
 ## Réponse BFS — en attente
 
