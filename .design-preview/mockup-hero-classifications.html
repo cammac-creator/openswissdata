@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maquette — Hero Classifications, 3 traitements de fond</title>
+<style>
+  :root{
+    --bg:#FBFBF8;--bg-soft:#F4F4F0;--bg-card:#FFFFFF;
+    --ink:#0A0A0C;--ink-soft:#4A4D55;--ink-mute:#6B6E76;
+    --line:rgba(10,10,12,.08);--line-strong:rgba(10,10,12,.14);
+    --accent:#DC1F2D;--green:#15803D;
+    --font-sans:Geist,-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
+    --font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+
+  .mockup-flag{position:fixed;top:12px;right:12px;z-index:200;background:var(--ink);color:var(--bg);font-family:var(--font-mono);font-size:10px;padding:6px 10px;border-radius:4px;letter-spacing:.08em;text-transform:uppercase}
+
+  .nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px 36px;background:rgba(251,251,248,.85);backdrop-filter:blur(16px);font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);border-bottom:1px solid var(--line)}
+  .nav-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-sans);font-weight:700;font-size:14px;letter-spacing:-.02em;color:var(--ink)}
+  .nav-mark{width:20px;height:20px}
+  .nav-mark img{width:100%;height:100%;object-fit:contain}
+
+  .container{max-width:1320px;margin:0 auto;padding:0 36px}
+
+  .variant-label{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:48px 36px 8px;max-width:1320px;margin:0 auto;font-weight:600;border-top:1px dashed var(--line-strong)}
+  .variant-meta{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);padding:0 36px 16px;max-width:1320px;margin:0 auto}
+
+  /* Hero shared styles (Classifications page) */
+  .hero{position:relative;padding:48px 0 64px;overflow:hidden}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:52px;align-items:start;position:relative;z-index:2}
+  .breadcrumb{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin-bottom:28px;position:relative;z-index:2}
+  .breadcrumb a{color:var(--ink-mute)}.breadcrumb .current{color:var(--ink)}.breadcrumb .sep{margin:0 8px;opacity:.4}
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .eyebrow .check{color:var(--green);display:inline-flex;align-items:center;gap:6px}
+  .eyebrow .check::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%}
+  .h1{font-size:clamp(48px,5.6vw,72px);font-weight:700;line-height:1;letter-spacing:-.04em;max-width:14ch;margin-bottom:24px}
+  .h1 .accent{color:var(--accent);border-bottom:3px solid var(--accent);padding-bottom:2px}
+  .lede{font-size:18px;color:var(--ink-soft);line-height:1.55;margin-bottom:28px;max-width:50ch}
+  .specs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:24px}
+  .spec{padding:16px 14px 16px 0;border-right:1px solid var(--line)}
+  .spec:last-child{border-right:none}
+  .spec-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:5px}
+  .spec-value{font-family:var(--font-mono);font-size:13px;font-weight:500}
+  .cta{display:flex;gap:10px;margin-bottom:28px}
+  .btn{padding:14px 22px;border-radius:8px;font-family:var(--font-sans);font-weight:500;font-size:14px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;border:1px solid transparent}
+  .btn-primary{background:var(--ink);color:var(--bg)}
+  .btn-secondary{background:var(--bg-card);color:var(--ink);border-color:var(--line-strong)}
+  .price{position:sticky;top:80px;background:rgba(255,255,255,.82);backdrop-filter:blur(10px);border:1px solid var(--line-strong);border-radius:14px;padding:24px 28px;align-self:start;min-width:240px}
+  .price-label{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:14px}
+  .price-amount{font-size:48px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .price-cur{font-size:18px;color:var(--ink-mute);margin-left:6px;font-weight:400}
+  .price-renew{font-size:13px;color:var(--ink-soft);margin-top:14px}
+
+  /* Background banner — variants */
+  .bg{position:absolute;pointer-events:none;z-index:1;background-image:url('../web/public/og-classifications.png');background-repeat:no-repeat}
+
+  /* M1 — V2 strict (copy of TARES, position center pour montrer le centre de la compo) */
+  .hero.m1 .bg{
+    right:-2%;bottom:-4%;
+    width:72%;height:85%;
+    background-size:cover;
+    background-position:center;
+    opacity:.45;
+    -webkit-mask-image:linear-gradient(135deg, transparent 0%, transparent 30%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.95) 100%);
+            mask-image:linear-gradient(135deg, transparent 0%, transparent 30%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.95) 100%);
+  }
+
+  /* M2 — Pleine largeur, centré bas, mask radial bottom (la bannière respire en horizontal) */
+  .hero.m2{padding-bottom:120px}
+  .hero.m2 .bg{
+    right:0;left:0;bottom:-2%;
+    width:100%;height:75%;
+    background-size:contain;
+    background-position:center 90%;
+    opacity:.5;
+    -webkit-mask-image:radial-gradient(ellipse at 50% 90%, rgba(0,0,0,.95) 0%, rgba(0,0,0,.7) 35%, rgba(0,0,0,.25) 70%, transparent 100%);
+            mask-image:radial-gradient(ellipse at 50% 90%, rgba(0,0,0,.95) 0%, rgba(0,0,0,.7) 35%, rgba(0,0,0,.25) 70%, transparent 100%);
+  }
+
+  /* M3 — Flipée + opacity moyenne — carré rouge passe à gauche (cohérence avec footer) */
+  .hero.m3 .bg{
+    right:-4%;bottom:-4%;
+    width:75%;height:88%;
+    background-size:cover;
+    background-position:center;
+    opacity:.42;
+    transform:scaleX(-1);
+    -webkit-mask-image:linear-gradient(45deg, transparent 0%, transparent 30%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.95) 100%);
+            mask-image:linear-gradient(45deg, transparent 0%, transparent 30%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.95) 100%);
+  }
+  /* Note : en flippant la section conteneur fait que le mask-direction passe aussi → ajusté à 45° pour compenser visuel */
+
+  footer{padding:48px 36px;font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);text-align:center;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<div class="mockup-flag">Maquette · Hero Classifications — 3 traitements de fond</div>
+
+<nav class="nav">
+  <div class="nav-brand"><span class="nav-mark"><img src="../web/public/logo.png" alt=""></span>openswissdata</div>
+</nav>
+
+<!-- ============= M1 — V2 strict ============= -->
+<div class="variant-label">M1 — V2 strict (cohérent avec TARES) · opacity 0.45 · mask diagonal 135°</div>
+<div class="variant-meta">Réplique exacte du traitement déjà validé sur TARES — mêmes paramètres, position right-bottom, mask haut-gauche → bas-droit. La bannière Classifications étant centrée (et non convergente), on positionne en `center` pour que le nuage de pixels et le carré rouge restent visibles côté droit-bas.</div>
+<section class="hero m1">
+  <div class="bg"></div>
+  <div class="container">
+    <nav class="breadcrumb"><a href="#">accueil</a><span class="sep">·</span><a href="#">datasets</a><span class="sep">·</span><span class="current">classifications</span></nav>
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><span>Classifications · NOGA · NACE · ISIC</span><span class="check">Sources publiques · LDA art. 5</span></div>
+        <h1 class="h1">Classifications économiques, <span class="accent">cross-walkées.</span></h1>
+        <p class="lede">NOGA 2025, NACE Rév. 2.1, ISIC Rév. 5. Hiérarchies complètes, désignations en 4 langues (DE/FR/IT/EN), tables de correspondance entre standards. JSON, Parquet, SQL.</p>
+        <div class="specs">
+          <div class="spec"><div class="spec-label">Standards</div><div class="spec-value">NOGA · NACE · ISIC</div></div>
+          <div class="spec"><div class="spec-label">Langues</div><div class="spec-value">DE · FR · IT · EN</div></div>
+          <div class="spec"><div class="spec-label">Cross-walks</div><div class="spec-value">3 directions</div></div>
+        </div>
+        <div class="cta">
+          <button class="btn btn-primary">Acheter — 399 CHF →</button>
+          <button class="btn btn-secondary">Échantillon CSV</button>
+        </div>
+      </div>
+      <div class="price">
+        <div class="price-label">One-shot</div>
+        <div><span class="price-amount">399</span><span class="price-cur">CHF</span></div>
+        <div class="price-renew">+160 CHF/an mises à jour (optionnel) · 360 jours d'updates inclus</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============= M2 — Pleine largeur, radial bottom ============= -->
+<div class="variant-label">M2 — Centrée pleine largeur · opacity 0.5 · mask radial bottom</div>
+<div class="variant-meta">La bannière s'étale sur toute la largeur du hero, ancrée au bas. Mask radial elliptique centré sur le bas-centre → les pixels diffusent vers les côtés et le haut. Plus pictural, exploite mieux la composition centrée de cette bannière.</div>
+<section class="hero m2">
+  <div class="bg"></div>
+  <div class="container">
+    <nav class="breadcrumb"><a href="#">accueil</a><span class="sep">·</span><a href="#">datasets</a><span class="sep">·</span><span class="current">classifications</span></nav>
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><span>Classifications · NOGA · NACE · ISIC</span><span class="check">Sources publiques · LDA art. 5</span></div>
+        <h1 class="h1">Classifications économiques, <span class="accent">cross-walkées.</span></h1>
+        <p class="lede">NOGA 2025, NACE Rév. 2.1, ISIC Rév. 5. Hiérarchies complètes, désignations en 4 langues (DE/FR/IT/EN), tables de correspondance entre standards. JSON, Parquet, SQL.</p>
+        <div class="specs">
+          <div class="spec"><div class="spec-label">Standards</div><div class="spec-value">NOGA · NACE · ISIC</div></div>
+          <div class="spec"><div class="spec-label">Langues</div><div class="spec-value">DE · FR · IT · EN</div></div>
+          <div class="spec"><div class="spec-label">Cross-walks</div><div class="spec-value">3 directions</div></div>
+        </div>
+        <div class="cta">
+          <button class="btn btn-primary">Acheter — 399 CHF →</button>
+          <button class="btn btn-secondary">Échantillon CSV</button>
+        </div>
+      </div>
+      <div class="price">
+        <div class="price-label">One-shot</div>
+        <div><span class="price-amount">399</span><span class="price-cur">CHF</span></div>
+        <div class="price-renew">+160 CHF/an mises à jour (optionnel) · 360 jours d'updates inclus</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============= M3 — Flipée + opacity 0.42 ============= -->
+<div class="variant-label">M3 — Flipée horizontale · opacity 0.42 · mask diagonal 45° (cohérence footer)</div>
+<div class="variant-meta">Bannière flipée comme dans le footer — le carré rouge passe côté gauche. Mask diagonal inversé (45°). Pour un visiteur qui scroll : footer + hero parlent le même langage visuel (flip cohérent), mais la page Classifications se distingue de TARES (qui n'est pas flipée dans son hero).</div>
+<section class="hero m3">
+  <div class="bg"></div>
+  <div class="container">
+    <nav class="breadcrumb"><a href="#">accueil</a><span class="sep">·</span><a href="#">datasets</a><span class="sep">·</span><span class="current">classifications</span></nav>
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><span>Classifications · NOGA · NACE · ISIC</span><span class="check">Sources publiques · LDA art. 5</span></div>
+        <h1 class="h1">Classifications économiques, <span class="accent">cross-walkées.</span></h1>
+        <p class="lede">NOGA 2025, NACE Rév. 2.1, ISIC Rév. 5. Hiérarchies complètes, désignations en 4 langues (DE/FR/IT/EN), tables de correspondance entre standards. JSON, Parquet, SQL.</p>
+        <div class="specs">
+          <div class="spec"><div class="spec-label">Standards</div><div class="spec-value">NOGA · NACE · ISIC</div></div>
+          <div class="spec"><div class="spec-label">Langues</div><div class="spec-value">DE · FR · IT · EN</div></div>
+          <div class="spec"><div class="spec-label">Cross-walks</div><div class="spec-value">3 directions</div></div>
+        </div>
+        <div class="cta">
+          <button class="btn btn-primary">Acheter — 399 CHF →</button>
+          <button class="btn btn-secondary">Échantillon CSV</button>
+        </div>
+      </div>
+      <div class="price">
+        <div class="price-label">One-shot</div>
+        <div><span class="price-amount">399</span><span class="price-cur">CHF</span></div>
+        <div class="price-renew">+160 CHF/an mises à jour (optionnel) · 360 jours d'updates inclus</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Maquette comparative · 3 traitements de fond pour la page Classifications · même bannière /og-classifications.png
+</footer>
+
+</body>
+</html>
