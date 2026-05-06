@@ -1,0 +1,151 @@
+email,prenom,nom,entreprise,segment,source,base_legale,domaine_site,opt_in_pending,notes
+info@gfms.com,,,GF Machining Solutions,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,gfms.com,yes,EDM/fraisage haute précision exportateur
+info@georgfischer.com,,,Georg Fischer,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,georgfischer.com,yes,Pipelines/manufacturing/machinery exportateur
+info@buhlergroup.com,,,Bühler Group,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,buhlergroup.com,yes,Plant equipment manufacturer
+info@schindler.com,,,Schindler Group,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,schindler.com,yes,Escalators/elevators
+info@rieter.com,,,Rieter,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,rieter.com,yes,Textile machinery
+info@mt.com,,,Mettler Toledo,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,mt.com,yes,Scientific instruments
+info@leica-geosystems.com,,,Leica Geosystems,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,leica-geosystems.com,yes,Surveying equipment
+info@burckhardt.com,,,Burckhardt Compression,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,burckhardt.com,yes,Reciprocating compressor
+info@staubli.com,,,Stäubli,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,staubli.com,yes,Textile machinery/connectors/robotics
+info@kudelski.com,,,Kudelski Group,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,kudelski.com,yes,Electronic media systems
+info@tornos.com,,,Tornos SA,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,tornos.com,yes,Machine-outils décolletage
+info@mikron.com,,,Mikron Switzerland AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,mikron.com,yes,Machines transfert/assemblage horlogerie
+info@mikrontool.com,,,Mikron Tool,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,mikrontool.com,yes,Outils coupe précision
+info@fehlmann.ch,,,Fehlmann AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,fehlmann.ch,yes,Fraiseuses haute précision
+info@precitrame.com,,,Precitrame Machines SA,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,precitrame.com,yes,Centres usinage horlogerie/médical
+info@starrag.com,,,Starrag Group,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,starrag.com,yes,Machine-outils précision
+info@mz-lw.ch,,,MONNIER + ZAHNER AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,mz-lw.ch,yes,Machines décolletage
+info@urma.ch,,,URMA AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,urma.ch,yes,Outils précision alésage
+info@blaser.com,,,Blaser Swisslube AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,blaser.com,yes,Lubrifiants industriels
+info@agathon.ch,,,Agathon AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,agathon.ch,yes,Outils précision/guides linéaires
+info@heule.com,,,HEULE Precision Tools,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,heule.com,yes,Outils ébavurage
+info@sphinx-tools.ch,,,Sphinx Tools Ltd.,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,sphinx-tools.ch,yes,Micro-outils précision
+info@reiden.ch,,,Reiden Technik AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,reiden.ch,yes,Centres usinage 5-axes
+info@triag.ch,,,Triag International AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,triag.ch,yes,Systèmes serrage CNC
+info@motorex.com,,,MOTOREX AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,motorex.com,yes,Lubrifiants industriels
+info@affolter.ch,,,Affolter Group SA,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,affolter.ch,yes,Machines tailler engrenages
+info@kunz-precision.ch,,,Kunz precision AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,kunz-precision.ch,yes,Composants précision
+info@bernex.com,,,IHI-Bernex AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,bernex.com,yes,Traitements thermochimiques
+info@regofix.com,,,REGO-FIX Switzerland,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,regofix.com,yes,Systèmes serrage outils
+info@studer.com,,,Fritz Studer AG,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,studer.com,yes,Rectifieuses cylindriques
+info@abarisk.ch,,,ABARISK SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,abarisk.ch,yes,Mécanique précision GIM
+info@aficor.ch,,,AFICOR SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,aficor.ch,yes,Mécanique précision GIM
+info@allega.ch,,,ALLEGA Sàrl,pme_exportatrice,gim,interet_legitime_B2B_email_public,allega.ch,yes,Mécanique précision GIM
+info@alpin-mecanique.ch,,,Alpin Mécanique Sàrl,pme_exportatrice,gim,interet_legitime_B2B_email_public,alpin-mecanique.ch,yes,Mécanique précision GIM
+info@altair-consulting.com,,,Altair Consulting SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,altair-consulting.com,yes,Mécanique consulting GIM
+info@amg-sa.ch,,,AMG Patrick Henchoz SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,amg-sa.ch,yes,Mécanique précision GIM
+info@andenmatten-freres.ch,,,Andenmatten Frères SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,andenmatten-freres.ch,yes,Mécanique précision GIM
+info@frei-andre.ch,,,André Frei & Fils SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,frei-andre.ch,yes,Mécanique précision GIM
+info@anotec.ch,,,ANOTEC SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,anotec.ch,yes,Traitement surface anodisation GIM
+info@apco-technologies.com,,,APCO Technologies SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,apco-technologies.com,yes,Ingénierie/space/énergie GIM
+info@apimec.ch,,,APIMEC SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,apimec.ch,yes,Mécanique précision GIM
+info@arcm.ch,,,ARCM,pme_exportatrice,gim,interet_legitime_B2B_email_public,arcm.ch,yes,Mécanique précision GIM
+info@arcofil.ch,,,ARCOFIL SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,arcofil.ch,yes,Filage métal précision GIM
+info@arp-mecanique.ch,,,ARP Mécanique et électronique SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,arp-mecanique.ch,yes,Mécanique électronique GIM
+info@desiebenthal.ch,,,Atelier de Siebenthal SA,pme_exportatrice,gim,interet_legitime_B2B_email_public,desiebenthal.ch,yes,Mécanique précision GIM
+info@asth.ch,,,Ateliers St-Hubert Granges,pme_exportatrice,gim,interet_legitime_B2B_email_public,asth.ch,yes,Mécanique formation GIM
+info@gotec.ch,,,Gotec SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,gotec.ch,yes,Pompes Sion VS
+info@hydro-exploitation.ch,,,Hydro Exploitation SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,hydro-exploitation.ch,yes,Centrales hydrauliques VS
+info@lemco.ch,,,Lemco Précision SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,lemco.ch,yes,Décolletage Vionnaz VS
+info@mgtech.ch,,,MGTech Sàrl,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,mgtech.ch,yes,Mécanique Saxon VS
+info@mullertechnology.com,,,Muller Technology,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,mullertechnology.com,yes,Plasturgie Conthey VS
+info@soprod.ch,,,Soprod SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,soprod.ch,yes,Mouvements horlogers Sion VS
+info@tmrsa.ch,,,TMR SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,tmrsa.ch,yes,Transports/maintenance VS
+info@valelectric.ch,,,Valélectric Farner SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,valelectric.ch,yes,Électrotechnique VS
+info@valprecision.ch,,,Valprécision SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,valprecision.ch,yes,Décolletage Chalais VS
+info@biar.ch,,,Biar SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,biar.ch,yes,Mécanique Sembrancher VS
+info@burgener.ch,,,Burgener AG,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,burgener.ch,yes,Mécanique Visp VS
+info@chiron-group.com,,,Chiron Group,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,chiron-group.com,yes,Centres usinage VS
+info@farronato.ch,,,Farronato,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,farronato.ch,yes,Mécanique Evionnaz VS
+info@jacquier-luisier.ch,,,Jacquier-Luisier SA,pme_exportatrice,swissmechanic,interet_legitime_B2B_email_public,jacquier-luisier.ch,yes,Mécanique Evionnaz VS
+info@swissmem.ch,,,Acrotec,pme_exportatrice,swissmem,interet_legitime_B2B_email_public,acrotec.ch,yes,Composants horlogers groupe
+info@mimotec.ch,,,Mimotec SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,mimotec.ch,yes,Microcomposants horlogerie LIGA
+info@easydec.ch,,,easyDec SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,easydec.ch,yes,Décolletage horlogerie haute précision
+info@decovi.ch,,,Décovi SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,decovi.ch,yes,Décolletage horlogerie/médical
+info@smsa.ch,,,Schaublin Machines SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,smsa.ch,yes,Tours haute précision
+info@luthymac.ch,,,Luthy Machines SA,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,luthymac.ch,yes,Machines outils
+info@schleuniger.com,,,Schleuniger AG,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,schleuniger.com,yes,Machines traitement câbles
+info@rolex.com,,,Rolex,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,rolex.com,yes,Horlogerie de luxe
+info@patek.com,,,Patek Philippe,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,patek.com,yes,Horlogerie haute gamme
+info@breitling.com,,,Breitling,pme_exportatrice,s-ge,interet_legitime_B2B_email_public,breitling.com,yes,Horlogerie
+info@aandarta.ch,,,Aandarta Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,aandarta.ch,yes,Intégrateur Abacus ERP
+info@abacus-solutions.ch,,,Abacus Business Solutions Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,abacus-solutions.ch,yes,Intégrateur Abacus ERP
+info@abraxas.ch,,,Abraxas Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,abraxas.ch,yes,Intégrateur Abacus + multi-ERP
+info@acribia.ch,,,Acribia Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,acribia.ch,yes,Intégrateur Abacus ERP
+info@ademis.ch,,,Ademis GmbH,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,ademis.ch,yes,Intégrateur Abacus ERP
+info@adista-it.ch,,,ADISTA IT Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,adista-it.ch,yes,Intégrateur Abacus ERP
+info@advice.ch,,,ADVICE Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,advice.ch,yes,Intégrateur Abacus ERP
+info@agm-alliance.ch,,,AGM Alliance Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,agm-alliance.ch,yes,Intégrateur Abacus ERP CH romande
+info@all-consulting.ch,,,ALL CONSULTING Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,all-consulting.ch,yes,Intégrateur Abacus ERP
+info@alteosys.ch,,,Alteo Business Systems GmbH,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,alteosys.ch,yes,Intégrateur Abacus ERP
+info@altrimo.ch,,,altrimo Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,altrimo.ch,yes,Intégrateur Abacus ERP
+info@arc.ch,,,ARC Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,arc.ch,yes,Intégrateur Abacus ERP
+info@arcon.ch,,,ARCON Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,arcon.ch,yes,Intégrateur Abacus ERP
+info@artaris-solutions.ch,,,ARTARIS SOLUTIONS Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,artaris-solutions.ch,yes,Intégrateur Abacus ERP
+info@axept.ch,,,Axept Business Software Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,axept.ch,yes,Intégrateur Abacus ERP
+info@b2go.ch,,,b2go.ch Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,b2go.ch,yes,Intégrateur Abacus ERP
+info@bdo.ch,,,BDO Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,bdo.ch,yes,Fiduciaire + intégrateur Abacus
+info@bewida.ch,,,Bewida Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,bewida.ch,yes,Intégrateur Abacus ERP
+info@bsbit.ch,,,bsb.info.partner Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,bsbit.ch,yes,Intégrateur Abacus ERP
+info@bsi-partner.ch,,,bsi partner Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,bsi-partner.ch,yes,Intégrateur Abacus ERP
+info@bullinger.ch,,,Bullinger Software Systems Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,bullinger.ch,yes,Intégrateur Abacus ERP
+info@customize.ch,,,Customize Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,customize.ch,yes,Intégrateur Abacus ERP
+info@dorean.ch,,,Dorean Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,dorean.ch,yes,Intégrateur Abacus ERP
+info@fidinam.com,,,Fidigit (Schweiz) Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,fidinam.com,yes,Intégrateur Abacus ERP
+info@interbit.ch,,,InterBit Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,interbit.ch,yes,Intégrateur Abacus ERP
+info@obt.ch,,,OBT Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,obt.ch,yes,Fiduciaire + intégrateur Abacus
+info@o-i.ch,,,OFISA Informatique Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,o-i.ch,yes,Intégrateur Abacus ERP romande
+info@projekt7.ch,,,projekt7 Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,projekt7.ch,yes,Intégrateur Abacus ERP
+info@talus.ch,,,Talus Informatik Ltd,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,talus.ch,yes,Intégrateur Abacus ERP
+info@onepartner.ch,,,One Partner SA,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,onepartner.ch,yes,RH/salaires Abacus CH romande
+info@axept.ch,,,Axept SA,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,axept.ch,yes,Intégrateur Abacus historique
+info@abacus-services.ch,,,Abacus Services SA,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,abacus-services.ch,yes,Implémentation Abacus CH romande
+info@ciges.ch,,,CIGES,erp_integrateur_abacus,abacus-partners,interet_legitime_B2B_email_public,ciges.ch,yes,Abacus admin publiques
+info@camptocamp.com,,,Camptocamp SA,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,camptocamp.com,yes,Odoo Gold Partner CH/FR/DE
+info@open-net.ch,,,Open Net Sàrl,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,open-net.ch,yes,Odoo Gold Partner Lausanne
+info@nalios.com,,,Nalios Sàrl,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,nalios.com,yes,Odoo Gold Partner CH
+info@dynapps.ch,,,Dynapps SA,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,dynapps.ch,yes,Odoo Gold Partner CH
+info@d4e.ch,,,D4E Digital4Efficiency Sàrl,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,d4e.ch,yes,Odoo Gold Partner CH
+info@braintec.ch,,,braintec Schweiz,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,braintec.ch,yes,Odoo Gold Partner CH
+info@twio.tech,,,twio.tech AG,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,twio.tech,yes,Odoo Gold Partner CH
+info@simpit.ch,,,simpit GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,simpit.ch,yes,Odoo Gold Partner CH
+info@sword-group.com,,,Sword Technologies SA,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,sword-group.com,yes,Odoo Gold Partner CH
+info@simplidoo.com,,,Simplidoo Sàrl,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,simplidoo.com,yes,Odoo Silver Partner CH
+info@onesolutions.ch,,,OneSolutions Klevia SA,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,onesolutions.ch,yes,Odoo Silver Partner CH
+info@nivels.ch,,,nivels GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,nivels.ch,yes,Odoo Silver Partner CH
+info@latus.ch,,,Latus GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,latus.ch,yes,Odoo Silver Partner CH
+info@consenso.ch,,,consenso GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,consenso.ch,yes,Odoo Silver Partner CH
+info@abilium.com,,,Abilium GmbH,erp_integrateur_odoo,odoo-partners,interet_legitime_B2B_email_public,abilium.com,yes,Odoo Silver Partner CH
+info@beonesolutions.com,,,be one solutions,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,beonesolutions.com,yes,SAP Partner Zug rollouts internationaux
+info@msg-global.com,,,msg global solutions,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,msg-global.com,yes,SAP Partner Pinnacle Award Regensdorf
+info@elca.ch,,,ELCA Informatique SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,elca.ch,yes,SAP/Microsoft/multi-ERP CH
+info@swisscom.ch,,,Swisscom (Schweiz) AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,swisscom.ch,yes,SAP Full Service Provider CH
+info@bechtle.com,,,Bechtle Suisse,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,bechtle.com,yes,Intégrateur multi-ERP CH
+info@trivadis.com,,,Trivadis (Accenture),erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,trivadis.com,yes,SAP/Oracle CH (Accenture)
+info@accenture.com,,,Accenture Switzerland,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,accenture.com,yes,SAP Platinum Partner CH
+info@deloitte.com,,,Deloitte Switzerland,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,deloitte.com,yes,SAP Platinum Partner CH
+info@capgemini.com,,,Capgemini Switzerland,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,capgemini.com,yes,SAP Platinum Partner CH
+info@aproda.ch,,,Aproda AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,aproda.ch,yes,Microsoft Dynamics 365 St-Gall
+info@isolutions.ch,,,iSolutions AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,isolutions.ch,yes,Microsoft Dynamics 365 Bern
+info@bossinfo.ch,,,Boss Info AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,bossinfo.ch,yes,Microsoft Dynamics 365 Farnern
+info@bs-team.ch,,,BS-Team SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,bs-team.ch,yes,Microsoft Dynamics 365 Morges VD
+info@ioz.ch,,,IOZ AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,ioz.ch,yes,Microsoft Dynamics 365 Sursee
+info@bucher-suter.com,,,Bucher + Suter,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,bucher-suter.com,yes,Microsoft Dynamics 365 Bern
+info@ambit-group.com,,,Ambit Group AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,ambit-group.com,yes,Microsoft Dynamics 365 Winterthur
+info@dbe.ch,,,DBE SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,dbe.ch,yes,Microsoft Dynamics 365 Bienne
+info@datadynamic.ch,,,Data Dynamic AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,datadynamic.ch,yes,Microsoft Dynamics 365 Bern
+info@joker-it.ch,,,Joker IT AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,joker-it.ch,yes,Microsoft Dynamics 365 Goldau
+info@softwareone.com,,,SoftwareONE AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,softwareone.com,yes,Microsoft Dynamics 365 Stans
+info@arvato-systems.ch,,,Arvato Systems Digital,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,arvato-systems.ch,yes,Microsoft Dynamics 365 Zürich
+info@prisma-informatik.ch,,,PRISMA Informatik AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,prisma-informatik.ch,yes,Microsoft Dynamics 365 Dietlikon
+info@aventit.ch,,,aventit AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,aventit.ch,yes,Microsoft Dynamics 365 Zürich
+info@erp-services.ch,,,ERP Services SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,erp-services.ch,yes,Microsoft Dynamics 365 Puidoux VD
+info@logico.ch,,,Logico SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,logico.ch,yes,Microsoft Dynamics 365 Bienne
+info@delphisoft.ch,,,Delphisoft SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,delphisoft.ch,yes,Microsoft Dynamics 365 Satigny GE
+info@erpxperts.ch,,,ERPXperts SA,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,erpxperts.ch,yes,Microsoft Dynamics 365 Givisiez FR
+info@foxdata.ch,,,fox data gmbh,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,foxdata.ch,yes,Microsoft Dynamics 365 Bern
+info@axians.ch,,,Axians Infoma Schweiz AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,axians.ch,yes,Microsoft Dynamics 365 Schlieren
+info@logol.ch,,,logol AG,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,logol.ch,yes,Microsoft Dynamics 365 Steinhausen
+info@kcs.net,,,KCS.net (Avanade),erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,kcs.net,yes,Microsoft Dynamics AX leader DACH
+info@almakom.ch,,,Almakom,erp_integrateur_sap,sap-partners,interet_legitime_B2B_email_public,almakom.ch,yes,Microsoft Dynamics 365 CH romande
