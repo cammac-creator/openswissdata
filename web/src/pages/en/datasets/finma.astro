@@ -9,7 +9,7 @@ const productJsonLd = {
   "@type": "Product",
   name: "FINMA Registry — Swiss financial compliance",
   description: "FINMA's 10 public authorisation lists consolidated under a single schema. Banks, insurers, PSPs, asset managers, SROs. Enriched with UID + LEI.",
-  image: "https://www.openswissdata.com/og-default.png",
+  image: "https://www.openswissdata.com/og-finma.png",
   url: "https://www.openswissdata.com/en/datasets/finma",
   brand: { "@type": "Brand", name: "openswissdata" },
   category: "Reference data — financial supervision registry",
@@ -27,11 +27,13 @@ const productJsonLd = {
 <BaseLayout
   title="Unified FINMA registry — Swiss financial compliance | openswissdata"
   description="FINMA's 10 public authorisation lists consolidated under a single schema. Banks, insurers, PSPs, asset managers, SROs. Enriched with UID + LEI. 299 CHF one-shot."
+  image="/og-finma.png"
   productJsonLd={productJsonLd}
 >
 <div class="bg-grid"></div>
 
 <section class="v4-hero ds-page">
+  <div class="ds-hero-banner-bg" style="background-image:url('/og-finma.png');" aria-hidden="true"></div>
   <div class="container-v4">
     <nav class="ds-breadcrumb">
       <a href="/en/">home</a>

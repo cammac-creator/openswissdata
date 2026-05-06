@@ -9,7 +9,7 @@ const productJsonLd = {
   "@type": "Product",
   name: "FINMA Registry — Schweizer Finanz-Compliance",
   description: "Die 10 öffentlichen Bewilligungslisten der FINMA konsolidiert in einem einzigen Schema. Banken, Versicherungen, PSPs, Vermögensverwalter, SRO. Angereichert mit UID + LEI.",
-  image: "https://www.openswissdata.com/og-default.png",
+  image: "https://www.openswissdata.com/og-finma.png",
   url: "https://www.openswissdata.com/de/datasets/finma",
   brand: { "@type": "Brand", name: "openswissdata" },
   category: "Reference data — financial supervision registry",
@@ -27,11 +27,13 @@ const productJsonLd = {
 <BaseLayout
   title="FINMA-Register vereint — Schweizer Finanz-Compliance | openswissdata"
   description="Die 10 öffentlichen Bewilligungslisten der FINMA konsolidiert in einem einzigen Schema. Banken, Versicherungen, PSPs, Vermögensverwalter, SRO. Angereichert mit UID + LEI. 299 CHF einmalig."
+  image="/og-finma.png"
   productJsonLd={productJsonLd}
 >
 <div class="bg-grid"></div>
 
 <section class="v4-hero ds-page">
+  <div class="ds-hero-banner-bg" style="background-image:url('/og-finma.png');" aria-hidden="true"></div>
   <div class="container-v4">
     <nav class="ds-breadcrumb">
       <a href="/de/">Startseite</a>
