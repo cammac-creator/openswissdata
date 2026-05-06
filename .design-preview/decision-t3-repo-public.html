@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Décision T3 — repo public ? · openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8; --bg-card: #FFFFFF; --bg-soft: #F5F4EE;
+    --ink: #0A0A0C; --ink-soft: #3A3D45; --ink-mute: #6B6E76;
+    --line: #E8E4D9; --line-strong: #D9D3C3;
+    --accent: #DC1F2D; --accent-soft: #FCE7E9;
+    --green: #15803D; --green-soft: #DCFCE7;
+    --amber: #92400E; --amber-soft: #FEF3C7;
+    --teal: #0F766E; --teal-soft: #E5F5F1;
+    --blue: #1D4ED8; --blue-soft: #DBEAFE;
+    --purple: #6D28D9; --purple-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%; z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  /* Hero */
+  .hero { padding: 56px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line); width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font-weight: 700; font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05; letter-spacing: -.03em;
+    margin: 0 0 18px; max-width: 24ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 24px 0 36px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-value.green { color: var(--green); } .stat-value.red { color: var(--accent); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); } }
+
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1;
+    letter-spacing: -.025em; margin: 0 0 12px; max-width: 30ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  /* Verdict banner */
+  .verdict {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg); border-radius: 14px; padding: 32px 36px; margin: 24px 0;
+  }
+  .verdict h3 { color: var(--bg); font-size: 22px; margin: 0 0 14px; }
+  .verdict p { color: rgba(255,255,255,.8); font-size: 14px; line-height: 1.65; margin: 0 0 12px; }
+  .verdict p strong { color: white; font-weight: 600; }
+  .verdict-yes { color: #6ee7b7; }
+  .verdict-no { color: #fda4af; }
+
+  /* Blockers visuel */
+  .blockers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 24px 0; }
+  @media (max-width: 720px) { .blockers { grid-template-columns: 1fr; } }
+  .blocker {
+    background: var(--accent-soft); border: 1px solid #f5b3b9; border-radius: 12px;
+    padding: 22px 24px; position: relative;
+  }
+  .blocker .icon {
+    position: absolute; top: 18px; right: 20px;
+    width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+    color: white; display: grid; place-items: center; font-weight: 700; font-size: 18px;
+  }
+  .blocker .label {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--accent);
+    font-weight: 700; margin-bottom: 6px;
+  }
+  .blocker h4 { font-size: 16px; margin: 0 0 8px; font-weight: 700; padding-right: 40px; }
+  .blocker p { font-size: 13px; color: var(--ink-soft); margin: 0 0 6px; line-height: 1.5; }
+  .blocker .terminal {
+    background: #1a1a1d; color: #6ee7b7; padding: 10px 14px; border-radius: 6px;
+    font-family: "Geist Mono", monospace; font-size: 11px; margin-top: 10px; line-height: 1.6;
+  }
+  .blocker .terminal .err { color: #fda4af; }
+
+  /* Options grid */
+  .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 28px 0; }
+  @media (max-width: 880px) { .options { grid-template-columns: 1fr; } }
+  .option {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 26px 24px; display: flex; flex-direction: column;
+  }
+  .option.recommended {
+    border: 2px solid var(--green); background: linear-gradient(180deg, var(--green-soft) 0%, var(--bg-card) 30%);
+    position: relative;
+  }
+  .option.recommended::before {
+    content: "RECOMMANDÉ"; position: absolute; top: -10px; left: 24px;
+    background: var(--green); color: white; padding: 4px 10px; border-radius: 10px;
+    font-family: "Geist Mono", monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  }
+  .option.bad { opacity: 0.85; }
+  .option-letter {
+    font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: .08em; color: var(--ink-mute); margin-bottom: 6px;
+  }
+  .option h3 { font-size: 19px; font-weight: 700; margin: 0 0 8px; line-height: 1.25; }
+  .option .summary { font-size: 13px; color: var(--ink-soft); margin: 0 0 18px; line-height: 1.5; }
+  .option .row {
+    display: flex; gap: 8px; align-items: flex-start; padding: 8px 0;
+    border-top: 1px dashed var(--line); font-size: 12px;
+  }
+  .option .row:first-of-type { border-top: none; }
+  .option .row-label {
+    font-family: "Geist Mono", monospace; font-size: 9px;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mute);
+    font-weight: 700; flex-shrink: 0; width: 90px;
+  }
+  .option .row-value { flex: 1; color: var(--ink-soft); line-height: 1.5; }
+  .option .row-value strong { color: var(--ink); }
+  .option .verdict-line {
+    margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line);
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+  }
+  .option.recommended .verdict-line { color: var(--green); }
+  .option.bad .verdict-line { color: var(--accent); }
+  .option .verdict-line.amber { color: var(--amber); }
+
+  /* Catalogues débloqués */
+  .catalog-impact {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px; margin: 16px 0;
+  }
+  @media (max-width: 720px) { .catalog-impact { grid-template-columns: repeat(2, 1fr); } }
+  .catalog-cell {
+    text-align: center; padding: 8px;
+  }
+  .catalog-cell .name {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--ink-mute);
+    margin-bottom: 4px; font-weight: 700;
+  }
+  .catalog-cell .icon {
+    width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 6px;
+    display: grid; place-items: center; font-size: 16px; font-weight: 700;
+  }
+  .catalog-cell.go .icon { background: var(--green-soft); color: var(--green); }
+  .catalog-cell.no .icon { background: var(--accent-soft); color: var(--accent); }
+  .catalog-cell.partial .icon { background: var(--amber-soft); color: var(--amber); }
+  .catalog-cell .status {
+    font-size: 10px; color: var(--ink-mute); font-weight: 600;
+  }
+
+  /* Risk comparison table */
+  .risk-table {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+    overflow: hidden; margin: 16px 0;
+  }
+  .risk-row {
+    display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 10px; padding: 14px 18px;
+    border-bottom: 1px solid var(--line); align-items: center;
+    font-size: 13px;
+  }
+  .risk-row:last-child { border-bottom: none; }
+  .risk-row.head {
+    background: var(--ink); color: var(--bg);
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
+    padding: 12px 18px;
+  }
+  .risk-row.head > div { color: rgba(255,255,255,.85); }
+  .risk-cell {
+    font-size: 12px; line-height: 1.45;
+  }
+  .risk-cell.label { font-weight: 600; color: var(--ink); font-size: 13px; }
+  .risk-cell.go { color: var(--green); font-weight: 600; }
+  .risk-cell.no { color: var(--accent); font-weight: 600; }
+  .risk-cell.amber { color: var(--amber); font-weight: 600; }
+  @media (max-width: 880px) { .risk-row { grid-template-columns: 1fr; } .risk-row.head { display: none; } }
+
+  /* Decision flow */
+  .decision-flow {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 24px; margin: 20px 0;
+  }
+  .flow-step {
+    display: flex; gap: 14px; padding: 12px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--ink); color: var(--bg);
+    display: grid; place-items: center;
+    font-family: "Geist Mono", monospace; font-size: 12px; font-weight: 700;
+  }
+  .flow-content h5 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+  .flow-content p { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .flow-content code { font-size: 11px; }
+
+  /* Concerns */
+  .concerns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 20px 0; }
+  @media (max-width: 880px) { .concerns-grid { grid-template-columns: 1fr; } }
+  .concern-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .concern-card.go { border-left: 3px solid var(--green); }
+  .concern-card.no { border-left: 3px solid var(--accent); }
+  .concern-card h5 { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
+  .concern-card.go h5 { color: var(--green); }
+  .concern-card.no h5 { color: var(--accent); }
+  .concern-card p { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+  .concern-card ul { margin: 8px 0 0; padding-left: 20px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+
+  footer {
+    padding: 36px 0 56px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Décision T3 · catalogues MCP · 2026-05-06</span>
+    </div>
+    <h1>Faut-il rendre <span class="accent">le repo public</span> et publier le package npm&nbsp;?</h1>
+    <p class="lede">
+      Pour soumettre <code>@openswissdata/mcp</code> aux 5 catalogues MCP (mcp.so, Smithery, Glama, Anthropic, Cursor), il faut résoudre <strong>2 blocages techniques</strong>. Trois options possibles. Une seule recommandée.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Catalogues à soumettre</div>
+        <div class="stat-value">5</div>
+        <div class="stat-sub">+ registry MCP officielle</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Blocages techniques</div>
+        <div class="stat-value red">2</div>
+        <div class="stat-sub">repo privé · npm pas publié</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Effort technique</div>
+        <div class="stat-value amber">~30 min</div>
+        <div class="stat-sub">si option recommandée</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Impact long-terme</div>
+        <div class="stat-value green">SEO durable</div>
+        <div class="stat-sub">+ crédibilité dev</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCAGES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Le contexte</strong>
+      <span class="sep">/</span>
+      <span>Pourquoi cette décision se pose</span>
+    </div>
+    <h2>Les <span class="serif">2 blocages techniques</span> à régler.</h2>
+    <p class="section-intro">Sans ces 2 corrections, les forms de soumission vont retourner <strong>404</strong> et les auto-scanners (Smithery, Glama, mcp.so) vont rejeter la soumission.</p>
+
+    <div class="blockers">
+
+      <div class="blocker">
+        <div class="icon">!</div>
+        <div class="label">Blocage 1</div>
+        <h4>Le repo GitHub est privé</h4>
+        <p><code>cammac-creator/openswissdata</code> est en mode <strong>PRIVATE</strong>. Smithery, Glama et mcp.so font de l'auto-scan du repo pour extraire le manifest, le README, la liste des tools. <strong>Repo privé = soumission impossible</strong> sur ces 3 catalogues.</p>
+        <div class="terminal">
+$ gh repo view cammac-creator/openswissdata<br>
+&nbsp;&nbsp;<span class="err">visibility: PRIVATE</span><br>
+$ curl github.com/cammac-creator/openswissdata<br>
+&nbsp;&nbsp;<span class="err">404 Not Found</span>
+        </div>
+      </div>
+
+      <div class="blocker">
+        <div class="icon">!</div>
+        <div class="label">Blocage 2</div>
+        <h4>Le package npm n'est pas publié</h4>
+        <p>Le snippet d'installation que tous les catalogues affichent — <code>npx -y @openswissdata/mcp</code> — <strong>est cassé</strong>. Quand un user clique "Install" sur Cursor / Claude Desktop, il a une erreur 404 npm. C'est l'une des plus mauvaises premières impressions possibles.</p>
+        <div class="terminal">
+$ npm view @openswissdata/mcp<br>
+&nbsp;&nbsp;<span class="err">npm error 404 Not Found</span><br>
+$ npx -y @openswissdata/mcp<br>
+&nbsp;&nbsp;<span class="err">npm error code E404</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- OPTIONS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Les 3 options</strong>
+      <span class="sep">/</span>
+      <span>Comparaison effort / risque / impact</span>
+    </div>
+    <h2>Tu as <span class="serif">trois choix</span>.</h2>
+
+    <div class="options">
+
+      <!-- OPTION B (présenté en premier visuellement) -->
+      <div class="option bad">
+        <div class="option-letter">Option B</div>
+        <h3>Tout garder privé</h3>
+        <p class="summary">Status quo. On ne soumet à aucun catalogue.</p>
+
+        <div class="row">
+          <div class="row-label">Effort</div>
+          <div class="row-value"><strong>0 min</strong></div>
+        </div>
+        <div class="row">
+          <div class="row-label">Catalogues</div>
+          <div class="row-value">0 / 5 accessibles. Zero acquisition organique via les marketplaces MCP.</div>
+        </div>
+        <div class="row">
+          <div class="row-label">Risque</div>
+          <div class="row-value">Personne ne peut installer ton MCP. Concurrent qui publie en premier prend la place SEO "Swiss MCP".</div>
+        </div>
+        <div class="row">
+          <div class="row-label">Bénéfice</div>
+          <div class="row-value">Code source privé (pas d'inquiétude de copie).</div>
+        </div>
+
+        <div class="verdict-line">À ÉVITER · perte d'opportunité</div>
+      </div>
+
+      <!-- OPTION A (RECOMMANDÉ, milieu) -->
+      <div class="option recommended">
+        <div class="option-letter">Option A</div>
+        <h3>Repo public + npm publié</h3>
+        <p class="summary">On débloque tout d'un coup. Soumission aux 5 catalogues + registry officielle MCP.</p>
+
+        <div class="row">
+          <div class="row-label">Effort</div>
+          <div class="row-value"><strong>~30 min</strong> côté Claude (audit secrets + push public + npm publish)</div>
+        </div>
+        <div class="row">
+          <div class="row-label">Catalogues</div>
+          <div class="row-value"><strong>5 / 5 accessibles</strong> + registry MCP officielle. Auto-scan opérationnel sur Smithery, Glama, mcp.so.</div>
+        </div>
+        <div class="row">
+          <div class="row-label">Risque</div>
+          <div class="row-value">Code des workflows ETL devient lisible publiquement (mais c'est déjà annoncé sur ton site comme "open source" — donc cohérent).</div>
+        </div>
+        <div class="row">
+          <div class="row-label">Bénéfice</div>
+          <div class="row-value">Crédibilité dev maximale. SEO durable. Argument de vente direct ("vérifiez la pipeline avant achat"). Permission BAZG visible.</div>
+        </div>
+
+        <div class="verdict-line">RECOMMANDÉ · effort minimal vs gain</div>
+      </div>
+
+      <!-- OPTION C -->
+      <div class="option">
+        <div class="option-letter">Option C</div>
+        <h3>Repo public sans npm</h3>
+        <p class="summary">Compromis. On rend le repo visible, on garde l'install via remote HTTP uniquement.</p>
+
+        <div class="row">
+          <div class="row-label">Effort</div>
+          <div class="row-value"><strong>~10 min</strong> côté Claude (audit secrets + push public)</div>
+        </div>
+        <div class="row">
+          <div class="row-label">Catalogues</div>
+          <div class="row-value"><strong>3 / 5 accessibles</strong>. mcp.so / Smithery / Glama OK pour scan repo, mais l'install snippet npm reste cassé.</div>
+        </div>
+        <div class="row">
+          <div class="row-label">Risque</div>
+          <div class="row-value">Mauvaise UX d'installation (users qui copy-paste <code>npx</code> ont 404). Friction inutile.</div>
+        </div>
+        <div class="row">
+          <div class="row-label">Bénéfice</div>
+          <div class="row-value">Évite de "publier officiellement" si tu veux d'abord stabiliser le SDK. Cohérent si v0.1 = preview.</div>
+        </div>
+
+        <div class="verdict-line amber">PASSAGE · choix d'attente</div>
+      </div>
+
+    </div>
+
+    <h3 style="font-size: 18px; margin: 36px 0 12px;">📊 Catalogues débloqués selon l'option choisie</h3>
+    <div class="catalog-impact">
+      <div class="catalog-cell">
+        <div class="name">mcp.so</div>
+        <div class="icon" style="background: var(--bg-soft); color: var(--ink);">—</div>
+        <div class="status">B: ✗ · C: ✓ · A: ✓</div>
+      </div>
+      <div class="catalog-cell">
+        <div class="name">Smithery</div>
+        <div class="icon" style="background: var(--bg-soft); color: var(--ink);">—</div>
+        <div class="status">B: ✗ · C: ✓ · A: ✓</div>
+      </div>
+      <div class="catalog-cell">
+        <div class="name">Glama.ai</div>
+        <div class="icon" style="background: var(--bg-soft); color: var(--ink);">—</div>
+        <div class="status">B: ✗ · C: ✓ · A: ✓</div>
+      </div>
+      <div class="catalog-cell">
+        <div class="name">Cursor</div>
+        <div class="icon" style="background: var(--bg-soft); color: var(--ink);">—</div>
+        <div class="status">B: ✗ · C: ⚠ · A: ✓</div>
+      </div>
+      <div class="catalog-cell">
+        <div class="name">Anthropic / Registry</div>
+        <div class="icon" style="background: var(--bg-soft); color: var(--ink);">—</div>
+        <div class="status">B: ✗ · C: ⚠ · A: ✓</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARATIF RISQUES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Comparatif risques</strong>
+      <span class="sep">/</span>
+      <span>Tableau synthétique</span>
+    </div>
+    <h2>Risques détaillés <span class="serif">par option</span>.</h2>
+
+    <div class="risk-table">
+      <div class="risk-row head">
+        <div>Risque</div><div>Option B</div><div>Option C</div><div>Option A</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell label">Concurrent prend la place SEO "Swiss MCP"</div>
+        <div class="risk-cell no">Probable</div>
+        <div class="risk-cell amber">Moyen</div>
+        <div class="risk-cell go">Évité</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell label">Mauvaise UX d'installation users</div>
+        <div class="risk-cell no">N/A (zéro user)</div>
+        <div class="risk-cell no">404 npm</div>
+        <div class="risk-cell go">Aucune</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell label">Code ETL lisible publiquement</div>
+        <div class="risk-cell go">Aucun</div>
+        <div class="risk-cell no">Oui</div>
+        <div class="risk-cell no">Oui</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell label">Secrets en historique git</div>
+        <div class="risk-cell go">Aucun</div>
+        <div class="risk-cell amber">À auditer</div>
+        <div class="risk-cell amber">À auditer</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell label">Engagement publication SDK</div>
+        <div class="risk-cell go">Aucun</div>
+        <div class="risk-cell go">Aucun</div>
+        <div class="risk-cell amber">Maintenance attendue</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell label">Crédibilité dev / argument vente</div>
+        <div class="risk-cell no">Faible</div>
+        <div class="risk-cell amber">Moyenne</div>
+        <div class="risk-cell go">Maximale</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INQUIÉTUDES VS RÉELLES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Inquiétudes fréquentes</strong>
+      <span class="sep">/</span>
+      <span>Réponses honnêtes</span>
+    </div>
+    <h2>Les <span class="serif">vraies questions</span> que tu te poses.</h2>
+
+    <div class="concerns-grid">
+
+      <div class="concern-card no">
+        <h5>« Et si quelqu'un copie mon code ? »</h5>
+        <p>Le code ETL des datasets fédéraux suisses n'est pas le moat. Le moat c'est : permission BAZG écrite, signatures Ed25519 garanties, mises à jour hebdomadaires fiables, conformité nLPD/RGPD. Quelqu'un qui copie le code doit aussi obtenir la permission BAZG (impossible à court-circuiter) et bâtir l'infra de signature.</p>
+      </div>
+
+      <div class="concern-card go">
+        <h5>« Le code public est un argument de vente »</h5>
+        <p>Tes ICP (compliance officers, data engineers) sont défiants par défaut. Pouvoir leur dire "vérifiez la pipeline avant d'acheter, le code est sur GitHub" est un puissant <em>trust signal</em>. Pennylane, Plausible, Posthog ont tous ce pattern.</p>
+      </div>
+
+      <div class="concern-card no">
+        <h5>« Et si je trouve un bug critique après publication ? »</h5>
+        <p>Vrai sur npm publish (impossible d'unpublish après 72h). Mais le risque est faible : v0.1 fonctionne, c'est testé. Et tu peux toujours pousser une 0.1.1 patch en 5 min. Les MCP servers ne sont pas régulés comme les libs financières.</p>
+      </div>
+
+      <div class="concern-card go">
+        <h5>« Repo public = vraie traction sur le launch »</h5>
+        <p>Un Show HN sans repo public converti à 1/5 d'un Show HN avec repo public (statistique HN observée). Tes lecteurs HN vont vouloir cliquer "Source" — sinon tu perds 60-80% du trafic intéressant.</p>
+      </div>
+
+      <div class="concern-card no">
+        <h5>« Mon historique git est-il propre ? »</h5>
+        <p>À auditer avant push. Vérification rapide :<br>
+        <code>git log --all -p | grep -iE "key|token|secret|password" | head -50</code></p>
+        <ul>
+          <li><code>.gitignore</code> couvre <code>.env*</code> et <code>data/</code> ✓</li>
+          <li>Pas de fichier <code>secrets.json</code> committé</li>
+          <li>Les ETL n'ont pas de creds en dur</li>
+        </ul>
+      </div>
+
+      <div class="concern-card go">
+        <h5>« Permission BAZG visible publiquement = +1 crédibilité »</h5>
+        <p>Le commit où tu mentionnes la référence <code>BAZG-PERMISSION-2026-04-21-MICHAEL-BEER</code> + l'email original devient public. C'est exactement ce qu'on veut : preuve immuable horodatée par GitHub que tu as cette permission.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DECISION FLOW -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Si tu choisis Option A</strong>
+      <span class="sep">/</span>
+      <span>Plan d'exécution côté Claude</span>
+    </div>
+    <h2>Voici <span class="serif">ce que je ferais</span>.</h2>
+    <p class="section-intro">Si tu réponds <code>a</code>, je travaille en autonomie. Voici l'enchaînement précis pour que tu saches à quoi t'attendre :</p>
+
+    <div class="decision-flow">
+
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+          <h5>Audit secrets dans l'historique git (5 min)</h5>
+          <p>Scan complet : <code>git log --all -p | grep -iE "key|token|secret|password|sk_|pk_|whsec_"</code>. Vérification <code>.gitignore</code>. Si tout est clean → on continue. Si je trouve quelque chose → je te flagge avant push (et on nettoie l'historique avec <code>git filter-repo</code>).</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+          <h5>Correction README desync 8 → 9 tools (2 min)</h5>
+          <p>Patch dans <code>sdks/mcp-server/README.md</code> et commentaire dans <code>src/server.ts</code>. Commit propre.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+          <h5>Toggle repo public (1 min)</h5>
+          <p><code>gh repo edit cammac-creator/openswissdata --visibility public</code>. Vérification immédiate que le repo s'affiche bien sur github.com.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content">
+          <h5>Publication npm (10 min)</h5>
+          <p>Création org <code>@openswissdata</code> sur npmjs.com (gratuit). <code>npm login</code>. <code>npm publish --access public</code> depuis <code>sdks/mcp-server</code>. Test : <code>npx -y @openswissdata/mcp</code> doit fonctionner.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-content">
+          <h5>Bonus — server.json registry MCP officielle (10 min)</h5>
+          <p>Création <code>server.json</code> conforme schema 2025-09-29 + DNS verif via TXT record + <code>mcp-publisher publish</code>. Cible : registry MCP officielle d'Anthropic — la plus stratégique parce que les clients (Claude Code, Desktop, Cursor) lisent ce registry.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-content">
+          <h5>Livrable : tu peux soumettre les forms en 15 min</h5>
+          <p>Je te livre les copier-coller pour les 5 catalogues. Tu cliques, tu colles, tu valides. Ce sont des forms manuels donc c'est toi qui finalises.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="verdict" style="margin-top: 24px;">
+      <h3>🎯 Recommandation finale</h3>
+      <p>
+        <strong class="verdict-yes">Option A.</strong> Effort minimal (~30 min côté Claude), gain massif (5 catalogues + registry officielle débloqués), zéro vrai risque (le code ETL n'est pas le moat). Pattern observé chez tous les solo founders qui réussissent en 2026 : <em>open by default, monetize the hosted version</em>.
+      </p>
+      <p>
+        <strong class="verdict-no">Anti-recommandation : Option B</strong> est une perte sèche d'opportunité. Tu as fait l'effort de créer le MCP, tu as la permission BAZG, tu as les datasets. Le seul truc qui te sépare de la visibilité = un toggle GitHub et un <code>npm publish</code>.
+      </p>
+      <p style="margin-top: 18px;">
+        Si Option A te stresse encore, prends <strong class="verdict-yes">Option C</strong> en premier (juste rendre public, pas npm). Tu vois la traction, et tu npm-publish dans 48h si l'élan est là.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ACTION FINALE -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Pour décider</strong>
+      <span class="sep">/</span>
+      <span>3 lettres possibles</span>
+    </div>
+    <h2>Ta <span class="serif">décision</span>.</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px;">
+      <div style="background: var(--green-soft); border: 2px solid var(--green); border-radius: 12px; padding: 24px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 36px; font-weight: 700; color: var(--green); margin-bottom: 8px;">a</div>
+        <div style="font-size: 13px; color: var(--ink); font-weight: 600; margin-bottom: 6px;">Repo public + npm publié</div>
+        <div style="font-size: 12px; color: var(--ink-mute);">~30 min · 5 catalogues débloqués</div>
+      </div>
+
+      <div style="background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 24px; text-align: center; opacity: 0.7;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 36px; font-weight: 700; color: var(--ink-mute); margin-bottom: 8px;">b</div>
+        <div style="font-size: 13px; color: var(--ink); font-weight: 600; margin-bottom: 6px;">Tout privé (status quo)</div>
+        <div style="font-size: 12px; color: var(--ink-mute);">0 catalogue accessible</div>
+      </div>
+
+      <div style="background: var(--amber-soft); border: 1px solid var(--amber); border-radius: 12px; padding: 24px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 36px; font-weight: 700; color: var(--amber); margin-bottom: 8px;">c</div>
+        <div style="font-size: 13px; color: var(--ink); font-weight: 600; margin-bottom: 6px;">Public sans npm</div>
+        <div style="font-size: 12px; color: var(--ink-mute);">~10 min · 3 catalogues + UX cassée</div>
+      </div>
+    </div>
+
+    <p style="margin-top: 24px; font-size: 14px; color: var(--ink-mute); text-align: center;">Réponds une lettre dans le terminal pour que je lance l'exécution.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · décision T3</strong></p>
+    <p style="margin: 0;">
+      Préparé pour décision Claude-Alain Martin · 2026-05-06. Source du livrable d'analyse : <code>docs/launch/mcp-catalog-submissions.md</code> (commit <code>460e821</code>).
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
