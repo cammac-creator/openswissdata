@@ -12,7 +12,7 @@ Plug-and-play for **Claude Desktop**, **Cursor**, **Cline**, **VS Code Copilot C
 
 ## What you get
 
-- 8 tools: `tariff_lookup`, `tariff_semantic_search`, `tariff_changelog`, `cross_walk`, `classify_text`, `kyc_check`, `finma_search`, `entity_history`.
+- 9 tools: `tariff_lookup`, `tariff_semantic_search`, `tariff_changelog`, `cross_walk`, `classify_text`, `kyc_check`, `finma_search`, `entity_history`, `statent_lookup`.
 - The mandatory non-official disclaimers (TARES) are passed through untouched in `content[].text`.
 - Anonymous tier works out of the box (~100 requests/day per IP). Bring your own `OPENSWISSDATA_API_KEY` for higher quotas.
 
@@ -44,7 +44,7 @@ Edit your config file:
 }
 ```
 
-Restart Claude Desktop. The 8 tools should appear under the MCP tool icon.
+Restart Claude Desktop. The 9 tools should appear under the MCP tool icon.
 
 A copy of the snippet ships in [`examples/claude-desktop-config.json`](./examples/claude-desktop-config.json).
 
@@ -111,7 +111,7 @@ docker run --rm -i \
 ```
 ┌──────────────────┐  STDIO   ┌──────────────────┐  HTTPS   ┌────────────────────────┐
 │ Claude Desktop   │  ───────▶│  openswissdata-  │  ──────▶│ mcp.openswissdata.com  │
-│ Cursor / Cline   │ ◀────── │  mcp (this pkg)  │ ◀────── │  (Hono + 8 tools)      │
+│ Cursor / Cline   │ ◀────── │  mcp (this pkg)  │ ◀────── │  (Hono + 9 tools)      │
 └──────────────────┘          └──────────────────┘          └────────────────────────┘
 ```
 
