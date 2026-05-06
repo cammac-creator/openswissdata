@@ -8,6 +8,7 @@ Dernière mise à jour : **2026-04-22** (chantier infra TERMINÉ ✅)
 |---|---|
 | Permissions commerciales | 3 mails envoyés 2026-04-17 (BFS, FINMA, BAZG) — voir `docs/legal-correspondence.md` |
 | BAZG TARES | **GO conditionnel reçu 2026-04-21** (7 conditions à implémenter — voir doc legal) |
+| FINMA Registry | **GO reçu 2026-05-06** (Nadine Bucher, Communication FINMA — pas de conditions explicites, sous réserve droits d'auteur + intégrité documents source) |
 | Cloudflare R2 | Bucket `openswissdata` EU/Frankfurt, S3 credentials dans `.env`, test E2E validé (`node scripts/test-r2.mjs`) |
 | Railway | Projet créé, service `api`, volume `/data` 1GB, 18 vars set, deploy live |
 | DNS + SSL | `https://www.openswissdata.com/api/health` répond `{"status":"ok","version":"0.1.0"}` |
@@ -51,7 +52,7 @@ Dernière mise à jour : **2026-04-22** (chantier infra TERMINÉ ✅)
 
 ### Décisions différées
 - **Root nu `openswissdata.com`** : abandonné (Infomaniak ne supporte pas CNAME-on-root). Pour le restaurer, migrer DNS vers Cloudflare (~20 min). Pas urgent, `www.` suffit.
-- **Relances BFS + FINMA** : 2 fichiers texte prêts dans `permissions-emails/{bfs,finma}-relance.txt`. Mises de côté pour le moment, à envoyer manuellement quand prêt (idéalement **2026-04-24** = J+7).
+- **Relance BFS** : 1 fichier texte prêt dans `permissions-emails/bfs-relance.txt`. Mis de côté pour le moment, à envoyer manuellement quand prêt. (FINMA : GO reçu 2026-05-06, plus besoin de relancer.)
 - **Activation Stripe Live mode** : à faire avant le premier vrai paiement (nécessite probablement landing complète + politique de remboursement publiée).
 
 ## URLs et IDs utiles
