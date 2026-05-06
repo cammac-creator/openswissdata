@@ -22,7 +22,7 @@ const tools = [
   {
     pack: "TARES",
     name: "tariff_semantic_search",
-    desc: "Semantic search across TARES descriptions (BAAI/bge-m3 multilingual embeddings, 7 511 vectors).",
+    desc: "Semantic search across TARES descriptions (sentence-transformers paraphrase-multilingual-mpnet-base-v2, 768d, ~7 500 vecteurs FR).",
     args: { query: "bijoux en or 18 carats", top_k: 5 },
     status: "live",
     scope: "tariff:semantic",
