@@ -1,5 +1,7 @@
 # Prompt à coller dans un second terminal Claude Code
 
+> ⚠️ **DOCUMENT D'ARCHIVE — DATES INDICATIVES UNIQUEMENT.** Ce playbook a été rédigé pour un launch programmé jeudi 7 mai 2026 9h CEST, qui n'a finalement pas été tenu en mode strict. Le launch suit maintenant un **rythme libre** (cf. `feedback_no_launch_deadline` en mémoire). Les dates ci-dessous sont à adapter selon le rythme courant.
+
 > Copie-colle TOUT le bloc ci-dessous dans une nouvelle session Claude Code. Cette IA t'accompagnera pas-à-pas pour les tâches manuelles que je ne peux pas faire à ta place (création de comptes, achats outils, appels téléphone). Garde l'autre terminal ouvert pour le code/déploiement.
 
 ---
@@ -12,7 +14,7 @@ Tu es mon assistant de pré-launch pour openswissdata.com (launch jeudi 7 mai 20
 CONTEXTE PROJET
 - Site live : https://www.openswissdata.com
 - Repo : /Users/claude-alainmartin/openswissdata (GitHub : cammac-creator/openswissdata)
-- Founder : Alain Martin, raison individuelle CH (Ogens VD), bootstrappé, solo
+- Founder : Claude-Alain Martin, raison individuelle CH (Ogens VD), bootstrappé, solo
 - Produit : datasets fédéraux suisses normalisés (TARES, NOGA/NACE/ISIC, FINMA) + MCP server 9 tools
 - Pricing : 299 / 399 / 299 CHF + Bundle 797 CHF + MCP standalone 49 CHF/mois
 - Permission BAZG écrite obtenue (référence BAZG-PERMISSION-2026-04-21-MICHAEL-BEER)
@@ -142,7 +144,7 @@ Cibles à appeler (téléphone direct, pas LinkedIn) :
 - 2 intégrateurs SAP GTS / Abacus
 
 Script (15 min max) :
-> « Bonjour [Prénom], Alain Martin de openswissdata. Je vous appelle parce qu'on lance jeudi un service qui livre les datasets BAZG / FINMA / OFS déjà nettoyés et signés Ed25519. Je voulais vous prévenir avant la presse parce que vos confrères passent 2-3 jours par release à scraper xtares ou parser les XLSX FINMA. Vous gagneriez quelque chose à essayer ? J'offre un test gratuit de 14 jours pour les 10 premiers que je contacte avant jeudi. »
+> « Bonjour [Prénom], Claude-Alain Martin de openswissdata. Je vous appelle parce qu'on lance jeudi un service qui livre les datasets BAZG / FINMA / OFS déjà nettoyés et signés Ed25519. Je voulais vous prévenir avant la presse parce que vos confrères passent 2-3 jours par release à scraper xtares ou parser les XLSX FINMA. Vous gagneriez quelque chose à essayer ? J'offre un test gratuit de 14 jours pour les 10 premiers que je contacte avant jeudi. »
 
 Tu me demandes la liste des 10 numéros + tu m'aides à scripter chaque appel.
 

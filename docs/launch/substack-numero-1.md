@@ -1,6 +1,5 @@
 # Substack inaugural · ETL Fédéral Suisse #1
 
-**Envoyé jeudi 7 mai 8h00 CEST**
 **Destinataires** : mailing-list pré-construite (~200-400 contacts collectés via réseau perso, GitHub stars, formulaires waitlist)
 **De** : `etl-federal@send.openswissdata.com` (sous-domaine dédié, pas le perso)
 
@@ -70,7 +69,7 @@ Si vous travaillez en compliance, data engineering, conformité douanière ou in
 
 ## ⚖️ Et un peu de méta : pourquoi cette newsletter
 
-Je m'appelle **Alain Martin**. Solo founder bootstrappé en Suisse romande. Je viens de lancer **openswissdata.com** : un service qui livre les données fédérales suisses normalisées, signées Ed25519, branchées MCP pour Claude/Cursor.
+Je m'appelle **Claude-Alain Martin**. Solo founder bootstrappé en Suisse romande. Je viens de lancer **openswissdata.com** : un service qui livre les données fédérales suisses normalisées, signées Ed25519, branchées MCP pour Claude/Cursor.
 
 Cette newsletter n'est PAS un canal de vente déguisé. C'est une promesse simple : 5 changements / jeudi / 5 minutes de lecture. Si vous voulez aussi le dataset complet (signé, à jour, prêt à brancher), [c'est là](https://www.openswissdata.com/bundle).
 
