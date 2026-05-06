@@ -19,10 +19,26 @@ const datasetLabels: Record<string, string> = {
   finma: "FINMA Registry — 299 CHF",
   all: "Bundle complet — 797 CHF",
 };
+const datasetOgImages: Record<string, string> = {
+  tares: "/og-tares.png",
+  classifications: "/og-classifications.png",
+  finma: "/og-finma.png",
+  all: "/og-default.png",
+};
+const datasetTags: Record<string, string> = {
+  tares: "TARES",
+  classifications: "Classifications",
+  finma: "FINMA",
+  all: "Bundle",
+};
 const ctaTarget = post.data.dataset === "all" ? "/bundle" : post.data.dataset ? `/datasets/${post.data.dataset}` : "/bundle";
 const ctaLabel = post.data.dataset && datasetLabels[post.data.dataset]
   ? datasetLabels[post.data.dataset]
   : "Voir le bundle complet — 797 CHF";
+const ogImage = post.data.dataset && datasetOgImages[post.data.dataset]
+  ? datasetOgImages[post.data.dataset]
+  : "/og-default.png";
+const datasetTag = post.data.dataset ? datasetTags[post.data.dataset] : null;
 
 const articleJsonLd = {
   "@context": "https://schema.org",
@@ -45,7 +61,7 @@ const articleJsonLd = {
       url: "https://www.openswissdata.com/icon-512.png",
     },
   },
-  image: "https://www.openswissdata.com/og-default.png",
+  image: `https://www.openswissdata.com${ogImage}`,
   mainEntityOfPage: {
     "@type": "WebPage",
     "@id": `https://www.openswissdata.com/blog/${post.id}`,
@@ -56,12 +72,16 @@ const articleJsonLd = {
 <BaseLayout
   title={`${post.data.title} — openswissdata.com`}
   description={post.data.description}
+  image={ogImage}
   productJsonLd={articleJsonLd}
   monolingual={true}
 >
 <div class="bg-grid"></div>
 
-<section class="v4-hero ds-page">
+<section class="v4-hero ds-page blog-article-hero">
+  {post.data.dataset && (
+    <div class="ds-hero-banner-bg" style={`background-image:url('${ogImage}');`} aria-hidden="true"></div>
+  )}
   <div class="container-v4">
     <nav class="ds-breadcrumb">
       <a href="/">accueil</a>
@@ -80,6 +100,12 @@ const articleJsonLd = {
           <>
             <span style="opacity:.4">·</span>
             <span>mis à jour {post.data.updatedAt.toISOString().slice(0, 10)}</span>
+          </>
+        )}
+        {datasetTag && (
+          <>
+            <span style="opacity:.4">·</span>
+            <span class="dataset-tag">{datasetTag}</span>
           </>
         )}
       </div>
@@ -118,11 +144,21 @@ const articleJsonLd = {
 </BaseLayout>
 
 <style>
-  .blog-article { max-width: 720px; margin: 0 auto; padding: 24px 0; }
+  .blog-article-hero { padding-top: 56px; }
+  .blog-article { max-width: 720px; margin: 0 auto; padding: 24px 0; position: relative; z-index: 2; }
+
+  .dataset-tag {
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
   .blog-tldr {
     margin: 32px 0;
     padding: 18px 22px;
-    background: var(--bg-card);
+    background: rgba(255,255,255,.78);
+    backdrop-filter: blur(8px);
     border: 1px solid var(--line);
     border-left: 3px solid var(--accent);
     border-radius: 0 10px 10px 0;
@@ -201,10 +237,24 @@ const articleJsonLd = {
   .blog-content table tr:last-child td { border-bottom: none; }
   .blog-content strong { color: var(--ink); font-weight: 600; }
 
+  /* Update note (added at top of articles when published-then-revised) */
+  .blog-content .update-note {
+    margin: 32px 0 24px;
+    padding: 16px 20px;
+    background: rgba(220,31,45,.05);
+    border: 1px solid rgba(220,31,45,.2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .blog-content .update-note strong { color: var(--accent); }
+
   .blog-cta {
     margin: 56px 0 24px;
     padding: 28px 32px;
-    background: var(--bg-card);
+    background: rgba(255,255,255,.78);
+    backdrop-filter: blur(8px);
     border: 1px solid var(--line);
     border-radius: 14px;
   }
