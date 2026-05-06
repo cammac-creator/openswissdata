@@ -1,0 +1,55 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "com.openswissdata/mcp",
+  "title": "OpenSwissData",
+  "description": "Lookup Swiss customs tariffs (TARES), FINMA-supervised entities, and NOGA/NACE/ISIC industry codes from any MCP client. 9 tools, non-official mirror of Swiss federal open data.",
+  "version": "0.1.0",
+  "websiteUrl": "https://www.openswissdata.com",
+  "repository": {
+    "url": "https://github.com/cammac-creator/openswissdata",
+    "source": "github",
+    "subfolder": "sdks/mcp-server"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@openswissdata/mcp",
+      "version": "0.1.0",
+      "transport": "stdio",
+      "runtimeHint": "npx",
+      "environmentVariables": [
+        {
+          "name": "OPENSWISSDATA_API_KEY",
+          "description": "Optional Bearer token for higher quotas / Pro tools. Anonymous tier works without it (~100 req/day/IP).",
+          "required": false,
+          "secret": true
+        },
+        {
+          "name": "OPENSWISSDATA_BASE_URL",
+          "description": "Override the remote MCP endpoint (default: https://mcp.openswissdata.com). Useful for staging or self-hosting.",
+          "required": false,
+          "default": "https://mcp.openswissdata.com"
+        },
+        {
+          "name": "OPENSWISSDATA_TIMEOUT_MS",
+          "description": "Per-request timeout in milliseconds.",
+          "required": false,
+          "default": "30000"
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.openswissdata.com/jsonrpc"
+    }
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "tags": ["swiss", "federal", "tares", "finma", "noga", "compliance", "tariff", "kyc"],
+      "categories": ["government", "compliance", "finance"]
+    }
+  }
+}
