@@ -13,14 +13,16 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import { pathToFileURL } from "node:url";
 
 interface SourceCanary {
   id: string;
   url: string;
-  // For HTML/CSV/XLSX sources we hash the raw bytes directly. For JSON we hash
-  // a structural shape (top-level keys + array length) so a row-level update
-  // doesn't false-positive — only structure changes alert.
-  mode: "raw" | "json-shape";
+  // `raw` hashes bytes — use for files published in discrete versions (e.g. XLSX
+  // releases). `json-shape` hashes only structural keys/types — use for JSON APIs.
+  // `csv-shape` hashes only the header row + separator — use for CSVs that update
+  // continuously (rows added/removed daily) where only schema changes matter.
+  mode: "raw" | "json-shape" | "csv-shape";
   description: string;
 }
 
@@ -68,11 +70,12 @@ const CANARIES: SourceCanary[] = [
     mode: "raw",
     description: "BAZG — Codes ZCO d'allègement douanier",
   },
-  // FINMA — single consolidated CSV
+  // FINMA — single consolidated CSV. Updated daily as institutions are
+  // added/removed → use csv-shape (headers only) to avoid daily false positives.
   {
     id: "finma.uid_csv",
     url: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/csv/uid.csv",
-    mode: "raw",
+    mode: "csv-shape",
     description: "FINMA — CSV consolidé des institutions autorisées (UID)",
   },
   // BFS — NOGA via i14y JSON API
@@ -110,21 +113,24 @@ interface CanaryResult {
 }
 
 /**
- * Build a structural hash of a JSON document. Sorted top-level keys + array
- * lengths at depth 1 — enough to detect "they renamed `entries` to `items`"
- * without flapping every time a row changes.
+ * Build a structural hash of a JSON document. Sorted top-level keys + element
+ * types — enough to detect "they renamed `entries` to `items`" without flapping
+ * every time a row is added/removed. Array lengths are explicitly NOT included
+ * in the signature: nomenclatures grow over time and content updates must not
+ * trigger a drift.
  */
-function hashJsonShape(json: unknown): string {
+export function hashJsonShape(json: unknown): string {
   const shape = describeShape(json, 0);
   return createHash("sha256").update(shape).digest("hex");
 }
 
-function describeShape(node: unknown, depth: number): string {
+export function describeShape(node: unknown, depth: number): string {
   if (node === null) return "null";
   if (Array.isArray(node)) {
-    if (depth > 1 || node.length === 0) return `array[${node.length}]`;
-    // Sample shape from first element only — assume homogeneous arrays
-    return `array[${node.length}]<${describeShape(node[0], depth + 1)}>`;
+    if (depth > 1 || node.length === 0) return "array[]";
+    // Sample shape from first element only — assume homogeneous arrays.
+    // Length is intentionally omitted: a single new entry must not change shape.
+    return `array<${describeShape(node[0], depth + 1)}>`;
   }
   if (typeof node === "object") {
     const keys = Object.keys(node as object).sort();
@@ -135,6 +141,31 @@ function describeShape(node: unknown, depth: number): string {
     return `object{${entries}}`;
   }
   return typeof node;
+}
+
+/**
+ * Build a structural hash of a CSV file. Detects the separator, parses the
+ * first non-empty line as the header row, sorts columns alphabetically, and
+ * hashes `separator|col1|col2|...`. Row count and content are intentionally
+ * ignored: a CSV that gains/loses rows daily must not trigger a drift, only
+ * a column rename or a separator change should.
+ */
+export function hashCsvShape(buf: Buffer): { hash: string; headers: string[]; separator: string } {
+  // Strip UTF-8 BOM if present so it doesn't end up in the first column name.
+  let text = buf.toString("utf-8");
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+  const firstLine = text.split(/\r?\n/).find((l) => l.length > 0) ?? "";
+  const candidates = [";", ",", "\t", "|"];
+  const separator = candidates
+    .map((s) => ({ s, count: firstLine.split(s).length - 1 }))
+    .reduce((best, cur) => (cur.count > best.count ? cur : best), { s: ",", count: -1 }).s;
+  const headers = firstLine
+    .split(separator)
+    .map((h) => h.trim().replace(/^"(.*)"$/, "$1"))
+    .filter((h) => h.length > 0)
+    .sort();
+  const signature = `${separator}|${headers.join("|")}`;
+  return { hash: createHash("sha256").update(signature).digest("hex"), headers, separator };
 }
 
 async function fetchAndHash(canary: SourceCanary): Promise<{ hash: string; size: number }> {
@@ -148,6 +179,11 @@ async function fetchAndHash(canary: SourceCanary): Promise<{ hash: string; size:
   if (canary.mode === "raw") {
     const buf = Buffer.from(await res.arrayBuffer());
     return { hash: createHash("sha256").update(buf).digest("hex"), size: buf.length };
+  }
+  if (canary.mode === "csv-shape") {
+    const buf = Buffer.from(await res.arrayBuffer());
+    const { hash } = hashCsvShape(buf);
+    return { hash, size: buf.length };
   }
   const json = await res.json();
   const text = JSON.stringify(json);
@@ -242,7 +278,11 @@ async function main() {
   process.exit(0);
 }
 
-main().catch((err) => {
-  console.error("[canary] fatal:", err);
-  process.exit(1);
-});
+// Run main() only when this file is executed directly (not when imported by tests).
+const entrypoint = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
+if (import.meta.url === entrypoint) {
+  main().catch((err) => {
+    console.error("[canary] fatal:", err);
+    process.exit(1);
+  });
+}
