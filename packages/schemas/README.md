@@ -40,4 +40,4 @@ Open an issue or PR. Schemas track the commercial datasets sold at openswissdata
 
 ---
 
-© 2026 Alain Martin · openswissdata.com · CC0
+© 2026 Claude-Alain Martin · openswissdata.com · CC0
