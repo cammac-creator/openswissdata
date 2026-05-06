@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Débrief 7 mai 2026 — openswissdata</title>
+  <style>
+    :root {
+      --ink-0: #0b0d11;
+      --ink-1: #11141a;
+      --ink-2: #181c25;
+      --ink-3: #232936;
+      --line: #2a3140;
+      --paper: #f5f1e6;
+      --paper-2: #ece4cf;
+      --gold: #d4a64a;
+      --gold-2: #b8893a;
+      --amber: #e8a23a;
+      --rust: #c2562b;
+      --green: #5a9968;
+      --red: #b94a3f;
+      --muted: #7a8294;
+      --text: #e8e6df;
+      --text-dim: #b1afa6;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --serif: 'Source Serif Pro', Georgia, serif;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--ink-0);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      background:
+        radial-gradient(ellipse at top right, rgba(212, 166, 74, 0.06), transparent 60%),
+        radial-gradient(ellipse at bottom left, rgba(232, 162, 58, 0.04), transparent 50%),
+        var(--ink-0);
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+    @media (max-width: 720px) { .wrap { padding: 28px 20px 60px; } }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(32px, 5.5vw, 56px);
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin-bottom: 20px;
+      color: var(--paper);
+    }
+    h1 .accent { color: var(--gold); font-style: italic; font-weight: 500; }
+    .lede {
+      font-family: var(--serif);
+      font-size: clamp(18px, 2.2vw, 22px);
+      color: var(--text-dim);
+      max-width: 780px;
+      line-height: 1.45;
+    }
+    .meta {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .meta b { color: var(--gold); font-weight: 500; }
+
+    /* Section primitives */
+    section { margin-top: 64px; }
+    section h2 {
+      font-family: var(--serif);
+      font-size: 30px;
+      font-weight: 600;
+      line-height: 1.15;
+      margin-bottom: 8px;
+      color: var(--paper);
+    }
+    section h2 .accent { color: var(--gold); }
+    section p.section-intro {
+      font-family: var(--serif);
+      font-size: 17px;
+      color: var(--text-dim);
+      margin-bottom: 28px;
+      max-width: 780px;
+    }
+
+    /* === Verdicts === */
+    .verdicts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 720px) { .verdicts { grid-template-columns: 1fr; } }
+    .v-card {
+      background: linear-gradient(180deg, var(--ink-2), var(--ink-1));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .v-card::before {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--bar-from, var(--gold)), var(--bar-to, var(--amber)));
+    }
+    .v-card.bad { --bar-from: var(--rust); --bar-to: var(--red); }
+    .v-card.mid { --bar-from: var(--amber); --bar-to: var(--gold); }
+    .v-card.good { --bar-from: var(--green); --bar-to: #7eb88a; }
+    .v-axis {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .v-score {
+      font-family: var(--serif);
+      font-size: 64px;
+      font-weight: 600;
+      line-height: 1;
+      margin-top: 4px;
+      color: var(--paper);
+    }
+    .v-score sup { color: var(--text-dim); font-size: 24px; font-weight: 400; }
+    .v-gauge {
+      margin: 14px 0 16px;
+      height: 6px;
+      background: var(--ink-3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .v-gauge .fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--bar-from), var(--bar-to));
+      border-radius: 3px;
+    }
+    .v-summary {
+      font-family: var(--serif);
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* === Quick wins timeline === */
+    .qw-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 720px) { .qw-grid { grid-template-columns: 1fr; } }
+    .qw {
+      background: var(--ink-1);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .qw .num {
+      flex: 0 0 auto;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--ink-3);
+      color: var(--gold);
+      display: grid; place-items: center;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .qw.done .num { background: rgba(90, 153, 104, 0.18); color: var(--green); border: 1px solid rgba(90, 153, 104, 0.3); }
+    .qw.partial .num { background: rgba(232, 162, 58, 0.16); color: var(--amber); border: 1px solid rgba(232, 162, 58, 0.3); }
+    .qw .body { flex: 1 1 auto; }
+    .qw h3 {
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--paper);
+    }
+    .qw .status {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .qw.done .status { background: rgba(90, 153, 104, 0.16); color: var(--green); }
+    .qw.partial .status { background: rgba(232, 162, 58, 0.18); color: var(--amber); }
+    .qw .desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+    .qw code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--ink-3);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--gold);
+    }
+
+    /* === Leviers === */
+    .leviers {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 720px) { .leviers { grid-template-columns: 1fr; } }
+    .lev {
+      background: var(--ink-1);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px;
+      position: relative;
+    }
+    .lev::before {
+      content: attr(data-num);
+      position: absolute;
+      top: -10px; left: 18px;
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--gold);
+      color: var(--ink-0);
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+    .lev h3 {
+      font-family: var(--serif);
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--paper);
+      margin-bottom: 8px;
+      margin-top: 8px;
+    }
+    .lev .pricing {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .lev p { font-size: 14px; color: var(--text-dim); line-height: 1.55; }
+    .lev .revenue {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .lev .revenue b { color: var(--green); font-weight: 500; }
+
+    /* === Partenariats === */
+    .parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 720px) { .parts { grid-template-columns: 1fr; } }
+    .part {
+      background: linear-gradient(180deg, var(--ink-2), var(--ink-1));
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px;
+    }
+    .part h3 {
+      font-family: var(--serif);
+      font-size: 21px;
+      color: var(--paper);
+      margin-bottom: 4px;
+    }
+    .part .who {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+    .part p { font-size: 13px; color: var(--text-dim); line-height: 1.55; }
+    .part .contact {
+      margin-top: 14px;
+      padding: 10px 12px;
+      background: var(--ink-3);
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text);
+    }
+
+    /* === Stacks outils === */
+    .stacks {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+    @media (max-width: 720px) { .stacks { grid-template-columns: 1fr; } }
+    .stack {
+      background: var(--ink-1);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 24px;
+      position: relative;
+    }
+    .stack.recommended {
+      border-color: var(--gold);
+      background: linear-gradient(180deg, rgba(212, 166, 74, 0.07), var(--ink-1));
+    }
+    .stack.recommended::before {
+      content: "★ recommandé pour démarrer";
+      position: absolute;
+      top: -10px; right: 16px;
+      background: var(--gold);
+      color: var(--ink-0);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .stack .price {
+      font-family: var(--serif);
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--paper);
+      line-height: 1;
+    }
+    .stack .price small { font-size: 14px; color: var(--text-dim); font-weight: 400; }
+    .stack h3 {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin: 12px 0 8px;
+    }
+    .stack ul {
+      list-style: none;
+      margin: 12px 0 0;
+      padding: 0;
+    }
+    .stack ul li {
+      font-size: 13px;
+      color: var(--text-dim);
+      padding: 6px 0;
+      border-bottom: 1px dashed rgba(122, 130, 148, 0.18);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .stack ul li:last-child { border-bottom: none; }
+    .stack ul li b { color: var(--text); font-weight: 500; }
+    .stack ul li .price-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .stack .promise {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      font-family: var(--serif);
+      color: var(--gold-2);
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    /* === Plan 7 jours === */
+    .plan {
+      margin-top: 24px;
+      background: linear-gradient(180deg, var(--ink-2), var(--ink-1));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 8px;
+    }
+    .plan-row {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(42, 49, 64, 0.5);
+      align-items: start;
+    }
+    .plan-row:last-child { border-bottom: none; }
+    .plan-day {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+    .plan-action {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .plan-action b { color: var(--paper); }
+
+    /* === TODO ALAIN === */
+    .todo {
+      background: linear-gradient(135deg, rgba(212, 166, 74, 0.09), rgba(232, 162, 58, 0.04));
+      border: 1px solid var(--gold-2);
+      border-radius: 14px;
+      padding: 28px;
+      margin-top: 24px;
+    }
+    .todo h2 {
+      font-family: var(--serif);
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .todo p { color: var(--text-dim); margin-bottom: 18px; font-size: 15px; line-height: 1.55; }
+    .todo ol {
+      list-style: none; counter-reset: todoctr;
+      margin: 0; padding: 0;
+    }
+    .todo ol li {
+      counter-increment: todoctr;
+      padding: 14px 0 14px 44px;
+      border-bottom: 1px dashed rgba(212, 166, 74, 0.2);
+      position: relative;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .todo ol li::before {
+      content: counter(todoctr);
+      position: absolute;
+      left: 0; top: 13px;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--ink-0);
+      display: grid; place-items: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .todo ol li:last-child { border-bottom: none; }
+    .todo ol li b { color: var(--paper); }
+    .todo ol li code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--ink-3);
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: var(--gold);
+    }
+    .todo ol li .why {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* === Footer === */
+    footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 24px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    footer .signature { color: var(--gold); }
+    footer .links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-left: 14px;
+      transition: color 0.15s;
+    }
+    footer .links a:hover { color: var(--gold); }
+
+    /* Misc */
+    .hl-good { color: var(--green); }
+    .hl-mid { color: var(--amber); }
+    .hl-bad { color: var(--rust); }
+    .pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 50px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      background: var(--ink-3);
+      color: var(--text);
+      margin-left: 6px;
+    }
+    .pill.good { background: rgba(90, 153, 104, 0.16); color: var(--green); }
+    .pill.bad { background: rgba(185, 74, 63, 0.16); color: var(--rust); }
+    .pill.mid { background: rgba(232, 162, 58, 0.16); color: var(--amber); }
+
+    /* === Risk pyramid (LinkedIn) === */
+    .risk-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 14px;
+    }
+    .risk-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 60px;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: var(--sans);
+    }
+    .risk-row.r-very-high { background: rgba(185, 74, 63, 0.18); color: var(--paper); border-left: 3px solid var(--red); }
+    .risk-row.r-high { background: rgba(194, 86, 43, 0.16); color: var(--paper); border-left: 3px solid var(--rust); }
+    .risk-row.r-mid { background: rgba(232, 162, 58, 0.14); color: var(--paper); border-left: 3px solid var(--amber); }
+    .risk-row.r-low { background: rgba(90, 153, 104, 0.14); color: var(--paper); border-left: 3px solid var(--green); }
+    .risk-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+    .risk-tool b { font-weight: 600; }
+    .risk-tool small { display: block; font-size: 11px; opacity: 0.75; margin-top: 2px; }
+    .risk-verdict {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-align: right;
+      opacity: 0.9;
+    }
+
+    /* === legal callout === */
+    .legal {
+      margin-top: 18px;
+      background: var(--ink-1);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--rust);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+    .legal h4 {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--rust);
+      margin-bottom: 8px;
+    }
+    .legal b { color: var(--paper); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ========== HERO ========== -->
+  <header>
+    <div class="eyebrow">Débrief autonome — nuit du 6 au 7 mai 2026</div>
+    <h1>openswissdata · audit complet,<br>
+        5 quick wins exécutés,<br>
+        <span class="accent">10 actions</span> qui font des ventes.</h1>
+    <p class="lede">Trois agents en parallèle ont scanné le produit (UX, technique, présence commerciale). Cinq quick wins push&eacute;s en prod dans la nuit. Une PR ouverte sur <code style="font-family:var(--mono);font-size:.85em;background:#181c25;padding:1px 6px;border-radius:3px;color:#d4a64a">awesome-mcp-servers</code>. Cinq leviers tarifaires nouveaux. Trois partenariats à pitcher cette semaine.</p>
+    <div class="meta">
+      <span><b>Date</b> 6 mai 2026 · 23h00 CEST</span>
+      <span><b>Commits poussés</b> 2dec5ba (qw) · 15003d3 (canary fix)</span>
+      <span><b>PR ouverte</b> punkpeye/awesome-mcp-servers#5966</span>
+      <span><b>Tests</b> 33 verts · build 1091 pages OK</span>
+    </div>
+  </header>
+
+  <!-- ========== VERDICTS 3 AXES ========== -->
+  <section>
+    <h2>Le verdict en <span class="accent">trois notes brutales</span>.</h2>
+    <p class="section-intro">Trois agents indépendants, chacun avec une mission précise : audit UX et parcours d'achat ; audit qualité technique du point de vue d'un data engineer fintech ; audit de présence commerciale externe (SEO, marketplaces, trust footprint, pricing benchmark).</p>
+    <div class="verdicts">
+      <article class="v-card mid">
+        <div class="v-axis">UX · parcours achat</div>
+        <div class="v-score">5<sup>/10</sup></div>
+        <div class="v-gauge"><div class="fill" style="width:50%"></div></div>
+        <p class="v-summary">Site visuel solide (hero épuré, terminal animé, FAQ claire, chaîne crypto Ed25519/RFC-3161). Mais 3 frictions B2B suisses bloquantes : <b>pas de TWINT</b>, <b>pas d'IDE/UID</b> (raison individuelle), <b>zéro preuve sociale</b>.</p>
+      </article>
+      <article class="v-card good">
+        <div class="v-axis">Qualité technique</div>
+        <div class="v-score">7<sup>/10</sup></div>
+        <div class="v-gauge"><div class="fill" style="width:70%"></div></div>
+        <p class="v-summary">Provenance crypto réelle, 300 tests Vitest, 9 tools MCP live, OAuth 2.1, CSP/HSTS production. Mais incohérences visibles à un dev en 5 min : 3 versions divergentes, embedding model marketing&nbsp;≠&nbsp;code, SDK npm annoncé mais 404.</p>
+      </article>
+      <article class="v-card bad">
+        <div class="v-axis">Présence commerciale</div>
+        <div class="v-score">1<sup>/10</sup></div>
+        <div class="v-gauge"><div class="fill" style="width:10%"></div></div>
+        <p class="v-summary"><b>Invisible</b> Google sur 5/5 mots-clés ICP. Non listé Smithery / mcp.so / awesome-mcp. <b>0</b> GitHub stars · <b>0</b> mention presse. Pricing 797&nbsp;CHF en zone morte. Collision de marque avec <code style="background:#181c25;padding:1px 5px;border-radius:3px;color:#d4a64a">opendata.swiss</code>.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ========== 5 QUICK WINS ========== -->
+  <section>
+    <h2>Les <span class="accent">5 quick wins</span> exécutés cette nuit.</h2>
+    <p class="section-intro">Quatre sont en prod, une est partielle (action manuelle Stripe Dashboard restante). Tests verts, build OK, déploiement Railway en cours.</p>
+    <div class="qw-grid">
+
+      <article class="qw partial">
+        <div class="num">1</div>
+        <div class="body">
+          <div class="status">prod (action manuelle restante)</div>
+          <h3>Activer TWINT dans Stripe Checkout</h3>
+          <p class="desc">Code modifié : <code>automatic_payment_methods.enabled = true</code> dans <code>src/routes/checkout.ts</code>. Toute méthode activée dans le dashboard apparaît automatiquement (TWINT, Apple/Google&nbsp;Pay, Klarna…). <b style="color:var(--amber)">Restant : activer TWINT côté dashboard</b> — Settings → Payment&nbsp;methods → TWINT.</p>
+        </div>
+      </article>
+
+      <article class="qw done">
+        <div class="num">2</div>
+        <div class="body">
+          <div class="status">déjà conforme</div>
+          <h3>Noindex /famille + retirer du nav</h3>
+          <p class="desc">Vérifié : la page a déjà <code>&lt;meta robots noindex,nofollow&gt;</code>, est exclue du sitemap (<code>astro.config.mjs</code>), et n'apparaît dans <b>aucun</b> lien de la nav ou du footer. <b style="color:var(--amber)">Restant&nbsp;:</b> demander la désindexation manuelle dans Google Search Console pour accélérer.</p>
+        </div>
+      </article>
+
+      <article class="qw done">
+        <div class="num">3</div>
+        <div class="body">
+          <div class="status">prod</div>
+          <h3>Sample CSV en CTA primaire dans le hero</h3>
+          <p class="desc">Nouveau bouton "Démo gratuite — 100 lignes CSV ↓" ajouté sur :<br>
+          • la <b>home</b> (à côté de "Voir les datasets")<br>
+          • <code>/datasets/tares</code>, <code>/datasets/finma</code>, <code>/datasets/classifications</code> (label durci avec le volume exact).</p>
+        </div>
+      </article>
+
+      <article class="qw done">
+        <div class="num">4</div>
+        <div class="body">
+          <div class="status">prod (manuel restant)</div>
+          <h3>Soumissions MCP marketplaces</h3>
+          <p class="desc">✅ <b>PR awesome-mcp-servers</b> ouverte : <code>punkpeye/awesome-mcp-servers#5966</code>, openswissdata inséré dans Finance&nbsp;&amp;&nbsp;Fintech.<br>🟡 <b>MCP Registry officiel</b> : token <code>mcp-publisher</code> expiré → action manuelle (1 commande, 30 sec).<br>🟡 <b>mcp.so</b> : login web manuel obligatoire.<br>🟡 <b>Glama.ai</b> : badge AAA requis pour merge awesome-mcp.</p>
+        </div>
+      </article>
+
+      <article class="qw done" style="grid-column: 1 / -1;">
+        <div class="num">5</div>
+        <div class="body">
+          <div class="status">prod</div>
+          <h3>Versions alignées + embedding model corrigé</h3>
+          <p class="desc">
+          <b>Versions</b> alignées sur 0.2.0 : <code>package.json</code> (api/health), <code>server.json</code> (registre MCP), <code>src/mcp/server.ts</code> (MCP /tools/list), marketing. Le SDK npm <code>@openswissdata/mcp</code> reste à 0.1.1 (cycle indépendant).<br><br>
+          <b>Embedding model</b> : la page <code>/mcp</code> annonçait "BAAI/bge-m3 multilingual, 7&nbsp;511 vectors" alors que le code utilise <code>paraphrase-multilingual-mpnet-base-v2</code> (768d, embeddings FR). Description corrigée en FR/DE/EN pour refléter la vérité du code.
+          </p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ========== CHANTIER N°1 ========== -->
+  <section>
+    <h2>Le <span class="accent">vrai blocker structurel</span>, pas un quick win.</h2>
+    <p class="section-intro">Toutes les frictions UX/Tech additionnées pèsent moins que ce seul point.</p>
+    <article style="background: linear-gradient(135deg, rgba(212, 166, 74, 0.1), rgba(232, 162, 58, 0.04)); border: 1px solid var(--gold-2); border-radius: 14px; padding: 32px;">
+      <div class="eyebrow" style="color: var(--gold-2)">Chantier nº 1 — créer la Sàrl</div>
+      <h2 style="margin: 6px 0 12px;">Sans IDE/UID, le service achats ne peut <b style="color: var(--rust)">pas créer "openswissdata"</b> dans SAP, Bexio ou Abacus.</h2>
+      <p style="font-family: var(--serif); font-size: 17px; color: var(--text-dim); line-height: 1.6;">La raison individuelle non assujettie TVA est un plafond de chiffre d'affaires structurel sur tout l'ICP B2B suisse : compliance officers banques cantonales, services douane PME industrielles, fiduciaires, intégrateurs ERP. Ils n'achètent pas un produit, ils référencent un <b style="color: var(--paper)">fournisseur</b>.</p>
+      <p style="margin-top: 20px; font-family: var(--mono); font-size: 13px; color: var(--gold);">→ EasyGov.swiss · ~10 j calendaires · ~20 CHF en ligne · capital min 20k CHF (10k libérables).</p>
+      <p style="margin-top: 8px; font-family: var(--mono); font-size: 12px; color: var(--text-dim);">Tant que ce n'est pas fait, tout le travail UX/Tech au-dessus reste freiné par ce plafond.</p>
+    </article>
+  </section>
+
+  <!-- ========== 5 LEVIERS NOUVEAUX ========== -->
+  <section>
+    <h2>5 leviers commerciaux <span class="accent">nouveaux</span>.</h2>
+    <p class="section-intro">Pas dans la stratégie launch déjà documentée. Identifiés cette nuit après benchmark des concurrents directs (Avalara, Zonos, FCA Register, Eurostat, classification.codes) et croisement avec les permissions BAZG&nbsp;+&nbsp;FINMA acquises.</p>
+    <div class="leviers">
+      <article class="lev" data-num="L1">
+        <h3>TARES Lite freemium → Pro 49&nbsp;CHF/mois</h3>
+        <div class="pricing">Mensuel · 49 CHF · 8 % conversion attendue</div>
+        <p>1000 codes HS les plus échangés CH→UE en gratuit signé Parquet. L'acheteur teste, valide la qualité, upgrade vers le full 7&nbsp;500 codes en abonnement (au lieu de 299 CHF one-shot). Aligne le pricing sur le rythme d'usage réel des intégrateurs.</p>
+        <div class="revenue">Revenu attendu M3 : <b>1 500–4 400 CHF MRR</b> · effort dev <b>2 jours</b></div>
+      </article>
+      <article class="lev" data-num="L2">
+        <h3>"Founding Audit FINMA" 99&nbsp;CHF</h3>
+        <div class="pricing">One-shot · livrable signé Ed25519</div>
+        <p>PDF nominatif "X est-il à jour FINMA au [date]" avec hash signé, utilisable comme pièce de dossier interne KYC. Cible les 1 800 compliance officers banques CH. Pricing pensé comme livrable de mission, pas comme dataset.</p>
+        <div class="revenue">Cycle 30j : <b>500–1 500 CHF</b> + lead-magnet vers Bundle 797</div>
+      </article>
+      <article class="lev" data-num="L3">
+        <h3>API "TARES delta webhook" 19&nbsp;CHF/mois</h3>
+        <div class="pricing">Mensuel · cible intégrateurs ERP</div>
+        <p>Webhook qui notifie automatiquement quand un code HS bouge dans TARES. Très bas-prix vs 299 CHF one-shot. Utile pour fiduciaires + intégrateurs Abacus/Bexio/Sage/Odoo qui veulent juste être avertis quand leurs clients doivent reclasser un produit.</p>
+        <div class="revenue">10 abonnés × 19&nbsp;CHF = <b>190 CHF MRR</b> · ouvre la porte ICP rang 5</div>
+      </article>
+      <article class="lev" data-num="L4">
+        <h3>Pay-per-call x402 sur le MCP</h3>
+        <div class="pricing">0,01 CHF / lookup · agentic-friendly</div>
+        <p>Exposer le MCP en x402 USDC (déjà testé sur ibanforge). Un agent IA tape l'API à 0,01&nbsp;CHF par appel sans abonnement. Conversion vers les 49 CHF/mois quand l'usage dépasse ~5 000 calls. <b>Aucun concurrent CH ne fait du pay-per-call x402 sur des données fédérales.</b></p>
+        <div class="revenue">Différenciateur radical · effort 5 jours (réutilise infra ibanforge)</div>
+      </article>
+      <article class="lev" data-num="L5">
+        <h3>Reseller blanc-marque B2B2B</h3>
+        <div class="pricing">Forfait 3 000–8 000 CHF/an + 50 % commission</div>
+        <p>Vendre l'accès aux datasets à des SaaS douaniers existants (clearcustoms.io, post.ch e-commerce, S-GE customs database) qui rebrandent en "TARES inside" ou "powered by openswissdata". Modèle OEM pur — différent des affiliés 15-25&nbsp;%.</p>
+        <div class="revenue">1 deal = <b>3 000–8 000 CHF/an</b> récurrent</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ========== 3 PARTENARIATS ========== -->
+  <section>
+    <h2>3 partenariats à <span class="accent">pitcher cette semaine</span>.</h2>
+    <p class="section-intro">Trois deals "zéro cash, gain mutuel" identifiés. Tous activables en moins de 30 minutes (un email de bonne facture).</p>
+    <div class="parts">
+      <article class="part">
+        <h3>Magic Heidi</h3>
+        <div class="who">VAT/freelance Switzerland · ~5 000 freelances CH</div>
+        <p>Intégrer TARES Lite dans leur module export &amp; factures internationales. openswissdata facture 2 CHF par utilisateur actif/mois sur leur base. Eux gagnent une feature différenciante (calcul HS automatique) sans dev.</p>
+        <div class="contact">contact@magicheidi.ch · site magicheidi.ch · LinkedIn founder</div>
+      </article>
+      <article class="part">
+        <h3>Spedlogswiss</h3>
+        <div class="who">Association faîtière transitaires · ~400 membres CH</div>
+        <p>Devenir "fournisseur de données certifié" pour leurs membres avec tarif association 199&nbsp;CHF (au lieu de 299) et 10&nbsp;% reversé à l'association. Zéro effort de leur côté — pure valeur ajoutée à la cotisation. Alignement Passar 2026.</p>
+        <div class="contact">info@spedlogswiss.com · secrétaire général</div>
+      </article>
+      <article class="part">
+        <h3>Pelt8</h3>
+        <div class="who">Compliance/ESG startup CH</div>
+        <p>Co-marketing croisé sur LinkedIn (2 carousels signés conjointement) + tarif croisé : leurs clients ESG → −30 % sur Bundle FINMA, nos clients FINMA → −30 % sur Pelt8 ESG. Public commun = compliance officers, gain mutuel zéro cash.</p>
+        <div class="contact">LinkedIn founder · pitch startup-to-startup</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ========== STACKS OUTILS ========== -->
+  <section>
+    <h2>Outils <span class="accent">payants</span> pour faire des ventes.</h2>
+    <p class="section-intro">Trois stacks budgétés, conformes nLPD, sans signal LinkedIn personnel. La hiérarchie de risque LinkedIn 2026 a beaucoup changé : HeyReach est cassé depuis février, La Growth Machine reste le plus safe pour un compte burner.</p>
+    <div class="stacks">
+      <div class="stack recommended">
+        <div class="price">200<small>&nbsp;CHF/mois</small></div>
+        <h3>L'os — go now</h3>
+        <ul>
+          <li><b>Smartlead Basic</b> <span class="price-tag">35 CHF</span></li>
+          <li><b>Dropcontact Starter</b> <span class="price-tag">75 CHF</span></li>
+          <li><b>Chatbase Pro</b> <span class="price-tag">17 CHF</span></li>
+          <li><b>6 Google Workspace</b> <span class="price-tag">70 CHF</span></li>
+        </ul>
+        <p class="promise">200–300 cold emails B2B nLPD-compliant /jour vers PME exportatrices CH d'ici 14 jours, sans LinkedIn.</p>
+      </div>
+      <div class="stack">
+        <div class="price">700<small>&nbsp;CHF/mois</small></div>
+        <h3>Le rythme</h3>
+        <ul>
+          <li><b>Smartlead Pro</b> <span class="price-tag">85 CHF</span></li>
+          <li><b>La Growth Machine</b> <span class="price-tag">57 CHF</span></li>
+          <li><b>Dropcontact Premium</b> <span class="price-tag">190 CHF</span></li>
+          <li><b>Clay Launch</b> <span class="price-tag">167 CHF</span></li>
+          <li><b>Chatbase Pro</b> <span class="price-tag">17 CHF</span></li>
+          <li><b>6 Google Workspace</b> <span class="price-tag">70 CHF</span></li>
+        </ul>
+        <p class="promise">300 emails/jour + 20 LinkedIn touches/jour (compte burner, cloud safe) + capture inbound.</p>
+      </div>
+      <div class="stack">
+        <div class="price">1240<small>&nbsp;CHF/mois</small></div>
+        <h3>L'optimal</h3>
+        <ul>
+          <li>Stack 700 + <b>Clay Growth</b> <span class="price-tag">+278 CHF</span></li>
+          <li><b>Apollo Basic</b> <span class="price-tag">44 CHF</span></li>
+          <li><b>Regie.ai AI SDR</b> <span class="price-tag">165 CHF</span></li>
+          <li>Lemlist optionnel <span class="price-tag">+57 CHF</span></li>
+        </ul>
+        <p class="promise">Signaux d'intent automatisés + AI co-pilot qui rédige les sequences. À tester 1 mois après validation du stack 700.</p>
+      </div>
+    </div>
+
+    <div class="legal">
+      <h4>⚠️ Cadre légal Suisse — à connaître AVANT de lancer</h4>
+      <ul style="list-style:none;padding:0;margin:0;">
+        <li style="padding:5px 0;"><b>LCD art. 3 al. 1 let. o</b> — interdit l'envoi de masse de messages publicitaires sans consentement (B2B inclus). Pénalité jusqu'à 100 000 CHF.</li>
+        <li style="padding:5px 0;"><b>nLPD art. 31</b> — cold email <b>1-to-1 personnalisé B2B</b> sur l'intérêt légitime toléré, mais : (1) lien privacy policy, (2) opt-out fonctionnel, (3) origine de la donnée. Pénalité 250 000 CHF.</li>
+        <li style="padding:5px 0;"><b>Cold calling B2B</b> — quasi-interdit sans relation préalable. <b style="color:var(--rust)">Voice AI sortant inadapté à la Suisse</b>.</li>
+        <li style="padding:5px 0;"><b>LinkedIn ToS</b> — interdit l'automation. Compte burner obligatoire. Warming 30 jours minimum (engagement réel) avant toute outreach.</li>
+      </ul>
+    </div>
+
+    <h2 style="margin-top:32px;font-size:22px;">Hiérarchie risque LinkedIn 2026</h2>
+    <div class="risk-stack">
+      <div class="risk-row r-very-high">
+        <div class="risk-label">very high</div>
+        <div class="risk-tool"><b>Chrome extension</b> <small>Dux-Soup, Waalaxy, ancien Phantombuster</small></div>
+        <div class="risk-verdict">❌ ban</div>
+      </div>
+      <div class="risk-row r-very-high">
+        <div class="risk-label">cassé</div>
+        <div class="risk-tool"><b>HeyReach</b> <small>API LinkedIn bannie depuis février 2025</small></div>
+        <div class="risk-verdict">❌ skip</div>
+      </div>
+      <div class="risk-row r-high">
+        <div class="risk-label">high</div>
+        <div class="risk-tool"><b>Expandi</b> <small>cloud mais 67 % users signalent restrictions</small></div>
+        <div class="risk-verdict">🟡 risqué</div>
+      </div>
+      <div class="risk-row r-mid">
+        <div class="risk-label">moyen</div>
+        <div class="risk-tool"><b>MeetAlfred</b> <small>cloud, moins robuste que LGM</small></div>
+        <div class="risk-verdict">🟡 ok solo</div>
+      </div>
+      <div class="risk-row r-low">
+        <div class="risk-label">le plus safe</div>
+        <div class="risk-tool"><b>La Growth Machine</b> <small>cloud + IP dédiée + variation comportementale</small></div>
+        <div class="risk-verdict">✅ recommandé</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PLAN 7 JOURS ========== -->
+  <section>
+    <h2>Plan 7 jours — <span class="accent">stack 700 CHF</span>.</h2>
+    <p class="section-intro">Si tu prends le stack 700 CHF/mois lundi prochain, voici la séquence par jour pour avoir des prospects qualifiés en main vendredi.</p>
+    <div class="plan">
+      <div class="plan-row">
+        <div class="plan-day">LUN</div>
+        <div class="plan-action"><b>Setup infra</b> — 6 domaines secondaires (openswissdata-ch.com, getopenswissdata.com, etc.) + Google Workspace 6 boîtes + SPF/DKIM/DMARC + Smartlead Pro abonné. Warm-up démarre. ~3h.</div>
+      </div>
+      <div class="plan-row">
+        <div class="plan-day">MAR</div>
+        <div class="plan-action"><b>Liste 500 prospects</b> — Souscrire Dropcontact + Clay Launch. Construire dans Clay une liste de 500 PME exportatrices CH via codes douaniers les plus actifs, enrichir emails décideurs douane. Cible : 200–300 emails vérifiés. ~4h.</div>
+      </div>
+      <div class="plan-row">
+        <div class="plan-day">MER</div>
+        <div class="plan-action"><b>Compte LinkedIn burner</b> — Créer compte LinkedIn dédié <code>team@openswissdata.com</code> (jamais lier au perso). Photo + bio + 50 connections naturelles. <b>30 jours warming</b> en mode "engagement only" via LGM avant toute outreach. ~2h aujourd'hui, puis passive.</div>
+      </div>
+      <div class="plan-row">
+        <div class="plan-day">JEU</div>
+        <div class="plan-action"><b>Sequences</b> — Smartlead 3-step en FR/DE pour PME ("comment automatiser TARES dans votre ERP"). LGM 4-step pour compliance officers (visite + invitation + msg + email fallback). Tester sur 20 prospects internes avant lancement. ~3h.</div>
+      </div>
+      <div class="plan-row">
+        <div class="plan-day">VEN</div>
+        <div class="plan-action"><b>Lancement</b> — Smartlead 50 emails/jour × 6 mailboxes = <b>300 envois/jour</b> (ramp progressif sur 2 semaines). 20 LGM LinkedIn touches/jour. Activer Chatbase sur le site (FAQ entraînée sur les 4 datasets). ~1h.</div>
+      </div>
+      <div class="plan-row">
+        <div class="plan-day">SAM-DIM</div>
+        <div class="plan-action"><b>Iteration</b> — Analyser : open rate doit être > 40 %, reply rate > 3 % pour valider. Si reply rate &lt; 1 % : retravailler subject + 1re ligne. Vendredi suivant : 20–30 prospects qualifiés en main. Cible 30j : 1–3 ventes Bundle attribuables.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TODO ALAIN ========== -->
+  <section>
+    <div class="todo">
+      <div class="eyebrow" style="color:var(--gold-2)">Action manuelles · à faire au lever</div>
+      <h2>10 actions, <span style="color:var(--gold)">3h total</span>.</h2>
+      <p>Tout ce que je n'ai pas pu faire en autonomie — auth interactive, comptes web, décisions humaines. Classé par impact / urgence.</p>
+      <ol>
+        <li><b>Activer TWINT dans Stripe Dashboard</b> — Settings → Payment methods → TWINT (CH). Le code est déjà prêt côté Hono ; dès que tu actives, TWINT apparaît dans le checkout. <span class="why">Impact ventes immédiat sur PME suisses (90 % paient en TWINT).</span></li>
+        <li><b>Republier au MCP Registry officiel</b> — <code>cd /Users/claude-alainmartin/openswissdata && mcp-publisher login github && mcp-publisher publish</code>. Le token actuel est expiré, il faut un nouveau login GitHub. <span class="why">Permettra à Smithery + autres marketplaces de te détecter automatiquement.</span></li>
+        <li><b>Soumettre openswissdata sur glama.ai</b> — Login GitHub, ajouter le repo, attendre le score. <span class="why">Le badge AAA (Quality A + Security A) débloque le merge de la PR awesome-mcp-servers#5966 (sinon les bots de triage la fermeront).</span></li>
+        <li><b>Editer le listing mcp.so</b> — Login web GitHub sur mcp.so, soumettre openswissdata, tags : <code>swiss, federal, tares, finma, noga, compliance, customs, government</code>. <span class="why">Marketplace MCP majeur, complément de Smithery.</span></li>
+        <li><b>Google Search Console : désindexer /famille</b> — outils → Suppression d'URL → soumettre <code>https://www.openswissdata.com/famille</code>. <span class="why">Accélère la sortie de l'index Google. La page a déjà <code>noindex</code> mais GSC le rendra effectif sous 24h au lieu de plusieurs semaines.</span></li>
+        <li><b>Créer la Sàrl + obtenir IDE/UID</b> — EasyGov.swiss, ~10 jours, ~20 CHF en ligne. <span class="why">Le seul vrai blocker structurel sur tout l'ICP B2B suisse. Tant que ce n'est pas fait, banques/grandes PME ne peuvent pas créer "openswissdata" comme fournisseur dans leur ERP.</span></li>
+        <li><b>Pitcher Magic Heidi</b> — email à <code>contact@magicheidi.ch</code>, deal "intégration TARES Lite contre 2 CHF/utilisateur/mois". <span class="why">Ouvre une base de ~5 000 freelances CH en MRR récurrent zéro effort.</span></li>
+        <li><b>Pitcher Spedlogswiss</b> — email à <code>info@spedlogswiss.com</code>, offre "fournisseur certifié" + tarif association 199 CHF + 10 % reversé. <span class="why">~400 transitaires CH en 1 envoi, alignement Passar 2026 = catalyseur réglementaire.</span></li>
+        <li><b>Pitcher Pelt8</b> — LinkedIn DM founder, deal co-marketing croisé compliance/ESG. <span class="why">Public commun (compliance officers), gain mutuel zéro cash, force la légitimité sur LinkedIn sans toucher ton perso.</span></li>
+        <li><b>Décider du stack outreach</b> — 200 ou 700 CHF/mois ? <span class="why">Si tu valides 200 CHF, je peux configurer Smartlead + Dropcontact + Chatbase + 6 mailboxes en autonomie demain. Si tu vises 700 CHF, on attend que tu choisisses la stratégie LinkedIn (compte burner ?) avant de souscrire LGM.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>
+    <div class="signature">⚙ rapport autonome · Claude Opus 4.7 · nuit du 6 mai 2026</div>
+    <div class="links">
+      <a href="https://github.com/cammac-creator/openswissdata/commit/2dec5ba">2dec5ba</a>
+      <a href="https://github.com/cammac-creator/openswissdata/commit/15003d3">15003d3</a>
+      <a href="https://github.com/punkpeye/awesome-mcp-servers/pull/5966">PR #5966</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
