@@ -1,6 +1,5 @@
 # Pitch presse — Inside Paradeplatz
 
-**À envoyer mercredi 6 mai 18h CEST · embargo levé jeudi 7 mai 9h CEST**
 **Destinataire** : `mail@insideparadeplatz.ch`
 **Format** : Gastbeitrag (Inside P. publie sous "ipteam" et auteurs externes)
 **Angle** : compliance / KYC / fiduciaires (le terrain favori de Lukas Hässig)
@@ -9,7 +8,7 @@
 
 ## Objet
 
-`[Embargo do 7.5. 9h] Solo Founder VD bringt erstes MCP Schweiz mit BAZG-Bewilligung — 299 CHF statt 6'000`
+`Solo Founder VD bringt erstes MCP Schweiz mit BAZG-Bewilligung — 299 CHF statt 6'000`
 
 ---
 
@@ -17,7 +16,7 @@
 
 Sehr geehrter Herr Hässig, sehr geehrtes ipteam,
 
-Embargo bis Donnerstag, 7. Mai 9h CEST. Ich melde mich, weil das Thema Inside Paradeplatz interessieren könnte: ein Solo Founder aus der Waadt veröffentlicht das **erste MCP-Server in der Schweiz** für Bundesdaten (TARES Zoll, NOGA/NACE/ISIC, FINMA-Register), mit einer **schriftlichen kommerziellen BAZG-Bewilligung** (M. Michael Beer, Tarifgrundlagen, 21. April 2026).
+Ich melde mich, weil das Thema Inside Paradeplatz interessieren könnte: ein Solo Founder aus der Waadt hat das **erste MCP-Server in der Schweiz** veröffentlicht, für Bundesdaten (TARES Zoll, NOGA/NACE/ISIC, FINMA-Register), mit einer **schriftlichen kommerziellen BAZG-Bewilligung** (M. Michael Beer, Tarifgrundlagen, 21. April 2026).
 
 **Der Knackpunkt für Compliance Officers**
 
@@ -40,7 +39,7 @@ Drei Aspekte, die Ihre Leser erwarten:
 
 **Mein Angebot**
 
-Ich kann einen **Gastbeitrag** (signiert "Alain Martin, founder openswissdata") liefern, 700-900 Wörter, mit folgendem Vorschlag:
+Ich kann einen **Gastbeitrag** (signiert "Claude-Alain Martin, founder openswissdata") liefern, 700-900 Wörter, mit folgendem Vorschlag:
 
 > *"Wie ein Solo Founder den FINMA-Registerstandard löst, den niemand löst — und warum sich Compliance Officers bei jedem Audit fragen sollten, ob sie unterschriebene Daten verwenden."*
 
@@ -55,7 +54,7 @@ Lieferbar binnen 24h. HD-Foto + Datenbeispiele verfügbar.
 Ich bin auch unter [Telefon] erreichbar, falls Sie 5 Minuten zum Briefing wünschen.
 
 Mit freundlichen Grüssen
-Alain Martin
+Claude-Alain Martin
 Founder openswissdata.com
 contact@openswissdata.com
 

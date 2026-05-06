@@ -1,6 +1,6 @@
 # Cold email templates · openswissdata launch
 
-**De** : `Alain Martin <cold@send.openswissdata.com>` (sous-domaine warmé séparé)
+**De** : `Claude-Alain Martin <cold@send.openswissdata.com>` (sous-domaine warmé séparé)
 **Outil envoi** : Instantly.ai ou Smartlead.ai (PAS Resend qui est transactionnel)
 **Volume safe** : 30-50 emails/jour pendant 14 jours après warm-up
 **Follow-ups** : 3 max (J+3, J+7, J+14)
@@ -27,14 +27,14 @@ livrées via API ou MCP (Claude / Cursor / Copilot).
 
 15 min jeudi pour un démo ?
 
-— Alain Martin, openswissdata.com
+— Claude-Alain Martin, openswissdata.com
 ```
 
 **Signature obligatoire (nLPD)**
 
 ```
 —
-Alain Martin · openswissdata · raison individuelle CH
+Claude-Alain Martin · openswissdata · raison individuelle CH
 Désinscription 1-clic : reply STOP
 Données traitées selon nLPD + RGPD · openswissdata.com/legal/sdr-policy
 For juridique : Berne (TARES) / Ogens VD (autres) · CHE-XXX

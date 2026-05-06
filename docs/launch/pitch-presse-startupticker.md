@@ -1,6 +1,5 @@
 # Pitch presse — startupticker.ch
 
-**À envoyer mercredi 6 mai 18h CEST · embargo levé jeudi 7 mai 9h CEST**
 **Destinataire** : formulaire `https://www.startupticker.ch/en/news/submit-news` ou `editor@startupticker.ch`
 **Format** : communiqué de presse classique (startupticker accepte les annonces de launch)
 **Angle** : startup suisse + datasets ouverts + SDK typé + premier MCP suisse
@@ -22,7 +21,7 @@
 
 ## Communiqué (à coller dans le form, 350 mots max)
 
-**Lausanne / Ogens (VD), 7 mai 2026** — openswissdata.com lance aujourd'hui **le premier MCP server suisse** dédié aux datasets fédéraux (TARES douanes, classifications NOGA/NACE/ISIC, registre FINMA), avec deux différenciateurs uniques : permission commerciale écrite du BAZG et signatures cryptographiques Ed25519 niveau bancaire.
+**Lausanne / Ogens (VD)** — openswissdata.com est **le premier MCP server suisse** dédié aux datasets fédéraux (TARES douanes, classifications NOGA/NACE/ISIC, registre FINMA), avec deux différenciateurs uniques : permission commerciale écrite du BAZG et signatures cryptographiques Ed25519 niveau bancaire.
 
 **Le besoin**
 
