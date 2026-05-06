@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.cammac-creator/openswissdata",
   "description": "Swiss federal open data via MCP: TARES tariffs, FINMA registry, NOGA codes (9 tools).",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "websiteUrl": "https://www.openswissdata.com",
   "repository": {
     "url": "https://github.com/cammac-creator/openswissdata",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "@openswissdata/mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": {
         "type": "stdio"
       },
