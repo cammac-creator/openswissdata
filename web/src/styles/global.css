@@ -1397,9 +1397,8 @@ details[open] .faq-body {
 }
 .v4-status-logo-mark {
   display: inline-block;
-  width: 14px; height: 14px;
-  background: var(--accent);
-  clip-path: polygon(40% 10%, 60% 10%, 60% 40%, 90% 40%, 90% 60%, 60% 60%, 60% 90%, 40% 90%, 40% 60%, 10% 60%, 10% 40%, 40% 40%);
+  width: 20px; height: 20px;
+  object-fit: contain;
   transition: transform var(--t-med) var(--ease-out);
 }
 .v4-status-logo:hover .v4-status-logo-mark { transform: rotate(45deg); }
