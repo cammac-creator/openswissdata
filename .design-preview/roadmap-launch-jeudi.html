@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Roadmap launch jeudi 7 mai · openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F4EE;
+    --ink: #0A0A0C;
+    --ink-soft: #3A3D45;
+    --ink-mute: #6B6E76;
+    --line: #E8E4D9;
+    --line-strong: #D9D3C3;
+    --accent: #DC1F2D;
+    --accent-soft: #FCE7E9;
+    --green: #15803D;
+    --green-soft: #DCFCE7;
+    --amber: #92400E;
+    --amber-soft: #FEF3C7;
+    --teal: #0F766E;
+    --teal-soft: #E5F5F1;
+    --blue: #1D4ED8;
+    --blue-soft: #DBEAFE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%;
+    z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  /* Hero */
+  .hero { padding: 64px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font-weight: 700;
+    font-size: clamp(36px, 4.5vw, 56px);
+    line-height: 1.04;
+    letter-spacing: -.03em;
+    margin: 0 0 20px;
+    max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 18px; color: var(--ink-soft); max-width: 60ch; margin: 0 0 32px; }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  /* Countdown */
+  .countdown {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 32px 0;
+  }
+  .countdown-item { padding: 18px 0; border-right: 1px solid var(--line); padding: 18px 24px; }
+  .countdown-item:last-child { border-right: none; }
+  .countdown-day { font-family: "Geist Mono", monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .countdown-num { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+  .countdown-num.today { color: var(--accent); }
+  .countdown-label { font-size: 12px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .countdown { grid-template-columns: repeat(2, 1fr); } .countdown-item { border-right: none; border-bottom: 1px solid var(--line); padding: 14px 16px; } }
+
+  /* Timeline visuelle */
+  .timeline-vis {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .timeline-track {
+    position: relative;
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    margin: 40px 0 60px;
+  }
+  .timeline-progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    background: var(--green);
+    border-radius: 2px;
+  }
+  .timeline-marker {
+    position: absolute;
+    top: -8px;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  .timeline-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 3px solid var(--line);
+    margin: 0 auto;
+  }
+  .timeline-dot.done { background: var(--green); border-color: var(--green); }
+  .timeline-dot.today { background: var(--accent); border-color: var(--accent); animation: pulse 2s infinite; }
+  .timeline-dot.future { background: var(--bg-card); border-color: var(--line-strong); }
+  .timeline-dot.launch { background: var(--ink); border-color: var(--ink); }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220,31,45,.4); }
+    50% { box-shadow: 0 0 0 8px rgba(220,31,45,0); }
+  }
+  .timeline-label {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-top: 8px;
+    white-space: nowrap;
+  }
+  .timeline-label.today { color: var(--accent); font-weight: 600; }
+  .timeline-label.launch { color: var(--ink); font-weight: 600; }
+
+  /* Sections */
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  .section-eyebrow .deadline { background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 3px; font-weight: 600; }
+  h2 { font-weight: 700; font-size: clamp(28px, 3vw, 36px); line-height: 1.1; letter-spacing: -.025em; margin: 0 0 14px; max-width: 26ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 62ch; margin: 0 0 36px; }
+
+  /* Task cards */
+  .task {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .task-head {
+    display: flex; gap: 16px; align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .task-num {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-family: "Geist Mono", monospace;
+    font-size: 14px; font-weight: 700;
+    background: var(--ink); color: var(--bg);
+  }
+  .task.critical .task-num { background: var(--accent); }
+  .task.medium .task-num { background: var(--amber); }
+  .task.low .task-num { background: var(--ink-mute); }
+  .task-title {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -.018em;
+    line-height: 1.3;
+    margin: 4px 0 4px;
+  }
+  .task-meta {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;
+  }
+  .badge {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 3px;
+    font-weight: 600;
+  }
+  .badge.critical { background: var(--accent-soft); color: var(--accent); }
+  .badge.medium { background: var(--amber-soft); color: var(--amber); }
+  .badge.low { background: var(--bg-soft); color: var(--ink-mute); }
+  .badge.toi { background: var(--blue-soft); color: var(--blue); }
+  .badge.moi { background: var(--green-soft); color: var(--green); }
+  .badge.eta { background: var(--bg-soft); color: var(--ink-mute); }
+  .task-desc {
+    font-size: 14px; color: var(--ink-soft); line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .task-why {
+    background: var(--bg-soft);
+    border-left: 3px solid var(--ink-mute);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .task-why strong { color: var(--ink); font-weight: 600; }
+  .task-how {
+    background: var(--bg-soft);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  .task-how-title {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+  }
+  .task-how ol, .task-how ul { margin: 0; padding-left: 20px; }
+  .task-how li { margin-bottom: 4px; line-height: 1.5; }
+  .task-how pre {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 8px 0;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    overflow-x: auto;
+  }
+
+  /* Day J plan */
+  .day-j {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg);
+    border-radius: 14px;
+    padding: 36px;
+    margin: 24px 0;
+  }
+  .day-j h3 { color: var(--bg); font-size: 22px; margin: 0 0 12px; }
+  .day-j p { color: rgba(255,255,255,.75); font-size: 14px; line-height: 1.6; margin: 0 0 16px; }
+  .day-j-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 24px;
+  }
+  @media (max-width: 720px) { .day-j-grid { grid-template-columns: 1fr; } }
+  .day-j-step {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .day-j-step-time {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    color: rgba(255,255,255,.55);
+    margin-bottom: 6px;
+  }
+  .day-j-step-title {
+    font-size: 14px; font-weight: 600;
+    color: var(--bg);
+    margin-bottom: 6px;
+  }
+  .day-j-step p {
+    font-size: 12px;
+    color: rgba(255,255,255,.65);
+    margin: 0;
+  }
+
+  /* Stripe diagram */
+  .stripe-diag {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    margin: 16px 0;
+  }
+  .price-compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .price-box {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+  }
+  .price-box.now { background: var(--amber-soft); border-color: var(--amber); }
+  .price-box.target { background: var(--green-soft); border-color: var(--green); }
+  .price-box-label { font-family: "Geist Mono", monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+  .price-box.now .price-box-label { color: var(--amber); }
+  .price-box.target .price-box-label { color: var(--green); }
+  .price-box-amount { font-size: 28px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
+  .price-box-detail { font-size: 11px; color: var(--ink-soft); }
+
+  /* Final */
+  .final-card {
+    background: var(--green-soft);
+    border: 2px solid var(--green);
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin: 32px 0;
+    text-align: center;
+  }
+  .final-card h3 { font-size: 22px; color: var(--green); margin: 0 0 8px; }
+  .final-card p { font-size: 14px; color: var(--ink-soft); margin: 0; }
+
+  footer {
+    padding: 48px 0 64px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+  footer .mono { font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Roadmap · 4 jours avant launch</span>
+    </div>
+    <h1>Ce qu'il reste avant <span class="accent">jeudi 7 mai.</span></h1>
+    <p class="lede">
+      Le pipeline de fraîcheur est en prod ce matin. <strong>L'infrastructure est verte.</strong> Il reste 4 jours pour finir 7 chantiers — 3 critiques (validation, prix, contraste) et 4 d'optimisation.
+      Cette page liste exactement ce qui doit être fait, par qui, pourquoi, et combien de temps.
+    </p>
+
+    <div class="countdown">
+      <div class="countdown-item">
+        <div class="countdown-day">Aujourd'hui</div>
+        <div class="countdown-num today">DIM 3</div>
+        <div class="countdown-label">Préparation finale</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-day">Lun-Mer</div>
+        <div class="countdown-num">3 jours</div>
+        <div class="countdown-label">Validation + tests</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-day">Mercredi</div>
+        <div class="countdown-num">06 mai</div>
+        <div class="countdown-label">Pré-launch check</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-day">Jeudi</div>
+        <div class="countdown-num">07 mai</div>
+        <div class="countdown-label">🚀 Launch</div>
+      </div>
+    </div>
+
+    <div class="timeline-vis">
+      <div class="timeline-track">
+        <div class="timeline-progress" style="width: 25%;"></div>
+        <div class="timeline-marker" style="left: 0%;">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-label">Sam 2</div>
+        </div>
+        <div class="timeline-marker" style="left: 25%;">
+          <div class="timeline-dot today"></div>
+          <div class="timeline-label today">Dim 3 · ici</div>
+        </div>
+        <div class="timeline-marker" style="left: 50%;">
+          <div class="timeline-dot future"></div>
+          <div class="timeline-label">Lun 4</div>
+        </div>
+        <div class="timeline-marker" style="left: 75%;">
+          <div class="timeline-dot future"></div>
+          <div class="timeline-label">Mer 6</div>
+        </div>
+        <div class="timeline-marker" style="left: 100%;">
+          <div class="timeline-dot launch"></div>
+          <div class="timeline-label launch">🚀 Jeu 7</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CRITIQUE ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Phase 1 / Critique</strong>
+      <span class="sep">/</span>
+      <span>3 chantiers à finir avant mercredi soir</span>
+      <span class="deadline">DEADLINE MERCREDI 6 MAI</span>
+    </div>
+    <h2>Les 3 actions <span class="serif">qui débloquent le launch</span>.</h2>
+    <p class="section-intro">
+      Sans ces 3 chantiers, tu peux pas annoncer <em>"premier MCP suisse / 8 tools"</em> sans risquer une plainte ou un bug client le jour J. À régler dans cet ordre.
+    </p>
+
+    <!-- Tâche 1 -->
+    <div class="task critical">
+      <div class="task-head">
+        <div class="task-num">01</div>
+        <div style="flex: 1;">
+          <div class="task-title">Bundle Stripe : passer 799 → 797 CHF</div>
+          <div class="task-meta">
+            <span class="badge critical">Critique</span>
+            <span class="badge toi">À faire toi</span>
+            <span class="badge eta">~5 min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-desc">
+        Ton site affiche partout <strong>"≈ 200 CHF économisés (≈ 20 %)"</strong>. La math n'est exacte que si le bundle coûte 797 CHF (299 + 399 + 299 = 997 → 997 − 797 = 200). À 799 CHF, l'écart est de 198 CHF — pas faux mais pas net.
+      </div>
+
+      <div class="task-why">
+        <strong>Pourquoi ça compte :</strong> un acheteur compliance qui calcule à la main remarque tout de suite. Fais le geste maintenant pour que tes pages disent <strong>exactement ce que tu factures</strong>, sans le ≈.
+      </div>
+
+      <div class="stripe-diag">
+        <div class="price-compare">
+          <div class="price-box now">
+            <div class="price-box-label">Maintenant (Stripe)</div>
+            <div class="price-box-amount">799 CHF</div>
+            <div class="price-box-detail">997 − 799 = 198 CHF (≈ 20 %)</div>
+          </div>
+          <div class="price-box target">
+            <div class="price-box-label">Cible</div>
+            <div class="price-box-amount">797 CHF</div>
+            <div class="price-box-detail">997 − 797 = 200 CHF tout rond ✓</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-how">
+        <div class="task-how-title">Comment faire</div>
+        <ol>
+          <li>Aller sur <code>dashboard.stripe.com/products</code></li>
+          <li>Trouver le produit <strong>"Bundle openswissdata"</strong></li>
+          <li>Cliquer sur le prix LIVE actuel (799 CHF)</li>
+          <li>"Update price" → entrer <strong>797.00 CHF</strong></li>
+          <li>Sauvegarder, copier le nouveau <code>price_id</code></li>
+          <li>Me le coller dans le chat → je mets à jour le code et je redéploie</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Tâche 2 -->
+    <div class="task critical">
+      <div class="task-head">
+        <div class="task-num">02</div>
+        <div style="flex: 1;">
+          <div class="task-title">Test OAuth E2E des 5 tools Pro MCP</div>
+          <div class="task-meta">
+            <span class="badge critical">Critique</span>
+            <span class="badge moi">Je peux faire</span>
+            <span class="badge eta">~30 min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-desc">
+        Ton MCP (Model Context Protocol) expose <strong>8 tools</strong> : 3 publics anonymes (déjà validés en prod) + 5 Pro qui exigent une authentification OAuth + scope. Les 5 Pro n'ont jamais été testés en condition réelle de bout en bout.
+      </div>
+
+      <div class="task-why">
+        <strong>Pourquoi ça compte :</strong> tu prévois de communiquer <em>"premier MCP suisse, 8 tools"</em>. Si un journaliste tech ou un dev influent essaie un tool Pro et que ça plante (token mal scoped, rate limit, JSON malformé), tu perds la crédibilité du launch. Mieux vaut le savoir maintenant.
+      </div>
+
+      <div class="task-how">
+        <div class="task-how-title">Comment faire (je peux le faire pour toi)</div>
+        <ol>
+          <li>Je génère un token OAuth Pro de test</li>
+          <li>Je lance un script qui appelle chacun des 5 tools (<code>tariff_lookup_pro</code>, <code>tariff_changelog</code>, etc.)</li>
+          <li>Je vérifie : 200 OK + JSON conforme au schéma + temps de réponse &lt; 1s</li>
+          <li>Je note les bugs (s'il y en a) et je les fixe</li>
+          <li>Tu auras un rapport "5/5 OK" ou "4/5 OK + bug fix"</li>
+        </ol>
+        <p style="margin: 10px 0 0; color: var(--ink-mute); font-size: 12px;">→ Dis-moi "go test mcp" et je lance.</p>
+      </div>
+    </div>
+
+    <!-- Tâche 3 -->
+    <div class="task critical">
+      <div class="task-head">
+        <div class="task-num">03</div>
+        <div style="flex: 1;">
+          <div class="task-title">Contraste --ink-mute (a11y WCAG AA)</div>
+          <div class="task-meta">
+            <span class="badge critical">Critique a11y</span>
+            <span class="badge toi">Décision visuelle</span>
+            <span class="badge eta">~10 min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-desc">
+        La couleur de tes textes "secondaires" (sous-titres, légendes, breadcrumbs) est <code>--ink-mute: #8A8D95</code> sur fond ivoire <code>#FBFBF8</code>. Le ratio de contraste est <strong>3.2:1</strong> — en dessous du seuil WCAG AA (4.5:1). C'est un bug d'accessibilité.
+      </div>
+
+      <div class="task-why">
+        <strong>Pourquoi ça compte :</strong> 1 visiteur sur 8 a une vue altérée (myopes corrigés, malvoyants, daltonisme). Les textes en gris clair leur sont illisibles. C'est aussi un <strong>argument compliance</strong> que tes clients banques/assurances vont vérifier (audit a11y obligatoire en CH dès 2025 pour le public).
+      </div>
+
+      <div class="stripe-diag">
+        <div class="price-compare">
+          <div class="price-box now">
+            <div class="price-box-label">Actuel</div>
+            <div style="background: white; padding: 10px; border-radius: 6px; margin-bottom: 6px;">
+              <span style="color: #8A8D95; font-size: 14px;">Texte secondaire (3.2:1)</span>
+            </div>
+            <div class="price-box-detail mono">#8A8D95 · échec WCAG AA</div>
+          </div>
+          <div class="price-box target">
+            <div class="price-box-label">Cible</div>
+            <div style="background: white; padding: 10px; border-radius: 6px; margin-bottom: 6px;">
+              <span style="color: #6B6E76; font-size: 14px;">Texte secondaire (4.6:1)</span>
+            </div>
+            <div class="price-box-detail mono">#6B6E76 · WCAG AA ✓</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-how">
+        <div class="task-how-title">Comment faire</div>
+        <ol>
+          <li>Tu valides visuellement la cible <code>#6B6E76</code> (peu de différence à l'œil nu, juste un poil plus foncé)</li>
+          <li>Tu me dis "go contraste" → je modifie <code>web/src/styles/global.css</code></li>
+          <li>Je redéploie, tu vérifies en live sur 2-3 pages que ça reste lisible et beau</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== OPTIMISATION ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Phase 2 / Optimisation</strong>
+      <span class="sep">/</span>
+      <span>4 chantiers — peuvent attendre après launch</span>
+    </div>
+    <h2>Les 4 actions <span class="serif">"nice to have"</span>.</h2>
+    <p class="section-intro">
+      Pas bloquantes pour jeudi, mais à régler dans les 2 semaines suivantes pour que la base soit solide. Aucune n'est visible côté client.
+    </p>
+
+    <!-- Tâche 4 -->
+    <div class="task medium">
+      <div class="task-head">
+        <div class="task-num">04</div>
+        <div style="flex: 1;">
+          <div class="task-title">Refactor /codes : Astro Island lazy-load</div>
+          <div class="task-meta">
+            <span class="badge medium">Performance</span>
+            <span class="badge moi">Je peux faire</span>
+            <span class="badge eta">~2 h</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-desc">
+        La page <code>/codes/index.html</code> pèse <strong>396 KB</strong> à cause de 1047 codes NOGA inlinés en HTML statique. C'est lourd pour mobile 3G/4G, et pénalise le Core Web Vital LCP.
+      </div>
+
+      <div class="task-why">
+        <strong>Pourquoi ça compte :</strong> Google indexe cette page pour 1047 mots-clés SEO (un par code NOGA). Si elle est lente, les positions SEO baissent, et tu perds des leads organiques.
+      </div>
+
+      <div class="task-how">
+        <div class="task-how-title">Comment faire</div>
+        <ul>
+          <li>Garder seulement le top 50 codes en HTML statique (les plus recherchés)</li>
+          <li>Les 1000 autres dans un JSON chargé à la demande quand l'user scrolle ou cherche</li>
+          <li>Cible : passer de 396 KB à &lt; 100 KB</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Tâche 5 -->
+    <div class="task medium">
+      <div class="task-head">
+        <div class="task-num">05</div>
+        <div style="flex: 1;">
+          <div class="task-title">Bug scope MCP : tariff_changelog → tariff:read</div>
+          <div class="task-meta">
+            <span class="badge medium">Bug mineur</span>
+            <span class="badge moi">Je peux faire</span>
+            <span class="badge eta">~15 min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-desc">
+        Le tool MCP <code>tariff_changelog</code> est mappé sur le scope <code>tariff:semantic</code> alors qu'il devrait être sur <code>tariff:read</code> (ou créer un nouveau scope <code>tariff:history</code>). C'est un bug identifié pendant l'audit MCP E2E.
+      </div>
+
+      <div class="task-why">
+        <strong>Pourquoi ça compte :</strong> certains clients qui achètent l'accès "lecture" (tariff:read) ne pourront pas utiliser changelog, alors qu'ils devraient. Friction commerciale.
+      </div>
+
+      <div class="task-how">
+        <div class="task-how-title">Comment faire</div>
+        <ol>
+          <li>Modifier le mapping dans <code>sdks/mcp-server/src/tools.ts</code></li>
+          <li>Vérifier les tests unitaires</li>
+          <li>Push live</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Tâche 6 -->
+    <div class="task low">
+      <div class="task-head">
+        <div class="task-num">06</div>
+        <div style="flex: 1;">
+          <div class="task-title">Supprimer Header.astro (code mort)</div>
+          <div class="task-meta">
+            <span class="badge low">Cleanup</span>
+            <span class="badge moi">Je peux faire</span>
+            <span class="badge eta">~5 min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-desc">
+        Le composant <code>web/src/components/Header.astro</code> existe dans le repo mais n'est importé nulle part — c'est <code>StatusBar.astro</code> qui est utilisé en prod. Le fichier prend de la place et embrouille.
+      </div>
+
+      <div class="task-why">
+        <strong>Pourquoi ça compte :</strong> du code mort dans un repo, c'est de la dette qui grossit. Quelqu'un (toi, moi, ou un futur dev) finira par l'éditer par erreur ou perdre 10 min à comprendre s'il sert.
+      </div>
+
+      <div class="task-how">
+        <div class="task-how-title">Comment faire</div>
+        <pre>git rm web/src/components/Header.astro
+git commit -m "chore: remove unused Header.astro (StatusBar is the active component)"
+git push</pre>
+      </div>
+    </div>
+
+    <!-- Tâche 7 -->
+    <div class="task medium">
+      <div class="task-head">
+        <div class="task-num">07</div>
+        <div style="flex: 1;">
+          <div class="task-title">Validation Sentry capture en prod</div>
+          <div class="task-meta">
+            <span class="badge medium">Observabilité</span>
+            <span class="badge toi">À faire toi</span>
+            <span class="badge eta">~5 min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-desc">
+        Sentry est déployé sur Railway, le DSN est configuré. Mais on n'a jamais vérifié qu'une erreur API remonte bien dans le dashboard Sentry.
+      </div>
+
+      <div class="task-why">
+        <strong>Pourquoi ça compte :</strong> le jour du launch, si une erreur 500 frappe, tu dois la voir en temps réel pour réagir. Sentry est ton radar. Si le radar est éteint, tu ne sais pas ce qui se passe.
+      </div>
+
+      <div class="task-how">
+        <div class="task-how-title">Comment faire</div>
+        <ol>
+          <li>Lance <code>curl -s -H "x-sentry-test: 62qgxFee5wp04ME9lmkptw" https://www.openswissdata.com/api/health/sentry-test</code></li>
+          <li>Ouvre <code>sentry.io</code> → projet openswissdata → Issues</li>
+          <li>L'erreur de test doit apparaître dans les 30 secondes</li>
+          <li>Si elle apparaît → ✅ Sentry est vivant, je supprime l'endpoint debug</li>
+          <li>Si elle n'apparaît pas → on diagnostique ensemble</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== JOUR J ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Phase 3 / Jour J</strong>
+      <span class="sep">/</span>
+      <span>Le plan du 7 mai</span>
+    </div>
+    <h2>Le <span class="serif">jeudi 7 mai</span>, voilà comment ça se passe.</h2>
+    <p class="section-intro">
+      Une journée structurée en 3 temps. Pas de précipitation, pas d'inconnue. Tu sais ce qui se passe à chaque heure.
+    </p>
+
+    <div class="day-j">
+      <h3>Plan launch jeudi 7 mai</h3>
+      <p>
+        L'objectif n'est pas d'avoir un pic de trafic monstrueux, c'est d'avoir un <strong>launch stable et auditable</strong>. Tu veux que les 10 premiers acheteurs aient une expérience parfaite — ce sont eux qui te ramèneront les 100 suivants.
+      </p>
+
+      <div class="day-j-grid">
+        <div class="day-j-step">
+          <div class="day-j-step-time">08:00 — 10:00</div>
+          <div class="day-j-step-title">Pre-flight check</div>
+          <p>Vérifier que les 3 datasets sont en prod, que les workflows ont tourné cette nuit, que Sentry/UptimeRobot sont verts. Tester un achat sur 1 SKU avec une carte test Stripe.</p>
+        </div>
+        <div class="day-j-step">
+          <div class="day-j-step-time">10:00 — 12:00</div>
+          <div class="day-j-step-title">Annonce</div>
+          <p>Publier les posts LinkedIn / X / newsletter / forums préparés à l'avance. Surveiller les premières réactions, répondre aux questions techniques en direct.</p>
+        </div>
+        <div class="day-j-step">
+          <div class="day-j-step-time">12:00 — 18:00</div>
+          <div class="day-j-step-title">Surveillance + support</div>
+          <p>Œil sur Sentry / UptimeRobot / dashboard Stripe (premières ventes). Répondre aux emails dans les 30 min. Logguer chaque incident dans un fichier <code>launch-day.md</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== POST-LAUNCH ========== -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Phase 4 / Post-launch</strong>
+      <span class="sep">/</span>
+      <span>Les 7 jours suivants</span>
+    </div>
+    <h2>Et après <span class="serif">jeudi</span> ?</h2>
+    <p class="section-intro">
+      Le launch n'est pas une fin, c'est le début de la phase d'apprentissage. Voilà les 3 questions auxquelles tu dois répondre avec les données du launch.
+    </p>
+
+    <div class="task low">
+      <div class="task-head">
+        <div class="task-num">∞</div>
+        <div style="flex: 1;">
+          <div class="task-title">Quel SKU se vend le mieux ?</div>
+          <div class="task-meta">
+            <span class="badge low">Apprentissage</span>
+          </div>
+        </div>
+      </div>
+      <div class="task-desc">
+        TARES, Classifications, FINMA, ou bundle ? Tu as 4 prix (299, 399, 299, 797). Au bout de 7 jours, tu sauras lequel est ton produit phare. Concentre tes 2 semaines suivantes dessus.
+      </div>
+    </div>
+
+    <div class="task low">
+      <div class="task-head">
+        <div class="task-num">∞</div>
+        <div style="flex: 1;">
+          <div class="task-title">D'où viennent les acheteurs ?</div>
+          <div class="task-meta">
+            <span class="badge low">Apprentissage</span>
+          </div>
+        </div>
+      </div>
+      <div class="task-desc">
+        LinkedIn ? Recherche Google ? Bouche-à-oreille via la communauté MCP ? Mets un UTM sur chaque canal. Doublel ton effort sur le canal qui ramène le plus, coupe les autres.
+      </div>
+    </div>
+
+    <div class="task low">
+      <div class="task-head">
+        <div class="task-num">∞</div>
+        <div style="flex: 1;">
+          <div class="task-title">Qu'est-ce qui bloque le checkout ?</div>
+          <div class="task-meta">
+            <span class="badge low">Apprentissage</span>
+          </div>
+        </div>
+      </div>
+      <div class="task-desc">
+        Si 100 visites → 1 vente, c'est 1 % de conversion (normal pour B2B). Mais regarde les abandons : la page produit est trop longue ? Le prix est intimidant ? Le formulaire de checkout fait peur ? Logue chaque clic abandon dans Sentry/Plausible.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FINAL ========== -->
+<section>
+  <div class="container">
+    <div class="final-card">
+      <h3>🚀 Ce que tu décides maintenant</h3>
+      <p>
+        Tu peux me dire <strong>"go" sur les 3 critiques (1, 2, 3)</strong> et je m'y mets dans la foulée — ça libère ton dimanche.
+        Ou tu peux <strong>commencer par la 01 (Stripe 797)</strong> tout seul puisque c'est juste un dashboard à modifier, et je traite les 2 autres pendant ce temps.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · roadmap launch</strong></p>
+    <p style="margin: 0;">
+      4 jours, 7 chantiers (3 critiques + 4 optimisation), 1 plan jour J. Le plus dur (CI verte, secrets, workflows automatiques) est derrière nous. Ce qui reste est concret, mesurable, et tient dans une journée de travail si on s'y met sérieusement.
+    </p>
+    <p style="margin-top: 14px; color: var(--ink-mute);" class="mono">
+      Tu décides l'ordre. Je peux faire la moitié en autonome cet après-midi si tu veux.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

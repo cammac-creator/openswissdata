@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maquette E — Footer Fade Bottom · openswissdata</title>
+<style>
+  :root{
+    --bg:#FBFBF8;--bg-soft:#F4F4F0;--bg-card:#FFFFFF;
+    --ink:#0A0A0C;--ink-soft:#4A4D55;--ink-mute:#6B6E76;
+    --line:rgba(10,10,12,.08);--line-strong:rgba(10,10,12,.14);
+    --accent:#DC1F2D;--green:#15803D;
+    --font-sans:Geist,-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
+    --font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;
+    --t-fast:.2s;--ease-out:cubic-bezier(0.16,1,0.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+
+  .mockup-flag{position:fixed;top:12px;right:12px;z-index:200;background:var(--ink);color:var(--bg);font-family:var(--font-mono);font-size:10px;padding:6px 10px;border-radius:4px;letter-spacing:.08em;text-transform:uppercase}
+
+  .nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 36px;background:rgba(251,251,248,.85);backdrop-filter:saturate(180%) blur(16px);font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);border-bottom:1px solid var(--line)}
+  .nav-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-sans);font-weight:600;font-size:14px;letter-spacing:-.02em;color:var(--ink)}
+  .nav-mark{width:24px;height:24px}
+  .nav-mark img{width:100%;height:100%;object-fit:contain}
+  .nav-right{display:flex;align-items:center;gap:18px;font-size:12px}
+  .nav-live{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:500}
+  .nav-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(21,128,61,.4)}50%{box-shadow:0 0 0 5px rgba(21,128,61,0)}}
+  .container{max-width:1320px;margin:0 auto;padding:0 36px}
+
+  .page-filler{padding:80px 0 100px;text-align:center}
+  .page-filler-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:14px}
+  .page-filler h2{font-size:36px;font-weight:600;letter-spacing:-.02em}
+  .page-filler p{color:var(--ink-soft);margin-top:12px}
+
+  /* ===== FOOTER E — Fade-out bottom ===== */
+  /* Footer cream classique, et la bannière apparaît PAR DESSOUS via mask qui révèle progressivement.
+     Effet : on dirait que les pixels sortent doucement du fond cream. */
+  .footer-e{position:relative;padding-top:88px}
+  .footer-e .container-cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:48px;padding:0 36px;max-width:1320px;margin:0 auto;margin-bottom:80px}
+
+  .footer-brand{display:flex;flex-direction:column;gap:18px}
+  .footer-brand-mark{display:flex;align-items:center;gap:14px;font-size:18px;font-weight:600;letter-spacing:-.02em}
+  .footer-brand-mark .m{width:36px;height:36px}
+  .footer-brand-mark .m img{width:100%;height:100%;object-fit:contain}
+  .footer-tag{font-size:14px;color:var(--ink-soft);max-width:36ch;line-height:1.5}
+  .footer-tag em{font-style:italic;color:var(--ink)}
+  .footer-status{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:.04em;font-weight:500}
+  .footer-status .d{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2.4s ease-in-out infinite}
+
+  .footer-col-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:14px}
+  .footer-col a{display:block;font-size:13px;color:var(--ink-soft);padding:5px 0;transition:color var(--t-fast)}
+  .footer-col a:hover{color:var(--accent)}
+
+  /* Banner reveal area — masked from top to bottom */
+  .footer-e-banner{position:relative;height:280px;overflow:hidden}
+  .footer-e-banner img{
+    width:100%;height:100%;object-fit:cover;object-position:center;
+    -webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.4) 35%,rgba(0,0,0,.85) 70%,#000 100%);
+            mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.4) 35%,rgba(0,0,0,.85) 70%,#000 100%);
+  }
+
+  /* Big horizontal wordmark embedded in the banner area */
+  .footer-e-wordmark{position:absolute;left:0;right:0;bottom:64px;text-align:center;pointer-events:none}
+  .footer-e-wordmark span{
+    display:inline-block;
+    font-family:var(--font-sans);
+    font-size:clamp(64px,12vw,176px);
+    font-weight:600;
+    letter-spacing:-.045em;
+    color:var(--ink);
+    line-height:.9;
+    mix-blend-mode:multiply;
+    opacity:.92;
+  }
+
+  .footer-bottom{position:relative;z-index:2;border-top:1px solid var(--ink);padding:18px 36px;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:11px;color:var(--ink);background:var(--bg)}
+  .footer-bottom-right{display:flex;gap:18px}
+  .footer-bottom-right a{color:var(--ink-soft);transition:color var(--t-fast)}
+  .footer-bottom-right a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<div class="mockup-flag">Maquette E · Footer Fade-Bottom Wordmark</div>
+
+<nav class="nav">
+  <div class="nav-brand"><span class="nav-mark"><img src="../web/public/logo.png" alt=""></span>openswissdata</div>
+  <div class="nav-right">
+    <a href="#">Datasets</a><a href="#">Pricing</a><a href="#">Docs</a><a href="#">Blog</a>
+    <span class="nav-live"><span class="nav-dot"></span>LIVE</span>
+  </div>
+</nav>
+
+<div class="page-filler">
+  <div class="page-filler-eyebrow">— Page exemple, scroll vers le footer ↓</div>
+  <h2>Le contenu principal vit ici.</h2>
+  <p>Le focus de cette maquette est le footer en bas — descends pour voir l'intégration de la bannière TARES.</p>
+</div>
+
+<!-- ====================== FOOTER E ====================== -->
+<footer class="footer-e">
+  <div class="container-cols">
+    <div class="footer-brand">
+      <div class="footer-brand-mark"><span class="m"><img src="../web/public/logo.png" alt=""></span>openswissdata</div>
+      <p class="footer-tag">Données fédérales suisses normalisées —<br><em>signed, versioned, ready to ship.</em></p>
+      <span class="footer-status"><span class="d"></span>Operational</span>
+    </div>
+
+    <div class="footer-col">
+      <div class="footer-col-title">Datasets</div>
+      <a href="#">TARES</a>
+      <a href="#">Classifications NOGA</a>
+      <a href="#">FINMA Registry</a>
+      <a href="#">Bundle</a>
+    </div>
+
+    <div class="footer-col">
+      <div class="footer-col-title">Resources</div>
+      <a href="#">Docs API</a>
+      <a href="#">SDK Python · TS</a>
+      <a href="#">MCP server</a>
+      <a href="#">Provenance</a>
+    </div>
+
+    <div class="footer-col">
+      <div class="footer-col-title">Legal</div>
+      <a href="#">CGV · For Berne</a>
+      <a href="#">Compliance</a>
+      <a href="#">Privacy</a>
+      <a href="#">Takedown 24h</a>
+    </div>
+  </div>
+
+  <div class="footer-e-banner">
+    <img src="../web/public/og-tares.png" alt="">
+    <div class="footer-e-wordmark"><span>openswissdata</span></div>
+  </div>
+
+  <div class="footer-bottom">
+    <div>© 2026 · Claude-Alain Martin · openswissdata.com</div>
+    <div class="footer-bottom-right">
+      <a href="#">FR</a><a href="#">DE</a><a href="#">EN</a>
+      <a href="#">Studio →</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

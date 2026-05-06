@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Plan acquisition launch · openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8; --bg-card: #FFFFFF; --bg-soft: #F5F4EE;
+    --ink: #0A0A0C; --ink-soft: #3A3D45; --ink-mute: #6B6E76;
+    --line: #E8E4D9; --line-strong: #D9D3C3;
+    --accent: #DC1F2D; --accent-soft: #FCE7E9;
+    --green: #15803D; --green-soft: #DCFCE7;
+    --amber: #92400E; --amber-soft: #FEF3C7;
+    --teal: #0F766E; --teal-soft: #E5F5F1;
+    --blue: #1D4ED8; --blue-soft: #DBEAFE;
+    --purple: #6D28D9; --purple-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%; z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  /* Hero */
+  .hero { padding: 56px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line); width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font-weight: 700; font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05; letter-spacing: -.03em;
+    margin: 0 0 18px; max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 24px 0 36px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-value.green { color: var(--green); } .stat-value.red { color: var(--accent); }
+  .stat-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); } }
+
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1;
+    letter-spacing: -.025em; margin: 0 0 12px; max-width: 30ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  /* Verdict banner */
+  .verdict {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg); border-radius: 14px; padding: 32px 36px; margin: 24px 0;
+  }
+  .verdict h3 { color: var(--bg); font-size: 22px; margin: 0 0 14px; }
+  .verdict p { color: rgba(255,255,255,.8); font-size: 14px; line-height: 1.65; margin: 0 0 12px; }
+  .verdict p strong { color: white; font-weight: 600; }
+  .verdict-yes { color: #6ee7b7; }
+  .verdict-no { color: #fda4af; }
+
+  /* ICP cards */
+  .icp-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 24px 0; }
+  .icp-card {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 26px;
+  }
+  .icp-card.top { border: 2px solid var(--accent); }
+  .icp-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+  .icp-rank {
+    flex-shrink: 0;
+    background: var(--ink); color: var(--bg);
+    width: 36px; height: 36px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: "Geist Mono", monospace; font-size: 13px; font-weight: 700;
+  }
+  .icp-card.top .icp-rank { background: var(--accent); }
+  .icp-title { flex: 1; }
+  .icp-title h3 { font-size: 17px; font-weight: 700; margin: 0 0 4px; line-height: 1.3; }
+  .icp-title-sub { font-size: 12px; color: var(--ink-mute); }
+  .icp-meta {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0;
+  }
+  @media (max-width: 720px) { .icp-meta { grid-template-columns: 1fr; } }
+  .icp-meta-cell {
+    background: var(--bg-soft); padding: 10px 12px; border-radius: 6px;
+    font-size: 12px;
+  }
+  .icp-meta-cell-label {
+    font-family: "Geist Mono", monospace; font-size: 9px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 4px; font-weight: 600;
+  }
+  .icp-trigger {
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin-top: 12px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .icp-trigger strong { color: var(--accent); }
+  .icp-tactic {
+    background: var(--green-soft); border-left: 3px solid var(--green);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin-top: 8px;
+    font-size: 13px; line-height: 1.5; font-style: italic;
+  }
+  .icp-tactic strong { color: var(--green); font-style: normal; }
+
+  /* Channels table */
+  .channel-row {
+    display: grid; grid-template-columns: 32px 1fr 100px 100px 110px;
+    gap: 14px; padding: 14px 18px;
+    border-bottom: 1px solid var(--line); align-items: start;
+    background: var(--bg-card);
+    font-size: 14px;
+  }
+  .channel-row:last-child { border-bottom: none; }
+  .channel-row.head {
+    background: var(--bg-soft);
+    font-family: "Geist Mono", monospace;
+    font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-mute); font-weight: 600; padding: 10px 18px;
+  }
+  .channel-table {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden; margin: 16px 0;
+  }
+  .channel-num {
+    font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 700;
+    color: var(--accent);
+  }
+  .channel-title strong { display: block; font-weight: 600; margin-bottom: 2px; }
+  .channel-title span { font-size: 12px; color: var(--ink-mute); line-height: 1.5; }
+  .channel-effort, .channel-impact {
+    font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 600;
+    padding: 3px 8px; border-radius: 4px; text-align: center; height: fit-content;
+    width: fit-content;
+  }
+  .channel-effort.xs, .channel-effort.s { background: var(--green-soft); color: var(--green); }
+  .channel-effort.m { background: var(--amber-soft); color: var(--amber); }
+  .channel-effort.l { background: var(--accent-soft); color: var(--accent); }
+  .channel-impact.high { background: var(--green-soft); color: var(--green); }
+  .channel-impact.med { background: var(--amber-soft); color: var(--amber); }
+  .channel-impact.low { background: var(--bg-soft); color: var(--ink-mute); }
+  .channel-verdict {
+    font-size: 11px; font-family: "Geist Mono", monospace;
+    color: var(--ink-soft); text-align: right;
+  }
+  .channel-verdict.parfait { color: var(--green); font-weight: 700; }
+  .channel-verdict.tester { color: var(--amber); font-weight: 600; }
+  .channel-verdict.eviter { color: var(--accent); font-weight: 600; }
+  @media (max-width: 880px) { .channel-row { grid-template-columns: 1fr; } .channel-row.head { display: none; } }
+
+  /* Day J timeline */
+  .timeline {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden; margin: 24px 0;
+  }
+  .timeline-row {
+    display: grid; grid-template-columns: 80px 1fr;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px; align-items: start;
+  }
+  .timeline-row:last-child { border-bottom: none; }
+  .timeline-row.hot {
+    background: linear-gradient(to right, rgba(220,31,45,.06) 0%, transparent 100%);
+    border-left: 3px solid var(--accent);
+  }
+  .timeline-time {
+    font-family: "Geist Mono", monospace; font-size: 13px; font-weight: 700;
+    color: var(--ink);
+  }
+  .timeline-row.hot .timeline-time { color: var(--accent); }
+  .timeline-action { color: var(--ink-soft); line-height: 1.5; }
+  .timeline-action strong { color: var(--ink); font-weight: 600; }
+
+  /* Budget plan */
+  .budget-table {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden; margin: 16px 0;
+    font-size: 14px;
+  }
+  .budget-row {
+    display: grid; grid-template-columns: 90px 1fr 130px 100px;
+    gap: 14px; padding: 14px 18px;
+    border-bottom: 1px solid var(--line); align-items: center;
+  }
+  .budget-row:last-child { border-bottom: none; background: var(--bg-soft); font-weight: 700; }
+  .budget-row.head {
+    background: var(--ink); color: var(--bg);
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
+    padding: 12px 18px;
+  }
+  .budget-month { font-family: "Geist Mono", monospace; font-weight: 700; color: var(--accent); }
+  .budget-amount { font-family: "Geist Mono", monospace; font-weight: 700; color: var(--ink); text-align: right; }
+  .budget-roas { font-family: "Geist Mono", monospace; font-size: 12px; color: var(--green); text-align: right; font-weight: 600; }
+  @media (max-width: 880px) { .budget-row, .budget-row.head { grid-template-columns: 1fr; } }
+
+  /* Lessons cards */
+  .lessons-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 20px 0; }
+  @media (max-width: 880px) { .lessons-grid { grid-template-columns: 1fr; } }
+  .lesson-card {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 18px 22px;
+  }
+  .lesson-card h4 { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: var(--ink); }
+  .lesson-card .lesson-source {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-mute); margin-bottom: 8px; font-weight: 600;
+  }
+  .lesson-card p { font-size: 13px; line-height: 1.55; color: var(--ink-soft); margin: 0; }
+  .lesson-card.warn { border-left: 3px solid var(--accent); background: var(--accent-soft); }
+  .lesson-card.warn h4 { color: var(--accent); }
+
+  footer {
+    padding: 36px 0 56px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Plan acquisition · 4 agents · J-2 avant launch</span>
+    </div>
+    <h1>Comment vendre <span class="accent">openswissdata</span>.</h1>
+    <p class="lede">
+      Recherche profonde sur 4 axes : <strong>cible exacte (ICP)</strong>, <strong>canaux organiques</strong>, <strong>canaux payants avec ROAS chiffré</strong>, <strong>leçons des SaaS B2B suisses comparables</strong>. Verdict : 7 ICP précis, 12 canaux organiques (+ plan jour J chronologique), 2 canaux payants rentables, et un pattern qui revient chez tous les gagnants suisses.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">ICP qualifiés</div>
+        <div class="stat-value">7</div>
+        <div class="stat-sub">~10 000 personnes CH</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Canaux organiques</div>
+        <div class="stat-value green">12</div>
+        <div class="stat-sub">budget = 0 CHF</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Canaux payants viables</div>
+        <div class="stat-value">2 / 10</div>
+        <div class="stat-sub">Google Ads + affiliés</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Budget pub 3 mois</div>
+        <div class="stat-value">~7 000 CHF</div>
+        <div class="stat-sub">conservateur</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Cible 3 mois</div>
+        <div class="stat-value green">25-35 ventes</div>
+        <div class="stat-sub">~12 000 CHF revenu</div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <h3>🎯 Le verdict tranchant des 4 agents</h3>
+      <p>
+        <strong class="verdict-yes">Ce qu'il faut faire :</strong> approcher 10 fiduciaires/cabinets compliance avant jeudi avec un accès gratuit à vie en échange de témoignages — c'est <strong>le pattern qui revient chez 4/5 SaaS B2B suisses</strong> qui ont scalé (Bexio, Klara, Pennylane). Le marché CH = trust gradient lent mais sticky une fois acquis.
+      </p>
+      <p>
+        <strong class="verdict-no">Ce qu'il ne faut JAMAIS faire :</strong> brûler du cash en LinkedIn Ads ou conférences sponsorisées avant 30 clients organiques. Numbrs a perdu $200M en faisant exactement ça. Le marché CH B2B <strong>ne répond pas au paid acquisition</strong> — il répond au bouche-à-oreille pro et à la presse de niche (finews, startupticker).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ICP -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 1 / Cible exacte</strong>
+      <span class="sep">/</span>
+      <span>7 ICP précis avec volume CH chiffré</span>
+    </div>
+    <h2>Les <span class="serif">7 personas</span> à attaquer.</h2>
+    <p class="section-intro">Volume Suisse total : ~10 000 personnes. Top-3 marqués ⭐ priorité.</p>
+
+    <div class="icp-grid">
+
+      <div class="icp-card top">
+        <div class="icp-head">
+          <div class="icp-rank">⭐</div>
+          <div class="icp-title">
+            <h3>Service douanier dans PME exportatrice CH-UE</h3>
+            <div class="icp-title-sub">Customs Manager / Trade Compliance Officer · industrie, agroalim, horlogerie, MedTech</div>
+          </div>
+        </div>
+        <div class="icp-meta">
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Dataset</div>TARES — 299 CHF</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Volume CH</div>~3 500 personnes</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Budget</div>300 CHF passe direct</div>
+        </div>
+        <div class="icp-trigger"><strong>⚡ Trigger 2026 :</strong> Transition Passar (DaziT) en cours, US tariffs reshuffling, certification AEO.</div>
+        <div class="icp-tactic"><strong>🎯 Tactique :</strong> "Article sponsorisé S-GE.com + Google Ads sur 'tarif douanier suisse fichier' (CPC ~2 CHF, faible compétition)"</div>
+      </div>
+
+      <div class="icp-card top">
+        <div class="icp-head">
+          <div class="icp-rank">⭐</div>
+          <div class="icp-title">
+            <h3>Compliance Officer banque cantonale / privée mid-size</h3>
+            <div class="icp-title-sub">AML Officer · banques cantonales (24), banques privées familiales (250), néobanques (Yapeal, Sygnum, Alpian)</div>
+          </div>
+        </div>
+        <div class="icp-meta">
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Dataset</div>FINMA + Bundle</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Volume CH</div>~1 800 personnes</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Budget</div>300 CHF direct · 800+ via CFO (2-4 sem)</div>
+        </div>
+        <div class="icp-trigger"><strong>⚡ Trigger 2026 :</strong> Audit FINMA annuel imminent, onboarding partenaire intermédiaire, projet "Operating Model AML 2026".</div>
+        <div class="icp-tactic"><strong>🎯 Tactique :</strong> "LinkedIn outbound ciblé 'Compliance Officer + bank + Switzerland' avec offre échantillon gratuit + signature Ed25519"</div>
+      </div>
+
+      <div class="icp-card top">
+        <div class="icp-head">
+          <div class="icp-rank">⭐</div>
+          <div class="icp-title">
+            <h3>Data Engineer fintech / asset manager</h3>
+            <div class="icp-title-sub">Senior Data Engineer · Pictet, Lombard Odier, Julius Bär, néobanques, fintech B2B (Avaloq, Temenos)</div>
+          </div>
+        </div>
+        <div class="icp-meta">
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Dataset</div>Bundle 797 + MCP 49/mois</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Volume CH</div>~2 500 personnes</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Budget</div>1000 CHF tech lead · 49/mois sans validation</div>
+        </div>
+        <div class="icp-trigger"><strong>⚡ Trigger 2026 :</strong> Migration NACE Rev 2 → 2.1, refonte data warehouse Snowflake/Databricks, projet RAG/Copilot interne.</div>
+        <div class="icp-tactic"><strong>🎯 Tactique :</strong> "Show HN: openswissdata, signed Swiss federal datasets via MCP" + Slack Swiss Data Engineering + démo Claude Desktop"</div>
+      </div>
+
+      <div class="icp-card">
+        <div class="icp-head">
+          <div class="icp-rank">04</div>
+          <div class="icp-title">
+            <h3>Cabinet d'avocats financiers / consultants KYC</h3>
+            <div class="icp-title-sub">Lenz &amp; Staehelin, Bär &amp; Karrer, Walder Wyss, Schellenberg Wittmer, consultants KYC indé</div>
+          </div>
+        </div>
+        <div class="icp-meta">
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Dataset</div>FINMA · Bundle</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Volume CH</div>~900 personnes</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Budget</div>300-800 direct (refacturable)</div>
+        </div>
+        <div class="icp-tactic"><strong>🎯 Tactique :</strong> "Sponsoring newsletter CDBF.ch (~600 CHF/insertion) angle 'Vérifiez chaque contrepartie en 30s, signature Ed25519 pour vos dossiers'"</div>
+      </div>
+
+      <div class="icp-card">
+        <div class="icp-head">
+          <div class="icp-rank">05</div>
+          <div class="icp-title">
+            <h3>Intégrateur ERP indépendant / agence (TARES)</h3>
+            <div class="icp-title-sub">Consultant SAP GTS, Odoo/Sage/Abacus, freelance certifié SAP MM</div>
+          </div>
+        </div>
+        <div class="icp-meta">
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Dataset</div>TARES · Bundle (revente)</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Volume CH</div>~600 personnes</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Budget</div>300 facturable client</div>
+        </div>
+        <div class="icp-tactic"><strong>🎯 Tactique :</strong> "Article LinkedIn long-form 'TARES en Parquet pour SAP GTS' + DM ciblé 80 agences ERP CH avec offre revendeur 50 CHF/licence"</div>
+      </div>
+
+      <div class="icp-card">
+        <div class="icp-head">
+          <div class="icp-rank">06</div>
+          <div class="icp-title">
+            <h3>Consultant-formateur compliance suisse</h3>
+            <div class="icp-title-sub">BDO, KPMG, PwC, EY, formateur ISFB / Swiss Finance Institute</div>
+          </div>
+        </div>
+        <div class="icp-meta">
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Dataset</div>Bundle 797 (réutilisé sur missions)</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Volume CH</div>~400 personnes</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Budget</div>800 CHF direct (frais facturables)</div>
+        </div>
+        <div class="icp-tactic"><strong>🎯 Tactique :</strong> "Programme ambassadeurs — 30 % commission récurrente sur Bundle revendu en mission"</div>
+      </div>
+
+      <div class="icp-card">
+        <div class="icp-head">
+          <div class="icp-rank">07</div>
+          <div class="icp-title">
+            <h3>Agence digital / dev studio avec clients FinTech</h3>
+            <div class="icp-title-sub">CTO/Tech Lead chez Liip, Antistatique, Apptitude, Smartive · freelance fullstack AI</div>
+          </div>
+        </div>
+        <div class="icp-meta">
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Dataset</div>MCP Standalone 49 CHF/mois</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Volume CH</div>~250 personnes</div>
+          <div class="icp-meta-cell"><div class="icp-meta-cell-label">Budget</div>49/mois carte CTO direct</div>
+        </div>
+        <div class="icp-tactic"><strong>🎯 Tactique :</strong> "Free tier MCP + tweet/LinkedIn '9 outils MCP pour la Suisse, plug &amp; play en 30s' + Product Hunt mardi 19 mai"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DAY J TIMELINE -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 2 / Plan jour J</strong>
+      <span class="sep">/</span>
+      <span>Jeudi 7 mai 2026 · chronologique 8h-22h</span>
+    </div>
+    <h2>Le <span class="serif">jour J</span> heure par heure.</h2>
+    <p class="section-intro">Lignes rouges = créneaux critiques. Show HN à 16h CEST = 10h ET (sweet spot mondial).</p>
+
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-time">08h00</div><div class="timeline-action">Café · push final · vérifier Stripe LIVE + emails Resend OK · health/deep tous verts</div></div>
+      <div class="timeline-row hot"><div class="timeline-time">08h15</div><div class="timeline-action"><strong>Carousel LinkedIn 8 slides</strong> "Pourquoi j'ai construit le 1er MCP suisse" (storytelling permission BAZG écrite). Carousels = 5.85-6.60% engagement, 3.5× reach vs texte.</div></div>
+      <div class="timeline-row"><div class="timeline-time">09h00</div><div class="timeline-action"><strong>Email pitch finews.ch + fintechnews.ch</strong> (dossier presse, angle BAZG). À pré-écrire mercredi.</div></div>
+      <div class="timeline-row"><div class="timeline-time">10h00</div><div class="timeline-action">Publication GitHub : repo <code>openswissdata-types</code> public + npm publish + README badges</div></div>
+      <div class="timeline-row"><div class="timeline-time">11h00</div><div class="timeline-action">Email FintechNewsCH newsletter + Swiss FinTech Association comms@</div></div>
+      <div class="timeline-row"><div class="timeline-time">12h00</div><div class="timeline-action">Soumettre Smithery + MCP.so + PR awesome-mcp-servers · pause déj</div></div>
+      <div class="timeline-row"><div class="timeline-time">13h00</div><div class="timeline-action">4 PRs awesome-lists (public-datasets, swiss, compliance, fintech)</div></div>
+      <div class="timeline-row"><div class="timeline-time">14h00</div><div class="timeline-action">Slack SFTA : intro courte #news + #tech (jamais de pitch direct)</div></div>
+      <div class="timeline-row"><div class="timeline-time">15h00</div><div class="timeline-action">Vérifier early traction LinkedIn · répondre commentaires (target &lt;2h)</div></div>
+      <div class="timeline-row hot"><div class="timeline-time">16h00</div><div class="timeline-action"><strong>SHOW HN POSTÉ</strong> — sweet spot mondial 10h ET. Titre : "Show HN: openswissdata — Signed Swiss federal datasets, BAZG-authorized, MCP-ready". Probabilité front page 10-15%. Si front page → 5000-15000 visites en 24h → 2-5 ventes immédiates.</div></div>
+      <div class="timeline-row hot"><div class="timeline-time">16h15-19h</div><div class="timeline-action"><strong>Surveillance HN obsessionnelle</strong> · répondre à CHAQUE commentaire en &lt;20 min · seuil critique = 30 upvotes en 1ère heure</div></div>
+      <div class="timeline-row"><div class="timeline-time">17h00</div><div class="timeline-action">Batch 1 cold emails : 30 envois personnalisés (compliance officers banques cantonales)</div></div>
+      <div class="timeline-row"><div class="timeline-time">18h00</div><div class="timeline-action">Post Reddit r/dataengineering (technique, pas pitch)</div></div>
+      <div class="timeline-row"><div class="timeline-time">19h00</div><div class="timeline-action">Story LinkedIn récap traction journée + remerciement early users</div></div>
+      <div class="timeline-row"><div class="timeline-time">20h00</div><div class="timeline-action">Dîner · téléphone à portée pour HN</div></div>
+      <div class="timeline-row"><div class="timeline-time">21h00</div><div class="timeline-action">Tour final : commentaires HN + DM LinkedIn + emails entrants</div></div>
+      <div class="timeline-row hot"><div class="timeline-time">22h00</div><div class="timeline-action"><strong>BILAN CHIFFRES</strong> : visites, signups, ventes, upvotes HN · préparer plan vendredi</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ORGANIC CHANNELS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 2bis / 12 canaux organiques</strong>
+      <span class="sep">/</span>
+      <span>Budget = 0 CHF</span>
+    </div>
+    <h2>Les <span class="serif">canaux gratuits</span> à activer.</h2>
+
+    <div class="channel-table">
+      <div class="channel-row head">
+        <div></div><div>Canal</div><div>Effort</div><div>Impact</div><div>Verdict</div>
+      </div>
+      <div class="channel-row"><div class="channel-num">01</div><div class="channel-title"><strong>LinkedIn personnel (carousels)</strong><span>4-5h/sem · 800-2000 vues/post → 0.5-2 ventes/mois</span></div><div class="channel-effort m">M · 4-5h/sem</div><div class="channel-impact high">HIGH</div><div class="channel-verdict parfait">PARFAIT</div></div>
+      <div class="channel-row"><div class="channel-num">02</div><div class="channel-title"><strong>Hacker News Show HN</strong><span>Jeudi 16h CEST · probabilité front page 10-15% · 5000-15000 visites si réussi</span></div><div class="channel-effort s">S · 1 journée</div><div class="channel-impact high">HIGH</div><div class="channel-verdict parfait">PARFAIT</div></div>
+      <div class="channel-row"><div class="channel-num">03</div><div class="channel-title"><strong>Reddit (r/dataengineering)</strong><span>r/Switzerland hostile à promo direct · r/dataeng meilleur</span></div><div class="channel-effort s">S · 2h/sem</div><div class="channel-impact low">LOW</div><div class="channel-verdict tester">TESTER</div></div>
+      <div class="channel-row"><div class="channel-num">04</div><div class="channel-title"><strong>finews.ch / fintechnews.ch (guest articles)</strong><span>"finews first" rubrique · 500-3000 visites/article · 5-15 ventes</span></div><div class="channel-effort m">M · 3h/article</div><div class="channel-impact high">HIGH</div><div class="channel-verdict parfait">PARFAIT</div></div>
+      <div class="channel-row"><div class="channel-num">05</div><div class="channel-title"><strong>Newsletters spécialisées (FintechNewsCH, SFTA)</strong><span>30k+ abonnés CH/EU · 200-800 visites par mention</span></div><div class="channel-effort xs">XS · 2h</div><div class="channel-impact high">HIGH</div><div class="channel-verdict parfait">PARFAIT</div></div>
+      <div class="channel-row"><div class="channel-num">06</div><div class="channel-title"><strong>GitHub openswissdata-types (npm public)</strong><span>Drainage SEO durable + crédibilité dev · 50 stars en 60j</span></div><div class="channel-effort s">S · 3h initial</div><div class="channel-impact med">MED</div><div class="channel-verdict parfait">PARFAIT</div></div>
+      <div class="channel-row"><div class="channel-num">07</div><div class="channel-title"><strong>Conférences CH (Swiss Fintech Week 19-25 juin)</strong><span>1500 participants · attendee + 20 RDV LinkedIn pré-réservés</span></div><div class="channel-effort l">L · 1 j + 800 CHF</div><div class="channel-impact high">HIGH</div><div class="channel-verdict tester">TESTER</div></div>
+      <div class="channel-row"><div class="channel-num">08</div><div class="channel-title"><strong>MCP marketplaces (Smithery, MCP.so)</strong><span>Smithery 7000+ servers, MCP.so 19700+ · signal crédibilité &gt; trafic</span></div><div class="channel-effort s">S · 3h one-shot</div><div class="channel-impact low">LOW</div><div class="channel-verdict parfait">PARFAIT</div></div>
+      <div class="channel-row"><div class="channel-num">09</div><div class="channel-title"><strong>Slack Swiss FinTech Association</strong><span>Slack actif · jamais pitch direct · relations long terme</span></div><div class="channel-effort s">S · 2h/sem</div><div class="channel-impact med">MED</div><div class="channel-verdict parfait">PARFAIT</div></div>
+      <div class="channel-row"><div class="channel-num">10</div><div class="channel-title"><strong>Cold email B2B nLPD-compliant</strong><span>30/jour max · 600/mois → 10 meetings → 1-3 ventes Bundle</span></div><div class="channel-effort m">M · 6h/sem</div><div class="channel-impact high">HIGH</div><div class="channel-verdict parfait">PARFAIT</div></div>
+      <div class="channel-row"><div class="channel-num">11</div><div class="channel-title"><strong>Awesome-list PRs (4 listes)</strong><span>Effort minimal · gain SEO durable · 5-50 visites/mois passives</span></div><div class="channel-effort xs">XS · 2h one-shot</div><div class="channel-impact med">MED</div><div class="channel-verdict parfait">PARFAIT</div></div>
+      <div class="channel-row"><div class="channel-num">12</div><div class="channel-title"><strong>Product Hunt (mardi 19 mai)</strong><span>Audience anglophone B2C · NE PAS lancer le 7 (dilue HN)</span></div><div class="channel-effort l">L · 1 jour</div><div class="channel-impact low">LOW</div><div class="channel-verdict tester">TESTER</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PAID CHANNELS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 3 / 10 canaux payants — verdict tranchant</strong>
+      <span class="sep">/</span>
+      <span>AOV 400 CHF · CAC max viable ~100 CHF</span>
+    </div>
+    <h2>Les <span class="serif">canaux payants</span>.</h2>
+    <p class="section-intro">Vérité crue : à 400 CHF de panier moyen, la plupart des canaux payants B2B suisses sont structurellement non-rentables. Seuls 2 sur 10 passent la math.</p>
+
+    <div class="channel-table">
+      <div class="channel-row head"><div></div><div>Canal · CPC/CPM</div><div>Test</div><div>ROAS</div><div>Verdict</div></div>
+      <div class="channel-row"><div class="channel-num">01</div><div class="channel-title"><strong>Google Ads long-tail intention</strong><span>CPC 0.80-2.50 CHF (long-tail) · conv 2-4% · CPL ~80 CHF · mots "TARES API", "FINMA registre CSV", "NOGA crosswalk"</span></div><div class="channel-effort s">600 CHF / 2 sem</div><div class="channel-impact high">3:1</div><div class="channel-verdict parfait">PARFAIT ✅</div></div>
+      <div class="channel-row"><div class="channel-num">10</div><div class="channel-title"><strong>Affiliés commissionnés (15-25%)</strong><span>0 CAC upfront · commission 120-200 CHF/Bundle · cibler cabinets compliance + agences ERP</span></div><div class="channel-effort xs">0 CHF cash + 10h setup</div><div class="channel-impact high">5:1</div><div class="channel-verdict parfait">PARFAIT ✅</div></div>
+      <div class="channel-row"><div class="channel-num">02</div><div class="channel-title"><strong>LinkedIn Ads</strong><span>CPM CH 30-55 CHF · CAC 250-1200 CHF · ICP précis mais ticket trop bas</span></div><div class="channel-effort s">500 CHF / 2 sem max</div><div class="channel-impact low">1:1</div><div class="channel-verdict eviter">À ÉVITER (sauf ABM Bundle 797)</div></div>
+      <div class="channel-row"><div class="channel-num">03</div><div class="channel-title"><strong>Sponsored newsletter finews.ch</strong><span>1500-3500 CHF/insertion · CTR 1-3% · break-even 5-7 ventes</span></div><div class="channel-effort m">1 insertion 1500-2000 CHF</div><div class="channel-impact med">3:1</div><div class="channel-verdict tester">TESTER après Google Ads</div></div>
+      <div class="channel-row"><div class="channel-num">04</div><div class="channel-title"><strong>Reddit Ads</strong><span>CPC 0.50-2 USD · audience compliance CH ≈ absente</span></div><div class="channel-effort xs">200 CHF / 2 sem</div><div class="channel-impact low">2:1</div><div class="channel-verdict tester">MICRO-TEST</div></div>
+      <div class="channel-row"><div class="channel-num">05</div><div class="channel-title"><strong>Twitter/X Ads</strong><span>Audience compliance/dev CH déserté</span></div><div class="channel-effort xs">0 CHF</div><div class="channel-impact low">—</div><div class="channel-verdict eviter">ÉVITER</div></div>
+      <div class="channel-row"><div class="channel-num">06</div><div class="channel-title"><strong>Conférences sponsoring</strong><span>3-15k CHF + déplacement · break-even 10-40 ventes</span></div><div class="channel-effort l">3-15k CHF</div><div class="channel-impact low">1:1</div><div class="channel-verdict eviter">ÉVITER (présence organique OK)</div></div>
+      <div class="channel-row"><div class="channel-num">07</div><div class="channel-title"><strong>Native ads (Outbrain/Taboola)</strong><span>Display généraliste · ciblage ICP impossible</span></div><div class="channel-effort m">—</div><div class="channel-impact low">—</div><div class="channel-verdict eviter">ÉVITER</div></div>
+      <div class="channel-row"><div class="channel-num">08</div><div class="channel-title"><strong>Substack sponsoring</strong><span>500-2000 CHF/insertion · peu de Substack compliance CH actifs</span></div><div class="channel-effort m">800-1200 CHF</div><div class="channel-impact med">2:1</div><div class="channel-verdict tester">SI Substack pertinent identifié</div></div>
+      <div class="channel-row"><div class="channel-num">09</div><div class="channel-title"><strong>Podcast sponsoring host-read</strong><span>500-1500 CHF/épisode · audiences Swiss FinTech &lt;5k</span></div><div class="channel-effort m">500-1500 CHF</div><div class="channel-impact low">2:1</div><div class="channel-verdict tester">UNE FOIS post Google Ads</div></div>
+    </div>
+
+    <h3 style="margin-top: 32px; font-size: 18px;">📊 Plan budget 0-3 mois</h3>
+
+    <div class="budget-table">
+      <div class="budget-row head">
+        <div>Mois</div><div>Action</div><div>Budget</div><div>ROAS cible</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-month">M1 (mai)</div>
+        <div>Google Ads long-tail (test)</div>
+        <div class="budget-amount">800 CHF</div>
+        <div class="budget-roas">3:1</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-month">M1</div>
+        <div>Reddit Ads micro-test</div>
+        <div class="budget-amount">200 CHF</div>
+        <div class="budget-roas">2:1</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-month">M1</div>
+        <div>Setup affiliés (15-20 % commission)</div>
+        <div class="budget-amount">0 CHF cash</div>
+        <div class="budget-roas">5:1</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-month">M2 (juin)</div>
+        <div>Google Ads scale (si ROAS ≥3:1)</div>
+        <div class="budget-amount">1500 CHF</div>
+        <div class="budget-roas">3:1</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-month">M2</div>
+        <div>Affiliés actifs (10-20 partenaires)</div>
+        <div class="budget-amount">commission only</div>
+        <div class="budget-roas">5:1</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-month">M3 (juillet)</div>
+        <div>Google Ads optimisé</div>
+        <div class="budget-amount">2000 CHF</div>
+        <div class="budget-roas">4:1</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-month">M3</div>
+        <div>1 sponsoring newsletter CH ciblée</div>
+        <div class="budget-amount">1500-2000 CHF</div>
+        <div class="budget-roas">3:1</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-month">M3</div>
+        <div>1 podcast host-read test</div>
+        <div class="budget-amount">800 CHF</div>
+        <div class="budget-roas">2:1</div>
+      </div>
+      <div class="budget-row">
+        <div>TOTAL 3 MOIS</div>
+        <div>Hors commissions affiliés</div>
+        <div class="budget-amount">6 800-7 600 CHF</div>
+        <div class="budget-roas">~1.7:1</div>
+      </div>
+    </div>
+
+    <p style="font-size: 13px; color: var(--ink-mute); margin-top: 14px;">
+      <strong>Stop-loss strict :</strong> tout canal sans ROAS ≥2:1 après 600 CHF dépensés est tué. <strong>Objectif réaliste 3 mois</strong> : 25-35 ventes payantes attribuées, soit ~12 000 CHF revenu.
+    </p>
+  </div>
+</section>
+
+<!-- LESSONS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 4 / Benchmarks SaaS B2B suisses</strong>
+      <span class="sep">/</span>
+      <span>7 études de cas · pattern qui revient chez 4/5 gagnants</span>
+    </div>
+    <h2>Ce que les <span class="serif">gagnants suisses</span> ont fait.</h2>
+
+    <div class="lessons-grid">
+      <div class="lesson-card">
+        <div class="lesson-source">Bexio · 100k+ PME clientes</div>
+        <h4>Réseau fiduciaires-partenaires</h4>
+        <p>Bexio a créé un réseau de 1 000+ fiduciaires partenaires-prescripteurs. <strong>Action :</strong> approcher 5-10 fiduciaires CH dès J+0 avec offre "Founding Partner".</p>
+      </div>
+      <div class="lesson-card">
+        <div class="lesson-source">Klara · 11.3M$ ARR (filiale La Poste)</div>
+        <h4>Trust gradient par association</h4>
+        <p>Klara a scalé via partenariat institutionnel La Poste. <strong>Action :</strong> chercher partenariat distribution (Chambre commerce, USAM, S-GE) avant le launch.</p>
+      </div>
+      <div class="lesson-card">
+        <div class="lesson-source">Yokoy · 500M$ valuation</div>
+        <h4>Ne pas sous-tarifer</h4>
+        <p>Yokoy a tout de suite ciblé enterprise sales. <strong>Action :</strong> ajouter un tier "Pro/Enterprise 2500-5000 CHF/an" multi-utilisateurs + SLA — c'est là que les fiduciaires/banques signent.</p>
+      </div>
+      <div class="lesson-card">
+        <div class="lesson-source">Plausible · solo founder · $1M ARR</div>
+        <h4>3 articles SEO fouillés avant le launch</h4>
+        <p>Plausible : 3 articles HN front page = déclic. <strong>Action :</strong> publier J-3/J-2/J-1 : "Pourquoi le TARES est inutilisable", "NOGA expliqué aux fiduciaires", "Le coût caché de la donnée fédérale CH".</p>
+      </div>
+      <div class="lesson-card">
+        <div class="lesson-source">Tally · 5M$ ARR bootstrap</div>
+        <h4>6 mois de cold outreach manuel</h4>
+        <p>Tally : 10% reply rate avec emails personnels. <strong>Action :</strong> 50 fiduciaires + compliance officers d'ici jeudi avec offre "Founding Partner" Pro à vie pour 299 CHF + logo sur landing.</p>
+      </div>
+      <div class="lesson-card">
+        <div class="lesson-source">Pennylane · €3.5Mds valuation</div>
+        <h4>Exploiter un catalyseur réglementaire</h4>
+        <p>Pennylane : positionnement comme "réponse à une obligation". <strong>Action openswissdata :</strong> NACE 2.1 + Passar 2026 + transition AML 2026 = 3 catalyseurs réglementaires à exploiter.</p>
+      </div>
+
+      <div class="lesson-card warn">
+        <div class="lesson-source">⚠ Numbrs · 200M$ levés · jamais rentable</div>
+        <h4>Le piège à NE JAMAIS faire</h4>
+        <p>Numbrs a brûlé 200M$ en pub avant d'avoir le PMF. <strong>Anti-action :</strong> ne PAS lever de capital tant que tu n'as pas 50 clients payants. Solo founder bootstrappé = avantage, pas faiblesse.</p>
+      </div>
+
+    </div>
+
+    <div class="verdict" style="margin-top: 24px;">
+      <h3>🔁 Le pattern qui revient (4/5 gagnants)</h3>
+      <p>
+        <strong>Pattern :</strong> Les SaaS B2B suisses qui ont réussi ont construit un <strong>réseau de prescripteurs métier</strong> AVANT de scaler en pub. Le marché CH B2B = trust gradient lent, mais sticky une fois acquis.
+      </p>
+      <p>
+        <strong class="verdict-yes">Action :</strong> approcher 10 fiduciaires/cabinets compliance avant jeudi avec accès gratuit à vie en échange de 1 témoignage public + 1 intro à 3 collègues. C'est ton trust loop suisse.
+      </p>
+      <p>
+        <strong class="verdict-no">Anti-action :</strong> brûler du cash en LinkedIn Ads ou conférences avant 30 clients organiques. Le marché CH ne répond pas au paid acquisition — il répond au bouche-à-oreille pro et à la presse de niche (finews, startupticker, KMU).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL ACTION -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Synthèse</strong>
+      <span class="sep">/</span>
+      <span>3 actions à faire AVANT jeudi 7 mai</span>
+    </div>
+    <h2>Les <span class="serif">3 actions critiques</span> avant le launch.</h2>
+
+    <div class="lessons-grid" style="grid-template-columns: 1fr;">
+      <div class="lesson-card">
+        <div class="lesson-source">⏱ Action 1 · à faire mardi 6 mai</div>
+        <h4>1. Cold-outreach 50 fiduciaires + compliance officers</h4>
+        <p>Email/DM personnel avec offre "Founding Partner" : Bundle 797 → 299 CHF à vie + logo sur landing. Liste manuelle (LinkedIn Sales Navigator + recherche). 10 % reply rate attendu = 5-10 conversions probables.</p>
+      </div>
+      <div class="lesson-card">
+        <div class="lesson-source">⏱ Action 2 · mercredi 7 mai 18h</div>
+        <h4>2. Pitcher finews.ch + startupticker.ch + Inside Paradeplatz</h4>
+        <p>Email aux 3 rédactions avec embargo levé jeudi 9h. Angle : <em>"Solo founder suisse normalise les datasets fédéraux que personne ne savait utiliser"</em>. 1 article = 50-200 visiteurs qualifiés J+0.</p>
+      </div>
+      <div class="lesson-card">
+        <div class="lesson-source">⏱ Action 3 · J+0 jeudi 8h-22h</div>
+        <h4>3. Plan jour J chronologique exécuté</h4>
+        <p>Voir section "Plan jour J" ci-dessus. Show HN à 16h CEST + LinkedIn 8h15 + 50 cold emails 17h. Budget temps : journée complète. Stop-loss 22h pour bilan + plan vendredi.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · plan acquisition launch</strong></p>
+    <p style="margin: 0;">
+      4 agents en parallèle (5 mai 2026). 7 ICP précis · 12 canaux organiques · 10 canaux payants chiffrés · 7 benchmarks SaaS B2B suisses. Budget recommandé 0-3 mois : ~7 000 CHF cash + commissions affiliés. Cible 25-35 ventes attribuées.
+      Sauvegardé en mémoire dans <code>openswissdata-launch-strategy.md</code> pour récupération future.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

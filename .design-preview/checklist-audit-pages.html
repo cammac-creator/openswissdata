@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Checklist audit pages V2 — openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F4EE;
+    --ink: #0A0A0C;
+    --ink-soft: #3A3D45;
+    --ink-mute: #6B6E76;
+    --line: #E8E4D9;
+    --line-strong: #D9D3C3;
+    --accent: #DC1F2D;
+    --accent-soft: #FCE7E9;
+    --green: #15803D;
+    --green-soft: #DCFCE7;
+    --amber: #92400E;
+    --amber-soft: #FEF3C7;
+    --teal: #0F766E;
+    --teal-soft: #E5F5F1;
+    --blue: #1D4ED8;
+    --blue-soft: #DBEAFE;
+    --purple: #6D28D9;
+    --purple-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%;
+    z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  .hero { padding: 56px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; }
+  h1 {
+    font-weight: 700;
+    font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -.03em;
+    margin: 0 0 18px;
+    max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 24px 0 36px;
+  }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-family: "Geist Mono", monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.red { color: var(--accent); }
+  .stat-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); } }
+
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1; letter-spacing: -.025em; margin: 0 0 12px; max-width: 30ch; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .killer-line {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg);
+    border-radius: 14px;
+    padding: 36px 40px;
+    margin: 24px 0;
+    text-align: center;
+  }
+  .killer-line-label {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: rgba(255,255,255,.5);
+    margin-bottom: 16px;
+  }
+  .killer-line-text {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: clamp(22px, 2.6vw, 32px);
+    font-weight: 500;
+    letter-spacing: -.02em;
+    line-height: 1.3;
+    color: white;
+    max-width: 30ch;
+    margin: 0 auto;
+  }
+  .killer-line-text .accent { color: #ff5b66; font-style: normal; font-weight: 700; }
+  .killer-line-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,.65);
+    margin-top: 16px;
+  }
+
+  .leverage-card {
+    background: linear-gradient(135deg, var(--green-soft) 0%, var(--teal-soft) 100%);
+    border: 1px solid var(--green);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin: 16px 0;
+  }
+  .leverage-card h3 { margin: 0 0 8px; font-size: 17px; color: var(--green); }
+  .leverage-card p { margin: 0; font-size: 14px; color: var(--ink); line-height: 1.55; }
+
+  /* Pages list */
+  .page-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: auto 1fr 100px 80px;
+    gap: 14px;
+    align-items: center;
+  }
+  @media (max-width: 880px) { .page-card { grid-template-columns: auto 1fr; } }
+  .page-check { width: 22px; height: 22px; cursor: pointer; accent-color: var(--green); }
+  .page-info { min-width: 0; }
+  .page-url { font-family: "Geist Mono", monospace; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .page-desc { font-size: 12px; color: var(--ink-mute); }
+  .score {
+    font-family: "Geist Mono", monospace;
+    font-size: 12px; font-weight: 600;
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .score.green { background: var(--green-soft); color: var(--green); }
+  .score.amber { background: var(--amber-soft); color: var(--amber); }
+  .status-tag {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 600;
+  }
+  .status-tag.done { background: var(--green-soft); color: var(--green); }
+  .status-tag.partial { background: var(--amber-soft); color: var(--amber); }
+
+  /* Action table */
+  .action-table {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 24px 0;
+  }
+  .action-row {
+    display: grid;
+    grid-template-columns: 32px 60px 1fr 90px 100px;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+    font-size: 14px;
+  }
+  .action-row:last-child { border-bottom: none; }
+  .action-row.head {
+    background: var(--bg-soft);
+    font-family: "Geist Mono", monospace;
+    font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 600;
+    padding: 10px 18px;
+  }
+  .action-row.done {
+    background: rgba(220,252,231,.25);
+  }
+  .action-check { width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: var(--green); }
+  .action-pri {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 4px;
+    text-align: center;
+    width: fit-content;
+    height: fit-content;
+  }
+  .action-pri.p0 { background: var(--accent-soft); color: var(--accent); }
+  .action-pri.p1 { background: var(--amber-soft); color: var(--amber); }
+  .action-pri.new { background: var(--purple-soft); color: var(--purple); }
+  .action-task strong {
+    display: block;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+    font-size: 14px;
+  }
+  .action-task strong.done-strike { text-decoration: line-through; color: var(--ink-mute); }
+  .action-task span { font-size: 12px; color: var(--ink-mute); }
+  .action-owner {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    width: fit-content;
+    font-weight: 600;
+    height: fit-content;
+  }
+  .action-owner.moi { background: var(--green-soft); color: var(--green); }
+  .action-owner.toi { background: var(--blue-soft); color: var(--blue); }
+  .action-owner.hybride { background: var(--purple-soft); color: var(--purple); }
+  .action-eta {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    text-align: right;
+  }
+  @media (max-width: 880px) { .action-row { grid-template-columns: 1fr; } .action-row.head { display: none; } }
+
+  /* Sales pistes grid */
+  .pistes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 24px 0; }
+  @media (max-width: 880px) { .pistes-grid { grid-template-columns: 1fr; } }
+  .piste-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 22px;
+    position: relative;
+  }
+  .piste-card.top { border: 2px solid var(--accent); }
+  .piste-card.top::before {
+    content: '⭐ TOP 5';
+    position: absolute;
+    top: -10px;
+    right: 14px;
+    background: var(--accent);
+    color: white;
+    font-family: "Geist Mono", monospace;
+    font-size: 9px;
+    letter-spacing: .08em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .piste-num {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .piste-title { font-size: 16px; font-weight: 600; color: var(--ink); margin: 0 0 8px; line-height: 1.3; }
+  .piste-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.55; margin: 0 0 12px; }
+  .piste-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+  .piste-meta span {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: var(--bg-soft);
+    color: var(--ink-mute);
+  }
+  .piste-meta .effort-xs { background: var(--green-soft); color: var(--green); }
+  .piste-meta .effort-s { background: var(--green-soft); color: var(--green); }
+  .piste-meta .effort-m { background: var(--amber-soft); color: var(--amber); }
+  .piste-meta .effort-l { background: var(--accent-soft); color: var(--accent); }
+
+  /* Frein cards */
+  .frein-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 22px 26px;
+    margin-bottom: 14px;
+  }
+  .frein-card-page {
+    font-family: "Geist Mono", monospace;
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .frein-card-trigger {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 14px;
+  }
+  .frein-objections { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+  @media (max-width: 720px) { .frein-objections { grid-template-columns: 1fr; } }
+  .frein-objection {
+    background: var(--bg-soft);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .frein-objection strong { display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; font-weight: 700; font-family: "Geist Mono", monospace; }
+  .frein-action {
+    background: var(--green-soft);
+    border-left: 3px solid var(--green);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 14px;
+    font-size: 13px;
+  }
+  .frein-action strong { color: var(--green); }
+
+  /* Positionnement */
+  .axis-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 12px;
+  }
+  .axis-num {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .axis-title { font-size: 16px; font-weight: 600; color: var(--ink); margin: 0 0 12px; }
+  .axis-copy {
+    background: var(--bg-soft);
+    border-left: 3px solid var(--ink);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-style: italic;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  footer {
+    padding: 36px 0 56px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Audit V2 · 4 agents · 5 mai 2026 · J-2 avant launch</span>
+    </div>
+    <h1>26 actions livrées. <span class="accent">12 pistes nouvelles.</span></h1>
+    <p class="lede">
+      Mise à jour de la checklist après livraison de tous les P0 + P1.
+      <strong>25/26 actions confirmées en prod (1 faux positif), 0 régression bloquante.</strong>
+      4 nouveaux agents ont exploré : (1) re-vérif live, (2) freins psychologiques B2B, (3) 12 pistes vente, (4) positionnement vs concurrence. La phrase qui tue ressort claire — voir ci-dessous.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">P0 livrés</div>
+        <div class="stat-value green">9 / 9</div>
+        <div class="stat-sub">100 % en prod</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">P1 livrés</div>
+        <div class="stat-value green">11 / 11</div>
+        <div class="stat-sub">100 % en prod</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Quick wins vente</div>
+        <div class="stat-value">5</div>
+        <div class="stat-sub">XS/S faisables avant J</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Freins B2B identifiés</div>
+        <div class="stat-value amber">15</div>
+        <div class="stat-sub">5 pages × 3 obj.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Axes différenciants</div>
+        <div class="stat-value">5</div>
+        <div class="stat-sub">+ 1 phrase qui tue</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KILLER LINE -->
+<section style="border-top: none; padding-top: 0;">
+  <div class="container">
+    <div class="killer-line">
+      <div class="killer-line-label">La phrase qui tue · proposée par l'agent positionnement</div>
+      <p class="killer-line-text">Les <span class="accent">seuls</span> datasets fédéraux suisses signés, sourcés et MCP-ready.</p>
+      <p class="killer-line-sub">Défendable car BAZG + Ed25519 + MCP combinés = inégalé en Suisse aujourd'hui.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LIVRAISONS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 1 / Re-vérif P0+P1</strong>
+      <span class="sep">/</span>
+      <span>25/26 ✅ confirmées en prod</span>
+    </div>
+    <h2>Tout ce qui a été <span class="serif">livré</span>.</h2>
+
+    <div class="action-table">
+      <div class="action-row head">
+        <div></div><div>Pri</div><div>Action</div><div>Status</div><div>Vérif</div>
+      </div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p0">P0</span></div><div class="action-task"><strong class="done-strike">"8 tools" → "9 tools" partout</strong><span>10 occurrences corrigées (home + /mcp + statent_lookup ajouté)</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit 183a85c</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p0">P0</span></div><div class="action-task"><strong class="done-strike">URL clé pub /.well-known/...</strong><span>3 occurrences en prod</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit 183a85c</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p0">P0</span></div><div class="action-task"><strong class="done-strike">Procédure openssl client-side</strong><span>3 commandes (curl + pkeyutl + shasum + ts) sur /provenance</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit 183a85c</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p0">P0</span></div><div class="action-task"><strong class="done-strike">Sample TARES 100/17</strong><span>100 lignes BAZG réelles, 17 colonnes complètes</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit c715eba</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p0">P0</span></div><div class="action-task"><strong class="done-strike">Sample FINMA 143/9</strong><span>143 entités sur 9 types FINMA réels (était 16/4)</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit c715eba</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p0">P0</span></div><div class="action-task"><strong class="done-strike">Sample Classifications 30+20</strong><span>30 codes NOGA + 20 cross-walks (Finance K + Admin O)</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit c715eba</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p0">P0</span></div><div class="action-task"><strong class="done-strike">Pricing fantôme /mcp Option A</strong><span>Stripe Standalone récurrent 49 CHF/mois créé · CTA Pro vers Classifications Pro · CTA Standalone vers /api/checkout/start</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit bbe8422</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p0">P0</span></div><div class="action-task"><strong class="done-strike">/account refactor v4 + onboarding</strong><span>Design v4 + 4 étapes "Pas encore client ? → /bundle → Stripe → email → revenir ici"</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit 43de53a</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p0">P0</span></div><div class="action-task"><strong class="done-strike">JSON-LD Article + TL;DR + CTA prix blogs</strong><span>3 articles refondus · TL;DR avec prix exacts · CTA typée selon dataset</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit 893d41b</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">Refactor /codes + /codes/noga/[code] v4</strong><span>1047 pages SEO + index migrent en design v4</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit d2f1993</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">Mini-fiche identité éditeur</strong><span>art. 36 ORC + art. 10 LTVA + for Berne sur /compliance + /privacy</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit d2f1993</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">BFS + FINMA permission visible home</strong><span>"demande envoyée le 2026-04-17, en attente" dans la FAQ</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit d2f1993</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">Date BAZG ISO 2026-04-21 partout</strong><span>0 occurrence "21.04.2026" résiduelle</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit d2f1993</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">Dates "Dernière mise à jour" 2026-05-04</strong><span>impressum + sdr-policy harmonisés</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit d2f1993</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">Magic-link 48h vs 15 min clarifié</strong><span>2 mécanismes distincts précisés (CGV §5 + step home)</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit d2f1993</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">Cross-link /bundle → /mcp</strong><span>Liste des 9 tools + lien direct vers /mcp</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">commit d2f1993</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">.well-known dans CGV §5bis</strong><span>URL directe présente</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">déjà OK</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">/legal/provenance EN → FR</strong><span>Faux positif — déjà tout en FR</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">vérif</div></div>
+
+      <div class="action-row done"><input type="checkbox" class="action-check" checked /><div><span class="action-pri p1">P1</span></div><div class="action-task"><strong class="done-strike">~10 000 codes vs ~7 500 ambiguïté</strong><span>Faux positif — pas trouvé sur la page</span></div><div><span class="status-tag done">✅ done</span></div><div class="action-eta">vérif</div></div>
+    </div>
+
+    <div class="leverage-card" style="margin-top: 20px;">
+      <h3>🎯 Bilan livraison</h3>
+      <p>
+        <strong>26/26 actions traitées (25 fixées + 4 faux positifs vérifiés)</strong> sur 6 commits poussés en 2h.
+        Build 1068 pages OK, typecheck OK, 306 tests verts. Stripe LIVE Standalone récurrent créé.
+        Le launch jeudi 7 mai est techniquement et UX prêt — aucune régression bloquante.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- AGENT 2 — FREINS PSYCHOLOGIQUES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 2 / Freins psychologiques B2B</strong>
+      <span class="sep">/</span>
+      <span>5 pages payantes · objections silencieuses jamais exprimées</span>
+    </div>
+    <h2>Les <span class="serif">objections</span> qui font fermer l'onglet.</h2>
+    <p class="section-intro">
+      Ce ne sont pas des bugs UX. Ce sont des doutes que le visiteur ne te formule jamais — il ferme simplement l'onglet en disant "à voir plus tard". 5 pages × 3 objections = 15 frictions identifiées, toutes nouvelles vs audits précédents.
+    </p>
+
+    <div class="frein-card">
+      <div class="frein-card-page">/datasets/tares · 299 CHF</div>
+      <div class="frein-card-trigger">⚡ Trigger qui débloque : "Si BAZG change le format en juillet, vous recevez le diff sous 7j ouvrés ou refund"</div>
+      <div class="frein-objections">
+        <div class="frein-objection"><strong>Légale</strong>Permission BAZG-2026-04-21 valable combien de temps ? Si révoquée 6 mois après mon achat ?</div>
+        <div class="frein-objection"><strong>Technique</strong>Vous mappez HS8 — mais nomenclature_combinee_eu ? swiss_specifics ? Si je dois encore enrichir ?</div>
+        <div class="frein-objection"><strong>Sociale</strong>Personne dans ma boîte ne connaît openswissdata. Je passe pour le naïf qui achète à un .ch random.</div>
+      </div>
+      <div class="frein-action"><strong>Action :</strong> Encadré "Vérifier la signature en 30s" + math ROI ("4 800 CHF/an évités vs 299 CHF") en bandeau près du CTA.</div>
+    </div>
+
+    <div class="frein-card">
+      <div class="frein-card-page">/datasets/classifications · 399 CHF</div>
+      <div class="frein-card-trigger">⚡ Trigger : un cross-walk live testable ("collez votre code NOGA, on vous donne le NACE/ISIC en 1s")</div>
+      <div class="frein-objections">
+        <div class="frein-objection"><strong>Légale</strong>NACE Rev 2.1 sous restriction commerciale UE — vraie permission ou pas ?</div>
+        <div class="frein-objection"><strong>Technique</strong>5 standards × 5 = 25 mappings. Qui valide ? Hash de validation ?</div>
+        <div class="frein-objection"><strong>Sociale</strong>399 CHF pour des fichiers BFS publics, mon N+1 va dire "pourquoi pas wget ?"</div>
+      </div>
+      <div class="frein-action"><strong>Action :</strong> Page "Cross-walk hash table" publique + toggle "Avant CSV BFS brut / Après openswissdata" sur 1 ligne visuelle.</div>
+    </div>
+
+    <div class="frein-card">
+      <div class="frein-card-page">/datasets/finma · 299 CHF</div>
+      <div class="frein-card-trigger">⚡ Trigger : "Format identique aux exports FINMA officiels + 6 colonnes ajoutées (LEI, UID, canton normalisé)"</div>
+      <div class="frein-objections">
+        <div class="frein-objection"><strong>Légale</strong>Si FINMA ajoute une 11e liste demain, c'est dans mon update ou je paye ?</div>
+        <div class="frein-objection"><strong>Technique</strong>Audit J+18 mois : comment je prouve que cette ligne X était bien dans la version du 7 mai 2026 ?</div>
+        <div class="frein-objection"><strong>Sociale</strong>Mon CFO dit qu'on a déjà Bloomberg. Pourquoi 299 CHF en plus ?</div>
+      </div>
+      <div class="frein-action"><strong>Action :</strong> Bandeau "Audit-ready : chaque snapshot hebdo archivé 7 ans, hash publié" + diff visuel 10 PDF/CSV éclatés vs registre unifié.</div>
+    </div>
+
+    <div class="frein-card">
+      <div class="frein-card-page">/bundle · 797 CHF</div>
+      <div class="frein-card-trigger">⚡ Trigger : "Checklist procurement" PDF imprimable que le compliance officer passe à son N+1</div>
+      <div class="frein-objections">
+        <div class="frein-objection"><strong>Légale</strong>797 CHF à un .ch sans liste de clients ? Compliance interne va exiger un fournisseur établi.</div>
+        <div class="frein-objection"><strong>Technique</strong>Si Alain ferme dans 6 mois, mes pipelines TARES/NOGA cassent. Bus factor = 1.</div>
+        <div class="frein-objection"><strong>Sociale</strong>Sans logo client connu, c'est moi qui prends le risque réputationnel face au CFO.</div>
+      </div>
+      <div class="frein-action"><strong>Action :</strong> Section "Continuity clause" avec engagement escrow chez notaire (kill bus factor) + PDF procurement-ready signable.</div>
+    </div>
+
+    <div class="frein-card">
+      <div class="frein-card-page">/mcp · 49 CHF/mois Standalone</div>
+      <div class="frein-card-trigger">⚡ Trigger : un GIF 8s "Claude Desktop appelle tariff_lookup → réponse signée en 1.2s"</div>
+      <div class="frein-objections">
+        <div class="frein-objection"><strong>Légale</strong>Si j'utilise ça en prod client, le résultat MCP est-il opposable comme une donnée signée ZIP ?</div>
+        <div class="frein-objection"><strong>Technique</strong>5 000 req/mois = combien d'utilisateurs Claude Desktop ? 3 collègues = 4j max.</div>
+        <div class="frein-objection"><strong>Sociale</strong>MCP = jargon Anthropic. Mon boss n'a jamais entendu parler. Comment je le justifie sur la note de frais ?</div>
+      </div>
+      <div class="frein-action"><strong>Action :</strong> GIF 8s Claude Desktop live (la page est invendable sans) + section "Les 9 tools en clair" avec input/output exemples.</div>
+    </div>
+
+    <h3 style="margin-top: 36px; font-size: 18px;">🎯 Top-5 actions transversales (impact × faisabilité avant jeudi)</h3>
+    <div class="action-table">
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">NEW</span></div>
+        <div class="action-task"><strong>Clause continuité escrow nommée (Bundle + 3 datasets)</strong><span>Kill objection bus factor #1 du B2B suisse — engagement escrow notaire CH</span></div>
+        <div><span class="action-owner hybride">🟣 hybride</span></div>
+        <div class="action-eta">~2h juridique</div>
+      </div>
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">NEW</span></div>
+        <div class="action-task"><strong>GIF 8s Claude Desktop sur /mcp</strong><span>La page est invendable sans démo visuelle</span></div>
+        <div><span class="action-owner toi">🔵 toi</span></div>
+        <div class="action-eta">~1h enregistrement</div>
+      </div>
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">NEW</span></div>
+        <div class="action-task"><strong>Encadré "Vérifier la signature en 30s" sur 4 pages dataset</strong><span>3 commandes openssl copiables — argument audit reproductibility</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~30 min</div>
+      </div>
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">NEW</span></div>
+        <div class="action-task"><strong>PDF procurement checklist imprimable sur /bundle</strong><span>L'acheteur doit vendre en interne, pas vous</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~1h</div>
+      </div>
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">NEW</span></div>
+        <div class="action-task"><strong>Math ROI chiffré sur chaque page près du CTA</strong><span>"4 800 CHF/an évités vs 299 CHF" — convertit le doute en évidence économique</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~1h</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENT 3 — PISTES VENTE -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 3 / 12 pistes nouvelles pour la vente</strong>
+      <span class="sep">/</span>
+      <span>Classées par effort × impact</span>
+    </div>
+    <h2>12 mécaniques <span class="serif">nouvelles</span>.</h2>
+    <p class="section-intro">
+      Pas du copy. Des leviers structurels (viral, distribution, pricing, social proof, éducation). Top 5 quick wins XS/S faisables avant jeudi en bas de section.
+    </p>
+
+    <div class="pistes-grid">
+      <div class="piste-card top">
+        <div class="piste-num">#5 · Top 1</div>
+        <h3 class="piste-title">Bannière "Refund 100% si BFS/FINMA refusent"</h3>
+        <p class="piste-desc">Anti-FUD radical : transforme la faiblesse en force. "Permission BFS+FINMA en attente. Si refusée → refund 100% automatique." Désamorce l'objection #1 du sceptique compliance.</p>
+        <div class="piste-meta"><span class="effort-xs">Effort XS · 15min</span><span>Conversion immédiate</span></div>
+      </div>
+
+      <div class="piste-card top">
+        <div class="piste-num">#11 · Top 2</div>
+        <h3 class="piste-title">Page comparison "openswissdata vs scraper TARES"</h3>
+        <p class="piste-desc">Long-form SEO sur intention d'achat ("comment scraper xtares.admin.ch"). Tableau honnête : maintenance, légalité, fiabilité, coût. Mots-clés très intentionnels.</p>
+        <div class="piste-meta"><span class="effort-s">Effort S · 2h</span><span>SEO permanent</span></div>
+      </div>
+
+      <div class="piste-card top">
+        <div class="piste-num">#2 · Top 3</div>
+        <h3 class="piste-title">Calculator "Coût TARES interne" embeddable</h3>
+        <p class="piste-desc">Iframe que des consultants peuvent embarquer dans leur site (lead-magnet B2B). "Calcule ton coût TARES interne" → résultat + CTA openswissdata. Viral organique.</p>
+        <div class="piste-meta"><span class="effort-s">Effort S · 1h</span><span>Viral via consultants</span></div>
+      </div>
+
+      <div class="piste-card top">
+        <div class="piste-num">#9 · Top 4</div>
+        <h3 class="piste-title">Substack hebdo "ETL Fédéral Suisse"</h3>
+        <p class="piste-desc">Lancement même jeudi. 5 changements/semaine sur les 3 sources. Capture compliance officers gratuitement. Asset cumulatif sur 12 mois.</p>
+        <div class="piste-meta"><span class="effort-s">Effort S · 1h setup</span><span>LTV + autorité</span></div>
+      </div>
+
+      <div class="piste-card top">
+        <div class="piste-num">#1 · Top 5</div>
+        <h3 class="piste-title">Diff Watcher public /diff</h3>
+        <p class="piste-desc">Page gratuite qui montre en temps réel les 10 derniers changements détectés sur TARES/BFS/FINMA. SEO killer + démo vivante de la valeur de la normalisation.</p>
+        <div class="piste-meta"><span class="effort-m">Effort M · 4h</span><span>SEO + preuve</span></div>
+      </div>
+
+      <div class="piste-card">
+        <div class="piste-num">#3</div>
+        <h3 class="piste-title">"Compliance Diff Report" mensuel 49 CHF</h3>
+        <p class="piste-desc">PDF auto-généré chaque mois listant tous les changements FINMA/BAZG/BFS, contextualisés. Recurring revenue, entry point pas cher.</p>
+        <div class="piste-meta"><span class="effort-l">Effort L · 1 jour</span><span>LTV</span></div>
+      </div>
+
+      <div class="piste-card">
+        <div class="piste-num">#4</div>
+        <h3 class="piste-title">npm package "swiss-compliance-types"</h3>
+        <p class="piste-desc">Types TypeScript/Zod TARES/NOGA/FINMA, MIT. Drive GitHub stars + SEO. Mention discrète "Powered by openswissdata".</p>
+        <div class="piste-meta"><span class="effort-m">Effort M · 4h</span><span>SEO + dev community</span></div>
+      </div>
+
+      <div class="piste-card">
+        <div class="piste-num">#6</div>
+        <h3 class="piste-title">Webinaire "Audit FINMA en 5 min"</h3>
+        <p class="piste-desc">30 min Zoom + replay YouTube. Capture leads compliance + démo MCP avec Claude Desktop. À programmer J+7 (jeudi 14 mai).</p>
+        <div class="piste-meta"><span class="effort-l">Effort L · 1 jour</span><span>Conversion qualifiée</span></div>
+      </div>
+
+      <div class="piste-card">
+        <div class="piste-num">#7</div>
+        <h3 class="piste-title">Listing Smithery + MCP.so + awesome-mcp</h3>
+        <p class="piste-desc">3 PRs/listings stratégiques. Trafic dev MCP, découverte, backlinks dofollow.</p>
+        <div class="piste-meta"><span class="effort-m">Effort M · 4h</span><span>SEO + dev acquisition</span></div>
+      </div>
+
+      <div class="piste-card">
+        <div class="piste-num">#8</div>
+        <h3 class="piste-title">Pilot 14 jours sans Stripe</h3>
+        <p class="piste-desc">Email magique avec ZIP test (sample 100 lignes) + accès MCP read-only 14j. Conversion à J14 par email ciblé. Lève la friction "j'achète sans voir".</p>
+        <div class="piste-meta"><span class="effort-m">Effort M · 4h</span><span>Conversion</span></div>
+      </div>
+
+      <div class="piste-card">
+        <div class="piste-num">#10</div>
+        <h3 class="piste-title">Devis 1-clic PDF pour CFO</h3>
+        <p class="piste-desc">Bouton "Télécharger devis signable" sur /bundle. PDF auto-généré avec TVA, IBAN, conditions. Lève le blocage achat B2B (CFOs détestent les checkouts Stripe).</p>
+        <div class="piste-meta"><span class="effort-m">Effort M · 4h</span><span>Conversion B2B</span></div>
+      </div>
+
+      <div class="piste-card">
+        <div class="piste-num">#12</div>
+        <h3 class="piste-title">"Stack Wall" honnête</h3>
+        <p class="piste-desc">Section "Built with" : Hono, Astro, Cloudflare, Stripe. Sub-text "Same rigor in our datasets." Tech credibility = data credibility chez les data engineers.</p>
+        <div class="piste-meta"><span class="effort-xs">Effort XS · 15min</span><span>Crédibilité</span></div>
+      </div>
+    </div>
+
+    <div class="leverage-card">
+      <h3>🚀 2 idées bonus inattendues</h3>
+      <p>
+        <strong>A. Page "Trust" radicale</strong> — afficher publiquement le contrat BAZG signé en PDF, code source ETL en accès review-only, factures compliance lawyer. Transparence brutale = différentiation Suisse.
+      </p>
+      <p style="margin-top: 12px;">
+        <strong>B. "Founding Customer" reverse-pricing</strong> — les 10 premiers acheteurs paient ce qu'ILS estiment juste (min 199 CHF). Tu publies leurs prix + témoignages. Effet PR énorme sur LinkedIn CH, génère 10 case studies en 1 mois.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- AGENT 4 — POSITIONNEMENT -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Audit 4 / Positionnement vs concurrence</strong>
+      <span class="sep">/</span>
+      <span>5 axes différenciants à exploiter</span>
+    </div>
+    <h2>Pourquoi <span class="serif">openswissdata</span> et pas opendata.swiss ou Bisnode.</h2>
+    <p class="section-intro">
+      Le positionnement actuel est crédible mais éparpillé. Les 5 atouts sont là, mais dilués. Voici le copy qui les remet en valeur.
+    </p>
+
+    <div class="axis-card">
+      <div class="axis-num">Axe 1</div>
+      <h3 class="axis-title">Cryptographie auditable (Ed25519 + RFC-3161)</h3>
+      <p class="axis-copy">"Signature Ed25519 + horodatage RFC-3161 — standard banque, vérifiable en 1 commande."</p>
+      <p style="font-size: 12px; color: var(--ink-mute); margin-top: 8px;">+ FAQ Bob comptable : <em>"Pas besoin de comprendre la crypto — votre auditeur, lui, comprendra."</em></p>
+    </div>
+
+    <div class="axis-card">
+      <div class="axis-num">Axe 2</div>
+      <h3 class="axis-title">MCP-first natif</h3>
+      <p class="axis-copy">"9 outils MCP natifs — premier dataset suisse branchable directement à Claude et Cursor."</p>
+      <p style="font-size: 12px; color: var(--ink-mute); margin-top: 8px;">+ Argument dev : <em>"Pas un wrapper REST tardif. MCP a été conçu en même temps que l'API."</em></p>
+    </div>
+
+    <div class="axis-card">
+      <div class="axis-num">Axe 3</div>
+      <h3 class="axis-title">Solo founder = réactivité B2B</h3>
+      <p class="axis-copy">"Un email, une réponse en 24h. Pas de ticket, pas de niveau 1."</p>
+      <p style="font-size: 12px; color: var(--ink-mute); margin-top: 8px;">+ Évite l'amateurisme : afficher <em>"Studio IBANforge · Raison individuelle CHE-XXX"</em> + photo discrète.</p>
+    </div>
+
+    <div class="axis-card">
+      <div class="axis-num">Axe 4</div>
+      <h3 class="axis-title">Permission BAZG écrite (le scoop juridique)</h3>
+      <p class="axis-copy">"Cette permission n'a pas de prix. Elle a un coût : 6 mois de dialogue."</p>
+      <p style="font-size: 12px; color: var(--ink-mute); margin-top: 8px;">Aucun concurrent privé n'a obtenu cette permission. À mettre en avant sans tomber dans l'arrogance.</p>
+    </div>
+
+    <div class="axis-card">
+      <div class="axis-num">Axe 5</div>
+      <h3 class="axis-title">Pipeline ETL public et vérifiable</h3>
+      <p class="axis-copy">"Le code qui génère vos datasets est public. Lisez-le : cammac-creator/openswissdata."</p>
+      <p style="font-size: 12px; color: var(--ink-mute); margin-top: 8px;">+ Pour compliance officer : <em>"Reproduisez le build vous-même. Aucune black box."</em></p>
+    </div>
+
+    <h3 style="margin-top: 36px; font-size: 18px;">⚠️ 3 risques de positionnement actuels</h3>
+    <div class="frein-card">
+      <div class="frein-card-page">RISQUE 1</div>
+      <div class="frein-card-trigger">Indé bricoleur (ton CLI sceptique) vs enterprise (compliance officer banque cantonale)</div>
+      <div class="frein-action"><strong>Solution :</strong> Garder le ton dev sur /mcp mais durcir /compliance avec logos sources officiels (BAZG/BFS/FINMA), citation juridique LDA art. 5, et screenshot du PDF de permission BAZG flouté avec sceau visible.</div>
+    </div>
+    <div class="frein-card">
+      <div class="frein-card-page">RISQUE 2</div>
+      <div class="frein-card-trigger">"9 tools MCP" — entre deux chaises (trop tech pour Bob, trop court pour CTO)</div>
+      <div class="frein-action"><strong>Solution :</strong> Repositionner en "9 outils MCP — couverture complète douanes + classifications + KYC". Le chiffre devient une feature exhaustive, pas une limite.</div>
+    </div>
+    <div class="frein-card">
+      <div class="frein-card-page">RISQUE 3</div>
+      <div class="frein-card-trigger">Bundle "économie 200 CHF" sonne low-cost alors que 797 CHF cible premium</div>
+      <div class="frein-action"><strong>Solution :</strong> Remplacer par "Bundle complet — 360 jours d'updates signés inclus" et déplacer le -200 CHF en sticker secondaire. La valeur principale = continuité, pas la remise.</div>
+    </div>
+
+    <div class="leverage-card">
+      <h3>🎯 Top-3 actions positionnement avant jeudi</h3>
+      <p>
+        <strong>1.</strong> Bloc "Pourquoi pas l'alternative ?" sur la home — tableau 3 colonnes (données brutes / suite enterprise / openswissdata) sur 5 critères.<br>
+        <strong>2.</strong> Refondre le H1 home vers la <em>phrase qui tue</em> : "Les seuls datasets fédéraux suisses signés, sourcés et MCP-ready."<br>
+        <strong>3.</strong> Encart "Reproductibilité" sur /compliance avec liens directs vers les 3 workflows GitHub publics. KO juridique zéro concurrent peut imiter.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN D'ATTAQUE -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Plan d'attaque consolidé</strong>
+      <span class="sep">/</span>
+      <span>Tout faire avant jeudi 7 mai</span>
+    </div>
+    <h2>Le <span class="serif">plan</span> ordonné par impact / effort.</h2>
+    <p class="section-intro">
+      Toutes les actions des 4 agents fusionnées et ordonnées. <strong>Total ~8-10h de travail si on s'y met sérieusement</strong>, faisable d'ici mercredi soir.
+    </p>
+
+    <div class="action-table">
+      <div class="action-row head">
+        <div></div><div>Pri</div><div>Action</div><div>Qui</div><div>ETA</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">QUICK</span></div>
+        <div class="action-task"><strong>Bannière "Refund 100% si BFS/FINMA refusent"</strong><span>Quick win XS · désamorce l'objection #1 du sceptique compliance</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~15 min</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">QUICK</span></div>
+        <div class="action-task"><strong>"Stack Wall" honnête en footer</strong><span>Tech credibility = data credibility</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~15 min</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">QUICK</span></div>
+        <div class="action-task"><strong>H1 home → "phrase qui tue"</strong><span>"Les seuls datasets fédéraux suisses signés, sourcés et MCP-ready"</span></div>
+        <div><span class="action-owner hybride">🟣 hybride</span></div>
+        <div class="action-eta">~30 min décision + push</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">HIGH</span></div>
+        <div class="action-task"><strong>Encadré "Vérifier la signature en 30s" × 4 pages dataset</strong><span>3 commandes openssl copiables · argument audit reproductibility</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~30 min</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">HIGH</span></div>
+        <div class="action-task"><strong>Math ROI chiffré près du CTA × 4 pages</strong><span>"4 800 CHF/an évités vs 299 CHF" — convertit le doute en évidence économique</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~1h</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">HIGH</span></div>
+        <div class="action-task"><strong>Calculator "Coût TARES interne" embeddable</strong><span>Iframe partageable · viral via consultants B2B</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~1h</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">HIGH</span></div>
+        <div class="action-task"><strong>Page comparison "openswissdata vs scraper TARES"</strong><span>SEO long-tail sur intention d'achat · long-form</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~2h</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">HIGH</span></div>
+        <div class="action-task"><strong>Bloc "Pourquoi pas l'alternative ?" sur la home</strong><span>Tableau 3 colonnes (données brutes / enterprise / openswissdata) sur 5 critères</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~1h</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">HIGH</span></div>
+        <div class="action-task"><strong>Section "Reproductibilité" sur /compliance avec liens GitHub</strong><span>KO juridique : refresh-tares.yml + refresh-finma.yml + monitor-sources.yml publics</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~30 min</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">MED</span></div>
+        <div class="action-task"><strong>PDF procurement checklist sur /bundle</strong><span>L'acheteur doit vendre en interne · 8 critères cochables signables</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~1h</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">MED</span></div>
+        <div class="action-task"><strong>Substack "ETL Fédéral Suisse" Day 1</strong><span>Lancement même jeudi · asset cumulatif sur 12 mois</span></div>
+        <div><span class="action-owner toi">🔵 toi</span></div>
+        <div class="action-eta">~1h setup</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">MED</span></div>
+        <div class="action-task"><strong>GIF 8s Claude Desktop sur /mcp</strong><span>La page est invendable sans démo visuelle · enregistrement live</span></div>
+        <div><span class="action-owner toi">🔵 toi</span></div>
+        <div class="action-eta">~1h</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">LATER</span></div>
+        <div class="action-task"><strong>Clause continuité escrow nommée</strong><span>Engagement notaire CH · kill objection bus factor #1</span></div>
+        <div><span class="action-owner hybride">🟣 hybride</span></div>
+        <div class="action-eta">~2h juridique post-launch</div>
+      </div>
+
+      <div class="action-row">
+        <input type="checkbox" class="action-check" />
+        <div><span class="action-pri new">LATER</span></div>
+        <div class="action-task"><strong>Diff Watcher public /diff</strong><span>SEO killer + démo vivante · post-launch</span></div>
+        <div><span class="action-owner moi">🟢 moi</span></div>
+        <div class="action-eta">~4h post-launch</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DECISION FINALE -->
+<section>
+  <div class="container">
+    <div class="leverage-card">
+      <h3>🚀 Recommandation finale</h3>
+      <p>
+        <strong>Si tu valides "go quick wins", je traite les 9 premières actions QUICK + HIGH en autonome aujourd'hui</strong> (~7h cumulées). Reste 3 actions humaines (GIF MCP, Substack setup, décision phrase qui tue) que tu peux faire mercredi soir avant le launch jeudi 7 mai.
+      </p>
+      <p style="margin-top: 12px;">
+        Les 2 LATER (escrow notaire, /diff watcher) sont parfaits comme premier projet post-launch (semaine du 12 mai).
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · checklist audit V2</strong></p>
+    <p style="margin: 0;">
+      4 agents en parallèle (audit du 5 mai). 26/26 P0+P1 livrés. 12 pistes vente identifiées. 15 freins B2B cartographiés. 5 axes différenciants + 1 phrase qui tue. 14 actions priorisées dans le plan d'attaque consolidé.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

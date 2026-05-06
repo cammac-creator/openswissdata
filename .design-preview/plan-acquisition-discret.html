@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Plan acquisition DISCRET · openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8; --bg-card: #FFFFFF; --bg-soft: #F5F4EE;
+    --ink: #0A0A0C; --ink-soft: #3A3D45; --ink-mute: #6B6E76;
+    --line: #E8E4D9; --line-strong: #D9D3C3;
+    --accent: #DC1F2D; --accent-soft: #FCE7E9;
+    --green: #15803D; --green-soft: #DCFCE7;
+    --amber: #92400E; --amber-soft: #FEF3C7;
+    --teal: #0F766E; --teal-soft: #E5F5F1;
+    --blue: #1D4ED8; --blue-soft: #DBEAFE;
+    --purple: #6D28D9; --purple-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid { position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%; z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  .hero { padding: 56px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line); width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 { font-weight: 700; font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05; letter-spacing: -.03em;
+    margin: 0 0 18px; max-width: 22ch; }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 24px 0 36px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-value.green { color: var(--green); } .stat-value.red { color: var(--accent); }
+  .stat-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); } }
+
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1;
+    letter-spacing: -.025em; margin: 0 0 12px; max-width: 30ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .alert {
+    background: linear-gradient(135deg, var(--accent-soft) 0%, var(--amber-soft) 100%);
+    border: 2px solid var(--accent); border-radius: 14px;
+    padding: 24px 28px; margin: 24px 0;
+  }
+  .alert h3 { color: var(--accent); margin: 0 0 10px; font-size: 18px; }
+  .alert p { font-size: 14px; line-height: 1.6; margin: 0 0 8px; color: var(--ink); }
+  .alert strong { font-weight: 700; }
+
+  .verdict {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg); border-radius: 14px; padding: 32px 36px; margin: 24px 0;
+  }
+  .verdict h3 { color: var(--bg); font-size: 22px; margin: 0 0 14px; }
+  .verdict p { color: rgba(255,255,255,.8); font-size: 14px; line-height: 1.65; margin: 0 0 12px; }
+  .verdict strong { color: white; font-weight: 600; }
+  .verdict-yes { color: #6ee7b7; } .verdict-no { color: #fda4af; }
+
+  /* Identity strategies */
+  .strategy-card {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 26px; margin-bottom: 12px;
+  }
+  .strategy-card.top { border: 2px solid var(--green); background: rgba(220,252,231,.2); }
+  .strategy-card.avoid { border-left: 4px solid var(--accent); }
+  .strategy-num {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: var(--ink-mute); margin-bottom: 6px; font-weight: 700;
+  }
+  .strategy-card.top .strategy-num { color: var(--green); }
+  .strategy-card.avoid .strategy-num { color: var(--accent); }
+  .strategy-title { font-size: 17px; font-weight: 700; margin: 0 0 10px; line-height: 1.3; }
+  .strategy-meta {
+    display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+  }
+  .strategy-meta span {
+    padding: 3px 8px; border-radius: 4px; font-weight: 600;
+  }
+  .risk-low { background: var(--green-soft); color: var(--green); }
+  .risk-med { background: var(--amber-soft); color: var(--amber); }
+  .risk-high { background: var(--accent-soft); color: var(--accent); }
+  .strategy-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.55; margin: 0 0 6px; }
+
+  /* Channels table */
+  .channel-table {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden; margin: 16px 0;
+  }
+  .channel-row {
+    display: grid; grid-template-columns: 32px 1fr 80px 80px 100px;
+    gap: 14px; padding: 14px 18px;
+    border-bottom: 1px solid var(--line); align-items: start;
+    background: var(--bg-card); font-size: 14px;
+  }
+  .channel-row:last-child { border-bottom: none; }
+  .channel-row.head {
+    background: var(--bg-soft);
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-mute); font-weight: 600; padding: 10px 18px;
+  }
+  .channel-row.priority { background: rgba(220,252,231,.2); }
+  .channel-num { font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 700; color: var(--accent); }
+  .channel-title strong { display: block; font-weight: 600; margin-bottom: 2px; }
+  .channel-title span { font-size: 12px; color: var(--ink-mute); line-height: 1.5; }
+  .badge {
+    font-family: "Geist Mono", monospace; font-size: 10px; font-weight: 700;
+    padding: 3px 7px; border-radius: 4px; text-align: center; width: fit-content;
+  }
+  .badge.invisible { background: var(--green-soft); color: var(--green); }
+  .badge.risk-mineur { background: var(--amber-soft); color: var(--amber); }
+  .badge.high { background: var(--green-soft); color: var(--green); }
+  .badge.med { background: var(--amber-soft); color: var(--amber); }
+  .badge.low { background: var(--bg-soft); color: var(--ink-mute); }
+  @media (max-width: 880px) { .channel-row { grid-template-columns: 1fr; } .channel-row.head { display: none; } }
+
+  /* Timeline jour J */
+  .timeline {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden; margin: 24px 0;
+  }
+  .timeline-row {
+    display: grid; grid-template-columns: 80px 1fr 90px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px; align-items: start; gap: 14px;
+  }
+  .timeline-row:last-child { border-bottom: none; }
+  .timeline-row.hot {
+    background: linear-gradient(to right, rgba(220,31,45,.06) 0%, transparent 100%);
+    border-left: 3px solid var(--accent);
+  }
+  .timeline-time { font-family: "Geist Mono", monospace; font-size: 13px; font-weight: 700; color: var(--ink); }
+  .timeline-row.hot .timeline-time { color: var(--accent); }
+  .timeline-action { color: var(--ink-soft); line-height: 1.5; }
+  .timeline-action strong { color: var(--ink); font-weight: 600; }
+
+  /* Email templates */
+  .email-template {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 0; margin-bottom: 14px; overflow: hidden;
+  }
+  .email-header {
+    background: var(--bg-soft); padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .email-header strong { color: var(--ink); font-weight: 600; }
+  .email-subject {
+    padding: 14px 18px;
+    font-weight: 600; color: var(--ink);
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .email-body {
+    padding: 16px 18px;
+    font-size: 13px; line-height: 1.6; color: var(--ink-soft);
+  }
+  .email-body p { margin: 0 0 10px; }
+  .email-signature {
+    padding: 10px 18px;
+    background: var(--bg-soft);
+    font-size: 11px; color: var(--ink-mute);
+    border-top: 1px solid var(--line);
+    font-family: "Geist Mono", monospace;
+  }
+
+  /* Funnel */
+  .funnel {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 24px; margin: 16px 0;
+  }
+  .funnel-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .funnel-row:last-child { border-bottom: none; }
+  .funnel-bar {
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-soft) 100%);
+    height: 30px; border-radius: 6px;
+    display: flex; align-items: center; padding: 0 14px;
+    color: white; font-weight: 700;
+    font-family: "Geist Mono", monospace; font-size: 13px;
+  }
+  .funnel-label { flex: 1; font-size: 13px; color: var(--ink-soft); }
+
+  /* Verdict cases */
+  .scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 16px 0; }
+  @media (max-width: 720px) { .scenarios { grid-template-columns: 1fr; } }
+  .scenario {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 18px 22px;
+    text-align: center;
+  }
+  .scenario.median { border: 2px solid var(--green); background: rgba(220,252,231,.15); }
+  .scenario-label {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 8px; font-weight: 600;
+  }
+  .scenario.median .scenario-label { color: var(--green); }
+  .scenario-revenue { font-size: 26px; font-weight: 700; color: var(--ink); margin-bottom: 4px; letter-spacing: -.02em; }
+  .scenario-detail { font-size: 12px; color: var(--ink-mute); }
+
+  footer {
+    padding: 36px 0 56px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Plan acquisition DISCRET · 4 agents · J-2 avant launch</span>
+    </div>
+    <h1>Lancer <span class="accent">sans LinkedIn perso</span>.</h1>
+    <p class="lede">
+      Ton employeur ne doit rien voir. Pas de post LinkedIn perso, pas de like, pas de commentaire qui apparaisse dans son fil. <strong>Voilà le plan complet pour atteindre la même portée (voire mieux) sans toucher à ton profil.</strong> 4 agents en parallèle ont audité 15 canaux substituts, 7 stratégies d'identité, le plan jour J revu, et la machine cold outreach amplifiée x3.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Canaux invisibles</div>
+        <div class="stat-value green">13 / 15</div>
+        <div class="stat-sub">zéro signal LinkedIn</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Cold emails / mois</div>
+        <div class="stat-value">600+</div>
+        <div class="stat-sub">vs 30 dans plan original</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Pitchs presse jour J</div>
+        <div class="stat-value">3</div>
+        <div class="stat-sub">finews + startupticker + Inside P.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Risque employeur</div>
+        <div class="stat-value">~15 %</div>
+        <div class="stat-sub">sur 12 mois (Google search actif)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Ventes mois 1 (médian)</div>
+        <div class="stat-value green">3</div>
+        <div class="stat-sub">~2 200 CHF revenu</div>
+      </div>
+    </div>
+
+    <div class="alert">
+      <h3>⚠ Verdict tranchant : LinkedIn perso n'est PAS le pilier (et ne l'a jamais été pour ce produit)</h3>
+      <p>
+        <strong>Découverte clé :</strong> en B2B suisse niche compliance/data, le <strong>Gastbeitrag finews.ch</strong>, les <strong>LinkedIn Ads ciblage Compliance Officer CH</strong> et le <strong>cold email B2B</strong> sont individuellement <strong>plus puissants</strong> que le LinkedIn personnel d'Alain (qui touche surtout son réseau actuel = collègues = bruit). <strong>La contrainte n'est pas un handicap — c'est l'opportunité de construire des canaux plus efficaces dès le départ.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- IDENTITÉ -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Identité publique</strong>
+      <span class="sep">/</span>
+      <span>Crédible côté acheteur, invisible côté employeur</span>
+    </div>
+    <h2>Comment se présenter <span class="serif">sans s'exposer</span>.</h2>
+    <p class="section-intro">
+      En B2B suisse compliance, l'anonymat total = red flag KYC. Mais la sur-exposition = ton employeur. Voilà la stratégie qui équilibre les deux.
+    </p>
+
+    <div class="strategy-card top">
+      <div class="strategy-num">⭐ TOP RECOMMANDATION</div>
+      <h3 class="strategy-title">Combo : LinkedIn perso neutre + Page entreprise active + page founder minimaliste sur le site</h3>
+      <div class="strategy-meta">
+        <span class="risk-low">RISQUE EMPLOYEUR ~15%</span>
+        <span class="risk-low">CRÉDIBILITÉ ÉLEVÉE</span>
+      </div>
+      <p>• <strong>LinkedIn perso reste vide d'openswissdata</strong> — l'employeur ne voit rien dans son fil.</p>
+      <p>• <strong>Page LinkedIn entreprise "openswissdata"</strong> active, gérée via burner email <code>team@openswissdata.com</code> + <strong>second compte LinkedIn admin dédié</strong>. Surtout PAS administrer la page avec ton compte perso (LinkedIn affichera "started a new position" en notif).</p>
+      <p>• <strong>Page <code>/about</code></strong> sur openswissdata.com avec photo + bio courte ("Claude-Alain Martin, builder suisse, 7 ans dans la data B2B") + email pro direct. Le site EST ton CV public — façon Pieter Levels.</p>
+      <p>• Risque concret : Google "Claude-Alain Martin" remonte le site openswissdata. Si l'employeur cherche activement, il trouve. Sinon, peu probable. Aucune notification automatique.</p>
+    </div>
+
+    <div class="strategy-card top">
+      <div class="strategy-num">⭐ ALTERNATIVE PUISSANTE</div>
+      <h3 class="strategy-title">Comité aviseur visible, founder en retrait</h3>
+      <div class="strategy-meta">
+        <span class="risk-low">RISQUE EMPLOYEUR ~5%</span>
+        <span class="risk-low">CRÉDIBILITÉ TRÈS ÉLEVÉE</span>
+      </div>
+      <p>Recruter 2-3 advisors crédibles affichés sur <code>/about</code> (ex : ancien compliance officer banque cantonale, prof EPFL/HSG en data, juriste FinSA). Toi en "Founder &amp; CEO" discret. <strong>Pattern Stripe Atlas / Lovable.</strong> L'attention de l'acheteur va sur les advisors connus, pas sur toi. Effort : convaincre 2-3 personnes de prêter leur nom (equity ou rétro). 4-8 semaines de recrutement.</p>
+    </div>
+
+    <div class="strategy-card avoid">
+      <div class="strategy-num">⛔ À ÉVITER</div>
+      <h3 class="strategy-title">Studio anonyme / marque sans visage</h3>
+      <p>Crédibilité <strong>très faible</strong> en compliance bancaire suisse. Un compliance officer veut savoir qui signe le DPA, qui héberge les données, qui répond en cas d'incident. "Studio openswissdata, contact via hello@" = red flag KYC. À éviter même si l'invisibilité employeur est nulle.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CANAUX SUBSTITUTS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>15 canaux qui remplacent LinkedIn perso</strong>
+      <span class="sep">/</span>
+      <span>13 invisibles · 2 risque mineur</span>
+    </div>
+    <h2>Les <span class="serif">substituts</span> à activer.</h2>
+
+    <div class="channel-table">
+      <div class="channel-row head">
+        <div></div><div>Canal · Description</div><div>Visibilité</div><div>Impact</div><div>Effort vs LI perso</div>
+      </div>
+      <div class="channel-row priority"><div class="channel-num">⭐1</div><div class="channel-title"><strong>Gastbeitrag finews.ch</strong><span>Lectorat = ICP exact (compliance/banque CH). 1 article = 5-10× LinkedIn perso. Article signé "Alain Martin, founder openswissdata" sans lien LinkedIn.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge high">TRÈS HAUT</span></div><div>+ pitch éditorial</div></div>
+      <div class="channel-row priority"><div class="channel-num">⭐2</div><div class="channel-title"><strong>LinkedIn Ads ciblage Compliance Officer CH</strong><span>500 CHF = 50 000 impressions sur ICP précis. Aucune publication organique sur profil perso. Géré via compte burner.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge high">TRÈS HAUT</span></div><div>+ cash, − temps</div></div>
+      <div class="channel-row priority"><div class="channel-num">⭐3</div><div class="channel-title"><strong>Cold email B2B (90+/sem)</strong><span>Sourcing FINMA + Zefix + Hunter (sans extension LinkedIn). 30-50/jour sur sous-domaine warmé <code>cold@send.openswissdata.com</code>.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge high">TRÈS HAUT</span></div><div>+ effort sourcing</div></div>
+      <div class="channel-row"><div class="channel-num">04</div><div class="channel-title"><strong>Show HN + Reddit (compte produit)</strong><span>Compte HN/Reddit dédié openswissdata. Jamais lié à un profil pro. Show HN jeudi 8h30 (ou 16h CEST sweet spot).</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge high">HAUT (si front page)</span></div><div>=</div></div>
+      <div class="channel-row"><div class="channel-num">05</div><div class="channel-title"><strong>Inside Paradeplatz + startupticker.ch</strong><span>Gastbeitrag + communiqué launch. Inside P. accepte signature personnelle ou "openswissdata team".</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge high">HAUT</span></div><div>+</div></div>
+      <div class="channel-row"><div class="channel-num">06</div><div class="channel-title"><strong>Page LinkedIn entreprise + Newsletter brand</strong><span>Compte admin avec burner email. Newsletter sous nom de marque (les abonnés reçoivent par email, pas via fil personnel).</span></div><div><span class="badge risk-mineur">🟡 RISQUE MINEUR</span></div><div><span class="badge high">HAUT</span></div><div>=</div></div>
+      <div class="channel-row"><div class="channel-num">07</div><div class="channel-title"><strong>Téléphone direct (compliance officers)</strong><span>10 appels/sem. Heures gold : 8-9h ou 16h30-17h30. Script 30s rodé.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge high">HAUT</span></div><div>+</div></div>
+      <div class="channel-row"><div class="channel-num">08</div><div class="channel-title"><strong>GitHub org publique openswissdata</strong><span>Repo <code>openswissdata-types</code> npm + exemples MCP. Crédibilité tech sans LinkedIn.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge med">MOYEN</span></div><div>−</div></div>
+      <div class="channel-row"><div class="channel-num">09</div><div class="channel-title"><strong>Slack Swiss FinTech Association + Slack data engineering</strong><span>Compte personnel mais aucune publication LinkedIn associée. Réponses utiles + signature.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge med">MOYEN-HAUT</span></div><div>=</div></div>
+      <div class="channel-row"><div class="channel-num">10</div><div class="channel-title"><strong>Substack newsletter "ETL Fédéral Suisse"</strong><span>Sous nom de marque. Mailing-list pré-construit + cross-post blog 1 sem plus tard.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge high">HAUT (long terme)</span></div><div>−</div></div>
+      <div class="channel-row"><div class="channel-num">11</div><div class="channel-title"><strong>Programme partenaire fiduciaires/Treuhand</strong><span>5-10 fiduciaires alémaniques avec deal 20% revshare. Ce sont EUX qui parlent en visible.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge high">HAUT (long terme)</span></div><div>+ recrutement</div></div>
+      <div class="channel-row"><div class="channel-num">12</div><div class="channel-title"><strong>MCP marketplaces (Smithery + MCP.so + awesome-mcp)</strong><span>Soumission unique le jour J. Trafic modéré + signal crédibilité tech.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge med">MOYEN</span></div><div>−</div></div>
+      <div class="channel-row"><div class="channel-num">13</div><div class="channel-title"><strong>X/Twitter @openswissdata (compte produit)</strong><span>Build-in-public, threads techniques TARES/NOGA. CH peu actif sur X mais audience tech globale.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge low">FAIBLE-MOYEN</span></div><div>=</div></div>
+      <div class="channel-row"><div class="channel-num">14</div><div class="channel-title"><strong>Conférences en personne (Swiss FinTech Week 19-25 juin)</strong><span>Networking direct, distribution cartes, démos live. Photos d'autres personnes sans toi tagué.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge high">HAUT</span></div><div>+ déplacement</div></div>
+      <div class="channel-row"><div class="channel-num">15</div><div class="channel-title"><strong>Xing entreprise (CH alémanique)</strong><span>2× plus petit que LinkedIn en CH 2025. Résiduel mais zéro risque. Bonus, pas pilier.</span></div><div><span class="badge invisible">✅ INVISIBLE</span></div><div><span class="badge low">FAIBLE</span></div><div>− (30 min setup)</div></div>
+    </div>
+
+    <div class="verdict">
+      <h3>🔁 Top-3 canaux qui SURPASSENT LinkedIn perso pour ce produit niche</h3>
+      <p>
+        <strong>1. Gastbeitrag finews.ch</strong> — un seul article touche plus de compliance officers banque CH qu'un mois entier de posts LinkedIn perso. Et zéro signal employeur.
+      </p>
+      <p>
+        <strong>2. LinkedIn Ads ciblage Compliance Officer + geo CH</strong> — 500 CHF = 50 000 impressions sur ICP précis. Un post LinkedIn perso d'Alain toucherait 800-2000 vues, dont la majorité = collègues = bruit.
+      </p>
+      <p>
+        <strong>3. Launch coordonné jeudi 7 mai = Show HN + startupticker.ch + Swiss FinTech newsletter</strong> — pic de trafic, pickup presse, zéro dépendance au profil perso.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE JOUR J -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Plan jour J discret</strong>
+      <span class="sep">/</span>
+      <span>Jeudi 7 mai 2026 · 8h-22h CEST</span>
+    </div>
+    <h2>Le <span class="serif">jour J</span>, sans une trace LinkedIn perso.</h2>
+
+    <div class="timeline">
+      <div class="timeline-row"><div class="timeline-time">07h45</div><div class="timeline-action">Vérification finale : site live, repo public, README, /pricing, démo SSR</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row hot"><div class="timeline-time">08h00</div><div class="timeline-action"><strong>Substack inaugural envoyé</strong> à mailing-list pré-construit (~200-400 contacts collectés via Slack FinTech, GitHub stars, formulaires waitlist)</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">08h15</div><div class="timeline-action"><strong>Post Page LinkedIn entreprise</strong> (compte admin burner, jamais profil perso). Aucun repost, aucun like depuis perso.</div><div><span class="badge risk-mineur">🟡</span></div></div>
+      <div class="timeline-row hot"><div class="timeline-time">08h30</div><div class="timeline-action"><strong>SHOW HN POSTÉ</strong> compte produit dédié. Titre : "Show HN: openswissdata — Signed Swiss federal datasets, BAZG-authorized, MCP-ready"</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">09h00</div><div class="timeline-action">Posts simultanés <strong>r/dataengineering + r/programming + r/Switzerland</strong> (compte Reddit produit)</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row hot"><div class="timeline-time">09h30</div><div class="timeline-action"><strong>VAGUE 1 cold emails</strong> (30 contacts) : fiduciaires, RegTech, équipes data banques cantonales</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">10h00</div><div class="timeline-action">Pitch presse #1 : <strong>finews.ch</strong> — Gastbeitrag signé Alain Martin sans lien LinkedIn (angle BAZG)</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">10h30</div><div class="timeline-action">Pitch presse #2 : <strong>startupticker.ch</strong> (angle solo founder + datasets ouverts + SDK typé)</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">11h00</div><div class="timeline-action">Pitch presse #3 : <strong>Inside Paradeplatz</strong> (angle compliance / KYC / fiduciaires)</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">11h30</div><div class="timeline-action">Soumission <strong>Smithery + MCP.so</strong> du serveur MCP openswissdata</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">12h00</div><div class="timeline-action">PR awesome-mcp-servers + awesome-switzerland + awesome-nodejs</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">13h00</div><div class="timeline-action"><strong>Newsletter LinkedIn Brand</strong> (page entreprise, abonnés volontaires)</div><div><span class="badge risk-mineur">🟡</span></div></div>
+      <div class="timeline-row hot"><div class="timeline-time">13h30</div><div class="timeline-action"><strong>VAGUE 2 cold emails</strong> (30 contacts) : cabinets compliance, avocats fintech, consultants AML</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">14h00</div><div class="timeline-action"><strong>5 appels téléphone</strong> direct fiduciaires (pré-contactés mardi-mercredi)</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">15h00</div><div class="timeline-action"><strong>5 appels téléphone</strong> cabinets compliance</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">15h45</div><div class="timeline-action">Post <strong>Slack Swiss FinTech Association</strong> (#news + #tech)</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">16h15</div><div class="timeline-action">Réponses HN/Reddit (questions techniques, prix, licence)</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row hot"><div class="timeline-time">16h45</div><div class="timeline-action"><strong>VAGUE 3 cold emails</strong> (30-40 contacts) : startups suisses fintech/insurtech listées sur startupticker.ch</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">17h30</div><div class="timeline-action">Release <strong>GitHub repo openswissdata-types</strong> + npm publish + tweet de release sur compte produit</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">18h00</div><div class="timeline-action">PR awesome-public-datasets + awesome-typescript</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">18h30</div><div class="timeline-action">Relance presse (mail aux 3 journalistes, photos HD + chiffres clés)</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">19h00</div><div class="timeline-action">Post de remerciement Page LinkedIn entreprise + Substack récap journée</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row"><div class="timeline-time">19h30-21h</div><div class="timeline-action">Monitoring HN ranking · réponses · ajustements</div><div><span class="badge invisible">✅</span></div></div>
+      <div class="timeline-row hot"><div class="timeline-time">21h00</div><div class="timeline-action"><strong>BILAN CHIFFRES</strong> visites · signups · ventes · upvotes HN · prep deuxième vague presse (NZZ, Le Temps, Bilan) pour vendredi</div><div><span class="badge invisible">✅</span></div></div>
+    </div>
+
+    <p style="font-size: 13px; color: var(--ink-mute); margin-top: 12px; text-align: center;">
+      <strong>~100 cold emails envoyés sur la journée + 10 appels + 3 pitchs presse + Show HN + 3 Reddit + 4 PR awesome.</strong> Aucun signal sur LinkedIn perso d'Alain.
+    </p>
+  </div>
+</section>
+
+<!-- COLD EMAIL MACHINE -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Machine cold email</strong>
+      <span class="sep">/</span>
+      <span>200 contacts × 30 jours · 0,5-1,5 ventes pour 100 emails</span>
+    </div>
+    <h2>Le <span class="serif">cold outreach</span>, amplifié × 5.</h2>
+
+    <h3 style="margin-top: 32px; font-size: 18px;">📥 Sourcing 200 contacts ICP (sans LinkedIn perso)</h3>
+    <ul style="font-size: 14px; color: var(--ink-soft); line-height: 1.8;">
+      <li><strong>Gratuit :</strong> Registre FINMA (compliance officers nommés publiquement par banque), Zefix.ch (raisons sociales + adresses), alliancefinance.ch, swissbanking.ch, fintech.ch, ordreavocats-vd.ch</li>
+      <li><strong>Hunter.io</strong> 49$/mois — 500 emails/mois · entre <code>bcv.ch</code>, sort emails publics + pattern. <strong>Aucune connexion LinkedIn requise</strong>.</li>
+      <li><strong>Apollo.io</strong> dashboard web SEULEMENT — ne jamais activer l'extension Chrome qui lit ton LinkedIn perso. 500 crédits gratuits/mois.</li>
+      <li><strong>Dropcontact</strong> (FR, GDPR-native) — alternative sans scraping LinkedIn.</li>
+      <li><strong>Recherche Google manuelle</strong> : <code>site:bcv.ch "compliance" email</code> · <code>"compliance officer" "banque cantonale" filetype:pdf</code></li>
+    </ul>
+
+    <h3 style="margin-top: 32px; font-size: 18px;">📨 3 templates email (FR, max 80 mots, nLPD-compliant)</h3>
+
+    <div class="email-template">
+      <div class="email-header"><strong>De :</strong> Alain Martin &lt;cold@send.openswissdata.com&gt; · <strong>Pour :</strong> Compliance Officer banque cantonale</div>
+      <div class="email-subject">Objet : TARES + nLPD — recherche en 30s au lieu de 3h</div>
+      <div class="email-body">
+        <p>Bonjour [Prénom],</p>
+        <p>Vos analystes croisent encore manuellement la TARES et les sanctions OFAC ? Chez openswissdata, nous fournissons ces données fédérales déjà nettoyées et schémas-stables, livrées via API ou MCP (Claude/Copilot).</p>
+        <p>Bundle Compliance 797 CHF/an, mises à jour incluses.</p>
+        <p>15 min jeudi pour un démo ?</p>
+        <p>— Alain Martin, openswissdata.com</p>
+      </div>
+      <div class="email-signature">Désinscription : reply STOP. Données traitées selon nLPD/RGPD (politique : openswissdata.com/legal).</div>
+    </div>
+
+    <div class="email-template">
+      <div class="email-header"><strong>De :</strong> Alain Martin &lt;cold@send.openswissdata.com&gt; · <strong>Pour :</strong> Data Engineer fintech</div>
+      <div class="email-subject">Objet : MCP server datasets CH normalisés (TARES, FINMA, Zefix)</div>
+      <div class="email-body">
+        <p>Hi [Prénom],</p>
+        <p>Vous codez encore des parsers pour les CSV cantonaux ? Notre MCP server expose 9 datasets fédéraux suisses comme tools natifs Claude/Cursor. 49 CHF/mois, schéma stable, SLA 99.5%.</p>
+        <p>Tu peux tester gratos 7 jours : openswissdata.com/mcp</p>
+        <p>Curieux d'avoir ton feedback technique.</p>
+        <p>— Alain, openswissdata.com</p>
+      </div>
+      <div class="email-signature">nLPD/RGPD compliant — STOP pour désinscription.</div>
+    </div>
+
+    <div class="email-template">
+      <div class="email-header"><strong>De :</strong> Alain Martin &lt;cold@send.openswissdata.com&gt; · <strong>Pour :</strong> Intégrateur ERP</div>
+      <div class="email-subject">Objet : TARES nettoyée pour vos clients exportateurs</div>
+      <div class="email-body">
+        <p>Bonjour [Prénom],</p>
+        <p>Vos clients PME ont des soucis avec les codes TARES dans leur ERP (Abacus, SAP, Odoo) ? Nous livrons la TARES en JSON/CSV propre, mise à jour mensuelle, 299 CHF/an par client.</p>
+        <p>Programme partenaire : 30 % commission récurrente.</p>
+        <p>15 min pour en parler ?</p>
+        <p>— Alain, openswissdata.com</p>
+      </div>
+      <div class="email-signature">nLPD-RGPD compliant — STOP.</div>
+    </div>
+
+    <h3 style="margin-top: 32px; font-size: 18px;">📊 Tunnel B2B CH — funnel réaliste</h3>
+    <div class="funnel">
+      <div class="funnel-row"><div class="funnel-bar" style="width: 100%;">100</div><div class="funnel-label">Cold emails envoyés</div></div>
+      <div class="funnel-row"><div class="funnel-bar" style="width: 40%;">35-45</div><div class="funnel-label">Ouvertures (35-45 %)</div></div>
+      <div class="funnel-row"><div class="funnel-bar" style="width: 12%;">8-12</div><div class="funnel-label">Réponses (8-12 %)</div></div>
+      <div class="funnel-row"><div class="funnel-bar" style="width: 5%;">3-5</div><div class="funnel-label">Meetings (3-5 %)</div></div>
+      <div class="funnel-row"><div class="funnel-bar" style="width: 1.5%;">0.5-1.5</div><div class="funnel-label">Ventes (0.5-1.5 %)</div></div>
+    </div>
+
+    <h3 style="margin-top: 32px; font-size: 18px;">🗓 Plan 30 jours</h3>
+    <div class="channel-table">
+      <div class="channel-row head"><div></div><div>Phase</div><div>Volume</div><div>Action</div><div>Cible</div></div>
+      <div class="channel-row"><div class="channel-num">J1-7</div><div class="channel-title"><strong>Sourcing 200 contacts</strong><span>60 compliance + 50 data eng + 40 ERP + 30 avocats + 20 douane</span></div><div><span class="badge invisible">200</span></div><div><span class="badge med">FINMA + Zefix</span></div><div></div></div>
+      <div class="channel-row"><div class="channel-num">J8-14</div><div class="channel-title"><strong>Batch 1 envoi</strong><span>50 emails/jour lun-jeu via Instantly.ai sous-domaine warmé</span></div><div><span class="badge high">200</span></div><div><span class="badge med">+ follow J+3, J+7</span></div><div></div></div>
+      <div class="channel-row"><div class="channel-num">J15-21</div><div class="channel-title"><strong>Batch 2 + appels chauds</strong><span>20 appels téléphoniques aux non-répondeurs prioritaires (compliance banques cantonales)</span></div><div><span class="badge high">+ 50</span></div><div><span class="badge high">demos calées</span></div><div></div></div>
+      <div class="channel-row"><div class="channel-num">J22-30</div><div class="channel-title"><strong>Closing</strong><span>Devis + signatures + onboarding · nurturing "pas maintenant" (J+30, J+60)</span></div><div><span class="badge high">closing</span></div><div><span class="badge high">conversions</span></div><div></div></div>
+    </div>
+
+    <h3 style="margin-top: 32px; font-size: 18px;">💰 Ventes réalistes 30 jours</h3>
+    <div class="scenarios">
+      <div class="scenario">
+        <div class="scenario-label">Low case</div>
+        <div class="scenario-revenue">797 CHF</div>
+        <div class="scenario-detail">1 vente · 1 bundle</div>
+      </div>
+      <div class="scenario median">
+        <div class="scenario-label">⭐ Médian</div>
+        <div class="scenario-revenue">2 200 CHF</div>
+        <div class="scenario-detail">3 ventes · 2 bundles + 1 MCP annuel</div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-label">High case</div>
+        <div class="scenario-revenue">3 800 CHF</div>
+        <div class="scenario-detail">6 ventes · 3 bundles + 2 MCP + 1 dataset</div>
+      </div>
+    </div>
+    <p style="font-size: 13px; color: var(--ink-mute); margin-top: 14px; text-align: center;">
+      Mois 2 amplifie : MRR MCP + bouche-à-oreille + références = ×2-3 le mois 3.
+    </p>
+  </div>
+</section>
+
+<!-- ALERTES SÉCURITÉ -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Pièges à éviter absolument</strong>
+      <span class="sep">/</span>
+      <span>Ce qui déclencherait une alerte LinkedIn employeur</span>
+    </div>
+    <h2>Les <span class="serif">erreurs</span> qui te trahiraient.</h2>
+
+    <div class="strategy-card avoid">
+      <div class="strategy-num">⛔ ERREUR 1</div>
+      <h3 class="strategy-title">Administrer la Page LinkedIn entreprise avec ton compte perso</h3>
+      <p>LinkedIn affichera "started a new position" ou "started working at openswissdata" en notification publique. Ton fil d'actualité chez l'employeur deviendra visible. <strong>Solution :</strong> créer un <strong>second compte LinkedIn</strong> avec une email burner (<code>team@openswissdata.com</code>) dédié uniquement à l'admin de la Page entreprise. Ne jamais lier ce compte à ton compte perso.</p>
+    </div>
+
+    <div class="strategy-card avoid">
+      <div class="strategy-num">⛔ ERREUR 2</div>
+      <h3 class="strategy-title">Activer l'extension Chrome Apollo.io / RocketReach</h3>
+      <p>Ces extensions lisent ton profil LinkedIn pour scraper les contacts. Activité visible côté LinkedIn = potentiellement signal côté employeur. <strong>Solution :</strong> utiliser uniquement le dashboard web (sans extension). Ou utiliser Hunter.io qui ne touche jamais à LinkedIn.</p>
+    </div>
+
+    <div class="strategy-card avoid">
+      <div class="strategy-num">⛔ ERREUR 3</div>
+      <h3 class="strategy-title">Liker, commenter ou partager des posts openswissdata depuis ton profil perso</h3>
+      <p>Le moindre like ou commentaire apparaît dans le fil de tes connexions. <strong>Solution :</strong> tout interaction openswissdata se fait depuis le compte produit ou le second compte admin. Strict separation.</p>
+    </div>
+
+    <div class="strategy-card avoid">
+      <div class="strategy-num">⛔ ERREUR 4</div>
+      <h3 class="strategy-title">Mentionner openswissdata dans ton "About" ou "Experience" LinkedIn perso</h3>
+      <p>Dès que tu modifies ton profil, LinkedIn notifie tes connexions. <strong>Solution :</strong> ne jamais ajouter openswissdata comme expérience sur LinkedIn perso tant que tu travailles ailleurs.</p>
+    </div>
+
+    <div class="strategy-card avoid">
+      <div class="strategy-num">⛔ ERREUR 5</div>
+      <h3 class="strategy-title">Email envoyé depuis <code>contact@openswissdata.com</code> à un collègue actuel</h3>
+      <p>Si un cold email arrive accidentellement à un collègue de ton employeur (la liste FINMA est large), il peut faire le rapprochement. <strong>Solution :</strong> exclure ton employeur actuel de toutes les listes de cold outreach. Liste manuelle, validation finale avant envoi.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COMPENSATION POST-LAUNCH -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Compensation 4 semaines</strong>
+      <span class="sep">/</span>
+      <span>Comment ne pas perdre l'axe LinkedIn à long terme</span>
+    </div>
+    <h2>L'effet <span class="serif">ambassadeurs</span>.</h2>
+    <p class="section-intro">
+      LinkedIn perso d'Alain est OFF. Mais on peut faire poster <strong>10-15 alliés</strong> sur LEUR profil (clients early, contributeurs GitHub, membres SFTI, fiduciaires partenaires). Leurs posts génèrent la portée qu'Alain ne peut pas créer lui-même.
+    </p>
+
+    <div class="strategy-card top">
+      <div class="strategy-num">SEMAINE 1-4 · ACTION 1</div>
+      <h3 class="strategy-title">Construire l'autorité de la Page entreprise openswissdata</h3>
+      <p>3 posts/semaine signés "team", inviter 10-15 alliés (clients early, contributeurs GitHub, membres Swiss FinTech Association) à devenir <strong>ambassadeurs visibles sur LEUR LinkedIn perso</strong>. Leurs posts génèrent la portée qu'Alain ne peut pas créer lui-même.</p>
+    </div>
+
+    <div class="strategy-card top">
+      <div class="strategy-num">SEMAINE 1-4 · ACTION 2</div>
+      <h3 class="strategy-title">Cadence presse + Substack hebdomadaire</h3>
+      <p>1 article fond/semaine sur Substack (use-case fiduciaire, deep-dive dataset, benchmark) + pitch mensuel à <strong>NZZ Tech, Le Temps Économie, Bilan, Handelszeitung</strong>. La presse signée marque crée backlinks SEO et autorité sans toucher au profil perso.</p>
+    </div>
+
+    <div class="strategy-card top">
+      <div class="strategy-num">SEMAINE 1-4 · ACTION 3</div>
+      <h3 class="strategy-title">Présence physique Swiss FinTech Week (19-25 juin Zurich)</h3>
+      <p>+ meetups Zurich/Genève data engineering. Networking direct, distribution cartes, démos live. Convertit les contacts en clients sans aucune trace LinkedIn perso, et permet à des tiers de poster <strong>LEURS</strong> photos avec le stand openswissdata.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · plan acquisition DISCRET</strong></p>
+    <p style="margin: 0;">
+      4 agents en parallèle (5 mai 2026). 15 canaux substituts (13 invisibles + 2 risque mineur). 7 stratégies d'identité (Top 1 = LinkedIn perso neutre + Page entreprise burner + page founder minimaliste). Plan jour J 8h-22h sans une trace LinkedIn perso. Cold outreach amplifié × 5 (200 contacts en 30 jours, 3 ventes médian). Risque employeur ~15 % sur 12 mois.
+      Sauvegardé en mémoire dans <code>openswissdata-launch-strategy.md</code>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

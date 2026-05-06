@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maquette C — Swiss Grid Brutalist · openswissdata</title>
+<style>
+  :root{
+    --bg:#FBFBF8;--bg-soft:#F4F4F0;--bg-card:#FFFFFF;
+    --ink:#0A0A0C;--ink-soft:#4A4D55;--ink-mute:#6B6E76;
+    --line:rgba(10,10,12,.08);--line-strong:rgba(10,10,12,.18);
+    --accent:#DC1F2D;--green:#15803D;
+    --font-sans:Geist,-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
+    --font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;
+    --t-fast:.2s;--ease-out:cubic-bezier(0.16,1,0.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+
+  .mockup-flag{position:fixed;top:12px;right:12px;z-index:200;background:var(--ink);color:var(--bg);font-family:var(--font-mono);font-size:10px;padding:6px 10px;letter-spacing:.08em;text-transform:uppercase}
+
+  /* Nav — très fine, brutaliste */
+  .nav{position:sticky;top:0;z-index:100;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:24px;padding:0 36px;height:56px;background:var(--bg);border-bottom:1px solid var(--ink);font-family:var(--font-mono);font-size:11px;color:var(--ink)}
+  .nav-mark{width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+  .nav-mark img{width:100%;height:100%;object-fit:contain}
+  .nav-id{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;color:var(--ink-mute);text-transform:uppercase}
+  .nav-id strong{color:var(--ink);font-weight:600;letter-spacing:.04em}
+  .nav-links{display:flex;gap:24px;justify-self:end}
+  .nav-links a{color:var(--ink);text-transform:uppercase;letter-spacing:.04em;font-size:11px;transition:color var(--t-fast)}
+  .nav-links a:hover{color:var(--accent)}
+  .nav-live{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+  .nav-dot{width:6px;height:6px;background:var(--green);border-radius:50%}
+
+  /* Hero — plein viewport, grille 12 colonnes */
+  .hero{position:relative;height:100vh;min-height:680px;display:grid;grid-template-columns:repeat(12,1fr);gap:0;border-bottom:1px solid var(--ink);overflow:hidden}
+  .hero-text{grid-column:1/9;padding:80px 48px 64px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--ink)}
+  .hero-banner{grid-column:9/13;position:relative;background:var(--bg-soft);overflow:hidden}
+  .hero-banner img{width:100%;height:100%;object-fit:cover;object-position:center}
+  .hero-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,transparent 70%,rgba(220,31,45,.05) 100%);pointer-events:none}
+
+  .hero-meta{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between;border-bottom:1px solid var(--line-strong);padding-bottom:16px;margin-bottom:auto}
+  .hero-meta-item{display:flex;flex-direction:column;gap:4px}
+  .hero-meta-item strong{color:var(--ink);font-weight:600;font-size:13px;letter-spacing:0;text-transform:none}
+
+  /* Title — gigantesque, mots empilés */
+  .hero-title{font-size:clamp(64px,11vw,144px);font-weight:600;line-height:.92;letter-spacing:-.05em;color:var(--ink);margin:auto 0}
+  .hero-title-line{display:block}
+  .hero-title-line .num{font-family:var(--font-mono);font-size:14px;font-weight:400;color:var(--ink-mute);vertical-align:top;margin-right:14px;letter-spacing:0}
+  .hero-title-square{display:inline-block;width:.6em;height:.6em;background:var(--accent);vertical-align:baseline;margin-left:.1em;animation:beat 3s ease-in-out infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+  /* Bottom — CTA + chain */
+  .hero-bottom{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;border-top:1px solid var(--line-strong);padding-top:24px}
+  .hero-lede{font-family:var(--font-mono);font-size:13px;color:var(--ink-soft);line-height:1.6;max-width:48ch}
+  .hero-cta{display:flex;gap:0;border:1px solid var(--ink)}
+  .btn{padding:16px 24px;font-family:var(--font-mono);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--ink);border:none;cursor:pointer;transition:background var(--t-fast)}
+  .btn:hover{background:var(--ink);color:var(--bg)}
+  .btn+.btn{border-left:1px solid var(--ink)}
+  .btn-primary{background:var(--ink);color:var(--bg)}
+  .btn-primary:hover{background:var(--accent);color:#fff}
+
+  /* Banner overlay — numbered marker brutaliste */
+  .banner-marker{position:absolute;background:var(--bg);border:1px solid var(--ink);padding:10px 12px;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+  .banner-marker.m1{top:24px;left:24px;color:var(--ink)}
+  .banner-marker.m2{bottom:24px;left:24px;color:var(--accent);border-color:var(--accent)}
+  .banner-marker .k{color:var(--ink-mute);display:block;margin-bottom:2px;font-size:9px}
+
+  /* TARES section — full bleed, brutalist */
+  .tares-section{border-bottom:1px solid var(--ink)}
+  .tares-meta-bar{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--ink);font-family:var(--font-mono);font-size:11px}
+  .tares-meta-bar > div{padding:16px 24px;border-right:1px solid var(--ink);text-transform:uppercase;letter-spacing:.04em}
+  .tares-meta-bar > div:last-child{border-right:none}
+  .tares-meta-bar .k{color:var(--ink-mute);display:block;font-size:9px;margin-bottom:4px}
+  .tares-meta-bar .v{color:var(--ink);font-weight:600}
+
+  .tares-hero{display:grid;grid-template-columns:repeat(12,1fr);min-height:520px}
+  .tares-hero-text{grid-column:1/8;padding:64px 48px;border-right:1px solid var(--ink);display:flex;flex-direction:column;justify-content:center}
+  .tares-hero-banner{grid-column:8/13;position:relative;overflow:hidden;background:var(--bg-soft)}
+  .tares-hero-banner img{width:100%;height:100%;object-fit:cover}
+  .tares-hero-eyebrow{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.08em;margin-bottom:24px;display:flex;gap:14px;align-items:center}
+  .tares-hero-eyebrow .check{color:var(--green)}
+  .tares-h1{font-size:clamp(48px,7vw,88px);font-weight:600;line-height:.95;letter-spacing:-.04em;margin-bottom:24px}
+  .tares-h1 .accent{color:var(--accent)}
+  .tares-lede{font-family:var(--font-mono);font-size:13px;color:var(--ink-soft);line-height:1.65;margin-bottom:32px;max-width:50ch}
+
+  /* Specs grid brutalist */
+  .specs-row{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);font-family:var(--font-mono)}
+  .specs-row > div{padding:18px 24px;border-right:1px solid var(--line-strong);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  .specs-row > div:last-child{border-right:none}
+  .specs-row .k{color:var(--ink-mute);display:block;font-size:9px;margin-bottom:4px}
+  .specs-row .v{color:var(--ink);font-weight:600;font-size:14px;letter-spacing:0}
+
+  footer{padding:48px 36px;font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);text-align:center;border-top:1px solid var(--line-strong);margin-top:0}
+</style>
+</head>
+<body>
+
+<div class="mockup-flag">Maquette C · Swiss Grid Brutalist</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-mark"><img src="../web/public/logo.png" alt=""></div>
+  <div class="nav-id"><strong>openswissdata</strong> / 2026.05 / v1.0.0 / Berne</div>
+  <div class="nav-links">
+    <a href="#">Datasets</a>
+    <a href="#">Method</a>
+    <a href="#">Docs</a>
+    <a href="#">Blog</a>
+  </div>
+  <span class="nav-live"><span class="nav-dot"></span>Live</span>
+</nav>
+
+<!-- HERO 100vh, grille 12 cols -->
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span>Edition</span><strong>2026.05</strong></div>
+      <div class="hero-meta-item"><span>Sources</span><strong>BAZG · OFS · FINMA</strong></div>
+      <div class="hero-meta-item"><span>Permissions</span><strong>2 / 3 acquired</strong></div>
+      <div class="hero-meta-item"><span>For</span><strong>Berne, CH</strong></div>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="hero-title-line"><span class="num">01</span>Open</span>
+      <span class="hero-title-line"><span class="num">02</span>Swiss</span>
+      <span class="hero-title-line"><span class="num">03</span>Data<span class="hero-title-square"></span></span>
+    </h1>
+
+    <div class="hero-bottom">
+      <p class="hero-lede">TARES, NOGA / NACE / ISIC, FINMA Registry — normalisés, signés Ed25519, horodatés RFC-3161. Délivrés en JSON, Parquet, SQL. Une seule chaîne de droits.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary">Datasets →</button>
+        <button class="btn">Sample</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-banner">
+    <img src="../web/public/og-tares.png" alt="">
+    <div class="banner-marker m1"><span class="k">Signature</span>Pixels → red</div>
+    <div class="banner-marker m2"><span class="k">Endpoint</span>#DC1F2D</div>
+  </div>
+</section>
+
+<!-- TARES PAGE — full-bleed brutalist -->
+<section class="tares-section">
+  <div class="tares-meta-bar">
+    <div><span class="k">Path</span><span class="v">/datasets/tares</span></div>
+    <div><span class="k">Source</span><span class="v">xtares.admin.ch</span></div>
+    <div><span class="k">Permission</span><span class="v">BAZG · 2026-04-21</span></div>
+    <div><span class="k">Price</span><span class="v">299 CHF · One-shot</span></div>
+  </div>
+
+  <div class="tares-hero">
+    <div class="tares-hero-text">
+      <div class="tares-hero-eyebrow">
+        <span>TARES / Customs tariff</span>
+        <span style="opacity:.4">/</span>
+        <span class="check">Permission acquired</span>
+      </div>
+      <h1 class="tares-h1">Le tarif douanier<br>suisse, <span class="accent">propre.</span></h1>
+      <p class="tares-lede">~7 500 codes HS8. Désignations DE/FR/IT/EN. Droits MFN. 30+ régimes préférentiels. Codes ZCO d'allègement. JSON / Parquet / SQL. Manifest signé. Horodatage RFC-3161.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary">Buy — 299 CHF →</button>
+        <button class="btn">Sample CSV</button>
+        <button class="btn">License terms</button>
+      </div>
+    </div>
+    <div class="tares-hero-banner">
+      <img src="../web/public/og-tares.png" alt="">
+      <div class="banner-marker m1"><span class="k">Updated</span>2026.05.06 · v1.0.0</div>
+    </div>
+  </div>
+
+  <div class="specs-row">
+    <div><span class="k">Codes HS8</span><span class="v">~7 500</span></div>
+    <div><span class="k">Régimes préf.</span><span class="v">30+</span></div>
+    <div><span class="k">Updates</span><span class="v">Weekly</span></div>
+    <div><span class="k">Formats</span><span class="v">JSON · Parquet · SQL</span></div>
+  </div>
+</section>
+
+<footer>
+  Maquette C — Swiss Grid Brutalist. Logo isolé 30px dans nav très fine 56px · hero 100vh sur grille 12 cols · titre 144px max sur 3 lignes numérotées · bannière TARES bloc affiche statique 4 cols à droite · sections séparées par filets noirs 1px · hommage Müller-Brockmann.
+</footer>
+
+</body>
+</html>
