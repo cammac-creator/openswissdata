@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Profil Claude-Alain Martin · onboarding nouvelle session</title>
+<style>
+  :root {
+    --bg: #FBFBF8; --bg-card: #FFFFFF; --bg-soft: #F5F4EE;
+    --ink: #0A0A0C; --ink-soft: #3A3D45; --ink-mute: #6B6E76;
+    --line: #E8E4D9; --line-strong: #D9D3C3;
+    --accent: #DC1F2D; --accent-soft: #FCE7E9;
+    --green: #15803D; --green-soft: #DCFCE7;
+    --amber: #92400E; --amber-soft: #FEF3C7;
+    --teal: #0F766E; --teal-soft: #E5F5F1;
+    --blue: #1D4ED8; --blue-soft: #DBEAFE;
+    --purple: #6D28D9; --purple-soft: #EDE9FE;
+    --orange: #C2410C; --orange-soft: #FFEDD5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%; z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  .hero { padding: 56px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line); width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font-weight: 700; font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05; letter-spacing: -.03em;
+    margin: 0 0 18px; max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 24px 0 36px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); } }
+
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1;
+    letter-spacing: -.025em; margin: 0 0 12px; max-width: 30ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  /* ID block */
+  .id-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+  @media (max-width: 720px) { .id-grid { grid-template-columns: 1fr; } }
+  .id-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 26px;
+  }
+  .id-card-label {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    font-weight: 700; margin-bottom: 10px;
+  }
+  .id-card h4 { margin: 0 0 8px; font-size: 17px; font-weight: 700; }
+  .id-card .meta { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+  .id-card .meta strong { color: var(--ink); }
+
+  /* Family card */
+  .family-card {
+    background: linear-gradient(135deg, var(--teal-soft) 0%, white 100%);
+    border: 1px solid var(--teal); border-radius: 12px;
+    padding: 22px 26px; margin: 14px 0;
+  }
+  .family-emoji-grid {
+    display: grid; grid-template-columns: repeat(11, 1fr);
+    gap: 8px; margin: 14px 0;
+    max-width: 360px;
+  }
+  .family-emoji-grid > div {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: white; display: grid; place-items: center;
+    font-size: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+
+  /* Projects */
+  .projects-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 24px 0; }
+  .project-row {
+    display: grid; grid-template-columns: 50px 1fr 200px 100px;
+    gap: 16px; padding: 14px 18px;
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 10px;
+    align-items: center;
+  }
+  .project-row.live { border-left: 3px solid var(--green); }
+  .project-row.dev { border-left: 3px solid var(--amber); }
+  .project-row.experimental { border-left: 3px solid var(--purple); }
+  .project-row.deprecated { border-left: 3px solid var(--ink-mute); opacity: 0.7; }
+  .project-icon {
+    width: 40px; height: 40px; border-radius: 8px;
+    display: grid; place-items: center;
+    font-size: 18px; font-weight: 700; color: white;
+  }
+  .project-icon.live { background: var(--green); }
+  .project-icon.dev { background: var(--amber); }
+  .project-icon.experimental { background: var(--purple); }
+  .project-icon.deprecated { background: var(--ink-mute); }
+  .project-content h4 { margin: 0 0 3px; font-size: 15px; font-weight: 700; }
+  .project-content p { margin: 0; font-size: 12px; color: var(--ink-mute); line-height: 1.4; }
+  .project-content .domain { font-family: "Geist Mono", monospace; font-size: 11px; color: var(--ink-soft); }
+  .project-stack {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: var(--ink-soft); line-height: 1.5;
+  }
+  .project-status {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: .04em; font-weight: 700;
+    padding: 4px 10px; border-radius: 4px; text-align: center;
+  }
+  .project-status.live { background: var(--green-soft); color: var(--green); }
+  .project-status.dev { background: var(--amber-soft); color: var(--amber); }
+  .project-status.experimental { background: var(--purple-soft); color: var(--purple); }
+  .project-status.deprecated { background: var(--bg-soft); color: var(--ink-mute); }
+  @media (max-width: 880px) { .project-row { grid-template-columns: 50px 1fr; } .project-stack, .project-status { grid-column: 2; } }
+
+  /* Stack chips */
+  .stack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 20px 0; }
+  @media (max-width: 720px) { .stack-grid { grid-template-columns: 1fr; } }
+  .stack-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .stack-card h5 {
+    margin: 0 0 12px; font-size: 13px; font-weight: 700;
+    font-family: "Geist Mono", monospace; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--ink-mute);
+  }
+  .stack-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .stack-chip {
+    background: var(--bg-soft); border: 1px solid var(--line);
+    padding: 4px 10px; border-radius: 4px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink);
+  }
+  .stack-chip.highlight { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  /* Assets card */
+  .assets-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
+  @media (max-width: 880px) { .assets-grid { grid-template-columns: 1fr; } }
+  .asset-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 24px; position: relative; overflow: hidden;
+  }
+  .asset-card .icon-bg {
+    position: absolute; top: -10px; right: -10px;
+    font-size: 80px; opacity: 0.06; pointer-events: none;
+  }
+  .asset-card .label {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 6px; font-weight: 700;
+  }
+  .asset-card h4 { margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+  .asset-card p { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+
+  /* Rules / preferences */
+  .rules-list {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 8px 0; margin: 20px 0;
+  }
+  .rule-item {
+    display: grid; grid-template-columns: 40px 1fr;
+    gap: 14px; padding: 14px 24px;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: white;
+    display: grid; place-items: center;
+    font-family: "Geist Mono", monospace; font-size: 12px; font-weight: 700;
+  }
+  .rule-content h5 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+  .rule-content p { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+
+  /* Ideas section */
+  .ideas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
+  @media (max-width: 880px) { .ideas-grid { grid-template-columns: 1fr; } }
+  .idea-card {
+    background: linear-gradient(180deg, var(--orange-soft) 0%, white 100%);
+    border: 1px solid var(--orange); border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .idea-card h5 {
+    margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--orange);
+  }
+  .idea-card ul {
+    margin: 0; padding-left: 18px; font-size: 12px;
+    color: var(--ink-soft); line-height: 1.6;
+  }
+  .idea-card ul li { margin-bottom: 4px; }
+
+  /* Network */
+  .network-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+  @media (max-width: 720px) { .network-grid { grid-template-columns: 1fr; } }
+  .network-row {
+    display: flex; gap: 12px; align-items: center;
+    padding: 14px 18px;
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 10px;
+  }
+  .network-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--bg-soft); display: grid; place-items: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .network-content h5 { margin: 0 0 2px; font-size: 13px; font-weight: 700; }
+  .network-content p { margin: 0; font-size: 12px; color: var(--ink-mute); line-height: 1.4; }
+
+  /* Verdict / footer */
+  .verdict {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg); border-radius: 14px; padding: 32px 36px; margin: 24px 0;
+  }
+  .verdict h3 { color: var(--bg); font-size: 22px; margin: 0 0 14px; }
+  .verdict p { color: rgba(255,255,255,.8); font-size: 14px; line-height: 1.65; margin: 0 0 12px; }
+  .verdict p strong { color: white; }
+  .verdict code { background: rgba(255,255,255,.1); color: #6ee7b7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+
+  footer {
+    padding: 36px 0 56px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Onboarding nouvelle session · 2026-05-07</span>
+    </div>
+    <h1>Le profil de <span class="accent">Claude-Alain</span> en une page.</h1>
+    <p class="lede">
+      Document de référence pour démarrer une nouvelle session Claude (ou autre agent IA) avec un contexte complet : qui tu es, ta famille, tes projets, tes acquis, tes contraintes, tes préférences. Compilé depuis toutes les mémoires Claude accumulées dans <code>~/.claude/projects/*/memory/</code>.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Projets actifs</div>
+        <div class="stat-value">14</div>
+        <div class="stat-sub">7 en prod · 7 en dev/exp</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Langues</div>
+        <div class="stat-value">3</div>
+        <div class="stat-sub">FR / DE / IT</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Famille</div>
+        <div class="stat-value">2 + 4 + 5</div>
+        <div class="stat-sub">adultes · enfants · animaux</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Expérience pro</div>
+        <div class="stat-value">7 ans</div>
+        <div class="stat-sub">roulements industriels</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Permissions CH</div>
+        <div class="stat-value">2 ✅</div>
+        <div class="stat-sub">BAZG + FINMA</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IDENTITÉ -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Identité</strong>
+      <span class="sep">/</span>
+      <span>Qui est Claude-Alain</span>
+    </div>
+    <h2>Solo founder + commercial <span class="serif">microtech CH</span>.</h2>
+
+    <div class="id-grid">
+
+      <div class="id-card">
+        <div class="id-card-label">État civil</div>
+        <h4>Claude-Alain Martin</h4>
+        <p class="meta">
+          <strong>PAS "Alain"</strong> — le prénom est composé. Solo founder + salarié. Trilingue FR/DE/IT, interaction toujours en français. Rue de l'Église 23, <strong>1045 Ogens</strong>, Vaud, Suisse. Connexion Swisscom.
+        </p>
+      </div>
+
+      <div class="id-card">
+        <div class="id-card-label">Comptes</div>
+        <h4>Identifiants numériques</h4>
+        <p class="meta">
+          Email perso <code>claudealainmartin06@gmail.com</code> · Email business <code>cam@ogens.ch</code> · Email alt <code>cammac@bluewin.ch</code><br>
+          Handles : <strong>Cammac</strong>, <strong>nytril</strong> (npm), <strong>cammac-creator</strong> (GitHub)<br>
+          Banques : Raiffeisen · Swissborg · Swissquote · Binance · ~10 boîtes mail au total
+        </p>
+      </div>
+
+      <div class="id-card">
+        <div class="id-card-label">Employeur</div>
+        <h4>UIKER Antriebstechnik AG</h4>
+        <p class="meta">
+          Membre du <strong>groupe Techne AG</strong> (microtech CH 80 ans, avec Gebrüder Meier). Rôle <strong>Commercial</strong>, 7 ans d'expérience dans les <strong>roulements industriels</strong> (SKF, FAG, NSK, NTN, Timken, Koyo, ZKL). Exposant <strong>SIAMS 2026</strong>.
+        </p>
+      </div>
+
+      <div class="id-card">
+        <div class="id-card-label">⚠️ Contrainte stricte</div>
+        <h4>Plan discret LinkedIn perso</h4>
+        <p class="meta">
+          <strong>JAMAIS</strong> d'activité projets parallèles (openswissdata, IBANforge, Tabornio…) sur le LinkedIn perso de Claude-Alain. UIKER surveille. Le reste (Reddit, HN, X, GitHub, Substack) est <strong>OK</strong> car personne chez UIKER n'est tech/geek.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FAMILLE -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Famille</strong>
+      <span class="sep">/</span>
+      <span>Centrale dans la vie + motivation Tabornio</span>
+    </div>
+    <h2>Une <span class="serif">tribu de 11</span> à Ogens.</h2>
+
+    <div class="family-card">
+      <p style="margin: 0 0 6px; font-size: 14px; color: var(--ink-soft);">Composition du foyer :</p>
+      <div class="family-emoji-grid">
+        <div>👨</div>
+        <div>👩</div>
+        <div>🧒</div>
+        <div>🧒</div>
+        <div>🧒</div>
+        <div>🧒</div>
+        <div>🐱</div>
+        <div>🐱</div>
+        <div>🐱</div>
+        <div>🐱</div>
+        <div>🐶</div>
+      </div>
+      <p style="margin: 12px 0 0; font-size: 13px; color: var(--ink-soft);">
+        <strong>2 adultes</strong> (lui + conjoint·e, finances en commun) · <strong>4 enfants mineurs</strong> · <strong>4 chats + 1 chien</strong>. Calendriers Apple + Google partagés. La famille est une motivation explicite pour le projet <strong>Tabornio</strong> (assistant de vie famille).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- PROJETS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Catalogue projets</strong>
+      <span class="sep">/</span>
+      <span>14 projets · 4 statuts</span>
+    </div>
+    <h2>Les <span class="serif">projets</span> en cours et passés.</h2>
+
+    <h3 style="font-size: 17px; margin: 28px 0 10px;">🟢 En production / actifs</h3>
+
+    <div class="projects-grid">
+
+      <div class="project-row live">
+        <div class="project-icon live">IF</div>
+        <div class="project-content">
+          <h4>IBANforge</h4>
+          <p>API validation IBAN/BIC pour PSP + agents AI (x402 + MCP)</p>
+          <div class="domain">ibanforge.com</div>
+        </div>
+        <div class="project-stack">Hono · SQLite · Vercel · Railway · MCP</div>
+        <div class="project-status live">Live · Monétisé</div>
+      </div>
+
+      <div class="project-row live">
+        <div class="project-icon live">OS</div>
+        <div class="project-content">
+          <h4>openswissdata</h4>
+          <p>Premier MCP server suisse — datasets fédéraux (TARES, NOGA, FINMA)</p>
+          <div class="domain">openswissdata.com + mcp.openswissdata.com</div>
+        </div>
+        <div class="project-stack">Hono · better-sqlite3 · Astro · Railway · R2</div>
+        <div class="project-status live">Live · Registry MCP</div>
+      </div>
+
+      <div class="project-row dev">
+        <div class="project-icon dev">OI</div>
+        <div class="project-content">
+          <h4>OIBTpro.ch</h4>
+          <p>SaaS contrôles OIBT électriques basse tension CH (vs Brunner)</p>
+          <div class="domain">oibtpro.ch</div>
+        </div>
+        <div class="project-stack">Vite · React · TS · Supabase · Vercel</div>
+        <div class="project-status dev">En dev</div>
+      </div>
+
+      <div class="project-row dev">
+        <div class="project-icon dev">OT</div>
+        <div class="project-content">
+          <h4>Otto CRM</h4>
+          <p>CRM distribution roulements + RAG 56 catalogues + chatbot Otto (UIKER)</p>
+          <div class="domain">interne UIKER</div>
+        </div>
+        <div class="project-stack">Vite · React · Supabase · Edge Functions · RAG</div>
+        <div class="project-status dev">Phase 5 ✅</div>
+      </div>
+
+      <div class="project-row dev">
+        <div class="project-icon dev">TB</div>
+        <div class="project-content">
+          <h4>Tabornio</h4>
+          <p>Assistant de vie famille + bot Telegram "Le Tabornio" + Dory</p>
+          <div class="domain">tabornio.ch</div>
+        </div>
+        <div class="project-stack">FastAPI · Next.js · Postgres · pgvector · Docker</div>
+        <div class="project-status dev">Phase 1 en cours</div>
+      </div>
+
+      <div class="project-row dev">
+        <div class="project-icon dev">GC</div>
+        <div class="project-content">
+          <h4>Le Grimoire Culinaire</h4>
+          <p>Projet React/TS/Vite (recettes culinaires)</p>
+          <div class="domain">à confirmer</div>
+        </div>
+        <div class="project-stack">React 18 · TS · Vite · Bun</div>
+        <div class="project-status dev">En dev</div>
+      </div>
+
+      <div class="project-row live">
+        <div class="project-icon live">GdC</div>
+        <div class="project-content">
+          <h4>Les Gens du Coin</h4>
+          <p>Carte locale Ogens : patrimoine, habitats, agriculture, anecdotes</p>
+          <div class="domain">site statique localStorage</div>
+        </div>
+        <div class="project-stack">HTML · JS · Leaflet 1.9.4 · localStorage</div>
+        <div class="project-status live">Statique live</div>
+      </div>
+
+    </div>
+
+    <h3 style="font-size: 17px; margin: 32px 0 10px;">🟣 Expérimentaux / brainstorming</h3>
+
+    <div class="projects-grid">
+
+      <div class="project-row experimental">
+        <div class="project-icon experimental">BA</div>
+        <div class="project-content">
+          <h4>BearingAPI</h4>
+          <p>Cross-référence roulements industriels + micropaiements x402 USDC sur Base</p>
+          <div class="domain">démo monétisation API niche par agents IA</div>
+        </div>
+        <div class="project-stack">Hono · Drizzle · MCP · x402 SDK v2</div>
+        <div class="project-status experimental">Démo</div>
+      </div>
+
+      <div class="project-row experimental">
+        <div class="project-icon experimental">Rt</div>
+        <div class="project-content">
+          <h4>Roulement.ch → PartHub MCP</h4>
+          <p>Pivot en cours, audit honnête v2 disponible</p>
+          <div class="domain">roulement.ch (Infomaniak)</div>
+        </div>
+        <div class="project-stack">à définir post-pivot</div>
+        <div class="project-status experimental">Pivot</div>
+      </div>
+
+      <div class="project-row experimental">
+        <div class="project-icon experimental">Sc</div>
+        <div class="project-content">
+          <h4>Solcréation</h4>
+          <p>ERP poseurs de sol — MVP démo pour un ami d'Alain</p>
+          <div class="domain">interne</div>
+        </div>
+        <div class="project-stack">Next.js · Supabase · Vercel</div>
+        <div class="project-status experimental">MVP démo</div>
+      </div>
+
+      <div class="project-row experimental">
+        <div class="project-icon experimental">PJ</div>
+        <div class="project-content">
+          <h4>Projet Jennifer</h4>
+          <p>Dossier brainstorms stratégiques avril 2026 — origine d'openswissdata + 20 idées physiques anti-IA</p>
+          <div class="domain">~/projet Jennifer/docs/</div>
+        </div>
+        <div class="project-stack">notes + drafts</div>
+        <div class="project-status experimental">Lab</div>
+      </div>
+
+    </div>
+
+    <h3 style="font-size: 17px; margin: 32px 0 10px;">⚪ Dépréciés (fusionnés)</h3>
+    <div class="projects-grid">
+      <div class="project-row deprecated">
+        <div class="project-icon deprecated">×</div>
+        <div class="project-content">
+          <h4>biclookup · ibanvalidator</h4>
+          <p>Anciens repos fusionnés dans IBANforge</p>
+          <div class="domain">deprecié</div>
+        </div>
+        <div class="project-stack">—</div>
+        <div class="project-status deprecated">Deprecié</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- STACK -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Stack technique</strong>
+      <span class="sep">/</span>
+      <span>Compétences maîtrisées</span>
+    </div>
+    <h2>Ce que <span class="serif">je sais faire</span> avec Claude Code.</h2>
+    <p class="section-intro">Développeur autodidacte, monte en niveau projet après projet. Pragmatique, pousse en live sans vérif locale.</p>
+
+    <div class="stack-grid">
+
+      <div class="stack-card">
+        <h5>Backend</h5>
+        <div class="stack-chips">
+          <span class="stack-chip highlight">Hono (TypeScript)</span>
+          <span class="stack-chip">FastAPI</span>
+          <span class="stack-chip">Next.js API</span>
+          <span class="stack-chip highlight">MCP server (no SDK)</span>
+        </div>
+      </div>
+
+      <div class="stack-card">
+        <h5>Frontend</h5>
+        <div class="stack-chips">
+          <span class="stack-chip">Astro</span>
+          <span class="stack-chip">Next.js 14</span>
+          <span class="stack-chip">React 18</span>
+          <span class="stack-chip">Tailwind</span>
+          <span class="stack-chip">shadcn/ui</span>
+          <span class="stack-chip">Vite</span>
+        </div>
+      </div>
+
+      <div class="stack-card">
+        <h5>Database</h5>
+        <div class="stack-chips">
+          <span class="stack-chip">PostgreSQL 16</span>
+          <span class="stack-chip">pgvector</span>
+          <span class="stack-chip">Supabase</span>
+          <span class="stack-chip highlight">SQLite WAL</span>
+          <span class="stack-chip">Drizzle</span>
+        </div>
+      </div>
+
+      <div class="stack-card">
+        <h5>Infra / Deploy</h5>
+        <div class="stack-chips">
+          <span class="stack-chip">Vercel</span>
+          <span class="stack-chip">Railway</span>
+          <span class="stack-chip">Cloudflare R2</span>
+          <span class="stack-chip">Docker Compose</span>
+          <span class="stack-chip">Caddy</span>
+          <span class="stack-chip">Infomaniak DNS/VPS</span>
+        </div>
+      </div>
+
+      <div class="stack-card">
+        <h5>Paiements / Email</h5>
+        <div class="stack-chips">
+          <span class="stack-chip">Stripe LIVE</span>
+          <span class="stack-chip highlight">x402 USDC (Base)</span>
+          <span class="stack-chip">Resend</span>
+          <span class="stack-chip">Webhooks signés</span>
+        </div>
+      </div>
+
+      <div class="stack-card">
+        <h5>AI / Agents</h5>
+        <div class="stack-chips">
+          <span class="stack-chip highlight">Claude API</span>
+          <span class="stack-chip highlight">MCP from scratch</span>
+          <span class="stack-chip">Ollama</span>
+          <span class="stack-chip">Gemini embeddings</span>
+          <span class="stack-chip">Telegram bot v20</span>
+          <span class="stack-chip">Wallet jetable x402</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ASSETS UNIQUES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Acquis & assets uniques</strong>
+      <span class="sep">/</span>
+      <span>Ce qui te différencie</span>
+    </div>
+    <h2>Tes <span class="serif">moats</span> personnels.</h2>
+
+    <div class="assets-grid">
+
+      <div class="asset-card">
+        <div class="icon-bg">🛃</div>
+        <div class="label">Réglementaire</div>
+        <h4>Permission BAZG écrite</h4>
+        <p>Acquise le 21 avril 2026 (Michael Beer, Tarifgrundlagen). <strong>Aucun autre éditeur privé n'a cette permission</strong> à connaissance.</p>
+      </div>
+
+      <div class="asset-card">
+        <div class="icon-bg">🏦</div>
+        <div class="label">Réglementaire</div>
+        <h4>Confirmation FINMA</h4>
+        <p>Reçue 6 mai 2026 (Nadine Bucher Communication). Aucune objection à l'usage commercial des données FINMA publiques.</p>
+      </div>
+
+      <div class="asset-card">
+        <div class="icon-bg">☀️</div>
+        <div class="label">Matériel</div>
+        <h4>20 panneaux solaires</h4>
+        <p>Production électrique perso/maison. <strong>Asset rare</strong> pour pivot vers projets énergie/autosuffisance, monitoring, marketplace P2P, conseil PME.</p>
+      </div>
+
+      <div class="asset-card">
+        <div class="icon-bg">🔩</div>
+        <div class="label">Expertise métier</div>
+        <h4>7 ans roulements industriels</h4>
+        <p>Connaissance fine SKF, FAG, NSK, NTN, Timken, Koyo, ZKL. Réseau distributeurs CH. Permet BearingAPI + Otto CRM + Roulement.ch.</p>
+      </div>
+
+      <div class="asset-card">
+        <div class="icon-bg">⚡</div>
+        <div class="label">Expertise métier</div>
+        <h4>Connaissance OIBT électrique</h4>
+        <p>Suffisante pour avoir lancé OIBTpro.ch (SaaS contrôles électriques basse tension CH). Marché dominé par Brunner Informatik (Windows-only).</p>
+      </div>
+
+      <div class="asset-card">
+        <div class="icon-bg">🤝</div>
+        <div class="label">Réseau</div>
+        <h4>UIKER + Techne AG</h4>
+        <p>Groupe microtech CH 80 ans. Organigramme connu, exposant SIAMS 2026. Canal warm pour outreach commercial industrie suisse.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- RÉSEAU -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Réseau humain</strong>
+      <span class="sep">/</span>
+      <span>Personnes ressources</span>
+    </div>
+    <h2>Tes <span class="serif">contacts</span> directs.</h2>
+
+    <div class="network-grid">
+
+      <div class="network-row">
+        <div class="network-icon">🏢</div>
+        <div class="network-content">
+          <h5>UIKER Antriebstechnik AG</h5>
+          <p>Employeur · Organigramme connu · Personnel détaillé dans Bericht</p>
+        </div>
+      </div>
+
+      <div class="network-row">
+        <div class="network-icon">🏢</div>
+        <div class="network-content">
+          <h5>Techne AG (groupe)</h5>
+          <p>Maison-mère UIKER + Gebrüder Meier · Microtech CH</p>
+        </div>
+      </div>
+
+      <div class="network-row">
+        <div class="network-icon">💡</div>
+        <div class="network-content">
+          <h5>Jennifer</h5>
+          <p>Brainstorms stratégiques avril 2026 · À l'origine d'openswissdata</p>
+        </div>
+      </div>
+
+      <div class="network-row">
+        <div class="network-icon">🏗</div>
+        <div class="network-content">
+          <h5>Ami "poseur de sol"</h5>
+          <p>Bénéficiaire du MVP Solcréation · Friend & feedback loop</p>
+        </div>
+      </div>
+
+      <div class="network-row">
+        <div class="network-icon">💼</div>
+        <div class="network-content">
+          <h5>Equipe Otto / Wecare</h5>
+          <p>Présentation Otto 12/03/2026 · Stratégie suivi établie</p>
+        </div>
+      </div>
+
+      <div class="network-row">
+        <div class="network-icon">🦄</div>
+        <div class="network-content">
+          <h5>SwissBorg (relation long-terme)</h5>
+          <p>Long-time client · Canal warm pour outreach fintech CH</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- RÈGLES DE COLLABORATION -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Préférences de collaboration</strong>
+      <span class="sep">/</span>
+      <span>8 règles à toujours respecter</span>
+    </div>
+    <h2>Comment <span class="serif">collaborer</span> avec moi.</h2>
+
+    <div class="rules-list">
+
+      <div class="rule-item">
+        <div class="rule-num">1</div>
+        <div class="rule-content">
+          <h5>Toujours répondre en français</h5>
+          <p>Toutes les questions, options, propositions en français. Exception : code, commits, docs techniques peuvent être en anglais.</p>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <div class="rule-num">2</div>
+        <div class="rule-content">
+          <h5>Push automatique après modification</h5>
+          <p><code>git add + commit + push</code> sans attendre confirmation. Je vérifie uniquement la version live, jamais en local.</p>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <div class="rule-num">3</div>
+        <div class="rule-content">
+          <h5>JAMAIS d'activité projets perso sur LinkedIn perso</h5>
+          <p>UIKER (employeur) surveille mon LinkedIn perso. Reste invisible côté UIKER. Reddit, HN, X, GitHub, Substack OK.</p>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <div class="rule-num">4</div>
+        <div class="rule-content">
+          <h5>Pas de deadline launch fixe</h5>
+          <p>On travaille à mon rythme. Pas de "jeudi 7 mai", pas de "J-X". Je fixe moi-même quand je veux envoyer/poster.</p>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <div class="rule-num">5</div>
+        <div class="rule-content">
+          <h5>Le produit est live, on ship la comm</h5>
+          <p>Pas de "pour le launch", pas de "plus tard". Quand on crée un canal, on le rend opérationnel immédiatement.</p>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <div class="rule-num">6</div>
+        <div class="rule-content">
+          <h5>JAMAIS de secrets dans le chat Claude</h5>
+          <p>Tous les secrets (API keys, webhook signing secrets, etc.) passent directement de leur source vers leur destination, sans transit par moi.</p>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <div class="rule-num">7</div>
+        <div class="rule-content">
+          <h5>Format compact &amp; tranchant</h5>
+          <p>Réponses courtes, pas de blabla. Tables markdown pour comparer. Checklists pour les actions. Liens directs UI quand bloqué.</p>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <div class="rule-num">8</div>
+        <div class="rule-content">
+          <h5>Bilan de fin de tâche</h5>
+          <p>Sur les tâches conséquentes, ajouter un bloc final <code>&gt; ✅ Demande / Fait</code> pour synthétiser ce qui a été accompli.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- IDÉES DE PROJETS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Pistes d'idées</strong>
+      <span class="sep">/</span>
+      <span>6 verticales compatibles avec ton profil</span>
+    </div>
+    <h2>Idées de <span class="serif">projets</span> à explorer.</h2>
+    <p class="section-intro">Compte tenu de tes acquis (BAZG/FINMA, 7 ans roulements, OIBT, 20 panneaux solaires, famille de 6, stack TS/Hono/Astro/MCP, réseau UIKER+Swissborg) — voici 6 verticales naturelles à considérer pour ton prochain projet.</p>
+
+    <div class="ideas-grid">
+
+      <div class="idea-card">
+        <h5>☀️ Énergie / autosuffisance</h5>
+        <ul>
+          <li>Monitoring solaire familial (20 panneaux)</li>
+          <li>Marketplace P2P revente surplus CH</li>
+          <li>Conseil install OIBT-conforme PV pour PME</li>
+          <li>Calcul LCA/CO2 pour PME exportatrices</li>
+          <li>Datasets énergétiques fédéraux normalisés</li>
+        </ul>
+      </div>
+
+      <div class="idea-card">
+        <h5>🔩 Microtech CH</h5>
+        <ul>
+          <li>Extension BearingAPI (engrenages, joints, courroies)</li>
+          <li>CRM léger fournisseurs microtech</li>
+          <li>Datasets normalisés du secteur (suite openswissdata)</li>
+          <li>SIAMS 2026 lead-magnet (que tu exposes déjà)</li>
+        </ul>
+      </div>
+
+      <div class="idea-card">
+        <h5>🏦 Compliance / RegTech CH</h5>
+        <ul>
+          <li>KYC light pour PME exportatrices</li>
+          <li>Sanctions screening API (CH + UE)</li>
+          <li>Registre commerce CH normalisé (suite openswissdata)</li>
+          <li>Audit FINMA digital pour mid-cap</li>
+        </ul>
+      </div>
+
+      <div class="idea-card">
+        <h5>👨‍👩‍👧‍👦 Famille / vie quotidienne</h5>
+        <ul>
+          <li>Extension Tabornio : enfants, scolarité, agenda partagé</li>
+          <li>Assistant santé véto multi-animaux</li>
+          <li>Gestion factures récurrentes familiales</li>
+          <li>Parental control IA bien-fait</li>
+        </ul>
+      </div>
+
+      <div class="idea-card">
+        <h5>🤖 MCP / Agents</h5>
+        <ul>
+          <li>Marketplace MCP servers payants secteurs niche CH</li>
+          <li>MCP-as-a-service hébergé pour PME</li>
+          <li>Connecteurs MCP pour données métier B2B suisses</li>
+          <li>Agent compliance autonome (KYC + AML auto)</li>
+        </ul>
+      </div>
+
+      <div class="idea-card">
+        <h5>🗺 Carte locale / patrimoine</h5>
+        <ul>
+          <li>Extension Les Gens du Coin → SaaS pour communes VD</li>
+          <li>Inventaire bâti historique pour cadastres communaux</li>
+          <li>Tourisme local Ogens / Romandie</li>
+          <li>Marketplace artisans locaux</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="verdict" style="margin-top: 28px;">
+      <h3>📋 Comment utiliser ce document</h3>
+      <p>
+        Au début d'une nouvelle session Claude (ou autre agent IA), <strong>colle le contenu de</strong> <code>~/Desktop/profil-claude-alain-martin.md</code> <strong>en premier message</strong>, suivi de ta question/projet du jour. Tu sautes le brief manuel.
+      </p>
+      <p>
+        Le markdown est <strong>scannable</strong> par tout LLM moderne. L'agent récupère immédiatement : ta stack, tes contraintes (LinkedIn perso surveillé, no deadline, push auto), tes acquis (BAZG/FINMA, panneaux solaires, 7 ans roulements), ton réseau, et tes 14 projets en cours.
+      </p>
+      <p style="margin-top: 18px;">
+        Ce document est à <strong>régénérer périodiquement</strong> quand des changements significatifs interviennent (nouveaux projets, événements famille, changement employeur). Source : compilation automatique de <code>~/.claude/projects/*/memory/</code>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">Profil Claude-Alain Martin · v1.0 · 2026-05-07</strong></p>
+    <p style="margin: 0;">
+      Compilé automatiquement par sub-agent à partir de toutes les mémoires Claude Code accumulées dans <code>~/.claude/projects/*/memory/</code>. Markdown source : <code>~/Desktop/profil-claude-alain-martin.md</code>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
