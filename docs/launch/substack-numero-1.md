@@ -25,7 +25,7 @@ Bonjour 👋
 
 Cette newsletter recense les **changements concrets** aux référentiels fédéraux suisses (douanes, classifications économiques, surveillance financière) — sans jargon, sans pub, au format scannable. Un numéro chaque jeudi à 8h, 5 changements maximum, jamais plus.
 
-Vous recevez ce premier numéro parce que vous êtes listé dans un registre public officiel suisse (FINMA, ASR, Swissmem, FintechNewsCH, partenaires SAP/Abacus, Alliance Finance) ou parce que vous vous êtes inscrit volontairement sur openswissdata.com. **Désinscription 1-clic en bas de cet email** — pas de question, pas de drama.
+Vous recevez ce premier numéro parce que vous vous êtes inscrit volontairement à ETL Fédéral via openswissdata.com (footer du site). **Désinscription 1-clic en bas de cet email** — pas de question, pas de drama.
 
 Avant de vous envoyer du contenu, voici ce que vous allez recevoir.
 
