@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Plan prospection 200 CHF · openswissdata · 2026-05-07</title>
+<style>
+  :root {
+    --bg: #FBFBF8; --bg-card: #FFFFFF; --bg-soft: #F5F4EE;
+    --ink: #0A0A0C; --ink-soft: #3A3D45; --ink-mute: #6B6E76;
+    --line: #E8E4D9; --line-strong: #D9D3C3;
+    --accent: #DC1F2D; --accent-soft: #FCE7E9; --accent-strong: #B91C1C;
+    --green: #15803D; --green-soft: #DCFCE7;
+    --amber: #92400E; --amber-soft: #FEF3C7;
+    --teal: #0F766E; --teal-soft: #E5F5F1;
+    --blue: #1D4ED8; --blue-soft: #DBEAFE;
+    --plum: #6D28D9; --plum-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%; z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  /* Hero */
+  .hero { padding: 64px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line); width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font-weight: 700; font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05; letter-spacing: -.03em;
+    margin: 0 0 18px; max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 24px 0 36px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-value.green { color: var(--green); } .stat-value.red { color: var(--accent); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.blue { color: var(--blue); }
+  .stat-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); } }
+
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1;
+    letter-spacing: -.025em; margin: 0 0 12px; max-width: 32ch; }
+  h2 .accent { color: var(--accent); }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  /* TLDR card */
+  .tldr {
+    background: linear-gradient(180deg, var(--accent-soft) 0%, white 100%);
+    border: 2px solid var(--accent);
+    border-radius: 16px; padding: 28px 32px;
+    box-shadow: 0 4px 20px rgba(220,31,45,.08);
+    margin: 32px 0;
+  }
+  .tldr h3 {
+    font-size: 14px; margin: 0 0 14px; color: var(--accent-strong);
+    font-family: "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .tldr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .tldr-grid { grid-template-columns: 1fr; } }
+  .tldr-item { font-size: 14px; color: var(--ink); line-height: 1.55; }
+  .tldr-item strong { color: var(--accent-strong); }
+
+  /* Market cards */
+  .market-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0;
+  }
+  @media (max-width: 880px) { .market-grid { grid-template-columns: 1fr; } }
+  .market-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 24px; position: relative;
+  }
+  .market-card.highlight { border-color: var(--accent); border-width: 2px; }
+  .market-card-tag {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .market-card-tag .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+  .market-card.highlight .market-card-tag .dot { background: var(--accent); }
+  .market-card h4 { margin: 0 0 8px; font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+  .market-card p { margin: 0 0 12px; font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+  .market-card .meta { font-family: "Geist Mono", monospace; font-size: 11px; color: var(--ink-mute);
+    border-top: 1px dashed var(--line); padding-top: 12px; }
+
+  /* ICP table */
+  .icp-table {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; margin: 20px 0;
+  }
+  .icp-row {
+    display: grid; grid-template-columns: 60px 1fr 110px 130px 140px;
+    gap: 14px; padding: 18px 22px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px; align-items: center;
+  }
+  .icp-row:last-child { border-bottom: none; }
+  .icp-row.head {
+    background: var(--ink); color: white;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
+    padding: 12px 22px;
+  }
+  .icp-row.head > div { color: rgba(255,255,255,.85); }
+  .icp-rank {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--ink); color: white;
+    display: grid; place-items: center;
+    font-family: "Geist Mono", monospace; font-size: 13px; font-weight: 700;
+  }
+  .icp-row[data-rank="1"] .icp-rank { background: var(--accent); }
+  .icp-row[data-rank="2"] .icp-rank { background: var(--amber); }
+  .icp-row[data-rank="3"] .icp-rank { background: var(--teal); }
+  .icp-row[data-rank="4"] .icp-rank { background: var(--blue); }
+  .icp-name { font-weight: 600; line-height: 1.4; }
+  .icp-name span { display: block; font-size: 11px; color: var(--ink-mute); font-weight: 400; margin-top: 2px; font-family: "Geist Mono", monospace; }
+  .icp-pool { font-family: "Geist Mono", monospace; font-size: 12px; font-weight: 700; }
+  .icp-price { font-family: "Geist Mono", monospace; font-size: 12px; }
+  .icp-price strong { color: var(--ink); display: block; }
+  .icp-price span { color: var(--ink-mute); font-size: 10px; }
+  .icp-channel { font-size: 12px; color: var(--ink-soft); }
+  @media (max-width: 880px) {
+    .icp-row { grid-template-columns: 60px 1fr; }
+    .icp-row.head { display: none; }
+    .icp-row > div:nth-child(n+3) { grid-column: 2; font-size: 12px; }
+    .icp-row > div:nth-child(n+3)::before {
+      content: attr(data-label) " · "; font-family: "Geist Mono", monospace;
+      font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    }
+  }
+
+  /* Channel matrix */
+  .channels {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; margin: 24px 0;
+  }
+  .channel-row {
+    display: grid; grid-template-columns: 1fr 100px 110px 80px 1fr;
+    gap: 14px; padding: 14px 22px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px; align-items: center;
+  }
+  .channel-row:last-child { border-bottom: none; }
+  .channel-row.head {
+    background: var(--ink); color: white;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
+    padding: 11px 22px;
+  }
+  .channel-row.head > div { color: rgba(255,255,255,.85); }
+  .channel-name { font-weight: 600; }
+  .channel-name span { display: block; font-size: 11px; color: var(--ink-mute); font-weight: 400; margin-top: 2px; }
+  .channel-auto, .channel-cost, .channel-effort {
+    font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px; text-align: center; width: fit-content;
+  }
+  .channel-auto.full { background: var(--green-soft); color: var(--green); }
+  .channel-auto.semi { background: var(--amber-soft); color: var(--amber); }
+  .channel-auto.manual { background: var(--accent-soft); color: var(--accent); }
+  .channel-cost.free { background: var(--green-soft); color: var(--green); }
+  .channel-cost.paid { background: var(--blue-soft); color: var(--blue); }
+  .channel-effort.low { background: var(--green-soft); color: var(--green); }
+  .channel-effort.med { background: var(--amber-soft); color: var(--amber); }
+  .channel-effort.high { background: var(--accent-soft); color: var(--accent); }
+  .channel-result { font-size: 12px; color: var(--ink-soft); }
+  @media (max-width: 1000px) {
+    .channel-row { grid-template-columns: 1fr; }
+    .channel-row.head { display: none; }
+    .channel-row > div:nth-child(n+2) { display: inline-block; margin-right: 8px; }
+  }
+
+  /* Budget allocation */
+  .budget {
+    background: var(--ink); color: var(--bg); border-radius: 16px;
+    padding: 32px 36px; margin: 24px 0;
+  }
+  .budget h3 {
+    color: var(--bg); font-size: 22px; margin: 0 0 6px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .budget h3::before { content: "💰"; font-size: 24px; }
+  .budget-sub { color: rgba(255,255,255,.7); font-size: 14px; margin: 0 0 26px; }
+  .budget-bar {
+    display: flex; height: 36px; border-radius: 8px; overflow: hidden;
+    margin: 18px 0; border: 1px solid rgba(255,255,255,.15);
+  }
+  .budget-segment {
+    display: grid; place-items: center; font-family: "Geist Mono", monospace;
+    font-size: 11px; font-weight: 700; color: white; padding: 0 8px;
+    border-right: 1px solid rgba(255,255,255,.15);
+  }
+  .budget-segment:last-child { border-right: none; }
+  .budget-list { display: grid; gap: 12px; margin-top: 18px; }
+  .budget-item {
+    display: grid; grid-template-columns: 110px 1fr 90px;
+    gap: 14px; padding: 12px 16px;
+    background: rgba(255,255,255,.05); border-radius: 8px;
+    align-items: center; font-size: 13px;
+  }
+  .budget-item-amount {
+    font-family: "Geist Mono", monospace; font-size: 14px; font-weight: 700;
+    color: white;
+  }
+  .budget-item-label { color: rgba(255,255,255,.92); }
+  .budget-item-label span { display: block; font-size: 11px; color: rgba(255,255,255,.55); margin-top: 2px; }
+  .budget-item-when {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    text-align: right;
+  }
+  .budget-total {
+    margin-top: 18px; padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,.2);
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: "Geist Mono", monospace; font-size: 13px;
+    color: rgba(255,255,255,.85);
+  }
+  .budget-total strong { font-size: 22px; color: white; }
+  @media (max-width: 720px) {
+    .budget-item { grid-template-columns: 1fr; }
+    .budget-item-when { text-align: left; }
+  }
+
+  /* Timeline */
+  .timeline { margin: 24px 0; position: relative; }
+  .timeline::before {
+    content: ""; position: absolute; left: 30px; top: 8px; bottom: 8px;
+    width: 2px; background: var(--line);
+  }
+  .timeline-phase {
+    position: relative; padding: 0 0 24px 76px;
+  }
+  .timeline-phase::before {
+    content: ""; position: absolute; left: 22px; top: 6px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--bg); border: 3px solid var(--accent);
+  }
+  .timeline-phase[data-phase="0"]::before { border-color: var(--green); }
+  .timeline-phase[data-phase="1"]::before { border-color: var(--amber); }
+  .timeline-phase[data-phase="2"]::before { border-color: var(--blue); }
+  .timeline-phase[data-phase="3"]::before { border-color: var(--plum); }
+  .timeline-phase-eyebrow {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 6px;
+  }
+  .timeline-phase h4 { margin: 0 0 10px; font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+  .timeline-phase-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .timeline-phase-card ul {
+    margin: 0; padding-left: 20px; font-size: 13px; color: var(--ink-soft); line-height: 1.7;
+  }
+  .timeline-phase-card ul li { margin-bottom: 4px; }
+  .timeline-phase-card ul li strong { color: var(--ink); }
+  .timeline-phase-card .meta {
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px dashed var(--line);
+    display: flex; gap: 14px; font-family: "Geist Mono", monospace; font-size: 11px;
+    flex-wrap: wrap;
+  }
+  .timeline-phase-card .meta span { color: var(--ink-mute); }
+  .timeline-phase-card .meta strong { color: var(--ink); }
+
+  /* KPI grid */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 24px 0;
+  }
+  @media (max-width: 880px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr; } }
+  .kpi-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; border-left: 3px solid var(--blue);
+  }
+  .kpi-card.green { border-left-color: var(--green); }
+  .kpi-card.amber { border-left-color: var(--amber); }
+  .kpi-label { font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
+  .kpi-sub { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+
+  /* Don'ts banner */
+  .donts {
+    background: linear-gradient(180deg, var(--accent-soft) 0%, white 100%);
+    border: 1px solid var(--accent);
+    border-radius: 14px; padding: 24px 28px; margin: 24px 0;
+  }
+  .donts h4 {
+    margin: 0 0 14px; font-size: 16px; color: var(--accent-strong);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .donts h4::before { content: "🚫"; font-size: 18px; }
+  .donts ul { margin: 0; padding-left: 20px; font-size: 13px; color: var(--ink-soft); line-height: 1.7; }
+  .donts ul li { margin-bottom: 4px; }
+  .donts ul li strong { color: var(--accent-strong); }
+
+  /* Verdict */
+  .verdict {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg); border-radius: 14px; padding: 32px 36px; margin: 24px 0;
+  }
+  .verdict h3 { color: var(--bg); font-size: 22px; margin: 0 0 14px; }
+  .verdict p { color: rgba(255,255,255,.85); font-size: 14px; line-height: 1.7; margin: 0 0 12px; }
+  .verdict p strong { color: white; font-weight: 600; }
+  .verdict .verdict-yes { color: #6ee7b7; font-weight: 600; }
+  .verdict ul { color: rgba(255,255,255,.88); padding-left: 20px; margin: 12px 0; line-height: 1.8; font-size: 13px; }
+  .verdict ul li::marker { color: #6ee7b7; }
+
+  footer {
+    padding: 36px 0 56px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 13px;
+  }
+  footer .container { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  footer .footer-meta { font-family: "Geist Mono", monospace; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Plan prospection · 2026-05-07 · 200 CHF one-shot · zéro téléphone</span>
+    </div>
+    <h1>3 segments. <span class="accent">10 canaux automatisés</span>. 200 CHF, zéro appel.</h1>
+    <p class="lede">
+      Le produit est <strong>live et stable</strong> (datasets, Stripe, R2, MCP, signatures Ed25519). On ne touche plus au code — on shippe la communication. Ce plan utilise les actifs déjà construits (mailing-list 394 contacts, MCP registry, pitches presse, comptes sociaux) et alloue les 200 CHF là où ça déclenche le plus de leads automatiquement.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">TAM CH compliance</div>
+        <div class="stat-value">200-500</div>
+        <div class="stat-sub">entités régulées (banques, fintechs, PSAN)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Mailing-list prête</div>
+        <div class="stat-value blue">394</div>
+        <div class="stat-sub">contacts B2B nLPD-conformes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Bundle 3 datasets</div>
+        <div class="stat-value">797</div>
+        <div class="stat-sub">CHF · économie 200 CHF vs unitaire</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">MCP standalone</div>
+        <div class="stat-value">49</div>
+        <div class="stat-sub">CHF/mois · 9 tools natifs Claude/Cursor</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Budget alloué</div>
+        <div class="stat-value amber">200</div>
+        <div class="stat-sub">CHF one-shot · 90 jours runway</div>
+      </div>
+    </div>
+
+    <div class="tldr">
+      <h3>TL;DR · Lecture 90 secondes</h3>
+      <div class="tldr-grid">
+        <div class="tldr-item">
+          <strong>Marché</strong> · Trois segments porteurs en CH : compliance/KYC banque (~200-500 prospects, gros tickets), data engineers fintech (50-150, décisions rapides), intégrateurs ERP suisses (50-200, revente possible). Concurrents D&B/Bisnode/Moneyhouse sont chers et opaques. Ta fenêtre = self-serve transparent + MCP natif.
+        </div>
+        <div class="tldr-item">
+          <strong>Cibles prioritaires</strong> · 1) compliance officers banque privée/cantonale (83 dans la liste), 2) intégrateurs SAP/Abacus/Odoo (77), 3) data engineers fintech (31), 4) PME exportatrices industrie (70). La mailing-list 394 contacts couvre déjà tout.
+        </div>
+        <div class="tldr-item">
+          <strong>Prospection sans téléphone</strong> · Substack drip hebdo (gratuit, déjà prêt), pitches presse (gratuit, déjà rédigés), Show HN + Reddit + X organique (gratuit, comptes prêts), <strong>Instantly cold email</strong> automatisé (le seul vrai poste payant), MCP registries passifs. CTA = sample CSV / Loom 3-min / Stripe checkout direct (pas de "15 min jeudi").
+        </div>
+        <div class="tldr-item">
+          <strong>200 CHF one-shot</strong> · Instantly 4 mois (~140 CHF) + sous-domaine cold (~10 CHF) + reserve boost (~50 CHF). Ça couvre 14j warm-up + 90j cold sequence à 50 emails/jour = ~3000 prospects touchés. ROI cible 2-5 ventes (1-3% conversion).
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ANALYSE MARCHÉ -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <span>1.</span>
+      <span class="sep">·</span>
+      <strong>Analyse de marché</strong>
+      <span class="sep">·</span>
+      <span>Le terrain de jeu suisse 2026-2028</span>
+    </div>
+    <h2>Trois catalyseurs réglementaires, une fenêtre <span class="accent">avant commoditisation</span>.</h2>
+    <p class="section-intro">
+      Le segment Swiss data + compliance est mûr (D&B a racheté Bisnode 720M CHF en 2021, AML software passe de 4,1 → 9,4 Mds USD entre 2025 et 2030, CAGR 17,8%). Mais l'offre actuelle est <strong>opaque et corporate</strong>. Trois deadlines réglementaires créent un marché captif jusqu'à fin 2028.
+    </p>
+
+    <div class="market-grid">
+      <div class="market-card highlight">
+        <div class="market-card-tag"><span class="dot"></span> Catalyseur #1 · Mi-2026</div>
+        <h4>LETA / UBO Suisse</h4>
+        <p>Registre central des bénéficiaires effectifs, ~600k entités CH concernées. Crée un besoin d'agrégation Zefix + UBO + sanctions pour tous les intermédiaires régulés.</p>
+        <div class="meta">Impact : ICP #1 (compliance banques) accélère son achat de datasets join-ready.</div>
+      </div>
+      <div class="market-card">
+        <div class="market-card-tag"><span class="dot"></span> Catalyseur #2 · 30 juin 2026</div>
+        <h4>Pillar Two GIR</h4>
+        <p>Premier dépôt de la déclaration GloBE pour multinationales CH. Demande NOGA codes propres, classifications cross-walks, signed exports pour audit trail.</p>
+        <div class="meta">Impact : ICP #2 (intégrateurs ERP) cherche un fournisseur classifications stable.</div>
+      </div>
+      <div class="market-card">
+        <div class="market-card-tag"><span class="dot"></span> Catalyseur #3 · Janvier 2026</div>
+        <h4>DAC8 / CARF</h4>
+        <p>Reporting crypto-actifs OCDE. Banques + fintechs PSAN doivent croiser FINMA + Zefix + sanctions à chaque onboarding. Pas de solution self-serve mature aujourd'hui.</p>
+        <div class="meta">Impact : ICP #1 + #3 (fintechs) — déjà en vigueur, urgence opérationnelle.</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 36px; font-size: 18px; font-weight: 600;">Différenciateur concurrentiel</h3>
+    <div class="channels" style="margin-top: 14px;">
+      <div class="channel-row head">
+        <div>Concurrent</div>
+        <div>Pricing</div>
+        <div>Self-serve</div>
+        <div>MCP</div>
+        <div>Différenciateur openswissdata</div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">D&B / Bisnode<span>Acquisition 2021</span></div>
+        <div class="channel-cost paid">5k-50k</div>
+        <div class="channel-auto manual">Sales</div>
+        <div class="channel-effort high">Non</div>
+        <div class="channel-result">Pricing transparent, MCP natif Claude/Cursor, signatures Ed25519, refund 14j</div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Moneyhouse<span>CH-spécifique mais cher</span></div>
+        <div class="channel-cost paid">2k-10k</div>
+        <div class="channel-auto semi">Mixte</div>
+        <div class="channel-effort high">Non</div>
+        <div class="channel-result">Bundle 797 CHF transparent vs leur abonnement opaque, joins multi-sources que mono-source ne fait pas</div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">KYC Spider / Creditreform<span>KYC software mid-market</span></div>
+        <div class="channel-cost paid">1k-5k</div>
+        <div class="channel-auto manual">Sales</div>
+        <div class="channel-effort high">Non</div>
+        <div class="channel-result">Tu vends la donnée brute (qu'ils utilisent), pas l'app — partenariat possible plutôt que concurrence</div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Vatstack / APIstax / vatify<span>VAT generic, CH "second-class"</span></div>
+        <div class="channel-cost paid">50-300</div>
+        <div class="channel-auto full">Auto</div>
+        <div class="channel-effort low">Non</div>
+        <div class="channel-result">Tu fais le join UID + MWST + VIES qu'ils n'ont pas, signatures Ed25519, snapshots historiques</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTS CIBLES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <span>2.</span>
+      <span class="sep">·</span>
+      <strong>Clients cibles</strong>
+      <span class="sep">·</span>
+      <span>4 ICP prioritaires, ROI décroissant</span>
+    </div>
+    <h2>De la banque privée au PME exportateur — <span class="accent">la liste 394 couvre tout</span>.</h2>
+    <p class="section-intro">
+      Les 394 contacts déjà extraits dans <code>docs/launch/mailing-list/</code> couvrent les 4 segments. Pas besoin de nouveau sourcing pour démarrer Phase 0. Le sourcing supplémentaire (Phase 2) cible spécifiquement les compliance officers nommés dans les rapports annuels FINMA — quelque chose que ni un annuaire ni un scraper ne te donne.
+    </p>
+
+    <div class="icp-table">
+      <div class="icp-row head">
+        <div>Rang</div>
+        <div>Segment & profil</div>
+        <div>Pool CH</div>
+        <div>Prix psy.</div>
+        <div>Canal optimal</div>
+      </div>
+      <div class="icp-row" data-rank="1">
+        <div><div class="icp-rank">1</div></div>
+        <div class="icp-name">Compliance officers banque privée + cantonale + néobanques<span>83 dans la liste · cycle 4-12 sem.</span></div>
+        <div class="icp-pool" data-label="Pool">200-500</div>
+        <div class="icp-price" data-label="Prix"><strong>1k-5k CHF/an</strong><span>Bundle 797 CHF en porte d'entrée</span></div>
+        <div class="icp-channel" data-label="Canal">Substack thought-leadership + cold Instantly + presse finews</div>
+      </div>
+      <div class="icp-row" data-rank="2">
+        <div><div class="icp-rank">2</div></div>
+        <div class="icp-name">Intégrateurs ERP indépendants (SAP GTS, Abacus, Odoo, Bexio)<span>77 dans la liste · cycle 2-6 sem.</span></div>
+        <div class="icp-pool" data-label="Pool">50-200</div>
+        <div class="icp-price" data-label="Prix"><strong>299 CHF/client</strong><span>+ 30% commission revente récurrente</span></div>
+        <div class="icp-channel" data-label="Canal">Cold Instantly avec kit revendeur + GitHub repo public</div>
+      </div>
+      <div class="icp-row" data-rank="3">
+        <div><div class="icp-rank">3</div></div>
+        <div class="icp-name">Data engineers fintechs + asset managers + PSAN<span>31+26 dans la liste · cycle 1-3 sem.</span></div>
+        <div class="icp-pool" data-label="Pool">50-150</div>
+        <div class="icp-price" data-label="Prix"><strong>49 CHF/mois</strong><span>(MCP) ou 797 (Bundle)</span></div>
+        <div class="icp-channel" data-label="Canal">Show HN + Reddit r/dataengineering + MCP registries + GitHub</div>
+      </div>
+      <div class="icp-row" data-rank="4">
+        <div><div class="icp-rank">4</div></div>
+        <div class="icp-name">PME exportatrices industrie (Swissmem, NOGA 25-32, 46-47)<span>70 dans la liste · cycle 1-2 sem.</span></div>
+        <div class="icp-pool" data-label="Pool">5k-15k</div>
+        <div class="icp-price" data-label="Prix"><strong>299 CHF (TARES)</strong><span>refund 14j</span></div>
+        <div class="icp-channel" data-label="Canal">SEO blog "Swiss VAT API" / "TARES SAP integration" + ProductHunt</div>
+      </div>
+    </div>
+
+    <p class="section-intro" style="margin-top: 28px;">
+      <strong>Hors-stratégie volontairement.</strong> Les fiduciaires (Treuhandsuisse) sont exclus : leur ToS interdit explicitement l'usage publicitaire de l'annuaire (LCD Art. 3 al. 1 let. o). Documenté dans <code>docs/launch/mailing-list/fiduciaires-BLOCAGE.md</code>. On les touche par presse + SEO, pas par cold email.
+    </p>
+  </div>
+</section>
+
+<!-- COMMENT PROSPECTER -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <span>3.</span>
+      <span class="sep">·</span>
+      <strong>Comment prospecter</strong>
+      <span class="sep">·</span>
+      <span>10 canaux, classés par automation × levier</span>
+    </div>
+    <h2>Pas de téléphone. <span class="accent">CTA asynchrone</span> partout.</h2>
+    <p class="section-intro">
+      Les templates existants dans <code>docs/launch/cold-email-templates.md</code> ont tous un CTA "15 min jeudi pour un démo". À <strong>réécrire systématiquement</strong> avec des CTA asynchrones : sample CSV gratuit, Loom 3-min préenregistré, lien Stripe checkout direct, lien GitHub repo. Le pre-call T4 (10 fiduciaires/compliance par téléphone) du plan acquisition initial est <strong>annulé</strong>.
+    </p>
+
+    <div class="channels">
+      <div class="channel-row head">
+        <div>Canal</div>
+        <div>Automation</div>
+        <div>Coût mensuel</div>
+        <div>Effort init</div>
+        <div>Effet attendu</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">Substack drip 394 contacts<span>ETL Fédéral hebdo · double opt-in</span></div>
+        <div><span class="channel-auto full">Total</span></div>
+        <div><span class="channel-cost free">Gratuit</span></div>
+        <div><span class="channel-effort med">2h</span></div>
+        <div class="channel-result">80-130 opt-in confirmés, 15-30 réponses qualifiées sur 30j</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">Pitches presse CH<span>finews + Inside Paradeplatz + startupticker</span></div>
+        <div><span class="channel-auto manual">Manuel</span></div>
+        <div><span class="channel-cost free">Gratuit</span></div>
+        <div><span class="channel-effort low">30 min</span></div>
+        <div class="channel-result">1 article finews = 50-200 inscriptions Substack en 48h</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">Show HN + Reddit + X<span>r/dataengineering, r/Switzerland, @cammac</span></div>
+        <div><span class="channel-auto semi">Semi</span></div>
+        <div><span class="channel-cost free">Gratuit</span></div>
+        <div><span class="channel-effort med">3h</span></div>
+        <div class="channel-result">Show HN front page = 5-15k visites + 100-300 GitHub stars</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">Cold email Instantly.ai<span>send.openswissdata.com warmé</span></div>
+        <div><span class="channel-auto full">Total</span></div>
+        <div><span class="channel-cost paid">37 USD</span></div>
+        <div><span class="channel-effort high">6h</span></div>
+        <div class="channel-result">50 emails/jour × 90j = 3000 prospects, ~1-3% conversion = 2-5 ventes</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">MCP registries<span>Anthropic, Smithery, Glama, mcp.so</span></div>
+        <div><span class="channel-auto full">Total</span></div>
+        <div><span class="channel-cost free">Gratuit</span></div>
+        <div><span class="channel-effort low">Fait</span></div>
+        <div class="channel-result">Découverte passive par users Claude Code / Cursor / Cline</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">SEO blog programmatique<span>"Swiss VAT API", "TARES SAP", "FINMA cross-walk"</span></div>
+        <div><span class="channel-auto full">Total</span></div>
+        <div><span class="channel-cost free">Gratuit</span></div>
+        <div><span class="channel-effort high">2-3 articles/sem</span></div>
+        <div class="channel-result">Croissance organique 3-6 mois, 200-1000 visites/mois en stable</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">GitHub repo public<span>github.com/cammac-creator/openswissdata</span></div>
+        <div><span class="channel-auto full">Total</span></div>
+        <div><span class="channel-cost free">Gratuit</span></div>
+        <div><span class="channel-effort low">Fait</span></div>
+        <div class="channel-result">Trust signal pour data engineers, indexé par recherche dev</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">Sample CSV download<span>tares-sample.csv en CTA hero</span></div>
+        <div><span class="channel-auto full">Total</span></div>
+        <div><span class="channel-cost free">Gratuit</span></div>
+        <div><span class="channel-effort low">Fait</span></div>
+        <div class="channel-result">Lead magnet conversion ~3-8% vers Stripe checkout</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">Loom demo 3-min<span>"TARES en 60 secondes" + MCP setup</span></div>
+        <div><span class="channel-auto full">Total</span></div>
+        <div><span class="channel-cost free">Gratuit</span></div>
+        <div><span class="channel-effort low">30 min</span></div>
+        <div class="channel-result">Remplace les pre-calls, embedable dans cold emails et site</div>
+      </div>
+
+      <div class="channel-row">
+        <div class="channel-name">Hunter.io enrichment (1 mois)<span>500 emails compliance officers nommés</span></div>
+        <div><span class="channel-auto full">Total</span></div>
+        <div><span class="channel-cost paid">50 USD</span></div>
+        <div><span class="channel-effort med">1h</span></div>
+        <div class="channel-result">Pattern detection + verification, multiplie le reply rate par 2-3</div>
+      </div>
+    </div>
+
+    <div class="donts">
+      <h4>Ce qu'il NE FAUT PAS faire</h4>
+      <ul>
+        <li><strong>Aucun post LinkedIn perso</strong> · employeur Uiker surveille — page entreprise <code>linkedin.com/company/openswissdata</code> uniquement, jamais relayée depuis ton perso.</li>
+        <li><strong>Aucun envoi cold depuis</strong> <code>contact@openswissdata.com</code> · ça crame l'inbox transactionnelle Stripe/Resend. Toujours le sous-domaine <code>send.openswissdata.com</code>.</li>
+        <li><strong>Aucune extension Chrome Apollo / RocketReach</strong> · elles lisent ton LinkedIn perso (signal possible employeur). Dashboards web only.</li>
+        <li><strong>Pas de Substack ET Instantly sur la même liste</strong> · Substack = newsletter opt-in, Instantly = cold prospection nouveaux. Brûler les 394 en cold = délivrabilité morte.</li>
+        <li><strong>Pas plus de 50 emails/jour</strong> avant warm-up complet 14j · spam folder garanti. Pas plus de 3 follow-ups (J+3, J+7, J+14).</li>
+        <li><strong>Pas de "15 min jeudi"</strong> dans les CTA · remplacer partout par sample CSV, Loom, Stripe checkout, repo GitHub.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- BUDGET -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <span>4.</span>
+      <span class="sep">·</span>
+      <strong>Allocation budget 200 CHF one-shot</strong>
+      <span class="sep">·</span>
+      <span>Optimisation effort/levier</span>
+    </div>
+    <h2>Tout sur l'<span class="accent">automatisation cold email</span> + une réserve.</h2>
+    <p class="section-intro">
+      Le seul vrai poste payant est le cold email automatisé : l'effort (sourcing + warm-up + sequencing + follow-ups + reply detection) serait impossible à faire à la main. Le reste est gratuit ou déjà payé. Hunter.io est optionnel — si tu veux maximiser le reply rate sur les 200 contacts qualifiés.
+    </p>
+
+    <div class="budget">
+      <h3>200 CHF · Plan d'allocation</h3>
+      <p class="budget-sub">3 postes principaux + reserve, runway ~90 jours.</p>
+
+      <div class="budget-bar">
+        <div class="budget-segment" style="background: #DC1F2D; flex: 140;">Instantly 4 mois · 140</div>
+        <div class="budget-segment" style="background: #92400E; flex: 45;">Hunter 1 mois · 45</div>
+        <div class="budget-segment" style="background: #1D4ED8; flex: 15;">Reserve · 15</div>
+      </div>
+
+      <div class="budget-list">
+        <div class="budget-item">
+          <div class="budget-item-amount">~140 CHF</div>
+          <div class="budget-item-label">Instantly.ai 4 mois<span>37 USD/mois × 4 = 148 USD ≈ 132 CHF (au taux 0.89)</span></div>
+          <div class="budget-item-when">J4 → J120</div>
+        </div>
+        <div class="budget-item">
+          <div class="budget-item-amount">~45 CHF</div>
+          <div class="budget-item-label">Hunter.io Starter 1 mois<span>50 USD = 1000 verifications, enrich 500 contacts compliance</span></div>
+          <div class="budget-item-when">J7 → J37</div>
+        </div>
+        <div class="budget-item">
+          <div class="budget-item-amount">~5 CHF</div>
+          <div class="budget-item-label">Sous-domaine cold + DNS<span>send.openswissdata.com chez Infomaniak (déjà inclus dans hosting)</span></div>
+          <div class="budget-item-when">J1</div>
+        </div>
+        <div class="budget-item">
+          <div class="budget-item-amount">~10 CHF</div>
+          <div class="budget-item-label">Loom Pro 1 mois (optionnel)<span>Vidéos illimitées sans watermark — sinon free tier OK pour 5 min</span></div>
+          <div class="budget-item-when">J2</div>
+        </div>
+        <div class="budget-item">
+          <div class="budget-item-amount">Reserve</div>
+          <div class="budget-item-label">Buffer pour boost ad-hoc<span>Reddit Ads CH-géo, X Ads thread @cammac, ou prolongation Instantly mois 5</span></div>
+          <div class="budget-item-when">Flex</div>
+        </div>
+      </div>
+
+      <div class="budget-total">
+        <span>Total alloué</span>
+        <strong>200 CHF</strong>
+      </div>
+    </div>
+
+    <p class="section-intro" style="margin-top: 24px;">
+      <strong>Variante "max-frugale"</strong> · Si tu veux étirer encore plus : skip Hunter.io et utilise les emails publics déjà extraits (info@, compliance@, généralistes) — le reply rate sera plus bas (~30-50%) mais le coût tombe à 145 CHF, libérant 55 CHF de reserve. Recommandé seulement si tu sens que les 90j premiers ne convertissent pas.
+    </p>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <span>5.</span>
+      <span class="sep">·</span>
+      <strong>Timeline 90 jours</strong>
+      <span class="sep">·</span>
+      <span>Phase 0 demain matin · pas de date launch</span>
+    </div>
+    <h2>4 phases, <span class="accent">démarrage gratuit</span>, paiement progressif.</h2>
+    <p class="section-intro">
+      Pas de deadline launch — tu progresses à ton rythme. Les phases sont séquentielles parce que la Phase 1 (warm-up cold) prend 14 jours obligatoires pour ne pas cramer la délivrabilité, et la Phase 2 démarre quand le warm-up est fini.
+    </p>
+
+    <div class="timeline">
+
+      <div class="timeline-phase" data-phase="0">
+        <div class="timeline-phase-eyebrow">Phase 0 · J1–J3 · Gratuit · Quick wins</div>
+        <h4>Activer ce qui est déjà construit</h4>
+        <div class="timeline-phase-card">
+          <ul>
+            <li><strong>Importer les 394 contacts dans Substack</strong> · Settings → Importer → upload <code>docs/launch/mailing-list/_substack-import.csv</code>. Double opt-in déjà ON. Substack envoie le welcome email automatiquement.</li>
+            <li><strong>Publier ETL Fédéral #1</strong> · template existant <code>docs/launch/substack-numero-1.md</code>, ~30 min de polish.</li>
+            <li><strong>Envoyer les 3 pitches presse</strong> · copier-coller depuis <code>docs/launch/pitch-presse-{finews,inside-paradeplatz,startupticker}.md</code> dans Gmail, FROM <code>cam@ogens.ch</code>. 5 min.</li>
+            <li><strong>Enregistrer 1 Loom 3-min</strong> · "openswissdata en 60 secondes : sample CSV → MCP → checkout". Embed sur landing + footer email + cold templates.</li>
+            <li><strong>Show HN</strong> · compte <code>openswissdata</code> prêt. Submit "Show HN: Swiss federal datasets normalized (TARES + NOGA + FINMA) signed Ed25519, MCP-ready". Best window mardi ou mercredi 15h CEST.</li>
+            <li><strong>4 commentaires Reddit</strong> · r/dataengineering, r/Switzerland, r/SwitzerlandLifeHacks, r/programming. Compte <code>Various-Ladder-5959</code> (5 mois karma) + 2 commentaires préparés à coller depuis sessions précédentes (Schema changes + Solo DE).</li>
+            <li><strong>1 thread X @cammac</strong> · "I built openswissdata.com — Swiss federal data normalized for devs" + 5 tweets explicatifs + sample CSV.</li>
+          </ul>
+          <div class="meta">
+            <span>Coût · <strong>0 CHF</strong></span>
+            <span>Effort humain · <strong>~5h</strong></span>
+            <span>Lead attendu · <strong>30-100 abonnés Substack + 5-15 trial samples</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-phase" data-phase="1">
+        <div class="timeline-phase-eyebrow">Phase 1 · J4–J17 · ~15 CHF · Setup cold</div>
+        <h4>Configurer Instantly + warm-up automatique</h4>
+        <div class="timeline-phase-card">
+          <ul>
+            <li><strong>DNS Infomaniak</strong> · sous-domaine <code>send.openswissdata.com</code> + SPF + DKIM + DMARC dédiés (séparés du transactionnel <code>contact@</code>). 30 min.</li>
+            <li><strong>Souscription Instantly.ai</strong> · 37 USD/mois, configurer 1 inbox sur <code>cold@send.openswissdata.com</code>.</li>
+            <li><strong>Warm-up automatique 14j</strong> · Instantly fait monter progressivement 5 → 10 → 20 → 40 → 50 emails/jour. Pas d'action humaine pendant.</li>
+            <li><strong>Sourcing 200 prospects nouveaux</strong> · pendant les 14j de warm-up. Hunter.io Starter activé, pattern detection sur 73 banques FINMA + 32 SAP partners + 30 Abacus. Recherche Google manuelle complémentaire (queries déjà documentées dans cold-email-templates.md:124).</li>
+            <li><strong>Réécrire les 3 templates</strong> · supprimer "15 min jeudi" partout, remplacer par CTA asynchrone : <em>(1) télécharge sample CSV gratuit (2) demo Loom 3-min (3) Stripe checkout direct (4) repo GitHub</em>. Variants A/B intégrés à Instantly.</li>
+            <li><strong>Loi LPD</strong> · ajouter signature <code>raison individuelle CH · désinscription 1-clic · for juridique Berne/Ogens VD</code> à toutes les sequences.</li>
+          </ul>
+          <div class="meta">
+            <span>Coût · <strong>~15 CHF (Loom optionnel)</strong></span>
+            <span>Effort humain · <strong>~6h sur 14j</strong></span>
+            <span>Lead attendu · <strong>0 (warm-up only)</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-phase" data-phase="2">
+        <div class="timeline-phase-eyebrow">Phase 2 · J18–J47 · ~80 CHF · Cold sequence</div>
+        <h4>3000 prospects en automatique</h4>
+        <div class="timeline-phase-card">
+          <ul>
+            <li><strong>Cold sequence active</strong> · 50 emails/jour × 5 jours ouvrables × 4 semaines = ~1000 emails/4sem. Auto follow-ups J+3, J+7. Reply detection coupe la séquence dès qu'un prospect répond.</li>
+            <li><strong>Segments prioritaires</strong> · Template A (compliance banques) · Template B (data engineers fintech) · Template C (intégrateurs ERP). Distribution = 40% / 30% / 30% des envois.</li>
+            <li><strong>Activer Hunter.io 1 mois</strong> · enrichir 500 emails compliance officers nommés (rapports annuels FINMA + Alliance Finance + ASR). Multiplie le reply rate.</li>
+            <li><strong>Réponses → Stripe checkout direct</strong> · pas d'agenda, pas de call. Le prospect paie ou répond non. Refund 14j explicite désamorce le risque.</li>
+            <li><strong>Substack #2 et #3</strong> · publication hebdo en parallèle, nourrit la liste 394 + nouveaux opt-in.</li>
+            <li><strong>Article presse</strong> · si finews/Inside Paradeplatz publient (typique 5-15 jours après pitch), boost Substack par tweet @cammac et thread Reddit.</li>
+          </ul>
+          <div class="meta">
+            <span>Coût cumul · <strong>~95 CHF</strong></span>
+            <span>Effort humain · <strong>~3h/sem (review replies)</strong></span>
+            <span>Lead attendu · <strong>1-3 ventes (1-3% conversion)</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-phase" data-phase="3">
+        <div class="timeline-phase-eyebrow">Phase 3 · J48–J90 · ~95 CHF · Optimisation + extension</div>
+        <h4>Optimiser ce qui marche, couper ce qui rame</h4>
+        <div class="timeline-phase-card">
+          <ul>
+            <li><strong>Instantly mois 2-3</strong> · 50 emails/jour continus, batch 2 (200 nouveaux prospects). A/B tests subject lines basés sur résultats Phase 2.</li>
+            <li><strong>Decision gate J+60</strong> · Si ≥1 vente cold confirmée → continuer Instantly mois 4. Si 0 vente → switch reserve sur Reddit Ads CH-géo (50 CHF) ou ProductHunt launch.</li>
+            <li><strong>SEO blog</strong> · 1-2 articles/semaine ciblés "Swiss VAT API", "TARES SAP integration", "FINMA cross-walk", "NOGA NACE conversion". Croissance organique 3-6 mois mais durable.</li>
+            <li><strong>Programme partenaire ERP</strong> · si traction Template C, formaliser kit revendeur (logo, sample, contrat 30% commission) et l'envoyer aux 5-10 répondeurs SAP/Abacus/Odoo.</li>
+            <li><strong>Substack #4-#13</strong> · 10 numéros, ~5 min lecture, publiés tous les jeudis. Décodage hebdomadaire des changements TARES/FINMA/NOGA.</li>
+            <li><strong>Pause / pivot</strong> · à J90, audit complet : KPIs ci-dessous + décision sur les 200 CHF suivants (continuer Instantly, ou X Ads, ou outil enrichment, ou rien).</li>
+          </ul>
+          <div class="meta">
+            <span>Coût cumul · <strong>~200 CHF total atteint</strong></span>
+            <span>Effort humain · <strong>~4h/sem</strong></span>
+            <span>Lead attendu · <strong>2-5 ventes cumulées + base SEO</strong></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- KPIs -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <span>6.</span>
+      <span class="sep">·</span>
+      <strong>KPIs à surveiller</strong>
+      <span class="sep">·</span>
+      <span>Plausible + Stripe + Substack + Instantly</span>
+    </div>
+    <h2>Quelques métriques. Pas de dashboard <span class="accent">vanity</span>.</h2>
+    <p class="section-intro">
+      Toutes les sources sont déjà branchées : Plausible (analytics web), Stripe (revenu), Substack (newsletter), Instantly (cold email). À regarder une fois par semaine, pas plus. Les seuils rouges sont ceux qui doivent déclencher un changement de stratégie.
+    </p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-label">Substack opt-in</div>
+        <div class="kpi-value">≥ 80</div>
+        <div class="kpi-sub">Sur 394 contacts à 30j. Source : Substack dashboard.</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Sample CSV downloads/sem</div>
+        <div class="kpi-value">≥ 20</div>
+        <div class="kpi-sub">Conversion vers checkout typique 3-8%. Source : Plausible.</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Cold reply rate</div>
+        <div class="kpi-value">≥ 3%</div>
+        <div class="kpi-sub">Sur 1000 emails Phase 2. Si &lt; 2% → revoir templates.</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Ventes cumulées 90j</div>
+        <div class="kpi-value">2-5</div>
+        <div class="kpi-sub">Tickets 299-797 CHF. Source : Stripe.</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Stripe checkout/sem</div>
+        <div class="kpi-value">≥ 3</div>
+        <div class="kpi-sub">Sessions créées (pas forcément payées).</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">GitHub stars</div>
+        <div class="kpi-value">≥ 50</div>
+        <div class="kpi-sub">À 90j. Show HN front page = +100-300 d'un coup.</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">MCP installs</div>
+        <div class="kpi-value">≥ 30</div>
+        <div class="kpi-sub">npm @openswissdata/mcp + Smithery downloads.</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Plausible visites/sem</div>
+        <div class="kpi-value">≥ 300</div>
+        <div class="kpi-sub">Croissance attendue avec presse + SEO + Substack.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VERDICT -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <span>7.</span>
+      <span class="sep">·</span>
+      <strong>Verdict</strong>
+      <span class="sep">·</span>
+      <span>Pourquoi ce plan plutôt qu'un autre</span>
+    </div>
+
+    <div class="verdict">
+      <h3>Le plan en une phrase</h3>
+      <p>
+        <strong>Tu as déjà construit 80% du travail</strong> (mailing-list 394, MCP registries, pitches presse, Substack, comptes sociaux, datasets live, Stripe). Les <strong class="verdict-yes">200 CHF</strong> servent à automatiser la seule chose qui reste manuelle et à fort volume : le cold email vers les 200-500 compliance officers + 50-200 intégrateurs ERP qui ne sont pas dans la liste 394.
+      </p>
+      <p>
+        <strong>Pas de téléphone</strong> ne te coûte rien : les CTA asynchrones (sample CSV, Loom 3-min, Stripe checkout direct, repo GitHub) sont en réalité <strong>plus convertissants</strong> sur le segment data engineer / dev, et acceptables sur compliance grâce au refund 14j.
+      </p>
+      <p>
+        <strong>Le seul vrai risque</strong> sur 90j est que les 3 templates cold ne convertissent pas (&lt; 1% reply rate). Mitigation : Decision gate J+60 — si 0 vente cold, switch les 95 CHF restants vers Reddit Ads CH-géo ou ProductHunt launch (canaux plus dev-friendly où le funnel naturel est déjà self-serve).
+      </p>
+      <p>
+        <strong class="verdict-yes">Démarre Phase 0 demain matin.</strong> Coût zéro, effort 5h cumulées, et ça génère 30-100 abonnés Substack qualifiés + premiers samples downloads avant même d'avoir touché aux 200 CHF.
+      </p>
+      <ul>
+        <li>Prochaine action immédiate : importer le CSV dans Substack (2 min) + publier #1 (30 min) + envoyer les 3 pitches presse (5 min).</li>
+        <li>Action humaine bloquante : enregistrer le Loom 3-min (30 min) — c'est le pivot du CTA "pas téléphone".</li>
+        <li>Question à trancher avant Phase 1 : tu pars sur Instantly ou Smartlead ? (Équivalents, je recommande Instantly pour la richesse de l'A/B testing.)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div>
+      Plan généré 2026-05-07 · openswissdata.com<br>
+      Référence des actifs existants : <code>docs/launch/strategic-summary.md</code>, <code>docs/launch/cold-email-templates.md</code>, <code>docs/launch/mailing-list/README.md</code>, <code>docs/launch/substack-numero-1.md</code>.
+    </div>
+    <div class="footer-meta">
+      Budget · 200 CHF one-shot<br>
+      Runway · ~90 jours<br>
+      Téléphone · 0 minute
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
