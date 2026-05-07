@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rapport — chantier branding + FINMA · 2026-05-06</title>
+<style>
+  :root{
+    --bg:#FBFBF8;--bg-soft:#F4F4F0;--bg-card:#FFFFFF;
+    --ink:#0A0A0C;--ink-soft:#4A4D55;--ink-mute:#6B6E76;
+    --line:rgba(10,10,12,.08);--line-strong:rgba(10,10,12,.14);
+    --accent:#DC1F2D;--accent-soft:rgba(220,31,45,.06);--green:#15803D;
+    --font-sans:Geist,-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
+    --font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;
+    --t-fast:.2s;--ease-out:cubic-bezier(0.16,1,0.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none;transition:color var(--t-fast)}
+  a:hover{color:var(--accent)}
+
+  /* === Layout === */
+  .container{max-width:1200px;margin:0 auto;padding:0 36px}
+  .container-tight{max-width:780px;margin:0 auto;padding:0 36px}
+
+  /* === Header === */
+  header{padding:96px 0 64px;border-bottom:1px solid var(--line)}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:var(--accent-soft);border:1px solid rgba(220,31,45,.18);border-radius:100px;font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  .pill::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%}
+  .doc-meta{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);letter-spacing:.04em;text-transform:uppercase;margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
+  .doc-meta strong{color:var(--ink);font-weight:600;letter-spacing:0;text-transform:none}
+  h1{font-size:clamp(48px,6vw,80px);font-weight:700;letter-spacing:-.04em;line-height:1;margin:24px 0 28px;max-width:18ch}
+  h1 .accent{color:var(--accent);border-bottom:3px solid var(--accent);padding-bottom:2px}
+  .lede{font-size:20px;color:var(--ink-soft);max-width:62ch;line-height:1.55}
+
+  /* === Sections === */
+  section.chunk{padding:96px 0;border-bottom:1px solid var(--line)}
+  section.chunk:last-of-type{border-bottom:none}
+  .chunk-num{display:inline-block;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--ink-mute);margin-bottom:14px;font-weight:500}
+  .chunk h2{font-size:clamp(32px,4vw,44px);font-weight:700;letter-spacing:-.03em;line-height:1.05;margin-bottom:18px;max-width:24ch}
+  .chunk h2 .accent{color:var(--accent)}
+  .chunk-intro{font-size:17px;color:var(--ink-soft);max-width:60ch;line-height:1.55;margin-bottom:48px}
+
+  /* === Visual cards === */
+  .card{background:var(--bg-card);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:border-color var(--t-fast),transform var(--t-fast)}
+  .card:hover{border-color:var(--line-strong);transform:translateY(-2px)}
+  .card-figure{position:relative;background:var(--bg-soft);aspect-ratio:191/100;overflow:hidden;border-bottom:1px solid var(--line)}
+  .card-figure img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .card-body{padding:20px 24px}
+  .card-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-weight:600}
+  .card-title{font-size:17px;font-weight:600;letter-spacing:-.015em;color:var(--ink);margin-bottom:6px}
+  .card-desc{font-size:13px;color:var(--ink-soft);line-height:1.55}
+
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media (max-width:900px){.grid-3{grid-template-columns:1fr}}
+
+  /* === Email block (FINMA quote) === */
+  .email{background:var(--ink);color:#fff;padding:36px 40px;border-radius:14px;margin:32px 0;font-family:var(--font-mono);font-size:14px;line-height:1.7}
+  .email-header{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:24px;display:flex;gap:14px;flex-wrap:wrap}
+  .email-header .src{color:#fff;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  .email-header .src::before{content:'';width:5px;height:5px;background:var(--accent);border-radius:50%}
+  .email-body{font-family:var(--font-sans);font-size:18px;line-height:1.55;color:#fff;font-weight:400}
+  .email-body em{color:var(--accent);font-style:normal;font-weight:500}
+  .email-sig{margin-top:24px;font-size:12px;color:rgba(255,255,255,.55)}
+
+  /* === Logo display === */
+  .logo-display{display:grid;grid-template-columns:200px 1fr;gap:48px;align-items:center;background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:40px}
+  .logo-display img{width:100%;height:auto;border-radius:12px}
+  .logo-specs{font-family:var(--font-mono);font-size:13px;line-height:1.9}
+  .logo-specs dt{color:var(--ink-mute);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-top:8px}
+  .logo-specs dt:first-child{margin-top:0}
+  .logo-specs dd{color:var(--ink);font-weight:500;margin-bottom:4px}
+  @media (max-width:700px){.logo-display{grid-template-columns:1fr;gap:24px}}
+
+  /* === Palette === */
+  .palette{display:flex;gap:14px;flex-wrap:wrap;margin-top:32px}
+  .swatch{flex:1;min-width:140px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .swatch-color{height:80px}
+  .swatch-meta{padding:10px 14px;font-family:var(--font-mono);font-size:11px;background:var(--bg-card)}
+  .swatch-meta strong{display:block;color:var(--ink);font-weight:600;font-size:12px;margin-bottom:2px}
+  .swatch-meta span{color:var(--ink-mute)}
+
+  /* === Numbered milestones === */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:48px}
+  .stat{padding:24px 26px;background:var(--bg-card);border:1px solid var(--line);border-radius:12px}
+  .stat-num{font-size:40px;font-weight:700;letter-spacing:-.03em;color:var(--accent);line-height:1}
+  .stat-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-top:8px}
+  .stat-desc{font-size:13px;color:var(--ink-soft);margin-top:8px;line-height:1.5}
+  @media (max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  /* === Compare block === */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  .compare > div{background:var(--bg-card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .compare img{width:100%;display:block;background:var(--bg-soft)}
+  .compare-cap{padding:14px 18px;font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);background:var(--bg-soft);border-top:1px solid var(--line)}
+  .compare-cap strong{color:var(--ink);font-weight:600;display:block;margin-bottom:2px;font-size:12px}
+  @media (max-width:700px){.compare{grid-template-columns:1fr}}
+
+  /* === Commits list === */
+  .commits{margin-top:32px;font-family:var(--font-mono);font-size:13px;background:var(--bg-card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .commit{padding:12px 18px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start}
+  .commit:last-child{border-bottom:none}
+  .commit-hash{color:var(--ink-mute);font-weight:500;flex-shrink:0;width:64px}
+  .commit-msg{color:var(--ink);line-height:1.5}
+  .commit-msg .scope{color:var(--accent);font-weight:600}
+
+  /* === Status table === */
+  .status-table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:24px;background:var(--bg-card);font-size:14px}
+  .status-table th,.status-table td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--line)}
+  .status-table th{background:var(--bg-soft);font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600}
+  .status-table tr:last-child td{border-bottom:none}
+  .badge-go{display:inline-flex;align-items:center;gap:5px;color:var(--green);font-weight:600;font-size:13px}
+  .badge-go::before{content:'';width:7px;height:7px;background:var(--green);border-radius:50%}
+  .badge-pending{display:inline-flex;align-items:center;gap:5px;color:var(--ink-mute);font-weight:500;font-size:13px}
+  .badge-pending::before{content:'';width:7px;height:7px;background:var(--ink-mute);border-radius:50%}
+
+  /* === Footer === */
+  footer.doc{padding:64px 0 48px;background:var(--ink);color:rgba(255,255,255,.7);font-family:var(--font-mono);font-size:13px;text-align:center;line-height:1.7}
+  footer.doc strong{color:#fff;font-weight:600}
+  footer.doc .links{margin-top:18px;display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+  footer.doc .links a{color:rgba(255,255,255,.55)}
+  footer.doc .links a:hover{color:var(--accent)}
+
+  /* === Banner illustrations (full-width) === */
+  .banner-show{position:relative;width:100%;aspect-ratio:191/100;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg-soft);margin:24px 0}
+  .banner-show img{width:100%;height:100%;object-fit:cover;display:block}
+</style>
+</head>
+<body>
+
+<!-- ====================== HEADER ====================== -->
+<header>
+  <div class="container-tight">
+    <span class="pill">openswissdata · récap</span>
+    <h1>Chantier <span class="accent">branding + FINMA</span> bouclé.</h1>
+    <p class="lede">Le 6 mai 2026, la FINMA a accordé l'autorisation écrite. Dans la foulée, on a rebrandé tout le site avec un nouveau logo, des bannières propres pour chaque dataset, un footer redesigné, une refonte du blog, et un carrousel de citations sur la home. Snapshot du chantier ci-dessous.</p>
+    <div class="doc-meta">
+      <span><strong>Date</strong></span>
+      <span style="opacity:.5">·</span>
+      <span>2026-05-06</span>
+      <span style="opacity:.5">·</span>
+      <span><strong>Commits</strong></span>
+      <span>14 sur main</span>
+      <span style="opacity:.5">·</span>
+      <span><strong>Pages déployées</strong></span>
+      <span>1091</span>
+    </div>
+  </div>
+</header>
+
+<!-- ====================== STATS ====================== -->
+<section class="chunk">
+  <div class="container">
+    <span class="chunk-num">01 — Bilan</span>
+    <h2>Quatre chiffres clés.</h2>
+    <p class="chunk-intro">Le résultat du chantier en une grille.</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">2/3</div>
+        <div class="stat-label">Permissions acquises</div>
+        <div class="stat-desc">BAZG (TARES) + FINMA. BFS (NOGA) toujours en attente.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Bannières datasets</div>
+        <div class="stat-desc">Convergence (TARES), blueprint (Classif), centrée (FINMA).</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">9</div>
+        <div class="stat-label">Variantes assets</div>
+        <div class="stat-desc">favicon × 3, apple-touch, PWA × 2, OG × 4.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">1091</div>
+        <div class="stat-label">Pages servies</div>
+        <div class="stat-desc">FR/DE/EN, sitemap propre, meta complets.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== FINMA permission ====================== -->
+<section class="chunk">
+  <div class="container-tight">
+    <span class="chunk-num">02 — Permission FINMA</span>
+    <h2>Réponse écrite reçue le <span class="accent">6 mai 2026.</span></h2>
+    <p class="chunk-intro">Communication FINMA, signée Nadine Bucher, en réponse au courriel envoyé le 17 avril 2026.</p>
+    <div class="email">
+      <div class="email-header">
+        <span>Permission commerciale</span>
+        <span style="opacity:.4">·</span>
+        <span class="src">FINMA</span>
+        <span style="opacity:.4">·</span>
+        <span>2026-05-06</span>
+      </div>
+      <p class="email-body">D'un point de vue juridique, nous n'avons <em>aucune objection</em> à ce que vous utilisiez des données de la FINMA accessibles au public comme source de données pour votre produit, sous réserve du respect des droits d'auteur de la FINMA et de l'intégrité des documents sources.</p>
+      <div class="email-sig">— Nadine Bucher · Communication · Eidgenössische Finanzmarktaufsicht FINMA · Laupenstrasse 27, CH-3003 Bern</div>
+    </div>
+
+    <table class="status-table">
+      <thead>
+        <tr><th>Source</th><th>Dataset</th><th>Statut</th><th>Date</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>BAZG</td><td>TARES</td><td><span class="badge-go">Permission écrite</span></td><td>2026-04-21</td></tr>
+        <tr><td>FINMA</td><td>FINMA Registry</td><td><span class="badge-go">Permission écrite</span></td><td><strong>2026-05-06</strong></td></tr>
+        <tr><td>OFS / BFS</td><td>NOGA / Classifications</td><td><span class="badge-pending">En attente</span></td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====================== LOGO ====================== -->
+<section class="chunk">
+  <div class="container">
+    <span class="chunk-num">03 — Identité visuelle</span>
+    <h2>Logo croix suisse en grille de pixels.</h2>
+    <p class="chunk-intro">Généré sur Midjourney, choisi le 6 mai parmi 4 candidats. Croppé à 640×640 pour faire ressortir la croix. Carré rouge accent au centre.</p>
+
+    <div class="logo-display">
+      <img src="../web/public/logo.png" alt="Logo openswissdata">
+      <dl class="logo-specs">
+        <dt>Source</dt>
+        <dd>Midjourney v6.1 · style raw</dd>
+        <dt>Format</dt>
+        <dd>PNG 640×640 (croppé depuis 1024)</dd>
+        <dt>Variantes générées</dt>
+        <dd>favicon 16/32 · ICO · apple-touch 180 · PWA 192/512</dd>
+        <dt>Référence prompt</dt>
+        <dd>swiss cross · pixel grid · single red square</dd>
+      </dl>
+    </div>
+
+    <div class="palette">
+      <div class="swatch"><div class="swatch-color" style="background:#FBFBF8"></div><div class="swatch-meta"><strong>cream</strong><span>#FBFBF8 · fond</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#0A0A0C"></div><div class="swatch-meta"><strong>ink</strong><span>#0A0A0C · pixels</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#DC1F2D"></div><div class="swatch-meta"><strong>accent</strong><span>#DC1F2D · carré rouge</span></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#15803D"></div><div class="swatch-meta"><strong>green</strong><span>#15803D · status live</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== BANNIÈRES ====================== -->
+<section class="chunk">
+  <div class="container">
+    <span class="chunk-num">04 — Bannières datasets</span>
+    <h2>Une trinité visuelle, <span class="accent">un seul vocabulaire.</span></h2>
+    <p class="chunk-intro">Trois compositions Midjourney distinctes, mêmes contraintes (pixels noirs sur cream, un carré rouge accent, swiss design, ratio 191:100). Chaque dataset a sa polarité visuelle.</p>
+
+    <div class="grid-3">
+      <article class="card">
+        <div class="card-figure"><img src="../web/public/og-tares.png" alt=""></div>
+        <div class="card-body">
+          <div class="card-tag">TARES · douanes</div>
+          <div class="card-title">Convergence</div>
+          <p class="card-desc">Pixels noirs qui s'agrègent vers un carré rouge à droite. Métaphore des données qui convergent vers la livraison.</p>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-figure"><img src="../web/public/og-classifications.png" alt=""></div>
+        <div class="card-body">
+          <div class="card-tag">Classifications · NOGA / NACE / ISIC</div>
+          <div class="card-title">Blueprint</div>
+          <p class="card-desc">Subdivision récursive avec lignes verticales — évoque la hiérarchie taxonomique. Flippée H pour pattern V2.</p>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-figure"><img src="../web/public/og-finma.png" alt=""></div>
+        <div class="card-body">
+          <div class="card-tag">FINMA · registre</div>
+          <div class="card-title">Subdivision centrée</div>
+          <p class="card-desc">Nuage dense de pixels en zone centrale, carré rouge en cœur. Évoque le registre des entités sous surveillance.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== HERO INTÉGRATION ====================== -->
+<section class="chunk">
+  <div class="container">
+    <span class="chunk-num">05 — Bannières en fond du hero</span>
+    <h2>Pattern V2 strict, <span class="accent">trois pages alignées.</span></h2>
+    <p class="chunk-intro">Sur les 3 pages dataset, la bannière apparaît en background du hero (right -2%, bottom -4%, 72% × 85%, opacity 0.45, mask diagonal 135°). Mêmes paramètres CSS partout — seule l'URL du <code>background-image</code> change.</p>
+    <div class="banner-show"><img src="../web/public/og-tares.png" alt=""></div>
+  </div>
+</section>
+
+<!-- ====================== CARROUSEL HOME ====================== -->
+<section class="chunk">
+  <div class="container-tight">
+    <span class="chunk-num">06 — Carrousel home</span>
+    <h2>Section "Permission commerciale" devient un <span class="accent">carrousel.</span></h2>
+    <p class="chunk-intro">La section qui affichait juste BAZG est passée en composant <code>QuoteCarousel.astro</code> avec navigation prev/next + dots indicateurs. Les 2 slides BAZG + FINMA partagent le même fond noir. Animation fade 450ms, accessible clavier (← →) + ARIA roles.</p>
+  </div>
+  <div class="container">
+    <div class="email" style="margin:32px 0 0">
+      <div class="email-header">
+        <span>● 1 / 2</span>
+        <span style="opacity:.4">·</span>
+        <span class="src">BAZG</span>
+        <span style="opacity:.4">·</span>
+        <span>2026-04-21</span>
+      </div>
+      <p class="email-body">Permission accordée pour la diffusion commerciale des données TARES sous votre offre, sous réserve des conditions usuelles d'attribution et d'exclusion.</p>
+      <div class="email-sig">— Michael Beer · Chef Tarifgrundlagen, BAZG · Bundesamt für Zoll und Grenzsicherheit</div>
+    </div>
+    <div class="email" style="margin:14px 0 0;border-top:1px solid rgba(255,255,255,.1)">
+      <div class="email-header">
+        <span>● 2 / 2</span>
+        <span style="opacity:.4">·</span>
+        <span class="src">FINMA</span>
+        <span style="opacity:.4">·</span>
+        <span>2026-05-06</span>
+      </div>
+      <p class="email-body">Nous n'avons aucune objection à ce que vous utilisiez des données de la FINMA accessibles au public comme source de données pour votre produit, sous réserve du respect des droits d'auteur de la FINMA et de l'intégrité des documents sources.</p>
+      <div class="email-sig">— Nadine Bucher · Communication · Eidgenössische Finanzmarktaufsicht FINMA</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== FOOTER F3 ====================== -->
+<section class="chunk">
+  <div class="container">
+    <span class="chunk-num">07 — Footer split asymmetric</span>
+    <h2>Logo 64px + bannière TARES <span class="accent">flippée H.</span></h2>
+    <p class="chunk-intro">Le footer passe en grid 1.5fr / 1fr. À gauche : la marque + 3 colonnes de liens + status. À droite : la bannière TARES inversée horizontalement, animation pan lent 18s. Les sections légales (disclaimer, copyright, lang switcher) restent full-width sous le split, alignées au padding 56px.</p>
+    <div class="banner-show" style="aspect-ratio:auto;height:280px"><img src="../web/public/og-tares.png" alt="" style="object-fit:cover;object-position:right center;transform:scaleX(-1)"></div>
+  </div>
+</section>
+
+<!-- ====================== BLOG ====================== -->
+<section class="chunk">
+  <div class="container">
+    <span class="chunk-num">08 — Blog</span>
+    <h2>Refresh visuel + nouvel article news.</h2>
+    <p class="chunk-intro">Page index : cards en grid 1fr / 280px avec mini-bannière thumbnail à droite (couverture du dataset associé). Template article : OG image dynamique + bannière en fond du hero (pattern V2). Nouvel article publié le 6 mai pour annoncer la permission FINMA.</p>
+
+    <div class="grid-3">
+      <article class="card">
+        <div class="card-figure"><img src="../web/public/og-finma.png" alt=""></div>
+        <div class="card-body">
+          <div class="card-tag">2026-05-06 · FINMA</div>
+          <div class="card-title">FINMA accorde formellement l'autorisation pour openswissdata</div>
+          <p class="card-desc">Annonce news — texte intégral du mail Nadine Bucher, conditions implicites, état des permissions.</p>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-figure"><img src="../web/public/og-finma.png" alt=""></div>
+        <div class="card-body">
+          <div class="card-tag">2026-04-22 · FINMA · updated 2026-05-06</div>
+          <div class="card-title">Cross-checking counterparties against FINMA: a 30-min playbook</div>
+          <p class="card-desc">Mis à jour avec encadré renvoyant vers la news + correction "10 separate lists" pour cohérence.</p>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-figure"><img src="../web/public/og-tares.png" alt=""></div>
+        <div class="card-body">
+          <div class="card-tag">2026-04-22 · TARES</div>
+          <div class="card-title">Integrating Swiss TARES customs codes into SAP GTS</div>
+          <p class="card-desc">Pas de mise à jour de contenu — bénéficie du nouveau template (OG dédiée + bannière en fond).</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== COMMITS ====================== -->
+<section class="chunk">
+  <div class="container-tight">
+    <span class="chunk-num">09 — Trace git</span>
+    <h2>14 commits sur main.</h2>
+    <p class="chunk-intro">Tous poussés en live sur Vercel, sans aucun rollback.</p>
+    <div class="commits">
+      <div class="commit"><span class="commit-hash">7e7cc91</span><span class="commit-msg"><span class="scope">feat(blog)</span>: refresh visuel + nouvel article news permission FINMA</span></div>
+      <div class="commit"><span class="commit-hash">3886223</span><span class="commit-msg"><span class="scope">fix(footer)</span>: aligne paddings de la zone légale avec le split au-dessus</span></div>
+      <div class="commit"><span class="commit-hash">e57b561</span><span class="commit-msg"><span class="scope">feat(home)</span>: carrousel permissions BAZG + FINMA en remplacement du single Quote</span></div>
+      <div class="commit"><span class="commit-hash">d519a1e</span><span class="commit-msg"><span class="scope">feat(brand)</span>: bannière FINMA + hero V2 strict (3 datasets unifiés)</span></div>
+      <div class="commit"><span class="commit-hash">591ea2c</span><span class="commit-msg"><span class="scope">feat(brand)</span>: bannière Classifications v2 (blueprint, flipée H) en V2 strict</span></div>
+      <div class="commit"><span class="commit-hash">a8f5e24</span><span class="commit-msg"><span class="scope">feat(brand)</span>: bannière Classifications + hero V2 + archive sources MJ</span></div>
+      <div class="commit"><span class="commit-hash">10281ea</span><span class="commit-msg"><span class="scope">feat(brand)</span>: bannière TARES en fond du hero des pages dataset (V2)</span></div>
+      <div class="commit"><span class="commit-hash">5d9d073</span><span class="commit-msg"><span class="scope">feat(brand)</span>: logo PNG dans StatusBar (remplace clip-path croix rouge)</span></div>
+      <div class="commit"><span class="commit-hash">b65e033</span><span class="commit-msg"><span class="scope">feat(footer)</span>: split asymétrique avec logo 64px + bannière TARES flipée (F3)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== FOOTER ====================== -->
+<footer class="doc">
+  <div class="container">
+    <p><strong>openswissdata</strong> · récap chantier branding + FINMA</p>
+    <p>Document généré le 2026-05-06</p>
+    <div class="links">
+      <a href="https://www.openswissdata.com/" target="_blank">Site live →</a>
+      <a href="https://www.openswissdata.com/blog/finma-permission-granted" target="_blank">Article news →</a>
+      <a href="https://www.openswissdata.com/legal/provenance" target="_blank">Provenance →</a>
+      <a href="https://www.openswissdata.com/compliance" target="_blank">Compliance →</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
