@@ -127,9 +127,9 @@ openswissdata is the data layer Switzerland needed — finally agent-native.
 Your AI agent (Claude Code, Cursor, Manus, ChatGPT desktop) can now query
 Swiss federal data natively, without copy-pasting CSVs:
 
-🇨🇭 8 MCP tools live (JSON-RPC 2.0, spec 2025-06-18)
+🇨🇭 9 MCP tools live (JSON-RPC 2.0, spec 2025-06-18)
    • tariff_lookup, tariff_semantic_search, tariff_changelog
-   • cross_walk, classify_text
+   • cross_walk, classify_text, statent_lookup
    • kyc_check, finma_search, entity_history
 
 🧠 Pre-computed multilingual embeddings (BAAI/bge-m3, 9,356 vectors)
@@ -685,7 +685,7 @@ https://openswissdata.com/mcp
 - 12-24 months historical changelog of MFN duties
 - Ed25519-signed manifest + RFC-3161 timestamp
 - Quarterly diff feed
-- 8 MCP server endpoints (tariff_lookup, tariff_semantic_search,
+- 9 MCP server endpoints (tariff_lookup, tariff_semantic_search,
   tariff_changelog, …)
 
 ## Source
@@ -764,7 +764,7 @@ Parquet (UTF-8), Apache, schema typed.
 ## ⚠️ Validation requise avant push public
 
 **Tous ces drafts mentionnent des features qui sont effectivement livrées en LIVE** au 2026-04-30 :
-- ✅ 8 MCP tools : `tariff_lookup`, `tariff_semantic_search`, `tariff_changelog`, `cross_walk`, `classify_text`, `kyc_check`, `finma_search`, `entity_history`
+- ✅ 9 MCP tools : `tariff_lookup`, `tariff_semantic_search`, `tariff_changelog`, `cross_walk`, `classify_text`, `kyc_check`, `finma_search`, `entity_history`, `statent_lookup`
 - ✅ Page `/mcp` avec sandbox playground
 - ✅ Sous-domaine `mcp.openswissdata.com` avec SSL Let's Encrypt
 - ✅ Permission BAZG 2026-04-21 documentée
