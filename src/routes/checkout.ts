@@ -94,12 +94,10 @@ async function buildSession(
   const params: Stripe.Checkout.SessionCreateParams = {
     mode,
     line_items,
-    // automatic_payment_methods lets Stripe surface every method enabled in the
-    // dashboard (card, TWINT, Apple Pay, Google Pay, …) without hardcoding a list.
-    // Activate TWINT in Stripe Dashboard → Settings → Payment methods to give CH
-    // PMEs and self-employed buyers their preferred rail.
-    payment_method_types: undefined,
-    automatic_payment_methods: { enabled: true },
+    // No `payment_method_types` set on purpose: Stripe Checkout then surfaces
+    // every method enabled in the dashboard (card, TWINT, Apple/Google Pay, …).
+    // Activate TWINT in Stripe Dashboard → Settings → Payment methods to give
+    // CH PMEs and self-employed buyers their preferred rail.
     success_url: `${baseUrl}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/${hasStandalone ? "mcp" : "bundle"}?checkout=cancelled`,
     metadata: { dataset_ids: dataset_ids.join(",") },
