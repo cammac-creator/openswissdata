@@ -31,3 +31,5 @@ coverage/
 *.log
 # Canary report is regenerated each run — only the baseline is checked in.
 etl/canary-report.json
+# MCP registry tokens (never commit — used by mcp-publisher CLI)
+.mcpregistry_*

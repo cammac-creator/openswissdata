@@ -5,7 +5,7 @@ Statut : ✅ Stripe LIVE actif en production
 
 ## Compte Stripe LIVE
 
-- **Account ID** : `acct_1TP3BlRenAUXTSv7`
+- **Account ID** : `***REDACTED — see Stripe dashboard***`
 - **Country** : CH
 - **Email** : cam@ogens.ch
 - **Default currency** : CHF
@@ -16,27 +16,25 @@ Statut : ✅ Stripe LIVE actif en production
 
 | Produit | Prix | Type | Stripe Price ID |
 |---|---|---|---|
-| TARES — Swiss Customs Tariff | **299 CHF** | one-shot | `price_1TPsgkRenAUXTSv71LJTvGFn` |
-| TARES updates | **120 CHF/an** | annuel récurrent | `price_1TPsglRenAUXTSv7s7nzqTeX` |
-| Classifications — NOGA NACE ISIC | **399 CHF** | one-shot | `price_1TPsgnRenAUXTSv7rX8NlOUV` |
-| Classifications updates | **160 CHF/an** | annuel récurrent | `price_1TPsgnRenAUXTSv7EDAZPr2E` |
-| FINMA Registry | **299 CHF** | one-shot | `price_1TPsgoRenAUXTSv7jicgiBW2` |
-| FINMA updates | **120 CHF/an** | annuel récurrent | `price_1TPsgpRenAUXTSv7HWH7WKiB` |
-| Bundle complet (TARES + Classifications + FINMA) | **799 CHF** | one-shot | `price_1TPsgqRenAUXTSv7XU8ZdYzq` |
+| TARES — Swiss Customs Tariff | **299 CHF** | one-shot | `***REDACTED***` |
+| TARES updates | **120 CHF/an** | annuel récurrent | `***REDACTED***` |
+| Classifications — NOGA NACE ISIC | **399 CHF** | one-shot | `***REDACTED***` |
+| Classifications updates | **160 CHF/an** | annuel récurrent | `***REDACTED***` |
+| FINMA Registry | **299 CHF** | one-shot | `***REDACTED***` |
+| FINMA updates | **120 CHF/an** | annuel récurrent | `***REDACTED***` |
+| Bundle complet (TARES + Classifications + FINMA) | **799 CHF** | one-shot | `***REDACTED***` |
 
-**Product IDs** :
-- TARES : `prod_UOg21wzmJpMR6D`
-- Classifications : `prod_UOg2HYIDH06mD0`
-- FINMA : `prod_UOg24y3llgFzs5`
-- Bundle : `prod_UOg2JMg97UdK34`
+**Product IDs** : `***REDACTED — see Stripe dashboard***`
 
 ## Webhook LIVE
 
-- **ID** : `we_1TPsh4RenAUXTSv7BFbid4yc`
+- **ID** : `***REDACTED — see Stripe dashboard***`
 - **URL** : `https://www.openswissdata.com/api/webhook/stripe`
 - **Status** : enabled
 - **Events** : `checkout.session.completed`, `invoice.payment_succeeded`
-- **Webhook secret** : `whsec_18KjrM93e9UuamnqHjiX0eFtQO6qvGn` (synced Railway)
+- **Webhook secret** : `***REDACTED — rotated 2026-05-07, see Railway env STRIPE_WEBHOOK_SECRET***`
+
+> ⚠️ **Note 2026-05-07** : Le secret webhook initial avait été leaké en clair dans ce fichier sur le repo public GitHub pendant ~11 jours (entre le commit du 25 avril et la rotation du 7 mai). Action prise : rotation immédiate du webhook secret sur Stripe + redact de ce fichier. Le secret leaké est désormais inactif. Pour effacer aussi de l'historique git : `git filter-repo` (action manuelle, optionnelle).
 
 ## Env vars synced
 
