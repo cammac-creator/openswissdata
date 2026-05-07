@@ -20,10 +20,11 @@ Je vous écris parce que finews.ch est lu par exactement les compliance officers
 
 **Le scoop**
 
-openswissdata.com est le **premier MCP server suisse** dédié aux datasets fédéraux (TARES douanes, classifications NOGA/NACE/ISIC, registre FINMA), avec deux particularités que personne d'autre ne propose en Suisse aujourd'hui :
+openswissdata.com est le **premier MCP server suisse** dédié aux datasets fédéraux (TARES douanes, classifications NOGA/NACE/ISIC, registre FINMA), avec trois particularités que personne d'autre ne propose en Suisse aujourd'hui :
 
-1. **Permission commerciale écrite du BAZG** acquise le 21 avril 2026 (référence `BAZG-PERMISSION-2026-04-21-MICHAEL-BEER`, M. Michael Beer, Tarifgrundlagen). Aucun autre éditeur privé n'a obtenu cette permission à ma connaissance.
-2. **Signatures Ed25519 + horodatage RFC-3161** sur chaque dataset livré — niveau bancaire, vérifiable client-side avec `openssl` standard. Le code source des workflows ETL est public sur GitHub (`cammac-creator/openswissdata`).
+1. **Permission commerciale écrite du BAZG** acquise le 21 avril 2026 (référence `BAZG-PERMISSION-2026-04-21-MICHAEL-BEER`, M. Michael Beer, Tarifgrundlagen).
+2. **Aucune objection de la FINMA** sur l'usage commercial des données publiques, confirmée par écrit le 6 mai 2026 (Nadine Bucher, Communication FINMA, référence `FINMA-PERMISSION-2026-05-06-NADINE-BUCHER`).
+3. **Signatures Ed25519 + horodatage RFC-3161** sur chaque dataset livré — niveau bancaire, vérifiable client-side avec `openssl` standard. Le code source des workflows ETL est public sur GitHub (`cammac-creator/openswissdata`).
 
 **Le contexte**
 
@@ -50,7 +51,7 @@ Je peux livrer le draft dans la journée si l'angle vous convient. Photos HD du 
 - Page provenance + vérification : https://www.openswissdata.com/legal/provenance
 - Repo public : https://github.com/cammac-creator/openswissdata
 
-Merci d'avance pour votre considération. Je reste joignable au [téléphone] si vous voulez 5 min pour cadrer l'angle.
+Merci d'avance pour votre considération. N'hésitez pas à me répondre par email pour cadrer l'angle.
 
 Cordialement,
 Claude-Alain Martin
