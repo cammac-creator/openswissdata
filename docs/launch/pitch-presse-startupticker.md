@@ -42,9 +42,9 @@ openswissdata extrait les données fédérales depuis les sources autoritaires (
 
 Claude-Alain Martin, builder vaudois (raison individuelle, Ogens), 7 ans dans la data B2B. openswissdata est bootstrappé, sans investisseurs externes. Le code source des workflows ETL est public sur GitHub (`cammac-creator/openswissdata`) — les acheteurs peuvent vérifier la pipeline avant achat.
 
-**Permission BAZG**
+**Permissions BAZG + FINMA**
 
-Permission commerciale écrite acquise le 21 avril 2026 (référence `BAZG-PERMISSION-2026-04-21-MICHAEL-BEER`, M. Michael Beer, BAZG Tarifgrundlagen). Demandes en cours auprès de l'OFS et de la FINMA. Politique publique de takedown 24h sur demande d'autorité source.
+Permission commerciale BAZG écrite acquise le 21 avril 2026 (référence `BAZG-PERMISSION-2026-04-21-MICHAEL-BEER`, M. Michael Beer, Tarifgrundlagen). Confirmation FINMA reçue le 6 mai 2026 (Mme Nadine Bucher, Communication, référence `FINMA-PERMISSION-2026-05-06-NADINE-BUCHER`) : aucune objection à l'usage commercial des données FINMA publiquement accessibles. Demande BFS pour NOGA en attente. Politique publique de takedown 24h sur demande d'autorité source.
 
 **Disponibilité**
 

@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Phase 0 · Exécution · openswissdata</title>
+<style>
+  :root {
+    --bg: #FBFBF8; --bg-card: #FFFFFF; --bg-soft: #F5F4EE;
+    --ink: #0A0A0C; --ink-soft: #3A3D45; --ink-mute: #6B6E76;
+    --line: #E8E4D9; --line-strong: #D9D3C3;
+    --accent: #DC1F2D; --accent-soft: #FCE7E9; --accent-strong: #B91C1C;
+    --green: #15803D; --green-soft: #DCFCE7;
+    --amber: #92400E; --amber-soft: #FEF3C7;
+    --teal: #0F766E; --teal-soft: #E5F5F1;
+    --blue: #1D4ED8; --blue-soft: #DBEAFE;
+    --plum: #6D28D9; --plum-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  .hero { padding: 56px 0 28px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line); width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 { font-weight: 700; font-size: clamp(32px, 4vw, 44px); line-height: 1.1; letter-spacing: -.03em; margin: 0 0 12px; max-width: 22ch; }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 8px; }
+
+  .progress {
+    background: var(--ink); border-radius: 12px; padding: 18px 22px;
+    color: white; margin: 24px 0;
+    display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center;
+  }
+  .progress-bar-wrap { width: 100%; height: 10px; background: rgba(255,255,255,.15); border-radius: 6px; overflow: hidden; margin-top: 8px; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, #6ee7b7, #15803D); width: 0%; transition: width .4s; }
+  .progress-label { font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+  .progress-count { font-family: "Geist Mono", monospace; font-size: 24px; font-weight: 700; }
+  .progress-count span { color: rgba(255,255,255,.5); font-size: 14px; }
+
+  /* Action cards */
+  .action {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+    margin: 14px 0; overflow: hidden; transition: border-color .2s;
+  }
+  .action.done { border-color: var(--green); background: linear-gradient(180deg, var(--green-soft) 0%, white 100%); }
+  .action-head {
+    display: grid; grid-template-columns: 56px 1fr auto; gap: 16px;
+    padding: 18px 22px; cursor: pointer; align-items: center;
+    user-select: none;
+  }
+  .action-head:hover { background: rgba(0,0,0,.015); }
+  .check {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--line-strong); background: white;
+    display: grid; place-items: center;
+    font-family: "Geist Mono", monospace; font-size: 13px; font-weight: 700;
+    color: var(--ink-mute); transition: all .2s;
+  }
+  .action.done .check { background: var(--green); border-color: var(--green); color: white; }
+  .action.done .check::before { content: "✓"; font-size: 16px; }
+  .action.done .check span { display: none; }
+  .action-info h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+  .action.done .action-info h3 { text-decoration: line-through; color: var(--ink-mute); }
+  .action-info p { margin: 0; font-size: 13px; color: var(--ink-mute); }
+  .action-meta {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase;
+  }
+  .action-meta span { padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+  .action-meta .time { background: var(--bg-soft); color: var(--ink-soft); }
+  .action-meta .ord { background: var(--accent-soft); color: var(--accent-strong); }
+  .action-meta .auto { background: var(--green-soft); color: var(--green); }
+  .action-meta .manual { background: var(--amber-soft); color: var(--amber); }
+  .toggle-icon { color: var(--ink-mute); transition: transform .2s; }
+  .action.open .toggle-icon { transform: rotate(180deg); }
+
+  .action-body {
+    display: none; padding: 0 22px 22px 22px;
+    border-top: 1px dashed var(--line); padding-top: 18px;
+  }
+  .action.open .action-body { display: block; }
+
+  .step { margin-bottom: 18px; }
+  .step-label {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 6px;
+  }
+  .step-body { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+  .step-body strong { color: var(--ink); }
+  .step-body ol { padding-left: 22px; margin: 6px 0; }
+  .step-body ol li { margin-bottom: 4px; }
+  .step-body a { color: var(--blue); text-decoration: none; border-bottom: 1px solid var(--blue-soft); }
+  .step-body a:hover { border-bottom-color: var(--blue); }
+
+  .copy-block {
+    position: relative; margin: 8px 0;
+    background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px;
+    overflow: hidden;
+  }
+  .copy-block-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 14px;
+    background: var(--ink); color: white;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase;
+  }
+  .copy-btn {
+    background: white; color: var(--ink); border: none;
+    padding: 4px 10px; border-radius: 4px; cursor: pointer;
+    font-family: "Geist Mono", monospace; font-size: 10px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .copy-btn:hover { background: #ffe; }
+  .copy-btn.copied { background: var(--green); color: white; }
+  .copy-content {
+    padding: 14px 16px; font-family: "Geist Mono", monospace; font-size: 12px;
+    color: var(--ink); line-height: 1.65; white-space: pre-wrap; word-wrap: break-word;
+    max-height: 320px; overflow-y: auto;
+  }
+  .copy-content.compact { font-size: 13px; max-height: none; }
+
+  .link-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--ink); color: white; padding: 9px 16px;
+    border-radius: 8px; text-decoration: none;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; font-weight: 700;
+    margin: 6px 6px 6px 0;
+    transition: background .15s;
+  }
+  .link-btn:hover { background: var(--accent); }
+  .link-btn::after { content: "→"; }
+
+  .alert {
+    background: var(--amber-soft); border: 1px solid var(--amber); border-radius: 10px;
+    padding: 12px 16px; font-size: 13px; color: var(--amber); margin: 8px 0;
+  }
+  .alert strong { color: var(--amber); }
+
+  footer {
+    padding: 36px 0 56px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 13px; text-align: center; margin-top: 32px;
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Phase 0 · Exécution · 2026-05-07 · ~5h cumulées</span>
+    </div>
+    <h1>Phase 0 · <span class="accent">7 actions</span>, textes prêts à coller, liens directs.</h1>
+    <p class="lede">
+      Chaque carte ci-dessous = une action. Clique pour ouvrir, copie le texte avec le bouton COPY, ouvre le lien direct vers l'UI cible. Coche la case quand c'est fait. Ordre conseillé en chiffre rouge — tu peux les faire en parallèle ou étalées sur la journée.
+    </p>
+
+    <div class="progress">
+      <div>
+        <div class="progress-label">Avancement Phase 0</div>
+        <div class="progress-count" id="progress-count">0 <span>/ 7</span></div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div class="progress-label" style="text-align: right;">
+        Coût · 0 CHF<br>
+        Effort · ~5h
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+
+<!-- ACTION 1 — IMPORT SUBSTACK -->
+<div class="action" data-id="1">
+  <div class="action-head">
+    <div class="check"><span>1</span></div>
+    <div class="action-info">
+      <h3>Importer les 394 contacts dans Substack</h3>
+      <p>Settings → Importer → upload CSV → double opt-in déjà activé</p>
+    </div>
+    <div class="action-meta">
+      <span class="ord">Ordre 1</span>
+      <span class="time">~3 min</span>
+      <span class="manual">Manuel UI</span>
+      <span class="toggle-icon">▾</span>
+    </div>
+  </div>
+  <div class="action-body">
+
+    <div class="step">
+      <div class="step-label">Étape 1 · Ouvrir Substack</div>
+      <div class="step-body">
+        <a href="https://etlfederal.substack.com/publish/settings?section=imports" target="_blank" class="link-btn">Ouvrir Substack imports</a>
+        Settings → <strong>Importer / Exporter</strong> → "Importer des adresses email".
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 2 · Localiser le CSV</div>
+      <div class="step-body">
+        Fichier à uploader : <code>docs/launch/mailing-list/_substack-import.csv</code><br>
+        3 colonnes : <code>email, first_name, last_name</code> · 394 contacts · conforme nLPD.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 3 · Vérifier double opt-in</div>
+      <div class="step-body">
+        Settings → <strong>Courriels</strong> → "Double opt-in" doit être <strong>activé</strong>. Substack envoie automatiquement le welcome email avec lien de confirmation.
+      </div>
+    </div>
+
+    <div class="alert">
+      <strong>Recommandation README :</strong> importer en 2 batchs de ~200 sur 4 jours (Substack peut flagger un import de 400 emails comme suspect). Mais Substack a déjà été configuré pour le double opt-in, donc c'est conservateur — tu peux uploader les 394 d'un coup, c'est ce que je te recommande.
+    </div>
+
+    <button class="link-btn" onclick="markDone(1)">Marquer comme fait</button>
+  </div>
+</div>
+
+<!-- ACTION 2 — PUBLIER SUBSTACK #1 -->
+<div class="action" data-id="2">
+  <div class="action-head">
+    <div class="check"><span>2</span></div>
+    <div class="action-info">
+      <h3>Publier ETL Fédéral #0 (numéro inaugural)</h3>
+      <p>Welcome email avec méthodologie + qui je suis + ce qui arrive jeudi prochain</p>
+    </div>
+    <div class="action-meta">
+      <span class="ord">Ordre 2</span>
+      <span class="time">~30 min</span>
+      <span class="manual">Manuel UI</span>
+      <span class="toggle-icon">▾</span>
+    </div>
+  </div>
+  <div class="action-body">
+
+    <div class="step">
+      <div class="step-label">Étape 1 · Ouvrir l'éditeur Substack</div>
+      <div class="step-body">
+        <a href="https://etlfederal.substack.com/publish/post?type=newsletter" target="_blank" class="link-btn">New post Substack</a>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 2 · Titre du post</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TITRE</span>
+          <button class="copy-btn" data-copy="t-titre">COPY</button>
+        </div>
+        <div class="copy-content compact" id="t-titre">#0 — Pourquoi cette newsletter et ce que vous allez recevoir chaque jeudi</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 3 · Sous-titre / preheader</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>SOUS-TITRE</span>
+          <button class="copy-btn" data-copy="t-sub">COPY</button>
+        </div>
+        <div class="copy-content compact" id="t-sub">Changements fédéraux suisses · sans jargon · 5 min de lecture chaque jeudi.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 4 · Corps du post (Markdown)</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>CORPS · MARKDOWN</span>
+          <button class="copy-btn" data-copy="t-corps">COPY</button>
+        </div>
+        <div class="copy-content" id="t-corps">Bonjour 👋
+
+Cette newsletter recense les **changements concrets** aux référentiels fédéraux suisses (douanes, classifications économiques, surveillance financière) — sans jargon, sans pub, au format scannable. Un numéro chaque jeudi à 8h, 5 changements maximum, jamais plus.
+
+Vous recevez ce premier numéro parce que vous êtes listé dans un registre public officiel suisse (FINMA, ASR, Swissmem, FintechNewsCH, partenaires SAP/Abacus, Alliance Finance) ou parce que vous vous êtes inscrit volontairement sur openswissdata.com. **Désinscription 1-clic en bas de cet email** — pas de question, pas de drama.
+
+Avant de vous envoyer du contenu, voici ce que vous allez recevoir.
+
+---
+
+## Les 4 référentiels que je surveille pour vous
+
+### 🛃 BAZG — Tarif douanier (TARES)
+
+~7 500 codes HS8 suisses, mis à jour à chaque release du BAZG. Si votre ERP roule sur un export vieux de 2 mois, votre prochaine déclaration douanière peut bloquer. Je publie le diff exact (codes ajoutés / retirés / réétiquetés) à chaque release.
+
+→ Source : [xtares.admin.ch](https://xtares.admin.ch/)
+
+### 🏦 FINMA — Registre des assujettis
+
+Banques, gestionnaires de fortune, courtiers, PSAN, assurances — la FINMA publie 10 listes XLSX séparées avec des schémas qui dérivent. J'unifie en un schéma unique de 16 colonnes (UID, LEI, statut, date d'autorisation), signé Ed25519, et je vous envoie le diff hebdomadaire des entrées/sorties.
+
+→ Source : [finma.ch](https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/)
+
+### 🏛 BFS / OFS — NOGA 2025
+
+Classification sectorielle suisse, alignée sur NACE européen. Quand un secteur est renommé ou un code ajouté, votre customer master peut nécessiter un ré-étiquetage. Je vous signale les changements et fournis le cross-walk NOGA → NACE → ISIC quand pertinent.
+
+→ Source : [i14y.admin.ch](https://www.i14y.admin.ch/)
+
+### 🇪🇺 Eurostat — NACE Rev 2.1
+
+La transition NACE Rev 2 → Rev 2.1 est effective depuis le 1er janvier 2026. Si vos rapports consolidés UE roulent encore sur Rev 2, c'est le moment de migrer. Je couvre les implications pour les filiales CH d'entreprises européennes.
+
+---
+
+## Le format à attendre chaque jeudi
+
+- **5 minutes de lecture maximum**
+- **5 changements maximum** — si la semaine est calme, ce sera 2 ou 3, pas du remplissage
+- Pour chaque changement : le quoi, le pourquoi-ça-compte-pour-vous, et le lien direct vers la source officielle
+- Aucun lien sponsorisé, aucune pub tierce, aucun call-to-action commercial dans le corps de l'email
+
+---
+
+## ⚖️ Pourquoi cette newsletter — et qui je suis
+
+Je m'appelle **Claude-Alain Martin**. Solo founder bootstrappé en Suisse romande. J'ai lancé **openswissdata.com** : un service qui livre les données fédérales suisses normalisées, signées Ed25519, branchées MCP pour Claude/Cursor/Copilot.
+
+J'ai obtenu deux permissions écrites avant de commercialiser : **BAZG** (Michael Beer, 21 avril 2026) et **FINMA** (Nadine Bucher, 6 mai 2026, aucune objection à l'usage commercial). Demande BFS pour NOGA en attente.
+
+Cette newsletter n'est **pas** un canal de vente déguisé. C'est une promesse simple : 5 changements / jeudi / 5 minutes. Si vous voulez aussi le dataset complet (signé, à jour, prêt à brancher), [le bundle est là à 797 CHF](https://www.openswissdata.com/bundle) — sinon ignorez ce paragraphe et profitez du contenu.
+
+Premier numéro avec changements concrets jeudi prochain.
+
+— Claude-Alain
+[contact@openswissdata.com](mailto:contact@openswissdata.com)</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 5 · Publier</div>
+      <div class="step-body">
+        <strong>Send to all subscribers</strong> · le post sera envoyé à toute la liste qui aura confirmé son opt-in. Les non-confirmés ne recevront pas (Substack gère ça).
+      </div>
+    </div>
+
+    <button class="link-btn" onclick="markDone(2)">Marquer comme fait</button>
+  </div>
+</div>
+
+<!-- ACTION 3 — ENVOYER PITCHES PRESSE -->
+<div class="action" data-id="3">
+  <div class="action-head">
+    <div class="check"><span>3</span></div>
+    <div class="action-info">
+      <h3>Envoyer les 3 pitches presse (Gmail)</h3>
+      <p>finews · Inside Paradeplatz · startupticker — actualisés avec FINMA GO 2026-05-06</p>
+    </div>
+    <div class="action-meta">
+      <span class="ord">Ordre 3</span>
+      <span class="time">~10 min</span>
+      <span class="manual">Manuel UI</span>
+      <span class="toggle-icon">▾</span>
+    </div>
+  </div>
+  <div class="action-body">
+
+    <div class="alert">
+      <strong>FROM :</strong> <code>cam@ogens.ch</code> ou <code>contact@openswissdata.com</code> (ton choix). Les 3 pitches ont été actualisés pour mentionner la permission FINMA reçue le 2026-05-06 et les placeholders <code>[téléphone]</code> ont été supprimés.
+    </div>
+
+    <!-- PITCH FINEWS -->
+    <div class="step">
+      <div class="step-label">Pitch 1 · finews.ch (FR)</div>
+      <div class="step-body">
+        <a href="https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=redaktion@finews.ch&su=Premier%20MCP%20suisse%20%2B%20permissions%20BAZG%20et%20FINMA%20%E2%80%94%20un%20solo%20founder%20normalise%20les%20donn%C3%A9es%20f%C3%A9d%C3%A9rales" target="_blank" class="link-btn">Ouvrir Gmail compose · finews</a>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>OBJET · finews</span>
+          <button class="copy-btn" data-copy="p1-objet">COPY</button>
+        </div>
+        <div class="copy-content compact" id="p1-objet">Premier MCP suisse + permissions BAZG et FINMA — un solo founder normalise les données fédérales</div>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>CORPS · finews</span>
+          <button class="copy-btn" data-copy="p1-corps">COPY</button>
+        </div>
+        <div class="copy-content" id="p1-corps">Bonjour,
+
+Je vous écris parce que finews.ch est lu par exactement les compliance officers et data engineers que ce produit cible — j'aimerais vous proposer un Gastbeitrag avant que je communique sur d'autres canaux.
+
+Le scoop
+
+openswissdata.com est le premier MCP server suisse dédié aux datasets fédéraux (TARES douanes, classifications NOGA/NACE/ISIC, registre FINMA), avec trois particularités que personne d'autre ne propose en Suisse aujourd'hui :
+
+1. Permission commerciale écrite du BAZG acquise le 21 avril 2026 (référence BAZG-PERMISSION-2026-04-21-MICHAEL-BEER, M. Michael Beer, Tarifgrundlagen).
+2. Aucune objection de la FINMA sur l'usage commercial des données publiques, confirmée par écrit le 6 mai 2026 (Nadine Bucher, Communication FINMA, référence FINMA-PERMISSION-2026-05-06-NADINE-BUCHER).
+3. Signatures Ed25519 + horodatage RFC-3161 sur chaque dataset livré — niveau bancaire, vérifiable client-side avec openssl standard. Le code source des workflows ETL est public sur GitHub (cammac-creator/openswissdata).
+
+Le contexte
+
+Je suis solo founder (raison individuelle, Ogens VD), 7 ans dans la data B2B. J'ai vu des équipes compliance perdre 2-3 jours par release à scraper xtares.admin.ch ou à parser les XLSX FINMA inhomogènes. openswissdata les livre prêts à l'emploi, signés, branchés MCP pour Claude/Cursor.
+
+Pricing transparent
+- TARES douanes · 299 CHF
+- Classifications NOGA + NACE + ISIC · 399 CHF
+- FINMA Registry unifié · 299 CHF
+- Bundle complet · 797 CHF (économie 200 CHF)
+- MCP Standalone récurrent · 49 CHF/mois
+
+Pourquoi finews ?
+
+Vos lecteurs sont l'audience exacte. Je vous propose un Gastbeitrag de 600-800 mots (signé Claude-Alain Martin, openswissdata) qui peut prendre 2 angles selon votre éditorialisation :
+
+- Angle compliance : "Pourquoi un compliance officer suisse devrait exiger des datasets signés Ed25519" (audit, traçabilité, vérification client-side en 30 secondes)
+- Angle techno-réglementaire : "Le premier MCP suisse, ou comment Claude/Cursor peuvent enfin lire la donnée fédérale signée"
+
+Je peux livrer le draft dans la journée si l'angle vous convient. Photos HD du founder + chiffres clés disponibles immédiatement.
+
+Ressources jointes
+- Site live : https://www.openswissdata.com
+- Page provenance + vérification : https://www.openswissdata.com/legal/provenance
+- Repo public : https://github.com/cammac-creator/openswissdata
+
+Merci d'avance pour votre considération. N'hésitez pas à me répondre par email pour cadrer l'angle.
+
+Cordialement,
+Claude-Alain Martin
+Founder openswissdata.com
+contact@openswissdata.com</div>
+      </div>
+    </div>
+
+    <!-- PITCH INSIDE PARADEPLATZ -->
+    <div class="step">
+      <div class="step-label">Pitch 2 · Inside Paradeplatz (DE)</div>
+      <div class="step-body">
+        <a href="https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=mail@insideparadeplatz.ch&su=Solo%20Founder%20VD%20bringt%20erstes%20MCP%20Schweiz%20mit%20BAZG%2BFINMA-Bewilligung%20%E2%80%94%20299%20CHF%20statt%206'000" target="_blank" class="link-btn">Ouvrir Gmail compose · Inside Paradeplatz</a>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>OBJET · Inside Paradeplatz</span>
+          <button class="copy-btn" data-copy="p2-objet">COPY</button>
+        </div>
+        <div class="copy-content compact" id="p2-objet">Solo Founder VD bringt erstes MCP Schweiz mit BAZG+FINMA-Bewilligung — 299 CHF statt 6'000</div>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>CORPS · Inside Paradeplatz</span>
+          <button class="copy-btn" data-copy="p2-corps">COPY</button>
+        </div>
+        <div class="copy-content" id="p2-corps">Sehr geehrter Herr Hässig, sehr geehrtes ipteam,
+
+Ich melde mich, weil das Thema Inside Paradeplatz interessieren könnte: ein Solo Founder aus der Waadt hat das erste MCP-Server in der Schweiz veröffentlicht, für Bundesdaten (TARES Zoll, NOGA/NACE/ISIC, FINMA-Register), mit einer schriftlichen kommerziellen BAZG-Bewilligung (M. Michael Beer, Tarifgrundlagen, 21. April 2026) und einer schriftlichen Bestätigung der FINMA (Nadine Bucher, Kommunikation, 6. Mai 2026), wonach keine Einwände gegen die kommerzielle Nutzung öffentlich zugänglicher FINMA-Daten bestehen.
+
+Der Knackpunkt für Compliance Officers
+
+Heute prüfen Banken, Treuhänder und KYC-Berater die FINMA-Beaufsichtigten manuell — 10 separate XLSX-Listen, jede mit eigenem Schema, UID mal mit "CHE-" Prefix, mal ohne. openswissdata vereinheitlicht alle 9 Listen unter einem Schema (16 Spalten inkl. UID + LEI), Ed25519 signiert, RFC-3161 zeitgestempelt. Verifikation in 30 Sekunden mit openssl — bankenfähig, prüfungssicher.
+
+Pricing transparent (was Schweizer KMU mögen)
+- TARES (Zoll) · 299 CHF
+- Klassifikationen NOGA + NACE + ISIC · 399 CHF
+- FINMA Registry vereinheitlicht · 299 CHF
+- Bundle · 797 CHF (200 CHF Ersparnis)
+- MCP Abonnement · 49 CHF/Monat
+
+Warum interessant für Inside Paradeplatz
+
+Drei Aspekte, die Ihre Leser erwarten:
+
+1. Solo Founder bootstrappt ein Compliance-Tool, das die grossen RegTechs links liegen lassen (Ticketgrösse zu klein für sie, zu spezifisch für die Schweiz).
+2. Transparenz total : Code öffentlich auf GitHub, Verifikationsanleitung mit openssl, BAZG- und FINMA-Referenzen nachprüfbar. Kein Black Box.
+3. Direkter Konkurrent für 6'000 CHF/Release Inhouse-Aufwand — die "make or buy"-Rechnung wird zugunsten "buy" eindeutig.
+
+Mein Angebot
+
+Ich kann einen Gastbeitrag (signiert "Claude-Alain Martin, founder openswissdata") liefern, 700-900 Wörter, mit folgendem Vorschlag:
+
+"Wie ein Solo Founder den FINMA-Registerstandard löst, den niemand löst — und warum sich Compliance Officers bei jedem Audit fragen sollten, ob sie unterschriebene Daten verwenden."
+
+Lieferbar binnen 24h. HD-Foto + Datenbeispiele verfügbar.
+
+Ressourcen
+- Site : https://www.openswissdata.com
+- Provenance + Verifikation : https://www.openswissdata.com/legal/provenance
+- Code : https://github.com/cammac-creator/openswissdata
+- BAZG-Referenz : BAZG-PERMISSION-2026-04-21-MICHAEL-BEER
+- FINMA-Referenz : FINMA-PERMISSION-2026-05-06-NADINE-BUCHER
+
+Bei Interesse bitte einfach per E-Mail antworten — ich bereite gerne die Detailpunkte für Sie auf.
+
+Mit freundlichen Grüssen
+Claude-Alain Martin
+Founder openswissdata.com
+contact@openswissdata.com</div>
+      </div>
+    </div>
+
+    <!-- PITCH STARTUPTICKER -->
+    <div class="step">
+      <div class="step-label">Pitch 3 · startupticker.ch (formulaire)</div>
+      <div class="step-body">
+        <a href="https://www.startupticker.ch/en/news/submit-news" target="_blank" class="link-btn">Ouvrir formulaire startupticker</a>
+        Catégories : <strong>FinTech / RegTech / Data</strong> · <strong>Bootstrap / Solo Founder</strong> · <strong>Vaud / Romandie</strong> · <strong>Product Launch</strong>.
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TITRE · startupticker</span>
+          <button class="copy-btn" data-copy="p3-titre">COPY</button>
+        </div>
+        <div class="copy-content compact" id="p3-titre">openswissdata launches: First Swiss MCP server for federal datasets, with BAZG and FINMA permissions</div>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>COMMUNIQUÉ · startupticker (~340 mots)</span>
+          <button class="copy-btn" data-copy="p3-corps">COPY</button>
+        </div>
+        <div class="copy-content" id="p3-corps">Lausanne / Ogens (VD) — openswissdata.com est le premier MCP server suisse dédié aux datasets fédéraux (TARES douanes, classifications NOGA/NACE/ISIC, registre FINMA), avec deux différenciateurs uniques : permissions commerciales écrites du BAZG et de la FINMA, et signatures cryptographiques Ed25519 niveau bancaire.
+
+Le besoin
+
+Les compliance officers, data engineers fintech et intégrateurs ERP suisses passent 5 jours-homme par release à scraper xtares.admin.ch, parser les XLSX inhomogènes du FINMA, et maintenir des cross-walks manuels NOGA → NACE → ISIC. Ce coût caché est estimé à 6 000 CHF par release maintenance, soit 36 000 CHF par an.
+
+La solution
+
+openswissdata extrait les données fédérales depuis les sources autoritaires (BAZG, OFS/BFS, FINMA), les normalise (schéma stable, formats CSV/JSON/Parquet/SQL), les signe Ed25519, les horodate RFC-3161 via TSA freetsa.org, et les expose via 9 outils MCP natifs Claude Desktop / Cursor.
+
+Pricing transparent :
+- TARES douanes : 299 CHF
+- Classifications NOGA + NACE + ISIC : 399 CHF
+- FINMA Registry unifié : 299 CHF
+- Bundle complet : 797 CHF (économie 200 CHF)
+- MCP Standalone : 49 CHF/mois (récurrent)
+
+Le founder
+
+Claude-Alain Martin, builder vaudois (raison individuelle, Ogens), 7 ans dans la data B2B. openswissdata est bootstrappé, sans investisseurs externes. Le code source des workflows ETL est public sur GitHub (cammac-creator/openswissdata) — les acheteurs peuvent vérifier la pipeline avant achat.
+
+Permissions BAZG + FINMA
+
+Permission commerciale BAZG écrite acquise le 21 avril 2026 (BAZG-PERMISSION-2026-04-21-MICHAEL-BEER, M. Michael Beer, Tarifgrundlagen). Confirmation FINMA reçue le 6 mai 2026 (Mme Nadine Bucher, Communication, FINMA-PERMISSION-2026-05-06-NADINE-BUCHER) : aucune objection à l'usage commercial des données publiquement accessibles. Demande BFS pour NOGA en attente. Politique publique de takedown 24h sur demande d'autorité source.
+
+Disponibilité
+
+Site live : https://www.openswissdata.com
+MCP discovery : https://www.openswissdata.com/mcp/discovery
+Code : https://github.com/cammac-creator/openswissdata
+
+Contact
+Claude-Alain Martin
+contact@openswissdata.com</div>
+      </div>
+    </div>
+
+    <button class="link-btn" onclick="markDone(3)">Marquer comme fait</button>
+  </div>
+</div>
+
+<!-- ACTION 4 — LOOM 60-90s -->
+<div class="action" data-id="4">
+  <div class="action-head">
+    <div class="check"><span>4</span></div>
+    <div class="action-info">
+      <h3>Enregistrer Loom 60-90s « openswissdata en 60 secondes »</h3>
+      <p>Sample CSV → MCP → checkout · embed sur landing + footer email + cold templates</p>
+    </div>
+    <div class="action-meta">
+      <span class="ord">Ordre 4</span>
+      <span class="time">~30 min</span>
+      <span class="manual">Manuel</span>
+      <span class="toggle-icon">▾</span>
+    </div>
+  </div>
+  <div class="action-body">
+
+    <div class="step">
+      <div class="step-label">Étape 1 · Préparer l'écran</div>
+      <div class="step-body">
+        <ol>
+          <li>Ouvre dans un onglet : <a href="https://www.openswissdata.com" target="_blank">openswissdata.com</a> (hero avec sample CSV)</li>
+          <li>Onglet 2 : <a href="https://www.openswissdata.com/samples/tares-sample.csv" target="_blank">tares-sample.csv</a> (déjà téléchargé)</li>
+          <li>Onglet 3 : Claude Desktop ou Cursor avec MCP <code>@openswissdata/mcp</code> connecté (pour montrer le tool en action)</li>
+          <li>Onglet 4 : <a href="https://www.openswissdata.com/bundle" target="_blank">openswissdata.com/bundle</a> (page Stripe checkout)</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 2 · Lancer Loom</div>
+      <div class="step-body">
+        <a href="https://www.loom.com/record" target="_blank" class="link-btn">Ouvrir Loom record</a>
+        Mode <strong>Screen + Cam (face-cam petit cercle bottom-left)</strong>. Audio micro intégré.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 3 · Script à lire (90 secondes max)</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>SCRIPT LOOM · 90s</span>
+          <button class="copy-btn" data-copy="loom-script">COPY</button>
+        </div>
+        <div class="copy-content" id="loom-script">[0-10s · sur la landing openswissdata.com]
+Salut, Claude-Alain Martin, founder d'openswissdata. En 90 secondes je te montre pourquoi tu pourrais arrêter de scraper xtares ou parser les XLSX FINMA toi-même.
+
+[10-30s · ouvrir tares-sample.csv]
+Voici un échantillon TARES gratuit. 7 500 codes douaniers suisses, schéma stable, JSON-able, signé Ed25519. Tu télécharges, tu importes dans ton ERP, c'est fini. Permission écrite du BAZG, M. Beer, 21 avril.
+
+[30-55s · Claude Desktop avec MCP openswissdata]
+Si tu utilises Claude ou Cursor, le MCP est natif. Je tape "donne-moi le code TARES pour les machines de chapitre 84" — tool exécuté, réponse en 200ms, pas de scraping. 9 tools dispo : TARES, FINMA registry, NOGA, NACE, ISIC, cross-walks.
+
+[55-75s · page bundle 797 CHF]
+Pricing transparent : 299 le dataset, 797 les trois en bundle, 49 par mois pour le MCP standalone. Refund 14 jours sans condition. Code source ETL public sur GitHub.
+
+[75-90s · retour landing]
+Si t'as 30 secondes, télécharge le sample. Si t'as 14 jours d'essai dans la tête, prends le bundle. Reply this email avec tes questions, je réponds en moins de 24h. Merci.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 4 · Après l'enregistrement</div>
+      <div class="step-body">
+        <ol>
+          <li>Garde l'URL Loom (format <code>loom.com/share/...</code>) — on l'embed dans le footer du Substack et dans les cold templates Phase 1.</li>
+          <li>Optionnel : edit Loom pour ajouter une thumbnail custom (logo openswissdata) et le titre "openswissdata en 90 secondes".</li>
+        </ol>
+      </div>
+    </div>
+
+    <button class="link-btn" onclick="markDone(4)">Marquer comme fait</button>
+  </div>
+</div>
+
+<!-- ACTION 5 — SHOW HN -->
+<div class="action" data-id="5">
+  <div class="action-head">
+    <div class="check"><span>5</span></div>
+    <div class="action-info">
+      <h3>Show HN — Hacker News submission</h3>
+      <p>Compte <code>openswissdata</code> · best window mardi/mercredi 15h CEST (9am ET)</p>
+    </div>
+    <div class="action-meta">
+      <span class="ord">Ordre 5</span>
+      <span class="time">~10 min</span>
+      <span class="manual">Manuel UI</span>
+      <span class="toggle-icon">▾</span>
+    </div>
+  </div>
+  <div class="action-body">
+
+    <div class="alert">
+      <strong>Timing critique HN :</strong> idéalement mardi 7 mai ou mercredi 8 mai entre 14h-16h CEST (9h-11h ET) pour maximiser la fenêtre de visibilité. Si tu submit aujourd'hui jeudi soir CET, c'est l'heure morte HN. Tu peux préparer le post maintenant en draft mental et submit demain matin EU.
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 1 · Login compte HN</div>
+      <div class="step-body">
+        <a href="https://news.ycombinator.com/login" target="_blank" class="link-btn">HN login (compte openswissdata)</a>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 2 · Submit</div>
+      <div class="step-body">
+        <a href="https://news.ycombinator.com/submit" target="_blank" class="link-btn">HN submit page</a>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TITLE · HN (64 chars)</span>
+          <button class="copy-btn" data-copy="hn-title">COPY</button>
+        </div>
+        <div class="copy-content compact" id="hn-title">Show HN: Swiss federal datasets normalized (TARES, FINMA, NOGA)</div>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>URL · HN</span>
+          <button class="copy-btn" data-copy="hn-url">COPY</button>
+        </div>
+        <div class="copy-content compact" id="hn-url">https://www.openswissdata.com</div>
+      </div>
+      <div class="step-body">
+        <strong>Text field</strong> : laisser vide (Show HN avec URL = pas de text body, sinon ça déclasse la submission).
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 3 · Premier commentaire (à poster ~30 secondes après submit)</div>
+      <div class="step-body">
+        Ce premier commentaire (de toi-même sur ta propre submission) explique le contexte. <strong>Crucial</strong> : sans ça, les Show HN qui n'ont pas de "OP comment" perdent 50% de leur traction.
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>OP COMMENT · HN</span>
+          <button class="copy-btn" data-copy="hn-op-comment">COPY</button>
+        </div>
+        <div class="copy-content" id="hn-op-comment">Hi HN — Claude-Alain here, solo founder in Switzerland.
+
+I built openswissdata after watching compliance teams and data engineers waste 2-3 days per release scraping xtares.admin.ch, parsing 10 incompatible FINMA XLSX files, and maintaining manual NOGA → NACE → ISIC cross-walks.
+
+What it is:
+- 3 normalized federal datasets: TARES (~7,500 customs codes), FINMA registry (unified across 10 official lists, 16 columns including UID + LEI), classifications (5-way cross-walk NOGA 2008/2025 + NACE 2.0/2.1 + ISIC 4)
+- Formats: CSV / JSON / Parquet / SQL
+- Signed Ed25519 + RFC-3161 timestamps via freetsa.org — verifiable client-side with openssl
+- MCP server (npm @openswissdata/mcp) exposing 9 tools natively to Claude Desktop / Cursor / Cline / Copilot
+- ETL code is public: github.com/cammac-creator/openswissdata
+
+Why this is non-trivial:
+- Written commercial permission from BAZG (Swiss Federal Customs, M. Beer, 21 April 2026) — first private editor with this scope to my knowledge
+- Written confirmation from FINMA (N. Bucher, 6 May 2026) of no objection to commercial use of public data
+- BFS request still pending for NOGA labels — I respect that and use only what's permission-cleared
+
+Pricing (transparent, no contact-sales): CHF 299 per dataset, 797 for the bundle, 49/mo for MCP standalone. 14-day refund, no questions.
+
+I'm here for technical questions, dataset coverage gaps, or compliance edge cases. Honest feedback welcome — what would make this useful (or useless) to you?</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 4 · Boost discret (PAS de manipulation)</div>
+      <div class="step-body">
+        Pas d'upvote ring, pas d'amis qui upvotent. <strong>Interdit par les règles HN, et detectable</strong>. Le seul boost autorisé : tweeter le lien depuis @cammac (action 6) une fois la submission live.
+      </div>
+    </div>
+
+    <button class="link-btn" onclick="markDone(5)">Marquer comme fait</button>
+  </div>
+</div>
+
+<!-- ACTION 6 — THREAD X @cammac -->
+<div class="action" data-id="6">
+  <div class="action-head">
+    <div class="check"><span>6</span></div>
+    <div class="action-info">
+      <h3>Thread X depuis @cammac (8 tweets)</h3>
+      <p>Hook + différenciateurs + sample + CTA · post le HN link en T8</p>
+    </div>
+    <div class="action-meta">
+      <span class="ord">Ordre 6</span>
+      <span class="time">~15 min</span>
+      <span class="manual">Manuel UI</span>
+      <span class="toggle-icon">▾</span>
+    </div>
+  </div>
+  <div class="action-body">
+
+    <div class="step">
+      <div class="step-label">Étape 1 · Ouvrir X compose thread</div>
+      <div class="step-body">
+        <a href="https://twitter.com/intent/tweet" target="_blank" class="link-btn">X compose</a>
+        Connecté en <code>@cammac</code>.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Tweet 1/8 · Le hook</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TWEET 1 · 273 chars</span>
+          <button class="copy-btn" data-copy="x-1">COPY</button>
+        </div>
+        <div class="copy-content compact" id="x-1">I shipped openswissdata.com — Swiss federal datasets normalized, signed Ed25519, MCP-ready.
+
+Why: compliance teams here waste 2-3 days/release scraping xtares.admin.ch and parsing 10 incompatible FINMA XLSX files.
+
+Now you don't.
+
+Thread on what's inside 👇</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Tweet 2/8</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TWEET 2 · 271 chars</span>
+          <button class="copy-btn" data-copy="x-2">COPY</button>
+        </div>
+        <div class="copy-content compact" id="x-2">3 datasets, all Swiss federal sources:
+
+🛃 TARES — ~7 500 HS8 customs codes (BAZG)
+🏦 FINMA registry — unified across 10 official lists, 16 columns inc. UID + LEI
+🏛 NOGA + NACE + ISIC — 5-way cross-walk
+
+CSV / JSON / Parquet / SQL. Schema stable. Diff-friendly.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Tweet 3/8</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TWEET 3 · 264 chars</span>
+          <button class="copy-btn" data-copy="x-3">COPY</button>
+        </div>
+        <div class="copy-content compact" id="x-3">Each release is signed Ed25519 + RFC-3161 timestamped via freetsa.org.
+
+Verify client-side in 30 seconds with `openssl`. Bank-grade audit trail.
+
+Why does that matter? Because next time your compliance officer asks "are we sure this dataset wasn't tampered with?", you can prove it.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Tweet 4/8</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TWEET 4 · 252 chars</span>
+          <button class="copy-btn" data-copy="x-4">COPY</button>
+        </div>
+        <div class="copy-content compact" id="x-4">Native MCP server: install `@openswissdata/mcp` in Claude Desktop, Cursor, Cline, or Copilot, and you get 9 tools that read federal data directly.
+
+No scraping, no glue code. Your AI assistant just queries Swiss customs codes and FINMA-licensed entities like a database.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Tweet 5/8</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TWEET 5 · 277 chars</span>
+          <button class="copy-btn" data-copy="x-5">COPY</button>
+        </div>
+        <div class="copy-content compact" id="x-5">Two written permissions before launch:
+
+✅ BAZG (Swiss Federal Customs), M. Beer, 21 Apr 2026
+✅ FINMA, N. Bucher, 6 May 2026 — no objection to commercial use of public data
+
+This isn't web-scraping. It's data engineering with paper trail. Compliance officers, you can sleep.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Tweet 6/8</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TWEET 6 · 266 chars</span>
+          <button class="copy-btn" data-copy="x-6">COPY</button>
+        </div>
+        <div class="copy-content compact" id="x-6">Pricing, no sales call required:
+
+CHF 299 · single dataset
+CHF 797 · 3-dataset bundle (saves 200)
+CHF 49/mo · MCP standalone subscription
+
+14-day refund, no questions.
+
+ETL code is public on GitHub. You can verify the pipeline before you pay anything.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Tweet 7/8 · CTA + sample</div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TWEET 7 · 251 chars</span>
+          <button class="copy-btn" data-copy="x-7">COPY</button>
+        </div>
+        <div class="copy-content compact" id="x-7">Try before you buy:
+
+→ TARES sample (free, no email): openswissdata.com/samples/tares-sample.csv
+→ Repo + ETL code: github.com/cammac-creator/openswissdata
+→ Bundle: openswissdata.com/bundle
+
+Solo founder, bootstrapped from Vaud. Bug reports welcome. DMs open for compliance gaps.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Tweet 8/8 · Show HN cross-link</div>
+      <div class="step-body">
+        <strong>À publier APRÈS avoir submit le Show HN</strong> (action 5) — contient le lien HN.
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TWEET 8 · adapté</span>
+          <button class="copy-btn" data-copy="x-8">COPY</button>
+        </div>
+        <div class="copy-content compact" id="x-8">Just posted Show HN — feedback from data engineers + compliance folks would be 🔥
+
+[COLLE ICI L'URL HN news.ycombinator.com/item?id=XXXXX une fois submit]</div>
+      </div>
+    </div>
+
+    <button class="link-btn" onclick="markDone(6)">Marquer comme fait</button>
+  </div>
+</div>
+
+<!-- ACTION 7 — REDDIT -->
+<div class="action" data-id="7">
+  <div class="action-head">
+    <div class="check"><span>7</span></div>
+    <div class="action-info">
+      <h3>3 commentaires Reddit organiques (Various-Ladder-5959)</h3>
+      <p>r/dataengineering · r/Switzerland · r/programming — pattern "value-first", openswissdata mentionné en passant</p>
+    </div>
+    <div class="action-meta">
+      <span class="ord">Ordre 7</span>
+      <span class="time">~30 min</span>
+      <span class="manual">Manuel UI</span>
+      <span class="toggle-icon">▾</span>
+    </div>
+  </div>
+  <div class="action-body">
+
+    <div class="alert">
+      <strong>Pattern critique Reddit :</strong> ne JAMAIS poster un commentaire qui parle d'abord d'openswissdata. Le pattern qui marche = répondre à la question du post avec une vraie solution technique, puis mentionner openswissdata seulement si pertinent (comme un autre commentateur le ferait). 1er commentaire fait sur r/dataengineering le 2026-05-06 par ce compte — continuer dans ce ton.
+    </div>
+
+    <div class="step">
+      <div class="step-label">Étape 1 · Login Reddit</div>
+      <div class="step-body">
+        <a href="https://www.reddit.com/login" target="_blank" class="link-btn">Reddit login (Various-Ladder-5959)</a>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Cible 1 · r/dataengineering</div>
+      <div class="step-body">
+        <a href="https://www.reddit.com/r/dataengineering/" target="_blank" class="link-btn">Ouvrir r/dataengineering</a>
+        Cherche un post récent sur : <strong>schema drift, data versioning, government data, ETL XLSX hell, sources of truth</strong>.
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TEMPLATE · r/dataengineering</span>
+          <button class="copy-btn" data-copy="r-de">COPY</button>
+        </div>
+        <div class="copy-content" id="r-de">[Adapter au post — l'idée : tu donnes une vraie réponse technique, et tu mentionnes openswissdata seulement si le post parle de données suisses ou de schema-stable government data]
+
+Schema drift on government data is the worst because there's no SLA — they "improve" the schema at random and you find out by your nightly job blowing up at 03:00.
+
+What worked for me on the Swiss federal side specifically: I keep three things versioned per release — (1) the raw upstream file with its mtime + content hash, (2) a normalized schema with explicit nullability, (3) a diff log showing column adds/removes/renames. The diff log is what survives upstream restructures.
+
+If anyone here works with Swiss federal data (TARES, FINMA, NOGA), I open-sourced this approach + maintain the datasets at openswissdata.com — Ed25519 signed, schema-stable, MCP-ready. Permission BAZG + FINMA in writing. Solo founder, not affiliated with any vendor.
+
+Shameless plug aside, the *general* pattern (raw + normalized + diff log) is the one I'd recommend regardless of vendor.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Cible 2 · r/Switzerland</div>
+      <div class="step-body">
+        <a href="https://www.reddit.com/r/Switzerland/" target="_blank" class="link-btn">Ouvrir r/Switzerland</a>
+        Cherche un post sur : <strong>customs codes, AML rules, NOGA codes, FINMA, tax classification, fiscal admin</strong>.
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TEMPLATE · r/Switzerland</span>
+          <button class="copy-btn" data-copy="r-ch">COPY</button>
+        </div>
+        <div class="copy-content" id="r-ch">[Si le post parle de FINMA / TARES / NOGA / customs / compliance — sinon skip ce subreddit]
+
+For anyone hitting Swiss federal data the hard way: BAZG publishes TARES on xtares.admin.ch in a usable but quirky format, FINMA splits its registry across 10 separate XLSX files with drifting schemas, and BFS publishes NOGA labels in three languages but the cross-walks to NACE/ISIC require manual joins.
+
+If you need this stuff in a clean format (CSV/JSON/Parquet), I run openswissdata.com — solo founder, bootstrapped, written permissions from BAZG and FINMA. Bundle at 797 CHF, refund 14 days, code on GitHub. There's also a free TARES sample on the landing.
+
+Not a sales pitch, just figured this might save someone the same 2-3 days I lost the first time.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-label">Cible 3 · r/programming (ou r/MachineLearning, r/LocalLLaMA)</div>
+      <div class="step-body">
+        <a href="https://www.reddit.com/r/programming/" target="_blank" class="link-btn">Ouvrir r/programming</a>
+        Cherche un post sur : <strong>MCP servers, Claude tools, AI data integration, government data APIs</strong>.
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-head">
+          <span>TEMPLATE · r/programming</span>
+          <button class="copy-btn" data-copy="r-prog">COPY</button>
+        </div>
+        <div class="copy-content" id="r-prog">[Si le post parle de MCP, Claude tools, ou AI agents lisant des données externes]
+
+Built an MCP server for Swiss federal data (customs codes, FINMA registry, statistical classifications) — exposes 9 tools to Claude Desktop / Cursor / Cline. Schema-stable, signed releases, written permissions from the source authorities.
+
+The interesting design choice was making each tool return *signed* responses (Ed25519 + RFC-3161 timestamp) so the AI agent can prove provenance to a downstream auditor. Compliance officer sees a tool call result and can verify it wasn't hallucinated/tampered with via openssl.
+
+Repo: github.com/cammac-creator/openswissdata
+npm: @openswissdata/mcp
+
+Curious what other domain-specific MCPs people are building — feels like the next layer after the generic "fetch URL" tools.</div>
+      </div>
+    </div>
+
+    <div class="alert">
+      <strong>Skip r/SwitzerlandLifeHacks</strong> · low B2B value pour cette Phase 0, et l'audience ne couvre pas les compliance/data engineers que tu cibles. Si tu veux 4 commentaires absolus, ajoute plutôt <strong>r/MachineLearning</strong> (post sur AI agents tooling) ou <strong>r/LocalLLaMA</strong> (post sur MCP servers) avec le template r/programming adapté.
+    </div>
+
+    <button class="link-btn" onclick="markDone(7)">Marquer comme fait</button>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <div class="container">
+    Phase 0 · openswissdata · 2026-05-07 · zéro téléphone · 0 CHF dépensé · ~5h cumulées<br>
+    Plan global : <code>.design-preview/prospection-plan-200chf-2026-05-07.html</code>
+  </div>
+</footer>
+
+<script>
+  // Toggle accordéon
+  document.querySelectorAll('.action-head').forEach(h => {
+    h.addEventListener('click', e => {
+      if (e.target.closest('.copy-btn') || e.target.closest('.link-btn')) return;
+      h.parentElement.classList.toggle('open');
+    });
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.copy;
+      const content = document.getElementById(id);
+      if (!content) return;
+      try {
+        await navigator.clipboard.writeText(content.textContent);
+        btn.classList.add('copied');
+        const originalText = btn.textContent;
+        btn.textContent = 'COPIÉ ✓';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.textContent = originalText;
+        }, 1500);
+      } catch (err) {
+        alert('Copy a échoué — sélectionne le texte manuellement');
+      }
+    });
+  });
+
+  // Persist done state
+  function loadDone() {
+    try {
+      return JSON.parse(localStorage.getItem('phase0-done') || '[]');
+    } catch { return []; }
+  }
+  function saveDone(arr) {
+    localStorage.setItem('phase0-done', JSON.stringify(arr));
+  }
+  function updateProgress() {
+    const done = loadDone();
+    document.querySelectorAll('.action').forEach(a => {
+      a.classList.toggle('done', done.includes(parseInt(a.dataset.id)));
+    });
+    document.getElementById('progress-count').innerHTML = `${done.length} <span>/ 7</span>`;
+    document.getElementById('progress-bar').style.width = `${(done.length / 7) * 100}%`;
+  }
+  function markDone(id) {
+    const done = loadDone();
+    if (!done.includes(id)) {
+      done.push(id);
+      saveDone(done);
+    } else {
+      const idx = done.indexOf(id);
+      done.splice(idx, 1);
+      saveDone(done);
+    }
+    updateProgress();
+  }
+  // Click on check circle to toggle
+  document.querySelectorAll('.check').forEach((c, i) => {
+    c.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = parseInt(c.closest('.action').dataset.id);
+      markDone(id);
+    });
+  });
+
+  updateProgress();
+
+  // Auto-open first action on load
+  document.querySelector('.action[data-id="1"]')?.classList.add('open');
+</script>
+
+</body>
+</html>

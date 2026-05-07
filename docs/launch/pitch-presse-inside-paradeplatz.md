@@ -16,7 +16,7 @@
 
 Sehr geehrter Herr Hässig, sehr geehrtes ipteam,
 
-Ich melde mich, weil das Thema Inside Paradeplatz interessieren könnte: ein Solo Founder aus der Waadt hat das **erste MCP-Server in der Schweiz** veröffentlicht, für Bundesdaten (TARES Zoll, NOGA/NACE/ISIC, FINMA-Register), mit einer **schriftlichen kommerziellen BAZG-Bewilligung** (M. Michael Beer, Tarifgrundlagen, 21. April 2026).
+Ich melde mich, weil das Thema Inside Paradeplatz interessieren könnte: ein Solo Founder aus der Waadt hat das **erste MCP-Server in der Schweiz** veröffentlicht, für Bundesdaten (TARES Zoll, NOGA/NACE/ISIC, FINMA-Register), mit einer **schriftlichen kommerziellen BAZG-Bewilligung** (M. Michael Beer, Tarifgrundlagen, 21. April 2026) **und einer schriftlichen Bestätigung der FINMA** (Nadine Bucher, Kommunikation, 6. Mai 2026), wonach keine Einwände gegen die kommerzielle Nutzung öffentlich zugänglicher FINMA-Daten bestehen.
 
 **Der Knackpunkt für Compliance Officers**
 
@@ -50,8 +50,9 @@ Lieferbar binnen 24h. HD-Foto + Datenbeispiele verfügbar.
 - Provenance + Verifikation : https://www.openswissdata.com/legal/provenance
 - Code : https://github.com/cammac-creator/openswissdata
 - BAZG-Referenz : `BAZG-PERMISSION-2026-04-21-MICHAEL-BEER`
+- FINMA-Referenz : `FINMA-PERMISSION-2026-05-06-NADINE-BUCHER`
 
-Ich bin auch unter [Telefon] erreichbar, falls Sie 5 Minuten zum Briefing wünschen.
+Bei Interesse bitte einfach per E-Mail antworten — ich bereite gerne die Detailpunkte für Sie auf.
 
 Mit freundlichen Grüssen
 Claude-Alain Martin
