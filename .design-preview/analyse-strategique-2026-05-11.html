@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mon avis sur les 2 analyses · openswissdata 2026-05-11</title>
+<style>
+  :root {
+    --bg: #FBFBF8; --bg-card: #FFFFFF; --bg-soft: #F5F4EE;
+    --ink: #0A0A0C; --ink-soft: #3A3D45; --ink-mute: #6B6E76;
+    --line: #E8E4D9; --line-strong: #D9D3C3;
+    --accent: #DC1F2D; --accent-soft: #FCE7E9;
+    --green: #15803D; --green-soft: #DCFCE7;
+    --amber: #92400E; --amber-soft: #FEF3C7;
+    --teal: #0F766E; --teal-soft: #E5F5F1;
+    --blue: #1D4ED8; --blue-soft: #DBEAFE;
+    --purple: #6D28D9; --purple-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%; z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+
+  .hero { padding: 56px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line); width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font-weight: 700; font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05; letter-spacing: -.03em;
+    margin: 0 0 18px; max-width: 24ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 24px 0 36px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-value.green { color: var(--green); } .stat-value.red { color: var(--accent); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); } }
+
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1;
+    letter-spacing: -.025em; margin: 0 0 12px; max-width: 32ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  /* Alert critical */
+  .alert-critical {
+    background: linear-gradient(180deg, var(--accent-soft) 0%, white 100%);
+    border: 2px solid var(--accent);
+    border-radius: 16px; padding: 28px 32px;
+    margin: 24px 0;
+  }
+  .alert-critical h3 {
+    font-size: 22px; margin: 0 0 14px; color: var(--accent);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .alert-critical h3::before { content: "⚠️"; font-size: 24px; }
+  .alert-critical p { margin: 0 0 12px; font-size: 14px; line-height: 1.6; color: var(--ink-soft); }
+  .alert-critical p strong { color: var(--ink); }
+
+  /* Comparison 3-col */
+  .compare-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
+  @media (max-width: 880px) { .compare-3 { grid-template-columns: 1fr; } }
+  .compare-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 24px;
+  }
+  .compare-card.ours { border: 2px solid var(--green); position: relative; }
+  .compare-card.ours::before {
+    content: "TOI"; position: absolute; top: -10px; left: 20px;
+    background: var(--green); color: white; padding: 4px 10px; border-radius: 10px;
+    font-family: "Geist Mono", monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  }
+  .compare-card .name {
+    font-family: "Geist Mono", monospace; font-size: 12px; font-weight: 700;
+    color: var(--ink-mute); letter-spacing: .04em; margin-bottom: 4px;
+  }
+  .compare-card h4 { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
+  .compare-card .subtitle { font-size: 12px; color: var(--ink-mute); margin: 0 0 16px; line-height: 1.4; }
+  .compare-row {
+    display: grid; grid-template-columns: 90px 1fr;
+    gap: 10px; padding: 8px 0;
+    border-top: 1px dashed var(--line); font-size: 12px;
+  }
+  .compare-row:first-of-type { border-top: none; }
+  .compare-row-label {
+    font-family: "Geist Mono", monospace; font-size: 9px;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mute);
+    font-weight: 700; flex-shrink: 0;
+  }
+  .compare-row-value { color: var(--ink-soft); line-height: 1.5; }
+  .compare-row-value strong { color: var(--ink); }
+
+  /* Verdicts grid */
+  .verdicts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 24px 0; }
+  @media (max-width: 720px) { .verdicts-grid { grid-template-columns: 1fr; } }
+  .verdict-item {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .verdict-item.good { border-left: 4px solid var(--green); }
+  .verdict-item.bad { border-left: 4px solid var(--accent); }
+  .verdict-item.mixed { border-left: 4px solid var(--amber); }
+  .verdict-item .verdict-label {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .verdict-item.good .verdict-label { color: var(--green); }
+  .verdict-item.bad .verdict-label { color: var(--accent); }
+  .verdict-item.mixed .verdict-label { color: var(--amber); }
+  .verdict-item h5 { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
+  .verdict-item p { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+
+  /* Concurrent rows */
+  .concurrents-table {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; margin: 20px 0;
+  }
+  .concurrent-row {
+    display: grid; grid-template-columns: 50px 1fr 180px 120px;
+    gap: 14px; padding: 14px 18px;
+    border-bottom: 1px solid var(--line); align-items: center;
+  }
+  .concurrent-row:last-child { border-bottom: none; }
+  .concurrent-row.head {
+    background: var(--ink); color: white;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
+    padding: 10px 18px;
+  }
+  .concurrent-row.head > div { color: rgba(255,255,255,.85); }
+  .concurrent-rank {
+    font-family: "Geist Mono", monospace; font-size: 12px; font-weight: 700;
+  }
+  .concurrent-name h5 { margin: 0 0 2px; font-size: 14px; font-weight: 700; }
+  .concurrent-name p { margin: 0; font-size: 12px; color: var(--ink-mute); line-height: 1.4; }
+  .concurrent-focus {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .concurrent-pos {
+    font-family: "Geist Mono", monospace; font-size: 10px; font-weight: 700;
+    padding: 4px 8px; border-radius: 4px; text-align: center;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .concurrent-pos.threat { background: var(--accent-soft); color: var(--accent); }
+  .concurrent-pos.different { background: var(--green-soft); color: var(--green); }
+  .concurrent-pos.adjacent { background: var(--amber-soft); color: var(--amber); }
+  @media (max-width: 880px) { .concurrent-row { grid-template-columns: 50px 1fr; } .concurrent-focus, .concurrent-pos { grid-column: 2; } }
+
+  /* Recommendations grid */
+  .recos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 24px 0; }
+  @media (max-width: 720px) { .recos-grid { grid-template-columns: 1fr; } }
+  .reco-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 24px; position: relative;
+  }
+  .reco-card.priority { border: 2px solid var(--accent); }
+  .reco-card.priority::before {
+    content: "URGENT"; position: absolute; top: -10px; left: 20px;
+    background: var(--accent); color: white; padding: 4px 10px; border-radius: 10px;
+    font-family: "Geist Mono", monospace; font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  }
+  .reco-num {
+    font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 700;
+    color: var(--accent); margin-bottom: 6px;
+  }
+  .reco-card h5 { margin: 0 0 8px; font-size: 15px; font-weight: 700; }
+  .reco-card p { margin: 0 0 8px; font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+  .reco-card .effort {
+    display: inline-block;
+    font-family: "Geist Mono", monospace; font-size: 10px; font-weight: 700;
+    background: var(--bg-soft); padding: 3px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--ink-mute);
+    margin-right: 6px;
+  }
+
+  /* Verdict banner */
+  .verdict {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg); border-radius: 14px; padding: 32px 36px; margin: 24px 0;
+  }
+  .verdict h3 { color: var(--bg); font-size: 22px; margin: 0 0 14px; }
+  .verdict p { color: rgba(255,255,255,.8); font-size: 14px; line-height: 1.65; margin: 0 0 12px; }
+  .verdict p strong { color: white; }
+  .verdict code { background: rgba(255,255,255,.1); color: #6ee7b7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+
+  footer {
+    padding: 36px 0 56px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Analyse stratégique · 2026-05-11</span>
+    </div>
+    <h1>2 analyses externes <span class="accent">+ une confusion majeure</span> à corriger.</h1>
+    <p class="lede">
+      Tu m'as partagé 2 analyses externes sur openswissdata.com. <strong>L'analyse #1 contient une erreur factuelle critique</strong> : elle attribue ton projet à un autre développeur (Vikram Gorla / mcp-swiss). Tout le reste de son raisonnement repose sur cette mauvaise prémisse. L'analyse #2 confond ton positionnement avec un portail OGD généraliste. Voici la lecture corrigée + mon avis tranchant.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Erreurs analyse #1</div>
+        <div class="stat-value red">3 majeures</div>
+        <div class="stat-sub">attribution + tools + repo</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Erreurs analyse #2</div>
+        <div class="stat-value amber">2 cadrage</div>
+        <div class="stat-sub">positionnement OGD</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Recos pertinentes</div>
+        <div class="stat-value green">7 / 20</div>
+        <div class="stat-sub">à exécuter</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Vrai concurrent identifié</div>
+        <div class="stat-value">1</div>
+        <div class="stat-sub">mcp-swiss (V. Gorla)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ALERT CRITIQUE -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>L'erreur majeure de l'analyse #1</strong>
+      <span class="sep">/</span>
+      <span>Attribution incorrecte</span>
+    </div>
+    <h2>L'analyste a <span class="serif">confondu deux projets</span>.</h2>
+
+    <div class="alert-critical">
+      <h3>openswissdata.com ≠ mcp-swiss (Vikram Gorla)</h3>
+      <p>
+        <strong>L'analyse #1 dit</strong> : « Créateur probable : Vikram Gorla (Bex/VD), persona dev agent_paaru sur dev.to. Repo public : <code>vikramgorla/mcp-swiss</code>. Version stable : npm <code>mcp-swiss@0.7.1</code>. 76 tools / 21 modules. Modèle gratuit, sans API key. »
+      </p>
+      <p>
+        <strong>Vérification factuelle (que je viens de faire)</strong> :
+      </p>
+      <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: var(--ink-soft); line-height: 1.7;">
+        <li><code>npm view mcp-swiss</code> retourne bien le package de <strong>Vikram Gorla</strong> (68 tools, 20 modules, MIT, free, no API key)</li>
+        <li><code>github.com/vikramgorla/mcp-swiss</code> existe (HTTP 200)</li>
+        <li><strong>MAIS</strong> : ton vrai repo est <code>cammac-creator/openswissdata</code> avec ton package <code>@openswissdata/mcp@0.1.1</code> et <strong>9 tools</strong> (TARES, FINMA, NOGA), pas 76</li>
+      </ul>
+      <p style="margin-top: 16px;">
+        <strong>Conclusion</strong> : ce sont <strong>2 projets distincts</strong>. L'analyste a vu un domaine <code>openswissdata.com</code> + un projet <code>mcp-swiss</code> populaire et il a fait l'amalgame. <strong>Mais l'info est utile pour toi</strong> : tu ignorais peut-être que mcp-swiss existait. C'est ton vrai concurrent sur le segment "MCP Swiss data" — pas opendata.swiss ni Wüest Partner.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 COMPARAISONS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Différences vs concurrents souvent cités</strong>
+      <span class="sep">/</span>
+      <span>opendata.swiss vs Wüest Partner vs toi</span>
+    </div>
+    <h2>Tu n'es <span class="serif">ni l'un ni l'autre</span>.</h2>
+    <p class="section-intro">Les 2 analyses te placent en compétition avec opendata.swiss (analyse #2) et Wüest Partner (analyse #1). En réalité, tu joues sur un autre terrain.</p>
+
+    <div class="compare-3">
+
+      <div class="compare-card">
+        <div class="name">CATALOGUE PUBLIC</div>
+        <h4>opendata.swiss</h4>
+        <p class="subtitle">Portail fédéral d'indexation des données ouvertes suisses</p>
+        <div class="compare-row">
+          <div class="compare-row-label">Rôle</div>
+          <div class="compare-row-value"><strong>Catalogue</strong> (indexe + référence)</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Datasets</div>
+          <div class="compare-row-value">~11 000 fiches descriptives</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Hébergement</div>
+          <div class="compare-row-value">Liens vers les sources réelles</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Maintenu par</div>
+          <div class="compare-row-value">Archives fédérales (institutionnel)</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Modèle</div>
+          <div class="compare-row-value">Gratuit, public, exhaustif</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Format</div>
+          <div class="compare-row-value">Fiches métadonnées + liens externes</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Frustration</div>
+          <div class="compare-row-value">Hétérogène, XML cassé, encodages variables — c'est ton opportunité</div>
+        </div>
+      </div>
+
+      <div class="compare-card ours">
+        <div class="name">REFINERIE B2B</div>
+        <h4>openswissdata.com</h4>
+        <p class="subtitle">Datasets fédéraux normalisés, signés, B2B compliance</p>
+        <div class="compare-row">
+          <div class="compare-row-label">Rôle</div>
+          <div class="compare-row-value"><strong>Publisher</strong> (transforme + livre)</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Datasets</div>
+          <div class="compare-row-value">3 verticaux : TARES + NOGA + FINMA</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Hébergement</div>
+          <div class="compare-row-value">Cloudflare R2 + Railway</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Maintenu par</div>
+          <div class="compare-row-value">Solo founder bootstrappé</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Modèle</div>
+          <div class="compare-row-value">Payant 299-797 CHF + 49/mo MCP</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Format</div>
+          <div class="compare-row-value">Parquet/JSON/SQL + signatures Ed25519</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Moat</div>
+          <div class="compare-row-value">Permission BAZG écrite + Confirmation FINMA</div>
+        </div>
+      </div>
+
+      <div class="compare-card">
+        <div class="name">SAAS PROPTECH</div>
+        <h4>Wüest Partner</h4>
+        <p class="subtitle">Société privée CH (depuis 1985) — données immobilières</p>
+        <div class="compare-row">
+          <div class="compare-row-label">Rôle</div>
+          <div class="compare-row-value"><strong>Analytics</strong> (rapports + indices)</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Datasets</div>
+          <div class="compare-row-value">Prix immo, indices, marché CH</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Hébergement</div>
+          <div class="compare-row-value">Plateforme propriétaire</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Maintenu par</div>
+          <div class="compare-row-value">Société 200+ collaborateurs</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Modèle</div>
+          <div class="compare-row-value">Premium SaaS, contrats annuels</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Format</div>
+          <div class="compare-row-value">Rapports PDF + dashboards web</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-row-label">Cible</div>
+          <div class="compare-row-value">Banques, assurances, promoteurs immo</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="verdict" style="margin-top: 28px;">
+      <h3>🎯 La vraie nature de openswissdata.com</h3>
+      <p>
+        <strong>Tu n'es pas un catalogue</strong> (opendata.swiss l'est déjà, gratis et exhaustif). <strong>Tu n'es pas un SaaS proptech</strong> (Wüest Partner couvre l'immo, tu couvres compliance/douanes/classifications).
+      </p>
+      <p>
+        <strong>Tu es une refinerie de 3 datasets fédéraux choisis</strong> : prendre la donnée brute mal foutue du gov, la nettoyer, la signer Ed25519, la livrer en Parquet/JSON/SQL + MCP. <strong>Permission BAZG + FINMA écrites = ton moat juridique</strong> que personne d'autre n'a (vérifié : mcp-swiss n'a pas demandé).
+      </p>
+      <p style="margin-top: 18px;">
+        La meilleure analogie : <strong>Stripe pour la data fédérale CH</strong>. Stripe ne stocke pas l'argent (les banques le font) — il fournit une API propre par-dessus. Tu ne crées pas la donnée (le gov le fait) — tu fournis l'API/dataset propre par-dessus.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- VRAI PAYSAGE CONCURRENTIEL -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Le vrai paysage concurrentiel</strong>
+      <span class="sep">/</span>
+      <span>MCP servers Suisse · 2026</span>
+    </div>
+    <h2>Tes <span class="serif">vrais concurrents</span>.</h2>
+    <p class="section-intro">L'écosystème MCP CH s'est cristallisé en 18 mois. Voici qui fait quoi, et où tu te positionnes.</p>
+
+    <div class="concurrents-table">
+      <div class="concurrent-row head">
+        <div></div><div>Projet</div><div>Focus</div><div>Position vs toi</div>
+      </div>
+
+      <div class="concurrent-row">
+        <div class="concurrent-rank">🥇</div>
+        <div class="concurrent-name">
+          <h5>mcp-swiss (Vikram Gorla)</h5>
+          <p>68 tools · 20 modules · MIT · free · no API key</p>
+        </div>
+        <div class="concurrent-focus">SBB, weather, geo, ZEFIX, parliament, real-estate</div>
+        <div class="concurrent-pos threat">CONCURRENT DIRECT</div>
+      </div>
+
+      <div class="concurrent-row">
+        <div class="concurrent-rank">2</div>
+        <div class="concurrent-name">
+          <h5>OpenCaseLaw MCP</h5>
+          <p>31 tools — jurisprudence CH</p>
+        </div>
+        <div class="concurrent-focus">Legal CH</div>
+        <div class="concurrent-pos different">DOMAINE DIFFÉRENT</div>
+      </div>
+
+      <div class="concurrent-row">
+        <div class="concurrent-rank">3</div>
+        <div class="concurrent-name">
+          <h5>Liip Stadt Zürich MCP</h5>
+          <p>20 tools — 900 datasets Zürich</p>
+        </div>
+        <div class="concurrent-focus">Local Zürich</div>
+        <div class="concurrent-pos adjacent">ADJACENT</div>
+      </div>
+
+      <div class="concurrent-row">
+        <div class="concurrent-rank">4</div>
+        <div class="concurrent-name">
+          <h5>Liip Swiss Parliament Bot</h5>
+          <p>~10 tools — OpenParlData</p>
+        </div>
+        <div class="concurrent-focus">Parlement CH</div>
+        <div class="concurrent-pos different">DOMAINE DIFFÉRENT</div>
+      </div>
+
+      <div class="concurrent-row">
+        <div class="concurrent-rank">5</div>
+        <div class="concurrent-name">
+          <h5>Schwaizer ZEFIX</h5>
+          <p>~5-10 tools — entreprises</p>
+        </div>
+        <div class="concurrent-focus">Registre commerce</div>
+        <div class="concurrent-pos adjacent">ADJACENT (KYC)</div>
+      </div>
+
+      <div class="concurrent-row" style="background: var(--green-soft);">
+        <div class="concurrent-rank" style="color: var(--green);">★</div>
+        <div class="concurrent-name">
+          <h5>openswissdata.com (TOI)</h5>
+          <p>9 tools — TARES + NOGA + FINMA · permission BAZG/FINMA</p>
+        </div>
+        <div class="concurrent-focus">Compliance / douanes / classifications</div>
+        <div class="concurrent-pos" style="background: var(--green); color: white;">FOCUSED B2B</div>
+      </div>
+
+    </div>
+
+    <div class="verdict" style="margin-top: 24px;">
+      <h3>📊 Lecture clé</h3>
+      <p>
+        <strong class="verdict-yes">Tu n'es PAS en concurrence frontale avec mcp-swiss.</strong> Lui couvre <strong>large + gratuit</strong> (SBB, météo, géo, transport — tout usage). Tu couvres <strong>étroit + payant</strong> (compliance/KYC professionnel). Vous adressez des ICP différents : lui = devs curieux / hobby ; toi = compliance officers banques + intégrateurs ERP.
+      </p>
+      <p>
+        <strong style="color: #fda4af;">MAIS</strong> : mcp-swiss pourrait ajouter TARES/FINMA/NOGA à n'importe quel moment (technique simple). Ce qui te protège vraiment : <strong>les permissions BAZG + FINMA écrites</strong> et <strong>les signatures Ed25519</strong>. Les hobbyistes ne demandent pas la permission au gov.
+      </p>
+      <p style="margin-top: 18px;">
+        Sur ton segment compliance B2B, <strong>tu n'as pas de concurrent direct</strong>. Wüest Partner couvre l'immo. PriceHubble la valorisation immo. Moneyhouse les news entreprises. <strong>Personne ne fait TARES+NOGA+FINMA normalisés et signés.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ANALYSE #1 — VERDICTS POINT PAR POINT -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Mon avis sur l'analyse #1</strong>
+      <span class="sep">/</span>
+      <span>Bonnes idées vs erreurs</span>
+    </div>
+    <h2>Ce qui <span class="serif">tient</span> et ce qui <span class="serif">tombe</span>.</h2>
+
+    <div class="verdicts-grid">
+
+      <div class="verdict-item bad">
+        <div class="verdict-label">❌ FAUX</div>
+        <h5>« Modèle économique : gratuit, sans API key »</h5>
+        <p>Faux pour toi. Tu vends Bundle 797 CHF + MCP 49/mo. C'est ce que dit Vikram Gorla pour mcp-swiss, pas toi.</p>
+      </div>
+
+      <div class="verdict-item bad">
+        <div class="verdict-label">❌ FAUX</div>
+        <h5>« 76 tools / 21 modules »</h5>
+        <p>Tu as 9 tools (TARES + FINMA + NOGA). C'est mcp-swiss qui a 68 tools.</p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ JUSTE</div>
+        <h5>L'anti-positionnement portail OGD</h5>
+        <p>Effectivement, ne pas se battre contre opendata.swiss. Tu n'es pas un catalogue. Bien vu.</p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ JUSTE</div>
+        <h5>L'anti-positionnement SaaS vertical</h5>
+        <p>Pas de bataille frontale avec Wüest Partner. Tu n'es pas un proptech.</p>
+      </div>
+
+      <div class="verdict-item mixed">
+        <div class="verdict-label">🟡 PARTIEL</div>
+        <h5>« 1er MCP server généraliste CH »</h5>
+        <p>Faux si on parle de toi (tu n'es pas généraliste, tu es focused). Mais l'idée du framing "API entre LLM et data CH" peut t'inspirer pour le messaging marketing.</p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ JUSTE</div>
+        <h5>« Stripe ≠ banque, = API entre devs et banques »</h5>
+        <p>Excellente analogie. <strong>Openswissdata ≠ portail data, = refinerie entre apps et data fédérale CH compliance.</strong> À garder pour ton pitch.</p>
+      </div>
+
+      <div class="verdict-item mixed">
+        <div class="verdict-label">🟡 PARTIEL</div>
+        <h5>Les 12 datasets à ajouter</h5>
+        <p>Liste intéressante mais sort de ton focus. Si tu ajoutes ESTV/LAMal/Salarium, tu deviens un mcp-swiss-bis. Reste sur compliance/douanes/classifications. <strong>Exception : Swissreg (brevets/marques)</strong> qui colle à ton segment compliance.</p>
+      </div>
+
+      <div class="verdict-item bad">
+        <div class="verdict-label">❌ HORS-SCOPE</div>
+        <h5>Les 3 killer showcases SEO (impôts, primes, salaires)</h5>
+        <p>Ce sont des showcases B2C. Ton ICP est B2B compliance officer. Ces showcases attirent des consommateurs, pas des banques. <strong>Bonne idée mais mauvais ICP.</strong></p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ EXCELLENT</div>
+        <h5>« Annuaires MCP (Glama, PulseMCP, mcpmarket, smithery, awesome-mcp) »</h5>
+        <p>Déjà fait pour 4 sur 5 le 6 mai (Smithery LIVE, mcp.so submitted, Glama submitted, Anthropic registry publié). Reste PulseMCP, mcpmarket à explorer.</p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ JUSTE</div>
+        <h5>« Article fondateur State of Swiss MCP servers 2026 »</h5>
+        <p>Idée forte. Tu pourrais écrire un article qui benchmark mcp-swiss + OpenCaseLaw + Liip + toi. Te positionne comme "the analyst" du segment. <strong>À mettre dans ta roadmap Substack.</strong></p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ANALYSE #2 — VERDICTS POINT PAR POINT -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Mon avis sur l'analyse #2</strong>
+      <span class="sep">/</span>
+      <span>Recos opérationnelles SEO/PR</span>
+    </div>
+    <h2>L'analyse <span class="serif">SEO/PR</span> au crible.</h2>
+
+    <div class="verdicts-grid">
+
+      <div class="verdict-item bad">
+        <div class="verdict-label">❌ MAUVAIS ICP</div>
+        <h5>Cible primaire « Dev / data engineer Yann zurichois »</h5>
+        <p>L'analyse positionne ton produit pour les data engineers généralistes ("j'ai besoin du NPA"). <strong>Ton vrai ICP est compliance officer banque + data engineer FINTECH</strong> (qui cherchent TARES/FINMA, pas NPA). Marché plus étroit mais à plus forte willingness to pay.</p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ JUSTE</div>
+        <h5>Cible levier = data journalistes CH</h5>
+        <p>Hyper pertinent. Tu as déjà pitché finews/Inside Paradeplatz/startupticker — c'est exactement cette logique. Ajoute Heidi.news, Republik, NZZ Data, RTS Découverte au pipeline.</p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ URGENT</div>
+        <h5>#1 — Débloquer indexation Google</h5>
+        <p>À vérifier en 10 min : Search Console connecté ? robots.txt OK ? sitemap soumis ? Si "0 résultat Google sur site:openswissdata.com" est vrai, c'est URGENT à régler aujourd'hui.</p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ EXCELLENT</div>
+        <h5>#2 — Pages dataset SEO + schema.org/Dataset</h5>
+        <p>Idée forte. Tu as 3 datasets (TARES, NOGA, FINMA) → 3 pages dataset enrichies en JSON-LD activeront Google Dataset Search. <strong>1h de travail, impact SEO durable.</strong></p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ FREE-WIN</div>
+        <h5>#3 — PR sur rnckp/awesome-ogd-switzerland</h5>
+        <p>2 min de boulot, backlink permanent depuis le repo OGD CH de référence. À faire cette semaine.</p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ JUSTE</div>
+        <h5>#5 — Référencement Wikidata + Wikipedia</h5>
+        <p>Backlinks Wikipedia = jackpot SEO. Identifie 5-10 articles Wikipedia CH (FINMA, TARES, NOGA, BAZG) qui pourraient citer openswissdata.com comme source. <strong>Effort modéré, impact permanent.</strong></p>
+      </div>
+
+      <div class="verdict-item mixed">
+        <div class="verdict-label">🟡 À TIMER</div>
+        <h5>#8 — Show HN avec killer dataset</h5>
+        <p>Tu as tenté le 7 mai mais HN bloquait (compte trop jeune). Compte vieux de 11 jours maintenant. <strong>Re-tenter aujourd'hui</strong>, focus sur un dataset spécifique pas la home. Ex : "Show HN: I built a signed Swiss customs tariff API (TARES) for compliance officers".</p>
+      </div>
+
+      <div class="verdict-item mixed">
+        <div class="verdict-label">🟡 À ÉVALUER</div>
+        <h5>#7 — Partenariat opendata.swiss</h5>
+        <p>Intéressant mais long terme (3-6 mois). Devenir source listée = crédibilité institutionnelle. Mais risque : ils peuvent refuser le commercial. <strong>À tenter après 100 abonnés Substack.</strong></p>
+      </div>
+
+      <div class="verdict-item bad">
+        <div class="verdict-label">❌ HORS-SCOPE</div>
+        <h5>#9 — Blog technique mensuel</h5>
+        <p>Tu as déjà Substack ("ETL Fédéral Suisse"). Inutile de doubler. Le blog de l'analyse cible "Yann zurichois", ton Substack cible compliance officers. Garde Substack, skip le blog.</p>
+      </div>
+
+      <div class="verdict-item good">
+        <div class="verdict-label">✅ INTÉRESSANT</div>
+        <h5>#10 — MAKE.opendata.ch + Swiss Data Science Conf 2026</h5>
+        <p>Sponsoring CHF 2-5k = exposition concentrée auprès du bon multiplicateur. <strong>Mais</strong> : pas une priorité tant que Phase 0 traction pas validée. À revoir Q3 2026.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- MON PLAN D'ACTION RECOMMANDÉ -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Mon plan d'action recommandé</strong>
+      <span class="sep">/</span>
+      <span>7 actions priorisées · sortir des analyses</span>
+    </div>
+    <h2>Ce que je <span class="serif">ferais à ta place</span> dans les 2 semaines.</h2>
+
+    <div class="recos-grid">
+
+      <div class="reco-card priority">
+        <div class="reco-num">Reco 1</div>
+        <h5>Audit indexation Google (aujourd'hui)</h5>
+        <p>Vérifier <code>site:openswissdata.com</code> sur Google. Si vraiment 0 résultat → Search Console, robots.txt, sitemap. Si déjà indexé → ignore l'analyse #2 sur ce point.</p>
+        <span class="effort">⏱ 15 min</span><span class="effort">🎯 Si vrai = URGENT</span>
+      </div>
+
+      <div class="reco-card priority">
+        <div class="reco-num">Reco 2</div>
+        <h5>Re-tenter Show HN aujourd'hui</h5>
+        <p>Compte HN vieux de 11 jours. Restriction probablement levée. Submit avec angle dataset spécifique (pas la home). Sweet spot 16h CEST.</p>
+        <span class="effort">⏱ 30 min</span><span class="effort">🎯 Upside x10</span>
+      </div>
+
+      <div class="reco-card">
+        <div class="reco-num">Reco 3</div>
+        <h5>3 pages dataset SEO + schema.org</h5>
+        <p>Pour TARES, NOGA, FINMA — pages dédiées avec JSON-LD <code>schema.org/Dataset</code> complet. Active Google Dataset Search. Je peux faire en autonome si tu valides.</p>
+        <span class="effort">⏱ 1h Claude</span><span class="effort">🎯 SEO durable</span>
+      </div>
+
+      <div class="reco-card">
+        <div class="reco-num">Reco 4</div>
+        <h5>PR awesome-ogd-switzerland (rnckp)</h5>
+        <p>Free-win backlink. 2 min de boulot pour toi (review + merge). Je prépare la PR.</p>
+        <span class="effort">⏱ 15 min</span><span class="effort">🎯 Free-win</span>
+      </div>
+
+      <div class="reco-card">
+        <div class="reco-num">Reco 5</div>
+        <h5>Article fondateur « State of Swiss MCP servers 2026 »</h5>
+        <p>Benchmark public et honnête : toi vs mcp-swiss vs OpenCaseLaw vs Liip. Te positionne comme l'analyste du segment. Publication Substack + dev.to + Hacker News.</p>
+        <span class="effort">⏱ 2-3h Claude</span><span class="effort">🎯 Autorité</span>
+      </div>
+
+      <div class="reco-card">
+        <div class="reco-num">Reco 6</div>
+        <h5>Pitcher 3 data journalistes CH supplémentaires</h5>
+        <p>Heidi.news, Republik, NZZ Data, RTS Découverte. Dataset exclusif packagé : un croisement TARES+FINMA inédit qu'ils peuvent exploiter pour une enquête. 5 emails = 1-2 articles.</p>
+        <span class="effort">⏱ 1h prep + 5 emails</span><span class="effort">🎯 Backlinks autoritaires</span>
+      </div>
+
+      <div class="reco-card">
+        <div class="reco-num">Reco 7</div>
+        <h5>Wikidata + Wikipedia (FINMA, TARES, BAZG, NOGA)</h5>
+        <p>5-10 articles Wikipedia CH qui peuvent citer openswissdata.com comme source. Édition prudente. Backlinks Wikipedia = jackpot SEO permanent.</p>
+        <span class="effort">⏱ 1-2h</span><span class="effort">🎯 SEO premium</span>
+      </div>
+
+    </div>
+
+    <div class="verdict" style="margin-top: 24px;">
+      <h3>🎯 La synthèse en 30 secondes</h3>
+      <p>
+        <strong class="verdict-yes">Les analyses sont utiles malgré leurs erreurs.</strong> Elles t'apportent : la découverte de <strong>mcp-swiss comme concurrent réel</strong>, le bon framing "Stripe pour la data fédérale CH", et 7 recos exécutables (indexation, schema.org, awesome-ogd, Wikipedia, Show HN, article fondateur, pitch journalistes).
+      </p>
+      <p>
+        <strong style="color: #fda4af;">Ce qu'il faut ignorer</strong> : les 12 datasets à ajouter (sortent de ton focus), les 3 showcases B2C (mauvais ICP), le blog dev parallèle à Substack (doublon), le cadrage "MCP généraliste" (faux pour toi).
+      </p>
+      <p style="margin-top: 18px;">
+        <strong>Action immédiate (30 min)</strong> : Reco 1 (audit indexation Google) + Reco 2 (re-tenter Show HN). C'est l'asymétrie max sur ton temps cette semaine.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · analyse stratégique 2026-05-11</strong></p>
+    <p style="margin: 0;">
+      Avis critique sur 2 analyses externes reçues par Claude-Alain. Vérification factuelle effectuée : <code>npm view mcp-swiss</code> + <code>github.com/vikramgorla/mcp-swiss</code>. Conclusions : analyse #1 a confondu openswissdata.com avec mcp-swiss (Vikram Gorla) ; analyse #2 a mal cadré l'ICP. 7 recos exécutables retenues sur 20.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
