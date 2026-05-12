@@ -4,6 +4,31 @@ import FinmaLookup from "../../components/FinmaLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
 import ProductFaq from "../../components/ProductFaq.astro";
 
+const datasetJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  name: "FINMA Registry — Swiss Supervised Financial Institutions (unified)",
+  description:
+    "Unified registry of ~1,500 FINMA-supervised entities (banks, insurers, asset managers, securities firms, fund managers, SROs, PSPs) consolidated from 10 separate official FINMA XLSX lists into a single 16-column schema (UID, LEI, authorization type, status, address, canton). Source: FINMA (written no-objection confirmation May 2026). Ed25519-signed releases. Multi-format (CSV/JSON/Parquet/SQL).",
+  url: "https://www.openswissdata.com/datasets/finma",
+  identifier: "openswissdata:finma",
+  license: "https://www.openswissdata.com/legal/cgv",
+  creator: { "@type": "Organization", name: "openswissdata", url: "https://www.openswissdata.com" },
+  publisher: { "@type": "Organization", name: "openswissdata" },
+  isBasedOn: { "@type": "Dataset", name: "FINMA Public Registry (official)", url: "https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/" },
+  keywords: ["FINMA", "Swiss financial supervision", "banks", "insurers", "asset managers", "PSPs", "fund managers", "SROs", "compliance", "KYC", "AML", "Switzerland", "UID", "LEI", "regulatory data"],
+  spatialCoverage: { "@type": "Place", name: "Switzerland", geo: { "@type": "GeoCoordinates", addressCountry: "CH" } },
+  temporalCoverage: "2008/..",
+  isAccessibleForFree: false,
+  variableMeasured: ["Entity name", "UID (Swiss commercial register)", "LEI (Legal Entity Identifier)", "Authorization type", "Authorization date", "Status (active/withdrawn)", "Address", "Canton"],
+  distribution: [
+    { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: "https://www.openswissdata.com/datasets/finma" },
+    { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: "https://www.openswissdata.com/datasets/finma" },
+    { "@type": "DataDownload", encodingFormat: "application/vnd.apache.parquet", contentUrl: "https://www.openswissdata.com/datasets/finma" },
+    { "@type": "DataDownload", encodingFormat: "application/sql", contentUrl: "https://www.openswissdata.com/datasets/finma" },
+  ],
+};
+
 const productJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
@@ -47,6 +72,7 @@ const productJsonLd = {
   description="Les 10 listes publiques d'autorisations FINMA consolidées sous un schéma unique. Banques, assurances, PSPs, gestionnaires d'actifs, SRO. Enrichi UID + LEI. 299 CHF one-shot."
   image="/og-finma.png"
   productJsonLd={productJsonLd}
+  datasetJsonLd={datasetJsonLd}
 >
 <div class="bg-grid"></div>
 
