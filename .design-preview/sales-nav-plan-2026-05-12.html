@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Plan Sales Navigator · openswissdata · 2026-05-12</title>
+<style>
+  :root {
+    --bg: #FBFBF8; --bg-card: #FFFFFF; --bg-soft: #F5F4EE;
+    --ink: #0A0A0C; --ink-soft: #3A3D45; --ink-mute: #6B6E76;
+    --line: #E8E4D9; --line-strong: #D9D3C3;
+    --accent: #DC1F2D; --accent-soft: #FCE7E9;
+    --green: #15803D; --green-soft: #DCFCE7;
+    --amber: #92400E; --amber-soft: #FEF3C7;
+    --teal: #0F766E; --teal-soft: #E5F5F1;
+    --blue: #1D4ED8; --blue-soft: #DBEAFE;
+    --purple: #6D28D9; --purple-soft: #EDE9FE;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Geist", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(10,10,12,.025) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%; z-index: 0;
+    mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 70%);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", monospace; font-size: 12px; }
+  .serif { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+  code { font-family: "Geist Mono", monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 6px; border-radius: 3px; }
+  a { color: var(--blue); text-decoration: underline; }
+  a:hover { color: var(--accent); }
+
+  .hero { padding: 56px 0 32px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line); width: fit-content;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font-weight: 700; font-size: clamp(36px, 4.5vw, 52px);
+    line-height: 1.05; letter-spacing: -.03em;
+    margin: 0 0 18px; max-width: 22ch;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin: 24px 0 36px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat-label { font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .stat-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { border-right: none; border-bottom: 1px solid var(--line); } }
+
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-eyebrow { font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .section-eyebrow strong { color: var(--ink); font-weight: 500; }
+  .section-eyebrow .sep { color: var(--line-strong); }
+  h2 { font-weight: 700; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.1;
+    letter-spacing: -.025em; margin: 0 0 12px; max-width: 32ch; }
+  .section-intro { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 28px; }
+
+  /* Quick start card */
+  .quickstart {
+    background: linear-gradient(135deg, var(--green-soft) 0%, white 100%);
+    border: 2px solid var(--green); border-radius: 14px;
+    padding: 24px 28px; margin: 24px 0;
+  }
+  .quickstart h3 { color: var(--green); margin: 0 0 10px; font-size: 18px; }
+  .quickstart-item {
+    display: grid; grid-template-columns: 28px 1fr;
+    gap: 10px; padding: 8px 0; align-items: start;
+  }
+  .quickstart-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--green); color: white;
+    display: grid; place-items: center;
+    font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 700;
+    margin-top: 2px;
+  }
+  .quickstart-content { font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
+  .quickstart-content strong { color: var(--ink); }
+
+  /* Search cards */
+  .searches-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 24px 0; }
+  .search-card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 26px;
+  }
+  .search-card.priority { border: 2px solid var(--accent); }
+  .search-card.priority .search-num { background: var(--accent); }
+  .search-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .search-num {
+    flex-shrink: 0;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--ink); color: white;
+    display: grid; place-items: center;
+    font-family: "Geist Mono", monospace; font-size: 14px; font-weight: 700;
+  }
+  .search-title h3 { font-size: 16px; font-weight: 700; margin: 0; line-height: 1.3; }
+  .search-title-sub {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mute);
+    margin-top: 4px;
+  }
+  .search-cta {
+    background: var(--ink); color: white;
+    padding: 8px 14px; border-radius: 6px;
+    font-family: "Geist Mono", monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+    text-decoration: none; flex-shrink: 0;
+    display: inline-block;
+  }
+  .search-card.priority .search-cta { background: var(--accent); }
+  .search-cta:hover { color: white; }
+  .search-filters {
+    background: var(--bg-soft); border-radius: 8px;
+    padding: 14px 18px; margin: 12px 0;
+  }
+  .filter-row {
+    display: grid; grid-template-columns: 120px 1fr;
+    gap: 12px; padding: 6px 0; font-size: 13px;
+  }
+  .filter-label {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-mute); font-weight: 700;
+  }
+  .filter-value { color: var(--ink-soft); line-height: 1.5; }
+  .filter-value code { font-size: 11px; }
+  .search-target {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; padding-top: 12px;
+    border-top: 1px solid var(--line); margin-top: 12px;
+  }
+  .search-target-label {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-mute); font-weight: 700;
+  }
+  .search-target-value { font-weight: 700; color: var(--ink); }
+  .search-target-segment {
+    background: var(--bg-soft); padding: 3px 10px;
+    border-radius: 4px;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: var(--ink-soft);
+  }
+
+  /* CSV preview */
+  .csv-preview {
+    background: var(--ink); color: #6ee7b7;
+    padding: 16px 18px; border-radius: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    overflow-x: auto; line-height: 1.6;
+    margin: 16px 0;
+  }
+  .csv-preview .head { color: white; font-weight: 700; }
+  .csv-preview .sep { color: #6b7280; }
+
+  /* Templates */
+  .template-block {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px 24px; margin: 14px 0;
+  }
+  .template-block.compliance { border-left: 4px solid var(--accent); }
+  .template-block.data { border-left: 4px solid var(--blue); }
+  .template-block.customs { border-left: 4px solid var(--amber); }
+  .template-block.founder { border-left: 4px solid var(--purple); }
+  .template-block.erp { border-left: 4px solid var(--teal); }
+  .template-block.connection { border-left: 4px solid var(--green); }
+  .template-label {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-mute); margin-bottom: 6px; font-weight: 700;
+  }
+  .template-block h4 { margin: 0 0 12px; font-size: 16px; }
+  .template-block .subject {
+    background: var(--bg-soft); padding: 8px 12px; border-radius: 6px;
+    font-family: "Geist Mono", monospace; font-size: 12px;
+    margin-bottom: 12px;
+  }
+  .template-body {
+    background: #f9f9f5; border: 1px solid var(--line);
+    padding: 14px 16px; border-radius: 6px;
+    font-size: 13px; line-height: 1.6;
+    white-space: pre-wrap; color: var(--ink-soft);
+    font-family: "Geist Mono", monospace;
+  }
+
+  /* Domains table */
+  .domains-grid {
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden; margin: 20px 0;
+  }
+  .domain-row {
+    display: grid; grid-template-columns: 1fr 200px 180px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px; align-items: center;
+  }
+  .domain-row:last-child { border-bottom: none; }
+  .domain-row.head {
+    background: var(--ink); color: white;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
+    padding: 10px 18px;
+  }
+  .domain-row.head > div { color: rgba(255,255,255,.85); }
+  .domain-entity { font-weight: 600; color: var(--ink); }
+  .domain-domain { font-family: "Geist Mono", monospace; color: var(--blue); font-size: 12px; }
+  .domain-pattern { font-family: "Geist Mono", monospace; color: var(--ink-soft); font-size: 11px; }
+  @media (max-width: 720px) { .domain-row { grid-template-columns: 1fr; } .domain-row.head { display: none; } }
+
+  /* Pitfalls */
+  .pitfalls {
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0; padding: 22px 26px; margin: 24px 0;
+  }
+  .pitfalls h3 { margin: 0 0 14px; color: var(--accent); font-size: 17px; }
+  .pitfalls ul { margin: 0; padding-left: 22px; }
+  .pitfalls li { margin-bottom: 8px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+  .pitfalls li strong { color: var(--accent); }
+
+  /* Verdict */
+  .verdict {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a1d 100%);
+    color: var(--bg); border-radius: 14px; padding: 32px 36px; margin: 24px 0;
+  }
+  .verdict h3 { color: var(--bg); font-size: 22px; margin: 0 0 14px; }
+  .verdict p { color: rgba(255,255,255,.8); font-size: 14px; line-height: 1.65; margin: 0 0 12px; }
+  .verdict p strong { color: white; }
+  .verdict-yes { color: #6ee7b7; }
+  .verdict-no { color: #fda4af; }
+
+  footer {
+    padding: 36px 0 56px; border-top: 1px solid var(--line);
+    color: var(--ink-mute); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Plan Sales Navigator · 3 jours · 2026-05-12</span>
+    </div>
+    <h1>Extraction <span class="accent">210 prospects CH</span> en 3 jours.</h1>
+    <p class="lede">
+      Plan d'action complet pour exploiter ton abo LinkedIn Premium avant son échéance dans 3 jours. <strong>5 recherches ciblées</strong>, <strong>~210 prospects qualifiés</strong>, format CSV ready, templates de messages prêts à coller. Tout est ici, tu cliques + tu colles.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Recherches LinkedIn</div>
+        <div class="stat-value">5</div>
+        <div class="stat-sub">filtres pré-encodés</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Prospects cibles</div>
+        <div class="stat-value">210</div>
+        <div class="stat-sub">B2B compliance CH</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Templates prêts</div>
+        <div class="stat-value">6</div>
+        <div class="stat-sub">InMail · cold email · connection</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Durée totale</div>
+        <div class="stat-value">~4h</div>
+        <div class="stat-sub">étalées sur 3 jours</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUICK START -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Quick start</strong>
+      <span class="sep">/</span>
+      <span>Prêt à coller, prêt à cliquer</span>
+    </div>
+    <h2>Commence en <span class="serif">3 actions</span>.</h2>
+
+    <div class="quickstart">
+      <h3>🚀 3 actions pour démarrer maintenant</h3>
+
+      <div class="quickstart-item">
+        <div class="quickstart-num">1</div>
+        <div class="quickstart-content">
+          <strong>Ouvre ton CSV de prospection</strong> — déjà pré-rempli avec 34 entreprises CH cibles (banques cantonales, banques privées, fintech, intégrateurs ERP, horlogerie) :<br>
+          <code>~/Desktop/linkedin-prospects-sales-nav.csv</code>
+          <br>Ouvre dans Excel ou importe dans <a href="https://sheets.new" target="_blank">Google Sheets</a> (File → Import → Upload → Replace data).
+        </div>
+      </div>
+
+      <div class="quickstart-item">
+        <div class="quickstart-num">2</div>
+        <div class="quickstart-content">
+          <strong>Active "Anonymous Profile Viewing"</strong> sur LinkedIn (sinon les profils que tu visites te voient) :<br>
+          <a href="https://www.linkedin.com/mypreferences/d/categories/account" target="_blank">Settings → Visibility → Profile viewing options → Private mode</a>
+        </div>
+      </div>
+
+      <div class="quickstart-item">
+        <div class="quickstart-num">3</div>
+        <div class="quickstart-content">
+          <strong>Lance la Recherche 1</strong> ci-dessous (compliance officers — priorité MAX). 50 prospects en 30 min.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LES 5 RECHERCHES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Les 5 recherches LinkedIn</strong>
+      <span class="sep">/</span>
+      <span>Liens cliquables · filtres pré-encodés</span>
+    </div>
+    <h2>Les <span class="serif">5 recherches</span> ciblées.</h2>
+
+    <div class="searches-grid">
+
+      <div class="search-card priority">
+        <div class="search-head">
+          <div class="search-num">1</div>
+          <div class="search-title">
+            <h3>Compliance Officers banques CH</h3>
+            <div class="search-title-sub">Priorité MAX · segment compliance_bank</div>
+          </div>
+          <a class="search-cta" href="https://www.linkedin.com/search/results/people/?keywords=%22compliance%20officer%22%20OR%20%22AML%20officer%22%20OR%20%22MLRO%22&geoUrn=%5B%22106693272%22%5D&origin=GLOBAL_SEARCH_HEADER" target="_blank">→ Lancer</a>
+        </div>
+        <div class="search-filters">
+          <div class="filter-row">
+            <div class="filter-label">Mots-clés</div>
+            <div class="filter-value"><code>"compliance officer" OR "AML officer" OR "MLRO"</code></div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Localisation</div>
+            <div class="filter-value">Switzerland (déjà pré-encodé dans l'URL)</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Secteur</div>
+            <div class="filter-value">Banking · Financial Services · Capital Markets</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Connexions</div>
+            <div class="filter-value">2nd degree (taux d'acceptance ×2)</div>
+          </div>
+        </div>
+        <div class="search-target">
+          <span class="search-target-label">Cible</span>
+          <span class="search-target-value">50 prospects</span>
+          <span class="search-target-segment">compliance_bank</span>
+        </div>
+      </div>
+
+      <div class="search-card">
+        <div class="search-head">
+          <div class="search-num">2</div>
+          <div class="search-title">
+            <h3>Data Engineers fintech CH</h3>
+            <div class="search-title-sub">segment data_eng_fintech</div>
+          </div>
+          <a class="search-cta" href="https://www.linkedin.com/search/results/people/?keywords=%22data%20engineer%22%20OR%20%22Lead%20Data%20Engineer%22%20OR%20%22Senior%20Data%20Engineer%22&geoUrn=%5B%22106693272%22%5D&origin=GLOBAL_SEARCH_HEADER" target="_blank">→ Lancer</a>
+        </div>
+        <div class="search-filters">
+          <div class="filter-row">
+            <div class="filter-label">Mots-clés</div>
+            <div class="filter-value"><code>"Data Engineer" OR "Lead Data Engineer" OR "Senior Data Engineer"</code></div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Secteur</div>
+            <div class="filter-value">Financial Services · Banking · IT Services</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Niveau</div>
+            <div class="filter-value">Senior · Lead · Manager</div>
+          </div>
+        </div>
+        <div class="search-target">
+          <span class="search-target-label">Cible</span>
+          <span class="search-target-value">50 prospects</span>
+          <span class="search-target-segment">data_eng_fintech</span>
+        </div>
+      </div>
+
+      <div class="search-card">
+        <div class="search-head">
+          <div class="search-num">3</div>
+          <div class="search-title">
+            <h3>Customs / Trade Compliance Managers</h3>
+            <div class="search-title-sub">segment customs_manager</div>
+          </div>
+          <a class="search-cta" href="https://www.linkedin.com/search/results/people/?keywords=%22Customs%20Manager%22%20OR%20%22Trade%20Compliance%22%20OR%20%22Export%20Manager%22&geoUrn=%5B%22106693272%22%5D&origin=GLOBAL_SEARCH_HEADER" target="_blank">→ Lancer</a>
+        </div>
+        <div class="search-filters">
+          <div class="filter-row">
+            <div class="filter-label">Mots-clés</div>
+            <div class="filter-value"><code>"Customs Manager" OR "Trade Compliance" OR "Export Manager"</code></div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Secteur</div>
+            <div class="filter-value">Manufacturing · Pharmaceuticals · Machinery · Watch Manufacturing · Medical Devices</div>
+          </div>
+        </div>
+        <div class="search-target">
+          <span class="search-target-label">Cible</span>
+          <span class="search-target-value">30 prospects</span>
+          <span class="search-target-segment">customs_manager</span>
+        </div>
+      </div>
+
+      <div class="search-card">
+        <div class="search-head">
+          <div class="search-num">4</div>
+          <div class="search-title">
+            <h3>CTOs / Founders fintech CH</h3>
+            <div class="search-title-sub">segment fintech_founder</div>
+          </div>
+          <a class="search-cta" href="https://www.linkedin.com/search/results/people/?keywords=%22CTO%22%20OR%20%22Founder%22%20OR%20%22Co-Founder%22%20fintech&geoUrn=%5B%22106693272%22%5D&origin=GLOBAL_SEARCH_HEADER" target="_blank">→ Lancer</a>
+        </div>
+        <div class="search-filters">
+          <div class="filter-row">
+            <div class="filter-label">Mots-clés</div>
+            <div class="filter-value"><code>"CTO" OR "Founder" OR "Co-Founder"</code> + <code>fintech</code></div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Secteur</div>
+            <div class="filter-value">Financial Services · Computer Software · Fintech</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Taille entreprise</div>
+            <div class="filter-value">1-10 · 11-50 (vraies startups)</div>
+          </div>
+        </div>
+        <div class="search-target">
+          <span class="search-target-label">Cible</span>
+          <span class="search-target-value">50 prospects</span>
+          <span class="search-target-segment">fintech_founder</span>
+        </div>
+      </div>
+
+      <div class="search-card">
+        <div class="search-head">
+          <div class="search-num">5</div>
+          <div class="search-title">
+            <h3>Intégrateurs SAP GTS / Abacus / ERP</h3>
+            <div class="search-title-sub">segment erp_integrator</div>
+          </div>
+          <a class="search-cta" href="https://www.linkedin.com/search/results/people/?keywords=%22SAP%20GTS%22%20OR%20%22Abacus%20consultant%22%20OR%20%22Trade%20Compliance%20Consultant%22&geoUrn=%5B%22106693272%22%5D&origin=GLOBAL_SEARCH_HEADER" target="_blank">→ Lancer</a>
+        </div>
+        <div class="search-filters">
+          <div class="filter-row">
+            <div class="filter-label">Mots-clés</div>
+            <div class="filter-value"><code>"SAP GTS" OR "Abacus consultant" OR "Trade Compliance Consultant" OR "ERP consultant"</code></div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Secteur</div>
+            <div class="filter-value">IT Services · Computer Software · Management Consulting</div>
+          </div>
+        </div>
+        <div class="search-target">
+          <span class="search-target-label">Cible</span>
+          <span class="search-target-value">30 prospects</span>
+          <span class="search-target-segment">erp_integrator</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CSV PREVIEW -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Format CSV pré-rempli</strong>
+      <span class="sep">/</span>
+      <span>~/Desktop/linkedin-prospects-sales-nav.csv</span>
+    </div>
+    <h2>Le <span class="serif">tableau</span> à remplir.</h2>
+    <p class="section-intro">J'ai créé un CSV avec 34 entreprises CH cibles déjà pré-remplies (compliance bank, data eng, customs, fintech founders, ERP). Tu n'as qu'à ajouter <strong>prenom + nom + linkedin_url</strong> en trouvant les personnes via Sales Nav.</p>
+
+    <div class="csv-preview">
+<span class="head">prenom<span class="sep">,</span>nom<span class="sep">,</span>titre_poste<span class="sep">,</span>entreprise<span class="sep">,</span>linkedin_url<span class="sep">,</span>ville<span class="sep">,</span>segment<span class="sep">,</span>email<span class="sep">,</span>statut<span class="sep">,</span>notes</span>
+<span class="sep">,,</span>Compliance Officer<span class="sep">,</span>Zürcher Kantonalbank<span class="sep">,,</span>Zürich<span class="sep">,</span>compliance_bank<span class="sep">,,</span>not_contacted<span class="sep">,</span>Banque cantonale ZH · domaine zkb.ch
+<span class="sep">,,</span>Compliance Officer<span class="sep">,</span>Banque Cantonale Vaudoise (BCV)<span class="sep">,,</span>Lausanne<span class="sep">,</span>compliance_bank<span class="sep">,,</span>not_contacted<span class="sep">,</span>Banque cantonale VD · domaine bcv.ch
+<span class="sep">,,</span>Compliance Officer<span class="sep">,</span>Pictet Group<span class="sep">,,</span>Genève<span class="sep">,</span>compliance_bank<span class="sep">,,</span>not_contacted<span class="sep">,</span>Banque privée · domaine group.pictet
+<span class="sep">,,</span>Compliance Officer<span class="sep">,</span>Sygnum Bank<span class="sep">,,</span>Zürich<span class="sep">,</span>compliance_bank<span class="sep">,,</span>not_contacted<span class="sep">,</span>Crypto bank · domaine sygnum.com
+<span class="sep">,,</span>Data Engineer<span class="sep">,</span>Swissquote<span class="sep">,,</span>Gland<span class="sep">,</span>data_eng_fintech<span class="sep">,,</span>not_contacted<span class="sep">,</span>Online broker · domaine swissquote.com
+<span class="sep">,,</span>Customs Manager<span class="sep">,</span>Schindler<span class="sep">,,</span>Ebikon<span class="sep">,</span>customs_manager<span class="sep">,,</span>not_contacted<span class="sep">,</span>Ascenseurs · industrie LU · exporte mondial
+...
+    </div>
+
+    <p style="font-size: 14px; color: var(--ink-mute); margin-top: 12px;"><strong>Ouvre dans Google Sheets :</strong> <a href="https://sheets.new" target="_blank">sheets.new</a> → File → Import → Upload → choisir le fichier → "Replace data". Ça importe les 34 lignes pré-remplies + les colonnes prêtes pour tes ajouts.</p>
+  </div>
+</section>
+
+<!-- TEMPLATES MESSAGES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Templates de messages</strong>
+      <span class="sep">/</span>
+      <span>Connection requests · InMails · Cold emails</span>
+    </div>
+    <h2>Les <span class="serif">6 templates</span> prêts à coller.</h2>
+    <p class="section-intro">Adapte chaque template avec <code>{prenom}</code>, <code>{entreprise}</code>, etc. avant envoi. Garde un ton humain, jamais salesy.</p>
+
+    <h3 style="margin-top: 24px; font-size: 17px;">Connection request (max 300 chars)</h3>
+    <div class="template-block connection">
+      <div class="template-label">JOUR 2 · Tous segments</div>
+      <h4>Pour 80-100 invitations · taux d'acceptance 30-40%</h4>
+      <div class="subject">Aucun sujet (connection request, pas d'email)</div>
+      <div class="template-body">Hi {prenom}, I'm building openswissdata.com — a Swiss federal data API for compliance officers (BAZG-authorized). Saw you work at {entreprise} and thought our perspectives might overlap. No pitch, just connecting. — Claude-Alain</div>
+    </div>
+
+    <h3 style="margin-top: 24px; font-size: 17px;">InMails (5-20 selon plan Premium · réserve aux profils hot)</h3>
+
+    <div class="template-block compliance">
+      <div class="template-label">SEGMENT · compliance_bank</div>
+      <h4>InMail compliance officer banque</h4>
+      <div class="subject"><strong>Sujet :</strong> 30s question on signed datasets for FINMA audits</div>
+      <div class="template-body">Hi {prenom},
+
+I built openswissdata.com — a publisher that delivers Swiss federal datasets (TARES, FINMA registry, NOGA) normalized, with Ed25519 signatures + RFC-3161 timestamps. The only private publisher with written BAZG and FINMA permissions on file.
+
+The use case I have in mind for {entreprise}: replacing manual scraping of xtares.admin.ch or parsing the 10 FINMA XLSX lists each release with a single signed bundle (797 CHF one-shot, 49 CHF/mo MCP).
+
+Worth a 15-min call to see if it fits? Or happy to send a sample bundle for you to evaluate.
+
+Best,
+Claude-Alain Martin
+contact@openswissdata.com
+openswissdata.com</div>
+    </div>
+
+    <div class="template-block data">
+      <div class="template-label">SEGMENT · data_eng_fintech</div>
+      <h4>InMail data engineer fintech</h4>
+      <div class="subject"><strong>Sujet :</strong> First Swiss MCP server — relevant for {entreprise}?</div>
+      <div class="template-body">Hi {prenom},
+
+I built the first Swiss MCP server (on Anthropic's official registry) — exposes 9 tools for TARES customs tariff, FINMA registry, NOGA classifications. Works with Claude Code, Cursor, Cline.
+
+The differentiator vs free alternatives: written commercial permission from BAZG + cryptographic signatures (Ed25519) on every dataset release.
+
+Stack: Hono + better-sqlite3 + Cloudflare R2 + Railway. Code public on GitHub.
+
+If your team at {entreprise} touches Swiss federal data, would you be open to a 20-min call? Or I can send a tech brief.
+
+Claude-Alain
+github.com/cammac-creator/openswissdata</div>
+    </div>
+
+    <div class="template-block customs">
+      <div class="template-label">SEGMENT · customs_manager</div>
+      <h4>InMail customs / trade compliance manager</h4>
+      <div class="subject"><strong>Sujet :</strong> TARES customs tariff API (BAZG-authorized) for {entreprise}</div>
+      <div class="template-body">Hi {prenom},
+
+Quick question — how does {entreprise} keep your customs tariff codes (TARES HS8) in sync with BAZG releases? Manual export of xtares.admin.ch + reformatting? Custom script?
+
+I built openswissdata.com, the first private publisher with written BAZG commercial permission. We deliver the full TARES schedule (~7500 HS8 codes) as Parquet/JSON/SQL, with Ed25519 signatures, updated automatically.
+
+299 CHF one-shot for the dataset, or 49 CHF/mo for the MCP integration (Claude Code, SAP GTS connector planned).
+
+Worth a 10-min call to compare with your current setup?
+
+Best,
+Claude-Alain Martin
+openswissdata.com</div>
+    </div>
+
+    <div class="template-block founder">
+      <div class="template-label">SEGMENT · fintech_founder</div>
+      <h4>InMail CTO / Founder fintech</h4>
+      <div class="subject"><strong>Sujet :</strong> Founder-to-founder : Swiss federal data infra</div>
+      <div class="template-body">Hi {prenom},
+
+Fellow Swiss founder reaching out — built openswissdata.com (signed Swiss federal datasets + first Swiss MCP server, BAZG-authorized) and IBANforge.com (IBAN/BIC validation API for PSPs).
+
+If {entreprise} touches FINMA registry, TARES, or industry classifications for KYC or product logic, my data infra might cut your engineering time. 100% bootstrapped, day job in industrial sales.
+
+15-min call to see if there's a fit? Or DM swap on what you're building.
+
+Claude-Alain
+openswissdata.com · ibanforge.com</div>
+    </div>
+
+    <div class="template-block erp">
+      <div class="template-label">SEGMENT · erp_integrator</div>
+      <h4>Cold email ERP consultant / partner program</h4>
+      <div class="subject"><strong>Sujet :</strong> Reseller margin on openswissdata bundle (50 CHF/license)</div>
+      <div class="template-body">Hi {prenom},
+
+I run openswissdata.com — Swiss federal datasets (TARES customs, NOGA, FINMA) normalized and signed Ed25519, plus an MCP server for AI agents. BAZG-authorized.
+
+I'm building a reseller program for SAP GTS / Abacus / Odoo consultants integrating Swiss federal data into client systems. 50 CHF margin per license sold (out of 797 CHF Bundle). No exclusivity required.
+
+If {entreprise} has clients on SAP GTS or Abacus needing fresh TARES/NOGA data, this is plug-and-play.
+
+15-min call to walk through the integration?
+
+Claude-Alain Martin
+openswissdata.com</div>
+    </div>
+  </div>
+</section>
+
+<!-- DOMAINES BANQUES POUR HUNTER -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Domaines & patterns email</strong>
+      <span class="sep">/</span>
+      <span>Pour enrichissement Hunter.io</span>
+    </div>
+    <h2>Banques CH · <span class="serif">domaines connus</span>.</h2>
+    <p class="section-intro">Quand tu auras les prenom + nom via Sales Nav, utilise <a href="https://hunter.io/email-pattern" target="_blank">Hunter.io Email Pattern</a> avec ces domaines pour générer les emails (gratuit jusqu'à 25 verifications/mois).</p>
+
+    <div class="domains-grid">
+      <div class="domain-row head">
+        <div>Entité</div><div>Domaine</div><div>Pattern email</div>
+      </div>
+      <div class="domain-row"><div class="domain-entity">Zürcher Kantonalbank (ZKB)</div><div class="domain-domain">zkb.ch</div><div class="domain-pattern">prenom.nom@zkb.ch</div></div>
+      <div class="domain-row"><div class="domain-entity">Banque Cantonale Vaudoise (BCV)</div><div class="domain-domain">bcv.ch</div><div class="domain-pattern">prenom.nom@bcv.ch</div></div>
+      <div class="domain-row"><div class="domain-entity">Banque Cantonale de Genève</div><div class="domain-domain">bcge.ch</div><div class="domain-pattern">prenom.nom@bcge.ch</div></div>
+      <div class="domain-row"><div class="domain-entity">Banque Cantonale du Jura</div><div class="domain-domain">bcj.ch</div><div class="domain-pattern">prenom.nom@bcj.ch</div></div>
+      <div class="domain-row"><div class="domain-entity">Banque Cantonale Neuchâteloise</div><div class="domain-domain">bcn.ch</div><div class="domain-pattern">prenom.nom@bcn.ch</div></div>
+      <div class="domain-row"><div class="domain-entity">Banque Cantonale du Valais</div><div class="domain-domain">bcvs.ch</div><div class="domain-pattern">prenom.nom@bcvs.ch</div></div>
+      <div class="domain-row"><div class="domain-entity">Banca dello Stato TI</div><div class="domain-domain">bancastato.ch</div><div class="domain-pattern">prenom.nom@bancastato.ch</div></div>
+      <div class="domain-row"><div class="domain-entity">Pictet Group</div><div class="domain-domain">group.pictet</div><div class="domain-pattern">prenom.nom@group.pictet</div></div>
+      <div class="domain-row"><div class="domain-entity">Lombard Odier</div><div class="domain-domain">lombardodier.com</div><div class="domain-pattern">prenom.nom@lombardodier.com</div></div>
+      <div class="domain-row"><div class="domain-entity">Julius Bär</div><div class="domain-domain">juliusbaer.com</div><div class="domain-pattern">prenom.nom@juliusbaer.com</div></div>
+      <div class="domain-row"><div class="domain-entity">Sygnum Bank</div><div class="domain-domain">sygnum.com</div><div class="domain-pattern">prenom.nom@sygnum.com</div></div>
+      <div class="domain-row"><div class="domain-entity">SEBA / AMINA Bank</div><div class="domain-domain">amina.com</div><div class="domain-pattern">prenom.nom@amina.com</div></div>
+      <div class="domain-row"><div class="domain-entity">Yapeal</div><div class="domain-domain">yapeal.ch</div><div class="domain-pattern">prenom.nom@yapeal.ch</div></div>
+      <div class="domain-row"><div class="domain-entity">Alpian</div><div class="domain-domain">alpian.com</div><div class="domain-pattern">prenom.nom@alpian.com</div></div>
+      <div class="domain-row"><div class="domain-entity">Swissquote</div><div class="domain-domain">swissquote.com</div><div class="domain-pattern">prenom.nom@swissquote.com</div></div>
+      <div class="domain-row"><div class="domain-entity">SwissBorg</div><div class="domain-domain">swissborg.com</div><div class="domain-pattern">prenom.nom@swissborg.com</div></div>
+      <div class="domain-row"><div class="domain-entity">UBS</div><div class="domain-domain">ubs.com</div><div class="domain-pattern">prenom.nom@ubs.com</div></div>
+      <div class="domain-row"><div class="domain-entity">Big 4 (KPMG/PwC/Deloitte/EY)</div><div class="domain-domain">kpmg.ch · pwc.ch · deloitte.ch · ey.com</div><div class="domain-pattern">prenom.nom@*</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOW DÉTAILLÉ -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Workflow exact d'extraction</strong>
+      <span class="sep">/</span>
+      <span>Pour chaque recherche · 30 min</span>
+    </div>
+    <h2>La <span class="serif">méthode</span> en 7 étapes.</h2>
+
+    <ol style="font-size: 14px; line-height: 1.8; color: var(--ink-soft); max-width: 64ch;">
+      <li>Clique le bouton <strong>"→ Lancer"</strong> de la recherche choisie ci-dessus. La page LinkedIn s'ouvre avec les filtres pré-appliqués.</li>
+      <li>Affine les filtres manuellement dans l'UI LinkedIn (Industry, Location, Connection Level — tu peux ajouter "2nd" pour augmenter le taux d'acceptance).</li>
+      <li>Trie par <strong>"Most Relevant"</strong> (par défaut).</li>
+      <li>Pour les <strong>50 premiers profils pertinents</strong> : <strong>Cmd+Click</strong> chaque profil → ouvre dans un nouvel onglet. Ça te fait 10-20 onglets en parallèle.</li>
+      <li>Pour chaque onglet ouvert, copie dans ton CSV : <code>prenom</code>, <code>nom</code>, <code>titre_poste</code>, <code>entreprise</code>, <code>linkedin_url</code> (clic droit dans la barre d'adresse → copier), <code>ville</code>.</li>
+      <li>Mets <code>segment = compliance_bank</code> (ou autre selon ta recherche) et <code>statut = not_contacted</code>.</li>
+      <li>Skip les profils sans entreprise pertinente, juniors (intern, assistant), anonymes, ou déjà tes connexions 1st degree.</li>
+    </ol>
+
+    <p style="font-size: 14px; color: var(--ink-mute); margin-top: 16px;"><strong>Astuce vitesse :</strong> garde la page de résultats LinkedIn dans un onglet (pour ne pas perdre la liste), et fais 10 onglets de profils avant de tout remplir dans le CSV.</p>
+  </div>
+</section>
+
+<!-- PIÈGES -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Pièges à éviter</strong>
+      <span class="sep">/</span>
+      <span>5 erreurs qui peuvent t'éjecter</span>
+    </div>
+    <h2>Les <span class="serif">5 erreurs</span> à éviter.</h2>
+
+    <div class="pitfalls">
+      <h3>⚠️ Ne fais PAS</h3>
+      <ul>
+        <li><strong>Cliquer "Connect" pendant l'extraction</strong> — Tu veux d'abord avoir la liste complète et prioriser. Les connections sont l'étape Jour 2.</li>
+        <li><strong>Visiter > 100 profils en 1 heure</strong> — LinkedIn peut flag "bot-like behavior" et limiter ton compte. Fais des pauses de 10 min entre chaque recherche.</li>
+        <li><strong>Utiliser des extensions Chrome de scraping (Phantom, Apollo, etc.)</strong> — ToS LinkedIn explicitement interdit. Ban garanti.</li>
+        <li><strong>Envoyer des InMails sans personnalisation</strong> — LinkedIn pénalise les InMails non-engageants. Reformule chaque template avec contexte spécifique au prospect (récent post, son employeur, etc.).</li>
+        <li><strong>Envoyer plus de 50 connection requests par jour</strong> — Au-delà, LinkedIn limite ou suspend. Reste sous 50.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN 3 JOURS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">
+      <strong>Le plan 3 jours</strong>
+      <span class="sep">/</span>
+      <span>Étalé · sans burnout</span>
+    </div>
+    <h2>Le <span class="serif">calendrier</span>.</h2>
+
+    <div class="searches-grid">
+      <div class="search-card">
+        <div class="search-head">
+          <div class="search-num">J1</div>
+          <div class="search-title">
+            <h3>Aujourd'hui (mardi 12) — Extraction (2h)</h3>
+            <div class="search-title-sub">Sales Nav + CSV</div>
+          </div>
+        </div>
+        <div class="search-filters">
+          <div class="filter-row">
+            <div class="filter-label">Action 1</div>
+            <div class="filter-value">Recherche 1 (compliance bank) — 30 min — 50 prospects</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Action 2</div>
+            <div class="filter-value">Recherche 2 (data eng) — 30 min — 50 prospects</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Action 3</div>
+            <div class="filter-value">Recherche 3 (customs) — 20 min — 30 prospects</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Action 4</div>
+            <div class="filter-value">Recherche 4 (founders) — 30 min — 50 prospects</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Action 5</div>
+            <div class="filter-value">Recherche 5 (ERP) — 20 min — 30 prospects</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-card">
+        <div class="search-head">
+          <div class="search-num">J2</div>
+          <div class="search-title">
+            <h3>Demain (mercredi 13) — Enrichissement (1h30)</h3>
+            <div class="search-title-sub">Hunter + Connection requests</div>
+          </div>
+        </div>
+        <div class="search-filters">
+          <div class="filter-row">
+            <div class="filter-label">Action 1</div>
+            <div class="filter-value">Hunter.io pattern email pour les 50 hot prospects (gratuit 25 verifs/mois)</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Action 2</div>
+            <div class="filter-value">80-100 connection requests avec note personnalisée (template ci-dessus)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-card">
+        <div class="search-head">
+          <div class="search-num">J3</div>
+          <div class="search-title">
+            <h3>Jeudi 14 — Contact direct (2h)</h3>
+            <div class="search-title-sub">InMails + cold emails</div>
+          </div>
+        </div>
+        <div class="search-filters">
+          <div class="filter-row">
+            <div class="filter-label">Action 1</div>
+            <div class="filter-value">10-20 InMails ciblés (compliance + founders les plus chauds)</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Action 2</div>
+            <div class="filter-value">30-50 cold emails depuis <code>team@openswissdata.com</code> (templates ci-dessus)</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-label">Action 3</div>
+            <div class="filter-value">Désactive l'auto-renew Premium si tu ne veux pas continuer à 50 USD/mois</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VERDICT -->
+<section>
+  <div class="container">
+    <div class="verdict">
+      <h3>🎯 ROI attendu sur 3 jours</h3>
+      <p>
+        <strong class="verdict-yes">À la fin du J3 :</strong> ~210 prospects extraits, ~30 connexions LinkedIn acceptées, ~5 InMails replies + ~5 cold email replies = <strong>10-15 conversations qualifiées</strong>. Sur 30 jours : <strong>1-3 ventes potentielles</strong> (Bundle 797 CHF + MCP 49/mo) + 20-50 nouveaux followers sur le profil + page entreprise.
+      </p>
+      <p>
+        <strong class="verdict-no">Si tu ne fais rien :</strong> tu paies 50 USD pour rien. Le Premium se renouvelle. Ton réseau ne grandit pas. Tes ICP restent froids.
+      </p>
+      <p style="margin-top: 18px;">
+        <strong>Action immédiate :</strong> ouvre le CSV sur ton Desktop, clique sur <strong>Recherche 1 (Compliance Officers)</strong> ci-dessus, et lance 30 min de focus pour les 50 premiers prospects. Le reste suivra.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="margin-bottom: 8px;"><strong style="color: var(--ink);">openswissdata · plan Sales Navigator 2026-05-12</strong></p>
+    <p style="margin: 0;">
+      Préparé pour Claude-Alain Martin (compte LinkedIn perso, 429 connexions, Premium expire 2026-05-15). CSV pré-rempli avec 34 entreprises CH cibles disponible sur <code>~/Desktop/linkedin-prospects-sales-nav.csv</code>. 6 templates messages prêts à coller. Templates anglais (cohérent avec ICP B2B fintech/compliance CH).
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
