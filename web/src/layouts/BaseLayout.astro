@@ -13,6 +13,7 @@ interface Props {
    * Shape: { name, description, price, priceCurrency, sku, ... }
    */
   productJsonLd?: Record<string, unknown>;
+  datasetJsonLd?: Record<string, unknown>;
   /** When true, emits <meta name="robots" content="noindex,nofollow">. */
   noindex?: boolean;
   /**
@@ -22,7 +23,7 @@ interface Props {
   monolingual?: boolean;
 }
 
-const { title, description, image = "/og-default.png", productJsonLd, noindex = false, monolingual = false } = Astro.props;
+const { title, description, image = "/og-default.png", productJsonLd, datasetJsonLd, noindex = false, monolingual = false } = Astro.props;
 const lang = getLangFromPath(Astro.url.pathname);
 const htmlLang = lang === "de" ? "de-CH" : lang === "fr" ? "fr-CH" : "en";
 
@@ -118,6 +119,10 @@ const orgDescription = lang === "de"
 
     {productJsonLd && (
       <script type="application/ld+json" set:html={JSON.stringify(productJsonLd)} />
+    )}
+
+    {datasetJsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(datasetJsonLd)} />
     )}
 
     {Astro.url.hostname === "www.openswissdata.com" && (

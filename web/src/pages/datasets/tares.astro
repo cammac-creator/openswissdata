@@ -4,6 +4,31 @@ import HSLookup from "../../components/HSLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
 import ProductFaq from "../../components/ProductFaq.astro";
 
+const datasetJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  name: "TARES — Swiss Customs Tariff Schedule (normalized)",
+  description:
+    "Complete Swiss customs tariff schedule (TARES) with ~7,500 HS8 codes, 4-language designations (DE/FR/IT/EN), MFN duties, 30+ preferential regimes (EU/EFTA/UK/China/Japan/Korea…), ZCO exemption codes. Sourced from BAZG (Swiss Federal Customs) with written commercial permission (April 2026). Multi-format distribution (CSV/JSON/Parquet/SQL). Ed25519-signed releases with RFC-3161 timestamps.",
+  url: "https://www.openswissdata.com/datasets/tares",
+  identifier: "openswissdata:tares",
+  license: "https://www.openswissdata.com/legal/cgv",
+  creator: { "@type": "Organization", name: "openswissdata", url: "https://www.openswissdata.com" },
+  publisher: { "@type": "Organization", name: "openswissdata" },
+  isBasedOn: { "@type": "Dataset", name: "TARES (BAZG official)", url: "https://xtares.admin.ch/" },
+  keywords: ["TARES", "Swiss customs", "customs tariff", "HS8 codes", "BAZG", "import", "export", "MFN duty", "preferential tariff", "trade compliance", "Switzerland", "douane"],
+  spatialCoverage: { "@type": "Place", name: "Switzerland", geo: { "@type": "GeoCoordinates", addressCountry: "CH" } },
+  temporalCoverage: "2024/..",
+  isAccessibleForFree: false,
+  variableMeasured: ["HS8 code", "Multilingual designation (DE/FR/IT/EN)", "MFN duty rate", "Preferential tariff regimes", "ZCO exemption codes"],
+  distribution: [
+    { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: "https://www.openswissdata.com/datasets/tares" },
+    { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: "https://www.openswissdata.com/datasets/tares" },
+    { "@type": "DataDownload", encodingFormat: "application/vnd.apache.parquet", contentUrl: "https://www.openswissdata.com/datasets/tares" },
+    { "@type": "DataDownload", encodingFormat: "application/sql", contentUrl: "https://www.openswissdata.com/datasets/tares" },
+  ],
+};
+
 const productJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
@@ -47,6 +72,7 @@ const productJsonLd = {
   description="Tarif douanier suisse complet : ~7 500 codes HS8 actuels, désignations DE/FR/IT/EN, droits MFN, 30+ régimes préférentiels (UE/AELE/UK/Chine/Japon…), codes ZCO d'allègement. JSON / Parquet / SQL. 299 CHF one-shot."
   image="/og-tares.png"
   productJsonLd={productJsonLd}
+  datasetJsonLd={datasetJsonLd}
 >
 <div class="bg-grid"></div>
 

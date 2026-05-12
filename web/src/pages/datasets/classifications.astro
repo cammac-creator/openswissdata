@@ -4,6 +4,35 @@ import ClassificationsLookup from "../../components/ClassificationsLookup.astro"
 import TrustStrip from "../../components/TrustStrip.astro";
 import ProductFaq from "../../components/ProductFaq.astro";
 
+const datasetJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  name: "Swiss Industry Classifications — NOGA 2008/2025 + NACE Rev 2/2.1 + ISIC Rev 4 with cross-walks",
+  description:
+    "Unified Swiss industry classification reference: NOGA 2008 (BFS/OFS), NOGA 2025 (NACE-aligned), NACE Rev 2 (EU), NACE Rev 2.1 (EU 2025), ISIC Rev 4 (UN). Bidirectional cross-walks between all 5 nomenclatures. Multilingual labels (DE/FR/IT/EN). NOGA-NAICS cross-walks included. Multi-format (CSV/JSON/Parquet/SQL).",
+  url: "https://www.openswissdata.com/datasets/classifications",
+  identifier: "openswissdata:classifications",
+  license: "https://www.openswissdata.com/legal/cgv",
+  creator: { "@type": "Organization", name: "openswissdata", url: "https://www.openswissdata.com" },
+  publisher: { "@type": "Organization", name: "openswissdata" },
+  isBasedOn: [
+    { "@type": "Dataset", name: "NOGA 2025 (BFS)", url: "https://www.i14y.admin.ch/" },
+    { "@type": "Dataset", name: "NACE Rev 2.1 (Eurostat)", url: "https://ec.europa.eu/eurostat/web/nace" },
+    { "@type": "Dataset", name: "ISIC Rev 4 (UN)", url: "https://unstats.un.org/unsd/classifications/Econ/isic" },
+  ],
+  keywords: ["NOGA 2008", "NOGA 2025", "NACE Rev 2", "NACE Rev 2.1", "ISIC Rev 4", "industry classification", "economic statistics", "Switzerland", "OFS", "BFS", "Eurostat", "cross-walk", "NACE EU"],
+  spatialCoverage: { "@type": "Place", name: "Switzerland", geo: { "@type": "GeoCoordinates", addressCountry: "CH" } },
+  temporalCoverage: "2008/..",
+  isAccessibleForFree: false,
+  variableMeasured: ["NOGA 2008 code", "NOGA 2025 code", "NACE Rev 2 code", "NACE Rev 2.1 code", "ISIC Rev 4 code", "Multilingual labels (DE/FR/IT/EN)", "Bidirectional cross-walks"],
+  distribution: [
+    { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: "https://www.openswissdata.com/datasets/classifications" },
+    { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: "https://www.openswissdata.com/datasets/classifications" },
+    { "@type": "DataDownload", encodingFormat: "application/vnd.apache.parquet", contentUrl: "https://www.openswissdata.com/datasets/classifications" },
+    { "@type": "DataDownload", encodingFormat: "application/sql", contentUrl: "https://www.openswissdata.com/datasets/classifications" },
+  ],
+};
+
 const productJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
@@ -47,6 +76,7 @@ const productJsonLd = {
   description="5 classifications d'activités économiques unifiées : NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Cross-walks bidirectionnels, 4 langues. JSON / Parquet / SQL. 399 CHF one-shot."
   image="/og-classifications.png"
   productJsonLd={productJsonLd}
+  datasetJsonLd={datasetJsonLd}
 >
 <div class="bg-grid"></div>
 
