@@ -28,6 +28,7 @@ data/classifications/classifications-2026.04.29-test-work/*
 .DS_Store
 permissions-emails/
 coverage/
+docs/internal/
 *.log
 # Canary report is regenerated each run — only the baseline is checked in.
 etl/canary-report.json
