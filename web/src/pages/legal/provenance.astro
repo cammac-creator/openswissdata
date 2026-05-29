@@ -4,8 +4,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 const lastUpdated = new Date().toISOString().split("T")[0];
 ---
 <BaseLayout
-  title="Provenance & moat juridique — openswissdata.com"
-  description="Comment openswissdata garantit la provenance des données : permission BAZG, manifest signé Ed25519, horodatage RFC-3161, conformité LCD."
+  title="Provenance & chaîne de droits — openswissdata.com"
+  description="Comment openswissdata garantit la provenance des données : permissions officielles BAZG & FINMA, manifest signé Ed25519, horodatage RFC-3161, réutilisation des œuvres officielles (LDA art. 5)."
 >
   <div class="bg-grid"></div>
   <section class="legal-page">
@@ -15,16 +15,16 @@ const lastUpdated = new Date().toISOString().split("T")[0];
       <a href="/" class="hover:underline">Accueil</a> · <a href="/legal/cgv" class="hover:underline">Légal</a> · <span>Provenance</span>
     </nav>
 
-    <h1 class="text-3xl font-bold mb-2">Provenance &amp; moat juridique</h1>
-    <p class="text-sm text-slate-500 mb-8">Version 1.1 · Dernière mise à jour : {lastUpdated}</p>
+    <h1 class="text-3xl font-bold mb-2">Provenance &amp; chaîne de droits</h1>
+    <p class="text-sm text-slate-500 mb-8">Version 1.2 · Dernière mise à jour : {lastUpdated}</p>
 
     <p class="lead text-lg">
-      Cette page explique <strong>pourquoi un acheteur d'openswissdata est juridiquement mieux protégé qu'un consommateur de données scrappées</strong>, et <strong>comment vérifier techniquement la provenance</strong> de chaque ZIP livré.
+      Cette page explique <strong>quelle chaîne de droits documentée accompagne chaque livraison</strong> (permissions officielles + provenance signée), et <strong>comment vérifier techniquement la provenance</strong> de chaque ZIP livré.
     </p>
 
-    <h2 class="text-2xl font-semibold mt-10 mb-3">1. Le moat juridique en une phrase</h2>
+    <h2 class="text-2xl font-semibold mt-10 mb-3">1. Ce que vous achetez, en une phrase</h2>
     <p>
-      openswissdata ne vend pas les données — elles sont publiques. Nous vendons la <strong>chaîne de droits documentée</strong> qui permet à un acheteur professionnel de les <em>commercialiser, intégrer dans un produit, ou citer en audit</em> sans s'exposer à un risque de droit suisse de la concurrence déloyale (LCD art. 5).
+      openswissdata ne vend pas les données — elles sont publiques. Nous vendons le <strong>travail de normalisation et la chaîne de droits documentée</strong> (permissions officielles écrites + provenance signée) qui permet à un acheteur professionnel de les <em>commercialiser, intégrer dans un produit, ou citer en audit</em> en sachant exactement d'où elles viennent et sur quelle base elles sont réutilisables.
     </p>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">2. Permissions commerciales et statut</h2>
@@ -43,17 +43,17 @@ const lastUpdated = new Date().toISOString().split("T")[0];
       Pour le détail complet des sources, des relances et des engagements de takedown, voir <a href="/compliance" class="text-indigo-600 hover:underline">/compliance</a>.
     </p>
 
-    <h2 class="text-2xl font-semibold mt-10 mb-3">3. Pourquoi le scraping ne remplace pas l'achat</h2>
+    <h2 class="text-2xl font-semibold mt-10 mb-3">3. Pourquoi l'achat plutôt que le scraping</h2>
     <p>
-      La <strong>Loi fédérale contre la concurrence déloyale (LCD), article 5</strong>, sanctionne <em>« l'exploitation sans droit du résultat du travail d'autrui »</em>. La jurisprudence suisse a appliqué cet article au scraping commercial agressif lorsque le résultat du travail (mise en forme, normalisation, vérification) est repris à des fins lucratives sans accord du producteur originel.
+      Les données sources sont publiques : vous pouvez les récupérer vous-même. Ce que vous achetez avec openswissdata, c'est de ne pas avoir à le faire — et de disposer d'une trace de provenance vérifiable.
     </p>
     <p>
       Concrètement :
     </p>
     <ul class="list-disc pl-6">
-      <li>Un développeur peut <strong>scraper le BAZG, le BFS, la FINMA pour son usage personnel ou interne</strong> sans risque significatif.</li>
-      <li>Une entreprise qui <strong>commercialise un produit alimenté par ces données scrappées</strong> s'expose à un risque LCD — surtout si elle redistribue les données telles quelles.</li>
-      <li>Un acquéreur d'openswissdata <strong>achète une licence claire</strong> avec chaîne de droits documentée. Cela élimine le risque LCD côté acquéreur, car notre permission BAZG agit comme une licence en chaîne.</li>
+      <li><strong>Le temps.</strong> Parser et normaliser les fichiers officiels bruts (formats qui changent sans prévenir, multilingue, régimes concaténés) représente plusieurs jours-homme par release, à maintenir dans la durée. On l'absorbe pour vous.</li>
+      <li><strong>La provenance.</strong> Chaque livraison référence sa source officielle, est signée Ed25519 et horodatée — utile pour un audit ou une revue interne, là où une donnée scrappée n'a aucune traçabilité.</li>
+      <li><strong>Les permissions.</strong> Nous documentons les permissions commerciales écrites obtenues (BAZG, FINMA) et la base de réutilisation des œuvres officielles (LDA art. 5) pour l'OFS. Vous savez sur quelle base la donnée est republiée.</li>
     </ul>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">4. Manifest signé Ed25519 + horodatage RFC-3161</h2>

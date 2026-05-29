@@ -1,0 +1,278 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Page tarifs canonique (abonnement-first). Capte l'intention commerciale
+// "openswissdata pricing / tarif API données suisses / Swiss data MCP pricing".
+// Pro 49/mois est câblé en self-serve (Stripe mcp_standalone). Business/Enterprise
+// passent par un contact tant que les produits Stripe récurrents ne sont pas créés.
+
+const faqs = [
+  {
+    q: "Quelle est la différence entre le free tier et un abonnement ?",
+    a: "Le free tier (0 CHF) donne 100 requêtes/jour par IP, sans compte, pour tester les 9 outils. L'abonnement Pro ajoute une clé persistante, un quota mensuel renouvelé et le support.",
+  },
+  {
+    q: "Que vend openswissdata exactement ?",
+    a: "Pas les données — elles sont publiques. On vend le travail : la normalisation multilingue, l'API/MCP prête à brancher (vous évitez de parser les fichiers officiels bruts), la chaîne de provenance signée Ed25519, et les mises à jour automatiques suivant les publications officielles.",
+  },
+  {
+    q: "Sur quoi reposent vos permissions ?",
+    a: "Permissions commerciales écrites officielles : BAZG (douanes, 2026-04-21) et FINMA (2026-05-06). La republication des données OFS/BFS s'appuie sur la liberté de réutilisation des œuvres officielles (LDA art. 5). Chaque livraison inclut un provenance.json vérifiable.",
+  },
+  {
+    q: "Puis-je annuler à tout moment ?",
+    a: "Oui. L'abonnement Pro est mensuel et annulable à tout moment depuis votre espace. Pas d'engagement de durée.",
+  },
+];
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Accueil", item: "https://www.openswissdata.com/" },
+    { "@type": "ListItem", position: 2, name: "Tarifs", item: "https://www.openswissdata.com/pricing/" },
+  ],
+};
+---
+<BaseLayout
+  title="Tarifs — openswissdata.com"
+  description="Tarifs openswissdata : API & MCP des données fédérales suisses (TARES, FINMA, NOGA). Free tier 100 req/jour, Pro 49 CHF/mois, Business 199 CHF/mois, Enterprise sur devis. Sans engagement."
+  monolingual={true}
+>
+  <div class="bg-grid"></div>
+
+  <section class="v4-hero ds-page">
+    <div class="container-v4">
+      <nav class="ds-breadcrumb">
+        <a href="/">accueil</a>
+        <span class="sep">·</span>
+        <span class="current">tarifs</span>
+      </nav>
+      <div class="v4-hero-grid">
+        <div>
+          <div class="v4-eyebrow reveal-v4">
+            <span>Tarifs</span>
+            <span style="opacity:.4">·</span>
+            <span class="check">Sans engagement</span>
+          </div>
+          <h1 class="v4-h1 reveal-v4" data-delay="1">
+            Branchez la donnée suisse.<br>
+            <span class="accent">Payez à l'usage.</span>
+          </h1>
+          <p class="v4-lede reveal-v4" data-delay="2">
+            Une API et un serveur MCP pour les données fédérales suisses — TARES (douanes), registre FINMA, classifications NOGA/NACE/ISIC. Commencez gratuitement, montez en charge quand vous en avez besoin. Pas de carte requise pour tester.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="v4-datasets ds-page">
+    <div class="container-v4">
+
+      <div class="pr-grid">
+        <!-- FREE -->
+        <div class="pr-card reveal-v4">
+          <div class="pr-tier">Free</div>
+          <div class="pr-price">0 CHF</div>
+          <p class="pr-sub">Pour tester et prototyper. Aucun compte requis.</p>
+          <ul class="pr-feats">
+            <li>✓ 100 requêtes/jour par IP</li>
+            <li>✓ Les 9 outils MCP</li>
+            <li>✓ JSON-RPC 2.0 standard</li>
+            <li class="dim">✗ Pas de quota mensuel garanti</li>
+            <li class="dim">✗ Pas de support</li>
+          </ul>
+          <a href="/mcp#install" class="v4-btn v4-btn-secondary pr-cta">Tester maintenant <span class="arrow">→</span></a>
+        </div>
+
+        <!-- PRO -->
+        <div class="pr-card pr-pop reveal-v4" data-delay="1">
+          <span class="pr-badge">populaire</span>
+          <div class="pr-tier" style="color:var(--accent);">Pro</div>
+          <div class="pr-price">49 CHF<small>/mois</small></div>
+          <p class="pr-sub">Pour les développeurs et workflows en production.</p>
+          <ul class="pr-feats">
+            <li>✓ 5 000 requêtes/mois</li>
+            <li>✓ Clé API persistante</li>
+            <li>✓ Les 9 outils MCP</li>
+            <li>✓ Annulable à tout moment</li>
+            <li>✓ Support email</li>
+          </ul>
+          <form method="POST" action="/api/checkout/start" style="margin:0;">
+            <input type="hidden" name="dataset_ids" value="mcp_standalone" />
+            <button type="submit" class="v4-btn v4-btn-primary pr-cta">S'abonner — 49 CHF/mois <span class="arrow">→</span></button>
+          </form>
+        </div>
+
+        <!-- BUSINESS -->
+        <div class="pr-card reveal-v4" data-delay="2">
+          <div class="pr-tier">Business</div>
+          <div class="pr-price">199 CHF<small>/mois</small></div>
+          <p class="pr-sub">Pour les fintechs et intégrateurs ERP à volume.</p>
+          <ul class="pr-feats">
+            <li>✓ 50 000 requêtes/mois</li>
+            <li>✓ Outils avancés (semantic search, classify, entity history)</li>
+            <li>✓ Embeddings multilingues DE/IT/EN</li>
+            <li>✓ Support prioritaire</li>
+            <li>✓ Annulable à tout moment</li>
+          </ul>
+          <a href="mailto:contact@openswissdata.com?subject=openswissdata%20Business%20(199%20CHF%2Fmois)" class="v4-btn v4-btn-secondary pr-cta">Nous contacter <span class="arrow">→</span></a>
+        </div>
+
+        <!-- ENTERPRISE -->
+        <div class="pr-card reveal-v4" data-delay="3">
+          <div class="pr-tier">Enterprise</div>
+          <div class="pr-price">Sur devis</div>
+          <p class="pr-sub">Pour les banques, asset managers et grands comptes.</p>
+          <ul class="pr-feats">
+            <li>✓ Volume illimité</li>
+            <li>✓ SLA contractuel</li>
+            <li>✓ Champs / formats sur-mesure</li>
+            <li>✓ Trust Center & due diligence</li>
+            <li>✓ Facturation annuelle</li>
+          </ul>
+          <a href="mailto:contact@openswissdata.com?subject=openswissdata%20Enterprise%20(devis)" class="v4-btn v4-btn-secondary pr-cta">Demander un devis <span class="arrow">→</span></a>
+        </div>
+      </div>
+
+      <p class="pr-note reveal-v4">
+        Besoin des datasets bruts (ZIP CSV / Parquet / JSON / SQL) en achat unique plutôt qu'en API ?
+        Voir <a href="/datasets/tares">TARES</a>, <a href="/datasets/classifications">Classifications</a>, <a href="/datasets/finma">FINMA</a> ou le <a href="/bundle">bundle 3-en-1</a>.
+      </p>
+
+      <section class="ds-section reveal-v4">
+        <h2 class="ds-section-title">Ce qu'on vend <span class="serif">vraiment</span></h2>
+        <p class="ds-section-intro">
+          Les données fédérales suisses sont publiques. Notre valeur n'est pas de les posséder — c'est de vous faire gagner du temps et de sécuriser leur usage :
+        </p>
+        <div class="ds-meta-grid">
+          <div class="ds-meta-card">
+            <div class="ds-meta-label">Commodité</div>
+            <div class="ds-meta-value">Une API/MCP prête à brancher, multilingue et normalisée — au lieu de parser des fichiers officiels bruts qui changent de format sans prévenir.</div>
+          </div>
+          <div class="ds-meta-card" data-delay="1">
+            <div class="ds-meta-label">Permissions officielles</div>
+            <div class="ds-meta-value">Permissions commerciales écrites BAZG et FINMA, et réutilisation des œuvres officielles (LDA art. 5) pour l'OFS. Vérifiables.</div>
+          </div>
+          <div class="ds-meta-card" data-delay="2">
+            <div class="ds-meta-label">Provenance signée</div>
+            <div class="ds-meta-value">Chaîne de provenance documentée, manifest signé Ed25519 + horodatage RFC-3161. Vous savez exactement d'où vient chaque donnée.</div>
+          </div>
+          <div class="ds-meta-card" data-delay="3">
+            <div class="ds-meta-label">Toujours à jour</div>
+            <div class="ds-meta-value">Mises à jour automatiques suivant les publications officielles, avec changelog. Pas de pipeline à maintenir de votre côté.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="ds-section reveal-v4">
+        <h2 class="ds-section-title">Questions <span class="serif">fréquentes</span></h2>
+        <div class="v4-faq-list">
+          {faqs.map((f) => (
+            <details class="v4-faq-item">
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <footer style="margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 12px; line-height: 1.6; color: var(--ink-mute);">
+        Les données proviennent de sources fédérales suisses officielles (BAZG, FINMA, OFS / BFS). openswissdata.com n'est affilié à aucune de ces autorités et ne se substitue pas à la consultation directe des portails officiels. Disclaimer « Ceci n'est pas une publication officielle » fourni avec chaque réponse.
+      </footer>
+    </div>
+  </section>
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+
+  <style>
+    .pr-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .pr-card {
+      background: var(--bg-card, #fff);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 24px 22px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .pr-pop { border: 2px solid var(--accent); }
+    .pr-badge {
+      position: absolute;
+      top: -10px;
+      right: 16px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .pr-tier {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      margin-bottom: 8px;
+    }
+    .pr-price {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+    .pr-price small {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-mute);
+    }
+    .pr-sub {
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.45;
+      margin: 0 0 16px;
+      min-height: 38px;
+    }
+    .pr-feats {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      flex: 1;
+    }
+    .pr-feats li { padding: 4px 0; line-height: 1.4; }
+    .pr-feats li.dim { color: var(--ink-mute); }
+    .pr-cta { width: 100%; justify-content: center; font-size: 13px; padding: 11px; }
+    .pr-note {
+      font-size: 13px;
+      color: var(--ink-soft);
+      text-align: center;
+      margin: 0 0 56px;
+    }
+    @media (max-width: 1024px) { .pr-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .pr-grid { grid-template-columns: 1fr; } }
+  </style>
+</BaseLayout>

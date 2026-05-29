@@ -4,8 +4,8 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 const lastUpdated = new Date().toISOString().split("T")[0];
 ---
 <BaseLayout
-  title="Provenienz & rechtlicher Moat — openswissdata.com"
-  description="Wie openswissdata die Provenienz der Daten garantiert: BAZG-Bewilligung, Ed25519-signiertes Manifest, RFC-3161 Zeitstempel, UWG-Konformität."
+  title="Provenienz & Rechtekette — openswissdata.com"
+  description="Wie openswissdata die Provenienz der Daten garantiert: offizielle Bewilligungen BAZG & FINMA, Ed25519-signiertes Manifest, RFC-3161 Zeitstempel, Wiederverwendung amtlicher Werke (URG Art. 5)."
 >
   <div class="bg-grid"></div>
   <section class="legal-page">
@@ -15,16 +15,16 @@ const lastUpdated = new Date().toISOString().split("T")[0];
       <a href="/de/" class="hover:underline">Startseite</a> · <a href="/de/legal/cgv" class="hover:underline">Rechtliches</a> · <span>Provenienz</span>
     </nav>
 
-    <h1 class="text-3xl font-bold mb-2">Provenienz &amp; rechtlicher Moat</h1>
-    <p class="text-sm text-slate-500 mb-8">Version 1.1 · Letzte Aktualisierung: {lastUpdated}</p>
+    <h1 class="text-3xl font-bold mb-2">Provenienz &amp; Rechtekette</h1>
+    <p class="text-sm text-slate-500 mb-8">Version 1.2 · Letzte Aktualisierung: {lastUpdated}</p>
 
     <p class="lead text-lg">
-      Diese Seite erklärt, <strong>warum ein Käufer von openswissdata rechtlich besser geschützt ist als ein Konsument gescrapter Daten</strong>, und <strong>wie die Provenienz</strong> jedes gelieferten ZIP <strong>technisch verifiziert</strong> werden kann.
+      Diese Seite erklärt, <strong>welche dokumentierte Rechtekette jede Lieferung begleitet</strong> (offizielle Bewilligungen + signierte Provenienz), und <strong>wie die Provenienz</strong> jedes gelieferten ZIP <strong>technisch verifiziert</strong> werden kann.
     </p>
 
-    <h2 class="text-2xl font-semibold mt-10 mb-3">1. Der rechtliche Moat in einem Satz</h2>
+    <h2 class="text-2xl font-semibold mt-10 mb-3">1. Was Sie kaufen, in einem Satz</h2>
     <p>
-      openswissdata verkauft die Daten nicht — sie sind öffentlich. Wir verkaufen die <strong>dokumentierte Rechtekette</strong>, die einem professionellen Käufer ermöglicht, sie <em>zu vermarkten, in ein Produkt zu integrieren oder in einem Audit zu zitieren</em>, ohne sich einem Risiko des Schweizer Rechts gegen unlauteren Wettbewerb (UWG Art. 5) auszusetzen.
+      openswissdata verkauft die Daten nicht — sie sind öffentlich. Wir verkaufen die <strong>Normalisierungsarbeit und die dokumentierte Rechtekette</strong> (offizielle schriftliche Bewilligungen + signierte Provenienz), die einem professionellen Käufer ermöglicht, sie <em>zu vermarkten, in ein Produkt zu integrieren oder in einem Audit zu zitieren</em> — in dem Wissen, woher sie genau stammen und auf welcher Grundlage sie wiederverwendbar sind.
     </p>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">2. Kommerzielle Bewilligungen und Status</h2>
@@ -43,17 +43,17 @@ const lastUpdated = new Date().toISOString().split("T")[0];
       Für die vollständigen Details zu Quellen, Nachfassungen und Takedown-Verpflichtungen, siehe <a href="/de/compliance" class="text-indigo-600 hover:underline">/de/compliance</a>.
     </p>
 
-    <h2 class="text-2xl font-semibold mt-10 mb-3">3. Warum Scraping den Kauf nicht ersetzt</h2>
+    <h2 class="text-2xl font-semibold mt-10 mb-3">3. Warum kaufen statt scrapen</h2>
     <p>
-      Das <strong>Bundesgesetz gegen den unlauteren Wettbewerb (UWG), Artikel 5</strong>, sanktioniert <em>„die unrechtmässige Verwertung des Arbeitsergebnisses eines Dritten"</em>. Die Schweizer Rechtsprechung hat diesen Artikel auf aggressives kommerzielles Scraping angewendet, wenn das Arbeitsergebnis (Formatierung, Normalisierung, Verifizierung) ohne Einverständnis des Originalproduzenten zu Erwerbszwecken übernommen wird.
+      Die Quelldaten sind öffentlich: Sie können sie selbst beschaffen. Was Sie mit openswissdata kaufen, ist, es nicht tun zu müssen — und über einen nachvollziehbaren Provenienznachweis zu verfügen.
     </p>
     <p>
       Konkret:
     </p>
     <ul class="list-disc pl-6">
-      <li>Ein Entwickler kann <strong>BAZG, BFS, FINMA für seinen persönlichen oder internen Gebrauch scrapen</strong> ohne erhebliches Risiko.</li>
-      <li>Ein Unternehmen, das <strong>ein Produkt vermarktet, das mit diesen gescrapten Daten betrieben wird</strong>, setzt sich einem UWG-Risiko aus — vor allem, wenn es die Daten unverändert weitergibt.</li>
-      <li>Ein Käufer von openswissdata <strong>kauft eine klare Lizenz</strong> mit dokumentierter Rechtekette. Das eliminiert das UWG-Risiko auf der Käuferseite, da unsere BAZG-Bewilligung als Lizenz in der Kette wirkt.</li>
+      <li><strong>Zeit.</strong> Das Parsen und Normalisieren der amtlichen Rohdateien (Formate, die sich ohne Vorwarnung ändern, mehrsprachig, verkettete Regime) kostet mehrere Personentage pro Release und muss laufend gepflegt werden. Wir übernehmen das für Sie.</li>
+      <li><strong>Provenienz.</strong> Jede Lieferung referenziert ihre offizielle Quelle, ist Ed25519-signiert und zeitgestempelt — nützlich für ein Audit oder eine interne Prüfung, wo gescrapte Daten keinerlei Nachvollziehbarkeit bieten.</li>
+      <li><strong>Bewilligungen.</strong> Wir dokumentieren die erhaltenen schriftlichen kommerziellen Bewilligungen (BAZG, FINMA) und die Grundlage der Wiederverwendung amtlicher Werke (URG Art. 5) für das BFS. Sie wissen, auf welcher Grundlage die Daten republiziert werden.</li>
     </ul>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">4. Ed25519-signiertes Manifest + RFC-3161 Zeitstempel</h2>
