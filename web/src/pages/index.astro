@@ -338,6 +338,21 @@ import QuoteCarousel from "../components/QuoteCarousel.astro";
   </div>
 </section>
 
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    { "@type": "Question", name: "Qui sont vos sources ?", acceptedAnswer: { "@type": "Answer", text: "BAZG (douanes, permission commerciale écrite acquise le 2026-04-21 — Michael Beer, BAZG Tarifgrundlagen), FINMA (surveillance financière, permission écrite reçue le 2026-05-06 — Nadine Bucher, Communication FINMA), OFS / BFS (statistiques, demande de permission envoyée le 2026-04-17, en attente). Republication des données BFS fondée sur la liberté de réutilisation des œuvres officielles (LDA art. 5) avec politique publique de takedown sous 24 h. Toutes officielles, vérifiables." } },
+    { "@type": "Question", name: "C'est légal de revendre des données publiques ?", acceptedAnswer: { "@type": "Answer", text: "Oui. Nous ne vendons pas les données — elles sont publiques. Nous vendons le travail de normalisation, la chaîne de droits documentée, la signature cryptographique et les mises à jour." } },
+    { "@type": "Question", name: "À quelle fréquence c'est mis à jour ?", acceptedAnswer: { "@type": "Answer", text: "TARES et FINMA : delta hebdomadaire suivant les publications officielles, avec changelog 90 jours. Classifications : refresh annuel + révisions majeures (NOGA 2025, NACE 2.1)." } },
+    { "@type": "Question", name: "Que se passe-t-il si le format officiel change ?", acceptedAnswer: { "@type": "Answer", text: "On absorbe. Notre schéma est stable depuis le début, peu importe ce que fait le BAZG en interne. On surveille les sources amont en continu (canary quotidien sur les URLs et structures de fichier) — si une rupture force un changement de schéma chez vous, vous êtes prévenu par email et changelog dès qu'on la détecte, avec la date d'effet." } },
+    { "@type": "Question", name: "Comment je vérifie que le ZIP n'a pas été altéré ?", acceptedAnswer: { "@type": "Answer", text: "Chaque ZIP contient un fichier provenance.json avec hash SHA-256 + signature Ed25519 + horodatage RFC-3161. Vérification rapide en CLI avec openssl, à comparer au champ sha256 du provenance.json. Détails et clé publique sur la page Provenance." } },
+    { "@type": "Question", name: "C'est exploitable dans un ERP existant (SAP, Odoo, Sage) ?", acceptedAnswer: { "@type": "Answer", text: "Oui. Format Parquet, JSON et SQL (DuckDB / SQLite / Postgres dump). Les schémas sont tabulaires standards. Un dev senior intègre TARES dans un module SAP en 2-4h." } },
+    { "@type": "Question", name: "Que couvre exactement le refund 14 jours ?", acceptedAnswer: { "@type": "Answer", text: "Si dans les 14 jours après achat le dataset ne couvre pas votre besoin, on rembourse intégralement, sans condition. Une seule règle : ne pas redistribuer le ZIP ailleurs entre-temps (CGV §2bis)." } },
+    { "@type": "Question", name: "Vous faites du sur-mesure ?", acceptedAnswer: { "@type": "Answer", text: "Oui, pour les besoins enterprise : champs supplémentaires, formats spécifiques, SLA contractuel, intégration ERP dédiée. Email à contact@openswissdata.com avec votre cas d'usage et on revient avec un devis." } },
+  ],
+})} />
+
 <!-- ========== CTA FINAL ========== -->
 <section class="v4-cta-final">
   <div class="container-v4">

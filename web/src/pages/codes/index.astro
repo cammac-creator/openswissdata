@@ -35,6 +35,30 @@ for (const row of all) {
     childrenByCode[row.parent].push(row);
   }
 }
+
+const codesJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Accueil", item: "https://www.openswissdata.com/" },
+        { "@type": "ListItem", position: 2, name: "Codes NOGA 2025", item: "https://www.openswissdata.com/codes/" },
+      ],
+    },
+    {
+      "@type": "ItemList",
+      name: "Sections NOGA 2025",
+      numberOfItems: sections.length,
+      itemListElement: sections.map((s, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: `${s.code} — ${s.label_fr}`,
+        url: `https://www.openswissdata.com/codes/noga/${s.code}`,
+      })),
+    },
+  ],
+};
 ---
 <BaseLayout
   title="Tous les codes NOGA 2025 — Nomenclature suisse | openswissdata.com"
@@ -183,6 +207,8 @@ for (const row of all) {
       </footer>
     </div>
   </section>
+
+  <script type="application/ld+json" set:html={JSON.stringify(codesJsonLd)} />
 
   <style>
     .noga-tree {
