@@ -27,6 +27,7 @@ const blogHref = localizePath("/blog", lang);
     <nav class="v4-status-nav">
       <a href={`${homeHref}#datasets`}>{t("nav.datasets", lang)}</a>
       <a href={`${homeHref}#how`}>{t("nav.how", lang)}</a>
+      <a href="/pricing">{lang === "de" ? "Preise" : lang === "en" ? "Pricing" : "Tarifs"}</a>
       <a href={blogHref}>{t("nav.blog", lang)}</a>
     </nav>
     <LangSwitcher variant="compact" monolingual={monolingual} />
