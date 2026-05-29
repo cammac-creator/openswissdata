@@ -1,0 +1,159 @@
+---
+import { entitiesByType, typeCounts, loadFinma } from "../lib/finma-helpers";
+import { FINMA_STR, typeLabel } from "../lib/finma-i18n";
+import { localizePath, type Lang } from "../i18n/utils";
+
+interface Props { lang: Lang; searchUrl: string; }
+const { lang, searchUrl } = Astro.props as Props;
+
+const S = FINMA_STR[lang];
+const byType = entitiesByType();
+const counts = typeCounts();
+const total = loadFinma().length;
+const homeHref = localizePath("/", lang);
+const registryHref = localizePath("/finma/", lang);
+const entHref = (slug: string) => localizePath(`/finma/${slug}`, lang);
+
+const ORIGIN = "https://www.openswissdata.com";
+const indexJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: S.bcHome, item: `${ORIGIN}${homeHref}` },
+      { "@type": "ListItem", position: 2, name: S.bcRegistry, item: `${ORIGIN}${registryHref}` },
+    ]},
+    { "@type": "ItemList", name: "FINMA authorisation types", numberOfItems: counts.length,
+      itemListElement: counts.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: `${typeLabel(c.type, lang)} (${c.count})` })) },
+  ],
+};
+---
+<div class="bg-grid"></div>
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href={homeHref}>{S.bcHome}</a>
+      <span class="sep">·</span>
+      <span class="current">{S.bcRegistry}</span>
+    </nav>
+    <div class="v4-hero-grid">
+      <div>
+        <div class="v4-eyebrow reveal-v4">
+          <span>{S.idxEyebrow}</span>
+          <span style="opacity:.4">·</span>
+          <span class="check">FINMA</span>
+        </div>
+        <h1 class="v4-h1 reveal-v4" data-delay="1">{S.idxH1a}<br><span class="accent">{S.idxH1b}</span></h1>
+        <p class="v4-lede reveal-v4" data-delay="2">{S.idxLede}</p>
+      </div>
+      <div class="ds-price-box reveal-v4" data-delay="2">
+        <div class="ds-price-box-label">{S.bcRegistry}</div>
+        <div class="ds-price-box-amount" style="font-size: 36px;">{total}</div>
+        <div class="ds-price-box-renew">{lang === "de" ? "bewilligte Einträge" : lang === "en" ? "authorised entries" : "entrées autorisées"}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v4-datasets ds-page">
+  <div class="container-v4">
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow"><strong>{S.idxSearchTitle}</strong></div>
+      <h2 class="v4-section-h2">{S.idxSearchTitle} <span class="serif">{S.idxSearchEm}</span></h2>
+      <p class="v4-section-intro">{S.idxSearchIntro}</p>
+      <input type="search" id="finma-search" data-index-url={searchUrl} placeholder={S.idxSearchPlaceholder} autocomplete="off" spellcheck="false"
+        style="width: 100%; padding: 14px 18px; font-size: 16px; border: 1px solid var(--color-line); border-radius: 12px; background: white; font-family: var(--font-sans); margin-bottom: 16px;" />
+      <div id="finma-results" style="display: none; max-height: 480px; overflow-y: auto; border: 1px solid var(--color-line); border-radius: 12px; background: white;"></div>
+      <p id="finma-search-count" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow"><strong>{S.idxBrowseTitle}</strong></div>
+      <h2 class="v4-section-h2">{S.idxBrowseTitle} <span class="serif">{S.idxBrowseEm}</span></h2>
+      <p class="ds-section-intro">{S.idxBrowseIntro}</p>
+      <div class="finma-tree">
+        {counts.map(({ type, count }) => (
+          <details class="finma-group">
+            <summary>
+              <span class="finma-group-label">{typeLabel(type, lang)}</span>
+              <span class="finma-group-count">{count}</span>
+            </summary>
+            <ul class="finma-list">
+              {(byType.get(type) || []).map((e) => (
+                <li>
+                  <a href={entHref(e.slug)}>{e.name}</a>
+                  {e.city && <span class="finma-city">{e.city}</span>}
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <footer style="margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 12px; line-height: 1.6; color: var(--ink-mute);">
+      {S.footer}
+    </footer>
+  </div>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify(indexJsonLd)} />
+
+<script define:vars={{ L: { loading: S.idxLoading, noResult: S.idxNoResult } }}>
+  const input = document.getElementById("finma-search");
+  const results = document.getElementById("finma-results");
+  const countEl = document.getElementById("finma-search-count");
+  const indexUrl = input?.dataset.indexUrl || "/finma/search-index.json";
+  let idx = null, loading = null;
+  function load() {
+    if (idx) return Promise.resolve(idx);
+    if (loading) return loading;
+    countEl.textContent = L.loading;
+    loading = fetch(indexUrl).then((r) => r.json()).then((d) => { idx = d; countEl.textContent = ""; return d; })
+      .catch(() => { countEl.textContent = "⚠"; loading = null; return []; });
+    return loading;
+  }
+  function norm(s) { return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+  function render(matches) {
+    if (!matches.length) { results.style.display = "none"; countEl.textContent = L.noResult; return; }
+    results.style.display = "block";
+    results.innerHTML = matches.slice(0, 50).map((m) =>
+      `<div class="finma-result-item"><a href="${m.href}"><span class="finma-result-name">${m.name}</span><span class="finma-result-meta">${m.city || ""}</span></a></div>`).join("");
+    countEl.textContent = matches.length > 50 ? `${matches.length} / 50` : String(matches.length);
+  }
+  input?.addEventListener("focus", () => load(), { once: true });
+  input?.addEventListener("input", async (e) => {
+    const q = norm(e.target.value.trim());
+    if (q.length < 2) { results.style.display = "none"; countEl.textContent = ""; return; }
+    const data = await load();
+    const matches = data.filter((r) => norm(r.name).includes(q));
+    matches.sort((a, b) => {
+      const as = norm(a.name).startsWith(q) ? 0 : 1, bs = norm(b.name).startsWith(q) ? 0 : 1;
+      return as !== bs ? as - bs : a.name.localeCompare(b.name);
+    });
+    render(matches);
+  });
+</script>
+
+<style>
+  .finma-tree { display: flex; flex-direction: column; gap: 8px; }
+  .finma-group { background: white; border: 1px solid var(--color-line); border-radius: 12px; overflow: hidden; }
+  .finma-group > summary { padding: 16px 20px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 16px; transition: background .15s ease; }
+  .finma-group > summary:hover { background: var(--color-bg-alt); }
+  .finma-group > summary::-webkit-details-marker { display: none; }
+  .finma-group > summary::before { content: "+"; font-family: var(--font-mono); width: 18px; text-align: center; color: var(--color-ink-mute); font-size: 18px; line-height: 1; }
+  .finma-group[open] > summary::before { content: "−"; }
+  .finma-group-label { flex: 1; font-size: 14px; font-weight: 500; letter-spacing: .02em; color: var(--color-ink); }
+  .finma-group-count { font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-mute); }
+  .finma-list { list-style: none; padding: 4px 20px 18px 50px; margin: 0; border-top: 1px solid var(--color-line-soft); columns: 2; column-gap: 32px; }
+  .finma-list > li { padding: 4px 0; font-size: 13px; break-inside: avoid; }
+  .finma-list a { color: var(--color-ink); text-decoration: none; }
+  .finma-list a:hover { color: var(--color-accent); }
+  .finma-city { font-size: 11px; color: var(--color-ink-mute); margin-left: 8px; }
+  .finma-result-item { padding: 12px 18px; border-bottom: 1px solid var(--color-line-soft); }
+  .finma-result-item:last-child { border-bottom: none; }
+  .finma-result-item a { text-decoration: none; color: var(--color-ink); display: flex; gap: 14px; align-items: baseline; }
+  .finma-result-item:hover { background: var(--color-bg-alt); }
+  .finma-result-name { flex: 1; font-size: 14px; }
+  .finma-result-meta { font-size: 12px; color: var(--color-ink-mute); }
+  @media (max-width: 640px) { .finma-list { columns: 1; } }
+</style>

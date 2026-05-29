@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FinmaEntityPage from "../../components/FinmaEntityPage.astro";
+import { loadFinma, type FinmaEntity } from "../../lib/finma-helpers";
+import { finmaMeta } from "../../lib/finma-i18n";
+
+export async function getStaticPaths() {
+  return loadFinma().map((entity) => ({ params: { slug: entity.slug }, props: { entity } }));
+}
+
+const { entity } = Astro.props as { entity: FinmaEntity };
+const meta = finmaMeta(entity, "fr");
+---
+<BaseLayout title={meta.title} description={meta.description}>
+  <FinmaEntityPage entity={entity} lang="fr" />
+</BaseLayout>

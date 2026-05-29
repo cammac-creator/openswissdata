@@ -38,6 +38,8 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
           <a href={L("/datasets/finma")}>{t("footer.link_finma", lang)}</a>
           <a href={L("/bundle")}>{t("footer.link_bundle", lang)}</a>
           <a href="/pricing">{lang === "de" ? "Preise" : lang === "en" ? "Pricing" : "Tarifs"}</a>
+          <a href={L("/codes/")}>{lang === "de" ? "NOGA-Codes" : lang === "en" ? "NOGA codes" : "Codes NOGA"}</a>
+          <a href={L("/finma/")}>{lang === "de" ? "FINMA-Register" : lang === "en" ? "FINMA registry" : "Registre FINMA"}</a>
         </div>
         <div>
           <div class="footer-col-title">{t("footer.col_account", lang)}</div>
