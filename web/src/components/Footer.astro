@@ -37,6 +37,7 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
           <a href={L("/datasets/classifications")}>{t("footer.link_classifications", lang)}</a>
           <a href={L("/datasets/finma")}>{t("footer.link_finma", lang)}</a>
           <a href={L("/bundle")}>{t("footer.link_bundle", lang)}</a>
+          <a href="/pricing">{lang === "de" ? "Preise" : lang === "en" ? "Pricing" : "Tarifs"}</a>
         </div>
         <div>
           <div class="footer-col-title">{t("footer.col_account", lang)}</div>
