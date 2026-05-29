@@ -1,0 +1,288 @@
+---
+import {
+  getAncestors,
+  getChildren,
+  getNeighbors,
+  getCrosswalksFor,
+  dottedCode,
+  type NogaRow,
+} from "../lib/noga-helpers";
+import { NOGA_STR, LEVEL_LABEL, labelFor, nogaExamples } from "../lib/noga-i18n";
+import { localizePath, type Lang } from "../i18n/utils";
+
+interface Props { row: NogaRow; lang: Lang; }
+const { row, lang } = Astro.props as Props;
+
+const S = NOGA_STR[lang];
+const LV = LEVEL_LABEL[lang];
+const dotted = dottedCode(row.code);
+const codeHref = (c: string) => localizePath(`/codes/noga/${c}`, lang);
+const codesHref = localizePath("/codes/", lang);
+const homeHref = localizePath("/", lang);
+const classificationsHref = localizePath("/datasets/classifications", lang);
+
+const ancestorsRaw = getAncestors(row.code);
+const childrenRaw = getChildren(row.code);
+const neighbors = getNeighbors(row.code, 8);
+const crosswalks = getCrosswalksFor(row.code);
+const examples = nogaExamples(row, lang);
+
+interface HierarchyRow { levelLabel: string; code: string; display: string; label: string; href: string; current: boolean; }
+const ancestorsBase: HierarchyRow[] = ancestorsRaw.map((a) => ({
+  levelLabel: LV[a.level] || a.level,
+  code: a.code,
+  display: a.level === "section" ? a.code : dottedCode(a.code),
+  label: labelFor(a, lang),
+  href: codeHref(a.code),
+  current: false,
+}));
+const currentRow: HierarchyRow = {
+  levelLabel: LV[row.level] || row.level,
+  code: row.code,
+  display: dotted,
+  label: labelFor(row, lang),
+  href: codeHref(row.code),
+  current: true,
+};
+const ancestors: HierarchyRow[] = [...ancestorsBase, currentRow];
+const children: HierarchyRow[] = childrenRaw.slice(0, 30).map((c) => ({
+  levelLabel: LV[c.level] || c.level,
+  code: c.code,
+  display: dottedCode(c.code),
+  label: labelFor(c, lang),
+  href: c.level === "subclass" ? "" : codeHref(c.code),
+  current: false,
+}));
+const childrenTotal = childrenRaw.length;
+
+interface CrosswalkRowFlat { standard: string; code: string; label: string; mapping_type: string; }
+const crosswalkRows: CrosswalkRowFlat[] = [];
+for (const cw of crosswalks) {
+  if (cw.nace_2_1) crosswalkRows.push({ standard: "NACE Rev 2.1", code: dottedCode(cw.nace_2_1), label: cw.nace_2_1_label_en || "—", mapping_type: cw.mapping_type });
+  if (cw.nace_2_0) crosswalkRows.push({ standard: "NACE Rev 2.0", code: dottedCode(cw.nace_2_0), label: cw.nace_2_0_label_en || "—", mapping_type: cw.mapping_type });
+  if (cw.isic_4) crosswalkRows.push({ standard: "ISIC Rev 4", code: cw.isic_4, label: cw.isic_4_label_en || "—", mapping_type: cw.mapping_type });
+  if (cw.noga_2008) crosswalkRows.push({ standard: "NOGA 2008", code: dottedCode(cw.noga_2008), label: cw.noga_2008_label_fr || "—", mapping_type: cw.mapping_type });
+}
+
+const ORIGIN = "https://www.openswissdata.com";
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "DefinedTerm",
+  "@id": `${ORIGIN}${codeHref(row.code)}`,
+  name: `NOGA ${dotted}`,
+  alternateName: [`NOGA ${dotted}`, row.code],
+  termCode: row.code,
+  description: labelFor(row, lang),
+  inDefinedTermSet: {
+    "@type": "DefinedTermSet",
+    name: "NOGA 2025",
+    url: S.srcUrl,
+  },
+  inLanguage: lang,
+};
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: S.bcHome, item: `${ORIGIN}${homeHref}` },
+    { "@type": "ListItem", position: 2, name: "NOGA 2025", item: `${ORIGIN}${codesHref}` },
+    { "@type": "ListItem", position: 3, name: `NOGA ${dotted}`, item: `${ORIGIN}${codeHref(row.code)}` },
+  ],
+};
+---
+<div class="bg-grid"></div>
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href={homeHref}>{S.bcHome}</a>
+      <span class="sep">·</span>
+      <a href={codesHref}>{S.bcCodes}</a>
+      <span class="sep">·</span>
+      <a href={codesHref}>{S.bcScheme}</a>
+      <span class="sep">·</span>
+      <span class="current">{dotted}</span>
+    </nav>
+
+    <div class="v4-hero-grid">
+      <div>
+        <div class="v4-eyebrow reveal-v4">
+          <span>NOGA 2025</span>
+          <span style="opacity:.4">·</span>
+          <span>{LV[row.level]}</span>
+        </div>
+        <h1 class="v4-h1 reveal-v4" data-delay="1">
+          <span style="display:block;font-family:var(--font-mono);font-size:.55em;color:var(--accent);font-weight:700;letter-spacing:.04em;margin-bottom:6px;">NOGA {dotted}</span>
+          {labelFor(row, lang)}
+        </h1>
+        <p class="v4-lede reveal-v4" data-delay="2" set:html={S.ledeHtml(classificationsHref)} />
+      </div>
+      <div class="ds-price-box reveal-v4" data-delay="2">
+        <div class="ds-price-box-label">{S.priceBoxLabel}</div>
+        <div class="ds-price-box-amount" style="font-size: 28px;">{LV[row.level]}</div>
+        <div class="ds-price-box-renew">{S.rawCode} <code style="font-family: var(--font-mono);">{row.code}</code></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v4-datasets ds-page">
+  <div class="container-v4">
+    <div class="ds-meta-grid">
+      <div class="ds-meta-card reveal">
+        <div class="ds-meta-label">{S.thDesignation}</div>
+        <div class="ds-meta-value">{labelFor(row, lang)}</div>
+      </div>
+      <div class="ds-meta-card reveal" data-delay="1">
+        <div class="ds-meta-label">Source · standard</div>
+        <div class="ds-meta-value">NOGA 2025 · OFS / BFS · 2026</div>
+      </div>
+    </div>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">{S.descTitle} <span class="serif">{S.descTitleEm}</span></h2>
+      <p class="ds-section-intro">{S.descIntro}</p>
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead><tr><th>{S.thLang}</th><th>{S.thDesignation}</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Français (fr)</strong></td><td>{row.label_fr || "—"}</td></tr>
+            <tr><td><strong>Deutsch (de)</strong></td><td>{row.label_de || "—"}</td></tr>
+            <tr><td><strong>Italiano (it)</strong></td><td>{row.label_it || "—"}</td></tr>
+            <tr><td><strong>English (en)</strong></td><td>{row.label_en || "—"}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {ancestors.length > 0 && (
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">{S.hierTitle} <span class="serif">{S.hierTitleEm}</span></h2>
+        <p class="ds-section-intro" set:html={S.hierIntro(dotted)} />
+        <div class="ds-table-wrap">
+          <table class="ds-table">
+            <thead><tr><th>{S.thLevel}</th><th>{S.thCode}</th><th>{S.thDesignation}</th></tr></thead>
+            <tbody>
+              {ancestors.map((a) => (
+                <tr class={a.current ? "current-hierarchy-row" : ""}>
+                  <td>{a.levelLabel}</td>
+                  <td class="mono"><a href={a.href}>{a.display}</a></td>
+                  <td class="dim">{a.label}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )}
+
+    {children.length > 0 && (
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">{S.subTitle} <span class="serif">{S.subTitleEm}</span></h2>
+        <p class="ds-section-intro">{S.subIntro(childrenTotal)}</p>
+        <div class="ds-table-wrap">
+          <table class="ds-table">
+            <thead><tr><th>{S.thLevel}</th><th>{S.thCode}</th><th>{S.thDesignation}</th></tr></thead>
+            <tbody>
+              {children.map((c) => (
+                <tr>
+                  <td>{c.levelLabel}</td>
+                  <td class="mono">
+                    {c.href && <a href={c.href}>{c.display}</a>}
+                    {!c.href && <span>{c.display}</span>}
+                  </td>
+                  <td class="dim">{c.label}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )}
+
+    {crosswalkRows.length > 0 && (
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">{S.cwTitle} <span class="serif">{S.cwTitleEm}</span></h2>
+        <p class="ds-section-intro">{S.cwIntro(dotted)}</p>
+        <div class="ds-table-wrap">
+          <table class="ds-table">
+            <thead><tr><th>{S.thStandard}</th><th>{S.thCode}</th><th>{S.thDesignation}</th><th>{S.thType}</th></tr></thead>
+            <tbody>
+              {crosswalkRows.map((cw) => (
+                <tr>
+                  <td>{cw.standard}</td>
+                  <td class="mono">{cw.code}</td>
+                  <td class="dim">{cw.label}</td>
+                  <td class="dim">{cw.mapping_type}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="ds-section-note">{S.cwNote}</p>
+      </section>
+    )}
+
+    {neighbors.length > 0 && (
+      <section class="ds-section reveal">
+        <h2 class="ds-section-title">{S.neighTitle} <span class="serif">{S.neighTitleEm}</span></h2>
+        <p class="ds-section-intro">{S.neighIntro(dotted)}</p>
+        <div class="ds-table-wrap">
+          <table class="ds-table">
+            <thead><tr><th>{S.thCode}</th><th>{S.thLevel}</th><th>{S.thDesignation}</th></tr></thead>
+            <tbody>
+              {neighbors.map((n) => (
+                <tr>
+                  <td class="mono"><a href={codeHref(n.code)}>{dottedCode(n.code)}</a></td>
+                  <td>{LV[n.level] || n.level}</td>
+                  <td class="dim">{labelFor(n, lang)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )}
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">{S.exTitle} <span class="serif">{S.exTitleEm}</span></h2>
+      <p class="ds-section-intro">{S.exIntro(dotted)}</p>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        {examples.map((ex) => (
+          <p style="margin: 0; font-size: 15px; line-height: 1.6; color: var(--color-ink-soft);">{ex}</p>
+        ))}
+      </div>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">{S.usedTitle} <span class="serif">{S.usedTitleEm}</span></h2>
+      <p class="ds-section-intro" set:html={S.usedIntro(dotted)} />
+      <ul style="font-size: 15px; line-height: 1.7; color: var(--color-ink-soft); padding-left: 20px; margin: 0;">
+        {S.usedList.map((li) => (<li set:html={li} />))}
+      </ul>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">{S.srcTitle} <span class="serif">{S.srcTitleEm}</span></h2>
+      <p class="ds-section-intro">{S.srcIntro}</p>
+      <p style="font-size: 15px; line-height: 1.6;">
+        <a href={S.srcUrl} target="_blank" rel="noopener">{S.srcLinkText}</a>
+      </p>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">{S.fullTitle} <span class="serif">{S.fullTitleEm}</span></h2>
+      <p class="ds-section-intro">{S.fullIntro}</p>
+      <a href={classificationsHref} style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; background: var(--color-ink); color: var(--color-bg); border-radius: 10px; text-decoration: none; font-weight: 500; font-size: 15px;">
+        {S.fullCta}
+        <span style="opacity:.7;">→</span>
+      </a>
+    </section>
+
+    <footer style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--color-line); font-size: 12px; line-height: 1.6; color: var(--color-ink-mute);">
+      {S.footer}
+    </footer>
+  </div>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+<script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />

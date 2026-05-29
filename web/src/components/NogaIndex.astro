@@ -1,0 +1,270 @@
+---
+import { getSections, getDivisionsBySection, loadNoga2025, dottedCode } from "../lib/noga-helpers";
+import { labelFor } from "../lib/noga-i18n";
+import { localizePath, type Lang } from "../i18n/utils";
+
+interface Props { lang: Lang; searchUrl: string; }
+const { lang, searchUrl } = Astro.props as Props;
+
+const sections = getSections();
+const all = loadNoga2025();
+const totalSeoCodes = all.filter((r) => r.level === "section" || r.level === "division" || r.level === "group" || r.level === "class").length;
+const totalAllCodes = all.length;
+const sectionsWithChildren = sections.map((s) => ({ section: s, divisions: getDivisionsBySection(s.code) }));
+const childrenByCode: Record<string, typeof all> = {};
+for (const row of all) {
+  if (row.parent) {
+    if (!childrenByCode[row.parent]) childrenByCode[row.parent] = [];
+    childrenByCode[row.parent].push(row);
+  }
+}
+
+const codeHref = (c: string) => localizePath(`/codes/noga/${c}`, lang);
+const classificationsHref = localizePath("/datasets/classifications", lang);
+const bundleHref = localizePath("/bundle", lang);
+const homeHref = localizePath("/", lang);
+const codesHref = localizePath("/codes/", lang);
+
+type S = {
+  bcCurrent: string; eyebrowRight: string; h1a: string; h1b: string;
+  lede: string; pbLabel: string; pbRenew: string;
+  searchEyebrow: string; searchTitle: string; searchTitleEm: string; searchIntro: string; searchPlaceholder: string;
+  hierEyebrow: string; hierTitle: string; hierTitleEm: string; hierIntro: string;
+  division: (n: number) => string; group: (n: number) => string;
+  dsEyebrow: string; dsTitle: string; dsTitleEm: string; dsIntro: string; ctaPrimary: string; ctaSecondary: string;
+  footer: string; loading: string; noResult: string; resultsN: (n: number) => string; resultsMore: (n: number) => string;
+};
+const STR: Record<Lang, S> = {
+  fr: {
+    bcCurrent: "codes NOGA", eyebrowRight: "OFS / BFS", h1a: "Tous les codes", h1b: "NOGA 2025.",
+    lede: `Nomenclature générale des activités économiques suisse, version 2025. <strong>${totalSeoCodes} codes</strong> indexés (sections, divisions, groupes, classes), avec leurs équivalents NACE 2.1 et ISIC Rev 4. Le dataset complet est inclus avec <a href="${classificationsHref}">Classifications (399 CHF)</a>.`,
+    pbLabel: "Codes indexés", pbRenew: "version officielle BFS 2025",
+    searchEyebrow: "Recherche", searchTitle: "Recherche", searchTitleEm: "rapide.", searchIntro: "Tapez un code (ex. 62.01), une activité (ex. « banque ») ou un mot-clé.", searchPlaceholder: "Code, mot-clé, désignation...",
+    hierEyebrow: "Hiérarchie", hierTitle: "Hiérarchie", hierTitleEm: "complète.", hierIntro: `NOGA 2025 est organisée en ${sections.length} sections (lettres A à V), subdivisées en divisions, groupes et classes.`,
+    division: (n) => `${n} division${n > 1 ? "s" : ""}`, group: (n) => `${n} groupe${n > 1 ? "s" : ""}`,
+    dsEyebrow: "Dataset complet", dsTitle: "Le", dsTitleEm: "dataset complet.", dsIntro: "Besoin de tous les codes (1 845 incluant les sous-classes), 5 nomenclatures alignées et cross-walks 5-way, en CSV / JSON / Parquet / SQL ?",
+    ctaPrimary: "Voir Classifications — 399 CHF", ctaSecondary: "Bundle 3-en-1 — 797 CHF",
+    footer: "Index généré à partir de la nomenclature NOGA 2025 publiée par l'Office fédéral de la statistique. openswissdata.com n'est pas affilié à l'OFS.",
+    loading: "Chargement de l'index…", noResult: "Aucun code ne correspond.", resultsN: (n) => `${n} résultat${n > 1 ? "s" : ""}`, resultsMore: (n) => `${n} résultats (50 affichés)`,
+  },
+  de: {
+    bcCurrent: "NOGA-Codes", eyebrowRight: "BFS", h1a: "Alle Codes", h1b: "NOGA 2025.",
+    lede: `Allgemeine Systematik der Wirtschaftszweige der Schweiz, Version 2025. <strong>${totalSeoCodes} Codes</strong> indexiert (Abschnitte, Abteilungen, Gruppen, Klassen), mit ihren Entsprechungen NACE 2.1 und ISIC Rev 4. Der vollständige Datensatz ist in <a href="${classificationsHref}">Klassifikationen (399 CHF)</a> enthalten.`,
+    pbLabel: "Indexierte Codes", pbRenew: "offizielle Fassung BFS 2025",
+    searchEyebrow: "Suche", searchTitle: "Schnelle", searchTitleEm: "Suche.", searchIntro: `Geben Sie einen Code (z. B. 62.01), eine Tätigkeit (z. B. „Bank") oder ein Stichwort ein.`, searchPlaceholder: "Code, Stichwort, Bezeichnung...",
+    hierEyebrow: "Hierarchie", hierTitle: "Vollständige", hierTitleEm: "Hierarchie.", hierIntro: `NOGA 2025 ist in ${sections.length} Abschnitte (Buchstaben A bis V) gegliedert, unterteilt in Abteilungen, Gruppen und Klassen.`,
+    division: (n) => `${n} Abteilung${n > 1 ? "en" : ""}`, group: (n) => `${n} Gruppe${n > 1 ? "n" : ""}`,
+    dsEyebrow: "Vollständiger Datensatz", dsTitle: "Der", dsTitleEm: "vollständige Datensatz.", dsIntro: "Benötigen Sie alle Codes (1 845 inkl. Unterklassen), 5 abgeglichene Systematiken und 5-Wege-Cross-Walks in CSV / JSON / Parquet / SQL?",
+    ctaPrimary: "Klassifikationen ansehen — 399 CHF", ctaSecondary: "3-in-1-Bundle — 797 CHF",
+    footer: "Index generiert aus der vom Bundesamt für Statistik herausgegebenen NOGA 2025. openswissdata.com ist nicht mit dem BFS verbunden.",
+    loading: "Index wird geladen…", noResult: "Kein Code passt.", resultsN: (n) => `${n} Ergebnis${n > 1 ? "se" : ""}`, resultsMore: (n) => `${n} Ergebnisse (50 angezeigt)`,
+  },
+  en: {
+    bcCurrent: "NOGA codes", eyebrowRight: "FSO / BFS", h1a: "All NOGA 2025", h1b: "codes.",
+    lede: `Swiss General Classification of Economic Activities, 2025 version. <strong>${totalSeoCodes} codes</strong> indexed (sections, divisions, groups, classes), with their NACE 2.1 and ISIC Rev 4 equivalents. The full dataset is included with <a href="${classificationsHref}">Classifications (399 CHF)</a>.`,
+    pbLabel: "Indexed codes", pbRenew: "official BFS 2025 version",
+    searchEyebrow: "Search", searchTitle: "Quick", searchTitleEm: "search.", searchIntro: "Type a code (e.g. 62.01), an activity (e.g. \"bank\") or a keyword.", searchPlaceholder: "Code, keyword, designation...",
+    hierEyebrow: "Hierarchy", hierTitle: "Full", hierTitleEm: "hierarchy.", hierIntro: `NOGA 2025 is organised into ${sections.length} sections (letters A to V), subdivided into divisions, groups and classes.`,
+    division: (n) => `${n} division${n > 1 ? "s" : ""}`, group: (n) => `${n} group${n > 1 ? "s" : ""}`,
+    dsEyebrow: "Full dataset", dsTitle: "The", dsTitleEm: "complete dataset.", dsIntro: "Need all codes (1,845 including subclasses), 5 aligned classifications and 5-way cross-walks, in CSV / JSON / Parquet / SQL?",
+    ctaPrimary: "See Classifications — 399 CHF", ctaSecondary: "3-in-1 bundle — 797 CHF",
+    footer: "Index generated from the NOGA 2025 classification published by the Federal Statistical Office. openswissdata.com is not affiliated with the FSO.",
+    loading: "Loading index…", noResult: "No matching code.", resultsN: (n) => `${n} result${n > 1 ? "s" : ""}`, resultsMore: (n) => `${n} results (50 shown)`,
+  },
+};
+const T = STR[lang];
+
+const ORIGIN = "https://www.openswissdata.com";
+const indexJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${ORIGIN}${homeHref}` },
+      { "@type": "ListItem", position: 2, name: "NOGA 2025", item: `${ORIGIN}${codesHref}` },
+    ]},
+    { "@type": "ItemList", name: "NOGA 2025 sections", numberOfItems: sections.length,
+      itemListElement: sections.map((s, i) => ({ "@type": "ListItem", position: i + 1, name: `${s.code} — ${labelFor(s, lang)}`, url: `${ORIGIN}${codeHref(s.code)}` })) },
+  ],
+};
+---
+<div class="bg-grid"></div>
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href={homeHref}>{lang === "de" ? "Startseite" : lang === "en" ? "home" : "accueil"}</a>
+      <span class="sep">·</span>
+      <span class="current">{T.bcCurrent}</span>
+    </nav>
+    <div class="v4-hero-grid">
+      <div>
+        <div class="v4-eyebrow reveal-v4">
+          <span>NOGA 2025</span>
+          <span style="opacity:.4">·</span>
+          <span class="check">{T.eyebrowRight}</span>
+        </div>
+        <h1 class="v4-h1 reveal-v4" data-delay="1">{T.h1a}<br><span class="accent">{T.h1b}</span></h1>
+        <p class="v4-lede reveal-v4" data-delay="2" set:html={T.lede} />
+      </div>
+      <div class="ds-price-box reveal-v4" data-delay="2">
+        <div class="ds-price-box-label">{T.pbLabel}</div>
+        <div class="ds-price-box-amount" style="font-size: 36px;">{totalAllCodes}</div>
+        <div class="ds-price-box-renew">{T.pbRenew}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v4-datasets ds-page">
+  <div class="container-v4">
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow"><strong>{T.searchEyebrow}</strong></div>
+      <h2 class="v4-section-h2">{T.searchTitle} <span class="serif">{T.searchTitleEm}</span></h2>
+      <p class="v4-section-intro">{T.searchIntro}</p>
+      <input type="search" id="noga-search" data-index-url={searchUrl} placeholder={T.searchPlaceholder} autocomplete="off" spellcheck="false"
+        style="width: 100%; padding: 14px 18px; font-size: 16px; border: 1px solid var(--color-line); border-radius: 12px; background: white; font-family: var(--font-sans); margin-bottom: 16px;" />
+      <div id="noga-results" style="display: none; max-height: 480px; overflow-y: auto; border: 1px solid var(--color-line); border-radius: 12px; background: white;"></div>
+      <p id="noga-search-count" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow"><strong>{T.hierEyebrow}</strong></div>
+      <h2 class="v4-section-h2">{T.hierTitle} <span class="serif">{T.hierTitleEm}</span></h2>
+      <p class="ds-section-intro">{T.hierIntro}</p>
+      <div class="noga-tree">
+        {sectionsWithChildren.map(({ section, divisions }) => (
+          <details class="noga-section">
+            <summary>
+              <a href={codeHref(section.code)} class="noga-section-letter">{section.code}</a>
+              <span class="noga-section-label">{labelFor(section, lang)}</span>
+              <span class="noga-section-count">{T.division(divisions.length)}</span>
+            </summary>
+            <div class="noga-section-body">
+              {divisions.map((div) => {
+                const groups = childrenByCode[div.code] || [];
+                return (
+                  <details class="noga-division">
+                    <summary>
+                      <a href={codeHref(div.code)} class="noga-code">{dottedCode(div.code)}</a>
+                      <span class="noga-label">{labelFor(div, lang)}</span>
+                      {groups.length > 0 && (<span class="noga-count">{T.group(groups.length)}</span>)}
+                    </summary>
+                    <ul class="noga-groups">
+                      {groups.map((grp) => {
+                        const classes = childrenByCode[grp.code] || [];
+                        return (
+                          <li>
+                            <a href={codeHref(grp.code)} class="noga-code">{dottedCode(grp.code)}</a>
+                            <span class="noga-label">{labelFor(grp, lang)}</span>
+                            {classes.length > 0 && (
+                              <ul class="noga-classes">
+                                {classes.map((cls) => (
+                                  <li>
+                                    <a href={codeHref(cls.code)} class="noga-code">{dottedCode(cls.code)}</a>
+                                    <span class="noga-label dim">{labelFor(cls, lang)}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </details>
+                );
+              })}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow"><strong>{T.dsEyebrow}</strong></div>
+      <h2 class="v4-section-h2">{T.dsTitle} <span class="serif">{T.dsTitleEm}</span></h2>
+      <p class="v4-section-intro">{T.dsIntro}</p>
+      <div class="v4-cta-row">
+        <a href={classificationsHref} class="v4-btn v4-btn-primary">{T.ctaPrimary} <span class="arrow">→</span></a>
+        <a href={bundleHref} class="v4-btn v4-btn-secondary">{T.ctaSecondary}</a>
+      </div>
+    </section>
+
+    <footer style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 12px; line-height: 1.6; color: var(--ink-mute);">
+      {T.footer}
+    </footer>
+  </div>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify(indexJsonLd)} />
+
+<script define:vars={{ L: { loading: T.loading, noResult: T.noResult } }}>
+  const input = document.getElementById("noga-search");
+  const results = document.getElementById("noga-results");
+  const countEl = document.getElementById("noga-search-count");
+  const indexUrl = input?.dataset.indexUrl || "/codes/search-index.json";
+  let searchIndex = null, loadingPromise = null;
+
+  function loadIndex() {
+    if (searchIndex) return Promise.resolve(searchIndex);
+    if (loadingPromise) return loadingPromise;
+    countEl.textContent = L.loading;
+    loadingPromise = fetch(indexUrl).then((r) => r.json()).then((data) => { searchIndex = data; countEl.textContent = ""; return data; })
+      .catch((err) => { countEl.textContent = "⚠"; loadingPromise = null; throw err; });
+    return loadingPromise;
+  }
+  function normalize(s) { return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+  function render(matches) {
+    if (matches.length === 0) { results.style.display = "none"; countEl.textContent = L.noResult; return; }
+    results.style.display = "block";
+    results.innerHTML = matches.slice(0, 50).map((m) => `<div class="noga-result-item"><a href="${m.href}"><span class="noga-result-code">${m.dotted}</span><span class="noga-result-label">${m.label}</span></a></div>`).join("");
+    countEl.textContent = matches.length > 50 ? `${matches.length} / 50` : String(matches.length);
+  }
+  input?.addEventListener("focus", () => loadIndex().catch(() => {}), { once: true });
+  input?.addEventListener("input", async (e) => {
+    const q = normalize(e.target.value.trim());
+    if (!q) { results.style.display = "none"; countEl.textContent = ""; return; }
+    const idx = await loadIndex();
+    const qNoDot = q.replace(/\./g, "");
+    const matches = idx.filter((r) => r.code.startsWith(qNoDot) || r.dotted.startsWith(q) || normalize(r.label).includes(q));
+    matches.sort((a, b) => {
+      const ac = a.code.startsWith(qNoDot) || a.dotted.startsWith(q) ? 0 : 1;
+      const bc = b.code.startsWith(qNoDot) || b.dotted.startsWith(q) ? 0 : 1;
+      return ac !== bc ? ac - bc : a.code.localeCompare(b.code);
+    });
+    render(matches);
+  });
+</script>
+
+<style>
+  .noga-tree { display: flex; flex-direction: column; gap: 8px; }
+  .noga-section { background: white; border: 1px solid var(--color-line); border-radius: 12px; overflow: hidden; }
+  .noga-section > summary { padding: 16px 20px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 16px; transition: background .15s ease; }
+  .noga-section > summary:hover { background: var(--color-bg-alt); }
+  .noga-section > summary::-webkit-details-marker { display: none; }
+  .noga-section > summary::before { content: "+"; font-family: var(--font-mono); width: 18px; text-align: center; color: var(--color-ink-mute); font-size: 18px; line-height: 1; }
+  .noga-section[open] > summary::before { content: "−"; }
+  .noga-section-letter { font-family: var(--font-mono); font-weight: 600; font-size: 14px; color: var(--color-ink); width: 30px; }
+  .noga-section-label { flex: 1; font-size: 14px; font-weight: 500; letter-spacing: .02em; color: var(--color-ink); }
+  .noga-section-count { font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-mute); }
+  .noga-section-body { padding: 8px 20px 20px 50px; border-top: 1px solid var(--color-line-soft); }
+  .noga-division { padding: 10px 0; border-bottom: 1px dashed var(--color-line-soft); }
+  .noga-division:last-child { border-bottom: none; }
+  .noga-division > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .noga-division > summary::-webkit-details-marker { display: none; }
+  .noga-division > summary::before { content: "▸"; color: var(--color-ink-mute); font-size: 10px; transition: transform .15s ease; }
+  .noga-division[open] > summary::before { transform: rotate(90deg); }
+  .noga-code { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--color-ink); text-decoration: none; min-width: 60px; }
+  .noga-code:hover { color: var(--color-accent); }
+  .noga-label { font-size: 13px; color: var(--color-ink-soft); }
+  .noga-label.dim { color: var(--color-ink-mute); }
+  .noga-count { font-family: var(--font-mono); font-size: 10px; color: var(--color-ink-mute); margin-left: auto; }
+  .noga-groups { list-style: none; padding: 8px 0 0 24px; margin: 0; }
+  .noga-groups > li { padding: 4px 0; display: flex; flex-direction: column; gap: 4px; }
+  .noga-classes { list-style: none; padding: 4px 0 6px 18px; margin: 0; border-left: 1px dashed var(--color-line-soft); }
+  .noga-classes > li { padding: 3px 0; display: flex; gap: 10px; align-items: baseline; font-size: 12px; }
+  .noga-result-item { padding: 12px 18px; border-bottom: 1px solid var(--color-line-soft); display: flex; gap: 16px; align-items: baseline; transition: background .15s ease; }
+  .noga-result-item:hover { background: var(--color-bg-alt); }
+  .noga-result-item:last-child { border-bottom: none; }
+  .noga-result-item a { text-decoration: none; color: var(--color-ink); display: contents; }
+  .noga-result-code { font-family: var(--font-mono); font-weight: 600; font-size: 13px; min-width: 70px; }
+  .noga-result-label { flex: 1; font-size: 13px; color: var(--color-ink-soft); }
+</style>
