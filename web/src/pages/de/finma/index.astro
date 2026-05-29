@@ -1,0 +1,9 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import FinmaIndex from "../../../components/FinmaIndex.astro";
+import { FINMA_STR } from "../../../lib/finma-i18n";
+const S = FINMA_STR.de;
+---
+<BaseLayout title={S.idxMetaTitle} description={S.idxMetaDesc}>
+  <FinmaIndex lang="de" searchUrl="/de/finma/search-index.json" />
+</BaseLayout>
