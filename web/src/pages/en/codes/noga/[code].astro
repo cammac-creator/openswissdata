@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import NogaCodePage from "../../../../components/NogaCodePage.astro";
+import { getSeoCodes, type NogaRow } from "../../../../lib/noga-helpers";
+import { nogaMeta } from "../../../../lib/noga-i18n";
+
+export async function getStaticPaths() {
+  return getSeoCodes().map((row) => ({ params: { code: row.code }, props: { row } }));
+}
+
+const { row } = Astro.props as { row: NogaRow };
+const meta = nogaMeta(row, "en");
+---
+<BaseLayout title={meta.title} description={meta.description}>
+  <NogaCodePage row={row} lang="en" />
+</BaseLayout>
