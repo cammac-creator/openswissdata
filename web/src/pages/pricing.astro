@@ -127,7 +127,10 @@ const breadcrumbJsonLd = {
             <li>✓ Support prioritaire</li>
             <li>✓ Annulable à tout moment</li>
           </ul>
-          <a href="mailto:contact@openswissdata.com?subject=openswissdata%20Business%20(199%20CHF%2Fmois)" class="v4-btn v4-btn-secondary pr-cta">Nous contacter <span class="arrow">→</span></a>
+          <form method="POST" action="/api/checkout/start" style="margin:0;">
+            <input type="hidden" name="dataset_ids" value="mcp_business" />
+            <button type="submit" class="v4-btn v4-btn-secondary pr-cta">S'abonner — 199 CHF/mois <span class="arrow">→</span></button>
+          </form>
         </div>
 
         <!-- ENTERPRISE -->
