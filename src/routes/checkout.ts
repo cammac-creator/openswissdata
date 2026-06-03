@@ -27,7 +27,7 @@ checkoutRoute.use("/start", async (c, next) => {
 // It uses Stripe's `mode: "subscription"` and CANNOT be combined with the
 // one-off ZIP datasets in the same Checkout Session — Stripe disallows
 // mixing one-time and recurring line items.
-const DATASET_IDS = ["tares", "classifications", "finma", "bundle", "mcp_standalone"] as const;
+const DATASET_IDS = ["tares", "classifications", "finma", "bundle", "mcp_standalone", "mcp_business"] as const;
 type DatasetId = (typeof DATASET_IDS)[number];
 
 const CheckoutSchema = z.object({
@@ -50,8 +50,14 @@ async function buildSession(
   const db = getDb();
   const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
-  // mcp_standalone is a recurring subscription SKU and must be sold alone.
-  const hasStandalone = dataset_ids.includes("mcp_standalone");
+  // mcp_standalone / mcp_business are recurring subscription SKUs and must be
+  // sold alone — Stripe disallows mixing one-time and recurring line items.
+  const SUBSCRIPTION_PRICE_ENV: Record<string, string> = {
+    mcp_standalone: "STRIPE_PRICE_MCP_STANDALONE",
+    mcp_business: "STRIPE_PRICE_MCP_BUSINESS",
+  };
+  const subSku = dataset_ids.find((id) => id in SUBSCRIPTION_PRICE_ENV);
+  const hasStandalone = subSku !== undefined;
   if (hasStandalone && dataset_ids.length > 1) {
     return {
       ok: false,
@@ -61,7 +67,7 @@ async function buildSession(
   }
 
   const hasBundle = dataset_ids.includes("bundle");
-  const individualIds = dataset_ids.filter((id) => id !== "bundle" && id !== "mcp_standalone");
+  const individualIds = dataset_ids.filter((id) => id !== "bundle" && !(id in SUBSCRIPTION_PRICE_ENV));
   if (hasBundle && individualIds.length > 0) {
     return { ok: false, status: 400, error: "bundle_cannot_be_combined_with_individual_datasets" };
   }
@@ -70,10 +76,10 @@ async function buildSession(
   let mode: Stripe.Checkout.SessionCreateParams.Mode = "payment";
 
   if (hasStandalone) {
-    const standalonePrice = process.env.STRIPE_PRICE_MCP_STANDALONE;
-    if (!standalonePrice)
+    const subPrice = process.env[SUBSCRIPTION_PRICE_ENV[subSku!]];
+    if (!subPrice)
       return { ok: false, status: 500, error: "mcp_standalone_price_not_configured" };
-    line_items.push({ price: standalonePrice, quantity: 1 });
+    line_items.push({ price: subPrice, quantity: 1 });
     mode = "subscription";
   } else if (hasBundle) {
     const bundlePrice = process.env.STRIPE_PRICE_BUNDLE;
