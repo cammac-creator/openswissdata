@@ -25,6 +25,14 @@ const EnvSchema = z.object({
   STRIPE_SECRET_KEY: prodRequired(z.string().min(1)),
   STRIPE_WEBHOOK_SECRET: prodRequired(z.string().min(1)),
   STRIPE_PRICE_BUNDLE: prodRequired(z.string().min(1)),
+  // Recurring MCP subscription price IDs. Optional (not prodRequired): a missing
+  // value yields a clean 500 at checkout rather than refusing to boot — and the
+  // subscription checkout is gated by MCP_SUBSCRIPTIONS_OPEN anyway.
+  STRIPE_PRICE_MCP_STANDALONE: z.string().optional(),
+  STRIPE_PRICE_MCP_BUSINESS: z.string().optional(),
+  // Feature flag: must be exactly "true" to allow new MCP subscription
+  // checkouts. Anything else (incl. unset) keeps the checkout CLOSED.
+  MCP_SUBSCRIPTIONS_OPEN: z.string().optional(),
   // Resend — optional (missing key = graceful no-email path, not 500)
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM_EMAIL: z.string().optional(),
@@ -36,6 +44,9 @@ const EnvSchema = z.object({
   R2_PUBLIC_URL: z.string().optional(),
   // MCP server — optional (missing token = auth disabled, suitable for dev)
   MCP_BEARER_TOKEN: z.string().optional(),
+  // Public base URL of the MCP server (used in OAuth credential emails + the
+  // /oauth discovery endpoints). Defaults to the production host.
+  MCP_BASE_URL: z.string().url().default("https://mcp.openswissdata.com"),
   // OAuth 2.1 signing secret for /oauth/* tokens. Required in prod ≥32 chars.
   // Without this, every authenticated MCP request crashes with HTTP 500.
   OAUTH_SIGNING_SECRET: isProd

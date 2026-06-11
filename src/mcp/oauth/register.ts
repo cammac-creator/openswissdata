@@ -71,8 +71,10 @@ registerRoute.post("/register", async (c) => {
   }
 
   // Public registration always lands on 'free'. Paid tiers are granted by the
-  // Stripe webhook after the order is paid (see stripe-webhook.ts → upgrade
-  // path). The `tier` field in the request body is intentionally ignored.
+  // Stripe webhook after a subscription is paid: it matches the payer to this
+  // client by email and calls setClientTier (or provisions a fresh paid client
+  // if none exists) — see src/routes/stripe-webhook.ts → handleSubscriptionCheckout.
+  // The `tier` field in the request body is intentionally ignored.
   const tier: Tier = "free";
 
   const clientId = generateClientId();

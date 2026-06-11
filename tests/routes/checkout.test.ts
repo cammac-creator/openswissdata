@@ -305,3 +305,67 @@ describe("POST /api/checkout/start (form-encoded → 303 redirect)", () => {
     expect(location).not.toContain("raised by");
   });
 });
+
+// P0 safety valve: MCP subscription checkout is CLOSED unless MCP_SUBSCRIPTIONS_OPEN==="true".
+describe("POST /api/checkout — subscription caisse fermée (MCP_SUBSCRIPTIONS_OPEN)", () => {
+  let tmp: string;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "osd-close-"));
+    process.env.DATABASE_PATH = join(tmp, "t.sqlite");
+    process.env.BASE_URL = "https://www.openswissdata.com";
+    process.env.STRIPE_PRICE_MCP_STANDALONE = "price_sub_standalone";
+    process.env.NODE_ENV = "test";
+    getDb();
+    closeDb();
+    sessionCreateMock.mockResolvedValue({ id: "cs_sub", url: "https://checkout.stripe.com/pay/cs_sub" });
+  });
+
+  afterEach(() => {
+    closeDb();
+    rmSync(tmp, { recursive: true, force: true });
+    delete process.env.DATABASE_PATH;
+    delete process.env.STRIPE_PRICE_MCP_STANDALONE;
+    delete process.env.MCP_SUBSCRIPTIONS_OPEN;
+    sessionCreateMock.mockReset();
+  });
+
+  it("returns 503 on /session for mcp_standalone when closed (default)", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ dataset_ids: ["mcp_standalone"], email: "x@y.com" }),
+    });
+    expect(res.status).toBe(503);
+    const body = await res.json();
+    expect(body.error).toBe("subscriptions_temporarily_closed");
+    expect(sessionCreateMock).not.toHaveBeenCalled();
+  });
+
+  it("redirects /start to /pricing?checkout=closed when closed", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/start", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "dataset_ids=mcp_standalone",
+    });
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toContain("/pricing?checkout=closed");
+    expect(sessionCreateMock).not.toHaveBeenCalled();
+  });
+
+  it("creates a subscription session when MCP_SUBSCRIPTIONS_OPEN=true", async () => {
+    process.env.MCP_SUBSCRIPTIONS_OPEN = "true";
+    const app = createApp();
+    const res = await app.request("/api/checkout/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ dataset_ids: ["mcp_standalone"], email: "x@y.com" }),
+    });
+    expect(res.status).toBe(200);
+    const call = sessionCreateMock.mock.calls[0][0];
+    expect(call.mode).toBe("subscription");
+    expect(call.line_items).toEqual([{ price: "price_sub_standalone", quantity: 1 }]);
+  });
+});

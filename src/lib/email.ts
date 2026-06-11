@@ -1,3 +1,5 @@
+import type { Tier } from "../mcp/oauth/scopes.js";
+
 export interface EmailSendResult {
   sent: boolean;
   reason?: "no_api_key" | "placeholder_key" | "resend_error";
@@ -118,6 +120,51 @@ export async function sendMagicLinkEmail(p: MagicLinkEmailParams): Promise<Email
     <p>— openswissdata.com</p>
   `;
   return resendSend(p.to, "Votre lien de connexion openswissdata", html);
+}
+
+export interface McpCredentialsEmailParams {
+  to: string;
+  clientId: string;
+  /**
+   * Plaintext client secret, generated on the fly. Shown ONLY in this email
+   * (never stored in plaintext). Omit when upgrading an existing client — the
+   * client keeps its original secret and we just confirm activation.
+   */
+  clientSecret?: string;
+  tier: Tier;
+  authorizationEndpoint: string;
+  tokenEndpoint: string;
+}
+
+/**
+ * Sent when a paid MCP subscription is activated (Stripe webhook). On a NEW
+ * client it delivers the credentials (the secret is shown once here); on an
+ * upgrade of an existing client it just confirms activation without a secret.
+ */
+export async function sendMcpCredentialsEmail(p: McpCredentialsEmailParams): Promise<EmailSendResult> {
+  const codeStyle = "font-family:monospace;background:#f4f4f5;padding:2px 6px;border-radius:4px;word-break:break-all;";
+  const hasSecret = typeof p.clientSecret === "string" && p.clientSecret.length > 0;
+
+  const credentialsBlock = hasSecret
+    ? `
+    <p><strong>Le client secret ci-dessous n'est affiché qu'une seule fois</strong> — conservez-le dans un gestionnaire de secrets, il ne pourra pas être récupéré ensuite.</p>
+    <p style="margin:4px 0;">client_id&nbsp;: <code style="${codeStyle}">${escapeHtml(p.clientId)}</code></p>
+    <p style="margin:4px 0;">client_secret&nbsp;: <code style="${codeStyle}">${escapeHtml(p.clientSecret as string)}</code></p>`
+    : `
+    <p>Votre clé MCP existante (<code style="${codeStyle}">${escapeHtml(p.clientId)}</code>) a été mise à niveau. Aucun nouvel identifiant n'est nécessaire — continuez d'utiliser votre client_secret habituel.</p>`;
+
+  const html = `
+    <p>Bonjour,</p>
+    <p>Votre abonnement <strong>openswissdata MCP — ${escapeHtml(p.tier)}</strong> est actif. Merci !</p>
+    ${credentialsBlock}
+    <p>Points de terminaison OAuth 2.1&nbsp;:</p>
+    <p style="margin:4px 0;">Authorization&nbsp;: <code style="${codeStyle}">${escapeHtml(p.authorizationEndpoint)}</code></p>
+    <p style="margin:4px 0;">Token&nbsp;: <code style="${codeStyle}">${escapeHtml(p.tokenEndpoint)}</code></p>
+    <p>Pour connecter Claude Desktop, Cursor ou Cline, ajoutez le serveur MCP <code style="${codeStyle}">https://mcp.openswissdata.com</code> — le client vous guidera dans le flux d'autorisation OAuth avec les identifiants ci-dessus.</p>
+    <p>Vous pouvez gérer ou résilier votre abonnement à tout moment depuis votre <a href="${escapeHtmlAttr((process.env.BASE_URL || "https://www.openswissdata.com").replace(/\/$/, "") + "/account")}">espace client</a>.</p>
+    <p>— openswissdata.com</p>
+  `;
+  return resendSend(p.to, `Votre abonnement MCP openswissdata est actif — ${p.tier}`, html);
 }
 
 function escapeHtml(s: string): string {

@@ -58,6 +58,16 @@ async function buildSession(
   };
   const subSku = dataset_ids.find((id) => id in SUBSCRIPTION_PRICE_ENV);
   const hasStandalone = subSku !== undefined;
+
+  // P0 safety valve: keep the subscription checkout CLOSED until paid delivery
+  // is verified end-to-end (Stripe → OAuth client → emailed key). This guard
+  // covers direct POSTs too, not just the web buttons. Re-open by setting
+  // MCP_SUBSCRIPTIONS_OPEN=true once the live test passes. One-shot ZIP SKUs
+  // (hasStandalone=false) are unaffected.
+  if (hasStandalone && process.env.MCP_SUBSCRIPTIONS_OPEN !== "true") {
+    return { ok: false, status: 503, error: "subscriptions_temporarily_closed" };
+  }
+
   if (hasStandalone && dataset_ids.length > 1) {
     return {
       ok: false,
@@ -151,6 +161,9 @@ checkoutRoute.post("/session", async (c) => {
     if (result.error === "mcp_standalone_price_not_configured") {
       return c.json({ error: result.error }, 500);
     }
+    if (result.error === "subscriptions_temporarily_closed") {
+      return c.json({ error: result.error }, 503);
+    }
     if (result.error === "checkout_failed" || result.error.startsWith("stripe_error:")) {
       // H4: return a generic error without Stripe internals
       return c.json({ error: "checkout_failed" }, 502);
@@ -186,9 +199,14 @@ checkoutRoute.post("/start", async (c) => {
 
   const result = await buildSession(dataset_ids, email);
   if (!result.ok) {
+    const base = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    // Subscription checkout temporarily closed → back to /pricing with a notice.
+    if (result.error === "subscriptions_temporarily_closed") {
+      return c.redirect(`${base}/pricing?checkout=closed`, 303);
+    }
     // H4: redirect to error page instead of leaking internal error strings
     if (result.status >= 500 || result.error === "checkout_failed" || result.error.startsWith("stripe_error:")) {
-      return c.redirect(`${(process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "")}/bundle?checkout=error`, 303);
+      return c.redirect(`${base}/bundle?checkout=error`, 303);
     }
     return c.text(result.error, result.status as ContentfulStatusCode);
   }
