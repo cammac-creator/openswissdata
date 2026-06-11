@@ -88,7 +88,8 @@ CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
 -- mcp_usage           : per-client per-day/month usage counters
 --
 -- Tiers: 'free' (100/day), 'standard' (1k/month), 'pro' (10k/month),
---        'standalone' (5k/month, 49 CHF/mo subscription)
+--        'standalone' (5k/month, Pro 49 CHF/mo subscription),
+--        'business' (50k/month, 199 CHF/mo subscription)
 
 CREATE TABLE IF NOT EXISTS mcp_clients (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,15 +97,20 @@ CREATE TABLE IF NOT EXISTS mcp_clients (
   client_secret_hash TEXT NOT NULL,
   name TEXT NOT NULL,
   email TEXT NOT NULL,
-  tier TEXT NOT NULL DEFAULT 'free' CHECK (tier IN ('free', 'standard', 'pro', 'standalone')),
+  tier TEXT NOT NULL DEFAULT 'free' CHECK (tier IN ('free', 'standard', 'pro', 'standalone', 'business')),
   scopes TEXT NOT NULL DEFAULT '',           -- space-separated allowed scopes
   customer_id INTEGER,                       -- optional link to /api/account customer
   created_at INTEGER NOT NULL,
   revoked_at INTEGER,
+  stripe_subscription_id TEXT,               -- Stripe subscription backing a paid tier (NULL for free/registered)
   FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_mcp_clients_email ON mcp_clients(email);
+-- NOTE: the index on stripe_subscription_id is created in src/lib/db.ts AFTER an
+-- idempotent ensureColumn(), because on a pre-existing DB the column is absent
+-- here (CREATE TABLE IF NOT EXISTS won't add it) and a CREATE INDEX referencing
+-- it would crash the boot. Do not move it back into schema.sql.
 
 CREATE TABLE IF NOT EXISTS mcp_oauth_codes (
   code TEXT PRIMARY KEY,

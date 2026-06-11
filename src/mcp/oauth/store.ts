@@ -8,7 +8,7 @@
 
 import { getDb } from "../../lib/db.js";
 import { hashToken } from "./crypto.js";
-import { parseScopes, serializeScopes, type Scope, type Tier } from "./scopes.js";
+import { parseScopes, serializeScopes, TIER_DEFAULT_SCOPES, type Scope, type Tier } from "./scopes.js";
 
 const ACCESS_TOKEN_TTL_MS = 60 * 60 * 1000; // 1h
 const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30d
@@ -25,6 +25,7 @@ export interface MCPClient {
   customer_id: number | null;
   created_at: number;
   revoked_at: number | null;
+  stripe_subscription_id: string | null;
 }
 
 export interface MCPAuthCode {
@@ -62,16 +63,18 @@ export function insertClient(args: {
   tier: Tier;
   scopes: readonly Scope[];
   customer_id?: number | null;
+  stripe_subscription_id?: string | null;
 }): MCPClient {
   const db = getDb();
   const now = Date.now();
   db.prepare(
-    `INSERT INTO mcp_clients (client_id, client_secret_hash, name, email, tier, scopes, customer_id, created_at)
-     VALUES (@client_id, @client_secret_hash, @name, @email, @tier, @scopes, @customer_id, @created_at)`,
+    `INSERT INTO mcp_clients (client_id, client_secret_hash, name, email, tier, scopes, customer_id, stripe_subscription_id, created_at)
+     VALUES (@client_id, @client_secret_hash, @name, @email, @tier, @scopes, @customer_id, @stripe_subscription_id, @created_at)`,
   ).run({
     ...args,
     scopes: serializeScopes(args.scopes),
     customer_id: args.customer_id ?? null,
+    stripe_subscription_id: args.stripe_subscription_id ?? null,
     created_at: now,
   });
   return findClientById(args.client_id) as MCPClient;
@@ -83,6 +86,60 @@ export function findClientById(client_id: string): MCPClient | null {
     .prepare("SELECT * FROM mcp_clients WHERE client_id = ?")
     .get(client_id) as MCPClient | undefined;
   return row ?? null;
+}
+
+/**
+ * Find the most recent non-revoked client registered under an email. Used by
+ * the Stripe webhook to upgrade an existing client after a paid subscription
+ * (we match payer → client by email, since checkout carries no client_id).
+ */
+export function findClientByEmail(email: string): MCPClient | null {
+  const db = getDb();
+  const row = db
+    .prepare(
+      "SELECT * FROM mcp_clients WHERE email = ? AND revoked_at IS NULL ORDER BY created_at DESC LIMIT 1",
+    )
+    .get(email) as MCPClient | undefined;
+  return row ?? null;
+}
+
+/** Find the client whose paid tier is backed by a given Stripe subscription. */
+export function findClientBySubscriptionId(subscriptionId: string): MCPClient | null {
+  const db = getDb();
+  const row = db
+    .prepare("SELECT * FROM mcp_clients WHERE stripe_subscription_id = ?")
+    .get(subscriptionId) as MCPClient | undefined;
+  return row ?? null;
+}
+
+/**
+ * Move a client to a new tier and REWRITE its scopes to that tier's defaults.
+ *
+ * Rewriting `scopes` is mandatory, not cosmetic: oauthVerify() reads the
+ * `scopes` column (not TIER_DEFAULT_SCOPES) at every request, so a tier change
+ * without rewriting scopes would unlock — or revoke — nothing. Optionally links
+ * the Stripe customer and subscription that justified the change (pass the key
+ * with `null` to clear it, e.g. on downgrade).
+ */
+export function setClientTier(
+  client_id: string,
+  tier: Tier,
+  opts?: { customer_id?: number | null; stripe_subscription_id?: string | null },
+): MCPClient | null {
+  const db = getDb();
+  const scopes = serializeScopes(TIER_DEFAULT_SCOPES[tier]);
+  const sets = ["tier = @tier", "scopes = @scopes"];
+  const params: Record<string, unknown> = { client_id, tier, scopes };
+  if (opts && "customer_id" in opts) {
+    sets.push("customer_id = @customer_id");
+    params.customer_id = opts.customer_id ?? null;
+  }
+  if (opts && "stripe_subscription_id" in opts) {
+    sets.push("stripe_subscription_id = @stripe_subscription_id");
+    params.stripe_subscription_id = opts.stripe_subscription_id ?? null;
+  }
+  db.prepare(`UPDATE mcp_clients SET ${sets.join(", ")} WHERE client_id = @client_id`).run(params);
+  return findClientById(client_id);
 }
 
 // ----- Authorization codes ----------------------------------------------

@@ -70,6 +70,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <p id="empty-state" class="hidden account-empty">
         Vous n'avez pas encore de dataset. <a href="/bundle">Voir le bundle complet — 797 CHF</a>.
       </p>
+
+      <div id="mcp-section" class="hidden account-mcp">
+        <h3 class="account-mcp-title">Abonnement MCP</h3>
+        <div class="ds-item">
+          <div class="ds-item-info">
+            <div class="ds-item-name">Serveur MCP openswissdata</div>
+            <div id="mcp-meta" class="ds-item-meta"></div>
+          </div>
+          <button id="mcp-portal-btn" class="ds-item-btn">Gérer mon abonnement</button>
+        </div>
+      </div>
     </div>
 
     <div id="loading-view" class="account-loading">Chargement…</div>
@@ -160,6 +171,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
   .ds-item-btn:hover { background: #1a1a1d; }
   .ds-item-btn:disabled { opacity: .6; cursor: wait; }
+
+  .account-mcp { margin-top: 36px; }
+  .account-mcp-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin: 0 0 14px;
+    font-weight: 500;
+  }
 </style>
 
   <script is:inline>
@@ -270,6 +292,39 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         }
       }
 
+      const TIER_LABELS = { standalone: "Pro — 5 000 req/mois", business: "Business — 50 000 req/mois", pro: "Pro", standard: "Standard", free: "Free" };
+
+      async function loadMcp() {
+        const sectionEl = document.getElementById("mcp-section");
+        const metaEl = document.getElementById("mcp-meta");
+        const btn = document.getElementById("mcp-portal-btn");
+        try {
+          const r = await fetch("/api/account/mcp", { credentials: "include" });
+          if (!r.ok) return;
+          const body = await r.json();
+          const client = body.mcp_client;
+          if (!client || client.tier === "free") return; // only show for paid subscribers
+          metaEl.textContent = (TIER_LABELS[client.tier] || client.tier) + " · clé " + client.client_id;
+          sectionEl.classList.remove("hidden");
+          btn.addEventListener("click", async function () {
+            btn.disabled = true;
+            btn.textContent = "Ouverture…";
+            try {
+              const pr = await fetch("/api/account/billing-portal", { method: "POST", credentials: "include" });
+              if (!pr.ok) throw new Error("HTTP " + pr.status);
+              const pb = await pr.json();
+              window.location.href = pb.url;
+            } catch (e) {
+              btn.disabled = false;
+              btn.textContent = "Réessayer";
+              alert("Impossible d'ouvrir le portail de facturation. Réessayez plus tard.");
+            }
+          });
+        } catch (e) {
+          // Non-blocking: the dashboard still works without the MCP section.
+        }
+      }
+
       async function load() {
         try {
           const meRes = await fetch("/api/account", { credentials: "include" });
@@ -279,6 +334,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           const dsRes = await fetch("/api/account/datasets", { credentials: "include" });
           const dsBody = dsRes.ok ? await dsRes.json() : { datasets: [] };
           showDashboard(meBody.customer, dsBody.datasets);
+          loadMcp();
         } catch (e) {
           loadingEl.textContent = "Impossible de charger votre espace client. Veuillez actualiser la page.";
         }
