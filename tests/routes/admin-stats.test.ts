@@ -88,4 +88,57 @@ describe("GET /api/admin/stats", () => {
     const body = await res.json();
     expect(body.window.days).toBe(30); // fallback
   });
+
+  it("computes the MCP kill-gate metrics (human calls, caller split, paying)", async () => {
+    const db = getDb();
+    const now = Date.now();
+    const ev = db.prepare(
+      "INSERT INTO events (kind, name, status, ua_class, meta_json, visitor_hash, ts) VALUES ('custom','mcp_tool_call',200,?,?,?,?)",
+    );
+    // Human authenticated, non-admin: 2× client c1, 1× client c2 → 2 distinct clients.
+    ev.run("human_authenticated", JSON.stringify({ admin: false, client_id: "c1" }), "v1", now);
+    ev.run("human_authenticated", JSON.stringify({ admin: false, client_id: "c1" }), "v1", now);
+    ev.run("human_authenticated", JSON.stringify({ admin: false, client_id: "c2" }), "v2", now);
+    // mcp_client anonymous (client_id null) ×2.
+    ev.run("mcp_client", JSON.stringify({ admin: false, client_id: null }), "v3", now);
+    ev.run("mcp_client", JSON.stringify({ admin: false, client_id: null }), "v4", now);
+    // Noise: scanner ×4, bot ×1.
+    for (let i = 0; i < 4; i++) ev.run("scanner", JSON.stringify({ admin: false, client_id: null }), "vs" + i, now);
+    ev.run("bot", JSON.stringify({ admin: false, client_id: null }), "vb", now);
+    // Admin bypass (Claude-Alain) — must be EXCLUDED from human count.
+    ev.run("human_authenticated", JSON.stringify({ admin: true, client_id: "adminc" }), "va", now);
+    // Out of the 7-day window — must be EXCLUDED.
+    ev.run("human_authenticated", JSON.stringify({ admin: false, client_id: "old" }), "vo", now - 8 * 24 * 3600 * 1000);
+
+    // Paying MCP clients.
+    const mc = db.prepare(
+      "INSERT INTO mcp_clients (client_id, client_secret_hash, name, email, tier, scopes, customer_id, created_at, revoked_at, stripe_subscription_id) VALUES (?,?,?,?,?,?,?,?,?,?)",
+    );
+    mc.run("osd_buyer", "h", "Buyer", "buyer@external.com", "business", "", null, now, null, "sub_b"); // counts: 199
+    mc.run("osd_admin", "h", "Admin sub", "admin@osd.com", "standalone", "", null, now, null, "sub_a"); // excluded (ADMIN_EMAILS)
+    mc.run("osd_admin2", "h", "Admin mixed-case", "ADMIN@OSD.com", "business", "", null, now, null, "sub_a2"); // excluded (case-insensitive)
+    mc.run("osd_free", "h", "Free", "free@x.com", "free", "", null, now, null, null); // excluded (no sub)
+    closeDb();
+
+    const app = createApp();
+    const res = await app.request("/api/admin/stats?days=30", {
+      headers: { cookie: `osd_session=${token}` },
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    // ONLY human_authenticated (non-admin) counts; mcp_client is anonymous/spoofable → excluded.
+    expect(body.mcpHuman7d.human_calls).toBe(3); // c1, c1, c2 (excl. mcp_client/scanner/bot/admin/old)
+    expect(body.mcpHuman7d.distinct_clients).toBe(2); // c1, c2 (nulls ignored)
+
+    const split: Record<string, number> = {};
+    for (const r of body.mcpCallerSplit) split[r.caller_class] = r.calls;
+    expect(split.human_authenticated).toBe(4); // 3 non-admin + 1 admin, in-window
+    expect(split.mcp_client).toBe(2);
+    expect(split.scanner).toBe(4);
+    expect(split.bot).toBe(1);
+
+    expect(body.mcpPaying.paying_clients).toBe(1); // buyer only; admin email + free excluded
+    expect(body.mcpPaying.mrr_chf).toBe(199);
+  });
 });
