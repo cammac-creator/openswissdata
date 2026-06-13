@@ -29,6 +29,7 @@
 import { Hono } from "hono";
 import { dispatch, getServerInfo } from "../../mcp/server.js";
 import { oauthRouter, oauthVerify, type MCPAuthVar } from "../../mcp/oauth/index.js";
+import { trackMcpToolCall } from "../../mcp/track-mcp.js";
 
 export const mcpRoute = new Hono<MCPAuthVar>();
 
@@ -58,10 +59,27 @@ mcpRoute.post("/jsonrpc", oauthVerify(), async (c) => {
   const auth = c.get("mcp_auth");
 
   if (Array.isArray(body)) {
+    // Bound the batch: an unbounded array of tools/call would run N dispatches
+    // + N tracking passes synchronously, letting an anonymous caller stall the
+    // single-threaded event loop. 50 is far above any real client's batch.
+    if (body.length > 50) {
+      return c.json(
+        { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Batch too large (max 50)" } },
+        400,
+      );
+    }
+    const started = Date.now();
     const out = await Promise.all(body.map((r) => dispatch(r, auth)));
+    const dur = Date.now() - started;
+    // One event row per tools/call sub-request (trackMcpToolCall no-ops on others).
+    body.forEach((r, i) =>
+      trackMcpToolCall(c, r as { method?: unknown; params?: unknown }, out[i], auth, dur),
+    );
     return c.json(out);
   }
 
+  const started = Date.now();
   const response = await dispatch(body, auth);
+  trackMcpToolCall(c, body as { method?: unknown; params?: unknown }, response, auth, Date.now() - started);
   return c.json(response);
 });

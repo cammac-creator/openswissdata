@@ -144,6 +144,35 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </section>
 
       <section class="border border-slate-200 rounded-lg p-4 bg-white mb-8">
+        <h2 class="text-sm font-semibold mb-1">Gate de kill — 15 sept 2026</h2>
+        <p class="text-xs text-slate-400 mb-3">Fenêtre fixe 7 jours. Signal de survie : ≥ 20 appels MCP humains/sem (hors bots), &gt; 0 paiement tiers réel, ou ≥ 10 clics GSC/sem. Sinon → mode veilleuse.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div class="border border-slate-100 rounded-lg p-3">
+            <div class="text-xs text-slate-500 uppercase">Appels MCP humains / 7j</div>
+            <div id="gate-human-calls" class="text-2xl font-bold">—</div>
+            <div id="gate-human-sub" class="text-xs text-slate-400">cible ≥ 20</div>
+          </div>
+          <div class="border border-slate-100 rounded-lg p-3">
+            <div class="text-xs text-slate-500 uppercase">Paiements tiers réels</div>
+            <div id="gate-paying" class="text-2xl font-bold">—</div>
+            <div id="gate-paying-sub" class="text-xs text-slate-400">hors Claude-Alain</div>
+          </div>
+          <div class="border border-slate-100 rounded-lg p-3">
+            <div class="text-xs text-slate-500 uppercase">Clics GSC / 7j</div>
+            <div class="text-2xl font-bold text-slate-300">manuel</div>
+            <div class="text-xs text-slate-400">voir Search Console</div>
+          </div>
+        </div>
+        <table class="w-full text-sm">
+          <thead><tr class="text-left text-slate-500 text-xs uppercase">
+            <th class="py-1">Classe d'appelant MCP (7j)</th><th class="py-1 text-right">Appels</th>
+          </tr></thead>
+          <tbody id="tbl-gate-split"></tbody>
+        </table>
+        <p class="mt-2 text-xs text-slate-400">Humain réel = <code>human_authenticated</code> (OAuth, hors admin) — infalsifiable. <code>mcp_client</code> (anonyme, UA non vérifié), <code>scanner</code>, <code>bot</code>, <code>unknown</code> = diagnostic seulement, exclus du compte.</p>
+      </section>
+
+      <section class="border border-slate-200 rounded-lg p-4 bg-white mb-8">
         <h2 class="text-sm font-semibold mb-3">MCP — top clients</h2>
         <table class="w-full text-sm">
           <thead><tr class="text-left text-slate-500 text-xs uppercase">
@@ -376,6 +405,26 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             { text: fmt(r.day_count), cls: "py-1.5 text-right" },
             { text: fmt(r.month_count), cls: "py-1.5 text-right" },
             { text: fmt(r.total_count), cls: "py-1.5 text-right" },
+          ];
+        });
+
+        // Gate de kill (fenêtre fixe 7j)
+        var gh = d.mcpHuman7d || { human_calls: 0, distinct_clients: 0 };
+        var humanCalls = gh.human_calls || 0;
+        setText("gate-human-calls", fmt(humanCalls) + " / 20");
+        var ghEl = document.getElementById("gate-human-calls");
+        if (ghEl) ghEl.className = "text-2xl font-bold " + (humanCalls >= 20 ? "text-green-600" : "text-red-600");
+        setText("gate-human-sub", fmt(gh.distinct_clients || 0) + " clients distincts · cible ≥ 20");
+        var mp = d.mcpPaying || { paying_clients: 0, mrr_chf: 0, measured: true };
+        var paying = mp.paying_clients || 0;
+        setText("gate-paying", mp.measured === false ? "?" : fmt(paying));
+        var gpEl = document.getElementById("gate-paying");
+        if (gpEl) gpEl.className = "text-2xl font-bold " + (mp.measured === false ? "text-amber-600" : (paying > 0 ? "text-green-600" : "text-slate-800"));
+        setText("gate-paying-sub", (mp.measured === false ? "⚠️ mesure indisponible · " : "") + "MRR " + chf(mp.mrr_chf || 0) + " · hors Claude-Alain");
+        fillTable("tbl-gate-split", d.mcpCallerSplit || [], function (r) {
+          return [
+            { text: r.caller_class },
+            { text: fmt(r.calls), cls: "py-1.5 text-right" },
           ];
         });
 

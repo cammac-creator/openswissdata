@@ -159,14 +159,84 @@ adminStatsRoute.get("/", async (c) => {
   `).all(since) as Array<{ ua: string; hits: number }>;
 
   // --- Custom events ---
+  // Exclude mcp_tool_call: it has its own dedicated gate blocks below and would
+  // otherwise saturate this top-20 and bury the real cta_* conversion events.
   const customEvents = db.prepare(`
     SELECT name, COUNT(*) AS count
     FROM events
-    WHERE kind IN ('custom','conversion') AND ts >= ?
+    WHERE kind IN ('custom','conversion') AND name <> 'mcp_tool_call' AND ts >= ?
     GROUP BY name
     ORDER BY count DESC
     LIMIT 20
   `).all(since) as Array<{ name: string; count: number }>;
+
+  // --- MCP kill-gate metrics (FIXED 7-day window, independent of ?days) ---
+  // The Sept 15 2026 gate: ~20 human MCP calls/week (excl. bots), 0 third-party
+  // paying clients, <10 GSC clicks/week (GSC = manual, not measurable here).
+  const since7d = Date.now() - 7 * 24 * 3600 * 1000;
+
+  // (a) Human MCP tool calls over 7d. ONLY `human_authenticated` (valid OAuth
+  //     bearer, non-admin) counts — anonymous UA-based classes are spoofable
+  //     (curl -A "claude") and must not inflate the gate (the "117" mistake).
+  //     Excludes the admin bypass (Claude-Alain) via meta_json.admin.
+  const mcpHuman7d = db.prepare(`
+    SELECT
+      COUNT(*)                                              AS human_calls,
+      COUNT(DISTINCT json_extract(meta_json,'$.client_id')) AS distinct_clients
+    FROM events
+    WHERE kind='custom' AND name='mcp_tool_call' AND ts >= ?
+      AND ua_class = 'human_authenticated'
+      AND COALESCE(json_extract(meta_json,'$.admin'), 0) = 0
+  `).get(since7d) as { human_calls: number; distinct_clients: number };
+
+  // (b) Full caller-class split over 7d (diagnostic: signal vs noise ratio).
+  const mcpCallerSplit = db.prepare(`
+    SELECT COALESCE(ua_class,'unknown') AS caller_class, COUNT(*) AS calls
+    FROM events
+    WHERE kind='custom' AND name='mcp_tool_call' AND ts >= ?
+    GROUP BY caller_class
+    ORDER BY calls DESC
+  `).all(since7d) as Array<{ caller_class: string; calls: number }>;
+
+  // (c) Real third-party paying MCP clients: live Stripe subscriptions, excluding
+  //     Claude-Alain's own test subs (ADMIN_EMAILS). Subs live in mcp_clients,
+  //     NOT orders (which are one-shot ZIP purchases). try/catch: the
+  //     stripe_subscription_id column is absent on a pre-P0-1 database.
+  let mcpPaying = { paying_clients: 0, mrr_chf: 0, measured: true };
+  try {
+    // Lower-cased for a case-insensitive exclusion (requireAdmin normalises
+    // emails to lowercase; mcp_clients.email casing may differ).
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const emailFilter = adminEmails.length
+      ? `AND lower(email) NOT IN (${adminEmails.map(() => "?").join(",")})`
+      : "";
+    const row = db.prepare(`
+      SELECT
+        COUNT(*)                       AS paying_clients,
+        COALESCE(SUM(CASE
+          WHEN tier='business'   THEN 199
+          WHEN tier IN ('standalone','pro') THEN 49
+          ELSE 0 END), 0)              AS mrr_chf
+      FROM mcp_clients
+      WHERE revoked_at IS NULL
+        AND stripe_subscription_id IS NOT NULL
+        AND tier IN ('standalone','pro','business')
+        ${emailFilter}
+    `).get(...adminEmails) as { paying_clients: number; mrr_chf: number };
+    mcpPaying = { ...row, measured: true };
+  } catch (err) {
+    // Only the pre-P0-1 "missing column" case is expected & silent. Anything
+    // else is a real measurement failure: log it and flag measured=false so a
+    // SQL error can't masquerade as a confident "0 paying" (a fake gate PASS).
+    const msg = err instanceof Error ? err.message : String(err);
+    if (!/no such column: stripe_subscription_id/.test(msg)) {
+      console.warn("[admin-stats] mcpPaying query failed", err);
+      mcpPaying = { paying_clients: 0, mrr_chf: 0, measured: false };
+    }
+  }
 
   // --- MCP usage ---
   let mcpUsage: Array<Record<string, unknown>> = [];
@@ -205,6 +275,9 @@ adminStatsRoute.get("/", async (c) => {
     topReferers,
     uaSplit,
     customEvents,
+    mcpHuman7d,
+    mcpCallerSplit,
+    mcpPaying,
     mcpUsage,
     plausible,
   });
