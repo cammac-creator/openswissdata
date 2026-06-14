@@ -39,6 +39,7 @@ export interface NogaStrings {
   exTitle: string; exTitleEm: string; exIntro: (dotted: string) => string;
   usedTitle: string; usedTitleEm: string; usedIntro: (dotted: string) => string; usedList: string[];
   srcTitle: string; srcTitleEm: string; srcIntro: string; srcLinkText: string; srcUrl: string;
+  mcpTitle: string; mcpTitleEm: string; mcpIntro: string; mcpCta: string;
   fullTitle: string; fullTitleEm: string; fullIntro: string; fullCta: string;
   footer: string;
   metaTitle: (dotted: string, labelShort: string) => string;
@@ -85,6 +86,9 @@ export const NOGA_STR: Record<Lang, NogaStrings> = {
     srcTitle: "Source", srcTitleEm: "officielle",
     srcIntro: "Cette page reprend les informations du standard NOGA 2025 publié par l'Office fédéral de la statistique. Pour la version officielle :",
     srcLinkText: "bfs.admin.ch — NOGA — Nomenclature générale des activités économiques", srcUrl: BFS_URL.fr,
+    mcpTitle: "NOGA à la", mcpTitleEm: "demande",
+    mcpIntro: "Classifiez du texte libre vers le top-3 NOGA et interrogez l'arbre complet (cross-walks NACE/ISIC inclus) via le serveur MCP — directement dans Claude Code, Cursor ou Cline. Gratuit pour tester, sans compte.",
+    mcpCta: "Brancher le MCP — gratuit",
     fullTitle: "Données", fullTitleEm: "complètes",
     fullIntro: "Besoin du dataset complet (1 845 codes NOGA 2025 + 5 nomenclatures alignées + cross-walks 5-way) pour vos systèmes ?",
     fullCta: "Voir le bundle Classifications",
@@ -125,6 +129,9 @@ export const NOGA_STR: Record<Lang, NogaStrings> = {
     srcTitle: "Offizielle", srcTitleEm: "Quelle",
     srcIntro: "Diese Seite gibt die Informationen des vom Bundesamt für Statistik herausgegebenen Standards NOGA 2025 wieder. Für die offizielle Fassung:",
     srcLinkText: "bfs.admin.ch — NOGA — Allgemeine Systematik der Wirtschaftszweige", srcUrl: BFS_URL.de,
+    mcpTitle: "NOGA auf", mcpTitleEm: "Abruf",
+    mcpIntro: "Klassifizieren Sie Freitext in die Top-3-NOGA-Codes und durchsuchen Sie den vollständigen Baum (inkl. NACE/ISIC-Cross-Walks) über den MCP-Server — direkt in Claude Code, Cursor oder Cline. Kostenlos testen, ohne Konto.",
+    mcpCta: "MCP einbinden — gratis",
     fullTitle: "Vollständige", fullTitleEm: "Daten",
     fullIntro: "Benötigen Sie den vollständigen Datensatz (1 845 NOGA-2025-Codes + 5 abgeglichene Systematiken + 5-Wege-Cross-Walks) für Ihre Systeme?",
     fullCta: "Klassifikationen-Bundle ansehen",
@@ -165,6 +172,9 @@ export const NOGA_STR: Record<Lang, NogaStrings> = {
     srcTitle: "Official", srcTitleEm: "source",
     srcIntro: "This page reproduces information from the NOGA 2025 standard published by the Federal Statistical Office. For the official version:",
     srcLinkText: "bfs.admin.ch — NOGA — General Classification of Economic Activities", srcUrl: BFS_URL.en,
+    mcpTitle: "NOGA on", mcpTitleEm: "demand",
+    mcpIntro: "Classify free text into the top-3 NOGA codes and query the full tree (NACE/ISIC cross-walks included) via the MCP server — straight from Claude Code, Cursor or Cline. Free to try, no account.",
+    mcpCta: "Connect the MCP — free",
     fullTitle: "Complete", fullTitleEm: "dataset",
     fullIntro: "Need the full dataset (1,845 NOGA 2025 codes + 5 aligned classifications + 5-way cross-walks) for your systems?",
     fullCta: "See the Classifications bundle",

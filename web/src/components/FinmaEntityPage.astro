@@ -12,6 +12,7 @@ const licence = licenceFor(entity, lang);
 const homeHref = localizePath("/", lang);
 const registryHref = localizePath("/finma/", lang);
 const entHref = (slug: string) => localizePath(`/finma/${slug}`, lang);
+const mcpHref = localizePath("/mcp#install", lang);
 const officialUrl = entity.src || "https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/";
 
 const fields: Array<{ label: string; value: string; mono?: boolean }> = [
@@ -93,6 +94,15 @@ const breadcrumbLd = {
       <p style="font-size:15px;line-height:1.6;">
         <a href={officialUrl} target="_blank" rel="noopener">{S.verifyCta} — finma.ch</a>
       </p>
+    </section>
+
+    <section class="ds-section reveal">
+      <h2 class="ds-section-title">{S.mcpCtaTitle} <span class="serif">{S.mcpCtaEm}</span></h2>
+      <p class="ds-section-intro">{S.mcpCtaIntro}</p>
+      <a href={mcpHref} style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; background: var(--color-ink); color: var(--color-bg); border-radius: 10px; text-decoration: none; font-weight: 500; font-size: 15px;">
+        {S.mcpCtaButton}
+        <span style="opacity:.7;">→</span>
+      </a>
     </section>
 
     {neighbors.length > 0 && (

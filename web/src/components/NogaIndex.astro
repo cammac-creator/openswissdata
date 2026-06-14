@@ -22,6 +22,7 @@ for (const row of all) {
 const codeHref = (c: string) => localizePath(`/codes/noga/${c}`, lang);
 const classificationsHref = localizePath("/datasets/classifications", lang);
 const bundleHref = localizePath("/bundle", lang);
+const mcpHref = localizePath("/mcp#install", lang);
 const homeHref = localizePath("/", lang);
 const codesHref = localizePath("/codes/", lang);
 
@@ -31,7 +32,7 @@ type S = {
   searchEyebrow: string; searchTitle: string; searchTitleEm: string; searchIntro: string; searchPlaceholder: string;
   hierEyebrow: string; hierTitle: string; hierTitleEm: string; hierIntro: string;
   division: (n: number) => string; group: (n: number) => string;
-  dsEyebrow: string; dsTitle: string; dsTitleEm: string; dsIntro: string; ctaPrimary: string; ctaSecondary: string;
+  dsEyebrow: string; dsTitle: string; dsTitleEm: string; dsIntro: string; ctaMcp: string; ctaPrimary: string; ctaSecondary: string;
   footer: string; loading: string; noResult: string; resultsN: (n: number) => string; resultsMore: (n: number) => string;
 };
 const STR: Record<Lang, S> = {
@@ -43,7 +44,7 @@ const STR: Record<Lang, S> = {
     hierEyebrow: "Hiérarchie", hierTitle: "Hiérarchie", hierTitleEm: "complète.", hierIntro: `NOGA 2025 est organisée en ${sections.length} sections (lettres A à V), subdivisées en divisions, groupes et classes.`,
     division: (n) => `${n} division${n > 1 ? "s" : ""}`, group: (n) => `${n} groupe${n > 1 ? "s" : ""}`,
     dsEyebrow: "Dataset complet", dsTitle: "Le", dsTitleEm: "dataset complet.", dsIntro: "Besoin de tous les codes (1 845 incluant les sous-classes), 5 nomenclatures alignées et cross-walks 5-way, en CSV / JSON / Parquet / SQL ?",
-    ctaPrimary: "Voir Classifications — 399 CHF", ctaSecondary: "Bundle 3-en-1 — 797 CHF",
+    ctaMcp: "Tester l'API NOGA — gratuit", ctaPrimary: "Voir Classifications — 399 CHF", ctaSecondary: "Bundle 3-en-1 — 797 CHF",
     footer: "Index généré à partir de la nomenclature NOGA 2025 publiée par l'Office fédéral de la statistique. openswissdata.com n'est pas affilié à l'OFS.",
     loading: "Chargement de l'index…", noResult: "Aucun code ne correspond.", resultsN: (n) => `${n} résultat${n > 1 ? "s" : ""}`, resultsMore: (n) => `${n} résultats (50 affichés)`,
   },
@@ -55,7 +56,7 @@ const STR: Record<Lang, S> = {
     hierEyebrow: "Hierarchie", hierTitle: "Vollständige", hierTitleEm: "Hierarchie.", hierIntro: `NOGA 2025 ist in ${sections.length} Abschnitte (Buchstaben A bis V) gegliedert, unterteilt in Abteilungen, Gruppen und Klassen.`,
     division: (n) => `${n} Abteilung${n > 1 ? "en" : ""}`, group: (n) => `${n} Gruppe${n > 1 ? "n" : ""}`,
     dsEyebrow: "Vollständiger Datensatz", dsTitle: "Der", dsTitleEm: "vollständige Datensatz.", dsIntro: "Benötigen Sie alle Codes (1 845 inkl. Unterklassen), 5 abgeglichene Systematiken und 5-Wege-Cross-Walks in CSV / JSON / Parquet / SQL?",
-    ctaPrimary: "Klassifikationen ansehen — 399 CHF", ctaSecondary: "3-in-1-Bundle — 797 CHF",
+    ctaMcp: "NOGA-API testen — gratis", ctaPrimary: "Klassifikationen ansehen — 399 CHF", ctaSecondary: "3-in-1-Bundle — 797 CHF",
     footer: "Index generiert aus der vom Bundesamt für Statistik herausgegebenen NOGA 2025. openswissdata.com ist nicht mit dem BFS verbunden.",
     loading: "Index wird geladen…", noResult: "Kein Code passt.", resultsN: (n) => `${n} Ergebnis${n > 1 ? "se" : ""}`, resultsMore: (n) => `${n} Ergebnisse (50 angezeigt)`,
   },
@@ -67,7 +68,7 @@ const STR: Record<Lang, S> = {
     hierEyebrow: "Hierarchy", hierTitle: "Full", hierTitleEm: "hierarchy.", hierIntro: `NOGA 2025 is organised into ${sections.length} sections (letters A to V), subdivided into divisions, groups and classes.`,
     division: (n) => `${n} division${n > 1 ? "s" : ""}`, group: (n) => `${n} group${n > 1 ? "s" : ""}`,
     dsEyebrow: "Full dataset", dsTitle: "The", dsTitleEm: "complete dataset.", dsIntro: "Need all codes (1,845 including subclasses), 5 aligned classifications and 5-way cross-walks, in CSV / JSON / Parquet / SQL?",
-    ctaPrimary: "See Classifications — 399 CHF", ctaSecondary: "3-in-1 bundle — 797 CHF",
+    ctaMcp: "Try the NOGA API — free", ctaPrimary: "See Classifications — 399 CHF", ctaSecondary: "3-in-1 bundle — 797 CHF",
     footer: "Index generated from the NOGA 2025 classification published by the Federal Statistical Office. openswissdata.com is not affiliated with the FSO.",
     loading: "Loading index…", noResult: "No matching code.", resultsN: (n) => `${n} result${n > 1 ? "s" : ""}`, resultsMore: (n) => `${n} results (50 shown)`,
   },
@@ -183,7 +184,8 @@ const indexJsonLd = {
       <h2 class="v4-section-h2">{T.dsTitle} <span class="serif">{T.dsTitleEm}</span></h2>
       <p class="v4-section-intro">{T.dsIntro}</p>
       <div class="v4-cta-row">
-        <a href={classificationsHref} class="v4-btn v4-btn-primary">{T.ctaPrimary} <span class="arrow">→</span></a>
+        <a href={mcpHref} class="v4-btn v4-btn-primary">{T.ctaMcp} <span class="arrow">→</span></a>
+        <a href={classificationsHref} class="v4-btn v4-btn-secondary">{T.ctaPrimary}</a>
         <a href={bundleHref} class="v4-btn v4-btn-secondary">{T.ctaSecondary}</a>
       </div>
     </section>

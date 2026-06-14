@@ -13,6 +13,7 @@ const total = loadFinma().length;
 const homeHref = localizePath("/", lang);
 const registryHref = localizePath("/finma/", lang);
 const entHref = (slug: string) => localizePath(`/finma/${slug}`, lang);
+const mcpHref = localizePath("/mcp#install", lang);
 
 const ORIGIN = "https://www.openswissdata.com";
 const indexJsonLd = {
@@ -64,6 +65,15 @@ const indexJsonLd = {
         style="width: 100%; padding: 14px 18px; font-size: 16px; border: 1px solid var(--color-line); border-radius: 12px; background: white; font-family: var(--font-sans); margin-bottom: 16px;" />
       <div id="finma-results" style="display: none; max-height: 480px; overflow-y: auto; border: 1px solid var(--color-line); border-radius: 12px; background: white;"></div>
       <p id="finma-search-count" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
+    </section>
+
+    <section class="ds-section reveal-v4">
+      <div class="v4-section-eyebrow"><strong>API</strong></div>
+      <h2 class="v4-section-h2">{S.mcpCtaTitle} <span class="serif">{S.mcpCtaEm}</span></h2>
+      <p class="v4-section-intro">{S.mcpCtaIntro}</p>
+      <div class="v4-cta-row">
+        <a href={mcpHref} class="v4-btn v4-btn-primary">{S.mcpCtaButton} <span class="arrow">→</span></a>
+      </div>
     </section>
 
     <section class="ds-section reveal-v4">
