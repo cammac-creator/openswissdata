@@ -85,6 +85,7 @@ export interface FinmaStrings {
   detailsTitle: string; detailsEm: string;
   meansTitle: string; meansEm: string;
   verifyTitle: string; verifyEm: string; verifyIntro: string; verifyCta: string;
+  mcpCtaTitle: string; mcpCtaEm: string; mcpCtaIntro: string; mcpCtaButton: string;
   neighborsTitle: (typeLabel: string) => string; neighborsEm: string;
   footer: string;
   metaTitle: (name: string, typeLabel: string) => string;
@@ -108,6 +109,9 @@ export const FINMA_STR: Record<Lang, FinmaStrings> = {
     verifyTitle: "Vérifier", verifyEm: "à la source",
     verifyIntro: "Cette fiche reprend des données publiques du registre FINMA. Pour le statut faisant foi et à jour, consultez le registre officiel :",
     verifyCta: "Registre officiel FINMA",
+    mcpCtaTitle: "Vérifier la FINMA", mcpCtaEm: "par API",
+    mcpCtaIntro: "Interrogez le statut d'autorisation FINMA par API, dans vos workflows — via le serveur MCP, directement dans Claude Code, Cursor ou Cline. Données issues d'un instantané du registre public ; le statut faisant foi reste celui de finma.ch. Gratuit pour tester, sans compte.",
+    mcpCtaButton: "Brancher le MCP — gratuit",
     neighborsTitle: (t) => `Autres ${t.toLowerCase()}`, neighborsEm: "autorisés",
     footer: "Fiche générée à partir du registre public des autorisations de la FINMA (établissements et personnes surveillés). openswissdata.com n'est pas affilié à la FINMA et ne se substitue pas à la consultation directe de finma.ch. Figurer dans le registre reflète une autorisation au moment de l'extraction ; le statut faisant foi est celui de la FINMA.",
     metaTitle: (n, t) => `${n} — ${t} autorisé(e) FINMA | openswissdata.com`,
@@ -130,6 +134,9 @@ export const FINMA_STR: Record<Lang, FinmaStrings> = {
     verifyTitle: "An der Quelle", verifyEm: "prüfen",
     verifyIntro: "Dieser Eintrag gibt öffentliche Daten des FINMA-Registers wieder. Für den massgebenden und aktuellen Status konsultieren Sie das offizielle Register:",
     verifyCta: "Offizielles FINMA-Register",
+    mcpCtaTitle: "FINMA-Status", mcpCtaEm: "per API",
+    mcpCtaIntro: "Fragen Sie den FINMA-Bewilligungsstatus per API in Ihren Workflows ab — über den MCP-Server, direkt in Claude Code, Cursor oder Cline. Daten aus einem Auszug des öffentlichen Registers; massgebend bleibt der Status auf finma.ch. Kostenlos testen, ohne Konto.",
+    mcpCtaButton: "MCP einbinden — gratis",
     neighborsTitle: (t) => `Weitere bewilligte ${t}`, neighborsEm: "",
     footer: "Eintrag generiert aus dem öffentlichen Bewilligungsregister der FINMA (beaufsichtigte Institute und Personen). openswissdata.com ist nicht mit der FINMA verbunden und ersetzt nicht die direkte Konsultation von finma.ch. Der Registereintrag spiegelt eine Bewilligung zum Zeitpunkt der Extraktion wider; massgebend ist der Status der FINMA.",
     metaTitle: (n, t) => `${n} — von der FINMA bewilligt (${t}) | openswissdata.com`,
@@ -152,6 +159,9 @@ export const FINMA_STR: Record<Lang, FinmaStrings> = {
     verifyTitle: "Verify", verifyEm: "at source",
     verifyIntro: "This entry reproduces public data from the FINMA register. For the authoritative, up-to-date status, consult the official register:",
     verifyCta: "Official FINMA register",
+    mcpCtaTitle: "Check FINMA", mcpCtaEm: "by API",
+    mcpCtaIntro: "Query FINMA authorisation status by API, inside your workflows — via the MCP server, straight from Claude Code, Cursor or Cline. Data from a public-register snapshot; the authoritative status remains finma.ch's. Free to try, no account.",
+    mcpCtaButton: "Connect the MCP — free",
     neighborsTitle: (t) => `Other authorised ${t.toLowerCase()}`, neighborsEm: "entities",
     footer: "Entry generated from FINMA's public authorisation register (supervised institutions and persons). openswissdata.com is not affiliated with FINMA and does not replace direct consultation of finma.ch. A register entry reflects an authorisation at extraction time; the authoritative status is FINMA's.",
     metaTitle: (n, t) => `${n} — FINMA-authorised ${t} | openswissdata.com`,

@@ -20,6 +20,7 @@ const codeHref = (c: string) => localizePath(`/codes/noga/${c}`, lang);
 const codesHref = localizePath("/codes/", lang);
 const homeHref = localizePath("/", lang);
 const classificationsHref = localizePath("/datasets/classifications", lang);
+const mcpHref = localizePath("/mcp#install", lang);
 
 const ancestorsRaw = getAncestors(row.code);
 const childrenRaw = getChildren(row.code);
@@ -270,12 +271,15 @@ const breadcrumbLd = {
     </section>
 
     <section class="ds-section reveal">
-      <h2 class="ds-section-title">{S.fullTitle} <span class="serif">{S.fullTitleEm}</span></h2>
-      <p class="ds-section-intro">{S.fullIntro}</p>
-      <a href={classificationsHref} style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; background: var(--color-ink); color: var(--color-bg); border-radius: 10px; text-decoration: none; font-weight: 500; font-size: 15px;">
-        {S.fullCta}
+      <h2 class="ds-section-title">{S.mcpTitle} <span class="serif">{S.mcpTitleEm}</span></h2>
+      <p class="ds-section-intro">{S.mcpIntro}</p>
+      <a href={mcpHref} style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; background: var(--color-ink); color: var(--color-bg); border-radius: 10px; text-decoration: none; font-weight: 500; font-size: 15px;">
+        {S.mcpCta}
         <span style="opacity:.7;">→</span>
       </a>
+      <p style="margin-top: 18px; font-size: 14px; line-height: 1.6; color: var(--color-ink-mute);">
+        {S.fullIntro} <a href={classificationsHref} style="color: var(--color-ink-soft); text-decoration: underline;">{S.fullCta} →</a>
+      </p>
     </section>
 
     <footer style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--color-line); font-size: 12px; line-height: 1.6; color: var(--color-ink-mute);">

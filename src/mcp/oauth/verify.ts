@@ -67,6 +67,14 @@ function clientIp(req: { header: (n: string) => string | undefined }): string {
 }
 
 /**
+ * Public /pricing URL surfaced on 429s so a rate-limited caller (human or LLM)
+ * sees the upgrade path. Uses BASE_URL (the public site), not MCP_BASE_URL.
+ */
+function pricingUpgradeUrl(): string {
+  return (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "") + "/pricing";
+}
+
+/**
  * Build the OAuth verification middleware. Pass `requireToken=true` to refuse
  * unauthenticated calls outright (used by the admin-only routes — none yet).
  */
@@ -126,10 +134,12 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
       if (quota.month_limit >= 0) c.header("X-RateLimit-Month-Limit", String(quota.month_limit));
 
       if (!quota.allowed) {
+        const upgrade = pricingUpgradeUrl();
         return c.json(
           {
             error: "rate_limit_exceeded",
-            error_description: `tier=${tier} day=${quota.day_used}/${quota.day_limit} month=${quota.month_used}/${quota.month_limit}`,
+            error_description: `tier=${tier} day=${quota.day_used}/${quota.day_limit} month=${quota.month_used}/${quota.month_limit} — upgrade at ${upgrade}`,
+            upgrade_url: upgrade,
           },
           429,
         );
@@ -160,8 +170,13 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
     c.header("X-RateLimit-Remaining", String(rl.remaining));
     c.header("X-RateLimit-Reset", String(Math.floor(rl.resetAt / 1000)));
     if (!rl.allowed) {
+      const upgrade = pricingUpgradeUrl();
       return c.json(
-        { error: "rate_limit_exceeded", error_description: "anonymous tier exceeded" },
+        {
+          error: "rate_limit_exceeded",
+          error_description: `anonymous tier exceeded — upgrade at ${upgrade}`,
+          upgrade_url: upgrade,
+        },
         429,
       );
     }

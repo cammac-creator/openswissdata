@@ -32,7 +32,7 @@ import QuoteCarousel from "../components/QuoteCarousel.astro";
         </h1>
 
         <p class="v4-lede reveal-v4" data-delay="2">
-          TARES, NOGA·NACE·ISIC, FINMA Registry — extraits des sources autoritaires fédérales, livrés <strong>normalisés, versionnés et signés Ed25519</strong>. Pour vos pipelines, vos audits, et vos intégrations ERP.
+          TARES, NOGA·NACE·ISIC, FINMA Registry — <strong>interrogeables par API via le serveur MCP</strong> (Claude Code, Cursor, Cline), ou livrés normalisés, versionnés et signés Ed25519. Pour vos pipelines, vos audits, et vos intégrations ERP.
         </p>
 
         <div class="v4-spec-row reveal-v4" data-delay="3">
@@ -45,14 +45,15 @@ import QuoteCarousel from "../components/QuoteCarousel.astro";
             <div class="v4-spec-value" data-count="12800">~12 800</div>
           </div>
           <div class="v4-spec">
-            <div class="v4-spec-label">Formats</div>
-            <div class="v4-spec-value">Parquet · JSON · SQL</div>
+            <div class="v4-spec-label">MCP</div>
+            <div class="v4-spec-value">9 tools · live</div>
           </div>
         </div>
 
         <div class="v4-cta-row reveal-v4" data-delay="4">
-          <a href="#datasets" class="v4-btn v4-btn-primary">Voir les datasets <span class="arrow">→</span></a>
-          <a href="/samples/tares-sample.csv" class="v4-btn v4-btn-secondary" download>Démo gratuite — 100 lignes CSV ↓</a>
+          <a href="/mcp#install" class="v4-btn v4-btn-primary">Brancher le MCP — gratuit <span class="arrow">→</span></a>
+          <a href="#datasets" class="v4-btn v4-btn-secondary">Voir les datasets</a>
+          <a href="/samples/tares-sample.csv" class="v4-btn v4-btn-secondary" download>Démo CSV ↓</a>
           <InstallBar command="npx @osd/cli pull tares" />
         </div>
 
@@ -358,12 +359,12 @@ import QuoteCarousel from "../components/QuoteCarousel.astro";
   <div class="container-v4">
     <h2 class="reveal-v4">Prêt à brancher la donnée suisse ?</h2>
     <p class="reveal-v4" data-delay="1">
-      299–399 CHF par dataset, 797 CHF le bundle. Mises à jour hebdomadaires (TARES, FINMA) ou annuelles (Classifications) incluses. Pas d'engagement, refund 14 jours sans condition.
+      Gratuit pour tester via le serveur MCP (100 requêtes/jour, sans compte). Ou en fichier : 299–399 CHF par dataset, 797 CHF le bundle, mises à jour incluses, refund 14 jours sans condition.
     </p>
     <div class="v4-cta-final-row reveal-v4" data-delay="2">
-      <a href="#datasets" class="v4-btn v4-btn-primary">Voir les datasets <span class="arrow">→</span></a>
-      <a href="/legal/provenance" class="v4-btn v4-btn-secondary">Voir la provenance signée</a>
-      <a href="mailto:contact@openswissdata.com" class="v4-btn-mono">Contact commercial</a>
+      <a href="/mcp#install" class="v4-btn v4-btn-primary">Brancher le MCP — gratuit <span class="arrow">→</span></a>
+      <a href="#datasets" class="v4-btn v4-btn-secondary">Voir les datasets</a>
+      <a href="/legal/provenance" class="v4-btn-mono">Provenance signée</a>
     </div>
   </div>
 </section>

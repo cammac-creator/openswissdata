@@ -10,6 +10,7 @@ const { monolingual = false } = Astro.props;
 const lang = getLangFromPath(Astro.url.pathname);
 const homeHref = localizePath("/", lang);
 const blogHref = localizePath("/blog", lang);
+const mcpHref = localizePath("/mcp", lang);
 ---
 <div class="v4-status" id="v4-status">
   <div class="v4-status-left">
@@ -27,6 +28,7 @@ const blogHref = localizePath("/blog", lang);
     <nav class="v4-status-nav">
       <a href={`${homeHref}#datasets`}>{t("nav.datasets", lang)}</a>
       <a href={`${homeHref}#how`}>{t("nav.how", lang)}</a>
+      <a href={mcpHref}>MCP</a>
       <a href="/pricing">{lang === "de" ? "Preise" : lang === "en" ? "Pricing" : "Tarifs"}</a>
       <a href={blogHref}>{t("nav.blog", lang)}</a>
     </nav>
