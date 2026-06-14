@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import TrustStrip from "../components/TrustStrip.astro";
 import ProductFaq from "../components/ProductFaq.astro";
+import ApiSwitch from "../components/ApiSwitch.astro";
 
 const productJsonLd = {
   "@context": "https://schema.org",
@@ -240,6 +241,7 @@ const productJsonLd = {
 
     <ProductFaq productName="Bundle 3-en-1" refundClause="Remboursement intégral dans les 14 jours si aucun des 3 ZIP n'a été téléchargé." />
 
+    <ApiSwitch lang="fr" />
     <div class="ds-cta" id="acheter">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
         <input type="hidden" name="dataset_ids" value="bundle" />
