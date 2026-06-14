@@ -24,7 +24,7 @@ describe("RemoteProxy", () => {
   it("calls /discovery on discovery()", async () => {
     const { fetch, calls } = makeFetch(() => ({
       body: {
-        protocol_version: "2025-06-18",
+        protocol_version: "2025-11-25",
         server_info: { name: "openswissdata-mcp", version: "0.2.0" },
         capabilities: { tools: { list_changed: false } },
         tools: ["tariff_lookup", "kyc_check"],

@@ -129,7 +129,7 @@ describe("Client", () => {
   it("calls /discovery on the discovery() method", async () => {
     const { fetch, calls } = makeMock(() => ({
       body: {
-        protocol_version: "2025-06-18",
+        protocol_version: "2025-11-25",
         server_info: { name: "openswissdata-mcp", version: "0.2.0" },
         capabilities: { tools: { list_changed: false } },
         tools: ["tariff_lookup", "kyc_check"],
@@ -137,7 +137,7 @@ describe("Client", () => {
     }));
     const client = new Client({ fetch, maxRetries: 0 });
     const info = await client.discovery();
-    expect(info.protocol_version).toBe("2025-06-18");
+    expect(info.protocol_version).toBe("2025-11-25");
     expect(calls[0]!.url).toMatch(/\/discovery$/);
     expect(calls[0]!.init?.method).toBe("GET");
   });

@@ -13,7 +13,7 @@
  *
  * V2 may switch to the SDK once we add SSE / streaming + session resumption.
  *
- * Spec reference: https://modelcontextprotocol.io/  (2025-06-18)
+ * Spec reference: https://modelcontextprotocol.io/  (2025-11-25)
  */
 
 import { tariffLookupTool } from "./tools/tariff-lookup.js";
@@ -27,7 +27,7 @@ import { entityHistoryTool } from "./tools/entity-history.js";
 import { statentLookupTool } from "./tools/statent-lookup.js";
 import { TOOL_SCOPE, isToolAllowed, type MCPAuthContext } from "./oauth/index.js";
 
-const PROTOCOL_VERSION = "2025-06-18";
+const PROTOCOL_VERSION = "2025-11-25";
 const SERVER_INFO = {
   name: "openswissdata-mcp",
   version: "0.2.0",
