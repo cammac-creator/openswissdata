@@ -276,7 +276,7 @@ def test_discovery_returns_server_info() -> None:
         lambda r: httpx.Response(
             200,
             json={
-                "protocol_version": "2025-06-18",
+                "protocol_version": "2025-11-25",
                 "server_info": {"name": "openswissdata-mcp", "version": "0.2.0"},
                 "capabilities": {"tools": {"list_changed": False}},
                 "tools": ["tariff_lookup"],
@@ -285,5 +285,5 @@ def test_discovery_returns_server_info() -> None:
     )
     with Client(transport=transport, max_retries=0) as client:
         info = client.discovery()
-    assert info["protocol_version"] == "2025-06-18"
+    assert info["protocol_version"] == "2025-11-25"
     assert "tariff_lookup" in info["tools"]

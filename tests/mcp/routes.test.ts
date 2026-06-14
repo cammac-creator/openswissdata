@@ -32,7 +32,7 @@ describe("MCP HTTP routes", () => {
       tools: string[];
       server_info: { name: string };
     };
-    expect(body.protocol_version).toBe("2025-06-18");
+    expect(body.protocol_version).toBe("2025-11-25");
     expect(body.server_info.name).toBe("openswissdata-mcp");
     expect(body.tools).toEqual(
       expect.arrayContaining(["tariff_lookup", "kyc_check", "cross_walk"]),
@@ -81,7 +81,7 @@ describe("MCP HTTP routes", () => {
     const body = (await res.json()) as {
       result: { protocolVersion: string };
     };
-    expect(body.result.protocolVersion).toBe("2025-06-18");
+    expect(body.result.protocolVersion).toBe("2025-11-25");
   });
 
   it("POST /mcp/jsonrpc — tools/list returns the 3 MVP tools", async () => {
