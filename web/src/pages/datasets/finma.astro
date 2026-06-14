@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import FinmaLookup from "../../components/FinmaLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
 import ProductFaq from "../../components/ProductFaq.astro";
+import ApiSwitch from "../../components/ApiSwitch.astro";
 
 const datasetJsonLd = {
   "@context": "https://schema.org",
@@ -283,6 +284,7 @@ const productJsonLd = {
 
     <ProductFaq productName="FINMA Registry" />
 
+    <ApiSwitch lang="fr" />
     <div class="ds-cta" id="acheter">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
         <input type="hidden" name="dataset_ids" value="finma" />

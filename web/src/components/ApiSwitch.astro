@@ -1,0 +1,41 @@
+---
+/**
+ * "Prefer an API over a file?" bridge — sits on the one-shot ZIP dataset pages
+ * to funnel file-intent visitors toward the free MCP tier WITHOUT demoting the
+ * working purchase CTA. Deliberately makes NO data-freshness claim (the MCP
+ * data is a snapshot) — it only contrasts the access method (API vs file).
+ */
+import { localizePath, type Lang } from "../i18n/utils";
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props as Props;
+const mcpHref = localizePath("/mcp#install", lang);
+
+const STR: Record<Lang, { eyebrow: string; h: string; p: string; cta: string }> = {
+  fr: {
+    eyebrow: "API · MCP",
+    h: "Plutôt en API qu'en fichier ?",
+    p: "Interrogez ces données directement dans vos workflows via le serveur MCP — pas de fichier à réimporter. Gratuit pour tester, sans compte.",
+    cta: "Tester l'API — gratuit",
+  },
+  de: {
+    eyebrow: "API · MCP",
+    h: "Lieber per API als als Datei?",
+    p: "Fragen Sie diese Daten direkt in Ihren Workflows über den MCP-Server ab — keine Datei zum Re-Import. Kostenlos testen, ohne Konto.",
+    cta: "API testen — gratis",
+  },
+  en: {
+    eyebrow: "API · MCP",
+    h: "Prefer an API over a file?",
+    p: "Query this data directly from your workflows via the MCP server — no file to re-import. Free to try, no account.",
+    cta: "Try the API — free",
+  },
+};
+const T = STR[lang] ?? STR.fr;
+---
+<div class="ds-api-switch" style="margin:28px 0;padding:20px 24px;border:1px solid var(--color-line);border-radius:12px;background:var(--bg-soft,#f4f4f0);">
+  <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-ink-mute);margin-bottom:8px;">{T.eyebrow}</div>
+  <strong style="display:block;font-size:17px;margin-bottom:6px;">{T.h}</strong>
+  <p style="font-size:14px;color:var(--color-ink-soft);line-height:1.6;margin:0 0 14px;">{T.p}</p>
+  <a href={mcpHref} class="v4-btn v4-btn-secondary">{T.cta} <span class="arrow">→</span></a>
+</div>

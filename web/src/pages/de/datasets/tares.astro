@@ -3,6 +3,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import HSLookup from "../../../components/HSLookup.astro";
 import TrustStrip from "../../../components/TrustStrip.astro";
 import ProductFaq from "../../../components/ProductFaq.astro";
+import ApiSwitch from "../../../components/ApiSwitch.astro";
 
 const productJsonLd = {
   "@context": "https://schema.org",
@@ -227,6 +228,7 @@ const productJsonLd = {
 
     <ProductFaq productName="TARES" formatNote="CSV (100 Zeilen Sample), JSON, Parquet und SQL in allen Käufen enthalten." />
 
+    <ApiSwitch lang="de" />
     <div class="ds-cta" id="kaufen">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
         <input type="hidden" name="dataset_ids" value="tares" />
