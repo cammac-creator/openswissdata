@@ -1524,6 +1524,14 @@ details[open] .faq-body {
 .v4-spec-value { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
 
 .v4-cta-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+/* Mobile: stack CTAs full-width so wide buttons / the install bar can't overflow
+   the viewport (hero CTA row clipped on ~390px before this). */
+@media (max-width: 640px) {
+  .v4-cta-row { flex-direction: column; align-items: stretch; }
+  .v4-cta-row > .v4-btn,
+  .v4-cta-row > .v4-btn-mono { width: 100%; justify-content: center; text-align: center; }
+  .v4-cta-row > .v4-install-bar { width: 100%; max-width: 100%; overflow-x: auto; }
+}
 .v4-btn { padding: 14px 22px; border-radius: 8px; font-family: var(--font-sans); font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; gap: 10px; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: transform var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out); }
 .v4-btn .arrow { font-family: var(--font-mono); font-weight: 400; display: inline-block; transition: transform var(--t-fast) var(--ease-out); }
 .v4-btn:hover .arrow { transform: translateX(3px); }
