@@ -109,7 +109,10 @@ const breadcrumbJsonLd = {
             <li>✓ Annulable à tout moment</li>
             <li>✓ Support email</li>
           </ul>
-          <button type="button" class="v4-btn v4-btn-secondary pr-cta" disabled style="opacity:.55;cursor:not-allowed;">Bientôt disponible</button>
+          <form method="POST" action="/api/checkout/start" style="margin:0;">
+            <input type="hidden" name="dataset_ids" value="mcp_standalone" />
+            <button type="submit" class="v4-btn v4-btn-primary pr-cta">S'abonner — 49 CHF/mois <span class="arrow">→</span></button>
+          </form>
         </div>
 
         <!-- BUSINESS -->
@@ -124,7 +127,10 @@ const breadcrumbJsonLd = {
             <li>✓ Support prioritaire</li>
             <li>✓ Annulable à tout moment</li>
           </ul>
-          <button type="button" class="v4-btn v4-btn-secondary pr-cta" disabled style="opacity:.55;cursor:not-allowed;">Bientôt disponible</button>
+          <form method="POST" action="/api/checkout/start" style="margin:0;">
+            <input type="hidden" name="dataset_ids" value="mcp_business" />
+            <button type="submit" class="v4-btn v4-btn-secondary pr-cta">S'abonner — 199 CHF/mois <span class="arrow">→</span></button>
+          </form>
         </div>
 
         <!-- ENTERPRISE -->
