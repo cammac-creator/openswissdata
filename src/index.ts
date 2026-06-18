@@ -144,6 +144,23 @@ export function createApp() {
     if (!isMcpHost) return next();
 
     const url = new URL(c.req.url);
+    // API/protocol paths stay on the sub-domain (mapped to /mcp/* below):
+    // JSON-RPC, discovery, health, the OAuth flow, and OAuth metadata.
+    const isMcpApi =
+      url.pathname === "/jsonrpc" ||
+      url.pathname === "/discovery" ||
+      url.pathname === "/health" ||
+      url.pathname.startsWith("/oauth/") ||
+      url.pathname.startsWith("/.well-known/") ||
+      url.pathname.startsWith("/mcp");
+    // A human opening the bare sub-domain in a browser would otherwise receive
+    // the /mcp HTML while its assets 404 (every path gets "/mcp" prepended, so
+    // /_astro/*.css breaks → unstyled page). Send browser GETs to the properly
+    // styled docs page on the main host instead. (POST /jsonrpc etc. are API.)
+    if (!isMcpApi && (c.req.method === "GET" || c.req.method === "HEAD")) {
+      const dest = "https://www.openswissdata.com" + (url.pathname === "/" ? "/mcp" : url.pathname);
+      return c.redirect(dest, 302);
+    }
     if (url.pathname.startsWith("/mcp")) return next();
     url.pathname = "/mcp" + url.pathname;
     const rewritten = new Request(url, c.req.raw);
