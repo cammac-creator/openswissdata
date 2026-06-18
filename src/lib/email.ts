@@ -208,7 +208,9 @@ function emailShell(opts: { heading: string; bodyHtml: string; preheader?: strin
     `<tr><td style="padding:4px 0 18px 0;">` +
     `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>` +
     `<td style="vertical-align:middle;padding:0 10px 0 0;">` +
-    `<img src="${LOGO_URL}" width="28" height="28" alt="openswissdata" ` +
+    // alt="" — decorative: the wordmark text right beside it already names the
+    // brand, so with images blocked we show "openswissdata" once, not twice.
+    `<img src="${LOGO_URL}" width="28" height="28" alt="" ` +
     `style="display:block;width:28px;height:28px;border:0;outline:none;"/></td>` +
     `<td style="vertical-align:middle;font-family:${FONT_MONO};font-size:15px;` +
     `letter-spacing:.02em;color:${BRAND.ink};font-weight:600;">openswissdata</td>` +
@@ -263,7 +265,7 @@ export interface DownloadEmailParams {
   locale?: Locale;
 }
 
-export async function sendDownloadEmail(p: DownloadEmailParams): Promise<EmailSendResult> {
+export function renderDownloadEmail(p: DownloadEmailParams): { subject: string; html: string } {
   const locale = p.locale ?? "fr";
   const name = escapeHtml(p.datasetName);
   const strong = (s: string) => `<strong style="color:${BRAND.ink};">${s}</strong>`;
@@ -315,7 +317,12 @@ export async function sendDownloadEmail(p: DownloadEmailParams): Promise<EmailSe
     para(copy.access);
 
   const html = emailShell({ heading: copy.heading, bodyHtml: body, preheader: copy.preheader, locale });
-  return resendSend(p.to, copy.subject, html);
+  return { subject: copy.subject, html };
+}
+
+export async function sendDownloadEmail(p: DownloadEmailParams): Promise<EmailSendResult> {
+  const { subject, html } = renderDownloadEmail(p);
+  return resendSend(p.to, subject, html);
 }
 
 export interface MagicLinkEmailParams {
@@ -324,7 +331,7 @@ export interface MagicLinkEmailParams {
   locale?: Locale;
 }
 
-export async function sendMagicLinkEmail(p: MagicLinkEmailParams): Promise<EmailSendResult> {
+export function renderMagicLinkEmail(p: MagicLinkEmailParams): { subject: string; html: string } {
   const locale = p.locale ?? "fr";
   const copy = {
     fr: {
@@ -372,7 +379,12 @@ export async function sendMagicLinkEmail(p: MagicLinkEmailParams): Promise<Email
     para(`<span style="color:${BRAND.inkMute};font-size:13px;">${copy.security}</span>`);
 
   const html = emailShell({ heading: copy.heading, bodyHtml: body, preheader: copy.preheader, locale });
-  return resendSend(p.to, copy.subject, html);
+  return { subject: copy.subject, html };
+}
+
+export async function sendMagicLinkEmail(p: MagicLinkEmailParams): Promise<EmailSendResult> {
+  const { subject, html } = renderMagicLinkEmail(p);
+  return resendSend(p.to, subject, html);
 }
 
 export interface McpCredentialsEmailParams {
@@ -400,7 +412,7 @@ export function accountUrl(locale: Locale): string {
  * client it delivers the credentials (the secret is shown once here); on an
  * upgrade of an existing client it just confirms activation without a secret.
  */
-export async function sendMcpCredentialsEmail(p: McpCredentialsEmailParams): Promise<EmailSendResult> {
+export function renderMcpCredentialsEmail(p: McpCredentialsEmailParams): { subject: string; html: string } {
   const locale = p.locale ?? "fr";
   const hasSecret = typeof p.clientSecret === "string" && p.clientSecret.length > 0;
   const acctUrl = accountUrl(locale);
@@ -502,7 +514,12 @@ export async function sendMcpCredentialsEmail(p: McpCredentialsEmailParams): Pro
     para(copy.manage);
 
   const html = emailShell({ heading: copy.heading, bodyHtml: body, preheader: copy.preheader, locale });
-  return resendSend(p.to, copy.subject, html);
+  return { subject: copy.subject, html };
+}
+
+export async function sendMcpCredentialsEmail(p: McpCredentialsEmailParams): Promise<EmailSendResult> {
+  const { subject, html } = renderMcpCredentialsEmail(p);
+  return resendSend(p.to, subject, html);
 }
 
 function escapeHtml(s: string): string {
