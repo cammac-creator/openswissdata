@@ -78,6 +78,32 @@ describe("POST /api/checkout/session", () => {
     expect(call.metadata.dataset_ids).toBe("tares,finma");
   });
 
+  it("propagates locale to Stripe Checkout UI and metadata", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ dataset_ids: ["tares"], email: "de@example.com", locale: "de" }),
+    });
+    expect(res.status).toBe(200);
+    const call = sessionCreateMock.mock.calls[0][0];
+    expect(call.locale).toBe("de");
+    expect(call.metadata.locale).toBe("de");
+  });
+
+  it("omits locale from params and metadata when not provided", async () => {
+    const app = createApp();
+    const res = await app.request("/api/checkout/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ dataset_ids: ["tares"], email: "x@y.com" }),
+    });
+    expect(res.status).toBe(200);
+    const call = sessionCreateMock.mock.calls[0][0];
+    expect(call.locale).toBeUndefined();
+    expect(call.metadata.locale).toBeUndefined();
+  });
+
   it("uses bundle price when dataset_ids=['bundle']", async () => {
     const app = createApp();
     const res = await app.request("/api/checkout/session", {

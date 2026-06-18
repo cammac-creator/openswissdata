@@ -256,30 +256,42 @@ const tools = [
     <h2 class="v4-section-h2">Free tier capable. Pro for production workflows.</h2>
 
     <div class="mcp-pricing-grid">
-      <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:22px;">
-        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Free</div>
-        <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">0 CHF</div>
-        <p style="font-size:12px;color:var(--ink-soft);line-height:1.4;">100 req/day per IP. No account required to test.</p>
+      <div class="mcp-pc">
+        <div class="mcp-pc-tier">Free</div>
+        <div class="mcp-pc-price">0 CHF</div>
+        <p class="mcp-pc-sub">100 req/day per IP. No account required to test.</p>
+        <a href="#install" class="v4-btn v4-btn-secondary mcp-pc-cta">Test now <span class="arrow">→</span></a>
       </div>
-      <div style="background:var(--bg-card);border:2px solid var(--accent);border-radius:12px;padding:22px;position:relative;">
-        <span style="position:absolute;top:-10px;right:14px;background:var(--accent);color:#fff;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;font-weight:600;">popular</span>
-        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Pro</div>
-        <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">49 CHF<small style="font-size:13px;font-weight:500;color:var(--ink-mute);">/month</small></div>
-        <p style="font-size:12px;color:var(--ink-soft);line-height:1.4;">5,000 req/month. Self-serve key, cancel anytime.</p>
+      <div class="mcp-pc pop">
+        <span class="mcp-pc-badge">popular</span>
+        <div class="mcp-pc-tier" style="color:var(--accent);">Pro</div>
+        <div class="mcp-pc-price">49 CHF<small>/month</small></div>
+        <p class="mcp-pc-sub">5,000 req/month. Self-serve key, cancel anytime.</p>
+        <form method="POST" action="/api/checkout/start">
+          <input type="hidden" name="dataset_ids" value="mcp_standalone" />
+          <input type="hidden" name="locale" value="en" />
+          <button type="submit" class="v4-btn v4-btn-primary mcp-pc-cta">Subscribe — 49 CHF/month <span class="arrow">→</span></button>
+        </form>
       </div>
-      <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:22px;">
-        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Business</div>
-        <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">199 CHF<small style="font-size:13px;font-weight:500;color:var(--ink-mute);">/month</small></div>
-        <p style="font-size:12px;color:var(--ink-soft);line-height:1.4;">50,000 req/month + advanced tools. Fintechs &amp; ERP integrators.</p>
+      <div class="mcp-pc">
+        <div class="mcp-pc-tier">Business</div>
+        <div class="mcp-pc-price">199 CHF<small>/month</small></div>
+        <p class="mcp-pc-sub">50,000 req/month + advanced tools. Fintechs &amp; ERP integrators.</p>
+        <form method="POST" action="/api/checkout/start">
+          <input type="hidden" name="dataset_ids" value="mcp_business" />
+          <input type="hidden" name="locale" value="en" />
+          <button type="submit" class="v4-btn v4-btn-secondary mcp-pc-cta">Subscribe — 199 CHF/month <span class="arrow">→</span></button>
+        </form>
       </div>
-      <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:22px;">
-        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Enterprise</div>
-        <div style="font-size:24px;font-weight:700;letter-spacing:-.018em;margin-bottom:4px;">Custom</div>
-        <p style="font-size:12px;color:var(--ink-soft);line-height:1.4;">Unlimited volume, SLA, bespoke. Banks &amp; large accounts.</p>
+      <div class="mcp-pc">
+        <div class="mcp-pc-tier">Enterprise</div>
+        <div class="mcp-pc-price">Custom</div>
+        <p class="mcp-pc-sub">Unlimited volume, SLA, bespoke. Banks &amp; large accounts.</p>
+        <a href="mailto:contact@openswissdata.com?subject=openswissdata%20Enterprise%20(quote)" class="v4-btn v4-btn-secondary mcp-pc-cta">Request a quote <span class="arrow">→</span></a>
       </div>
     </div>
-    <div style="text-align:center;margin-top:22px;">
-      <a href="/pricing" class="v4-btn v4-btn-primary">See pricing &amp; subscribe <span class="arrow">→</span></a>
+    <div style="text-align:center;margin-top:20px;">
+      <a href="/pricing" class="v4-btn-mono">Compare plans in detail</a>
     </div>
   </div>
 </section>
@@ -304,6 +316,54 @@ const tools = [
     gap: 14px;
     margin-top: 24px;
   }
+  .mcp-pc {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+  }
+  .mcp-pc.pop { border: 2px solid var(--accent); position: relative; }
+  .mcp-pc-badge {
+    position: absolute;
+    top: -10px;
+    right: 14px;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .mcp-pc-tier {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+  }
+  .mcp-pc-price {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -.018em;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+  .mcp-pc-price small { font-size: 13px; font-weight: 500; color: var(--ink-mute); }
+  .mcp-pc-sub {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+    margin: 0 0 16px;
+    flex: 1;
+  }
+  .mcp-pc form { margin: 0; }
+  .mcp-pc-cta { width: 100%; justify-content: center; font-size: 13px; padding: 10px; }
   .mcp-playground-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
