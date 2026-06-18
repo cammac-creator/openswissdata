@@ -21,6 +21,7 @@ import { downloadRoute, publicDownload } from "./routes/download.js";
 import { eventsRoute } from "./routes/events.js";
 import { mcpRoute } from "./routes/mcp/index.js";
 import { trackApiRequest } from "./lib/track.js";
+import { startMcpDataRefresh } from "./mcp/r2-refresh.js";
 import { loadEnv } from "./env.js";
 
 export function createApp() {
@@ -241,6 +242,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const app = createApp();
   serve({ fetch: app.fetch, port: env.PORT });
   console.log(`Listening on :${env.PORT}`);
+
+  // Pull fresh FINMA slices from R2 into the in-memory MCP caches (boot +
+  // 12 h safety timer). Fire-and-forget: the server is already listening and
+  // serves the committed seed until the first refresh lands. Never blocks boot.
+  startMcpDataRefresh();
 
   // Flush Sentry events on graceful shutdown so errors right before
   // SIGTERM aren't lost.

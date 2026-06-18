@@ -257,3 +257,68 @@ describe("POST /api/admin/release", () => {
     expect(res.status).toBe(401);
   });
 });
+
+// C2 — MCP data-freshness wiring (release trigger + observability endpoint).
+describe("C2 MCP freshness wiring", () => {
+  let tmp: string;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "osd-c2wire-"));
+    process.env.DATABASE_PATH = join(tmp, "t.sqlite");
+    process.env.ADMIN_SECRET = "test-secret-1234567890";
+    process.env.NODE_ENV = "test";
+    // No R2 creds → the fire-and-forget refresh is a safe no-op (must not crash).
+    delete process.env.R2_ACCOUNT_ID;
+    delete process.env.R2_BUCKET;
+    const db = getDb();
+    db.prepare(
+      "INSERT INTO datasets (id, name, slug, price_chf, stripe_price_id, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+    ).run("finma", "FINMA", "finma", 0, "price_test_finma", Date.now());
+    closeDb();
+  });
+
+  afterEach(() => {
+    closeDb();
+    rmSync(tmp, { recursive: true, force: true });
+    delete process.env.DATABASE_PATH;
+    delete process.env.ADMIN_SECRET;
+  });
+
+  it("a finma release returns 200 (refresh is fire-and-forget, never fails the release)", async () => {
+    const app = createApp();
+    const res = await app.request("/api/admin/release", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-admin-secret": "test-secret-1234567890" },
+      body: JSON.stringify({
+        dataset_id: "finma",
+        version: "2026.06.18",
+        r2_key: "finma/2026.06.18/finma.zip",
+        sha256: "a".repeat(64),
+        size_bytes: 667380,
+        changelog: "",
+      }),
+    });
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("GET /api/admin/mcp-freshness requires the admin secret", async () => {
+    const app = createApp();
+    const res = await app.request("/api/admin/mcp-freshness");
+    expect(res.status).toBe(401);
+  });
+
+  it("GET /api/admin/mcp-freshness returns per-dataset freshness with the secret", async () => {
+    const app = createApp();
+    const res = await app.request("/api/admin/mcp-freshness", {
+      headers: { "x-admin-secret": "test-secret-1234567890" },
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.datasets.finma).toBeDefined();
+    expect(body.datasets.finma).toHaveProperty("currentVersion");
+    expect(body.datasets.finma).toHaveProperty("stale");
+    expect(body.datasets.finma).toHaveProperty("onSeed");
+  });
+});

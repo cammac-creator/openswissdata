@@ -4,6 +4,7 @@ import { getDb } from "../lib/db.js";
 import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
 import { runCleanup } from "../lib/cleanup.js";
+import { refreshFinmaFromR2, getMcpFreshness } from "../mcp/r2-refresh.js";
 import {
   S3Client,
   PutObjectCommand,
@@ -171,5 +172,29 @@ adminRoute.post("/release", async (c) => {
   db.prepare("UPDATE datasets SET current_version = ? WHERE id = ?")
     .run(parsed.version, parsed.dataset_id);
 
+  // Refresh the in-memory MCP slices from the just-released ZIP — DECOUPLED:
+  // fire-and-forget so a refresh failure can never fail the release response.
+  // This runs on Railway (same process as the MCP server) so it mutates the
+  // live in-memory caches; the daily FINMA cron's release POST makes the MCP
+  // fresh within seconds. The 12 h timer + next boot are the safety nets.
+  if (parsed.dataset_id === "finma") {
+    void refreshFinmaFromR2();
+  }
+
   return c.json({ ok: true, dataset_id: parsed.dataset_id, version: parsed.version });
+});
+
+/**
+ * GET /api/admin/mcp-freshness — observability for the MCP data freshness.
+ * Returns, per dataset, the version currently loaded in memory vs the current
+ * DB version (+ a `stale` flag), last refresh/attempt timestamps and last
+ * error. Lets us see at a glance whether the paid MCP is serving fresh data,
+ * instead of trusting it silently (the C1→C2 honesty thread).
+ */
+adminRoute.get("/mcp-freshness", (c) => {
+  const secret = c.req.header("x-admin-secret");
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) {
+    return c.json({ error: "unauthorized" }, 401);
+  }
+  return c.json({ ok: true, datasets: getMcpFreshness(), checked_at: new Date().toISOString() });
 });
