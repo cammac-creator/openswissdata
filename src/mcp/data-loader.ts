@@ -129,6 +129,14 @@ export function getTares(): { rows: readonly TaresRow[]; byHs8: ReadonlyMap<stri
   return { rows: _tares, byHs8: _taresByHs8 };
 }
 
+/**
+ * READ-CONSISTENCY INVARIANT: a consumer that needs BOTH the registry and the
+ * warnings (kyc_check, finma_search) must read them WITHOUT an `await` between
+ * the two getter calls. The R2 refresh swaps both maps from the same ZIP run
+ * with no await between the two setters (see r2-refresh.ts), so back-to-back
+ * synchronous reads always observe a matching registry+warnings pair. Insert an
+ * `await` between the reads and a scheduled refresh could land in the gap.
+ */
 export function getFinmaRegistry(): readonly FinmaRegistryRow[] {
   if (!_finmaRegistry) {
     _finmaRegistry = loadCsv<FinmaRegistryRow>("finma_registry.csv");
@@ -141,6 +149,25 @@ export function getFinmaWarnings(): readonly FinmaWarningRow[] {
     _finmaWarnings = loadCsv<FinmaWarningRow>("finma_warnings.csv");
   }
   return _finmaWarnings;
+}
+
+/**
+ * Hot-swap the in-memory FINMA slices with fresh rows pulled from R2 (see
+ * `r2-refresh.ts`). The committed CSVs remain the cold-start SEED; once a
+ * refresh succeeds these setters replace the served data — no redeploy, no
+ * commit. The getters stay synchronous, so the 7 sync tools are untouched.
+ *
+ * Assignment is a single reference swap (JS is single-threaded) → no lock and
+ * no torn read: a getter either returns the old array or the new one, never a
+ * half-built one. The refresh engine validates rows BEFORE calling these, so a
+ * bad/truncated download never lands here.
+ */
+export function setFinmaRegistry(rows: FinmaRegistryRow[]): void {
+  _finmaRegistry = rows;
+}
+
+export function setFinmaWarnings(rows: FinmaWarningRow[]): void {
+  _finmaWarnings = rows;
 }
 
 export function getCrosswalks(): readonly CrosswalkRow[] {
