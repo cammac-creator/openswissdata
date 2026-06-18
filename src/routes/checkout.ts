@@ -30,9 +30,16 @@ checkoutRoute.use("/start", async (c, next) => {
 const DATASET_IDS = ["tares", "classifications", "finma", "bundle", "mcp_standalone", "mcp_business"] as const;
 type DatasetId = (typeof DATASET_IDS)[number];
 
+// Buyer-facing language. Carried from the localized page (fr/de/en) so the
+// Stripe Checkout UI renders in the buyer's language and the webhook can send
+// transactional emails in the same language (stored on the customer row).
+const LOCALES = ["fr", "de", "en"] as const;
+type Locale = (typeof LOCALES)[number];
+
 const CheckoutSchema = z.object({
   dataset_ids: z.array(z.enum(DATASET_IDS)).min(1).max(4),
   email: z.string().email().optional(),
+  locale: z.enum(LOCALES).optional(),
 });
 
 function isDatasetId(s: string): s is DatasetId {
@@ -46,6 +53,7 @@ type SessionResult =
 async function buildSession(
   dataset_ids: DatasetId[],
   email: string | undefined,
+  locale?: Locale,
 ): Promise<SessionResult> {
   const db = getDb();
   const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -107,6 +115,9 @@ async function buildSession(
     }
   }
 
+  const metadata: Record<string, string> = { dataset_ids: dataset_ids.join(",") };
+  if (locale) metadata.locale = locale;
+
   const params: Stripe.Checkout.SessionCreateParams = {
     mode,
     line_items,
@@ -116,10 +127,12 @@ async function buildSession(
     // CH PMEs and self-employed buyers their preferred rail.
     success_url: `${baseUrl}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/${hasStandalone ? "mcp" : "bundle"}?checkout=cancelled`,
-    metadata: { dataset_ids: dataset_ids.join(",") },
+    metadata,
     allow_promotion_codes: true,
   };
   if (email) params.customer_email = email;
+  // Render the Stripe Checkout UI in the buyer's language (default: Stripe auto).
+  if (locale) params.locale = locale;
 
   try {
     const session = await stripe().checkout.sessions.create(params);
@@ -141,7 +154,7 @@ checkoutRoute.post("/session", async (c) => {
     // H4: don't expose Zod validation internals to clients
     return c.json({ error: "invalid_body" }, 400);
   }
-  const result = await buildSession(parsed.dataset_ids, parsed.email);
+  const result = await buildSession(parsed.dataset_ids, parsed.email, parsed.locale);
   if (!result.ok) {
     if (result.error === "bundle_cannot_be_combined_with_individual_datasets") {
       return c.json({ error: result.error }, 400);
@@ -197,7 +210,13 @@ checkoutRoute.post("/start", async (c) => {
   const emailRaw = body.email;
   const email = typeof emailRaw === "string" && emailRaw.trim() !== "" ? emailRaw.trim() : undefined;
 
-  const result = await buildSession(dataset_ids, email);
+  const localeRaw = body.locale;
+  const locale =
+    typeof localeRaw === "string" && (LOCALES as readonly string[]).includes(localeRaw)
+      ? (localeRaw as Locale)
+      : undefined;
+
+  const result = await buildSession(dataset_ids, email, locale);
   if (!result.ok) {
     const base = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
     // Subscription checkout temporarily closed → back to /pricing with a notice.
