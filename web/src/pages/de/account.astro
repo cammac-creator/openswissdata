@@ -1,20 +1,9 @@
 ---
-// Interim redirect → the customer account UI is FR-only for now (monolingual).
-// Localized transactional emails link here; this keeps those links resolving
-// instead of 404ing. Replace with a real localized account page (B3) later.
-const target = "/account";
+// Kundenbereich (DE). Markup/Style/Script geteilt über AccountApp.astro ;
+// diese Route ist nur ein Sprach-Wrapper. Siehe auch /account und /en/account.
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import AccountApp from "../../components/AccountApp.astro";
 ---
-<!doctype html>
-<html lang="de">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="robots" content="noindex" />
-    <meta http-equiv="refresh" content={`0; url=${target}`} />
-    <link rel="canonical" href={`https://www.openswissdata.com${target}`} />
-    <title>Kundenbereich — openswissdata</title>
-    <script is:inline define:vars={{ target }}>window.location.replace(target);</script>
-  </head>
-  <body>
-    <p>Weiterleitung zum <a href={target}>Kundenbereich</a>…</p>
-  </body>
-</html>
+<BaseLayout title="Kundenbereich — openswissdata" noindex={true}>
+  <AccountApp lang="de" />
+</BaseLayout>

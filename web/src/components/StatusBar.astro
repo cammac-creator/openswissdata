@@ -1,6 +1,7 @@
 ---
 import { getLangFromPath, t, localizePath } from "../i18n/utils";
 import LangSwitcher from "./LangSwitcher.astro";
+import datasetVersions from "../data/dataset-versions.json";
 
 interface Props {
   monolingual?: boolean;
@@ -11,6 +12,13 @@ const lang = getLangFromPath(Astro.url.pathname);
 const homeHref = localizePath("/", lang);
 const blogHref = localizePath("/blog", lang);
 const mcpHref = localizePath("/mcp", lang);
+
+// Édition = version la plus récente parmi les datasets (manifest généré par
+// `npm run sync:versions`, jamais éditée à la main). Évite le badge figé.
+const edition = [datasetVersions.tares, datasetVersions.classifications, datasetVersions.finma]
+  .sort()
+  .slice(-1)[0]
+  .slice(0, 7);
 ---
 <div class="v4-status" id="v4-status">
   <div class="v4-status-left">
@@ -19,7 +27,7 @@ const mcpHref = localizePath("/mcp", lang);
       openswissdata
     </a>
     <div class="v4-status-meta">
-      <span>{t("statusbar.edition", lang)} <strong>2026.04</strong></span>
+      <span>{t("statusbar.edition", lang)} <strong>{edition}</strong></span>
       <span>{t("statusbar.version", lang)}<strong>1.0.0</strong></span>
       <span>{t("statusbar.for", lang)}</span>
     </div>

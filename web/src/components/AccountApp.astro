@@ -1,0 +1,907 @@
+---
+import type { Lang } from "../i18n/utils";
+import { localizePath } from "../i18n/utils";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+/* ============================================================================
+   Espace client — composant partagé FR/DE/EN (login + dashboard).
+
+   i18n : l'espace client appartient à la couche « app / transactionnel »
+   (comme les emails dans src/lib/email.ts), distincte du catalogue marketing
+   t()/JSON. On garde donc la copie dans un dict TYPÉ colocalisé : un
+   Record<Lang, …> fait ÉCHOUER le build sur une clé manquante, là où t()
+   retomberait silencieusement sur le FR (i18n/utils.ts) — on gagne la
+   complétude à la compilation.
+
+   Le markup, le <style> et le <script> sont mutualisés ici : les 3 routes
+   (/account, /de/account, /en/account) ne sont que de minces wrappers. Les
+   identifiants DOM (#login-view, #banner, …) restent identiques dans les 3
+   langues ; seules les chaînes changent. Les chaînes côté JS sont injectées
+   via define:vars sous un SEUL objet namespacé `osdAcct` — les scripts
+   is:inline partagent le scope top-level de la page, le préfixe évite toute
+   collision avec les const de BaseLayout (navEl/reveals/io…).
+   ============================================================================ */
+
+interface AccountCopy {
+  bcHome: string;
+  bcCurrent: string;
+  loginEyebrow1: string;
+  loginEyebrow2: string;
+  loginH1: string;
+  loginLedeHtml: string;
+  fieldLabel: string;
+  emailPlaceholder: string;
+  submitBtn: string;
+  reassure: string;
+  onboardingTitle: string;
+  dashH1: string;
+  logoutBtn: string;
+  emptyEyebrow: string;
+  emptyTitle: string;
+  emptySub: string;
+  emptyCta: string;
+  mcpTitle: string;
+  mcpName: string;
+  mcpStatus: string;
+  mcpPortalBtn: string;
+  loading: string;
+}
+
+interface AccountJsCopy {
+  bannerCheckoutSuccess: string;
+  bannerCheckoutCancelled: string;
+  bannerAuthOk: string;
+  bannerAuthInvalid: string;
+  bannerAuthExpired: string;
+  noVersion: string;
+  updatesUntil: string;
+  dlDownload: string;
+  dlPreparing: string;
+  dlRetry: string;
+  dlError: string;
+  tierStandalone: string;
+  tierBusiness: string;
+  tierPro: string;
+  tierStandard: string;
+  tierFree: string;
+  mcpKey: string;
+  mcpOpening: string;
+  mcpRetry: string;
+  mcpPortalError: string;
+  loginSending: string;
+  loginSuccess: string;
+  loginError: string;
+  loginNetworkError: string;
+  loadError: string;
+}
+
+const COPY: Record<Lang, AccountCopy> = {
+  fr: {
+    bcHome: "accueil",
+    bcCurrent: "Espace client",
+    loginEyebrow1: "Espace client",
+    loginEyebrow2: "lien magique",
+    loginH1: "Bienvenue.",
+    loginLedeHtml: "Entrez votre adresse email — nous vous enverrons un lien de connexion valable <strong>15&nbsp;minutes</strong>. Pas de mot de passe à retenir.",
+    fieldLabel: "Adresse email",
+    emailPlaceholder: "vous@entreprise.com",
+    submitBtn: "Recevoir le lien",
+    reassure: "Aucun mot de passe stocké. Le lien expire automatiquement après usage.",
+    onboardingTitle: "Comment ça marche",
+    dashH1: "Mes datasets",
+    logoutBtn: "Se déconnecter",
+    emptyEyebrow: "Aucun dataset",
+    emptyTitle: "Votre espace est vide pour l'instant.",
+    emptySub: "Composez votre accès sur le bundle complet — TARES, Classifications et FINMA réunis.",
+    emptyCta: "Voir le bundle — 797 CHF",
+    mcpTitle: "Abonnement MCP",
+    mcpName: "Serveur MCP openswissdata",
+    mcpStatus: "Abonnement",
+    mcpPortalBtn: "Gérer mon abonnement",
+    loading: "Chargement de votre espace…",
+  },
+  de: {
+    bcHome: "Startseite",
+    bcCurrent: "Kundenbereich",
+    loginEyebrow1: "Kundenbereich",
+    loginEyebrow2: "Magic Link",
+    loginH1: "Willkommen.",
+    loginLedeHtml: "Geben Sie Ihre E-Mail-Adresse ein — wir senden Ihnen einen Anmeldelink, gültig <strong>15&nbsp;Minuten</strong>. Kein Passwort nötig.",
+    fieldLabel: "E-Mail-Adresse",
+    emailPlaceholder: "sie@unternehmen.com",
+    submitBtn: "Link erhalten",
+    reassure: "Kein Passwort gespeichert. Der Link verfällt automatisch nach Gebrauch.",
+    onboardingTitle: "So funktioniert's",
+    dashH1: "Meine Datensätze",
+    logoutBtn: "Abmelden",
+    emptyEyebrow: "Keine Datensätze",
+    emptyTitle: "Ihr Bereich ist derzeit leer.",
+    emptySub: "Stellen Sie Ihren Zugang mit dem Komplettpaket zusammen — TARES, Klassifikationen und FINMA vereint.",
+    emptyCta: "Paket ansehen — 797 CHF",
+    mcpTitle: "MCP-Abonnement",
+    mcpName: "MCP-Server openswissdata",
+    mcpStatus: "Abonnement",
+    mcpPortalBtn: "Abonnement verwalten",
+    loading: "Ihr Bereich wird geladen…",
+  },
+  en: {
+    bcHome: "home",
+    bcCurrent: "Account",
+    loginEyebrow1: "Account",
+    loginEyebrow2: "magic link",
+    loginH1: "Welcome.",
+    loginLedeHtml: "Enter your email address — we'll send you a sign-in link valid for <strong>15&nbsp;minutes</strong>. No password to remember.",
+    fieldLabel: "Email address",
+    emailPlaceholder: "you@company.com",
+    submitBtn: "Get the link",
+    reassure: "No password stored. The link expires automatically after use.",
+    onboardingTitle: "How it works",
+    dashH1: "My datasets",
+    logoutBtn: "Sign out",
+    emptyEyebrow: "No datasets",
+    emptyTitle: "Your space is empty for now.",
+    emptySub: "Build your access with the complete bundle — TARES, Classifications and FINMA together.",
+    emptyCta: "View the bundle — 797 CHF",
+    mcpTitle: "MCP subscription",
+    mcpName: "openswissdata MCP server",
+    mcpStatus: "Subscription",
+    mcpPortalBtn: "Manage my subscription",
+    loading: "Loading your space…",
+  },
+};
+
+const JS: Record<Lang, AccountJsCopy> = {
+  fr: {
+    bannerCheckoutSuccess: "✓ Paiement reçu. Vous allez recevoir un email de confirmation avec un lien de connexion sous 5 minutes. Vérifiez aussi vos spams si rien n'arrive.",
+    bannerCheckoutCancelled: "Paiement annulé — aucun montant n'a été débité. Vous pouvez réessayer à tout moment.",
+    bannerAuthOk: "Connexion réussie.",
+    bannerAuthInvalid: "Ce lien de connexion n'est pas valide. Veuillez en demander un nouveau.",
+    bannerAuthExpired: "Ce lien de connexion a expiré. Veuillez en demander un nouveau.",
+    noVersion: "aucune version disponible",
+    updatesUntil: " · mises à jour jusqu'au ",
+    dlDownload: "Télécharger",
+    dlPreparing: "Préparation…",
+    dlRetry: "Réessayer",
+    dlError: "Échec du téléchargement : ",
+    tierStandalone: "Pro — 5 000 req/mois",
+    tierBusiness: "Business — 50 000 req/mois",
+    tierPro: "Pro",
+    tierStandard: "Standard",
+    tierFree: "Free",
+    mcpKey: " · clé ",
+    mcpOpening: "Ouverture…",
+    mcpRetry: "Réessayer",
+    mcpPortalError: "Impossible d'ouvrir le portail de facturation. Réessayez plus tard.",
+    loginSending: "Envoi en cours…",
+    loginSuccess: "✓ Vérifiez votre boîte de réception — le lien est valable 15 minutes.",
+    loginError: "Une erreur est survenue. Veuillez réessayer.",
+    loginNetworkError: "Erreur réseau. Veuillez réessayer.",
+    loadError: "Impossible de charger votre espace client. Veuillez actualiser la page.",
+  },
+  de: {
+    bannerCheckoutSuccess: "✓ Zahlung erhalten. Sie erhalten innerhalb von 5 Minuten eine Bestätigungs-E-Mail mit einem Anmeldelink. Prüfen Sie auch Ihren Spam-Ordner, falls nichts ankommt.",
+    bannerCheckoutCancelled: "Zahlung abgebrochen — es wurde kein Betrag belastet. Sie können es jederzeit erneut versuchen.",
+    bannerAuthOk: "Anmeldung erfolgreich.",
+    bannerAuthInvalid: "Dieser Anmeldelink ist ungültig. Bitte fordern Sie einen neuen an.",
+    bannerAuthExpired: "Dieser Anmeldelink ist abgelaufen. Bitte fordern Sie einen neuen an.",
+    noVersion: "keine Version verfügbar",
+    updatesUntil: " · Updates bis ",
+    dlDownload: "Herunterladen",
+    dlPreparing: "Wird vorbereitet…",
+    dlRetry: "Erneut versuchen",
+    dlError: "Download fehlgeschlagen: ",
+    tierStandalone: "Pro — 5'000 Anf./Monat",
+    tierBusiness: "Business — 50'000 Anf./Monat",
+    tierPro: "Pro",
+    tierStandard: "Standard",
+    tierFree: "Free",
+    mcpKey: " · Schlüssel ",
+    mcpOpening: "Wird geöffnet…",
+    mcpRetry: "Erneut versuchen",
+    mcpPortalError: "Das Abrechnungsportal kann nicht geöffnet werden. Bitte versuchen Sie es später erneut.",
+    loginSending: "Wird gesendet…",
+    loginSuccess: "✓ Prüfen Sie Ihren Posteingang — der Link ist 15 Minuten gültig.",
+    loginError: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    loginNetworkError: "Netzwerkfehler. Bitte versuchen Sie es erneut.",
+    loadError: "Ihr Kundenbereich kann nicht geladen werden. Bitte aktualisieren Sie die Seite.",
+  },
+  en: {
+    bannerCheckoutSuccess: "✓ Payment received. You'll get a confirmation email with a sign-in link within 5 minutes. Check your spam folder too if nothing arrives.",
+    bannerCheckoutCancelled: "Payment cancelled — no amount was charged. You can try again at any time.",
+    bannerAuthOk: "Signed in successfully.",
+    bannerAuthInvalid: "This sign-in link is not valid. Please request a new one.",
+    bannerAuthExpired: "This sign-in link has expired. Please request a new one.",
+    noVersion: "no version available",
+    updatesUntil: " · updates until ",
+    dlDownload: "Download",
+    dlPreparing: "Preparing…",
+    dlRetry: "Retry",
+    dlError: "Download failed: ",
+    tierStandalone: "Pro — 5,000 req/month",
+    tierBusiness: "Business — 50,000 req/month",
+    tierPro: "Pro",
+    tierStandard: "Standard",
+    tierFree: "Free",
+    mcpKey: " · key ",
+    mcpOpening: "Opening…",
+    mcpRetry: "Retry",
+    mcpPortalError: "Unable to open the billing portal. Please try again later.",
+    loginSending: "Sending…",
+    loginSuccess: "✓ Check your inbox — the link is valid for 15 minutes.",
+    loginError: "An error occurred. Please try again.",
+    loginNetworkError: "Network error. Please try again.",
+    loadError: "Unable to load your account. Please refresh the page.",
+  },
+};
+
+const c = COPY[lang];
+const s = JS[lang];
+
+const accountPath = localizePath("/account", lang);
+const dateLocale = lang === "de" ? "de-CH" : lang === "en" ? "en-GB" : "fr-CH";
+
+// Liens d'onboarding — hrefs localisés calculés une fois (pas de préfixe
+// /de/ saisi à la main), texte par langue assemblé par template literal.
+const bundleHref = localizePath("/bundle", lang);
+const taresHref = localizePath("/datasets/tares", lang);
+const classHref = localizePath("/datasets/classifications", lang);
+const finmaHref = localizePath("/datasets/finma", lang);
+
+const steps: Record<Lang, string[]> = {
+  fr: [
+    `<strong>Pas encore client&nbsp;?</strong> Choisissez vos datasets sur <a href="${bundleHref}">la page bundle</a> ou les pages <a href="${taresHref}">TARES</a>, <a href="${classHref}">Classifications</a>, <a href="${finmaHref}">FINMA</a>.`,
+    `<strong>Achat sécurisé</strong> via Stripe (cartes, Apple Pay, Google Pay).`,
+    `<strong>Réception immédiate</strong> d'un email avec un lien de téléchargement direct (ZIP signé Ed25519).`,
+    `<strong>Accès permanent</strong> ici via le lien de connexion, à tout moment pendant les 360&nbsp;jours d'updates inclus.`,
+  ],
+  de: [
+    `<strong>Noch kein Kunde?</strong> Wählen Sie Ihre Datensätze auf <a href="${bundleHref}">der Paketseite</a> oder den Seiten <a href="${taresHref}">TARES</a>, <a href="${classHref}">Klassifikationen</a>, <a href="${finmaHref}">FINMA</a>.`,
+    `<strong>Sichere Zahlung</strong> über Stripe (Karten, Apple Pay, Google Pay).`,
+    `<strong>Sofortiger Erhalt</strong> einer E-Mail mit einem direkten Download-Link (Ed25519-signiertes ZIP).`,
+    `<strong>Dauerhafter Zugang</strong> hier über den Anmeldelink, jederzeit während der inbegriffenen 360&nbsp;Tage Updates.`,
+  ],
+  en: [
+    `<strong>Not a customer yet?</strong> Choose your datasets on <a href="${bundleHref}">the bundle page</a> or the <a href="${taresHref}">TARES</a>, <a href="${classHref}">Classifications</a>, <a href="${finmaHref}">FINMA</a> pages.`,
+    `<strong>Secure payment</strong> via Stripe (cards, Apple Pay, Google Pay).`,
+    `<strong>Instant delivery</strong> of an email with a direct download link (Ed25519-signed ZIP).`,
+    `<strong>Permanent access</strong> here via the sign-in link, anytime during the 360&nbsp;days of updates included.`,
+  ],
+};
+const stepsLang = steps[lang];
+---
+<div class="bg-grid"></div>
+
+<section class="v4-hero ds-page">
+  <div class="container-v4">
+    <nav class="ds-breadcrumb">
+      <a href={accountPath === "/account" ? "/" : `/${lang}/`}>{c.bcHome}</a>
+      <span class="sep">·</span>
+      <span class="current">{c.bcCurrent}</span>
+    </nav>
+
+    <div id="banner" class="account-banner hidden" role="status" aria-live="polite"></div>
+
+    <!-- Login view -->
+    <div id="login-view" class="hidden account-view">
+      <div class="account-login-grid">
+        <!-- Colonne gauche : connexion -->
+        <div class="account-login-main">
+          <div class="v4-eyebrow">
+            <span>{c.loginEyebrow1}</span>
+            <span style="opacity:.4">·</span>
+            <span>{c.loginEyebrow2}</span>
+          </div>
+          <h1 class="v4-h1 account-h1">{c.loginH1}</h1>
+          <p class="v4-lede account-lede" set:html={c.loginLedeHtml}></p>
+
+          <div class="account-login-card">
+            <form id="login-form" class="account-form">
+              <label for="login-email" class="account-field-label">{c.fieldLabel}</label>
+              <div class="account-input-row">
+                <input
+                  id="login-email"
+                  type="email"
+                  name="email"
+                  required
+                  autocomplete="email"
+                  placeholder={c.emailPlaceholder}
+                />
+                <button type="submit" class="v4-btn v4-btn-primary account-submit">
+                  {c.submitBtn} <span class="arrow">→</span>
+                </button>
+              </div>
+              <p id="login-msg" class="account-msg"></p>
+            </form>
+            <p class="account-login-reassure">
+              <span class="account-lock" aria-hidden="true"></span>
+              {c.reassure}
+            </p>
+          </div>
+        </div>
+
+        <!-- Colonne droite : onboarding -->
+        <aside class="account-onboarding">
+          <h3 class="account-panel-eyebrow">{c.onboardingTitle}</h3>
+          <ol class="account-steps">
+            {stepsLang.map((html, i) => (
+              <li>
+                <span class="account-step-num">{i + 1}</span>
+                <span class="account-step-body" set:html={html}></span>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Dashboard view -->
+    <div id="dashboard-view" class="hidden account-view">
+      <div class="account-dash">
+        <div class="account-header">
+          <div>
+            <div class="v4-eyebrow">
+              <span>{c.loginEyebrow1}</span>
+              <span style="opacity:.4">·</span>
+              <span id="dashboard-email"></span>
+            </div>
+            <h1 class="v4-h1 account-h1 account-h1-dash">{c.dashH1}</h1>
+          </div>
+          <button id="logout-btn" class="v4-btn v4-btn-secondary account-logout">{c.logoutBtn}</button>
+        </div>
+
+        <ul id="datasets-list" class="account-datasets-list"></ul>
+
+        <div id="empty-state" class="hidden account-empty">
+          <div class="account-empty-inner">
+            <span class="account-empty-eyebrow">{c.emptyEyebrow}</span>
+            <span class="account-empty-title">{c.emptyTitle}</span>
+            <span class="account-empty-sub">{c.emptySub}</span>
+            <a class="v4-btn v4-btn-primary account-empty-cta" href={bundleHref}>{c.emptyCta} <span class="arrow">→</span></a>
+          </div>
+        </div>
+
+        <div id="mcp-section" class="hidden account-mcp">
+          <h3 class="account-panel-eyebrow account-mcp-title">{c.mcpTitle}</h3>
+          <div class="account-mcp-card">
+            <div class="account-mcp-info">
+              <div class="account-mcp-head">
+                <span class="account-mcp-name">{c.mcpName}</span>
+                <span class="account-mcp-status"><span class="account-mcp-dot" aria-hidden="true"></span>{c.mcpStatus}</span>
+              </div>
+              <div id="mcp-meta" class="account-mcp-meta"></div>
+            </div>
+            <button id="mcp-portal-btn" class="v4-btn v4-btn-secondary account-mcp-btn">{c.mcpPortalBtn}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="loading-view" class="account-loading">
+      <span class="account-loading-inner">
+        <span class="account-loading-dot" aria-hidden="true"></span>{c.loading}
+      </span>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ============================================================
+     Espace client — login + dashboard
+     IMPORTANT : aucun `display` n'est posé sur les éléments que le
+     <script> bascule via .hidden (#login-view, #dashboard-view,
+     #loading-view, #banner, #empty-state, #mcp-section). En Tailwind v4
+     `.hidden{display:none}` vit dans @layer utilities ; un style Astro
+     hors-layer l'emporterait et casserait le toggle. La mise en page
+     (grid/flex) est donc portée par des WRAPPERS INTÉRIEURS.
+     ============================================================ */
+
+  .account-view { max-width: 980px; margin: 0 auto; padding: 8px 0 24px; }
+
+  /* ---------- Bandeau d'état (textContent piloté par le JS) ---------- */
+  .account-banner {
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 auto 36px;
+    max-width: 980px;
+  }
+  .account-banner.success { background: var(--green-soft); border: 1px solid rgba(21,128,61,.30); color: var(--green); }
+  .account-banner.warn    { background: var(--amber-soft); border: 1px solid rgba(200,160,90,.40); color: #8a6d2f; }
+  .account-banner.error   { background: var(--accent-soft); border: 1px solid rgba(220,31,45,.30); color: var(--accent); }
+
+  /* =========================================================
+     VUE CONNEXION
+     ========================================================= */
+  .account-login-grid {
+    display: grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .account-login-grid { grid-template-columns: 1fr; gap: 36px; }
+  }
+
+  .account-h1 { margin-bottom: 16px; }
+  .account-lede { margin-bottom: 28px; max-width: 46ch; }
+
+  /* Carte du formulaire de connexion — focal de la vue */
+  .account-login-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line-strong);
+    border-radius: 14px;
+    padding: 26px 26px 22px;
+    box-shadow: 0 12px 32px -20px rgba(10,10,12,.18);
+  }
+  .account-field-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 10px;
+  }
+  .account-form { margin: 0; }
+  .account-input-row { display: flex; gap: 10px; align-items: stretch; }
+  @media (max-width: 520px) {
+    .account-input-row { flex-direction: column; }
+  }
+  .account-form input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 13px 15px;
+    border: 1px solid var(--line-strong);
+    border-radius: 9px;
+    font-size: 15px;
+    font-family: var(--font-sans);
+    color: var(--ink);
+    background: var(--bg);
+    transition: border-color .15s, box-shadow .15s, background .15s;
+  }
+  .account-form input::placeholder { color: var(--ink-mute); }
+  .account-form input:focus {
+    outline: none;
+    background: var(--bg-card);
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(10,10,12,.08);
+  }
+  .account-submit { flex-shrink: 0; white-space: nowrap; }
+  @media (max-width: 520px) {
+    .account-submit { justify-content: center; }
+  }
+
+  /* Message de retour (textContent piloté par le JS) */
+  .account-msg { font-size: 13px; line-height: 1.5; color: var(--ink-mute); margin: 14px 0 0; min-height: 1px; }
+  .account-msg.ok  { color: var(--green); }
+  .account-msg.err { color: var(--accent); }
+
+  .account-login-reassure {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 20px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink-mute);
+  }
+  .account-lock {
+    flex-shrink: 0;
+    width: 12px; height: 12px;
+    margin-top: 2px;
+    border: 1.5px solid var(--ink-mute);
+    border-radius: 3px;
+    position: relative;
+  }
+  .account-lock::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: -4px;
+    width: 6px; height: 6px;
+    border: 1.5px solid var(--ink-mute);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    transform: translateX(-50%);
+  }
+
+  /* Panneau onboarding (colonne droite) */
+  .account-onboarding {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 26px 28px;
+  }
+  .account-panel-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin: 0 0 18px;
+    font-weight: 500;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .account-steps { list-style: none; margin: 0; padding: 0; counter-reset: none; }
+  .account-steps li {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .account-steps li:last-child { border-bottom: none; padding-bottom: 0; }
+  .account-steps li:first-child { padding-top: 0; }
+  .account-step-num {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: var(--bg-card);
+  }
+  .account-step-body { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; }
+  .account-step-body strong { color: var(--ink); font-weight: 600; }
+  .account-onboarding a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(220,31,45,.25); }
+  .account-onboarding a:hover { border-bottom-color: var(--accent); }
+
+  /* =========================================================
+     VUE TABLEAU DE BORD
+     ========================================================= */
+  .account-dash { max-width: 760px; }
+
+  .account-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .account-h1-dash { font-size: clamp(28px, 3vw, 40px); margin-bottom: 0; }
+  .account-logout { font-size: 13px; padding: 10px 16px; }
+
+  .account-datasets-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+
+  /* Lignes datasets — markup généré EN DUR par le <script> via
+     document.createElement (li.ds-item > div.ds-item-info >
+     .ds-item-name + .ds-item-meta ; button.ds-item-btn).
+     CES NŒUDS NE PORTENT PAS l'attribut de scope Astro (data-astro-cid-*)
+     car ils sont créés au runtime → les sélecteurs DOIVENT être :global,
+     sinon le CSS scopé ne les atteint pas (bug latent du fichier d'origine).
+     Ces noms de classes sont uniques à /account → :global est sûr ici. */
+  :global(.ds-item) {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 18px 22px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    transition: border-color .15s, box-shadow .15s, transform .15s;
+  }
+  :global(.ds-item:hover) {
+    border-color: var(--line-strong);
+    box-shadow: 0 10px 28px -20px rgba(10,10,12,.22);
+  }
+  :global(.ds-item-info) { min-width: 0; }
+  :global(.ds-item-name) { font-weight: 600; color: var(--ink); font-size: 15px; letter-spacing: -.01em; }
+  :global(.ds-item-meta) {
+    font-size: 12px;
+    color: var(--ink-mute);
+    margin-top: 5px;
+    font-family: var(--font-mono);
+    letter-spacing: .01em;
+    font-variant-numeric: tabular-nums;
+  }
+  :global(.ds-item-btn) {
+    flex-shrink: 0;
+    background: var(--ink); color: var(--bg);
+    padding: 10px 18px; border-radius: 8px; border: 1px solid var(--ink);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    font-family: var(--font-sans);
+    transition: background .15s, transform .15s, box-shadow .15s;
+  }
+  :global(.ds-item-btn:hover) { background: #1a1a1d; transform: translateY(-1px); box-shadow: 0 10px 22px -10px rgba(10,10,12,.30); }
+  :global(.ds-item-btn:disabled) { opacity: .55; cursor: wait; transform: none; box-shadow: none; }
+
+  /* État vide — markup riche dans un wrapper INTÉRIEUR.
+     On ne pose AUCUN display sur #empty-state (togglé via .hidden). */
+  .account-empty {
+    margin: 0;
+    padding: 40px 32px;
+    background: var(--bg-soft);
+    border: 1px dashed var(--line-strong);
+    border-radius: 14px;
+  }
+  .account-empty-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .account-empty-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .account-empty-title { font-size: 18px; font-weight: 600; color: var(--ink); letter-spacing: -.015em; margin-top: 4px; }
+  .account-empty-sub { font-size: 14px; color: var(--ink-soft); line-height: 1.55; max-width: 48ch; }
+  .account-empty-cta { margin-top: 16px; }
+
+  /* Carte abonnement MCP */
+  .account-mcp { margin-top: 40px; }
+  .account-mcp-title { margin-bottom: 16px; }
+  .account-mcp-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+    padding: 22px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--line-strong);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px -22px rgba(10,10,12,.18);
+  }
+  .account-mcp-info { min-width: 0; }
+  .account-mcp-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .account-mcp-name { font-weight: 600; font-size: 15px; color: var(--ink); letter-spacing: -.01em; }
+  .account-mcp-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--green);
+    padding: 3px 9px 3px 8px;
+    background: var(--green-soft);
+    border: 1px solid rgba(21,128,61,.22);
+    border-radius: 999px;
+  }
+  .account-mcp-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(21,128,61,.45);
+    animation: livepulse 2.2s ease-out infinite;
+  }
+  /* (Définition de secours si livepulse n'est pas dans global.css à cet endroit.) */
+  @keyframes livepulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(21,128,61,.45); }
+    50% { box-shadow: 0 0 0 5px rgba(21,128,61,0); }
+  }
+  .account-mcp-meta {
+    font-size: 12px;
+    color: var(--ink-mute);
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    letter-spacing: .01em;
+    word-break: break-word;
+  }
+  .account-mcp-btn { flex-shrink: 0; font-size: 13px; padding: 10px 18px; }
+  /* v4-btn-secondary n'a pas d'état :disabled — parité avec ds-item-btn. */
+  .account-mcp-btn:disabled { opacity: .6; cursor: wait; transform: none; }
+
+  /* Chargement — AUCUN display sur #loading-view (togglé via .hidden).
+     Le flex est sur le wrapper intérieur ; en cas d'erreur le <script>
+     écrase le textContent (le span inner disparaît → texte simple, OK). */
+  .account-loading {
+    color: var(--ink-mute);
+    font-size: 14px;
+    padding: 32px 0;
+  }
+  .account-loading-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .account-loading-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ink-mute);
+    animation: account-blink 1.1s ease-in-out infinite;
+  }
+  @keyframes account-blink { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+</style>
+
+  <script is:inline define:vars={{ osdAcct: { s, accountPath, dateLocale } }}>
+    (function () {
+      const qs = new URLSearchParams(window.location.search);
+      const authStatus = qs.get("auth");
+      const checkoutStatus = qs.get("checkout");
+      const banner = document.getElementById("banner");
+
+      // Post-paiement Stripe — message en priorité (avant auth)
+      if (checkoutStatus === "success") {
+        banner.textContent = osdAcct.s.bannerCheckoutSuccess;
+        banner.className = "account-banner success";
+        banner.classList.remove("hidden");
+      } else if (checkoutStatus === "cancelled") {
+        banner.textContent = osdAcct.s.bannerCheckoutCancelled;
+        banner.className = "account-banner warn";
+        banner.classList.remove("hidden");
+      } else if (authStatus === "ok") {
+        banner.textContent = osdAcct.s.bannerAuthOk;
+        banner.className = "account-banner success";
+        banner.classList.remove("hidden");
+      } else if (authStatus === "invalid") {
+        banner.textContent = osdAcct.s.bannerAuthInvalid;
+        banner.className = "account-banner error";
+        banner.classList.remove("hidden");
+      } else if (authStatus === "expired") {
+        banner.textContent = osdAcct.s.bannerAuthExpired;
+        banner.className = "account-banner warn";
+        banner.classList.remove("hidden");
+      }
+
+      const loadingEl = document.getElementById("loading-view");
+      const loginEl = document.getElementById("login-view");
+      const dashEl = document.getElementById("dashboard-view");
+      const listEl = document.getElementById("datasets-list");
+      const emptyEl = document.getElementById("empty-state");
+      const emailLabelEl = document.getElementById("dashboard-email");
+
+      function showLogin() {
+        loadingEl.classList.add("hidden");
+        dashEl.classList.add("hidden");
+        loginEl.classList.remove("hidden");
+      }
+
+      function showDashboard(customer, datasets) {
+        loadingEl.classList.add("hidden");
+        loginEl.classList.add("hidden");
+        dashEl.classList.remove("hidden");
+        emailLabelEl.textContent = customer ? customer.email : "";
+        listEl.innerHTML = "";
+        if (!datasets || datasets.length === 0) {
+          emptyEl.classList.remove("hidden");
+          return;
+        }
+        emptyEl.classList.add("hidden");
+        for (const d of datasets) {
+          const li = document.createElement("li");
+          li.className = "ds-item";
+
+          const infoDiv = document.createElement("div");
+          infoDiv.className = "ds-item-info";
+          const nameEl = document.createElement("div");
+          nameEl.className = "ds-item-name";
+          nameEl.textContent = d.name;
+          const metaEl = document.createElement("div");
+          metaEl.className = "ds-item-meta";
+          const vers = d.current_version ? ("v" + d.current_version) : osdAcct.s.noVersion;
+          let meta = vers;
+          if (d.updates_until) {
+            const until = new Date(d.updates_until).toLocaleDateString(osdAcct.dateLocale);
+            meta += osdAcct.s.updatesUntil + until;
+          }
+          metaEl.textContent = meta;
+          infoDiv.appendChild(nameEl);
+          infoDiv.appendChild(metaEl);
+
+          const btn = document.createElement("button");
+          btn.className = "ds-item-btn";
+          btn.textContent = osdAcct.s.dlDownload;
+          btn.setAttribute("data-id", d.id);
+          btn.addEventListener("click", async function () {
+            btn.disabled = true;
+            btn.textContent = osdAcct.s.dlPreparing;
+            try {
+              const r = await fetch("/api/account/download-request", {
+                method: "POST",
+                credentials: "include",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ dataset_id: d.id }),
+              });
+              if (!r.ok) {
+                const err = await r.json().catch(function () { return {}; });
+                throw new Error(err.error || ("HTTP " + r.status));
+              }
+              const body = await r.json();
+              window.location.href = body.download_url;
+            } catch (e) {
+              btn.disabled = false;
+              btn.textContent = osdAcct.s.dlRetry;
+              alert(osdAcct.s.dlError + (e && e.message ? e.message : String(e)));
+            }
+          });
+
+          li.appendChild(infoDiv);
+          li.appendChild(btn);
+          listEl.appendChild(li);
+        }
+      }
+
+      const TIER_LABELS = { standalone: osdAcct.s.tierStandalone, business: osdAcct.s.tierBusiness, pro: osdAcct.s.tierPro, standard: osdAcct.s.tierStandard, free: osdAcct.s.tierFree };
+
+      async function loadMcp() {
+        const sectionEl = document.getElementById("mcp-section");
+        const metaEl = document.getElementById("mcp-meta");
+        const btn = document.getElementById("mcp-portal-btn");
+        try {
+          const r = await fetch("/api/account/mcp", { credentials: "include" });
+          if (!r.ok) return;
+          const body = await r.json();
+          const client = body.mcp_client;
+          if (!client || client.tier === "free") return; // only show for paid subscribers
+          metaEl.textContent = (TIER_LABELS[client.tier] || client.tier) + osdAcct.s.mcpKey + client.client_id;
+          sectionEl.classList.remove("hidden");
+          btn.addEventListener("click", async function () {
+            btn.disabled = true;
+            btn.textContent = osdAcct.s.mcpOpening;
+            try {
+              const pr = await fetch("/api/account/billing-portal", { method: "POST", credentials: "include" });
+              if (!pr.ok) throw new Error("HTTP " + pr.status);
+              const pb = await pr.json();
+              window.location.href = pb.url;
+            } catch (e) {
+              btn.disabled = false;
+              btn.textContent = osdAcct.s.mcpRetry;
+              alert(osdAcct.s.mcpPortalError);
+            }
+          });
+        } catch (e) {
+          // Non-blocking: the dashboard still works without the MCP section.
+        }
+      }
+
+      async function load() {
+        try {
+          const meRes = await fetch("/api/account", { credentials: "include" });
+          if (meRes.status === 401) { showLogin(); return; }
+          if (!meRes.ok) throw new Error("HTTP " + meRes.status);
+          const meBody = await meRes.json();
+          const dsRes = await fetch("/api/account/datasets", { credentials: "include" });
+          const dsBody = dsRes.ok ? await dsRes.json() : { datasets: [] };
+          showDashboard(meBody.customer, dsBody.datasets);
+          loadMcp();
+        } catch (e) {
+          loadingEl.textContent = osdAcct.s.loadError;
+        }
+      }
+
+      document.getElementById("login-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const email = String(fd.get("email") || "").trim();
+        if (!email) return;
+        const msgEl = document.getElementById("login-msg");
+        msgEl.textContent = osdAcct.s.loginSending;
+        try {
+          const r = await fetch("/api/auth/magic-link", {
+            method: "POST",
+            credentials: "include",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ email: email }),
+          });
+          if (r.ok) {
+            msgEl.textContent = osdAcct.s.loginSuccess;
+            msgEl.className = "account-msg ok";
+          } else {
+            msgEl.textContent = osdAcct.s.loginError;
+            msgEl.className = "account-msg err";
+          }
+        } catch (err) {
+          msgEl.textContent = osdAcct.s.loginNetworkError;
+          msgEl.className = "account-msg err";
+        }
+      });
+
+      document.getElementById("logout-btn").addEventListener("click", async function () {
+        await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+        window.location.href = osdAcct.accountPath;
+      });
+
+      load();
+    })();
+  </script>
