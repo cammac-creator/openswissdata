@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS customers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT UNIQUE NOT NULL,
   stripe_customer_id TEXT,
+  -- Buyer-facing language (fr/de/en), captured from the localized checkout page.
+  -- Drives the language of transactional emails (credentials, magic-link).
+  locale TEXT NOT NULL DEFAULT 'fr',
   created_at INTEGER NOT NULL
 );
 
