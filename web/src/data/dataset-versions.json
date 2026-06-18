@@ -1,0 +1,6 @@
+{
+  "_note": "Versions réelles des datasets, reflétées sur les pastilles de la landing. Généré par `npm run sync:versions` (scripts/sync-dataset-versions.ts) depuis datasets.current_version en prod — NE PAS éditer la date à la main.",
+  "tares": "2026.06.15",
+  "classifications": "2026.04.30",
+  "finma": "2026.06.18"
+}

@@ -5,6 +5,7 @@ import InstallBar from "../../components/InstallBar.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
 import PersonaTile from "../../components/PersonaTile.astro";
 import Fiche from "../../components/Fiche.astro";
+import datasetVersions from "../../data/dataset-versions.json";
 import Step from "../../components/Step.astro";
 import QuoteCarousel from "../../components/QuoteCarousel.astro";
 ---
@@ -143,7 +144,7 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
     <div class="v4-section-eyebrow reveal-v4">
       <strong>Available datasets</strong>
       <span class="sep">/</span>
-      <span>ED. 2026.04</span>
+      <span>ED. {[datasetVersions.tares, datasetVersions.classifications, datasetVersions.finma].sort().slice(-1)[0].slice(0, 7)}</span>
       <span class="sep">/</span>
       <span>3 + 1 bundle</span>
     </div>
@@ -156,7 +157,7 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
       <Fiche
         ribbonLabel="TARES"
         ribbonSource="BAZG"
-        pillText="v2026.04.30"
+        pillText={`v${datasetVersions.tares}`}
         title="Customs tariff"
         sub="~7,500 codes · DE/FR/IT"
         desc="The Swiss customs tariff, trilingual descriptions, duty rates, HS hierarchy. Cross-walks HS6 and CN8."
@@ -168,7 +169,7 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
       <Fiche
         ribbonLabel="CLASSIFICATIONS"
         ribbonSource="OFS"
-        pillText="v2026.04.30"
+        pillText={`v${datasetVersions.classifications}`}
         title="NOGA · NACE · ISIC"
         sub="~3,800 codes · 4 languages"
         desc="Swiss and international economic classifications with complete cross-walks between standards. New: NOGA 2025 + NACE 2.1."
@@ -180,7 +181,7 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
       <Fiche
         ribbonLabel="FINMA"
         ribbonSource="FINMA"
-        pillText="v2026.04.30"
+        pillText={`v${datasetVersions.finma}`}
         title="Registry + Warnings"
         sub="2,912 entities · 2,182 warnings"
         desc="FINMA-supervised entities + the complete warnings list, unified in a single pack with cross-ref is_warning_listed."
@@ -320,7 +321,7 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
       </details>
       <details class="v4-faq-item reveal-v4" data-delay="3">
         <summary>How do I verify that the ZIP has not been tampered with?</summary>
-        <p>Each ZIP contains a <code>provenance.json</code> file with SHA-256 hash + Ed25519 signature + RFC-3161 timestamp. Quick CLI check: <code>openssl dgst -sha256 tares-2026.04.zip</code> and compare with the <code>sha256</code> field in <code>provenance.json</code>. Details and public key on the <a href="/de/legal/provenance">Provenance page</a>. An official SDK <code>@openswissdata/sdk verify-provenance</code> will be released shortly after launch (release tracked on GitHub).</p>
+        <p>Each ZIP contains a <code>provenance.json</code> file with SHA-256 hash + Ed25519 signature + RFC-3161 timestamp. Quick CLI check: <code>openssl dgst -sha256 tares-{datasetVersions.tares.slice(0, 7)}.zip</code> and compare with the <code>sha256</code> field in <code>provenance.json</code>. Details and public key on the <a href="/de/legal/provenance">Provenance page</a>. An official SDK <code>@openswissdata/sdk verify-provenance</code> will be released shortly after launch (release tracked on GitHub).</p>
       </details>
       <details class="v4-faq-item reveal-v4" data-delay="3">
         <summary>Is it usable in an existing ERP (SAP, Odoo, Sage)?</summary>
@@ -353,7 +354,7 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
   </div>
 </section>
 
-<script is:inline>
+<script is:inline define:vars={{ osdTaresVersion: datasetVersions.tares }}>
   // ===== Count-up =====
   function osdCountUp(el) {
     const target = +el.dataset.count;
@@ -383,7 +384,7 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
   const termLines = [
     { text: '$ npx @osd/cli pull tares@latest', cls: 'cmd', prompt: true, delay: 600 },
     { text: '✓ Verified Ed25519 signature openswissdata.com', cls: 'ok', delay: 400 },
-    { text: '✓ Pulled tares.parquet (1.8 MB · 7,511 rows · v2026.04.30)', cls: 'ok', delay: 350 },
+    { text: '✓ Pulled tares.parquet (1.8 MB · 7,511 rows · v' + osdTaresVersion + ')', cls: 'ok', delay: 350 },
     { text: '✓ Cross-walks: HS6, CN8', cls: 'ok', delay: 300 },
     { text: '✓ Manifest SHA-256 + RFC-3161 timestamp', cls: 'ok', delay: 350 },
     { text: '', cls: '', delay: 250 },
@@ -395,7 +396,7 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
     { text: '  it  "Caffè non torrefatto"', cls: 'json-str', delay: 250 },
     { text: '}', cls: 'dim', delay: 200 },
     { text: 'duty_chf     0.00', cls: 'json-yellow', delay: 250 },
-    { text: 'source       "BAZG · 2026.04.30"', cls: 'json-blue', delay: 300 },
+    { text: 'source       "BAZG · ' + osdTaresVersion + '"', cls: 'json-blue', delay: 300 },
   ];
   const termBody = document.getElementById('v4-termBody');
   function osdRenderTermLine(line) {

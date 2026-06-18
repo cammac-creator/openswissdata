@@ -10,6 +10,9 @@ data/
 # Exception: bundled MCP data slice ships with the deploy (small CSVs only)
 !src/mcp/data/
 !src/mcp/data/*
+# Exception: dataset-version manifest powering the landing badges (build-time import)
+!web/src/data/
+!web/src/data/*
 # Exception: classifications CSVs needed by Astro build for SEO pages
 # (web/src/lib/noga-helpers.ts → /codes/noga/[code]). Keep only the small
 # text formats — the .json / .sql / .parquet duplicates stay gitignored.

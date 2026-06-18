@@ -21,6 +21,7 @@
     "backup:db": "tsx scripts/backup-db.ts",
     "backup:db:dry": "tsx scripts/backup-db.ts --dry-run",
     "cleanup:expired": "tsx scripts/cleanup-expired.ts",
+    "sync:versions": "tsx scripts/sync-dataset-versions.ts",
     "web:dev": "cd web && npx astro dev",
     "web:build": "cd web && npm ci && npx astro build"
   },
