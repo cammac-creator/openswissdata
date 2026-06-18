@@ -30,6 +30,9 @@ export function getDb(path?: string): Database.Database {
   // tier's CHECK-constraint widening cannot be done with ALTER — it lives in
   // src/db/migrations/003 and must be applied manually before selling Business.
   ensureColumn(db, "mcp_clients", "stripe_subscription_id", "TEXT");
+  // Buyer language for transactional emails — added after `customers` first
+  // shipped, so backfill on older DBs (constant DEFAULT makes the ALTER legal).
+  ensureColumn(db, "customers", "locale", "TEXT NOT NULL DEFAULT 'fr'");
   // UNIQUE (partial) so a given Stripe subscription can back at most one client.
   // Partial → multiple NULLs (free/registered clients) remain allowed. Turns a
   // concurrent double-provision into a catchable constraint error instead of

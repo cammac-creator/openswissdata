@@ -7,6 +7,7 @@ const { sendMagicLinkMock } = vi.hoisted(() => ({
 vi.mock("../../src/lib/email.js", () => ({
   sendMagicLinkEmail: sendMagicLinkMock,
   sendDownloadEmail: vi.fn(),
+  parseLocale: (v: unknown) => (v === "de" || v === "en" ? v : "fr"),
 }));
 
 import { createApp } from "../../src/index.js";

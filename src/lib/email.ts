@@ -6,6 +6,21 @@ export interface EmailSendResult {
   details?: string;
 }
 
+/** Buyer-facing language for transactional emails. */
+export type Locale = "fr" | "de" | "en";
+
+/** Coerce an untrusted value (Stripe metadata, DB column) to a Locale, default fr. */
+export function parseLocale(v: unknown): Locale {
+  return v === "de" || v === "en" ? v : "fr";
+}
+
+/** Footer disclaimer, localized. */
+const FOOTER_DISCLAIMER: Record<Locale, string> = {
+  fr: "openswissdata.com est un service privé indépendant. Non affilié à opendata.swiss, BAZG, BFS, FINMA.",
+  de: "openswissdata.com ist ein unabhängiger privater Dienst. Nicht verbunden mit opendata.swiss, BAZG, BFS, FINMA.",
+  en: "openswissdata.com is an independent private service. Not affiliated with opendata.swiss, BAZG, BFS, FINMA.",
+};
+
 function resendApiKey(): string | null {
   const key = process.env.RESEND_API_KEY;
   if (!key || key === "re_xxx" || key.trim() === "") return null;
@@ -166,11 +181,12 @@ function eyebrow(text: string): string {
  * Shared frame for every transactional email. `bodyHtml` is injected verbatim
  * into the white card (callers build it with the helpers above + escaped data).
  */
-function emailShell(opts: { heading: string; bodyHtml: string; preheader?: string }): string {
+function emailShell(opts: { heading: string; bodyHtml: string; preheader?: string; locale?: Locale }): string {
+  const locale = opts.locale ?? "fr";
   const preheader = opts.preheader ? preheaderHtml(opts.preheader) : "";
   return (
     `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">` +
-    `<html lang="fr" xmlns="http://www.w3.org/1999/xhtml"><head>` +
+    `<html lang="${locale}" xmlns="http://www.w3.org/1999/xhtml"><head>` +
     `<meta charset="utf-8"/>` +
     `<meta name="viewport" content="width=device-width, initial-scale=1"/>` +
     `<meta name="x-apple-disable-message-reformatting"/>` +
@@ -214,7 +230,7 @@ function emailShell(opts: { heading: string; bodyHtml: string; preheader?: strin
     // Footer.
     `<tr><td style="padding:24px 8px 8px 8px;">` +
     `<p style="margin:0 0 8px 0;font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${BRAND.inkMute};">` +
-    `openswissdata.com est un service privé indépendant. Non affilié à opendata.swiss, BAZG, BFS, FINMA.</p>` +
+    `${escapeHtml(FOOTER_DISCLAIMER[locale])}</p>` +
     `<p style="margin:0;font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${BRAND.inkMute};">` +
     `<a href="${siteOrigin()}" target="_blank" style="color:${BRAND.inkSoft};text-decoration:underline;">openswissdata.com</a></p>` +
     `</td></tr>` +
@@ -244,55 +260,119 @@ export interface DownloadEmailParams {
   downloadUrl: string;
   accountUrl: string;
   version: string;
+  locale?: Locale;
 }
 
 export async function sendDownloadEmail(p: DownloadEmailParams): Promise<EmailSendResult> {
+  const locale = p.locale ?? "fr";
+  const name = escapeHtml(p.datasetName);
+  const strong = (s: string) => `<strong style="color:${BRAND.ink};">${s}</strong>`;
+  const accountLink = (label: string) =>
+    `<a href="${escapeHtmlAttr(p.accountUrl)}" target="_blank" style="color:${BRAND.ink};text-decoration:underline;">${label}</a>`;
+  const copy = {
+    fr: {
+      eyebrow: "Téléchargement prêt",
+      heading: `Votre dataset ${p.datasetName} est prêt`,
+      subject: `Votre dataset ${p.datasetName} est prêt — openswissdata`,
+      preheader: `Téléchargez ${p.datasetName} (lien valide 48 h) — openswissdata`,
+      intro: `Merci pour votre achat de ${strong(name)} (version ${escapeHtml(p.version)}). Votre archive est prête.`,
+      button: "Télécharger le ZIP",
+      validity: "Ce lien de téléchargement est valide 48&nbsp;heures.",
+      access: `Accès permanent depuis votre ${accountLink("espace client")}.`,
+    },
+    de: {
+      eyebrow: "Download bereit",
+      heading: `Ihr Dataset ${p.datasetName} ist bereit`,
+      subject: `Ihr Dataset ${p.datasetName} ist bereit — openswissdata`,
+      preheader: `${p.datasetName} herunterladen (Link 48 h gültig) — openswissdata`,
+      intro: `Vielen Dank für Ihren Kauf von ${strong(name)} (Version ${escapeHtml(p.version)}). Ihr Archiv ist bereit.`,
+      button: "ZIP herunterladen",
+      validity: "Dieser Download-Link ist 48&nbsp;Stunden gültig.",
+      access: `Dauerhafter Zugriff über Ihren ${accountLink("Kundenbereich")}.`,
+    },
+    en: {
+      eyebrow: "Download ready",
+      heading: `Your ${p.datasetName} dataset is ready`,
+      subject: `Your ${p.datasetName} dataset is ready — openswissdata`,
+      preheader: `Download ${p.datasetName} (link valid 48 h) — openswissdata`,
+      intro: `Thank you for purchasing ${strong(name)} (version ${escapeHtml(p.version)}). Your archive is ready.`,
+      button: "Download the ZIP",
+      validity: "This download link is valid for 48&nbsp;hours.",
+      access: `Permanent access from your ${accountLink("account")}.`,
+    },
+  }[locale];
+
   const body =
-    eyebrow("Téléchargement prêt") +
-    para(`Merci pour votre achat de <strong style="color:${BRAND.ink};">${escapeHtml(p.datasetName)}</strong> ` +
-      `(version ${escapeHtml(p.version)}). Votre archive est prête.`) +
+    eyebrow(copy.eyebrow) +
+    para(copy.intro) +
     `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 12px 0;"><tr><td>` +
-    emailButton({ href: p.downloadUrl, label: "Télécharger le ZIP" }) +
+    emailButton({ href: p.downloadUrl, label: copy.button }) +
     `</td></tr></table>` +
-    para(`<span style="color:${BRAND.inkMute};font-size:13px;">Ce lien de téléchargement est valide 48&nbsp;heures.</span>`) +
+    para(`<span style="color:${BRAND.inkMute};font-size:13px;">${copy.validity}</span>`) +
     // Hairline separator before the secondary access note.
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr>` +
     `<td style="height:1px;line-height:1px;font-size:1px;background:${BRAND.line};">&nbsp;</td></tr></table>` +
-    para(`Accès permanent depuis votre <a href="${escapeHtmlAttr(p.accountUrl)}" target="_blank" ` +
-      `style="color:${BRAND.ink};text-decoration:underline;">espace client</a>.`);
+    para(copy.access);
 
-  const html = emailShell({
-    heading: `Votre dataset ${p.datasetName} est prêt`,
-    bodyHtml: body,
-    preheader: `Téléchargez ${p.datasetName} (lien valide 48 h) — openswissdata`,
-  });
-  return resendSend(p.to, `Votre dataset ${p.datasetName} est prêt — openswissdata`, html);
+  const html = emailShell({ heading: copy.heading, bodyHtml: body, preheader: copy.preheader, locale });
+  return resendSend(p.to, copy.subject, html);
 }
 
 export interface MagicLinkEmailParams {
   to: string;
   magicUrl: string;
+  locale?: Locale;
 }
 
 export async function sendMagicLinkEmail(p: MagicLinkEmailParams): Promise<EmailSendResult> {
+  const locale = p.locale ?? "fr";
+  const copy = {
+    fr: {
+      eyebrow: "Connexion",
+      heading: "Votre lien de connexion",
+      subject: "Votre lien de connexion openswissdata",
+      preheader: "Lien de connexion openswissdata (valide 15 minutes)",
+      intro: "Voici votre lien de connexion à votre espace client openswissdata.",
+      button: "Se connecter",
+      expiry: "Ce lien expire dans 15&nbsp;minutes et ne peut être utilisé qu'une seule fois.",
+      security: "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message — aucune action ne sera effectuée.",
+    },
+    de: {
+      eyebrow: "Anmeldung",
+      heading: "Ihr Anmeldelink",
+      subject: "Ihr openswissdata-Anmeldelink",
+      preheader: "openswissdata-Anmeldelink (15 Minuten gültig)",
+      intro: "Hier ist Ihr Link zur Anmeldung in Ihrem openswissdata-Kundenbereich.",
+      button: "Anmelden",
+      expiry: "Dieser Link läuft in 15&nbsp;Minuten ab und kann nur einmal verwendet werden.",
+      security: "Falls Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese Nachricht — es wird keine Aktion ausgeführt.",
+    },
+    en: {
+      eyebrow: "Sign in",
+      heading: "Your sign-in link",
+      subject: "Your openswissdata sign-in link",
+      preheader: "openswissdata sign-in link (valid 15 minutes)",
+      intro: "Here is your link to sign in to your openswissdata account.",
+      button: "Sign in",
+      expiry: "This link expires in 15&nbsp;minutes and can only be used once.",
+      security: "If you didn't request this, ignore this message — no action will be taken.",
+    },
+  }[locale];
+
   const body =
-    eyebrow("Connexion") +
-    para("Voici votre lien de connexion à votre espace client openswissdata.") +
+    eyebrow(copy.eyebrow) +
+    para(copy.intro) +
     `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 12px 0;"><tr><td>` +
-    emailButton({ href: p.magicUrl, label: "Se connecter" }) +
+    emailButton({ href: p.magicUrl, label: copy.button }) +
     `</td></tr></table>` +
-    para(`<span style="color:${BRAND.inkMute};font-size:13px;">Ce lien expire dans 15&nbsp;minutes et ne peut être utilisé qu'une seule fois.</span>`) +
+    para(`<span style="color:${BRAND.inkMute};font-size:13px;">${copy.expiry}</span>`) +
     // Hairline separator before the security note.
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr>` +
     `<td style="height:1px;line-height:1px;font-size:1px;background:${BRAND.line};">&nbsp;</td></tr></table>` +
-    para(`<span style="color:${BRAND.inkMute};font-size:13px;">Si vous n'êtes pas à l'origine de cette demande, ignorez ce message — aucune action ne sera effectuée.</span>`);
+    para(`<span style="color:${BRAND.inkMute};font-size:13px;">${copy.security}</span>`);
 
-  const html = emailShell({
-    heading: "Votre lien de connexion",
-    bodyHtml: body,
-    preheader: "Lien de connexion openswissdata (valide 15 minutes)",
-  });
-  return resendSend(p.to, "Votre lien de connexion openswissdata", html);
+  const html = emailShell({ heading: copy.heading, bodyHtml: body, preheader: copy.preheader, locale });
+  return resendSend(p.to, copy.subject, html);
 }
 
 export interface McpCredentialsEmailParams {
@@ -307,6 +387,12 @@ export interface McpCredentialsEmailParams {
   tier: Tier;
   authorizationEndpoint: string;
   tokenEndpoint: string;
+  locale?: Locale;
+}
+
+/** Localized site path to the customer account page. */
+export function accountUrl(locale: Locale): string {
+  return siteOrigin() + (locale === "fr" ? "/account" : `/${locale}/account`);
 }
 
 /**
@@ -315,8 +401,53 @@ export interface McpCredentialsEmailParams {
  * upgrade of an existing client it just confirms activation without a secret.
  */
 export async function sendMcpCredentialsEmail(p: McpCredentialsEmailParams): Promise<EmailSendResult> {
+  const locale = p.locale ?? "fr";
   const hasSecret = typeof p.clientSecret === "string" && p.clientSecret.length > 0;
-  const accountUrl = siteOrigin() + "/account";
+  const acctUrl = accountUrl(locale);
+  const tierChip = codeChip(p.tier);
+  const accountLink = (label: string) =>
+    `<a href="${escapeHtmlAttr(acctUrl)}" target="_blank" style="color:${BRAND.ink};text-decoration:underline;">${label}</a>`;
+  const copy = {
+    fr: {
+      heading: "Votre abonnement MCP est actif",
+      subject: `Votre abonnement MCP openswissdata est actif — ${p.tier}`,
+      preheader: `openswissdata MCP — ${p.tier} : identifiants et points de terminaison OAuth`,
+      intro: `Votre abonnement <strong style="color:${BRAND.ink};">openswissdata MCP — ${escapeHtml(p.tier)}</strong> est actif. Merci de votre confiance.`,
+      eyebrowCreds: "Identifiants OAuth",
+      callout: `<strong>À conserver une seule fois.</strong> Le <span style="font-family:${FONT_MONO};">client_secret</span> ci-dessous n'est affiché que dans cet e-mail. Enregistrez-le dans un gestionnaire de secrets : il ne pourra pas être récupéré ensuite.`,
+      eyebrowUpgrade: "Mise à niveau",
+      upgrade: `Votre clé MCP existante a été mise à niveau vers ${tierChip}. Aucun nouvel identifiant n'est nécessaire&nbsp;: continuez d'utiliser votre <span style="font-family:${FONT_MONO};">client_secret</span> habituel.`,
+      eyebrowEndpoints: "Points de terminaison OAuth 2.1",
+      connect: `Pour connecter Claude Desktop, Cursor ou Cline, ajoutez le serveur MCP ${codeChip("https://mcp.openswissdata.com")} — le client vous guidera dans le flux d'autorisation OAuth avec les identifiants ci-dessus.`,
+      manage: `Gérez ou résiliez votre abonnement à tout moment depuis votre ${accountLink("espace client")}.`,
+    },
+    de: {
+      heading: "Ihr MCP-Abonnement ist aktiv",
+      subject: `Ihr openswissdata-MCP-Abonnement ist aktiv — ${p.tier}`,
+      preheader: `openswissdata MCP — ${p.tier}: Zugangsdaten und OAuth-Endpunkte`,
+      intro: `Ihr Abonnement <strong style="color:${BRAND.ink};">openswissdata MCP — ${escapeHtml(p.tier)}</strong> ist aktiv. Vielen Dank für Ihr Vertrauen.`,
+      eyebrowCreds: "OAuth-Zugangsdaten",
+      callout: `<strong>Nur einmalig sichtbar.</strong> Das untenstehende <span style="font-family:${FONT_MONO};">client_secret</span> wird nur in dieser E-Mail angezeigt. Speichern Sie es in einem Secret-Manager: es kann später nicht erneut abgerufen werden.`,
+      eyebrowUpgrade: "Upgrade",
+      upgrade: `Ihr bestehender MCP-Schlüssel wurde auf ${tierChip} hochgestuft. Es sind keine neuen Zugangsdaten erforderlich&nbsp;: verwenden Sie weiterhin Ihr gewohntes <span style="font-family:${FONT_MONO};">client_secret</span>.`,
+      eyebrowEndpoints: "OAuth-2.1-Endpunkte",
+      connect: `Um Claude Desktop, Cursor oder Cline zu verbinden, fügen Sie den MCP-Server ${codeChip("https://mcp.openswissdata.com")} hinzu — der Client führt Sie mit den obigen Zugangsdaten durch den OAuth-Autorisierungsfluss.`,
+      manage: `Verwalten oder kündigen Sie Ihr Abonnement jederzeit über Ihren ${accountLink("Kundenbereich")}.`,
+    },
+    en: {
+      heading: "Your MCP subscription is active",
+      subject: `Your openswissdata MCP subscription is active — ${p.tier}`,
+      preheader: `openswissdata MCP — ${p.tier}: credentials and OAuth endpoints`,
+      intro: `Your <strong style="color:${BRAND.ink};">openswissdata MCP — ${escapeHtml(p.tier)}</strong> subscription is active. Thank you for your trust.`,
+      eyebrowCreds: "OAuth credentials",
+      callout: `<strong>Shown only once.</strong> The <span style="font-family:${FONT_MONO};">client_secret</span> below appears only in this email. Save it in a secrets manager: it cannot be retrieved later.`,
+      eyebrowUpgrade: "Upgrade",
+      upgrade: `Your existing MCP key has been upgraded to ${tierChip}. No new credentials are needed&nbsp;: keep using your usual <span style="font-family:${FONT_MONO};">client_secret</span>.`,
+      eyebrowEndpoints: "OAuth 2.1 endpoints",
+      connect: `To connect Claude Desktop, Cursor or Cline, add the MCP server ${codeChip("https://mcp.openswissdata.com")} — the client will guide you through the OAuth authorization flow with the credentials above.`,
+      manage: `Manage or cancel your subscription anytime from your ${accountLink("account")}.`,
+    },
+  }[locale];
 
   // One labelled mono row inside a credentials panel.
   const credRow = (label: string, value: string, last = false): string =>
@@ -337,54 +468,41 @@ export async function sendMcpCredentialsEmail(p: McpCredentialsEmailParams): Pro
 
   let credentialsBlock: string;
   if (hasSecret) {
-    // "Conserver une seule fois" callout: red hairline left border on white.
+    // "Save it once" callout: red hairline left border on white.
     const callout =
       `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" ` +
       `style="background:${BRAND.card};border:1px solid ${BRAND.lineStrong};border-left:3px solid ${BRAND.accent};` +
       `border-radius:8px;margin:0 0 16px 0;">` +
       `<tr><td style="padding:14px 18px;font-family:${FONT_SANS};font-size:13px;line-height:1.6;color:${BRAND.ink};">` +
-      `<strong>À conserver une seule fois.</strong> Le <span style="font-family:${FONT_MONO};">client_secret</span> ` +
-      `ci-dessous n'est affiché que dans cet e-mail. Enregistrez-le dans un gestionnaire de secrets : ` +
-      `il ne pourra pas être récupéré ensuite.` +
+      copy.callout +
       `</td></tr></table>`;
     credentialsBlock =
-      eyebrow("Identifiants OAuth") +
+      eyebrow(copy.eyebrowCreds) +
       callout +
       panel(credRow("client_id", p.clientId) + credRow("client_secret", p.clientSecret as string, true));
   } else {
     credentialsBlock =
-      eyebrow("Mise à niveau") +
-      para(`Votre clé MCP existante a été mise à niveau vers ${codeChip(p.tier)}. ` +
-        `Aucun nouvel identifiant n'est nécessaire&nbsp;: continuez d'utiliser votre ` +
-        `<span style="font-family:${FONT_MONO};">client_secret</span> habituel.`) +
+      eyebrow(copy.eyebrowUpgrade) +
+      para(copy.upgrade) +
       panel(credRow("client_id", p.clientId, true));
   }
 
   const body =
-    para(`Votre abonnement <strong style="color:${BRAND.ink};">openswissdata MCP — ${escapeHtml(p.tier)}</strong> ` +
-      `est actif. Merci de votre confiance.`) +
+    para(copy.intro) +
     credentialsBlock +
-    eyebrow("Points de terminaison OAuth 2.1") +
+    eyebrow(copy.eyebrowEndpoints) +
     panel(
       credRow("Authorization endpoint", p.authorizationEndpoint) +
       credRow("Token endpoint", p.tokenEndpoint, true),
     ) +
-    para(`Pour connecter Claude Desktop, Cursor ou Cline, ajoutez le serveur MCP ` +
-      `${codeChip("https://mcp.openswissdata.com")} — le client vous guidera dans le flux ` +
-      `d'autorisation OAuth avec les identifiants ci-dessus.`) +
+    para(copy.connect) +
     // Hairline separator before the account link.
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;"><tr>` +
     `<td style="height:1px;line-height:1px;font-size:1px;background:${BRAND.line};">&nbsp;</td></tr></table>` +
-    para(`Gérez ou résiliez votre abonnement à tout moment depuis votre ` +
-      `<a href="${escapeHtmlAttr(accountUrl)}" target="_blank" ` +
-      `style="color:${BRAND.ink};text-decoration:underline;">espace client</a>.`);
+    para(copy.manage);
 
-  const html = emailShell({
-    heading: "Votre abonnement MCP est actif",
-    bodyHtml: body,
-    preheader: `openswissdata MCP — ${p.tier} : identifiants et points de terminaison OAuth`,
-  });
-  return resendSend(p.to, `Votre abonnement MCP openswissdata est actif — ${p.tier}`, html);
+  const html = emailShell({ heading: copy.heading, bodyHtml: body, preheader: copy.preheader, locale });
+  return resendSend(p.to, copy.subject, html);
 }
 
 function escapeHtml(s: string): string {

@@ -3,7 +3,7 @@ import type { Stripe } from "stripe";
 import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
 import { signedDownloadUrl } from "../lib/r2.js";
-import { sendDownloadEmail, sendMcpCredentialsEmail } from "../lib/email.js";
+import { sendDownloadEmail, sendMcpCredentialsEmail, parseLocale } from "../lib/email.js";
 import { generateClientId, generateClientSecret, hashToken } from "../mcp/oauth/crypto.js";
 import {
   insertClient,
@@ -62,6 +62,10 @@ async function handleSubscriptionCheckout(
     const db = getDb();
     const now = Date.now();
     const subId = (session.subscription as string | null) ?? null;
+    // Buyer language carried from the localized checkout page → drives the
+    // language of the credentials email and is stored for future emails.
+    const metaLocale = session.metadata?.locale;
+    const locale = parseLocale(metaLocale);
 
     // Idempotency: Stripe replays events. If this subscription already
     // provisioned a client, do nothing (no duplicate client / duplicate email).
@@ -91,10 +95,14 @@ async function handleSubscriptionCheckout(
           "UPDATE customers SET stripe_customer_id = COALESCE(stripe_customer_id, ?) WHERE id = ?",
         ).run(session.customer as string, customerId);
       }
+      // Follow the buyer's latest checkout language (only when explicitly set).
+      if (metaLocale) {
+        db.prepare("UPDATE customers SET locale = ? WHERE id = ?").run(locale, customerId);
+      }
     } else {
       const info = db
-        .prepare("INSERT INTO customers (email, stripe_customer_id, created_at) VALUES (?, ?, ?)")
-        .run(email, (session.customer as string | null) ?? null, now);
+        .prepare("INSERT INTO customers (email, stripe_customer_id, locale, created_at) VALUES (?, ?, ?, ?)")
+        .run(email, (session.customer as string | null) ?? null, locale, now);
       customerId = Number(info.lastInsertRowid);
     }
 
@@ -118,6 +126,7 @@ async function handleSubscriptionCheckout(
         tier,
         authorizationEndpoint,
         tokenEndpoint,
+        locale,
       });
       if (!emailResult.sent) {
         console.error(
@@ -150,6 +159,7 @@ async function handleSubscriptionCheckout(
       tier,
       authorizationEndpoint,
       tokenEndpoint,
+      locale,
     });
     if (!emailResult.sent) {
       console.error(
@@ -270,15 +280,20 @@ stripeWebhookRoute.post("/", async (c) => {
 
   const db = getDb();
   const now = Date.now();
+  const metaLocale = session.metadata?.locale;
+  const locale = parseLocale(metaLocale);
 
   // Find or create customer
   const customerRow = db.prepare("SELECT id FROM customers WHERE email = ?").get(email) as { id: number } | undefined;
   let customerId: number;
   if (customerRow) {
     customerId = customerRow.id;
+    if (metaLocale) {
+      db.prepare("UPDATE customers SET locale = ? WHERE id = ?").run(locale, customerId);
+    }
   } else {
-    const info = db.prepare("INSERT INTO customers (email, stripe_customer_id, created_at) VALUES (?, ?, ?)")
-      .run(email, (session.customer as string | null) ?? null, now);
+    const info = db.prepare("INSERT INTO customers (email, stripe_customer_id, locale, created_at) VALUES (?, ?, ?, ?)")
+      .run(email, (session.customer as string | null) ?? null, locale, now);
     customerId = Number(info.lastInsertRowid);
   }
 
@@ -382,8 +397,9 @@ stripeWebhookRoute.post("/", async (c) => {
         to: email,
         datasetName,
         downloadUrl,
-        accountUrl: `${baseUrl}/account`,
+        accountUrl: `${baseUrl}${locale === "fr" ? "/account" : "/" + locale + "/account"}`,
         version,
+        locale,
       });
       if (!emailResult.sent) {
         console.warn(`[webhook] download email for ${datasetId} not sent: ${emailResult.reason}`);

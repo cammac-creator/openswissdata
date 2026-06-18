@@ -14,6 +14,7 @@ vi.mock("../../src/lib/r2.js", () => ({
 vi.mock("../../src/lib/email.js", () => ({
   sendDownloadEmail: vi.fn().mockResolvedValue({ sent: true }),
   sendMagicLinkEmail: vi.fn(),
+  parseLocale: (v: unknown) => (v === "de" || v === "en" ? v : "fr"),
 }));
 
 import { stripe } from "../../src/lib/stripe.js";

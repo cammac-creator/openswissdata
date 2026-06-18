@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getDb } from "../lib/db.js";
 import { generateToken, isValidTokenFormat } from "../lib/tokens.js";
-import { sendMagicLinkEmail } from "../lib/email.js";
+import { sendMagicLinkEmail, parseLocale } from "../lib/email.js";
 
 export const authRoute = new Hono();
 
@@ -48,7 +48,9 @@ authRoute.post("/magic-link", async (c) => {
   }
   const { email } = parsed;
   const db = getDb();
-  const row = db.prepare("SELECT id FROM customers WHERE email = ?").get(email) as { id: number } | undefined;
+  const row = db.prepare("SELECT id, locale FROM customers WHERE email = ?").get(email) as
+    | { id: number; locale: string | null }
+    | undefined;
   if (row) {
     const token = generateToken();
     const now = Date.now();
@@ -58,7 +60,7 @@ authRoute.post("/magic-link", async (c) => {
       .run(token, row.id, now + MAGIC_LINK_TTL_MS, now);
     const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
     const magicUrl = `${baseUrl}/api/auth/verify?token=${token}`;
-    await sendMagicLinkEmail({ to: email, magicUrl });
+    await sendMagicLinkEmail({ to: email, magicUrl, locale: parseLocale(row.locale) });
   }
   // Always return 200 to avoid email enumeration.
   return c.json({ ok: true });
@@ -83,7 +85,13 @@ authRoute.get("/verify", async (c) => {
 
   const cookie = `osd_session=${longToken}; HttpOnly; ${isProd() ? "Secure; " : ""}SameSite=Lax; Max-Age=${Math.floor(SESSION_TTL_MS / 1000)}; Path=/`;
   c.header("Set-Cookie", cookie);
-  return c.redirect("/account?auth=ok", 302);
+  // Land on the account page in the customer's language.
+  const cust = db.prepare("SELECT locale FROM customers WHERE id = ?").get(session.customer_id) as
+    | { locale: string | null }
+    | undefined;
+  const loc = parseLocale(cust?.locale);
+  const accountPath = loc === "fr" ? "/account" : `/${loc}/account`;
+  return c.redirect(`${accountPath}?auth=ok`, 302);
 });
 
 authRoute.post("/logout", async (c) => {
