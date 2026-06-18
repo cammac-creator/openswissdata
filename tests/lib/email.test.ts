@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { sendDownloadEmail, sendMagicLinkEmail } from "../../src/lib/email.js";
+import {
+  sendDownloadEmail,
+  sendMagicLinkEmail,
+  renderMcpCredentialsEmail,
+  renderMagicLinkEmail,
+  renderDownloadEmail,
+} from "../../src/lib/email.js";
 
 describe("lib/email graceful degradation", () => {
   const origFetch = global.fetch;
@@ -95,5 +101,62 @@ describe("lib/email graceful degradation", () => {
     const r = await sendMagicLinkEmail({ to: "a@b.com", magicUrl: "https://x" });
     expect(r.sent).toBe(false);
     expect(r.reason).toBe("resend_error");
+  });
+});
+
+describe("lib/email renderers (content + i18n)", () => {
+  const CREDS = {
+    to: "client@exemple.com",
+    clientId: "osd_iTxq7UMSw8wNkK7sv2Axig",
+    clientSecret: "osdsec_TOPSECRETvalue123",
+    tier: "standalone" as const,
+    authorizationEndpoint: "https://mcp.openswissdata.com/oauth/authorize",
+    tokenEndpoint: "https://mcp.openswissdata.com/oauth/token",
+  };
+
+  it("credentials email delivers the secret + id + tier (the critical payload)", () => {
+    const { subject, html } = renderMcpCredentialsEmail({ ...CREDS, locale: "fr" });
+    expect(html).toContain("osdsec_TOPSECRETvalue123");
+    expect(html).toContain("osd_iTxq7UMSw8wNkK7sv2Axig");
+    expect(html).toContain("standalone");
+    expect(html).toContain("abonnement MCP est actif");
+    expect(subject).toContain("standalone");
+  });
+
+  it("credentials email is localized (DE heading)", () => {
+    const { html } = renderMcpCredentialsEmail({ ...CREDS, locale: "de" });
+    expect(html).toContain("MCP-Abonnement ist aktiv");
+    expect(html).toContain('lang="de"');
+  });
+
+  it("upgrade variant (no secret) never leaks a secret value", () => {
+    const { html } = renderMcpCredentialsEmail({ ...CREDS, clientSecret: undefined, locale: "fr" });
+    expect(html).not.toContain("osdsec_");
+    expect(html).toContain("osd_iTxq7UMSw8wNkK7sv2Axig"); // id still shown
+    expect(html).toContain("Mise à niveau");
+  });
+
+  it("magic-link renderer carries the URL + localized heading", () => {
+    const fr = renderMagicLinkEmail({ to: "a@b.com", magicUrl: "https://osd/verify?t=xyz", locale: "fr" });
+    expect(fr.html).toContain("https://osd/verify?t=xyz");
+    expect(fr.html).toContain("Votre lien de connexion");
+    const en = renderMagicLinkEmail({ to: "a@b.com", magicUrl: "https://osd/verify?t=xyz", locale: "en" });
+    expect(en.html).toContain("Your sign-in link");
+  });
+
+  it("download renderer carries name + version + url", () => {
+    const { html, subject } = renderDownloadEmail({
+      to: "a@b.com", datasetName: "TARES", downloadUrl: "https://dl/zip", accountUrl: "https://acc", version: "2026.06.18", locale: "fr",
+    });
+    expect(html).toContain("TARES");
+    expect(html).toContain("2026.06.18");
+    expect(html).toContain("https://dl/zip");
+    expect(subject).toContain("TARES");
+  });
+
+  it("brand logo is decorative (alt empty) — no duplicated wordmark when images are blocked", () => {
+    const { html } = renderMagicLinkEmail({ to: "a@b.com", magicUrl: "https://x", locale: "fr" });
+    expect(html).toContain('alt=""');
+    expect(html).not.toContain('alt="openswissdata"');
   });
 });
