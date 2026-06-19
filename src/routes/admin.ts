@@ -4,7 +4,10 @@ import { getDb } from "../lib/db.js";
 import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
 import { runCleanup } from "../lib/cleanup.js";
-import { refreshFinmaFromR2, getMcpFreshness } from "../mcp/r2-refresh.js";
+import { refreshFinmaFromR2, getMcpFreshness, extractCsvFromZip } from "../mcp/r2-refresh.js";
+import { getObjectBuffer } from "../lib/r2.js";
+import { snapshotFromRows, getReleasedAt, type SnapshotDataset } from "../mcp/snapshots.js";
+import { parse as parseCsvSync } from "csv-parse/sync";
 import {
   S3Client,
   PutObjectCommand,
@@ -197,4 +200,76 @@ adminRoute.get("/mcp-freshness", (c) => {
     return c.json({ error: "unauthorized" }, 401);
   }
   return c.json({ ok: true, datasets: getMcpFreshness(), checked_at: new Date().toISOString() });
+});
+
+// The slice CSV (inside the release ZIP) snapshotted per dataset.
+const SNAPSHOT_SLICE: Record<SnapshotDataset, string> = {
+  finma: "finma_registry.csv",
+  tares: "tares.csv",
+};
+
+/**
+ * POST /api/admin/snapshot-backfill — one-shot historical backfill of
+ * `dataset_snapshots` from the dated R2 ZIPs (powers tariff_changelog /
+ * entity_history). Body: { dataset_id: "finma" | "tares" }.
+ *
+ * Iterates every version oldest→newest. FULL snapshots are self-contained →
+ * order-independent AND idempotent (INSERT OR IGNORE), so re-running is safe and
+ * only adds missing rows. Per-version errors (e.g. a pruned ZIP) are collected,
+ * not fatal. Run from INSIDE the container (railway ssh → localhost) to dodge
+ * the edge proxy timeout — it downloads + unzips one ZIP per version.
+ */
+adminRoute.post("/snapshot-backfill", async (c) => {
+  const secret = c.req.header("x-admin-secret");
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) {
+    return c.json({ error: "unauthorized" }, 401);
+  }
+  let body: { dataset_id?: string };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "invalid_body" }, 400);
+  }
+  if (body.dataset_id !== "finma" && body.dataset_id !== "tares") {
+    return c.json({ error: "dataset_id must be 'finma' or 'tares'" }, 400);
+  }
+  const ds: SnapshotDataset = body.dataset_id;
+  const slice = SNAPSHOT_SLICE[ds];
+  const db = getDb();
+  const versions = db
+    .prepare("SELECT version, r2_key, released_at FROM versions WHERE dataset_id=? ORDER BY released_at ASC")
+    .all(ds) as { version: string; r2_key: string; released_at: number }[];
+
+  let totalInserted = 0;
+  const processed: { version: string; inserted: number; entities: number }[] = [];
+  const errors: { version: string; error: string }[] = [];
+  for (const v of versions) {
+    try {
+      // 60 MB cap: the TARES ZIP carries embeddings (~25 MB); still guards
+      // against a wrong key pointing at a much larger object.
+      const zip = await getObjectBuffer(v.r2_key, { maxBytes: 60_000_000 });
+      const csv = await extractCsvFromZip(zip, slice);
+      const rows = parseCsvSync(csv, {
+        columns: true,
+        skip_empty_lines: true,
+        relax_quotes: true,
+      }) as Array<Record<string, string>>;
+      const recordedAt = v.released_at || getReleasedAt(db, ds, v.version);
+      const r = snapshotFromRows(db, ds, v.version, recordedAt, rows);
+      totalInserted += r.inserted;
+      processed.push({ version: v.version, inserted: r.inserted, entities: r.entities });
+    } catch (e) {
+      errors.push({ version: v.version, error: e instanceof Error ? e.message : String(e) });
+    }
+  }
+  return c.json({
+    ok: true,
+    dataset_id: ds,
+    versions_total: versions.length,
+    versions_ok: processed.length,
+    versions_failed: errors.length,
+    total_inserted: totalInserted,
+    processed,
+    errors,
+  });
 });

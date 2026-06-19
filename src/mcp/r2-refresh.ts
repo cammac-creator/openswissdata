@@ -44,6 +44,7 @@ import {
   type FinmaRegistryRow,
   type FinmaWarningRow,
 } from "./data-loader.js";
+import { snapshotFromRows } from "./snapshots.js";
 
 export interface FreshnessState {
   /** Dataset version currently held in the in-memory maps (null = seed only). */
@@ -104,7 +105,7 @@ export function getMcpFreshness(): Record<string, FreshnessState & { currentVers
 }
 
 /** Extract a single file (by basename) from an in-memory ZIP buffer. */
-function extractCsvFromZip(zipBuf: Buffer, basename: string): Promise<string> {
+export function extractCsvFromZip(zipBuf: Buffer, basename: string): Promise<string> {
   return new Promise((resolve, reject) => {
     yauzl.fromBuffer(zipBuf, { lazyEntries: true }, (err, zip) => {
       if (err || !zip) return reject(err ?? new Error("zip open failed"));
@@ -229,8 +230,8 @@ async function doRefreshFinma(): Promise<void> {
       return;
     }
     const ver = db
-      .prepare("SELECT r2_key, sha256, size_bytes FROM versions WHERE dataset_id='finma' AND version=?")
-      .get(version) as { r2_key: string; sha256: string; size_bytes: number } | undefined;
+      .prepare("SELECT r2_key, sha256, size_bytes, released_at FROM versions WHERE dataset_id='finma' AND version=?")
+      .get(version) as { r2_key: string; sha256: string; size_bytes: number; released_at: number } | undefined;
     if (!ver?.r2_key) {
       state.lastError = `no r2_key for finma ${version}`;
       return;
@@ -277,6 +278,28 @@ async function doRefreshFinma(): Promise<void> {
     console.log(
       `[mcp-refresh] finma → ${version} (registry ${registry.length} rows, warnings ${warnings.length} rows)`,
     );
+
+    // Best-effort history snapshot for tariff_changelog / entity_history. Reuses
+    // the registry rows we just parsed (no second download). ISOLATED in its own
+    // try/catch: a snapshot failure must NEVER mark the refresh as failed (the
+    // swap already succeeded above). Idempotent (INSERT OR IGNORE per version).
+    try {
+      const recordedAt = ver.released_at || Date.now();
+      const snap = snapshotFromRows(
+        db,
+        "finma",
+        version,
+        recordedAt,
+        registry as unknown as Array<Record<string, string>>,
+      );
+      if (snap.inserted > 0) {
+        console.log(`[mcp-snapshot] finma ${version}: +${snap.inserted} rows (${snap.entities} entities)`);
+      }
+    } catch (e) {
+      console.error(
+        `[mcp-snapshot] finma ${version} snapshot failed (non-fatal): ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
   } catch (e) {
     // Keep last-good (or seed). Never propagate — this runs off the hot path.
     state.lastError = e instanceof Error ? e.message : String(e);
