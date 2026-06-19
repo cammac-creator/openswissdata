@@ -213,7 +213,7 @@ export function tariffChangelogHandler(args: unknown): {
 export const tariffChangelogTool = {
   name: "tariff_changelog",
   description:
-    "Returns the historical changelog of MFN duty rates (and adjacent fields) for a Swiss customs tariff (HS8) code. Window: rolling 12-24 months. Irreplicable by scraping — xtares.admin.ch only serves the current version. Requires `hs8`; optional `since` (ISO date) to bound the window.",
+    "Returns the historical changelog of MFN duty rates (and adjacent fields) for a Swiss customs tariff (HS8) code, across every dated release we have archived (history deepens over time from launch). Irreplicable by scraping — xtares.admin.ch only serves the current version. Requires `hs8`; optional `since` (ISO date) to bound the window.",
   inputSchema: tariffChangelogSchema,
   handler: tariffChangelogHandler,
 } as const;
