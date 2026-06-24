@@ -125,13 +125,8 @@ openssl ts -verify -data manifest.json -in manifest.json.tsr \\
   -CAfile freetsa-cacert.pem
 # → Verification: OK`}</code></pre>
 
-    <h4 class="text-base font-semibold mt-5 mb-2">Methode 2 — Offizielles SDK (TypeScript/Python, schneller)</h4>
-    <p>Wenn Sie bereits Node.js verwenden:</p>
-    <pre><code>{`$ npx @osd/sdk verify-provenance ./tares-2026.04.zip
-✓ Ed25519-Signatur gültig
-✓ RFC-3161 Zeitstempel gültig (2026-04-29T15:30:00Z, freetsa.org)
-✓ SHA-256-Hash der Quelldatei verifiziert
-✓ Bewilligung BAZG-PERMISSION-2026-04-21-MICHAEL-BEER referenziert`}</code></pre>
+    <h4 class="text-base font-semibold mt-5 mb-2">Methode 2 — Offizielles SDK (in Kürze)</h4>
+    <p>Ein TypeScript/Python-SDK, das diese Prüfung in einem einzigen Befehl kapselt, wird in Kürze veröffentlicht. Bis dahin ist Methode 1 oben (openssl + shasum) der kanonische und vollständig ausreichende Weg.</p>
     <p>
       Jede Änderung am Inhalt des ZIP (auch nur ein einziges Zeichen) macht die Signatur ungültig. Jedes gefälschte Ausstellungsdatum macht den RFC-3161 Zeitstempel ungültig, da das Token von einer unabhängigen Drittpartei-TSA (freetsa.org) ausgestellt wird.
     </p>
