@@ -125,13 +125,8 @@ openssl ts -verify -data manifest.json -in manifest.json.tsr \\
   -CAfile freetsa-cacert.pem
 # → Verification: OK`}</code></pre>
 
-    <h4 class="text-base font-semibold mt-5 mb-2">Méthode 2 — SDK officiel (TypeScript/Python, plus rapide)</h4>
-    <p>Si vous utilisez déjà Node.js :</p>
-    <pre><code>{`$ npx @osd/sdk verify-provenance ./tares-2026.04.zip
-✓ Signature Ed25519 valide
-✓ Horodatage RFC-3161 valide (2026-04-29T15:30:00Z, freetsa.org)
-✓ Hash SHA-256 du fichier source vérifié
-✓ Permission BAZG-PERMISSION-2026-04-21-MICHAEL-BEER référencée`}</code></pre>
+    <h4 class="text-base font-semibold mt-5 mb-2">Méthode 2 — SDK officiel (à venir)</h4>
+    <p>Un SDK TypeScript/Python encapsulant cette vérification en une seule commande sera publié prochainement. En attendant, la méthode 1 ci-dessus (openssl + shasum) est la voie canonique et pleinement suffisante.</p>
     <p>
       Toute modification du contenu du ZIP (même un seul caractère) invalide la signature. Toute date d'émission falsifiée invalide l'horodatage RFC-3161 puisque le token est émis par une TSA tierce indépendante (freetsa.org).
     </p>

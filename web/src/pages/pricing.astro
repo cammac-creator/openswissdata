@@ -149,10 +149,85 @@ const breadcrumbJsonLd = {
         </div>
       </div>
 
-      <p class="pr-note reveal-v4">
-        Besoin des datasets bruts (ZIP CSV / Parquet / JSON / SQL) en achat unique plutôt qu'en API ?
-        Voir <a href="/datasets/tares">TARES</a>, <a href="/datasets/classifications">Classifications</a>, <a href="/datasets/finma">FINMA</a> ou le <a href="/bundle">bundle 3-en-1</a>.
-      </p>
+      <!-- ===== DATASETS EN ACHAT UNIQUE (one-shot) ===== -->
+      <div class="reveal-v4" style="margin-top:64px;text-align:center;max-width:680px;margin-left:auto;margin-right:auto;">
+        <h2 class="ds-section-title">Ou en <span class="serif">achat unique</span></h2>
+        <p class="ds-section-intro">
+          Pas besoin d'API&nbsp;? Téléchargez les datasets bruts — ZIP <strong>CSV · Parquet · JSON · SQL</strong>,
+          versionnés et signés Ed25519. Paiement unique, accès immédiat.
+        </p>
+      </div>
+
+      <div class="pr-grid" style="margin-top:32px;">
+        <!-- TARES -->
+        <div class="pr-card reveal-v4">
+          <div class="pr-tier">TARES</div>
+          <div class="pr-price">299 CHF</div>
+          <p class="pr-sub">Tarif douanier suisse HS8 — désignations 4 langues, droits MFN, régimes préférentiels.</p>
+          <ul class="pr-feats">
+            <li>✓ ~7 500 codes HS8</li>
+            <li>✓ 4 formats (CSV/JSON/Parquet/SQL)</li>
+            <li>✓ Manifeste signé Ed25519</li>
+          </ul>
+          <form method="POST" action="/api/checkout/start" style="margin:0;">
+            <input type="hidden" name="dataset_ids" value="tares" />
+            <button type="submit" class="v4-btn v4-btn-secondary pr-cta">Acheter — 299 CHF <span class="arrow">→</span></button>
+          </form>
+          <a href="/datasets/tares" style="display:inline-block;margin-top:12px;font-size:12px;color:var(--ink-mute);text-decoration:none;">Détails du dataset →</a>
+        </div>
+
+        <!-- CLASSIFICATIONS -->
+        <div class="pr-card reveal-v4" data-delay="1">
+          <div class="pr-tier">Classifications</div>
+          <div class="pr-price">399 CHF</div>
+          <p class="pr-sub">NOGA · NACE · ISIC avec crosswalks bidirectionnels entre nomenclatures.</p>
+          <ul class="pr-feats">
+            <li>✓ NOGA 2008/2025 ↔ NACE ↔ ISIC</li>
+            <li>✓ 4 formats normalisés</li>
+            <li>✓ Manifeste signé Ed25519</li>
+          </ul>
+          <form method="POST" action="/api/checkout/start" style="margin:0;">
+            <input type="hidden" name="dataset_ids" value="classifications" />
+            <button type="submit" class="v4-btn v4-btn-secondary pr-cta">Acheter — 399 CHF <span class="arrow">→</span></button>
+          </form>
+          <a href="/datasets/classifications" style="display:inline-block;margin-top:12px;font-size:12px;color:var(--ink-mute);text-decoration:none;">Détails du dataset →</a>
+        </div>
+
+        <!-- FINMA -->
+        <div class="pr-card reveal-v4" data-delay="2">
+          <div class="pr-tier">FINMA</div>
+          <div class="pr-price">299 CHF</div>
+          <p class="pr-sub">Registre des intermédiaires financiers autorisés + listes de mise en garde.</p>
+          <ul class="pr-feats">
+            <li>✓ 10 listes consolidées</li>
+            <li>✓ 4 formats normalisés</li>
+            <li>✓ Manifeste signé Ed25519</li>
+          </ul>
+          <form method="POST" action="/api/checkout/start" style="margin:0;">
+            <input type="hidden" name="dataset_ids" value="finma" />
+            <button type="submit" class="v4-btn v4-btn-secondary pr-cta">Acheter — 299 CHF <span class="arrow">→</span></button>
+          </form>
+          <a href="/datasets/finma" style="display:inline-block;margin-top:12px;font-size:12px;color:var(--ink-mute);text-decoration:none;">Détails du dataset →</a>
+        </div>
+
+        <!-- BUNDLE -->
+        <div class="pr-card pr-pop reveal-v4" data-delay="3">
+          <span class="pr-badge">−200 CHF</span>
+          <div class="pr-tier" style="color:var(--accent);">Bundle 3-en-1</div>
+          <div class="pr-price">797 CHF</div>
+          <p class="pr-sub">Les 3 datasets en un seul achat. 360 jours de mises à jour inclus.</p>
+          <ul class="pr-feats">
+            <li>✓ TARES + Classifications + FINMA</li>
+            <li>✓ Économie de 200 CHF (−20 %)</li>
+            <li>✓ 360 j de mises à jour incluses</li>
+          </ul>
+          <form method="POST" action="/api/checkout/start" style="margin:0;">
+            <input type="hidden" name="dataset_ids" value="bundle" />
+            <button type="submit" class="v4-btn v4-btn-primary pr-cta">Acheter le bundle — 797 CHF <span class="arrow">→</span></button>
+          </form>
+          <a href="/bundle" style="display:inline-block;margin-top:12px;font-size:12px;color:var(--ink-mute);text-decoration:none;">Détails du bundle →</a>
+        </div>
+      </div>
 
       <section class="ds-section reveal-v4">
         <h2 class="ds-section-title">Ce qu'on vend <span class="serif">vraiment</span></h2>

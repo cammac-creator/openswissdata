@@ -54,7 +54,7 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
         <div class="v4-cta-row reveal-v4" data-delay="4">
           <a href="/en/mcp#install" class="v4-btn v4-btn-primary">Connect the MCP — free <span class="arrow">→</span></a>
           <a href="#datasets" class="v4-btn v4-btn-secondary">See the datasets</a>
-          <InstallBar command="npx @osd/cli pull tares" />
+          <InstallBar command="claude mcp add --transport http openswissdata https://mcp.openswissdata.com/mcp/jsonrpc" />
         </div>
 
         <div class="v4-permission-line reveal-v4" data-delay="5">
@@ -382,13 +382,13 @@ import QuoteCarousel from "../../components/QuoteCarousel.astro";
 
   // ===== Terminal typewriter =====
   const termLines = [
-    { text: '$ npx @osd/cli pull tares@latest', cls: 'cmd', prompt: true, delay: 600 },
-    { text: '✓ Verified Ed25519 signature openswissdata.com', cls: 'ok', delay: 400 },
-    { text: '✓ Pulled tares.parquet (1.8 MB · 7,511 rows · v' + osdTaresVersion + ')', cls: 'ok', delay: 350 },
-    { text: '✓ Cross-walks: HS6, CN8', cls: 'ok', delay: 300 },
-    { text: '✓ Manifest SHA-256 + RFC-3161 timestamp', cls: 'ok', delay: 350 },
+    { text: '$ claude mcp add --transport http openswissdata https://mcp.openswissdata.com/mcp/jsonrpc', cls: 'cmd', prompt: true, delay: 600 },
+    { text: '✓ MCP server "openswissdata" connected · 9 tools', cls: 'ok', delay: 400 },
+    { text: '✓ Ed25519 signature + RFC-3161 timestamp verified', cls: 'ok', delay: 350 },
+    { text: '✓ TARES v' + osdTaresVersion + ' · 7,511 HS8 codes · cross-walks HS6/CN8', cls: 'ok', delay: 300 },
     { text: '', cls: '', delay: 250 },
-    { text: '$ npx @osd/cli query tares "0901.10"', cls: 'cmd', prompt: true, delay: 700 },
+    { text: '> find the customs tariff for unroasted coffee', cls: 'cmd', prompt: true, delay: 700 },
+    { text: '  → tariff_lookup("0901.10.10")', cls: 'dim', delay: 300 },
     { text: 'hs_code      "0901.10.10"', cls: 'json-red', delay: 250 },
     { text: 'description  {', cls: 'dim', delay: 200 },
     { text: '  de  "Kaffee, nicht geröstet"', cls: 'json-str', delay: 250 },
