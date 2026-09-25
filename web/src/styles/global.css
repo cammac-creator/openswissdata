@@ -1227,12 +1227,12 @@ details[open] .faq-body {
 .v4-hero.ds-page { padding: 48px 0 64px; position: relative; overflow: hidden; }
 .v4-hero.ds-page .ds-breadcrumb { margin-bottom: 32px; position: relative; z-index: 2; }
 .v4-hero.ds-page .v4-hero-grid {
-  grid-template-columns: 1.15fr .85fr;
+  grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr);
   align-items: start;
   position: relative;
   z-index: 2;
 }
-@media (max-width: 1100px) { .v4-hero.ds-page .v4-hero-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .v4-hero.ds-page .v4-hero-grid { grid-template-columns: minmax(0,1fr); } }
 .v4-hero.ds-page .ds-price-box {
   position: sticky;
   top: 80px;
@@ -1473,14 +1473,15 @@ details[open] .faq-body {
 .v4-hero { position: relative; padding: 64px 0 80px; overflow: hidden; }
 .v4-hero-grid {
   display: grid;
-  grid-template-columns: 1.05fr .95fr;
+  grid-template-columns: minmax(0,1.05fr) minmax(0,.95fr);
   gap: 52px;
   align-items: start;
 }
-@media (max-width: 1100px) { .v4-hero-grid { grid-template-columns: 1fr; gap: 40px; } }
+.v4-hero-grid > * { min-width: 0; }
+@media (max-width: 1100px) { .v4-hero-grid { grid-template-columns: minmax(0,1fr); gap: 40px; } }
 
 .v4-eyebrow {
-  display: inline-flex; align-items: center; gap: 10px;
+  display: inline-flex; align-items: center; flex-wrap: wrap; gap: 10px;
   font-family: var(--font-mono);
   font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
   color: var(--ink-mute);
@@ -1502,6 +1503,7 @@ details[open] .faq-body {
   letter-spacing: -.035em;
   margin-bottom: 22px;
   max-width: 17ch;
+  overflow-wrap: anywhere;
 }
 .v4-h1 .accent { color: var(--accent); position: relative; display: inline-block; }
 .v4-h1 .accent::after {
@@ -1617,7 +1619,7 @@ details[open] .faq-body {
   to { opacity: 1; background-position: 0 0; }
 }
 @media (max-width: 720px) {
-  .v4-hero-chain { font-size: 9px; padding: 10px 12px; gap: 0; }
+  .v4-hero-chain { font-size: 9px; padding: 10px 12px; gap: 8px 0; flex-wrap: wrap; overflow: visible; }
   .v4-chain-node { padding: 4px 7px; gap: 4px; }
   .v4-chain-link { width: 14px; margin: 0 3px; }
   .v4-hero { padding: 32px 0 48px; }
@@ -1834,7 +1836,7 @@ details[open] .faq-body {
 .v4-diy .v4-eyebrow { display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; color: var(--ink-mute); margin-bottom: 12px; }
 .v4-diy h2 { font-weight: 700; font-size: clamp(28px, 3.2vw, 40px); letter-spacing: -.025em; line-height: 1.1; margin-bottom: 14px; max-width: 28ch; }
 .v4-diy .v4-section-lead { font-size: 17px; color: var(--ink-soft); margin-bottom: 48px; max-width: 60ch; line-height: 1.55; }
-.v4-diy-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.v4-diy-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
 .v4-diy-item { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 26px 28px; transition: border-color var(--t-fast) var(--ease-out), transform var(--t-med) var(--ease-out); }
 .v4-diy-item:hover { border-color: var(--ink); transform: translateY(-1px); }
 .v4-diy-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-family: var(--font-mono); font-weight: 700; font-size: 13px; margin-bottom: 14px; }
@@ -1973,3 +1975,11 @@ details[open] .faq-body {
   padding-bottom: 16px;
   border-bottom: 1px dashed var(--line-strong);
 }
+
+/* Expliquer une offre fermée avant toute tentative d'achat. */
+.subscription-notice{padding:18px 20px;margin:0 0 24px;border:1px solid var(--line-strong);border-radius:10px;background:var(--bg-soft);color:var(--ink-soft);line-height:1.6;max-width:80ch}
+.subscription-status{padding:14px 16px;border:1px solid var(--line-strong);border-radius:8px;background:var(--bg-soft);color:var(--ink-mute);font-size:13px;line-height:1.45;text-align:center}
+@media(max-width:720px){.v4-term-line{white-space:pre-wrap;overflow-wrap:anywhere;overflow:visible}.v4-term-bar{flex-wrap:wrap}.v4-term-bar-title{min-width:0}}
+@media(max-width:720px){.v4-diy-grid{grid-template-columns:minmax(0,1fr)}.v4-install-bar{height:auto;min-height:46px}.v4-install-bar-cmd{min-width:0;overflow-wrap:anywhere;align-self:center;padding-top:10px;padding-bottom:10px}.v4-install-bar-copy{flex-shrink:0}}
+
+.subscription-notice a{display:inline-block;margin-top:8px;color:var(--ink);font-weight:600;text-decoration:underline;text-underline-offset:3px}

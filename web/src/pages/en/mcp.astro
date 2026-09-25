@@ -255,7 +255,9 @@ const tools = [
     </div>
     <h2 class="v4-section-h2">Free tier capable. Pro for production workflows.</h2>
 
-    <div class="mcp-pricing-grid">
+    <p class="subscription-notice">New Pro and Business subscriptions are temporarily unavailable. Free access and dataset file purchases remain available.</p>
+
+      <div class="mcp-pricing-grid">
       <div class="mcp-pc">
         <div class="mcp-pc-tier">Free</div>
         <div class="mcp-pc-price">0 CHF</div>
@@ -263,25 +265,17 @@ const tools = [
         <a href="#install" class="v4-btn v4-btn-secondary mcp-pc-cta">Test now <span class="arrow">→</span></a>
       </div>
       <div class="mcp-pc pop">
-        <span class="mcp-pc-badge">popular</span>
+        <span class="mcp-pc-badge">currently closed</span>
         <div class="mcp-pc-tier" style="color:var(--accent);">Pro</div>
         <div class="mcp-pc-price">49 CHF<small>/month</small></div>
-        <p class="mcp-pc-sub">5,000 req/month. Self-serve key, cancel anytime.</p>
-        <form method="POST" action="/api/checkout/start">
-          <input type="hidden" name="dataset_ids" value="mcp_standalone" />
-          <input type="hidden" name="locale" value="en" />
-          <button type="submit" class="v4-btn v4-btn-primary mcp-pc-cta">Subscribe — 49 CHF/month <span class="arrow">→</span></button>
-        </form>
+        <p class="mcp-pc-sub">5,000 req/month. Currently closed to new subscriptions.</p>
+        <p class="subscription-status">New subscriptions temporarily closed</p>
       </div>
       <div class="mcp-pc">
         <div class="mcp-pc-tier">Business</div>
         <div class="mcp-pc-price">199 CHF<small>/month</small></div>
         <p class="mcp-pc-sub">50,000 req/month + advanced tools. Fintechs &amp; ERP integrators.</p>
-        <form method="POST" action="/api/checkout/start">
-          <input type="hidden" name="dataset_ids" value="mcp_business" />
-          <input type="hidden" name="locale" value="en" />
-          <button type="submit" class="v4-btn v4-btn-secondary mcp-pc-cta">Subscribe — 199 CHF/month <span class="arrow">→</span></button>
-        </form>
+        <p class="subscription-status">New subscriptions temporarily closed</p>
       </div>
       <div class="mcp-pc">
         <div class="mcp-pc-tier">Enterprise</div>
