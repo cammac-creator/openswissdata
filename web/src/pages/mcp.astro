@@ -378,7 +378,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
       out.textContent = "→ Calling " + sel.value + "...";
       try {
         const parsedArgs = JSON.parse(args.value);
-        const res = await fetch('https://mcp.openswissdata.com/mcp/jsonrpc', {
+        const res = await fetch('/mcp/jsonrpc', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

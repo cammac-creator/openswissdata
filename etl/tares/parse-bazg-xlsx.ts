@@ -1,4 +1,4 @@
-import xlsx from "xlsx";
+import xlsx from "../shared/xlsx.js";
 
 /**
  * Parsers for the BAZG XLSX files referenced in sources.ts.

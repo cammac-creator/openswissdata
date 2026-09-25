@@ -44,7 +44,7 @@ interface Tool {
   inputSchema: Readonly<Record<string, unknown>>;
   /**
    * Tool handlers may be sync (CSV-only tools) or async (embedding-based
-   * tools that await `@xenova/transformers`). The dispatch layer awaits the
+   * tools that await `@huggingface/transformers`). The dispatch layer awaits the
    * return value uniformly.
    */
   handler: (args: unknown) => ToolResult | Promise<ToolResult>;

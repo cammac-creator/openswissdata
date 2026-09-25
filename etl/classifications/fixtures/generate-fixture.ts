@@ -1,4 +1,4 @@
-import { utils, writeFile } from "xlsx";
+import { utils, writeFile } from "../../shared/xlsx.js";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mkdirSync, existsSync, writeFileSync } from "node:fs";

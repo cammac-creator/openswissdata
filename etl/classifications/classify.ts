@@ -1,3 +1,4 @@
+import { createEmbeddingExtractor } from "../../src/lib/embedding-model.js";
 /**
  * NOGA 2025 free-text classifier — Phase 1 / C3.
  *
@@ -6,7 +7,7 @@
  *   → top-3 NOGA codes with cosine similarity scores.
  *
  * Implementation:
- *   - Reuses the same multilingual mpnet model (`@xenova/transformers`,
+ *   - Reuses the same multilingual mpnet model (`@huggingface/transformers`,
  *     768-d, mean-pooled + L2-normalised) used to pre-compute the dataset
  *     embeddings — see `etl/classifications/embeddings.ts`.
  *   - Loads the embeddings from the JSON cache produced at ETL time
@@ -155,16 +156,7 @@ async function loadIndex(opts: ClassifyOptions): Promise<CachedIndex> {
 
 async function getExtractor(): Promise<unknown> {
   if (_extractorPromise) return _extractorPromise;
-  _extractorPromise = (async () => {
-    // @ts-expect-error — package exports CJS named exports without bundled types
-    const { pipeline, env } = await import("@xenova/transformers");
-    // @ts-expect-error
-    env.allowRemoteModels = true;
-    // @ts-expect-error
-    env.allowLocalModels = true;
-    // @ts-expect-error
-    return pipeline("feature-extraction", NOGA_EMBEDDING_MODEL, { quantized: true });
-  })();
+  _extractorPromise = createEmbeddingExtractor().catch(error => { _extractorPromise = null; throw error; });
   return _extractorPromise;
 }
 

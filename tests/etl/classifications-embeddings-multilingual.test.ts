@@ -78,7 +78,7 @@ function makeFakeVector(seed: number): number[] {
 /**
  * Pre-populate per-language caches so `generateNogaEmbeddings` short-circuits
  * the model loading + inference and returns directly from cache. This lets us
- * test the wrapper logic without depending on the heavy `@xenova/transformers`
+ * test the wrapper logic without depending on the heavy `@huggingface/transformers`
  * dependency at runtime.
  */
 function primeCacheFiles(cacheDir: string, rows: NomenclatureRow[], langs: SecondaryLang[]): void {

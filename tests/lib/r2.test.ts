@@ -12,13 +12,13 @@ const { sendMock, getSignedUrlMock } = vi.hoisted(() => {
 });
 
 vi.mock("@aws-sdk/client-s3", () => ({
-  S3Client: vi.fn().mockImplementation(() => ({ send: sendMock })),
+  S3Client: vi.fn().mockImplementation(function () { return { send: sendMock }; }),
   PutObjectCommand: vi
     .fn()
-    .mockImplementation((input) => ({ __type: "PutObjectCommand", input })),
+    .mockImplementation(function (input) { return { __type: "PutObjectCommand", input }; }),
   GetObjectCommand: vi
     .fn()
-    .mockImplementation((input) => ({ __type: "GetObjectCommand", input })),
+    .mockImplementation(function (input) { return { __type: "GetObjectCommand", input }; }),
 }));
 
 vi.mock("@aws-sdk/s3-request-presigner", () => ({

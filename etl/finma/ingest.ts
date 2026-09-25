@@ -1,4 +1,4 @@
-import XLSX from "xlsx";
+import XLSX from "../shared/xlsx.js";
 const { readFile, utils } = XLSX;
 import { readFileSync } from "node:fs";
 import { parse } from "csv-parse/sync";

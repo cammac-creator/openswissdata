@@ -17,6 +17,16 @@ describe('Bureau privé et suivi client',()=>{
  });
  afterEach(()=>{closeDb();rmSync(temp,{recursive:true,force:true});for(const key of ['DATABASE_PATH','ADMIN_EMAILS','BASE_URL','OSD_BACKUP_KEY'])delete process.env[key];clearCrmCache();vi.restoreAllMocks();vi.unstubAllGlobals()});
  it('refuse un visiteur anonyme et un client non administrateur',async()=>{const app=createApp();for(const path of ['/overview','/customers/2','/mail','/operations','/visibility']){expect((await app.request('/api/admin/crm'+path)).status).toBe(401);expect((await app.request('/api/admin/crm'+path,{headers:{cookie:`osd_session=${other}`}})).status).toBe(403)}});
+ it('refuse un corps surdimensionné sans Content-Length avant toute création de tâche',async()=>{
+  const raw=new TextEncoder().encode(JSON.stringify({title:'Action fictive',padding:'x'.repeat(18000)}));
+  const body=new ReadableStream<Uint8Array>({start(controller){controller.enqueue(raw.slice(0,8000));controller.enqueue(raw.slice(8000));controller.close();}});
+  const request=new Request('https://www.openswissdata.com/api/admin/crm/tasks',{method:'POST',headers,body,duplex:'half'} as RequestInit);
+  expect(request.headers.has('content-length')).toBe(false);
+  const response=await createApp().fetch(request);
+  expect(response.status).toBe(413);
+  expect(await response.json()).toEqual({error:'body_too_large'});
+  expect(getDb().prepare('SELECT COUNT(*) AS n FROM crm_tasks').get()).toEqual({n:0});
+ });
  it('exclut propriétaire, tests et remboursements des ventes',async()=>{const r=await createApp().request('/api/admin/crm/overview',{headers});const body=await r.json();expect(r.status).toBe(200);expect(r.headers.get('cache-control')).toBe('private, no-store');expect(body.revenue).toEqual({orders:1,customers:1,revenue_cents:29900});expect(body.customers.find((c:{id:number})=>c.id===admin).internal).toBe(true);expect(JSON.stringify(body)).not.toContain(token)});
  it('déduit les remboursements partiels et sépare une contestation des ventes',async()=>{
   const db=getDb(),app=createApp();db.prepare("UPDATE orders SET refunded_chf=5000 WHERE stripe_session_id='cs_live_buyer'").run();

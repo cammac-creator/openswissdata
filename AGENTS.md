@@ -79,3 +79,10 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Les versions de l'accueil viennent du catalogue distribué à la consultation ; une panne affiche l'impossibilité de vérifier, jamais une ancienne date présentée comme actuelle. Les FAQ FR/DE/EN partagent les mêmes règles : paiement confirmé, collecte FINMA quotidienne planifiée, TARES hebdomadaire, classifications après contrôle.
 - Le bundle livre les trois fichiers. Aucun accès MCP payant n'est créé par l'achat de fichiers : ne pas l'annoncer comme inclus. Les outils anonymes sont `tariff_lookup`, `kyc_check` et `cross_walk` ; les autres demandent des droits. Les souscriptions payantes restent fermées.
 - `statent_lookup` et son CSV ont été retirés du service le 25.09.2026 faute de preuve de droits de redistribution dans le dossier. Les scopes historiques restent lisibles pour compatibilité, mais ne donnent accès à aucun outil STATENT. Ne pas remettre la source au seul motif qu'un client possède ce scope. Voir `docs/droits-des-sources.md` pour les preuves et vérifications restantes.
+
+## Dépendances et modèle de recherche
+- Référence de contrôle : `docs/securite-dependances.md`. Application et site ont des lockfiles distincts ; les SDK également. Ne pas confondre audit npm sans avis et audit de sécurité complet.
+- SheetJS vient de sa distribution officielle 0.20.3, intégrité verrouillée ; imports par `etl/shared/xlsx.ts` (CommonJS Node avec fichiers/encodages).
+- Recherche et collectes vectorielles utilisent le même moteur Transformers.js 3.8.1. Modèle mpnet à révision figée, tailles/SHA dans `embedding-model.ts`, préchargé au build ; aucun téléchargement pendant une requête. Pour une collecte vectorielle seule : `npm run models:prepare:embedding`.
+- Les caches de reprise exigent modèle, révision/moteur et dimension courants. Les index livrés restent ceux des collectes historiques tant qu’une régénération distincte n’a pas été validée.
+- Le démonstrateur navigateur appelle `/mcp/jsonrpc` sur la même origine, compatible avec la CSP ; une URL de sous-domaine nécessite CORS et CSP et ne doit pas être utilisée ici.

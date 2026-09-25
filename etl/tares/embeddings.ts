@@ -1,3 +1,4 @@
+import { createEmbeddingExtractor, EMBEDDING_REVISION } from "../../src/lib/embedding-model.js";
 /**
  * TARES embeddings — pre-computed multilingual semantic vectors per HS8 code.
  *
@@ -10,7 +11,7 @@
  *   - One vector per row, FR description only (most-used language)
  *   - Model: `Xenova/paraphrase-multilingual-mpnet-base-v2` (sentence-transformers,
  *     768 dimensions, mean-pooled + L2-normalised)
- *   - Local inference via `@xenova/transformers` (ONNX/WASM, runs in Node)
+ *   - Local inference via `@huggingface/transformers` (ONNX/WASM, runs in Node)
  *   - Resumable cache (`embeddings-cache-fr.json`) so a crashed run resumes
  *     instead of recomputing 4-6 minutes of CPU work
  *
@@ -47,12 +48,8 @@ export interface GenerateEmbeddingsOptions {
 }
 
 export const TARES_EMBEDDING_MODEL = "Xenova/paraphrase-multilingual-mpnet-base-v2";
-/**
- * Model "version" — short fingerprint that lets buyers detect when we change models.
- * NOT a cryptographic hash of the weights; just "<repo>@<readable-tag>" so consumers
- * can compare across releases. Bumped manually whenever we change the model.
- */
-export const TARES_EMBEDDING_MODEL_VERSION = "Xenova/paraphrase-multilingual-mpnet-base-v2@2024-04";
+/** La reprise exige la même révision de poids et le même moteur de calcul. */
+export const TARES_EMBEDDING_MODEL_VERSION = `${TARES_EMBEDDING_MODEL}@${EMBEDDING_REVISION}:transformers-3.8.1:q8:mean-l2`;
 export const TARES_EMBEDDING_DIMENSIONS = 768;
 
 /** Pick the description for the requested language, with a fallback so we never emit empty text. */
@@ -103,6 +100,7 @@ function loadCache(path: string): CacheShape | null {
       raw &&
       typeof raw === "object" &&
       raw.model === TARES_EMBEDDING_MODEL &&
+      raw.model_version === TARES_EMBEDDING_MODEL_VERSION &&
       raw.dimensions === TARES_EMBEDDING_DIMENSIONS &&
       raw.entries &&
       typeof raw.entries === "object"
@@ -134,27 +132,6 @@ export async function generateTaresEmbeddings(
   const log = opts.log ?? ((m) => console.log(m));
   const cachePath = opts.cachePath ?? "./data/tares/embeddings-cache-fr.json";
 
-  // Lazy import: @xenova/transformers is a heavyweight dependency we only need
-  // at ETL time, never at server runtime. Importing it eagerly would slow down
-  // every tsx invocation in the repo.
-  // @ts-expect-error — package exports CJS named exports without bundled types
-  const { pipeline, env } = await import("@xenova/transformers");
-  // Restrict to local cache + tighten threads. The library defaults are fine
-  // but we want deterministic logs.
-  // @ts-expect-error — env shape exposed by transformers.js at runtime
-  env.allowRemoteModels = true;
-  // @ts-expect-error — env shape exposed by transformers.js at runtime
-  env.allowLocalModels = true;
-
-  log(`[embeddings] loading model ${TARES_EMBEDDING_MODEL}...`);
-  // `feature-extraction` returns the last hidden state; we ask for mean-pooling
-  // + L2 normalisation so the output is directly comparable with cosine.
-  // @ts-expect-error — pipeline() typing relaxed in @xenova/transformers v2
-  const extractor = await pipeline("feature-extraction", TARES_EMBEDDING_MODEL, {
-    quantized: true, // quantised ONNX is ~4x faster on CPU and quality is fine for our use case
-  });
-  log(`[embeddings] model loaded`);
-
   const cache = (opts.noCache ? null : loadCache(cachePath)) ?? {
     model: TARES_EMBEDDING_MODEL,
     model_version: TARES_EMBEDDING_MODEL_VERSION,
@@ -182,6 +159,7 @@ export async function generateTaresEmbeddings(
   if (todo.length === 0) {
     log(`[embeddings] all embeddings cached, skipping inference`);
   } else {
+    const extractor = await createEmbeddingExtractor();
     const startedAt = Date.now();
     let processed = 0;
     let lastFlush = Date.now();
