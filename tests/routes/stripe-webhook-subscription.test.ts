@@ -51,9 +51,11 @@ import { join } from "node:path";
 function subscriptionCheckoutEvent(over: Record<string, unknown> = {}) {
   return {
     type: "checkout.session.completed",
+    livemode: false,
     data: {
       object: {
         id: "cs_sub_1",
+        payment_status: "paid", currency: "chf", amount_total: 4900, livemode: false,
         mode: "subscription",
         customer: "cus_1",
         subscription: "sub_1",
@@ -248,9 +250,11 @@ describe("Stripe webhook — MCP subscription delivery", () => {
   it("non-regression: a one-shot ZIP checkout (mode=payment) does NOT touch mcp_clients", async () => {
     constructEventAsyncMock.mockResolvedValueOnce({
       type: "checkout.session.completed",
+      livemode: false,
       data: {
         object: {
           id: "cs_oneshot",
+          payment_status: "paid", currency: "chf", livemode: false,
           mode: "payment",
           customer_email: "zipbuyer@example.com",
           payment_intent: "pi_z",

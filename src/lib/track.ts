@@ -132,7 +132,8 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
 
   track({
     kind: "api_request",
-    name: path,
+    // Un lien de livraison porte un droit d'accès ; seul le type de route est mesuré.
+    name: path.replace(/^\/api\/(download|delivery)\/.*/, "/api/$1/:token"),
     status: c.res.status,
     duration_ms,
     customer_id,

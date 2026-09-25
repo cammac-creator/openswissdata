@@ -1,329 +1,216 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-
-vi.mock("../../src/lib/stripe.js", () => ({
-  stripe: vi.fn(() => ({
-    webhooks: { constructEventAsync: vi.fn() },
-  })),
-}));
-
-vi.mock("../../src/lib/r2.js", () => ({
-  signedDownloadUrl: vi.fn().mockResolvedValue("https://signed.example.com/zip"),
-  uploadZip: vi.fn(),
-}));
-
-vi.mock("../../src/lib/email.js", () => ({
-  sendDownloadEmail: vi.fn().mockResolvedValue({ sent: true }),
-  sendMagicLinkEmail: vi.fn(),
-  parseLocale: (v: unknown) => (v === "de" || v === "en" ? v : "fr"),
-}));
-
-import { stripe } from "../../src/lib/stripe.js";
-import { signedDownloadUrl as signedUrlMock } from "../../src/lib/r2.js";
-import { sendDownloadEmail as sendEmailMock } from "../../src/lib/email.js";
-
-// Typed accessors for mock functions
-const constructEventAsyncMock = vi.fn();
-(stripe as ReturnType<typeof vi.fn>).mockImplementation(() => ({
-  webhooks: { constructEventAsync: constructEventAsyncMock },
-}));
-
-import { createApp } from "../../src/index.js";
-import { getDb, closeDb } from "../../src/lib/db.js";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-describe("POST /api/webhook/stripe", () => {
-  let tmp: string;
+vi.mock("../../src/lib/stripe.js", () => ({ stripe: vi.fn() }));
+vi.mock("../../src/lib/email.js", async importOriginal => ({
+  ...await importOriginal<typeof import("../../src/lib/email.js")>(),
+  sendPreparedEmail: vi.fn().mockResolvedValue({ sent: true }),
+}));
+import { stripe } from "../../src/lib/stripe.js";
+import { sendPreparedEmail } from "../../src/lib/email.js";
+import { createApp } from "../../src/index.js";
+import { getDb, closeDb } from "../../src/lib/db.js";
+import { processOrderDeliveries, deliveryStatus } from "../../src/lib/order-delivery.js";
 
+const construct = vi.fn();
+vi.mocked(stripe).mockReturnValue({webhooks:{constructEventAsync:construct}} as any);
+const send = vi.mocked(sendPreparedEmail);
+const event = (session:Record<string,unknown>={}, type="checkout.session.completed") => ({
+  id:"evt_test", type, livemode:false, data:{object:{
+    id:"cs_test_1",mode:"payment",payment_status:"paid",currency:"chf",livemode:false,
+    customer_email:"acheteur@example.test",payment_intent:"pi_1",amount_total:29900,
+    metadata:{dataset_ids:"tares",locale:"de"},...session,
+  }},
+});
+const post = () => createApp().request("/api/webhook/stripe",{
+  method:"POST",headers:{"content-type":"application/json","stripe-signature":"ok"},body:"{}",
+});
+const rows = (table:string) => getDb().prepare("SELECT * FROM "+table).all() as any[];
+const retryNow = () => getDb().prepare("UPDATE order_deliveries SET next_attempt_at=0").run();
+
+describe("Paiements et livraisons durables", () => {
+  let tmp:string;
   beforeEach(() => {
-    tmp = mkdtempSync(join(tmpdir(), "osd-wh-"));
-    process.env.DATABASE_PATH = join(tmp, "t.sqlite");
-    process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
-    process.env.BASE_URL = "https://www.openswissdata.com";
-    process.env.NODE_ENV = "test";
-
-    const db = getDb();
-    const now = Date.now();
-    db.prepare("INSERT INTO datasets (id, name, slug, price_chf, stripe_price_id, current_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run("tares", "TARES Dataset", "tares", 29900, "price_t", "2026.04.22", now);
-    db.prepare("INSERT INTO datasets (id, name, slug, price_chf, stripe_price_id, current_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run("classifications", "Classifications", "classifications", 39900, "price_c", "2026.04.22", now);
-    db.prepare("INSERT INTO datasets (id, name, slug, price_chf, stripe_price_id, current_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run("finma", "FINMA", "finma", 29900, "price_f", "2026.04.22", now);
-    db.prepare("INSERT INTO versions (dataset_id, version, r2_key, sha256, size_bytes, released_at) VALUES (?, ?, ?, ?, ?, ?)")
-      .run("tares", "2026.04.22", "tares/2026.04.22.zip", "a".repeat(64), 100, now);
-    db.prepare("INSERT INTO versions (dataset_id, version, r2_key, sha256, size_bytes, released_at) VALUES (?, ?, ?, ?, ?, ?)")
-      .run("classifications", "2026.04.22", "classifications/2026.04.22.zip", "b".repeat(64), 100, now);
-    db.prepare("INSERT INTO versions (dataset_id, version, r2_key, sha256, size_bytes, released_at) VALUES (?, ?, ?, ?, ?, ?)")
-      .run("finma", "2026.04.22", "finma/2026.04.22.zip", "c".repeat(64), 100, now);
-    closeDb();
-
-    constructEventAsyncMock.mockReset();
-    signedUrlMock.mockClear();
-    sendEmailMock.mockClear();
+    tmp=mkdtempSync(join(tmpdir(),"osd-livraisons-"));
+    vi.stubEnv("DATABASE_PATH",join(tmp,"test.sqlite"));
+    vi.stubEnv("STRIPE_WEBHOOK_SECRET","whsec_test");
+    vi.stubEnv("STRIPE_SECRET_KEY","sk_test_factice");
+    vi.stubEnv("BASE_URL","https://www.openswissdata.com");
+    vi.stubEnv("NODE_ENV","test");
+    const db=getDb(),now=Date.now();
+    for(const id of ["tares","classifications","finma"]){
+      db.prepare("INSERT INTO datasets(id,name,slug,price_chf,stripe_price_id,current_version,created_at) VALUES(?,?,?,?,?,?,?)")
+        .run(id,id.toUpperCase(),id,29900,"price_"+id,"2026.09.25",now);
+      db.prepare("INSERT INTO versions(dataset_id,version,r2_key,sha256,size_bytes,released_at) VALUES(?,?,?,?,?,?)")
+        .run(id,"2026.09.25",id+"/test.zip","a".repeat(64),100,now);
+    }
+    construct.mockReset().mockResolvedValue(event());
+    send.mockReset().mockResolvedValue({sent:true});
   });
+  afterEach(() => { closeDb();rmSync(tmp,{recursive:true,force:true});vi.unstubAllEnvs(); });
 
-  afterEach(() => {
-    closeDb();
-    rmSync(tmp, { recursive: true, force: true });
-    delete process.env.DATABASE_PATH;
-    delete process.env.STRIPE_WEBHOOK_SECRET;
-    delete process.env.BASE_URL;
+  it("refuse une signature absente ou invalide",async()=>{
+    expect((await createApp().request("/api/webhook/stripe",{method:"POST",body:"{}"})).status).toBe(400);
+    construct.mockRejectedValueOnce(new Error("signature invalide"));
+    expect((await post()).status).toBe(400);
+    expect(rows("orders")).toHaveLength(0);
   });
-
-  it("returns 400 without stripe-signature header", async () => {
-    const app = createApp();
-    const res = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ type: "checkout.session.completed" }),
-    });
-    expect(res.status).toBe(400);
+  it("enregistre atomiquement la commande, les droits et la livraison avant tout envoi",async()=>{
+    expect((await post()).status).toBe(200);
+    expect(rows("orders")[0]).toMatchObject({amount_chf:29900,status:"paid"});
+    expect(rows("entitlements")).toHaveLength(1);
+    expect(rows("order_deliveries")[0]).toMatchObject({state:"pending",locale:"de"});
+    expect(send).not.toHaveBeenCalled();
+    await processOrderDeliveries();
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send.mock.calls[0][0].subject).toContain("Ihr Dataset");
+    expect(send.mock.calls[0][0].html).toContain("/api/delivery/");
+    expect(rows("order_deliveries")[0].state).toBe("sent");
   });
-
-  it("returns 400 on invalid signature", async () => {
-    constructEventAsyncMock.mockRejectedValueOnce(new Error("bad signature"));
-    const app = createApp();
-    const res = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json", "stripe-signature": "xxx" },
-      body: "{}",
-    });
-    expect(res.status).toBe(400);
+  it("continue si les préférences linguistiques CRM manquent",async()=>{
+    getDb().exec("DROP TABLE crm_languages");
+    expect((await post()).status).toBe(200);
+    await processOrderDeliveries();
+    expect(send.mock.calls[0][0].subject).toContain("Ihr Dataset");
   });
-
-  it("creates customer/order/entitlement for single dataset", async () => {
-    constructEventAsyncMock.mockResolvedValueOnce({
-      type: "checkout.session.completed",
-      data: { object: {
-        id: "cs_test_1",
-        customer_email: "alice@example.com",
-        payment_intent: "pi_t1",
-        amount_total: 29900,
-        metadata: { dataset_ids: "tares" },
-      }},
-    });
-    const app = createApp();
-    const res = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json", "stripe-signature": "ok" },
-      body: "{}",
-    });
-    expect(res.status).toBe(200);
-
-    const db = getDb();
-    const cust = db.prepare("SELECT id FROM customers WHERE email = ?").get("alice@example.com") as any;
-    expect(cust).toBeDefined();
-    const order = db.prepare("SELECT * FROM orders WHERE stripe_session_id = ?").get("cs_test_1") as any;
-    expect(order.amount_chf).toBe(29900);
-    const ent = db.prepare("SELECT * FROM entitlements WHERE customer_id = ?").all(cust.id) as any[];
-    expect(ent).toHaveLength(1);
-    expect(ent[0].dataset_id).toBe("tares");
-
-    expect(sendEmailMock).toHaveBeenCalledTimes(1);
-    expect(sendEmailMock.mock.calls[0][0].to).toBe("alice@example.com");
-    expect(sendEmailMock.mock.calls[0][0].datasetName).toBe("TARES Dataset");
+  it.each(["unpaid","no_payment_required",undefined])("ne livre pas un paiement non confirmé : %s",async payment_status=>{
+    construct.mockResolvedValue(event({payment_status}));
+    expect((await post()).status).toBe(200);
+    expect(rows("orders")).toHaveLength(0);
+    expect(rows("entitlements")).toHaveLength(0);
+    expect(send).not.toHaveBeenCalled();
   });
-
-  it("livre un achat payé même si la table de langues CRM est indisponible", async () => {
-    const app = createApp();
-    getDb().exec('DROP TABLE crm_languages');
-    constructEventAsyncMock.mockResolvedValueOnce({ type:'checkout.session.completed', data:{ object:{ id:'cs_test_sans_langue', customer_email:'buyer@example.test', payment_intent:'pi_sans_langue', amount_total:29900, metadata:{dataset_ids:'tares',locale:'en'} } } });
-    const response = await app.request('/api/webhook/stripe', {method:'POST',headers:{'content-type':'application/json','stripe-signature':'ok'},body:'{}'});
-    expect(response.status).toBe(200);
-    expect(getDb().prepare('SELECT status FROM orders WHERE stripe_session_id=?').get('cs_test_sans_langue')).toEqual({status:'paid'});
-    expect(getDb().prepare('SELECT dataset_id FROM entitlements').all()).toEqual([{dataset_id:'tares'}]);
-    expect(sendEmailMock).toHaveBeenCalledWith(expect.objectContaining({to:'buyer@example.test',locale:'en'}));
+  it("livre lorsque Stripe confirme ensuite un paiement différé",async()=>{
+    construct.mockResolvedValueOnce(event({payment_status:"unpaid"}))
+      .mockResolvedValueOnce(event({},"checkout.session.async_payment_succeeded"));
+    await post();await post();
+    expect(rows("orders")).toHaveLength(1);
+    await processOrderDeliveries();
+    expect(send).toHaveBeenCalledTimes(1);
   });
-
-  it("expands bundle to 3 datasets with 3 entitlements and 3 emails", async () => {
-    constructEventAsyncMock.mockResolvedValueOnce({
-      type: "checkout.session.completed",
-      data: { object: {
-        id: "cs_test_bundle",
-        customer_email: "bob@example.com",
-        payment_intent: "pi_tb",
-        amount_total: 79900,
-        metadata: { dataset_ids: "bundle" },
-      }},
-    });
-    const app = createApp();
-    const res = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json", "stripe-signature": "ok" },
-      body: "{}",
-    });
-    expect(res.status).toBe(200);
-
-    const db = getDb();
-    const cust = db.prepare("SELECT id FROM customers WHERE email = ?").get("bob@example.com") as any;
-    const ents = db.prepare("SELECT dataset_id FROM entitlements WHERE customer_id = ?").all(cust.id) as any[];
-    expect(ents.map((e: any) => e.dataset_id).sort()).toEqual(["classifications", "finma", "tares"]);
-    expect(sendEmailMock).toHaveBeenCalledTimes(3);
+  it("livre un achat offert par une remise totale confirmée par Stripe",async()=>{
+    construct.mockResolvedValue(event({payment_status:'no_payment_required',amount_total:0,payment_intent:null}));
+    expect((await post()).status).toBe(200);
+    expect(rows('orders')[0]).toMatchObject({amount_chf:0,status:'paid'});
   });
-
-  it("is idempotent — second delivery of same event does not duplicate", async () => {
-    constructEventAsyncMock.mockResolvedValue({
-      type: "checkout.session.completed",
-      data: { object: {
-        id: "cs_test_dup",
-        customer_email: "carol@example.com",
-        payment_intent: "pi_tc",
-        amount_total: 29900,
-        metadata: { dataset_ids: "finma" },
-      }},
-    });
-    const app = createApp();
-    const r1 = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json", "stripe-signature": "ok" },
-      body: "{}",
-    });
-    expect(r1.status).toBe(200);
-    const r2 = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json", "stripe-signature": "ok" },
-      body: "{}",
-    });
-    expect(r2.status).toBe(200);
-    const body2 = await r2.json();
-    expect(body2.idempotent).toBe(true);
-
-    const db = getDb();
-    const orders = db.prepare("SELECT * FROM orders WHERE stripe_session_id = ?").all("cs_test_dup");
-    expect(orders).toHaveLength(1);
+  it.each([{currency:"eur"},{amount_total:null},{amount_total:-1},{livemode:true}])("refuse une devise, un montant ou un environnement incohérent",async invalid=>{
+    construct.mockResolvedValue(event(invalid));
+    expect((await post()).status).toBe(400);
+    expect(rows("orders")).toHaveLength(0);
   });
-
-  it("still returns 200 when Resend is unconfigured (graceful degradation)", async () => {
-    sendEmailMock.mockResolvedValueOnce({ sent: false, reason: "no_api_key" });
-    constructEventAsyncMock.mockResolvedValueOnce({
-      type: "checkout.session.completed",
-      data: { object: {
-        id: "cs_test_noresend",
-        customer_email: "dave@example.com",
-        payment_intent: "pi_d",
-        amount_total: 29900,
-        metadata: { dataset_ids: "tares" },
-      }},
-    });
-    const app = createApp();
-    const res = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json", "stripe-signature": "ok" },
-      body: "{}",
-    });
-    expect(res.status).toBe(200);
-
-    const db = getDb();
-    const ent = db.prepare("SELECT * FROM entitlements").all();
-    expect(ent).toHaveLength(1);
+  it("refuse aussi un événement de test sur une configuration de production",async()=>{
+    vi.stubEnv("STRIPE_SECRET_KEY","sk_live_factice");
+    expect((await post()).status).toBe(400);
+    expect(rows("orders")).toHaveLength(0);
   });
-
-  it("ignores non-checkout events gracefully", async () => {
-    constructEventAsyncMock.mockResolvedValueOnce({
-      type: "customer.created",
-      data: { object: { id: "cus_1" } },
-    });
-    const app = createApp();
-    const res = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json", "stripe-signature": "ok" },
-      body: "{}",
-    });
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.ignored).toBe("customer.created");
+  it("ne double ni commande ni mail lors des rejeux ou traitements concurrents",async()=>{
+    await Promise.all([post(),post()]);
+    await Promise.all([processOrderDeliveries(),processOrderDeliveries()]);
+    const res=await post();
+    expect((await res.json()).idempotent).toBe(true);
+    expect(rows("orders")).toHaveLength(1);
+    expect(rows("order_deliveries")).toHaveLength(1);
+    expect(send).toHaveBeenCalledTimes(1);
   });
-
-  // H2 (fail-safe partial delivery): if some datasets have no current_version,
-  // the webhook delivers what it CAN and skips the missing ones. Only if ALL
-  // datasets fail to resolve do we return 500 (so Stripe retries). This avoids
-  // the worst-case scenario where Stripe retry-storms a permanently broken
-  // dataset and the customer's email is never sent for the working ones.
-  it("H2 (partial delivery): skips dataset with no current_version, delivers the rest", async () => {
-    const db = getDb();
-    // Remove current_version from 'finma' — simulates a missing version for 1
-    // of 3 datasets in the bundle. tares + classifications still have versions.
-    db.prepare("UPDATE datasets SET current_version = NULL WHERE id = 'finma'").run();
-    closeDb();
-
-    constructEventAsyncMock.mockResolvedValueOnce({
-      type: "checkout.session.completed",
-      data: {
-        object: {
-          id: "cs_test_tx_partial",
-          customer_email: "tx-test@example.com",
-          payment_intent: "pi_tx",
-          amount_total: 79900,
-          metadata: { dataset_ids: "bundle" },
-        },
-      },
-    });
-
-    const app = createApp();
-    const res = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json", "stripe-signature": "ok" },
-      body: "{}",
-    });
-
-    // 200 — partial success, delivered what we could.
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.received).toBe(true);
-    expect(body.skipped).toBeDefined();
-    expect(body.skipped).toEqual([{ id: "finma", reason: "no_current_version" }]);
-    expect(body.datasets).toEqual(expect.arrayContaining(["tares", "classifications"]));
-    expect(body.datasets).not.toContain("finma");
-
-    // Order is created. Entitlements only for the resolvable datasets.
-    const db2 = getDb();
-    const orders = db2
-      .prepare("SELECT * FROM orders WHERE stripe_session_id = ?")
-      .all("cs_test_tx_partial");
-    expect(orders).toHaveLength(1);
-    const ents = db2
-      .prepare("SELECT dataset_id FROM entitlements ORDER BY dataset_id")
-      .all() as Array<{ dataset_id: string }>;
-    expect(ents.map((e) => e.dataset_id)).toEqual(["classifications", "tares"]);
+  it("reprend après une panne avec la même requête et la même clé, même après redémarrage",async()=>{
+    send.mockResolvedValueOnce({sent:false,reason:"resend_error"});
+    await post();await processOrderDeliveries();
+    expect(rows("order_deliveries")[0]).toMatchObject({state:"pending",last_error:"resend_error"});
+    const first=send.mock.calls[0];
+    closeDb();retryNow();await processOrderDeliveries();
+    expect(send.mock.calls[1]).toEqual(first);
+    expect(rows("order_deliveries")[0].state).toBe("sent");
   });
-
-  // H2 (fail-fast on total failure): if EVERY dataset is missing a version,
-  // we return 500 so Stripe retries — better to delay than deliver an empty
-  // order with no entitlements at all.
-  it("H2: returns 500 when ALL datasets are unresolvable", async () => {
-    const db = getDb();
-    db.prepare("UPDATE datasets SET current_version = NULL").run();
-    closeDb();
-
-    constructEventAsyncMock.mockResolvedValueOnce({
-      type: "checkout.session.completed",
-      data: {
-        object: {
-          id: "cs_test_tx_total_fail",
-          customer_email: "tx-test@example.com",
-          payment_intent: "pi_tx",
-          amount_total: 29900,
-          metadata: { dataset_ids: "tares,classifications,finma" },
-        },
-      },
-    });
-
-    const app = createApp();
-    const res = await app.request("/api/webhook/stripe", {
-      method: "POST",
-      headers: { "content-type": "application/json", "stripe-signature": "ok" },
-      body: "{}",
-    });
-
-    expect(res.status).toBe(500);
-    const db2 = getDb();
-    const orders = db2
-      .prepare("SELECT * FROM orders WHERE stripe_session_id = ?")
-      .all("cs_test_tx_total_fail");
-    expect(orders).toHaveLength(0);
-    const ents = db2.prepare("SELECT * FROM entitlements").all();
-    expect(ents).toHaveLength(0);
+  it("récupère une livraison interrompue dont le bail est expiré",async()=>{
+    await post();
+    getDb().prepare("UPDATE order_deliveries SET state='processing',lease_until=0").run();
+    await processOrderDeliveries();
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+  it("demande une vérification après la fenêtre de déduplication",async()=>{
+    send.mockResolvedValueOnce({sent:false,reason:"resend_error"});
+    await post();await processOrderDeliveries();
+    getDb().prepare("UPDATE order_deliveries SET first_attempt_at=?,next_attempt_at=0").run(Date.now()-24*3600_000);
+    await processOrderDeliveries();
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(rows("order_deliveries")[0]).toMatchObject({state:"review",last_error:"delivery_confirmation_required"});
+  });
+  it("attend la configuration mail sans épuiser la fenêtre de déduplication",async()=>{
+    send.mockResolvedValueOnce({sent:false,reason:"no_api_key"});
+    await post();await processOrderDeliveries();
+    expect(rows("order_deliveries")[0]).toMatchObject({state:"pending",first_attempt_at:null,payload_json:null});
+    expect(rows("download_tokens")).toHaveLength(0);
+    retryNow();await processOrderDeliveries();
+    expect(rows("order_deliveries")[0].state).toBe("sent");
+  });
+  it("ne réinitialise jamais la déduplication après un envoi incertain",async()=>{
+    send.mockResolvedValueOnce({sent:false,reason:'resend_error'}).mockResolvedValueOnce({sent:false,reason:'no_api_key'});
+    await post();await processOrderDeliveries();
+    const first=rows('order_deliveries')[0];
+    retryNow();await processOrderDeliveries();
+    expect(rows('order_deliveries')[0]).toMatchObject({first_attempt_at:first.first_attempt_at,payload_json:first.payload_json,download_token:first.download_token});
+  });
+  it("utilise la session Stripe pour la déduplication et purge le corps après remise",async()=>{
+    await post();await processOrderDeliveries();
+    expect(send.mock.calls[0][1]).toBe('osd-download-cs_test_1-tares');
+    expect(rows('order_deliveries')[0]).toMatchObject({payload_json:null,download_token:null});
+  });
+  it("conserve tous les droits du bundle et reprend le fichier temporairement absent",async()=>{
+    construct.mockResolvedValue(event({metadata:{dataset_ids:"bundle,tares"}}));
+    getDb().prepare("UPDATE datasets SET current_version=NULL WHERE id='finma'").run();
+    await post();await processOrderDeliveries();
+    expect(rows("entitlements")).toHaveLength(3);
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(rows("order_deliveries").find(x=>x.dataset_id==="finma")).toMatchObject({state:"pending",last_error:"version_unavailable"});
+    getDb().prepare("UPDATE datasets SET current_version='2026.09.25' WHERE id='finma'").run();
+    retryNow();await processOrderDeliveries();
+    expect(send).toHaveBeenCalledTimes(3);
+    expect(rows("order_deliveries").every(x=>x.state==="sent")).toBe(true);
+  });
+  it("garde une commande totalement indisponible en attente sans perdre le paiement",async()=>{
+    getDb().prepare("UPDATE datasets SET current_version=NULL").run();
+    expect((await post()).status).toBe(200);
+    await processOrderDeliveries();
+    expect(rows("orders")).toHaveLength(1);
+    expect(rows("entitlements")).toHaveLength(1);
+    expect(rows("order_deliveries")[0].last_error).toBe("version_unavailable");
+    expect(send).not.toHaveBeenCalled();
+  });
+  it("annule la livraison lorsque la commande n'est plus payée",async()=>{
+    await post();getDb().prepare("UPDATE orders SET status='refunded'").run();
+    await processOrderDeliveries();
+    expect(send).not.toHaveBeenCalled();
+    expect(rows("order_deliveries")[0].state).toBe("cancelled");
+  });
+  it("ne remet pas les commandes historiques en livraison",async()=>{
+    await post();getDb().prepare("DELETE FROM order_deliveries").run();
+    await post();await processOrderDeliveries();
+    expect(send).not.toHaveBeenCalled();
+  });
+  it("annule toutes les écritures si la mise en file échoue",async()=>{
+    getDb().exec("DROP TABLE order_deliveries");
+    expect((await post()).status).toBe(500);
+    expect(rows("orders")).toHaveLength(0);
+    expect(rows("entitlements")).toHaveLength(0);
+    expect(rows("customers")).toHaveLength(0);
+  });
+  it("ne divulgue pas les liens privés dans le suivi de livraison",async()=>{
+    await post();await processOrderDeliveries();
+    const status=JSON.stringify(deliveryStatus());
+    expect(status).not.toContain("payload_json");
+    expect(status).not.toContain("download_token");
+    expect(status).not.toContain("acheteur@example.test");
+  });
+  it("refuse les achats vides ou inconnus",async()=>{
+    construct.mockResolvedValueOnce(event({metadata:{}})).mockResolvedValueOnce(event({metadata:{dataset_ids:"inconnu"}}));
+    expect((await post()).status).toBe(400);
+    expect((await post()).status).toBe(400);
+  });
+  it("ignore les autres événements",async()=>{
+    construct.mockResolvedValue(event({},"customer.created"));
+    expect((await post()).status).toBe(200);
+    expect(rows("orders")).toHaveLength(0);
   });
 });

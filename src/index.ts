@@ -25,9 +25,19 @@ import { mcpRoute } from "./routes/mcp/index.js";
 import { trackApiRequest, trackPageView } from "./lib/track.js";
 import { startMcpDataRefresh } from "./mcp/r2-refresh.js";
 import { loadEnv } from "./env.js";
+import { startOrderDeliveryWorker } from "./lib/order-delivery.js";
 
 export function createApp() {
   const app = new Hono();
+
+  // Ces en-têtes s'appliquent après les réglages généraux, y compris aux redirections.
+  app.use("*", async (c, next) => {
+    await next();
+    if (/^\/api\/(delivery|download)\//.test(c.req.path)) c.header("Referrer-Policy", "no-referrer");
+    if (c.req.path.startsWith("/api/delivery/")) {
+      c.header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://*.r2.cloudflarestorage.com; frame-ancestors 'none'; base-uri 'none'");
+    }
+  });
 
   // --- Error handler — capture in Sentry, return 500 to client ---
   // Hooks before everything so even errors in the routing layer are caught.
@@ -254,10 +264,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // 12 h safety timer). Fire-and-forget: the server is already listening and
   // serves the committed seed until the first refresh lands. Never blocks boot.
   startMcpDataRefresh();
+  const stopDeliveries = startOrderDeliveryWorker();
 
   // Flush Sentry events on graceful shutdown so errors right before
   // SIGTERM aren't lost.
   const shutdown = async (sig: string) => {
+    stopDeliveries();
     console.log(`[shutdown] received ${sig}, flushing Sentry…`);
     await flushSentry(2000);
     process.exit(0);

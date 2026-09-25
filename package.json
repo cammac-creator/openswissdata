@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "security:public": "node scripts/check-public-repository.mjs",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "node --env-file=.env --import tsx/esm src/db/seed.ts",
     "etl:tares": "tsx etl/tares/release.ts",
