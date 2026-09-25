@@ -35,24 +35,33 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          # Build needs the web bundle which has no runtime secrets, but
-          # tsc needs NODE_ENV=development to allow defaults from env.ts.
+          # La compilation utilise les valeurs de développement, sans secret de production.
           NODE_ENV: development
 
-  mcp-server:
+  integrations:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [sdks/mcp-server, sdks/sdk-ts]
+    defaults:
+      run:
+        working-directory: ${{ matrix.package }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install sub-package deps
-        working-directory: sdks/mcp-server
-        run: npm install
-      - name: Typecheck mcp-server
-        working-directory: sdks/mcp-server
+      - name: Installer les versions verrouillées
+        run: npm ci
+      - name: Contrôler les types
         run: npm run typecheck
-      - name: Test mcp-server
-        working-directory: sdks/mcp-server
+      - name: Vérifier les échanges et les erreurs
         run: npm test
+      - name: Construire la distribution
+        run: npm run build
+      - name: Vérifier le contenu du paquet sans publication
+        run: npm pack --dry-run
+      - name: Contrôler les avis de sécurité
+        run: npm audit --audit-level=low

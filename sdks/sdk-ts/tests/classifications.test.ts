@@ -43,8 +43,8 @@ describe("classifications", () => {
       scheme_requested: "NOGA_2025",
       scheme_returned: "NOGA_2025",
       hits: [
-        { code: "47.29", label_fr: "Commerce de détail alimentaire spécialisé", score: 0.81 },
-        { code: "47.26", label_fr: "Commerce de tabac", score: 0.42 },
+        { code: "47.29", label: "Commerce de détail alimentaire spécialisé", score: 0.81 },
+        { code: "47.26", label: "Commerce de tabac", score: 0.42 },
       ],
       count: 2,
       model: "Xenova/paraphrase-multilingual-mpnet-base-v2",

@@ -1,3 +1,5 @@
+> Lecteur de fichiers historique, conservé pour référence. Il ne correspond pas au SDK HTTP dans `sdks/sdk-py` et sa compatibilité avec les archives de septembre 2026 n’est pas validée. Les instructions ci-dessous sont historiques ; ne pas publier ce dossier sous le nom du client HTTP.
+
 # openswissdata
 
 Python SDK for working with datasets from [openswissdata.com](https://openswissdata.com).

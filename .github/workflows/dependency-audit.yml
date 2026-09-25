@@ -1,0 +1,42 @@
+name: Contrôle des dépendances
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dossier: .
+            nom: application
+          - dossier: web
+            nom: site
+          - dossier: sdks/mcp-server
+            nom: mcp
+          - dossier: sdks/sdk-ts
+            nom: sdk-typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Examiner le graphe verrouillé sans exécuter les dépendances
+        working-directory: ${{ matrix.dossier }}
+        run: npm audit --audit-level=low --json > npm-audit.json
+      - name: Conserver le rapport public de dépendances
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-${{ matrix.nom }}
+          path: ${{ matrix.dossier }}/npm-audit.json
+          retention-days: 14
+          if-no-files-found: error

@@ -1,6 +1,6 @@
 {
   "name": "@openswissdata/mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "mcpName": "io.github.cammac-creator/openswissdata",
   "description": "Standalone MCP server (STDIO) that proxies to the openswissdata.com remote MCP endpoint. Plug-and-play for Claude Desktop, Cursor, Cline and other MCP clients.",
   "type": "module",
@@ -53,13 +53,14 @@
     "url": "https://github.com/cammac-creator/openswissdata/issues"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "1.30.1",
+    "zod": "4.3.6"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0"
+    "vitest": "4.1.11"
   },
   "engines": {
     "node": ">=18"

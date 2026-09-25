@@ -1,173 +1,70 @@
 # @openswissdata/sdk
 
-[![npm version](https://img.shields.io/npm/v/@openswissdata/sdk.svg)](https://www.npmjs.com/package/@openswissdata/sdk)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![Node.js >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
-[![Types: TypeScript](https://img.shields.io/badge/types-typescript-blue.svg)](https://www.typescriptlang.org/)
+Client TypeScript du service MCP HTTP OpenSwissData : TARES, classifications NOGA/NACE/ISIC et registre FINMA. Distribution ESM et CommonJS, types inclus, aucune dépendance d’exécution supplémentaire. Ce dossier concerne l’API distante ; `packages/sdk-ts` contient un lecteur de fichiers distinct.
 
-Official TypeScript SDK for [openswissdata.com](https://openswissdata.com) — Swiss customs (TARES), economic classifications (NOGA / NACE / ISIC) and the FINMA registry of supervised entities.
+## Commencer
 
-Works in Node.js 18+ and modern browsers, ships dual ESM + CJS exports, and uses the global `fetch` (no extra runtime dependencies).
-
-## Install
+Publication de la version 0.1.0 envoyée au registre le 25.09.2026 ; sa disponibilité externe reste à confirmer au moment de cette mise à jour. Si npm répond 404, utiliser la compilation et l’installation par archive ci-dessous.
 
 ```bash
 npm install @openswissdata/sdk
 ```
 
-## Quickstart
+Pour compiler la version du dépôt : `npm ci`, `npm run build`, puis `npm pack`. Installer ensuite le fichier `.tgz` produit dans le projet consommateur.
 
 ```ts
 import { Client } from "@openswissdata/sdk";
+const client = new Client();
+const tarif = await client.tares.lookup({ hs8: "09011100", lang: "fr" });
+console.log(tarif.designation, tarif.duty_mfn);
+console.log(tarif.disclaimer, tarif.summary_note);
+const liens = await client.classifications.crossWalk({
+  code: "62.10", source: "NOGA_2025", target: "NACE_2.1",
+});
+console.log(liens.reference_version, liens.mappings, liens.limitations);
+const registre = await client.finma.kycCheck({ name: "UBS", top_k: 3 });
+console.log(registre);
+```
 
+Ces trois opérations sont accessibles anonymement, dans la limite de 100 appels par jour et par IP. Les recherches sémantiques, historiques et recherches FINMA avancées exigent des droits existants. Les nouvelles souscriptions payantes sont fermées ; acheter un fichier ne donne pas de clé API.
+
+Une mise à jour du dépôt ne publie pas automatiquement le paquet npm. Les champs de version et de qualité documentés ici décrivent le code de cette branche ; contrôler la distribution choisie avant de l’intégrer.
+
+## Configuration et erreurs
+
+```ts
 const client = new Client({
-  apiKey: process.env.OPENSWISSDATA_API_KEY, // optional — anonymous gets free-tier
-});
-
-const tariff = await client.tares.lookup({ hs8: "84620010", lang: "fr" });
-console.log(tariff.designation, tariff.duty_mfn.value, tariff.duty_mfn.unit);
-
-// Always surface the non-official disclaimer to your end users
-console.log(tariff.disclaimer);
-```
-
-## Datasets
-
-### TARES — Swiss customs tariffs
-
-```ts
-// Exact HS8 lookup
-await client.tares.lookup({ hs8: "84620010", lang: "fr" });
-
-// Free-text semantic search (FR embeddings)
-await client.tares.search({ query: "couteau de cuisine", top_k: 5 });
-
-// Historical changelog (rolling 12-24 months)
-await client.tares.changelog({ hs8: "84620010", since: "2025-01-01" });
-```
-
-### Classifications — NOGA / NACE / ISIC
-
-```ts
-// Translate a code between schemes
-await client.classifications.crossWalk({
-  code: "62.01",
-  source: "NACE_2.0",
-  target: "NOGA_2025",
-});
-
-// Classify free-text business description
-await client.classifications.classifyText({
-  text: "vente de café en grain et torréfaction",
-  top_k: 3,
-});
-```
-
-### FINMA — supervised entities + warnings
-
-```ts
-// Substring KYC check
-await client.finma.kycCheck({ name: "UBS", top_k: 10 });
-
-// Fuzzy / typo-tolerant search
-await client.finma.search({ name: "Cred Suisse", include_warnings: true });
-
-// Timeline of a single entity
-await client.finma.entityHistory({ uid: "CHE-103.137.179" });
-```
-
-## Authentication
-
-| Tier        | How                                                     | Limits                          |
-| ----------- | ------------------------------------------------------- | ------------------------------- |
-| Anonymous   | `new Client()`                                          | ~100 req/day per IP, V1 tools   |
-| Bearer      | `new Client({ apiKey: "sk_live_..." })`                 | Plan-dependent                  |
-| OAuth 2.1   | Token issued via `/oauth/*` endpoints                   | All tools, scope-checked        |
-
-The free tier is enough to evaluate the SDK without registering. Sign up at [openswissdata.com](https://openswissdata.com) for an API key.
-
-## Error handling
-
-```ts
-import {
-  Client,
-  AuthError,
-  RateLimitError,
-  ServerError,
-  NetworkError,
-  ToolError,
-} from "@openswissdata/sdk";
-
-try {
-  await client.tares.lookup({ hs8: "00000000" });
-} catch (e) {
-  if (e instanceof RateLimitError) {
-    // e.retryAfterSeconds, e.remaining, e.limit, e.reset
-  } else if (e instanceof AuthError) {
-    // 401/403
-  } else if (e instanceof ToolError) {
-    // tool returned isError (e.g. unknown HS8)
-  } else if (e instanceof ServerError) {
-    // 5xx after retries exhausted
-  } else if (e instanceof NetworkError) {
-    // DNS / TCP / abort
-  }
-}
-```
-
-The client retries 5xx and network errors with exponential backoff + jitter (default 3 attempts, 250ms initial). Set `maxRetries: 0` to disable.
-
-## Rate limiting
-
-After every request the client exposes the latest `X-RateLimit-*` headers:
-
-```ts
-console.log(client.lastRateLimit);
-// { limit: 100, remaining: 73, reset: 1714512000 }
-```
-
-## Configuration
-
-```ts
-new Client({
-  apiKey: "sk_live_...",                       // optional
-  baseUrl: "https://mcp.openswissdata.com",    // override for staging
+  apiKey: process.env.OPENSWISSDATA_API_KEY,
   timeoutMs: 30_000,
   maxRetries: 3,
   retryBackoffMs: 250,
-  fetch: globalThis.fetch,                     // inject custom fetch
-  userAgent: "my-app/1.0",                     // suffix appended after the SDK UA
 });
 ```
 
-## Browser usage
+Le délai couvre les en-têtes et le corps de chaque tentative. Les erreurs réseau et HTTP 500, 502, 503 ou 504 sont réessayées au plus trois fois par défaut : quatre tentatives au total. Les réponses 401/403, 429 et les erreurs métier remontent directement. `maxRetries: 0` désactive la reprise.
 
-```html
-<script type="module">
-  import { Client } from "https://esm.sh/@openswissdata/sdk@0.1.0";
-  const client = new Client();
-  const r = await client.tares.lookup({ hs8: "84620010" });
-  console.log(r);
-</script>
-```
+Classes exportées : `AuthError`, `RateLimitError`, `ServerError`, `NetworkError`, `ToolError`, `OpenSwissDataError`. `RateLimitError.retryAfterSeconds` et `client.lastRateLimit` exposent les quotas reçus.
 
-See [`examples/browser.html`](./examples/browser.html) for a fuller sample.
+Le client accepte `structured` historique et `structuredContent` du standard MCP. Le champ des résultats de classification sémantique est `label`, accompagné de `scheme` ; ce n’est pas `label_fr`.
 
-## Disclaimers
+## Intégration dans un site
 
-OpenSwissData is a non-official mirror of public Swiss government datasets. Every TARES result includes a mandatory disclaimer that you **MUST** surface to your end users — it is shipped inside `result.disclaimer` *and* prepended to the human-readable text content. Your application must not strip it.
+Utiliser le client côté serveur pour conserver les clés privées. Un navigateur ne peut appeler le domaine distant que si CORS et la politique de contenu du site l’autorisent ; cette possibilité n’est pas activée universellement. Pour une interface publique, exposer une route de son propre serveur avec les contrôles et limites adaptés. Ne jamais placer un jeton payant dans du JavaScript livré au navigateur.
 
-For customs, classifications and FINMA decisions always check the original source linked in `source_url`.
+## Qualité des résultats
 
-## Development
+Conserver les avertissements de source non officielle. Un droit absent ne signifie pas gratuité ; les taux conditionnels complets sont distincts du résumé. Les correspondances indiquent `relation`, `requires_review`, `path`, leurs sources et limites ; une relation approchée n’est pas une identité. Une recherche FINMA ne remplace pas une vérification auprès de la source.
+
+## Développement
+
+Node 22 est utilisé par la CI. Les déclarations d’exécution restent Node 18+ ; utiliser une version encore maintenue.
 
 ```bash
-npm install
-npm test         # vitest, mocked fetch — no live API calls
-npm run build    # emits ESM + CJS + .d.ts to dist/
+npm ci
 npm run typecheck
+npm test
+npm run build
+npm pack --dry-run
 ```
 
-## License
-
-Apache 2.0 — see [LICENSE](./LICENSE).
+Les tests utilisent des réponses fictives et couvrent délais, reprises, droits, quotas et erreurs. La CI construit les distributions ESM/CommonJS et contrôle les avis npm. Licence Apache-2.0.

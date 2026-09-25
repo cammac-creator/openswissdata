@@ -5,7 +5,7 @@
  * Why standalone:
  *   - Claude Desktop / Cursor / Cline launch MCP servers as a child process
  *     speaking JSON-RPC over STDIO. They don't talk HTTP directly.
- *   - This binary is the bridge: it advertises the same 9 tools as the
+ *   - This binary is the bridge: it advertises the same available tools as the
  *     remote, but delegates `tools/call` over HTTP behind the scenes.
  *
  * Usage:
@@ -23,7 +23,7 @@ import {
 import { RemoteProxy, type ProxyOptions } from "./proxy.js";
 
 const SERVER_NAME = "openswissdata-mcp";
-const SERVER_VERSION = "0.1.0";
+const SERVER_VERSION = "0.1.2";
 
 export interface BuildServerOptions extends ProxyOptions {
   /** Inject a pre-built proxy (test injection). */
@@ -75,7 +75,8 @@ export function buildServer(options: BuildServerOptions = {}): {
         return {
           content: result.content,
           ...(result.isError !== undefined ? { isError: result.isError } : {}),
-          ...(result.structured !== undefined ? { structuredContent: result.structured } : {}),
+          ...((result.structuredContent ?? result.structured) !== undefined
+            ? { structuredContent: result.structuredContent ?? result.structured } : {}),
         };
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);

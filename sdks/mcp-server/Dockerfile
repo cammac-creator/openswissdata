@@ -4,8 +4,8 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 # Install everything (dev deps included so we can run tsc).
-COPY package.json package-lock.json* ./
-RUN npm install --no-audit --no-fund
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
 
 COPY tsconfig.json ./
 COPY src ./src

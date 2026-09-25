@@ -1,71 +1,7 @@
-# @openswissdata/sdk
+# Lecteur TypeScript historique de fichiers
 
-TypeScript SDK for working with datasets from [openswissdata.com](https://openswissdata.com).
+Prototype conservé pour référence, non publié et marqué `private` pour empêcher une publication accidentelle sous le nom du SDK HTTP. Pour l’API distante maintenue, voir [`sdks/sdk-ts`](../../sdks/sdk-ts/README.md).
 
-## Install
+Ce lecteur a été écrit pour le schéma de fichiers d’avril 2026. Ses correspondances larges `noga_2008` / `noga_2025` ne représentent pas le schéma par paires de septembre 2026 : ne pas utiliser `loadCrossWalks` pour les archives actuelles. La compatibilité des autres lecteurs doit être validée séparément. Aucune promesse de support des archives actuelles.
 
-```bash
-npm install @openswissdata/sdk
-```
-
-## Usage
-
-### Load TARES
-
-```ts
-import { loadTares } from "@openswissdata/sdk";
-
-const rows = await loadTares("./tares-2026.04.22/tares.csv");
-console.log(rows.length, "codes loaded");
-
-// Find a specific HS code
-const row = rows.find(r => r.hs8 === "84820010");
-console.log(row?.designation_fr);
-```
-
-### Load Classifications with cross-walks
-
-```ts
-import { loadClassifications, loadCrossWalks } from "@openswissdata/sdk";
-
-const nomenclatures = await loadClassifications("./classifications-2026.04.22/");
-const walks = await loadCrossWalks("./classifications-2026.04.22/crosswalks.csv");
-
-// Map NOGA 2008 '6411' to ISIC 4
-const walk = walks.find(w => w.noga_2008 === "6411");
-console.log("ISIC equivalent:", walk?.isic_4);
-```
-
-### Load FINMA registry
-
-```ts
-import { loadFinmaRegistry } from "@openswissdata/sdk";
-
-const entities = await loadFinmaRegistry("./finma-2026.04.22/finma_registry.csv");
-const banks = entities.filter(e => e.entity_type === "bank");
-console.log(banks.length, "banks in the registry");
-```
-
-## Helpers
-
-### Join by key
-
-```ts
-import { joinBy } from "@openswissdata/sdk";
-
-const enriched = joinBy(
-  tares,
-  hsLookups,
-  row => row.hs6,
-  lookup => lookup.code
-);
-```
-
-## Buying datasets
-
-The SDK is free and open-source. The datasets themselves are sold at https://openswissdata.com.
-- TARES: CHF 299 · Classifications Bundle: CHF 399 · FINMA Registry: CHF 299 · Full Bundle: CHF 799.
-
-## License
-
-[Apache 2.0](./LICENSE)
+Développement local uniquement dans ce dossier : `npm install`, `npm test`, `npm run build`. Les exports peuvent être importés depuis `./dist/index.js` après compilation ; ne pas utiliser `npm install @openswissdata/sdk` pour obtenir ce prototype.

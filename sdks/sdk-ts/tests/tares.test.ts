@@ -6,6 +6,9 @@ import type { TariffLookupResult, TariffSemanticSearchResult } from "../src/type
 describe("tares", () => {
   it("lookup() unwraps result.structured", async () => {
     const fixture: TariffLookupResult = {
+      version: "2026.09.25",
+      duty_rates_count: 1,
+      summary_note: "Une absence ne signifie pas gratuité.",
       hs8: "84620010",
       hs6: "846200",
       chapter: "84",
@@ -29,6 +32,8 @@ describe("tares", () => {
     expect(result.hs8).toBe("84620010");
     expect(result.duty_mfn.value).toBe(0);
     expect(result.disclaimer).toMatch(/AVIS NON-OFFICIEL/);
+    expect(result.version).toBe("2026.09.25");
+    expect(result.summary_note).toMatch(/absence/);
 
     const body = JSON.parse(calls[0]!.init!.body as string);
     expect(body.method).toBe("tools/call");
