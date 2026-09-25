@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import { S3Client, HeadBucketCommand } from "@aws-sdk/client-s3";
 import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
+import { checkReadiness } from "../lib/readiness.js";
 
 const require = createRequire(import.meta.url);
 const { version: APP_VERSION } = require("../../package.json") as { version: string };
@@ -10,12 +11,17 @@ const { version: APP_VERSION } = require("../../package.json") as { version: str
 export const healthRoute = new Hono();
 
 /**
- * Shallow health check — used by Railway's load balancer for routing decisions
- * and by external uptime monitors that just want a 200/non-200 signal.
- * Always returns 200 if the process is up. Does not exercise any dependency.
+ * Présence du processus uniquement. Le contrôle Railway utilise /ready.
  */
 healthRoute.get("/", (c) => {
   return c.json({ status: "ok", version: APP_VERSION, revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? null });
+});
+
+healthRoute.get("/ready", (c) => {
+  const state = checkReadiness();
+  c.header("Cache-Control", "no-store");
+  return c.json({ status: state.ready ? "ready" : "not_ready", version: APP_VERSION,
+    revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? null, checks: state.checks }, state.ready ? 200 : 503);
 });
 
 // Une application disponible peut distribuer des données anciennes : signal distinct.

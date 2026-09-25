@@ -1,7 +1,9 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
   "deploy": {
-    "startCommand": "node dist/index.js"
+    "startCommand": "node dist/index.js",
+    "healthcheckPath": "/api/health/ready",
+    "healthcheckTimeout": 180
   },
   "build": {
     "watchPatterns": [

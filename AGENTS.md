@@ -62,3 +62,15 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Le workflow manuel démarre en simulation ; le calendrier hebdomadaire dépend de `TARES_CRON_ENABLED`. Les vecteurs ne sont pas inclus dans cette actualisation, ce qui est annoncé sur la fiche. Rapport minimal GitHub 14 jours, aucun ZIP vendu en artefact public.
 - Catalogue et échantillon proviennent de l'archive vendue. Le MCP recharge TARES au démarrage, après publication et toutes les douze heures ; garde la dernière version complète en cas de panne, avec fraîcheur visible. Les embeddings restent distincts et non actualisés par cette opération.
 - Bronze de traitement TARES sur le volume : ZIP vérifié, 30 jours, plafond 200 Mo, réserve disque 300 Mo ; ce n'est pas une sauvegarde. Aucun changement de prix. Une évolution du schéma doit rester expliquée dans README et la fiche qualité.
+
+## Classifications — schéma 2
+- NACE 2 vient directement d'Eurostat, pas du paquet npm qui expose la révision 2.1. Volumes validés : NOGA 2008 1 790, NOGA 2025 1 845, NACE 2 996, NACE 2.1 1 047, ISIC 4 766. Un changement de ces volumes demande un examen des sources.
+- Relations directes sourcées et typées, aucune égalité de code présumée ; seule l'identité OFS aux niveaux 1 à 4 est exacte. Ne pas chaîner deux relations non exactes. Les genres suisses à six chiffres nécessitent une table dédiée pour migrer entre révisions.
+- Le format historique crosswalks contient désormais des paires ; README et fiche produit préviennent de cette évolution. Sources, qualité, provenance signée et empreintes sont dans chaque archive. Catalogue et MCP rechargent la version distribuée.
+- Publication manuelle par `release-classifications.yml`, simulation par défaut, Standard uniquement. Fixtures et Pro refusés avant publication. Lien Stripe Pro désactivé le 25.09.2026 : ne rouvrir qu'après validation complète des compléments et de leur livraison.
+
+## Disponibilité au démarrage
+- Railway attend `/api/health/ready` (180 s) : trois versions enregistrées, schéma financier disponible, pages essentielles et leurs ressources présentes. Aucun appel externe dans ce contrôle ; `/api/health/deep` et `/freshness` restent distincts.
+- `/api/health` prouve seulement que le processus répond. Railway ne surveille plus `/ready` après le démarrage : conserver le contrôle extérieur.
+- Le volume SQLite impose une courte interruption lors du remplacement ; ce contrôle n'est pas une promesse de zéro interruption ni un mécanisme de restauration des données.
+- Retour arrière : version de code compatible avec `order_deliveries`, `order_grants` et rapprochement financier obligatoire ; sauvegarde avant migration et relecture des droits après restauration. Ne jamais restaurer une ancienne base par simple rollback de code.
