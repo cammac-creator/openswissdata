@@ -19,6 +19,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Installer Astro pour les tests des pages publiques
+        run: npm --prefix web ci
       - run: npm run typecheck
       - run: npm run test
 

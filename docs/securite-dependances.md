@@ -34,3 +34,9 @@ Les preuves détaillées de contrôle, mesures et essais sont dans le dossier pr
 `dependency-audit.yml` examine les quatre lockfiles chaque lundi à 06 h 35 UTC et sur demande. Il consulte les avis npm sans installer ni exécuter les paquets, échoue dès un avis et conserve les rapports 14 jours. Aucune mise à jour forcée ni publication automatique de paquet. La CI des deux intégrations installe avec `npm ci`, vérifie les types, les tests, la compilation, le contenu du paquet et l’audit.
 
 Pour le site, régénérer le lockfile depuis un dossier propre et vérifier également avec npm 10, utilisé par Node 22 sur Railway. Un succès npm 11/Mac ne prouve pas une installation npm 10/Linux : l’omission de dépendances WASM a bloqué un build le 25 septembre.
+
+## Modèles de traduction
+
+Les deux révisions de traduction restent inchangées : [m2m100 multilingue](https://huggingface.co/Xenova/m2m100_418M/tree/9c374f0b7aca709787cea97b047bfbbd1559d177) et [opus anglais–français](https://huggingface.co/Xenova/opus-mt-en-fr/tree/28726206f80896b90035bd99cccd5cc1e151f916). Leurs douze fichiers (753 087 762 octets) ont été comparés aux objets du dépôt officiel, par SHA-256 LFS pour les poids et par identifiant Git pour les petits fichiers. Les SHA-256 de tous les fichiers sont maintenant figés dans `translation-model.ts`.
+
+Le même contrôle de cache sert à la recherche et à la traduction : taille et empreinte, écriture temporaire unique, refus d’un flux trop long, tronqué ou différent, promotion seulement après validation. Un cache de taille correcte mais altéré ne passe plus silencieusement. Une panne laisse l’ancien fichier en place mais fait échouer la préparation ; elle ne le déclare pas valide. Les textes de mails restent dans le processus local de traduction ; ces contrôles portent sur les fichiers publics du modèle, pas sur leur qualité linguistique.
