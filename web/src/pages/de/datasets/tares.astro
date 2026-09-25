@@ -3,6 +3,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import HSLookup from "../../../components/HSLookup.astro";
 import TrustStrip from "../../../components/TrustStrip.astro";
 import ProductFaq from "../../../components/ProductFaq.astro";
+import TaresQuality from "../../../components/TaresQuality.astro";
 import ApiSwitch from "../../../components/ApiSwitch.astro";
 
 const productJsonLd = {
@@ -77,8 +78,8 @@ const productJsonLd = {
 
         <p class="v4-lede reveal-v4" data-delay="2">
           ~7 500 aktuelle HS8-Codes, Bezeichnungen in 4 Sprachen (DE/FR/IT/EN),
-          MFN-Zollansätze mit Wert + Einheit, bis zu <strong>30+ Präferenzregimes pro Code</strong>
-          (EU, EFTA, UK, China, Japan, Korea…). Wöchentliche Updates aus den offiziellen BAZG-XLSX.
+          MFN-Zollansätze und <strong>detaillierte Präferenzzollsätze</strong>
+          (EU, EFTA, UK, China, Japan, Korea…). Wöchentliche Erfassung der offiziellen BAZG-XLSX mit Prüfung vor Veröffentlichung.
         </p>
 
         <div class="v4-spec-row reveal-v4" data-delay="3">
@@ -98,7 +99,7 @@ const productJsonLd = {
 
         <div class="v4-cta-row reveal-v4" data-delay="4">
           <a href="#kaufen" class="v4-btn v4-btn-primary">Kaufen — 299 CHF <span class="arrow">→</span></a>
-          <a href="/samples/tares-sample.csv" download class="v4-btn v4-btn-secondary">CSV-Muster</a>
+          <a href="/api/catalog/tares?format=csv" download class="v4-btn v4-btn-secondary">CSV-Muster</a>
         </div>
 
         <div class="v4-permission-line reveal-v4" data-delay="5">
@@ -135,6 +136,8 @@ const productJsonLd = {
       </p>
     </div>
 
+    <TaresQuality lang="de" />
+
     <div class="ds-meta-grid">
       <div class="ds-meta-card reveal-v4">
         <div class="ds-meta-label">Enthaltene Formate</div>
@@ -150,7 +153,7 @@ const productJsonLd = {
       <div class="v4-section-eyebrow">
         <strong>TARES-Schema</strong>
         <span class="sep">/</span>
-        <span>17 normalisierte Spalten</span>
+        <span>Übersicht und detaillierte Bedingungen</span>
       </div>
       <h2 class="v4-section-h2">Das <span class="serif">Schema</span> auf einen Blick.</h2>
       <p class="v4-section-intro">
@@ -193,7 +196,7 @@ const productJsonLd = {
     <div class="ds-sample reveal-v4">
       <h3>Kostenloses Muster — 100 Zeilen (CSV)</h3>
       <p>Kuratierter Auszug, der verschiedene Kapitel abdeckt (Lebensmittel, Mechanik, Elektronik, Textil). Um vor dem Kauf zu validieren, dass Ihnen das Format passt.</p>
-      <a href="/samples/tares-sample.csv" download class="ds-sample-dl">
+      <a href="/api/catalog/tares?format=csv" download class="ds-sample-dl">
         <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 7l4 4 4-4M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         tares-sample.csv herunterladen
       </a>

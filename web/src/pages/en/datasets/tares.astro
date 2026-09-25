@@ -3,6 +3,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import HSLookup from "../../../components/HSLookup.astro";
 import TrustStrip from "../../../components/TrustStrip.astro";
 import ProductFaq from "../../../components/ProductFaq.astro";
+import TaresQuality from "../../../components/TaresQuality.astro";
 import ApiSwitch from "../../../components/ApiSwitch.astro";
 
 const productJsonLd = {
@@ -77,8 +78,8 @@ const productJsonLd = {
 
         <p class="v4-lede reveal-v4" data-delay="2">
           ~7,500 current HS8 codes, descriptions in 4 languages (DE/FR/IT/EN),
-          MFN duties with value + unit, up to <strong>30+ preferential regimes per code</strong>
-          (EU, EFTA, UK, China, Japan, Korea…). Weekly updates from the official BAZG XLSX files.
+          MFN duties and <strong>detailed preferential rates</strong>
+          (EU, EFTA, UK, China, Japan, Korea…). Weekly collection from official BAZG XLSX files, checked before publication.
         </p>
 
         <div class="v4-spec-row reveal-v4" data-delay="3">
@@ -98,7 +99,7 @@ const productJsonLd = {
 
         <div class="v4-cta-row reveal-v4" data-delay="4">
           <a href="#buy" class="v4-btn v4-btn-primary">Buy — 299 CHF <span class="arrow">→</span></a>
-          <a href="/samples/tares-sample.csv" download class="v4-btn v4-btn-secondary">CSV sample</a>
+          <a href="/api/catalog/tares?format=csv" download class="v4-btn v4-btn-secondary">CSV sample</a>
         </div>
 
         <div class="v4-permission-line reveal-v4" data-delay="5">
@@ -134,6 +135,8 @@ const productJsonLd = {
         Legal venue for TARES disputes: Berne, Switzerland.
       </p>
     </div>
+
+    <TaresQuality lang="en" />
 
     <div class="ds-meta-grid">
       <div class="ds-meta-card reveal-v4">
@@ -172,7 +175,7 @@ const productJsonLd = {
             <tr><td class="mono">duty_mfn_value</td><td class="dim">number</td><td class="mono">0.00</td></tr>
             <tr><td class="mono">duty_mfn_unit</td><td class="dim">string</td><td>per 100 kg gross</td></tr>
             <tr><td class="mono">duty_mfn_currency</td><td class="dim">string</td><td class="mono">CHF</td></tr>
-            <tr><td class="mono">preferential_regimes</td><td class="dim">object</td><td class="mono" is:raw>{"eu":"free","efta":"free","japon":"free"}</td></tr>
+            <tr><td class="mono">preferential_regimes</td><td class="dim">object</td><td class="mono" is:raw>{"eu":"free","efta":"free","jp":"free"}</td></tr>
             <tr><td class="mono">customs_relief_codes</td><td class="dim">string[]</td><td class="mono">["01"]</td></tr>
           </tbody>
         </table>
@@ -193,7 +196,7 @@ const productJsonLd = {
     <div class="ds-sample reveal-v4">
       <h3>Free sample — 100 rows (CSV)</h3>
       <p>Curated preview covering varied chapters (food, mechanical, electronics, textile). To validate that the format suits you before purchase.</p>
-      <a href="/samples/tares-sample.csv" download class="ds-sample-dl">
+      <a href="/api/catalog/tares?format=csv" download class="ds-sample-dl">
         <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 7l4 4 4-4M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Download tares-sample.csv
       </a>

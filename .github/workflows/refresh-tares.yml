@@ -1,28 +1,23 @@
-name: Weekly TARES refresh
-
-# CRON DESACTIVE pour le moment — workflow_dispatch only.
-# Une fois validé par un dry-run manuel, retirer le `if: false` du job pour
-# activer le cron hebdomadaire (lundi 04:00 UTC = 06:00 CEST).
+name: Actualisation TARES contrôlée
 on:
   schedule:
-    # Hebdomadaire, lundi 04:00 UTC. BAZG publie les XLSX de manière continue
-    # mais les changements significatifs sont rares (~1-2 par mois). Tourner
-    # une fois par semaine suffit largement.
     - cron: "0 4 * * 1"
   workflow_dispatch:
     inputs:
-      force_release:
-        description: "Force release even if BAZG sources unchanged"
-        required: false
-        default: "false"
-
+      dry_run:
+        description: "Préparer et vérifier sans publier"
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: tares-production
+  cancel-in-progress: false
 jobs:
   refresh-and-publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.TARES_CRON_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # Disable scheduled runs until first dry-run validates end-to-end. Set to
-    # `true` (or remove the line) once ready.
-    if: ${{ github.event_name == 'workflow_dispatch' || vars.TARES_CRON_ENABLED == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,8 +25,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-
-      - name: Run TARES ETL → publish to R2 + register in DB
+      - name: Collecter, contrôler, signer et relire TARES
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -40,8 +34,21 @@ jobs:
           BASE_URL: https://www.openswissdata.com
           ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
           OSD_SIGNING_KEY_ED25519: ${{ secrets.OSD_SIGNING_KEY_ED25519 }}
-          # Skip embeddings in CI — they take ~10 min on CPU and the model
-          # weights aren't cached in the runner. Embeddings are recomputed
-          # locally before each major release, not on weekly refreshes.
+          TARES_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '0' }}
           SKIP_EMBEDDINGS: "1"
-        run: npm run etl:tares
+        run: |
+          node --import tsx --input-type=module <<'NODE'
+          import { runRelease } from './etl/tares/release.ts';
+          import { writeFileSync, appendFileSync } from 'node:fs';
+          const result = await runRelease();
+          const { zip_path, ...summary } = result;
+          writeFileSync('data/tares/resultat.json', JSON.stringify(summary, null, 2));
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## TARES ${result.version}\n${result.row_count} codes ; archive vérifiée, ${result.registered ? 'version enregistrée' : 'simulation sans publication'}.\nSHA-256 : ${result.sha256}\n\nLes vecteurs de recherche ne font pas partie de cette actualisation.\n`);
+          NODE
+      - name: Conserver le témoin de résultat
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultat-tares-${{ github.run_id }}
+          path: data/tares/resultat.json
+          retention-days: 14
+          if-no-files-found: error

@@ -57,6 +57,7 @@ function makeDuty(hs8: string, ldgCode: string, ansatzart: string, value: number
     ldgText_en: "Test",
     value,
     currency: "Fr.",
+    zcoCode: "00", sequence: "1", conditions_fr: "", basisCode: "206", source_file: "fictif.xlsx", source_record: {},
     unit_de: "je 100 kg brutto",
     unit_fr: "par 100 kg brut",
     unit_it: "per 100 kg lordo",
@@ -119,26 +120,28 @@ describe("buildTaresRows", () => {
     expect(r.duty_mfn_currency).toBe("CHF");
   });
 
-  it("maps LDG 100020 → eu in preferential_regimes, keeps lowest rate", () => {
+  it("ne résume pas deux taux différents en retenant le minimum", () => {
     (parseTariff8Digit as ReturnType<typeof vi.fn>).mockReturnValue([makeValidRow("84821000")]);
     (parseTarifstruktur as ReturnType<typeof vi.fn>).mockReturnValue([makeStruct("84821000")]);
     (parseDutyRates as ReturnType<typeof vi.fn>).mockReturnValue([
       makeDuty("84821000", "100000", "NT", 10),    // MFN
-      makeDuty("84821000", "100020", "PR", 5),     // EU pref (first)
-      makeDuty("84821000", "100020", "PR", 3),     // EU pref (lower — should win)
+      makeDuty("84821000", "100001", "PR", 5),     // EU pref (first)
+      makeDuty("84821000", "100001", "PR", 3),     // EU pref (lower — should win)
     ]);
     (parseCustomsFacilities as ReturnType<typeof vi.fn>).mockReturnValue([]);
 
     const { rows } = buildTaresRows({ today: TODAY, sources: SOURCES });
     const r = rows[0];
-    expect(r.preferential_regimes.eu).toBe(3);   // lowest kept
+    expect(r.preferential_regimes.eu).toBeUndefined();
+    expect(rows[0].duty_rates_count).toBe(3);
   });
 
   it("sets preferential_regimes value to 'free' when duty is 0", () => {
     (parseTariff8Digit as ReturnType<typeof vi.fn>).mockReturnValue([makeValidRow("84821000")]);
     (parseTarifstruktur as ReturnType<typeof vi.fn>).mockReturnValue([makeStruct("84821000")]);
     (parseDutyRates as ReturnType<typeof vi.fn>).mockReturnValue([
-      makeDuty("84821000", "100020", "PR", 0),
+      makeDuty("84821000", "100000", "NT", 10),
+      makeDuty("84821000", "100001", "PR", 0),
     ]);
     (parseCustomsFacilities as ReturnType<typeof vi.fn>).mockReturnValue([]);
 
@@ -201,5 +204,33 @@ describe("buildTaresRows", () => {
 
     // Should NOT throw — clean row passes assertNoForbiddenFields
     expect(() => buildTaresRows({ today: TODAY, sources: SOURCES })).not.toThrow();
+  });
+});
+
+describe("Taux conditionnels préservés", () => {
+  function build(duties: ReturnType<typeof makeDuty>[]) {
+    vi.mocked(parseTariff8Digit).mockReturnValue([makeValidRow("04069051")]);
+    vi.mocked(parseTarifstruktur).mockReturnValue([makeStruct("04069051")]);
+    vi.mocked(parseDutyRates).mockReturnValue(duties); vi.mocked(parseCustomsFacilities).mockReturnValue([]);
+    return buildTaresRows({ today: TODAY, sources: SOURCES });
+  }
+  it("conserve le contingent à 50 sans remplacer le taux de base 383", () => {
+    const base = makeDuty("04069051", "100000", "NT", 383), quota = { ...base, value: 50, sequence: "2", conditions_fr: "dans le contingent" };
+    const result = build([quota, base]); expect(result.rows[0].duty_mfn_value).toBe(383); expect(result.rates).toEqual([quota, base]);
+  });
+  it("n’assimile pas un pourcentage préférentiel à des francs", () => {
+    const normal = makeDuty("04069051", "100000", "NT", 383), percent = { ...makeDuty("04069051", "100122", "PR", 102), currency: "%" };
+    const result = build([normal, percent]); expect(result.rows[0].preferential_regimes).toEqual({}); expect(result.rates[1].currency).toBe("%"); expect(result.rates[1].value).toBe(102);
+  });
+  it("ne compare pas une unité par pièce et une unité par poids", () => {
+    const normal = makeDuty("04069051", "100000", "NT", 10), pref = { ...makeDuty("04069051", "100001", "PR", 1), basisCode: "201", unit_fr: "par pièce" };
+    expect(build([normal, pref]).rows[0].preferential_regimes).toEqual({});
+  });
+  it("ne présente pas un régime conditionnel gratuit comme une exemption générale", () => {
+    const normal = makeDuty("04069051", "100000", "NT", 383), conditional = { ...makeDuty("04069051", "100001", "PR", 0), conditions_fr: "usage particulier" };
+    expect(build([normal, conditional]).rows[0].preferential_regimes).toEqual({});
+  });
+  it("ne transforme pas une unité MFN inconnue en CHF", () => {
+    const normal = { ...makeDuty("04069051", "100000", "NT", 10), currency: "%" }; const row = build([normal]).rows[0]; expect(row.duty_mfn_value).toBeUndefined(); expect(row.duty_mfn_currency).toBeUndefined();
   });
 });

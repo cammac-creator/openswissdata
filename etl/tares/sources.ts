@@ -1,7 +1,7 @@
-import { mkdirSync, existsSync, statSync, createWriteStream } from "node:fs";
+/** Sources BAZG → bronze brut daté immuable ; index de cache argent reconstruisible. */
+import { mkdirSync, existsSync, readFileSync, writeFileSync, renameSync } from "node:fs";
 import { join } from "node:path";
-import { Readable } from "node:stream";
-import { pipeline } from "node:stream/promises";
+import { createHash } from "node:crypto";
 
 /**
  * Official BAZG XLSX downloads — Free Data Delivery service
@@ -67,17 +67,40 @@ export async function downloadAllSources(
   const maxAgeMs = (opts.maxAgeHours ?? 12) * 3600 * 1000;
   const out: Record<string, string> = {};
   for (const src of Object.values(BAZG_SOURCES)) {
-    const path = join(cacheDir, `${src.key}.xlsx`);
-    if (existsSync(path) && Date.now() - statSync(path).mtimeMs < maxAgeMs) {
-      out[src.key] = path;
-      continue;
+    const indexPath = join(cacheDir, `${src.key}.cache.json`);
+    if (existsSync(indexPath) && maxAgeMs > 0) {
+      const index = JSON.parse(readFileSync(indexPath, "utf8"));
+      if (/^\d{4}-\d{2}-\d{2}$/.test(index.day) && /^[a-f0-9]{64}$/.test(index.sha256) &&
+          index.url === src.url && Date.now() - Date.parse(index.fetched_at) >= 0 && Date.now() - Date.parse(index.fetched_at) < maxAgeMs) {
+        const path = join(cacheDir, "bronze", index.day, `${src.key}-${index.sha256}.xlsx`);
+        if (existsSync(path) && createHash("sha256").update(readFileSync(path)).digest("hex") === index.sha256) {
+          out[src.key] = path;
+          continue;
+        }
+      }
     }
-    console.log(`[bazg] downloading ${src.key} ...`);
-    const res = await fetch(src.url);
+    console.log(`[bazg] lecture de ${src.key} ...`);
+    const res = await fetch(src.url, { signal: AbortSignal.timeout(60_000) });
     if (!res.ok || !res.body) {
-      throw new Error(`Failed to download ${src.key} from ${src.url}: HTTP ${res.status}`);
+      throw new Error(`Source BAZG indisponible ${src.key} : HTTP ${res.status}`);
     }
-    await pipeline(Readable.fromWeb(res.body as Parameters<typeof Readable.fromWeb>[0]), createWriteStream(path));
+    const parts: Uint8Array[] = []; let size = 0;
+    for await (const part of res.body) {
+      size += part.length;
+      if (size > 50_000_000) throw new Error(`Source BAZG trop volumineuse : ${src.key}`);
+      parts.push(part);
+    }
+    const bytes = Buffer.concat(parts);
+    const sha256 = createHash("sha256").update(bytes).digest("hex");
+    const fetched_at = new Date().toISOString(), day = fetched_at.slice(0, 10);
+    const dir = join(cacheDir, "bronze", day); mkdirSync(dir, { recursive: true });
+    const path = join(dir, `${src.key}-${sha256}.xlsx`);
+    try { writeFileSync(path, bytes, { flag: "wx" }); }
+    catch (error) { if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error; }
+    if (bytes.subarray(0, 4).toString("hex") !== "504b0304") throw new Error(`Source BAZG non XLSX : ${src.key}`);
+    const meta = { url: src.url, fetched_at, day, sha256, bytes: size, last_modified: res.headers.get("last-modified") };
+    if (!existsSync(`${path}.meta.json`)) writeFileSync(`${path}.meta.json`, JSON.stringify(meta, null, 2), { flag: "wx" });
+    writeFileSync(`${indexPath}.tmp`, JSON.stringify(meta)); renameSync(`${indexPath}.tmp`, indexPath);
     out[src.key] = path;
   }
   return out;

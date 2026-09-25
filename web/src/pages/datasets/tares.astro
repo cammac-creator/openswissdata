@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import HSLookup from "../../components/HSLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
 import ProductFaq from "../../components/ProductFaq.astro";
+import TaresQuality from "../../components/TaresQuality.astro";
 import ApiSwitch from "../../components/ApiSwitch.astro";
 
 const datasetJsonLd = {
@@ -103,8 +104,8 @@ const productJsonLd = {
 
         <p class="v4-lede reveal-v4" data-delay="2">
           ~7 500 codes HS8 actuels, désignations en 4 langues (DE/FR/IT/EN),
-          droits MFN avec valeur + unité, jusqu'à <strong>30+ régimes préférentiels par code</strong>
-          (UE, AELE, UK, Chine, Japon, Corée…). Mises à jour hebdomadaires depuis les XLSX officiels BAZG.
+          droits MFN et <strong>taux préférentiels détaillés</strong>
+          (UE, AELE, UK, Chine, Japon, Corée…). Collecte hebdomadaire des XLSX BAZG, avec contrôle avant publication.
         </p>
 
         <div class="v4-spec-row reveal-v4" data-delay="3">
@@ -124,7 +125,7 @@ const productJsonLd = {
 
         <div class="v4-cta-row reveal-v4" data-delay="4">
           <a href="#acheter" class="v4-btn v4-btn-primary">Acheter — 299 CHF <span class="arrow">→</span></a>
-          <a href="/samples/tares-sample.csv" download class="v4-btn v4-btn-secondary">Démo gratuite — 100 lignes CSV ↓</a>
+          <a href="/api/catalog/tares?format=csv" download class="v4-btn v4-btn-secondary">Démo gratuite — 100 lignes CSV ↓</a>
         </div>
 
         <div class="v4-permission-line reveal-v4" data-delay="5">
@@ -161,6 +162,8 @@ const productJsonLd = {
       </p>
     </div>
 
+    <TaresQuality lang="fr" />
+
     <div class="ds-meta-grid">
       <div class="ds-meta-card reveal-v4">
         <div class="ds-meta-label">Formats inclus</div>
@@ -168,7 +171,7 @@ const productJsonLd = {
       </div>
       <div class="ds-meta-card reveal-v4" data-delay="1">
         <div class="ds-meta-label">Mises à jour</div>
-        <div class="ds-meta-value">Delta hebdomadaire suivant les publications BAZG · 360 jours inclus · renouvellement 120 CHF/an</div>
+        <div class="ds-meta-value">Contrôle hebdomadaire et comparaison avec la version précédente · 360 jours inclus · renouvellement 120 CHF/an</div>
       </div>
     </div>
 
@@ -176,11 +179,11 @@ const productJsonLd = {
       <div class="v4-section-eyebrow">
         <strong>Schéma TARES</strong>
         <span class="sep">/</span>
-        <span>17 colonnes normalisées</span>
+        <span>Résumé et détail des conditions</span>
       </div>
       <h2 class="v4-section-h2">Le <span class="serif">schéma</span> en un coup d'œil.</h2>
       <p class="v4-section-intro">
-        Chaque ligne représente un code HS à 8 chiffres avec ses désignations multilingues, droits applicables et accords préférentiels.
+        Le résumé donne une ligne par code HS8. Les variantes de taux, unités et conditions restent dans les fichiers détaillés. Le champ historique unit_stat désigne l’unité du droit.
       </p>
 
       <div class="ds-table-wrap">
@@ -198,7 +201,7 @@ const productJsonLd = {
             <tr><td class="mono">duty_mfn_value</td><td class="dim">number</td><td class="mono">0.00</td></tr>
             <tr><td class="mono">duty_mfn_unit</td><td class="dim">string</td><td>par 100 kg brut</td></tr>
             <tr><td class="mono">duty_mfn_currency</td><td class="dim">string</td><td class="mono">CHF</td></tr>
-            <tr><td class="mono">preferential_regimes</td><td class="dim">object</td><td class="mono" is:raw>{"eu":"free","efta":"free","japon":"free"}</td></tr>
+            <tr><td class="mono">preferential_regimes</td><td class="dim">object</td><td class="mono" is:raw>{"eu":"free","efta":"free","jp":"free"}</td></tr>
             <tr><td class="mono">customs_relief_codes</td><td class="dim">string[]</td><td class="mono">["01"]</td></tr>
           </tbody>
         </table>
@@ -219,7 +222,7 @@ const productJsonLd = {
     <div class="ds-sample reveal-v4">
       <h3>Échantillon gratuit — 100 lignes (CSV)</h3>
       <p>Aperçu curé couvrant des chapitres variés (alimentaire, mécanique, électronique, textile). Pour valider que le format vous convient avant achat.</p>
-      <a href="/samples/tares-sample.csv" download class="ds-sample-dl">
+      <a href="/api/catalog/tares?format=csv" download class="ds-sample-dl">
         <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 7l4 4 4-4M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Télécharger tares-sample.csv
       </a>

@@ -1,46 +1,21 @@
 /**
- * MCP data freshness — refresh the in-memory FINMA slices from the current R2
- * ZIP, WITHOUT redeploy and WITHOUT breaking the synchronous tool API.
- *
- * Why this exists
- * ---------------
- * The MCP tools read bundled CSV slices (`src/mcp/data/*.csv`) via the SYNC
- * getters in `data-loader.ts`. Those CSVs are committed and frozen — they only
- * change on redeploy. Meanwhile the daily FINMA ETL (GitHub Actions) publishes
- * a fresh ZIP to R2 and points `datasets.current_version` at it. So the paid
- * MCP served stale (April) FINMA data while R2/DB were current.
- *
- * This engine closes that gap: at boot, after each `/api/admin/release`, and on
- * a 12 h safety timer, it pulls the current FINMA ZIP from R2, extracts the
- * registry + warnings slices, validates them, and hot-swaps the in-memory maps.
- * The getters stay synchronous → the 7 sync tools are untouched.
- *
- * Design invariants (the dangerous part is serving WRONG data, not crashing):
- *   - VERSION-GATED: skip entirely unless `datasets.current_version` moved since
- *     the loaded version. The timer is then just a cheap DB read; TARES (cron
- *     disabled) never re-downloads.
- *   - ALL-OR-NOTHING per dataset: registry + warnings are fetched, parsed AND
- *     validated before EITHER is swapped. A partial failure keeps the last-good
- *     (or the April seed) — never a half-fresh, inconsistent registry/warnings.
- *   - FIRE-AND-FORGET SAFE: never throws to the caller, never blocks the request
- *     path, never fails a release. All R2 work happens off the hot path.
- *   - OBSERVABLE: `getMcpFreshness()` exposes loaded vs current version so stale
- *     state is visible in /admin instead of served silently (the C1→C2 honesty
- *     thread — honest freshness, data-side this time).
- *
- * Scope: FINMA only — it is the only dataset whose cron runs daily. TARES (cron
- * disabled) and classifications (annual) would refresh by the same mechanism if
- * their `current_version` ever advanced, but are intentionally not configured
- * here. Embeddings (frozen by design) and STATENT (deprecated) are out of scope.
+ * Archives or FINMA et TARES dans R2 → lecture bornée et vérifiée → cartes MCP en mémoire.
+ * Reprise au démarrage, après publication et toutes les douze heures. Chaque jeu
+ * garde sa dernière version complète en cas d'échec ; état consultable dans le CRM.
+ * FINMA et TARES restent indépendants. Les embeddings et classifications ne sont
+ * pas actualisés par ce mécanisme.
  */
 import { createHash } from "node:crypto";
 import yauzl from "yauzl";
 import { parse } from "csv-parse/sync";
 import { getDb } from "../lib/db.js";
+import { readTaresArchive } from "../lib/tares-archive.js";
 import { getObjectBuffer } from "../lib/r2.js";
 import {
   setFinmaRegistry,
   setFinmaWarnings,
+  setTares,
+  type TaresRow,
   type FinmaRegistryRow,
   type FinmaWarningRow,
 } from "./data-loader.js";
@@ -57,8 +32,9 @@ export interface FreshnessState {
   lastError: string | null;
 }
 
-const freshness: Record<"finma", FreshnessState> = {
+const freshness: Record<"finma" | "tares", FreshnessState> = {
   finma: { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null },
+  tares: { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null },
 };
 
 /**
@@ -105,19 +81,26 @@ export function getMcpFreshness(): Record<string, FreshnessState & { currentVers
 }
 
 /** Extract a single file (by basename) from an in-memory ZIP buffer. */
-export function extractCsvFromZip(zipBuf: Buffer, basename: string): Promise<string> {
+export function extractCsvFromZip(zipBuf: Buffer, basename: string, maxBytes = 30_000_000): Promise<string> {
   return new Promise((resolve, reject) => {
     yauzl.fromBuffer(zipBuf, { lazyEntries: true }, (err, zip) => {
       if (err || !zip) return reject(err ?? new Error("zip open failed"));
       let resolved = false;
       zip.on("entry", (entry) => {
         if (entry.fileName.split("/").pop() === basename) {
+          if (entry.uncompressedSize > maxBytes) { zip.close(); return reject(new Error(`Fichier ZIP trop volumineux : ${basename}`)); }
           zip.openReadStream(entry, (e, rs) => {
             if (e || !rs) return reject(e ?? new Error("zip read stream failed"));
             const parts: Buffer[] = [];
-            rs.on("data", (d: Buffer) => parts.push(d));
+            let size = 0;
+            rs.on("data", (d: Buffer) => {
+              size += d.length;
+              if (size > maxBytes) { rs.destroy(); zip.close(); reject(new Error(`Fichier ZIP trop volumineux : ${basename}`)); return; }
+              parts.push(d);
+            });
             rs.on("end", () => {
               resolved = true;
+              zip.close();
               resolve(Buffer.concat(parts).toString("utf8"));
             });
             rs.on("error", reject);
@@ -308,6 +291,46 @@ async function doRefreshFinma(): Promise<void> {
 }
 
 const REFRESH_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 h safety net
+let taresFlight: Promise<void> | null = null;
+let taresAgain = false;
+
+/** TARES suit aussi la version vendue ; aucun remplacement partiel en cas d'échec. */
+export function refreshTaresFromR2(): Promise<void> {
+  if (taresFlight) { taresAgain = true; return taresFlight; }
+  taresFlight = (async () => {
+    do {
+      taresAgain = false;
+      const state = freshness.tares;
+      state.lastAttemptAt = Date.now();
+      try {
+        if (!process.env.R2_ACCOUNT_ID || !process.env.R2_BUCKET) throw new Error("Accès R2 non configuré");
+        const db = getDb();
+        const current = () => (db.prepare("SELECT current_version FROM datasets WHERE id='tares'").get() as { current_version?: string } | undefined)?.current_version;
+        const version = current();
+        if (!version) throw new Error("Version TARES absente");
+        if (version === state.loadedVersion) { state.lastError = null; continue; }
+        const info = db.prepare("SELECT r2_key,sha256,size_bytes,released_at FROM versions WHERE dataset_id='tares' AND version=?").get(version) as
+          { r2_key: string; sha256: string; size_bytes: number; released_at: number } | undefined;
+        if (!info || !/^[a-f0-9]{64}$/.test(info.sha256) || info.size_bytes <= 0 || info.size_bytes > 100_000_000) throw new Error("Métadonnées TARES invalides");
+        const bytes = await withTimeout(readTaresArchive(info), R2_FETCH_TIMEOUT_MS, "Lecture TARES");
+        if (bytes.length !== info.size_bytes || createHash("sha256").update(bytes).digest("hex") !== info.sha256) throw new Error("Empreinte TARES invalide");
+        const rows = parseCsv<TaresRow>(await extractCsvFromZip(bytes, "tares.csv"));
+        validateRows(rows, 6_000, ["hs8", "designation_fr", "duty_mfn_value", "duty_rates_count"], "TARES");
+        if (rows.length > 10_000 || new Set(rows.map(r => r.hs8)).size !== rows.length || rows.some(r => !/^\d{8}$/.test(r.hs8) || !r.designation_fr || !Number.isInteger(Number(r.duty_rates_count)) || Number(r.duty_rates_count) <= 0)) throw new Error("Lignes TARES invalides");
+        if (current() !== version) { taresAgain = true; continue; }
+        setTares(rows, version); state.loadedVersion = version; state.lastRefreshAt = Date.now(); state.lastError = null;
+        console.log(`[mcp-refresh] TARES ${version} : ${rows.length} codes`);
+        try { snapshotFromRows(db, "tares", version, info.released_at, rows as unknown as Record<string, string>[]); }
+        catch { console.error("[mcp-snapshot] Instantané TARES non enregistré ; données courantes chargées"); }
+      } catch (error) {
+        state.lastError = error instanceof Error ? error.message : "Échec TARES";
+        console.error(`[mcp-refresh] TARES conservé : ${state.lastError}`);
+      }
+    } while (taresAgain);
+  })().finally(() => { taresFlight = null; });
+  return taresFlight;
+}
+
 let _timer: ReturnType<typeof setInterval> | null = null;
 
 /**
@@ -316,8 +339,9 @@ let _timer: ReturnType<typeof setInterval> | null = null;
  */
 export function startMcpDataRefresh(): void {
   void refreshFinmaFromR2();
+  void refreshTaresFromR2();
   if (!_timer) {
-    _timer = setInterval(() => void refreshFinmaFromR2(), REFRESH_INTERVAL_MS);
+    _timer = setInterval(() => { void refreshFinmaFromR2(); void refreshTaresFromR2(); }, REFRESH_INTERVAL_MS);
     // Don't keep the event loop alive just for the timer.
     _timer.unref?.();
   }
@@ -326,6 +350,8 @@ export function startMcpDataRefresh(): void {
 /** Test helper: reset freshness + in-flight state between cases. */
 export function _resetFreshnessForTest(): void {
   freshness.finma = { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null };
+  freshness.tares = { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null };
+  taresFlight = null; taresAgain = false;
   _inFlight = null;
   _rerun = false;
   if (_timer) {

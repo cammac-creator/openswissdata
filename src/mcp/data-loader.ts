@@ -39,6 +39,7 @@ export interface TaresRow {
   duty_mfn_value: string;
   duty_mfn_unit: string;
   duty_mfn_currency: string;
+  duty_rates_count?: string;
   preferential_regimes: string;
   restrictions_codes: string;
   customs_relief_codes: string;
@@ -106,6 +107,7 @@ export interface StatentRow {
   emplois_eq_plein_temps: string;
 }
 
+let _taresVersion: string | null = null;
 let _tares: TaresRow[] | null = null;
 let _taresByHs8: Map<string, TaresRow> | null = null;
 let _finmaRegistry: FinmaRegistryRow[] | null = null;
@@ -121,12 +123,20 @@ function loadCsv<T>(filename: string): T[] {
   return parse(raw, { columns: true, skip_empty_lines: true, relax_quotes: true }) as T[];
 }
 
-export function getTares(): { rows: readonly TaresRow[]; byHs8: ReadonlyMap<string, TaresRow> } {
+export function getTares(): { rows: readonly TaresRow[]; byHs8: ReadonlyMap<string, TaresRow>; version: string | null } {
   if (!_tares || !_taresByHs8) {
     _tares = loadCsv<TaresRow>("tares.csv");
     _taresByHs8 = new Map(_tares.map((r) => [r.hs8, r]));
   }
-  return { rows: _tares, byHs8: _taresByHs8 };
+  return { rows: _tares, byHs8: _taresByHs8, version: _taresVersion };
+}
+
+/** Remplace ensemble les lignes TARES et leur index après validation de l'archive. */
+export function setTares(rows: TaresRow[], version: string): void {
+  const index = new Map(rows.map(row => [row.hs8, row]));
+  _tares = rows;
+  _taresVersion = version;
+  _taresByHs8 = index;
 }
 
 /**
@@ -255,6 +265,7 @@ export function getNogaEmbeddings(): Promise<EmbeddingRow[]> {
 /** Test helper: clears in-memory caches so tests can swap fixture data. */
 export function _resetDataLoaderCache(): void {
   _tares = null;
+  _taresVersion = null;
   _taresByHs8 = null;
   _finmaRegistry = null;
   _finmaWarnings = null;

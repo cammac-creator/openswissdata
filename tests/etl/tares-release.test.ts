@@ -2,112 +2,55 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createHash } from "node:crypto";
+const mocks = vi.hoisted(() => ({ upload: vi.fn(), read: vi.fn(), ingest: vi.fn(), build: vi.fn(), quality: vi.fn(), verify: vi.fn(), extract: vi.fn() }));
+vi.mock("../../src/lib/r2.js", () => ({ uploadZip: mocks.upload, getObjectBuffer: mocks.read }));
+vi.mock("../../src/mcp/r2-refresh.js", () => ({ extractCsvFromZip: mocks.extract }));
+vi.mock("../../etl/tares/ingest.js", () => ({ ingestFromBazg: mocks.ingest, ingestFromFixture: () => [{ hs8: "84821000" }] }));
+vi.mock("../../etl/tares/bundle.js", () => ({ buildBundle: mocks.build }));
+vi.mock("../../etl/tares/quality.js", () => ({ validateTares: mocks.quality }));
+vi.mock("../../etl/shared/verify-provenance.js", () => ({ verifyProvenanceZip: mocks.verify }));
+import { runRelease } from "../../etl/tares/release.js";
 
-// Mock r2.js uploadZip before importing the orchestrator
-const uploadMock = vi.fn().mockResolvedValue(undefined);
-vi.mock("../../src/lib/r2.js", () => ({
-  uploadZip: uploadMock,
-  signedDownloadUrl: vi.fn().mockResolvedValue("https://example.com/signed"),
-}));
-
-describe("etl/tares/release orchestration", () => {
-  let tmp: string;
-  let fetchMock: ReturnType<typeof vi.fn>;
-
+describe("Publication TARES protégée", () => {
+  let temp: string; let http: ReturnType<typeof vi.fn>;
+  const today = new Date().toISOString().slice(0, 10), version = today.replaceAll("-", ".");
+  const bytes = Buffer.from("archive de test"), sha = createHash("sha256").update(bytes).digest("hex");
+  const metadata = () => ({ dataset: { current_version: "2026.01.01" }, versions: [{ version: "2026.01.01", r2_key: "tares/2026.01.01/tares.zip", sha256: sha, size_bytes: bytes.length }] });
   beforeEach(() => {
-    tmp = mkdtempSync(join(tmpdir(), "osd-release-"));
-    uploadMock.mockClear();
-    process.env.BASE_URL = "http://localhost:3000";
-    process.env.ADMIN_SECRET = "test-secret-1234567890";
-    process.env.USE_FIXTURE = "1";
-    process.env.TARES_VERSION = "2026.04.22";
-    // Phase 1/T1 added an embeddings step that downloads/loads a ~120 MB ONNX
-    // model. Tests don't need to verify embedding correctness here (covered by
-    // tares-embeddings.test.ts and a sanity script), so opt out for speed.
-    process.env.SKIP_EMBEDDINGS = "1";
-    fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({ ok: true, dataset_id: "tares", version: "2026.04.22" }),
-      text: async () => "",
-    });
-    // @ts-expect-error overriding global fetch
-    global.fetch = fetchMock;
+    vi.resetAllMocks(); temp = mkdtempSync(join(tmpdir(), "osd-tares-release-"));
+    vi.stubEnv("BASE_URL", "https://example.test"); vi.stubEnv("ADMIN_SECRET", "fictif"); vi.stubEnv("SKIP_EMBEDDINGS", "1"); vi.stubEnv("USE_FIXTURE", "0");
+    vi.stubEnv("TARES_DRY_RUN", "0"); vi.stubEnv("TARES_CACHE_DIR", join(temp, "cache"));
+    http = vi.fn(async (_url, init) => init?.method === "POST" ? Response.json({ ok: true, version }) : Response.json(metadata())); vi.stubGlobal("fetch", http);
+    mocks.read.mockResolvedValue(bytes); mocks.extract.mockResolvedValue(JSON.stringify([{ hs8: "84821000" }]));
+    mocks.ingest.mockResolvedValue({ rows: [{ hs8: "84821000" }], rates: [{}], sources: [{ fetched_at: `${today}T00:00:00Z` }] }); mocks.quality.mockReturnValue({ rows: 1 });
+    mocks.build.mockResolvedValue({ zipPath: join(temp, "archive.zip"), sha256: sha, sizeBytes: bytes.length });
+    mocks.verify.mockResolvedValue({ ok: true, fileChecks: ["tares.csv", "tares.json", "tares.parquet", "tares.sql", "tares_rates.json", "tares_rates.csv", "quality.json", "sources.json"].map(name => ({ name, ok: true })) });
   });
-
-  afterEach(() => {
-    rmSync(tmp, { recursive: true, force: true });
-    delete process.env.USE_FIXTURE;
-    delete process.env.TARES_VERSION;
-    delete process.env.SKIP_EMBEDDINGS;
+  afterEach(() => { rmSync(temp, { recursive: true, force: true }); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
+  const run = (opts = {}) => runRelease({ version, outDir: temp, ...opts });
+  it("interdit toute publication de fixture avant réseau", async () => {
+    await expect(run({ useFixture: true })).rejects.toThrow("fixture"); expect(http).not.toHaveBeenCalled(); expect(mocks.upload).not.toHaveBeenCalled();
   });
-
-  it("end-to-end: ingest → bundle → upload → admin release", async () => {
-    const { runRelease } = await import("../../etl/tares/release.js");
-
-    const result = await runRelease({
-      useFixture: true,
-      version: "2026.04.22",
-      outDir: tmp,
-    });
-
-    // Verify result shape
-    expect(result.version).toBe("2026.04.22");
-    expect(result.r2_key).toBe("tares/2026.04.22/tares.zip");
-    expect(result.sha256).toMatch(/^[0-9a-f]{64}$/);
-    expect(result.size_bytes).toBeGreaterThan(100);
-    expect(result.row_count).toBe(5);
-    expect(result.registered).toBe(true);
-
-    // Verify uploadZip was called with expected R2 key
-    expect(uploadMock).toHaveBeenCalledOnce();
-    const [, r2Key] = uploadMock.mock.calls[0];
-    expect(r2Key).toBe("tares/2026.04.22/tares.zip");
-
-    // Verify fetch POST to admin endpoint
-    expect(fetchMock).toHaveBeenCalledOnce();
-    const [url, opts] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:3000/api/admin/release");
-    expect(opts.method).toBe("POST");
-    expect(opts.headers["x-admin-secret"]).toBe("test-secret-1234567890");
-    const body = JSON.parse(opts.body);
-    expect(body.dataset_id).toBe("tares");
-    expect(body.version).toBe("2026.04.22");
-    expect(body.r2_key).toBe("tares/2026.04.22/tares.zip");
-    expect(body.sha256).toMatch(/^[0-9a-f]{64}$/);
-    expect(body.size_bytes).toBeGreaterThan(100);
-  }, 15000);
-
-  it("throws if BASE_URL is missing", async () => {
-    delete process.env.BASE_URL;
-    const { runRelease } = await import("../../etl/tares/release.js");
-    await expect(runRelease({ useFixture: true, version: "2026.04.22", outDir: tmp })).rejects.toThrow("BASE_URL");
+  it("une simulation contrôle les sources et l’archive sans écriture distante", async () => {
+    expect((await run({ dryRun: true })).registered).toBe(false); expect(mocks.quality).toHaveBeenCalledOnce(); expect(mocks.verify).toHaveBeenCalledOnce(); expect(mocks.upload).not.toHaveBeenCalled(); expect(http).toHaveBeenCalledOnce();
   });
-
-  it("throws if ADMIN_SECRET is missing", async () => {
-    delete process.env.ADMIN_SECRET;
-    const { runRelease } = await import("../../etl/tares/release.js");
-    await expect(runRelease({ useFixture: true, version: "2026.04.22", outDir: tmp })).rejects.toThrow("ADMIN_SECRET");
+  it("refuse une date artificielle", async () => { await expect(run({ version: "2020.01.01" })).rejects.toThrow("date réelle"); expect(http).not.toHaveBeenCalled(); });
+  it("refuse une version déjà enregistrée avant toute écriture", async () => {
+    http.mockResolvedValue(Response.json({ ...metadata(), versions: [...metadata().versions, { ...metadata().versions[0], version }] }));
+    await expect(run()).rejects.toThrow("déjà publiée"); expect(mocks.upload).not.toHaveBeenCalled();
   });
-
-  it("real ingest path tries to download BAZG XLSX (cache miss → fetch attempted)", async () => {
-    // useFixture=false should now route to ingestFromBazg() which calls
-    // downloadAllSources() — proves the orchestrator no longer throws "not implemented".
-    // We mock fetch to fail explicitly, so the test asserts the real ingest path
-    // is wired (and fails for a different, observable reason).
-    fetchMock.mockResolvedValueOnce({ ok: false, status: 503, body: null, text: async () => "" });
-    const { runRelease } = await import("../../etl/tares/release.js");
-    await expect(runRelease({ useFixture: false, version: "2026.04.22", outDir: tmp })).rejects.toThrow(/Failed to download/);
+  it("refuse une archive précédente altérée", async () => { mocks.read.mockResolvedValue(Buffer.from("altérée")); await expect(run()).rejects.toThrow("précédente altérée"); expect(mocks.ingest).not.toHaveBeenCalled(); });
+  it("un échec qualité empêche même la construction", async () => { mocks.quality.mockImplementation(() => { throw Error("Volume incomplet"); }); await expect(run()).rejects.toThrow("Volume"); expect(mocks.build).not.toHaveBeenCalled(); });
+  it("une signature invalide empêche l’envoi", async () => { mocks.verify.mockResolvedValue({ ok: false }); await expect(run()).rejects.toThrow("signature"); expect(mocks.upload).not.toHaveBeenCalled(); });
+  it("un fichier détaillé absent empêche l’envoi", async () => { mocks.verify.mockResolvedValue({ ok: true, fileChecks: [] }); await expect(run()).rejects.toThrow("contenu"); expect(mocks.upload).not.toHaveBeenCalled(); });
+  it("une collision de clé immuable empêche l’enregistrement", async () => { mocks.upload.mockRejectedValue(Error("PreconditionFailed")); await expect(run()).rejects.toThrow("Precondition"); expect(http).toHaveBeenCalledOnce(); });
+  it("une relecture distante différente empêche l’enregistrement", async () => { mocks.read.mockResolvedValueOnce(bytes).mockResolvedValueOnce(Buffer.from("autre")); await expect(run()).rejects.toThrow("distante"); expect(http).toHaveBeenCalledOnce(); });
+  it("envoie une archive immuable et conditionne la publication à la version précédente", async () => {
+    expect((await run()).registered).toBe(true);
+    expect(mocks.upload).toHaveBeenCalledWith(join(temp, "archive.zip"), `tares/${version}/tares.zip`, { immutable: true });
+    expect(mocks.read).toHaveBeenCalledTimes(2);
+    const body = JSON.parse(http.mock.calls[1][1].body); expect(body.expected_previous_version).toBe("2026.01.01"); expect(body.changelog).not.toContain("fixture");
   });
-
-  it("propagates admin endpoint HTTP errors", async () => {
-    fetchMock.mockResolvedValue({
-      ok: false,
-      status: 403,
-      text: async () => "Forbidden",
-      json: async () => ({}),
-    });
-    const { runRelease } = await import("../../etl/tares/release.js");
-    await expect(runRelease({ useFixture: true, version: "2026.04.22", outDir: tmp })).rejects.toThrow("HTTP 403");
-  });
+  it("une course à la publication remonte le refus sans écraser", async () => { http.mockImplementation(async (_url, init) => init?.method === "POST" ? new Response("conflit", { status: 409 }) : Response.json(metadata())); await expect(run()).rejects.toThrow("HTTP 409"); expect(mocks.upload).toHaveBeenCalledOnce(); });
 });

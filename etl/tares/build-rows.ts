@@ -12,30 +12,24 @@ import {
 
 const TARES_BASE_URL = "https://xtares.admin.ch/tares/";
 
-/**
- * Map of LDG Nr (BAZG country/regime code) → short slug used in
- * preferential_regimes. Extend as needed when new agreements ship.
- */
+// Identifiants relus dans les fichiers officiels BAZG. Aucun pays déduit du numéro.
 const LDG_TO_SLUG: Record<string, string> = {
-  "100000": "mfn",   // Normal-Ansatz / MFN
-  "100002": "efta",  // Europäische Freihandelsassoziation
-  "100020": "eu",    // Union européenne (EU)
-  "100021": "uk",    // United Kingdom
-  "100022": "cn",    // China
-  "100023": "jp",    // Japan
-  "100024": "tr",    // Turquie
+  "100000": "mfn", "100002": "efta", "100001": "eu", "100142": "uk",
+  "100136": "cn", "100124": "jp", "100110": "tr",
 };
-
 function slugFromLdg(row: DutyRateRow): string {
-  if (LDG_TO_SLUG[row.ldgCode]) return LDG_TO_SLUG[row.ldgCode];
-  // Fallback: derive a slug from the FR text (lowercase, alphanum only).
-  const slug = row.ldgText_fr
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_|_$/g, "");
-  return slug || `ldg_${row.ldgCode}`;
+  return LDG_TO_SLUG[row.ldgCode] ?? `ldg_${row.ldgCode}`;
+}
+
+// Un résumé ne choisit jamais le minimum entre des conditions ou unités différentes.
+function baseRate(row: DutyRateRow): boolean {
+  return row.zcoCode === "00" && row.sequence === "1" && !row.conditions_fr &&
+    !["D", "F", "I", "E"].some(lang => String(row.source_record[`ANS Txt ${lang}`] ?? "").trim());
+}
+function uniqueRate(rows: DutyRateRow[]): DutyRateRow | undefined {
+  if (!rows.length) return undefined;
+  const signatures = new Set(rows.map(r => JSON.stringify([r.value, r.currency, r.basisCode, r.unit_fr])));
+  return signatures.size === 1 ? rows[0] : undefined;
 }
 
 function isCurrent(validFrom: string | null, validTo: string | null, today: string): boolean {
@@ -56,6 +50,7 @@ export interface BuildOptions {
 
 export interface BuildResult {
   rows: TaresRow[];
+  rates: DutyRateRow[];
   stats: {
     tn8_total: number;
     tn8_currently_valid: number;
@@ -132,26 +127,19 @@ export function buildTaresRows(opts: BuildOptions): BuildResult {
 
     const codeDuties = dutiesByHs8.get(v.hs8) ?? [];
 
-    // MFN duty (Ansatzart === "NT" with LDG Nr = "100000")
-    const mfn = codeDuties.find((d) => d.ldgCode === "100000") ?? codeDuties.find((d) => d.ansatzart === "NT");
-
-    // Preferential regimes: pick all rows with Ansatzart === "PR" (preferential).
+    const normalRates = codeDuties.filter(d => d.ldgCode === "100000" && d.ansatzart === "NT");
+    const mfn = uniqueRate(normalRates.filter(r => baseRate(r) && r.currency === "Fr."));
     const prefs: Record<string, number | "free"> = {};
-    for (const d of codeDuties) {
-      if (d.ansatzart !== "PR") continue;
-      const slug = slugFromLdg(d);
-      const v: number | "free" = d.value === 0 ? "free" : d.value;
-      // Keep the lowest rate per regime (most favourable).
-      const cur = prefs[slug];
-      if (cur === undefined) {
-        prefs[slug] = v;
-      } else if (cur === "free") {
-        // already best
-      } else if (v === "free") {
-        prefs[slug] = "free";
-      } else if (typeof cur === "number" && typeof v === "number" && v < cur) {
-        prefs[slug] = v;
-      }
+    const groups = new Map<string, DutyRateRow[]>();
+    for (const rate of codeDuties.filter(d => d.ansatzart === "PR")) {
+      const group = groups.get(rate.ldgCode) ?? [];
+      group.push(rate); groups.set(rate.ldgCode, group);
+    }
+    for (const group of groups.values()) {
+      // Les taux conditionnels restent dans le détail, avec leur unité et leur texte.
+      const rate = group.every(baseRate) ? uniqueRate(group) : undefined;
+      if (!rate || !mfn || rate.basisCode !== mfn.basisCode || rate.currency !== mfn.currency) continue;
+      prefs[slugFromLdg(rate)] = rate.value === 0 ? "free" : rate.value;
     }
 
     const reliefCodes = reliefByHs8.get(v.hs8);
@@ -173,6 +161,7 @@ export function buildTaresRows(opts: BuildOptions): BuildResult {
       restrictions_codes: [],
       customs_relief_codes: reliefCodes && reliefCodes.size > 0 ? Array.from(reliefCodes).sort() : undefined,
       valid_from: v.validFrom ?? "1970-01-01",
+      duty_rates_count: codeDuties.length,
       source_url: `${TARES_BASE_URL}control/searchSimpleTarifNumber?number=${v.hs8}`,
     };
 
@@ -189,8 +178,10 @@ export function buildTaresRows(opts: BuildOptions): BuildResult {
   // Stable sort by hs8 — deterministic ZIP for diff/cache.
   rows.sort((a, b) => a.hs8.localeCompare(b.hs8));
 
+  const included = new Set(rows.map(r => r.hs8));
   return {
     rows,
+    rates: duties.filter(d => included.has(d.hs8) && isCurrent(d.validFrom, d.validTo, today)),
     stats: {
       tn8_total: tn8List.length,
       tn8_currently_valid,

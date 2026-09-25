@@ -41,3 +41,17 @@ describe("Qualité publique FINMA", () => {
   expect((await createApp().request("/api/health/freshness")).status).toBe(200);
  });
 });
+
+async function publishTares() {
+ const zip=archiver("zip"), parts:Buffer[]=[];const ready=new Promise<Buffer>((resolve,reject)=>{zip.on("data",c=>parts.push(c));zip.on("error",reject);zip.on("end",()=>resolve(Buffer.concat(parts)));});
+ zip.append(JSON.stringify({schema_version:2,rows:120,rates:1200,missing_mfn_summary:4,checked_at:new Date().toISOString(),previous_version:"2026.08.24",added:[],removed:[],changes:[],interpretation:"Fictif"}),{name:"quality.json"});
+ zip.append(JSON.stringify(Array.from({length:120},(_,i)=>({hs8:String(1000000+i).padStart(8,"0"),chapter:i%96+1,designation_fr:`Exemple ${i}`,preferential_regimes:{eu:"free"},restrictions_codes:[]}))),{name:"tares.json"});
+ await zip.finalize();const bytes=await ready,version=`2026.09.25.${++counter}`;
+ getDb().prepare("INSERT INTO datasets(id,name,slug,price_chf,stripe_price_id,current_version,created_at) VALUES('tares','TARES','tares',0,'fictif',?,?)").run(version,Date.now());
+ getDb().prepare("INSERT INTO versions(dataset_id,version,r2_key,sha256,size_bytes,released_at) VALUES('tares',?,?,?,?,?)").run(version,`tares/${version}/tares.zip`,createHash("sha256").update(bytes).digest("hex"),bytes.length,Date.now());download.mockResolvedValue(bytes);return bytes;
+}
+describe("Qualité publique TARES",()=>{
+ it("sert le compte exact du fichier vendu et cent lignes couvrant les chapitres",async()=>{await publishTares();const res=await createApp().request('/api/catalog/tares');expect(res.status).toBe(200);const body=await res.json();expect(body.rows).toBe(120);expect(body.rates).toBe(1200);expect(body.sample).toHaveLength(100);expect(new Set(body.sample.map((r:any)=>r.chapter)).size).toBe(96);});
+ it("refuse une archive dont l’empreinte diffère",async()=>{await publishTares();download.mockResolvedValue(Buffer.from('altéré'));expect((await createApp().request('/api/catalog/tares')).status).toBe(503);});
+ it("exporte le même échantillon en CSV daté",async()=>{await publishTares();const res=await createApp().request('/api/catalog/tares?format=csv');expect(res.status).toBe(200);expect(res.headers.get('content-disposition')).toContain('tares-sample-2026.09.25');expect(res.headers.get('cache-control')).toBe('no-store');expect(await res.text()).toContain('Exemple 0');});
+});
