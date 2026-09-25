@@ -10,7 +10,7 @@
  */
 
 const DEFAULT_BASE_URL = "https://mcp.openswissdata.com";
-const PKG_VERSION = "0.1.0";
+const PKG_VERSION = "0.1.2";
 
 export interface ProxyOptions {
   baseUrl?: string;
@@ -39,6 +39,7 @@ export interface CallToolResponse {
   content: { type: "text"; text: string }[];
   isError?: boolean;
   structured?: unknown;
+  structuredContent?: unknown;
 }
 
 export class RemoteProxy {
@@ -67,8 +68,7 @@ export class RemoteProxy {
 
   /** GET /discovery — used as a startup health check. */
   public async discovery(): Promise<{ tools: string[]; server_info: { name: string; version: string } }> {
-    const res = await this.request("GET", `${this.baseUrl}/discovery`);
-    return (await res.json()) as { tools: string[]; server_info: { name: string; version: string } };
+    return await this.request("GET", `${this.baseUrl}/discovery`);
   }
 
   /** Forward `tools/list` to the remote and return the descriptor list. */
@@ -93,13 +93,7 @@ export class RemoteProxy {
       ...(params !== undefined ? { params } : {}),
     };
 
-    const res = await this.request("POST", `${this.baseUrl}/jsonrpc`, JSON.stringify(body));
-    let payload: JsonRpcResult;
-    try {
-      payload = (await res.json()) as JsonRpcResult;
-    } catch (e) {
-      throw new Error(`Remote MCP returned non-JSON: ${(e as Error).message}`);
-    }
+    const payload = await this.request<JsonRpcResult>("POST", `${this.baseUrl}/jsonrpc`, JSON.stringify(body));
     if (payload.error) {
       throw new Error(`Remote MCP error ${payload.error.code}: ${payload.error.message}`);
     }
@@ -109,7 +103,7 @@ export class RemoteProxy {
     return payload.result as R;
   }
 
-  private async request(method: string, url: string, body?: string): Promise<Response> {
+  private async request<T>(method: string, url: string, body?: string): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
@@ -131,7 +125,8 @@ export class RemoteProxy {
         const text = await safeText(res);
         throw new Error(`Remote MCP HTTP ${res.status}: ${text}`);
       }
-      return res;
+      // Le délai couvre aussi la lecture du corps, pas seulement les en-têtes.
+      return await res.json() as T;
     } finally {
       clearTimeout(timeout);
     }

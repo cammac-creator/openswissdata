@@ -1,136 +1,58 @@
 # @openswissdata/mcp
 
-[![npm version](https://img.shields.io/npm/v/@openswissdata/mcp.svg)](https://www.npmjs.com/package/@openswissdata/mcp)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![Node.js >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
+Passerelle MCP STDIO vers le service HTTPS OpenSwissData, pour les clients qui lancent un processus local. Elle transmet les descriptions et les résultats du serveur, y compris les avertissements de source non officielle.
 
-Standalone MCP (Model Context Protocol) server that proxies STDIO ⇄ the live openswissdata HTTP MCP endpoint.
+## Accès disponible
 
-Plug-and-play for **Claude Desktop**, **Cursor**, **Cline**, **VS Code Copilot Chat** and any other MCP client. The package ships an executable named `openswissdata-mcp` which the client launches as a child process — no separate backend deploy needed.
+Le serveur expose huit outils. Trois sont accessibles anonymement, avec une limite de 100 appels par jour et par IP : `tariff_lookup`, `cross_walk`, `kyc_check`.
 
-> The MCP server you find in the openswissdata core repo at `src/mcp/` is HTTP-only (Hono-mounted at `mcp.openswissdata.com/jsonrpc`). This package is the STDIO bridge that talks to that remote on your behalf.
-
-## What you get
-
-- 9 tools: `tariff_lookup`, `tariff_semantic_search`, `tariff_changelog`, `cross_walk`, `classify_text`, `kyc_check`, `finma_search`, `entity_history`, `statent_lookup`.
-- The mandatory non-official disclaimers (TARES) are passed through untouched in `content[].text`.
-- Anonymous tier works out of the box (~100 requests/day per IP). Bring your own `OPENSWISSDATA_API_KEY` for higher quotas.
-
-## Install
-
-You don't need to install anything — `npx` will fetch the package on demand. To pin globally:
-
-```bash
-npm install -g @openswissdata/mcp
-```
-
-## Claude Desktop
-
-Edit your config file:
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-
-```jsonc
-{
-  "mcpServers": {
-    "openswissdata": {
-      "command": "npx",
-      "args": ["-y", "@openswissdata/mcp"],
-      "env": {
-        "OPENSWISSDATA_API_KEY": "sk_live_..." // optional, anonymous tier otherwise
-      }
-    }
-  }
-}
-```
-
-Restart Claude Desktop. The 9 tools should appear under the MCP tool icon.
-
-A copy of the snippet ships in [`examples/claude-desktop-config.json`](./examples/claude-desktop-config.json).
-
-## Cursor
-
-Edit `~/.cursor/mcp.json` (global) or `<workspace>/.cursor/mcp.json`:
-
-```jsonc
-{
-  "mcpServers": {
-    "openswissdata": {
-      "command": "npx",
-      "args": ["-y", "@openswissdata/mcp"],
-      "env": {
-        "OPENSWISSDATA_API_KEY": "sk_live_..."
-      }
-    }
-  }
-}
-```
-
-See [`examples/cursor-mcp.json`](./examples/cursor-mcp.json).
-
-## Cline
-
-Add a stdio MCP server through Cline's UI (or directly in `.vscode/mcp.json`) with:
-
-- Command: `npx`
-- Args: `-y @openswissdata/mcp`
-- Env: `OPENSWISSDATA_API_KEY=sk_live_...`
-
-See [`examples/cline-config.json`](./examples/cline-config.json).
+`tariff_semantic_search`, `tariff_changelog`, `classify_text`, `finma_search` et `entity_history` exigent des droits existants. Les nouvelles souscriptions payantes sont fermées. L’achat d’un fichier ne crée pas de clé API. `statent_lookup` a été retiré du service.
 
 ## Configuration
 
-| Variable                      | Default                              | Description                            |
-| ----------------------------- | ------------------------------------ | -------------------------------------- |
-| `OPENSWISSDATA_API_KEY`       | (anonymous)                          | Bearer token for higher quotas / paid tools |
-| `OPENSWISSDATA_BASE_URL`      | `https://mcp.openswissdata.com`      | Override (staging, self-host)          |
-| `OPENSWISSDATA_TIMEOUT_MS`    | `30000`                              | Per-request timeout                    |
+La version 0.1.1 est la dernière version relue dans le registre. La publication de 0.1.2 a été acceptée le 25.09.2026 et reste en cours de vérification externe. Les améliorations de délai décrites ici concernent 0.1.2.
 
-CLI flags:
+Exemple pour un client compatible avec `mcpServers` :
+
+```json
+{
+  "mcpServers": {
+    "openswissdata": {
+      "command": "npx",
+      "args": ["-y", "@openswissdata/mcp"]
+    }
+  }
+}
+```
+
+Les clients qui acceptent directement MCP HTTP peuvent utiliser `https://mcp.openswissdata.com/jsonrpc`, sans cette passerelle. Les outils et leurs schémas proviennent du serveur à chaque consultation.
+
+| Variable | Valeur par défaut | Usage |
+| --- | --- | --- |
+| `OPENSWISSDATA_API_KEY` | Aucune | Jeton déjà accordé, pour les droits associés |
+| `OPENSWISSDATA_BASE_URL` | `https://mcp.openswissdata.com` | Serveur de substitution |
+| `OPENSWISSDATA_TIMEOUT_MS` | `30000` | Délai incluant la lecture complète de la réponse |
+
+Une clé reste dans la configuration privée du client. Les diagnostics vont vers stderr ; stdout est réservé au protocole. `openswissdata-mcp --version` et `--help` affichent la version et l’aide.
+
+## Développement et vérification
+
+Node 22 est utilisé pour les contrôles. Le runtime conserve sa déclaration Node 18+ ; utiliser une version encore maintenue.
 
 ```bash
-openswissdata-mcp --version
-openswissdata-mcp --help
-```
-
-## Docker
-
-A two-stage non-root Dockerfile is included (Glama / Smithery friendly):
-
-```bash
-docker build -t openswissdata-mcp .
-docker run --rm -i \
-  -e OPENSWISSDATA_API_KEY=sk_live_... \
-  openswissdata-mcp
-```
-
-(STDIO MCP servers are interactive — pass `-i` so stdin is open.)
-
-## How it works
-
-```
-┌──────────────────┐  STDIO   ┌──────────────────┐  HTTPS   ┌────────────────────────┐
-│ Claude Desktop   │  ───────▶│  openswissdata-  │  ──────▶│ mcp.openswissdata.com  │
-│ Cursor / Cline   │ ◀────── │  mcp (this pkg)  │ ◀────── │  (Hono + 9 tools)      │
-└──────────────────┘          └──────────────────┘          └────────────────────────┘
-```
-
-The standalone server uses the official [`@modelcontextprotocol/sdk`](https://www.npmjs.com/package/@modelcontextprotocol/sdk) for STDIO transport and forwards every `tools/list` / `tools/call` to the remote JSON-RPC endpoint. Tool descriptors come from the remote so this binary stays trivially up-to-date when the API gains new tools.
-
-## Disclaimers
-
-OpenSwissData is a non-official mirror of public Swiss government datasets (TARES / NOGA / NACE / ISIC / FINMA registry). TARES tool calls return a mandatory non-official notice in their text content — the agent must surface this to the end user before customs decisions. Final decisions always go back to xtares.admin.ch / finma.ch.
-
-## Development
-
-```bash
-npm install
-npm run dev         # tsx — live STDIO server reading from your terminal (Ctrl-D to exit)
-npm test            # vitest, mocked HTTP — no live API calls
+npm ci
 npm run typecheck
+npm test
 npm run build
+npm pack --dry-run
 ```
 
-## License
+Les tests vérifient un échange MCP complet avec le SDK officiel et l’interruption d’une réponse dont le corps reste bloqué. Une modification du dépôt ne publie pas automatiquement une nouvelle version npm : vérifier séparément le registre avant distribution.
 
-Apache 2.0 — see [LICENSE](./LICENSE).
+Le Dockerfile fournit une alternative locale : `docker build -t openswissdata-mcp .`, puis `docker run --rm -i openswissdata-mcp`.
+
+## Limites métier
+
+OpenSwissData est une copie non officielle. Conserver les avertissements remis à l’utilisateur. Une correspondance approchée exige une validation métier ; un tarif absent ne signifie pas gratuité ; l’absence de résultat FINMA n’est pas une certification de conformité. Consulter les sources originales avant une décision.
+
+Licence Apache-2.0. [Documentation du SDK MCP utilisé](https://github.com/modelcontextprotocol/typescript-sdk/tree/v1.x).

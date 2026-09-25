@@ -25,6 +25,9 @@ export interface TariffLookupInput {
 }
 
 export interface TariffLookupResult {
+  version: string | null;
+  duty_rates_count: number | null;
+  summary_note: string;
   hs8: string;
   hs6: string;
   chapter: string;
@@ -105,6 +108,13 @@ export interface CrossWalkMapping {
   target_code: string;
   mapping_type: string;
   notes: string;
+  relation: "exactMatch" | "closeMatch" | "broadMatch" | "narrowMatch" | "relatedMatch";
+  requires_review: boolean;
+  path: {
+    source_scheme: ClassificationScheme; source_code: string;
+    target_scheme: ClassificationScheme; target_code: string;
+    relation: CrossWalkMapping["relation"]; source_id: string;
+  }[];
 }
 
 export interface CrossWalkResult {
@@ -113,6 +123,9 @@ export interface CrossWalkResult {
   source_code: string;
   mappings: CrossWalkMapping[];
   count: number;
+  reference_version: string;
+  sources: readonly { source_id: string; url: string; sha256: string; fetched_at: string; version: string }[];
+  limitations: string[];
 }
 
 export interface ClassifyTextInput {
@@ -124,8 +137,9 @@ export interface ClassifyTextInput {
 
 export interface ClassifyTextHit {
   code: string;
-  label_fr: string;
+  label: string;
   score: number;
+  scheme: "NOGA_2025";
 }
 
 export interface ClassifyTextResult {
@@ -155,7 +169,7 @@ export interface KycMatch {
   status: string;
   canton: string | null;
   city: string;
-  is_warning_listed: boolean;
+  is_warning_listed: boolean | null;
   source_url: string;
 }
 
@@ -190,7 +204,7 @@ export interface FinmaSearchMatch {
   status: string;
   city: string;
   canton: string | null;
-  is_warning_listed: boolean;
+  is_warning_listed: boolean | null;
   source_url: string;
   score: number;
 }
@@ -263,6 +277,7 @@ export interface ToolCallResult<S = unknown> {
   content: { type: "text"; text: string }[];
   isError?: boolean;
   structured?: S;
+  structuredContent?: S;
 }
 
 /** Discovery payload (`GET /discovery`). */

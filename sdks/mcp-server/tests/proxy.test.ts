@@ -21,6 +21,16 @@ function makeFetch(handler: (call: MockCall) => { status?: number; body: unknown
 }
 
 describe("RemoteProxy", () => {
+  it("interrompt un corps de réponse bloqué après réception des en-têtes", async () => {
+    const fetch: typeof globalThis.fetch = async (_url, init) => new Response(new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('{"result":'));
+        init?.signal?.addEventListener("abort", () => controller.error(new DOMException("Délai dépassé", "AbortError")), { once: true });
+      },
+    }));
+    const proxy = new RemoteProxy({ fetch, timeoutMs: 20 });
+    await expect(proxy.listTools()).rejects.toThrow(/Délai dépassé/);
+  }, 1000);
   it("calls /discovery on discovery()", async () => {
     const { fetch, calls } = makeFetch(() => ({
       body: {

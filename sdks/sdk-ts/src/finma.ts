@@ -28,7 +28,7 @@ export class FinmaAPI {
    * @example
    * ```ts
    * const r = await client.finma.kycCheck({ name: "UBS", top_k: 10 });
-   * for (const m of r.matches) console.log(m.name, m.licence_type);
+   * for (const m of r.registry_matches) console.log(m.name, m.licence_type);
    * ```
    */
   public kycCheck(input: KycCheckInput): Promise<KycCheckResult> {
@@ -41,7 +41,7 @@ export class FinmaAPI {
    * @example
    * ```ts
    * const r = await client.finma.search({ name: "Cred Suisse", include_warnings: true });
-   * for (const h of r.hits) console.log(h.score.toFixed(2), h.name);
+   * for (const h of r.matches) console.log(h.score.toFixed(2), h.name);
    * ```
    */
   public search(input: FinmaSearchInput): Promise<FinmaSearchResult> {
@@ -54,7 +54,7 @@ export class FinmaAPI {
    * @example
    * ```ts
    * const r = await client.finma.entityHistory({ uid: "CHE-103.137.179" });
-   * console.log(r.current.name, "—", r.events.length, "events");
+   * console.log(r.current.name, "—", r.timeline.length, "events");
    * ```
    */
   public entityHistory(input: EntityHistoryInput): Promise<EntityHistoryResult> {

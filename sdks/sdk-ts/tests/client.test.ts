@@ -10,6 +10,23 @@ import {
 import { makeMock, rpcError, rpcOk, rpcToolError } from "./_mock.js";
 
 describe("Client", () => {
+  it("interrompt aussi la lecture du corps lorsque le serveur ne la termine pas", async () => {
+    const fetch: typeof globalThis.fetch = async (_url, init) => new Response(new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('{"result":'));
+        init?.signal?.addEventListener("abort", () => controller.error(new DOMException("Délai dépassé", "AbortError")), { once: true });
+      },
+    }));
+    const client = new Client({ fetch, timeoutMs: 20, maxRetries: 0 });
+    await expect(client.discovery()).rejects.toBeInstanceOf(NetworkError);
+  }, 1000);
+
+  it("lit le champ structuré standard MCP sans perdre l'ancienne compatibilité", async () => {
+    const { fetch } = makeMock(() => ({ body: { jsonrpc: "2.0", id: 1,
+      result: { content: [{ type: "text", text: "Avis conservé" }], structuredContent: { valeur: 42 } } } }));
+    const client = new Client({ fetch, maxRetries: 0 });
+    expect(await client.callTool("x", {})).toEqual({ valeur: 42 });
+  });
   it("attaches Authorization header when apiKey is set", async () => {
     const { fetch, calls } = makeMock(() => ({ body: rpcOk(1, { ok: true }) }));
     const client = new Client({ apiKey: "test-key", fetch, maxRetries: 0 });

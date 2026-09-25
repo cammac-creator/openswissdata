@@ -116,15 +116,13 @@ export class Client {
   /** GET /discovery — protocol version, capabilities and tool list. */
   public async discovery(): Promise<ServerInfo> {
     const url = `${this.baseUrl}/discovery`;
-    const res = await this.fetchWithRetry(url, { method: "GET" });
-    return (await res.json()) as ServerInfo;
+    return await this.fetchWithRetry<ServerInfo>(url, { method: "GET" });
   }
 
   /** GET /health — liveness probe (no auth). */
   public async health(): Promise<{ status: string }> {
     const url = `${this.baseUrl}/health`;
-    const res = await this.fetchWithRetry(url, { method: "GET" });
-    return (await res.json()) as { status: string };
+    return await this.fetchWithRetry<{ status: string }>(url, { method: "GET" });
   }
 
   /**
@@ -140,18 +138,12 @@ export class Client {
     };
 
     const url = `${this.baseUrl}/jsonrpc`;
-    const res = await this.fetchWithRetry(url, {
+    const payload = await this.fetchWithRetry<JsonRpcResponse<R>>(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 
-    let payload: JsonRpcResponse<R>;
-    try {
-      payload = (await res.json()) as JsonRpcResponse<R>;
-    } catch (e) {
-      throw new OpenSwissDataError("Server returned non-JSON response", { cause: e });
-    }
     if (payload.error) {
       throw new OpenSwissDataError(payload.error.message, {
         code: payload.error.code,
@@ -177,17 +169,18 @@ export class Client {
       const text = result.content.map((c) => c.text).join("\n");
       throw new ToolError(name, text || `Tool '${name}' returned an error`);
     }
-    if (result.structured === undefined) {
+    const structured = result.structuredContent ?? result.structured;
+    if (structured === undefined) {
       // Fallback: tool returned only text (rare, but valid per MCP spec).
       // We surface the joined text as a plain string cast to S — callers
       // requesting a typed surface should never hit this.
       const text = result.content.map((c) => c.text).join("\n");
       return text as unknown as S;
     }
-    return result.structured;
+    return structured;
   }
 
-  private async fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
+  private async fetchWithRetry<T>(url: string, init: RequestInit): Promise<T> {
     let attempt = 0;
     let lastError: unknown;
 
@@ -209,7 +202,14 @@ export class Client {
 
         this.captureRateLimit(res);
 
-        if (res.ok) return res;
+        if (res.ok) {
+          // Garder le délai actif pendant le corps évite une attente sans fin.
+          try { return await res.json() as T; }
+          catch (e) {
+            if (e instanceof SyntaxError) throw new OpenSwissDataError("Server returned non-JSON response", { cause: e });
+            throw e;
+          }
+        }
 
         if (res.status === 401 || res.status === 403) {
           const text = await safeReadText(res);
@@ -232,6 +232,7 @@ export class Client {
         }
 
         if (RETRYABLE_STATUS.has(res.status) && attempt < this.maxRetries) {
+          await res.body?.cancel();
           attempt++;
           await this.sleep(this.computeBackoff(attempt));
           continue;

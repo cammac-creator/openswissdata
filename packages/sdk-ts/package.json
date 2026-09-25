@@ -11,14 +11,27 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["openswissdata", "swiss", "customs", "tares", "noga", "nace", "isic", "finma"],
-  "author": "Alain Martin",
+  "keywords": [
+    "openswissdata",
+    "swiss",
+    "customs",
+    "tares",
+    "noga",
+    "nace",
+    "isic",
+    "finma"
+  ],
+  "author": "Claude-Alain Martin",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -33,5 +46,8 @@
     "vitest": "^2.1.0",
     "@types/node": "^22.9.0"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true
 }
