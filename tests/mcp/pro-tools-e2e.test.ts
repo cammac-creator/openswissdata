@@ -180,17 +180,15 @@ describe("MCP Pro tier — 5 tools E2E with OAuth client_credentials", () => {
     }
   });
 
-  it("Pro tool 5/5 — statent_lookup accepts a NOGA code and returns enterprise stats", async () => {
+  it("ne distribue pas STATENT même à un client Pro tant que les droits ne sont pas documentés", async () => {
     const app = createApp();
     const { accessToken: token } = provisionProClient();
     const { status, body } = await callTool(app, token, "statent_lookup", {
-      noga_code: "62.10",
+      noga_division: "62",
     });
     expect(status).toBe(200);
-    if (body.error) {
-      expect(body.error.code).not.toBe(-32001);
-      expect(body.error.code).not.toBe(-32003);
-    }
+    expect(body.error?.code).toBe(-32601);
+    expect(body.result).toBeUndefined();
   });
 
   it("Free tier client without Pro scopes is rejected on a Pro tool (defense)", async () => {

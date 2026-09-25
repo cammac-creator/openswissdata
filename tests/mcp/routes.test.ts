@@ -98,6 +98,7 @@ describe("MCP HTTP routes", () => {
     expect(names).toEqual(
       expect.arrayContaining(["tariff_lookup", "kyc_check", "cross_walk"]),
     );
+    expect(names).not.toContain("statent_lookup");
   });
 
   it("POST /mcp/jsonrpc — tools/call dispatches to cross_walk", async () => {

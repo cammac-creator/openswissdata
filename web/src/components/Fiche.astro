@@ -15,11 +15,12 @@ interface Props {
   roiText?: string;
   strikePrice?: string;
   delay?: number;
+  datasetId?: string;
 }
 const {
   ribbonLabel, ribbonSource, pillText, title, sub, desc, formats,
   price, currency = "CHF", href, ctaLabel = "Détails",
-  theme = 'default', roiText, strikePrice, delay = 1
+  theme = 'default', roiText, strikePrice, delay = 1, datasetId
 } = Astro.props;
 ---
 <a href={href} class={`v4-fiche ${theme === 'bundle' ? 'bundle' : ''} reveal-v4`} data-delay={delay}>
@@ -27,7 +28,7 @@ const {
     <span><strong>{ribbonLabel}</strong></span>
     <span style="opacity:.4">·</span>
     <span>{ribbonSource}</span>
-    <span class="pill">{pillText}</span>
+    <span class="pill" data-dataset-version={datasetId}>{pillText}</span>
   </div>
   <div class="v4-fiche-body">
     <h3 class="v4-fiche-h3">{title}</h3>

@@ -21,6 +21,7 @@ const copy = {
    "Une même entreprise peut apparaître plusieurs fois si elle possède plusieurs autorisations. Le nombre de lignes n’est donc pas un nombre d’entreprises.",
    "Le LEI, l’adresse et le canton ne sont renseignés que lorsqu’un rapprochement non ambigu est disponible. Les dates de licence et le statut ne sont pas fournis par le CSV source et restent vides.",
    "La liste d’avertissement reste séparée du registre. Un nom ressemblant n’établit pas une identité : aucun signalement automatique n’est attribué à une institution sur cette seule base.",
+   "Un LEI non renouvelé (LAPSED) n’est pas une sanction ni un retrait d’autorisation FINMA. L’absence d’une institution dans un instantané ne permet pas non plus de conclure à une sanction.",
    "Le périmètre suit le registre UID public de la FINMA. Il ne constitue pas une copie exhaustive de tous les registres spécialisés, notamment des intermédiaires d’assurance. Consultez la source officielle pour une décision de conformité."],
   preview: "Un aperçu des fichiers réels", previewNote: "Jusqu’à 20 lignes par catégorie présente, issues de la version publiée. Une absence dans cet échantillon ne signifie pas une absence du registre.", search: "Filtrer l’échantillon par nom, UID ou catégorie", empty: "Aucun résultat dans cet échantillon.",
   columns: ["Institution", "Catégorie", "UID", "LEI"], history: "Continuité de l’historique", gap: "Intervalle sans collecte", days: "jours", noGap: "Aucun intervalle de plus de deux jours entre les versions disponibles.",
@@ -41,6 +42,7 @@ const copy = {
    "A company may appear more than once if it holds multiple authorisations. Row counts are therefore not company counts.",
    "LEI, address and canton are populated only when an unambiguous match is available. Licence dates and status are not provided by the source CSV and remain empty.",
    "The warning list is kept separate. A similar name does not establish identity: institutions are not automatically flagged based on name similarity.",
+   "A non-renewed LEI (LAPSED) is not a sanction or a withdrawal of FINMA authorisation. An institution’s absence from a snapshot does not establish a sanction either.",
    "Coverage follows FINMA’s public UID registry. It is not an exhaustive copy of all specialised registers, including insurance intermediaries. Consult the official source before making compliance decisions."],
   preview: "Preview the actual files", previewNote: "Up to 20 rows per available category, taken from the published version. Absence from this sample does not imply absence from the registry.", search: "Filter sample by name, UID or category", empty: "No match in this sample.", columns: ["Institution", "Category", "UID", "LEI"], history: "History coverage", gap: "Collection gap", days: "days", noGap: "No gap longer than two days between available versions.",
   service: "Delivery and support", serviceText: "After payment, download your archive from the delivery email or your account. Your Stripe receipt is also available there. For an invoice addressed to your company, send us its legal name and billing address.", contact: "Contact support", account: "Your account", source: "View FINMA source", independent: "Independent private service, not affiliated with FINMA or GLEIF.",
@@ -59,10 +61,16 @@ const copy = {
    "Ein Unternehmen kann bei mehreren Bewilligungen mehrfach erscheinen. Die Zeilenzahl entspricht deshalb nicht der Anzahl Unternehmen.",
    "LEI, Adresse und Kanton werden nur bei eindeutiger Zuordnung ergänzt. Bewilligungsdatum und Status fehlen in der CSV-Quelle und bleiben leer.",
    "Die Warnliste bleibt separat. Ein ähnlicher Name belegt keine Identität: Institute werden nicht allein aufgrund einer Namensähnlichkeit markiert.",
+   "Ein nicht erneuerter LEI (LAPSED) bedeutet weder eine Sanktion noch den Entzug einer FINMA-Bewilligung. Auch das Fehlen eines Instituts in einer Momentaufnahme belegt keine Sanktion.",
    "Die Abdeckung folgt dem öffentlichen UID-Register der FINMA. Sie umfasst nicht sämtliche Spezialregister, insbesondere nicht alle Versicherungsvermittler. Für Compliance-Entscheide ist die offizielle Quelle zu prüfen."],
   preview: "Vorschau der tatsächlichen Dateien", previewNote: "Bis zu 20 Zeilen je vorhandener Kategorie aus der veröffentlichten Version. Ein fehlender Treffer in dieser Auswahl bedeutet nicht, dass ein Institut im Register fehlt.", search: "Muster nach Name, UID oder Kategorie filtern", empty: "Kein Treffer in diesem Muster.", columns: ["Institut", "Kategorie", "UID", "LEI"], history: "Verfügbarkeit des Verlaufs", gap: "Erhebungslücke", days: "Tage", noGap: "Keine Lücke von mehr als zwei Tagen zwischen verfügbaren Versionen.",
   service: "Lieferung und Unterstützung", serviceText: "Nach der Zahlung erhalten Sie das Archiv per E-Mail und in Ihrem Kundenkonto. Dort finden Sie auch den Stripe-Zahlungsbeleg. Für eine Rechnung an Ihr Unternehmen senden Sie uns bitte den Firmennamen und die Rechnungsadresse.", contact: "Support kontaktieren", account: "Kundenkonto", source: "FINMA-Quelle ansehen", independent: "Unabhängiger privater Dienst ohne Verbindung zur FINMA oder GLEIF.",
  },
+}[lang];
+const coverageCopy = {
+ fr: {title:"Champs renseignés dans cette version", note:"Calcul par ligne d’autorisation, pas par entreprise. Les champs vides restent vides dans les fichiers.", field:"Champ", count:"Lignes renseignées", share:"Part des lignes", labels:{uid:"UID",lei:"LEI",licence_date:"Date d’autorisation",status:"Statut détaillé",canton:"Canton",city:"Localité",address:"Adresse"}},
+ de: {title:"Ausgefüllte Felder dieser Version", note:"Berechnung je Bewilligungszeile, nicht je Unternehmen. Fehlende Werte bleiben in den Dateien leer.",field:"Feld",count:"Ausgefüllte Zeilen",share:"Anteil der Zeilen",labels:{uid:"UID",lei:"LEI",licence_date:"Bewilligungsdatum",status:"Detaillierter Status",canton:"Kanton",city:"Ort",address:"Adresse"}},
+ en: {title:"Populated fields in this version",note:"Calculated per authorisation row, not per company. Missing values remain empty in the files.",field:"Field",count:"Populated rows",share:"Share of rows",labels:{uid:"UID",lei:"LEI",licence_date:"Authorisation date",status:"Detailed status",canton:"Canton",city:"City",address:"Address"}},
 }[lang];
 const datasetJsonLd = { "@context": "https://schema.org", "@type": "Dataset", name: "FINMA Registry", description: copy.description, url: `https://www.openswissdata.com${prefix}/datasets/finma`, creator: { "@type": "Organization", name: "openswissdata" }, license: "https://www.openswissdata.com/legal/cgv", isAccessibleForFree: false };
 ---
@@ -83,6 +91,7 @@ const datasetJsonLd = { "@context": "https://schema.org", "@type": "Dataset", na
   <div class="quality-panel"><p class="quality-label">{copy.status}</p><p id="finma-version" role="status">{copy.waiting}</p><div class="quality-grid">{[["registry_rows",copy.rows],["unique_uids",copy.uids],["lei",copy.leis],["warning_rows",copy.warnings]].map(([key,label]) => <div><strong data-count={key}>…</strong><span>{label}</span></div>)}</div></div>
   <section class="ds-section"><h2 class="v4-section-h2">{copy.why}</h2><div class="ds-audience-grid">{copy.cards.map(([title,text]) => <div class="ds-audience-item"><strong>{title}</strong><span>{text}</span></div>)}</div></section>
   <section class="ds-section"><h2 class="v4-section-h2">{copy.limitsTitle}</h2><ul class="coverage-list">{copy.limits.map(item => <li>{item}</li>)}</ul><a href="https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/">{copy.source} ↗</a></section>
+  <section class="ds-section"><h2 class="v4-section-h2">{coverageCopy.title}</h2><p class="v4-section-intro">{coverageCopy.note}</p><div class="ds-table-wrap"><table class="ds-table coverage-table"><thead><tr><th>{coverageCopy.field}</th><th>{coverageCopy.count}</th><th>{coverageCopy.share}</th></tr></thead><tbody>{Object.entries(coverageCopy.labels).map(([key,label])=><tr><th scope="row">{label}</th><td data-field-count={key}>—</td><td data-field-share={key}>—</td></tr>)}</tbody></table></div></section>
   <section class="ds-section"><h2 class="v4-section-h2">{copy.preview}</h2><p class="v4-section-intro">{copy.previewNote}</p><label for="finma-search" class="sr-only">{copy.search}</label><input type="search" id="finma-search" placeholder={copy.search} class="hs-lookup-input"/><div class="ds-table-wrap"><table class="ds-table"><thead><tr>{copy.columns.map(c => <th>{c}</th>)}</tr></thead><tbody id="finma-preview"></tbody></table></div><p id="finma-preview-status" role="status"></p><a href="/api/catalog/finma?format=csv" class="v4-btn v4-btn-secondary">{copy.sample} ↓</a></section>
   <section class="ds-section"><h2 class="v4-section-h2">{copy.history}</h2><p id="finma-history">{copy.waiting}</p></section>
   <section class="ds-section"><h2 class="v4-section-h2">{copy.service}</h2><p class="v4-section-intro">{copy.serviceText}</p><div class="v4-cta-row"><a href="mailto:contact@openswissdata.com">{copy.contact}</a><a href={`${prefix}/account`}>{copy.account} →</a></div></section>
@@ -114,6 +123,13 @@ const datasetJsonLd = { "@context": "https://schema.org", "@type": "Dataset", na
    const data = await response.json();
    version.textContent = data.collected_on + ' · v' + data.version;
    root.querySelectorAll<HTMLElement>('[data-count]').forEach(el => { const key = el.dataset.count!; el.textContent = number.format(key === 'lei' ? data.populated_fields.lei : data[key]); });
+   const percent=new Intl.NumberFormat(lang,{style:'percent',maximumFractionDigits:1});
+   root.querySelectorAll<HTMLElement>('[data-field-count]').forEach(el=>{
+    const key=el.dataset.fieldCount!,value=data.populated_fields[key];
+    if(!Number.isInteger(value)||value<0||value>data.registry_rows||data.registry_rows<=0)return;
+    el.textContent=`${number.format(value)} / ${number.format(data.registry_rows)}`;
+    root.querySelector<HTMLElement>(`[data-field-share="${key}"]`)!.textContent=percent.format(value/data.registry_rows);
+   });
    const coverage = data.history;
    history.textContent = `${coverage.available_from} → ${coverage.available_until}. ` + (coverage.gaps.length ? coverage.gaps.map((gap: {from: string; to: string; days: number}) => `${copy.gap} : ${gap.from} → ${gap.to} (${gap.days} ${copy.days}).`).join(' ') : copy.noGap);
    sample = data.sample; render();
@@ -131,6 +147,8 @@ const datasetJsonLd = { "@context": "https://schema.org", "@type": "Dataset", na
  .coverage-list li { margin-bottom:14px; }
  #finma-search { margin:18px 0; width:100%; box-sizing:border-box; }
  #finma-history { max-width:850px; line-height:1.8; }
+ .coverage-table { min-width:0; width:100%; } .coverage-table th,.coverage-table td { white-space:normal; }
+ .coverage-table th[scope="row"] { text-transform:none; letter-spacing:normal; }
  @media(max-width:640px) { .quality-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .quality-panel { padding:20px; } .quality-grid strong { font-size:26px; } }
 </style>
 </BaseLayout>
