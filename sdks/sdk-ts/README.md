@@ -4,7 +4,7 @@ Client TypeScript du service MCP HTTP OpenSwissData : TARES, classifications NOG
 
 ## Commencer
 
-Publication de la version 0.1.0 envoyée au registre le 25.09.2026 ; sa disponibilité externe reste à confirmer au moment de cette mise à jour. Si npm répond 404, utiliser la compilation et l’installation par archive ci-dessous.
+Version 0.1.0 relue dans le registre public le 25.09.2026, avec une intégrité identique à l’archive vérifiée.
 
 ```bash
 npm install @openswissdata/sdk

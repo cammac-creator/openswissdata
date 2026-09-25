@@ -10,7 +10,7 @@ Le serveur expose huit outils. Trois sont accessibles anonymement, avec une limi
 
 ## Configuration
 
-La version 0.1.1 est la dernière version relue dans le registre. La publication de 0.1.2 a été acceptée le 25.09.2026 et reste en cours de vérification externe. Les améliorations de délai décrites ici concernent 0.1.2.
+Version 0.1.2 relue dans le registre public le 25.09.2026, avec une intégrité identique à l’archive vérifiée.
 
 Exemple pour un client compatible avec `mcpServers` :
 

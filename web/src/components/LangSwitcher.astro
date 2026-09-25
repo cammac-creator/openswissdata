@@ -1,5 +1,5 @@
 ---
-import { LANGS, LANG_LABELS, LANG_NAMES, getLangFromPath, localizePath } from "../i18n/utils";
+import { LANGS, LANG_LABELS, LANG_NAMES, getLangFromPath, localizePath, getHreflangAlternates } from "../i18n/utils";
 import type { Lang } from "../i18n/utils";
 
 interface Props {
@@ -14,12 +14,14 @@ interface Props {
 
 const { variant = "compact", monolingual = false } = Astro.props;
 const currentLang: Lang = getLangFromPath(Astro.url.pathname);
+const available = monolingual ? ["fr"] : getHreflangAlternates(Astro.url.pathname).map(item => item.lang);
+const errorPage = /^\/404(?:\.html)?\/?$/.test(Astro.url.pathname);
 ---
 <div class={`lang-switcher lang-switcher-${variant}`} role="group" aria-label="Language">
   {LANGS.map((lang) => {
     const isCurrent = lang === currentLang;
-    const targetMissing = monolingual && lang !== "fr" && lang !== currentLang;
-    const href = targetMissing ? `/${lang}/` : localizePath(Astro.url.pathname, lang);
+    const targetMissing = errorPage || !available.includes(lang);
+    const href = targetMissing ? localizePath("/", lang) : localizePath(Astro.url.pathname, lang);
     const ariaLabel = targetMissing
       ? `${LANG_NAMES[lang]} — page non disponible, retour à l'accueil`
       : LANG_NAMES[lang];

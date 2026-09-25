@@ -5,6 +5,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   title="Page introuvable — 404 | openswissdata"
   description="Cette page n'existe pas (ou plus). Voici les chemins les plus utiles pour retrouver ce que vous cherchez."
   monolingual={true}
+  noindex={true}
 >
 <div class="bg-grid"></div>
 
@@ -30,7 +31,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         </h1>
 
         <p class="v4-lede">
-          Ou bien le lien était cassé, ou bien la page a été déplacée. Aucun de nos datasets n'est concerné — l'API et les téléchargements continuent de fonctionner.
+          Le lien peut être ancien ou la page avoir été déplacée. Retrouvez les fichiers, la documentation ou l’état du service depuis les liens ci-dessous.
         </p>
 
         <div class="v4-cta-row">
@@ -46,7 +47,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           <li><a href="/datasets/classifications">Classifications NOGA + NACE + ISIC · 399 CHF</a></li>
           <li><a href="/datasets/finma">FINMA Registry · 299 CHF</a></li>
           <li><a href="/bundle">Bundle complet · 797 CHF (économie 200 CHF)</a></li>
-          <li><a href="/codes">Tous les codes NOGA 2025 (1047 codes SEO)</a></li>
+          <li><a href="/codes">Explorer les codes NOGA 2025</a></li>
           <li><a href="/mcp">MCP Server (Claude, Cursor, Cline)</a></li>
           <li><a href="/blog">Blog &amp; tutoriels</a></li>
           <li><a href="/legal/cgv">CGV · refund 14 jours</a></li>
