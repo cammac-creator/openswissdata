@@ -255,7 +255,9 @@ const tools = [
     </div>
     <h2 class="v4-section-h2">Free Tier ausreichend. Pro für Produktions-Workflows.</h2>
 
-    <div class="mcp-pricing-grid">
+    <p class="subscription-notice">Neue Pro- und Business-Abonnements sind vorübergehend nicht verfügbar. Der kostenlose Zugang und der Kauf von Datendateien bleiben verfügbar.</p>
+
+      <div class="mcp-pricing-grid">
       <div class="mcp-pc">
         <div class="mcp-pc-tier">Free</div>
         <div class="mcp-pc-price">0 CHF</div>
@@ -263,25 +265,17 @@ const tools = [
         <a href="#install" class="v4-btn v4-btn-secondary mcp-pc-cta">Jetzt testen <span class="arrow">→</span></a>
       </div>
       <div class="mcp-pc pop">
-        <span class="mcp-pc-badge">beliebt</span>
+        <span class="mcp-pc-badge">derzeit geschlossen</span>
         <div class="mcp-pc-tier" style="color:var(--accent);">Pro</div>
         <div class="mcp-pc-price">49 CHF<small>/Monat</small></div>
-        <p class="mcp-pc-sub">5 000 Req/Monat. Self-Service-Key, jederzeit kündbar.</p>
-        <form method="POST" action="/api/checkout/start">
-          <input type="hidden" name="dataset_ids" value="mcp_standalone" />
-          <input type="hidden" name="locale" value="de" />
-          <button type="submit" class="v4-btn v4-btn-primary mcp-pc-cta">Abonnieren — 49 CHF/Monat <span class="arrow">→</span></button>
-        </form>
+        <p class="mcp-pc-sub">5 000 Req/Monat. Derzeit keine neuen Abonnements.</p>
+        <p class="subscription-status">Neue Abonnements derzeit geschlossen</p>
       </div>
       <div class="mcp-pc">
         <div class="mcp-pc-tier">Business</div>
         <div class="mcp-pc-price">199 CHF<small>/Monat</small></div>
         <p class="mcp-pc-sub">50 000 Req/Monat + erweiterte Tools. Fintechs &amp; ERP-Integratoren.</p>
-        <form method="POST" action="/api/checkout/start">
-          <input type="hidden" name="dataset_ids" value="mcp_business" />
-          <input type="hidden" name="locale" value="de" />
-          <button type="submit" class="v4-btn v4-btn-secondary mcp-pc-cta">Abonnieren — 199 CHF/Monat <span class="arrow">→</span></button>
-        </form>
+        <p class="subscription-status">Neue Abonnements derzeit geschlossen</p>
       </div>
       <div class="mcp-pc">
         <div class="mcp-pc-tier">Enterprise</div>
