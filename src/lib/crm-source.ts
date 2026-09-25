@@ -48,16 +48,27 @@ export async function sourceJson<T>(source: string, url: string, init: RequestIn
   await bronze(source, raw);
   return JSON.parse(raw.toString()) as T;
 }
+let cacheGeneration = 0;
 const cache = new Map<string, { until: number; value: unknown }>();
 const pending = new Map<string, Promise<unknown>>();
 export async function cached<T>(key: string, duration: number, fn: () => Promise<T>): Promise<T> {
   const hit = cache.get(key);
   if (hit && hit.until > Date.now()) return hit.value as T;
   if (pending.has(key)) return pending.get(key) as Promise<T>;
-  const work = fn().then(value => { cache.set(key, { until: Date.now() + duration, value }); return value; }).finally(() => pending.delete(key));
+  const generation = cacheGeneration;
+  const work = fn().then(value => { if (generation === cacheGeneration) cache.set(key, { until: Date.now() + duration, value }); return value; }).finally(() => pending.delete(key));
   pending.set(key, work); return work;
 }
-export function clearCrmCache(): void { cache.clear(); }
+export function clearCrmCache(): void { cacheGeneration++; cache.clear(); pending.clear(); }
+// Les originaux restent chez Infomaniak ; seules les copies temporaires de ce compte sont retirées.
+export async function clearMailboxBronze(account: "support" | "cam_project"): Promise<void> {
+  const root = join(dirname(process.env.DATABASE_PATH ?? "./data/openswissdata.sqlite"), "bronze", "dashboard");
+  for (const day of await readdir(root, { withFileTypes: true }).catch(() => [])) {
+    if (!day.isDirectory() || !/^\d{4}-\d{2}-\d{2}$/.test(day.name)) continue;
+    for (const name of await readdir(join(root, day.name))) if (name.startsWith(`imap-${account}-`)) await rm(join(root, day.name, name), { force: true });
+  }
+  nextBronzeSweep = 0;
+}
 
 export type SearchRow = { keys?: string[]; clicks: number; impressions: number; ctr: number; position: number };
 export async function searchConsole(days: number) {
