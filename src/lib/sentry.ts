@@ -32,6 +32,16 @@ export function initSentry(): void {
     // Strip large request bodies from breadcrumbs to avoid leaking secrets.
     sendDefaultPii: false,
     beforeSend(event) {
+      // Les requêtes privées peuvent porter cookies, liens d'accès et mots de passe.
+      // Aucun contenu de requête ni fil d'activité n'est transmis au suivi d'erreurs.
+      delete event.request;
+      delete event.breadcrumbs;
+      delete event.user;
+      delete event.transaction;
+      if (event.extra) {
+        const { path, method } = event.extra;
+        event.extra = { path, method };
+      }
       // Defensive: drop common secret-looking strings before sending.
       const clean = (s: string) =>
         s

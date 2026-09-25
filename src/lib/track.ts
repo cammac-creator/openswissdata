@@ -86,6 +86,7 @@ export function uaClassFromRequest(c: Context): string {
   const ua = (c.req.header("user-agent") ?? "").toLowerCase();
   if (!ua) return "other";
   if (/bot|crawl|spider|slurp|preview|fetch/.test(ua)) return "bot";
+  if (/curl|wget|python|node|postman|httpie|go-http|headless|scanner/.test(ua)) return "automation";
   if (/mobile|android|iphone|ipad/.test(ua)) return "mobile";
   return "desktop";
 }
@@ -140,4 +141,16 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
     referer: refererOrigin(c),
     ua_class: uaClassFromRequest(c),
   });
+};
+
+// Pages publiques servies : mesure séparée des appels API, sans paramètres d'URL.
+// Les identifiants tournent chaque jour : il s'agit de visiteurs-jours estimés.
+export const trackPageView: MiddlewareHandler = async (c, next) => {
+  await next();
+  const path = new URL(c.req.url).pathname;
+  if (c.req.method !== "GET" || c.res.status !== 200 || !c.res.headers.get("content-type")?.includes("text/html")) return;
+  if (/^\/(api|admin|account|_astro)(\/|$)/.test(path) || /^\/(en|de)\/account/.test(path)) return;
+  const referer = refererOrigin(c);
+  const own = referer && /\/(www\.)?openswissdata\.com$/.test(referer);
+  track({ kind: "custom", name: "page_view", visitor_hash: visitorHashFromRequest(c), ua_class: uaClassFromRequest(c), country: countryFromRequest(c), referer: own ? null : referer, meta_json: JSON.stringify({ path }) });
 };

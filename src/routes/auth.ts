@@ -42,7 +42,7 @@ authRoute.post("/magic-link", async (c) => {
 
   let parsed;
   try {
-    parsed = z.object({ email: z.string().email() }).parse(await c.req.json());
+    parsed = z.object({ email: z.string().email(), return_to: z.literal("admin").optional() }).parse(await c.req.json());
   } catch {
     return c.json({ error: "invalid_body" }, 400);
   }
@@ -59,7 +59,7 @@ authRoute.post("/magic-link", async (c) => {
     db.prepare("INSERT INTO sessions (token, customer_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
       .run(token, row.id, now + MAGIC_LINK_TTL_MS, now);
     const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-    const magicUrl = `${baseUrl}/api/auth/verify?token=${token}`;
+    const magicUrl = `${baseUrl}/api/auth/verify?token=${token}${parsed.return_to === "admin" ? "&return_to=admin" : ""}`;
     await sendMagicLinkEmail({ to: email, magicUrl, locale: parseLocale(row.locale) });
   }
   // Always return 200 to avoid email enumeration.
@@ -91,6 +91,8 @@ authRoute.get("/verify", async (c) => {
     | undefined;
   const loc = parseLocale(cust?.locale);
   const accountPath = loc === "fr" ? "/account" : `/${loc}/account`;
+  // Seul ce chemin interne fixe est accepté comme retour du bureau.
+  if (c.req.query("return_to") === "admin") return c.redirect("/admin", 302);
   return c.redirect(`${accountPath}?auth=ok`, 302);
 });
 

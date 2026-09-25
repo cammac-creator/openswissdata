@@ -14,6 +14,7 @@ import { healthRoute } from "./routes/health.js";
 import { catalogRoute } from "./routes/catalog.js";
 import { adminRoute } from "./routes/admin.js";
 import { adminStatsRoute } from "./routes/admin-stats.js";
+import { crmRoute } from "./routes/crm.js";
 import { checkoutRoute } from "./routes/checkout.js";
 import { stripeWebhookRoute } from "./routes/stripe-webhook.js";
 import { authRoute } from "./routes/auth.js";
@@ -21,7 +22,7 @@ import { accountRoute } from "./routes/account.js";
 import { downloadRoute, publicDownload } from "./routes/download.js";
 import { eventsRoute } from "./routes/events.js";
 import { mcpRoute } from "./routes/mcp/index.js";
-import { trackApiRequest } from "./lib/track.js";
+import { trackApiRequest, trackPageView } from "./lib/track.js";
 import { startMcpDataRefresh } from "./mcp/r2-refresh.js";
 import { loadEnv } from "./env.js";
 
@@ -32,9 +33,8 @@ export function createApp() {
   // Hooks before everything so even errors in the routing layer are caught.
   app.onError((err, c) => {
     captureException(err, {
-      url: c.req.url,
+      path: c.req.routePath,
       method: c.req.method,
-      headers: Object.fromEntries(c.req.raw.headers.entries()),
     });
     console.error("[unhandled]", err);
     return c.json({ error: "internal_server_error" }, 500);
@@ -99,7 +99,7 @@ export function createApp() {
       path === "/mcp/discovery" ||
       path === "/mcp/health" ||
       path.startsWith("/mcp/oauth/");
-    if (path.startsWith("/api/") || isMcpApi) {
+    if (path.startsWith("/api/") || path === "/admin" || path.startsWith("/admin/") || isMcpApi) {
       c.res.headers.set("Cache-Control", "no-store");
       return;
     }
@@ -173,12 +173,14 @@ export function createApp() {
   // Logs every /api/* request (except health/admin/webhook) into the events
   // table for the /admin dashboard. Best-effort, non-blocking.
   app.use("/api/*", trackApiRequest);
+  app.use("*", trackPageView);
 
   // --- API routes ---
   app.route("/api/health", healthRoute);
   app.route("/api/catalog", catalogRoute);
   app.route("/api/admin", adminRoute);
   app.route("/api/admin/stats", adminStatsRoute);
+  app.route("/api/admin/crm", crmRoute);
   app.route("/api/checkout", checkoutRoute);
   app.route("/api/webhook/stripe", stripeWebhookRoute);
   app.route("/api/auth", authRoute);
