@@ -37,7 +37,7 @@ export function parseUidCsv(path: string): FinmaEntity[] {
   // otherwise corrupt the first header name).
   if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
   if (!content.trim()) return [];
-  const records = parse(content, {
+  const records = parse(escapeBareQuotes(content), {
     delimiter: ";", skip_empty_lines: true,
     columns: (headers: string[]) => {
       if (!["Name", "City", "UID", "AuthorisationTypeEN"].every(h => headers.includes(h))) throw new Error("Colonnes FINMA inattendues : publication annulée");
@@ -57,28 +57,25 @@ export function parseUidCsv(path: string): FinmaEntity[] {
   return out;
 }
 
-/**
- * Minimal RFC-4180-ish CSV parser tuned for the FINMA uid.csv (semicolon-separated,
- * double-quoted, no embedded newlines in observed data).
- */
-function parseCsvLine(line: string, sep = ";"): string[] {
-  const out: string[] = [];
-  let cur = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (inQuotes) {
-      if (ch === "\"") {
-        if (line[i + 1] === "\"") { cur += "\""; i++; }
-        else inQuotes = false;
-      } else cur += ch;
-    } else {
-      if (ch === "\"") inQuotes = true;
-      else if (ch === sep) { out.push(cur); cur = ""; }
-      else cur += ch;
+// Certaines raisons sociales du CSV officiel contiennent des guillemets non doublés.
+// Réparer seulement les guillemets intérieurs ; le parseur conserve les contrôles
+// de colonnes, les séparateurs dans un champ et les noms sur plusieurs lignes.
+function escapeBareQuotes(content: string): string {
+  let quoted = false;
+  let atStart = true;
+  let out = "";
+  for (let i = 0; i < content.length; i++) {
+    const char = content[i];
+    if (atStart && char === '"') { quoted = true; atStart = false; out += char; continue; }
+    if (quoted && char === '"') {
+      const next = content[i + 1];
+      if (next === '"') { out += '""'; i++; continue; }
+      if (next === undefined || next === ';' || next === '\r' || next === '\n') quoted = false;
+      else { out += '""'; continue; }
     }
+    out += char;
+    if (!quoted) atStart = char === ';' || char === '\r' || char === '\n';
   }
-  out.push(cur);
   return out;
 }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ingestOneSource } from "../../etl/finma/ingest.js";
+import { ingestOneSource, parseUidCsv } from "../../etl/finma/ingest.js";
 import { unifyRow } from "../../etl/finma/unify-schema.js";
 import { FINMA_SOURCES } from "../../etl/finma/sources.js";
 import { join } from "node:path";
@@ -92,5 +92,25 @@ describe("ingestOneSource — synthetic fixtures", () => {
     const source = FINMA_SOURCES.find(s => s.entity_type === "asset_manager_individual")!;
     const rows = ingestOneSource(join(fixtureDir, "finma-asset-manager-individual-sample.xlsx"), source);
     expect(rows.length).toBe(2);
+  });
+});
+
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+describe("CSV officiel FINMA", () => {
+  it("préserve les guillemets des noms, les points-virgules et les retours à la ligne", () => {
+    const dir=mkdtempSync(join(tmpdir(),"finma-csv-"));
+    try {
+      const path=join(dir,"uid.csv");
+      writeFileSync(path,'Name;City;UID;AuthorisationTypeEN\n""Commercial" Treuhand AG";"Zürich";"CHE-101.379.984";"Portfolio manager"\n"Nom; avec séparateur";"Berne";"";"Bank"\n"Nom\nsur deux lignes";"Lausanne";"";"Bank"\n"""Autre""";"Genève";"";"Bank"');
+      const rows=parseUidCsv(path);
+      expect(rows).toHaveLength(4);
+      expect(rows[0].name).toBe('"Commercial" Treuhand AG');
+      expect(rows[1].name).toBe('Nom; avec séparateur');
+      expect(rows[2].name).toContain('sur deux lignes');
+      expect(rows[3].name).toBe('"Autre"');
+      writeFileSync(path,'Name;City;UID;AuthorisationTypeEN\n"Nom";"Ville";"UID";"Bank";"colonne imprévue"');
+      expect(() => parseUidCsv(path)).toThrow();
+    } finally { rmSync(dir,{recursive:true,force:true}); }
   });
 });
