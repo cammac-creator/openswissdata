@@ -1,12 +1,60 @@
 import { Hono } from "hono";
 import { createHash } from "node:crypto";
 import { getDb } from "../lib/db.js";
-import { readTaresArchive } from "../lib/tares-archive.js";
+import { readTaresArchive, readDatasetArchive } from "../lib/tares-archive.js";
 import { getObjectBuffer } from "../lib/r2.js";
 import { extractCsvFromZip } from "../mcp/r2-refresh.js";
 import { stringify } from "csv-stringify/sync";
+import { crossWalkHandler } from "../mcp/tools/cross-walk.js";
 
 export const catalogRoute = new Hono();
+catalogRoute.get("/classifications/mapping", c => {
+  const result = crossWalkHandler({ code: c.req.query("code"), source: c.req.query("source"), target: c.req.query("target") });
+  if (result.isError) return c.json({ error: "invalid_mapping_request" }, 400);
+  c.header("Cache-Control", "no-cache");
+  return c.json(result.structured!);
+});
+let classificationsCached: { version: string; loaded: number; value: Record<string, unknown> } | undefined;
+let classificationsPending: Promise<void> | undefined;
+
+catalogRoute.get("/classifications", async (c) => {
+  const row = getDb().prepare(`SELECT v.version,v.r2_key,v.sha256,v.size_bytes FROM datasets d JOIN versions v
+    ON v.dataset_id=d.id AND v.version=d.current_version WHERE d.id='classifications'`).get() as
+    { version: string; r2_key: string; sha256: string; size_bytes: number } | undefined;
+  if (!row) return c.json({ error: "no_version" }, 503);
+  try {
+    if (!classificationsCached || classificationsCached.version !== row.version || Date.now() - classificationsCached.loaded > 60_000) {
+      classificationsPending ??= (async () => {
+        const bytes = await readDatasetArchive("classifications", row);
+        const quality = JSON.parse(await extractCsvFromZip(bytes, "quality.json"));
+        if (quality.schema_version !== 2 || quality.orphan_parents !== 0 || !quality.schemes) throw new Error("Qualité classifications indisponible");
+        const sample: Record<string, unknown>[] = [];
+        let total = 0;
+        for (const scheme of ["noga_2008", "noga_2025", "nace_2_0", "nace_2_1", "isic_4"]) {
+          const rows = JSON.parse(await extractCsvFromZip(bytes, `${scheme}.json`)) as Record<string, unknown>[];
+          if (!Array.isArray(rows)) throw new Error("Nomenclature invalide");
+          total += rows.length;
+          sample.push(...rows.slice(0, 10));
+        }
+        if (total !== quality.rows) throw new Error("Volume classifications incohérent");
+        classificationsCached = { version: row.version, loaded: Date.now(), value: { version: row.version,
+          ...quality, sample, archive_bytes: row.size_bytes } };
+      })();
+      try { await classificationsPending; } finally { classificationsPending = undefined; }
+    }
+    if (classificationsCached?.version !== row.version) return c.json({ error: "version_changed" }, 503);
+    if (c.req.query("format") === "csv") {
+      c.header("Content-Type", "text/csv; charset=utf-8");
+      c.header("Content-Disposition", `attachment; filename="classifications-sample-${row.version}.csv"`);
+      c.header("Cache-Control", "no-store");
+      return c.body(stringify(classificationsCached.value.sample as object[], { header: true, bom: true,
+        columns: ["scheme", "code", "level", "parent", "label_fr", "label_de", "label_it", "label_en", "label_es"] }));
+    }
+    c.header("Cache-Control", "no-cache");
+    return c.json(classificationsCached.value);
+  } catch { return c.json({ error: "quality_unavailable", version: row.version }, 503); }
+});
+
 let taresCached: { version: string; loaded: number; value: Record<string, unknown> } | undefined;
 let taresPending: Promise<void> | undefined;
 

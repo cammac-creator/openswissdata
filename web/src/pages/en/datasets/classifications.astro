@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import ClassificationsLookup from "../../../components/ClassificationsLookup.astro";
+import ClassificationsQuality from "../../../components/ClassificationsQuality.astro";
 import TrustStrip from "../../../components/TrustStrip.astro";
 import ProductFaq from "../../../components/ProductFaq.astro";
 import ApiSwitch from "../../../components/ApiSwitch.astro";
@@ -9,7 +10,7 @@ const productJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
   name: "Classifications NOGA + NACE + ISIC",
-  description: "5 unified economic activity classifications: NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Bidirectional cross-walks, 4 languages. JSON / Parquet / SQL.",
+  description: "5 unified economic activity classifications: NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Bidirectional cross-walks, FR/DE/IT/EN (NOGA/NACE), FR/EN/ES (ISIC). JSON / Parquet / SQL.",
   image: "https://www.openswissdata.com/og-classifications.png",
   url: "https://www.openswissdata.com/en/datasets/classifications",
   brand: { "@type": "Brand", name: "openswissdata" },
@@ -45,7 +46,7 @@ const productJsonLd = {
 ---
 <BaseLayout
   title="Economic classifications NOGA + NACE + ISIC | openswissdata"
-  description="5 unified economic activity classifications: NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Bidirectional cross-walks, 4 languages. JSON / Parquet / SQL. Free CSV sample — no account."
+  description="5 unified economic activity classifications: NOGA 2008/2025, NACE Rev 2/2.1, ISIC Rev 4. Bidirectional cross-walks, FR/DE/IT/EN (NOGA/NACE), FR/EN/ES (ISIC). JSON / Parquet / SQL. Free CSV sample — no account."
   image="/og-classifications.png"
   productJsonLd={productJsonLd}
 >
@@ -77,7 +78,7 @@ const productJsonLd = {
 
         <p class="v4-lede reveal-v4" data-delay="2">
           Five unified nomenclatures (NOGA 2008, NOGA 2025, NACE Rev 2, NACE Rev 2.1, ISIC Rev 4) with their <strong>bidirectional cross-walks</strong>.
-          Descriptions in FR/DE/IT/EN. Ideal for multi-jurisdiction reporting and time-series continuity.
+          NOGA and NACE: FR/DE/IT/EN. ISIC: FR/EN/ES. Approximate mappings require review.
         </p>
 
         <div class="v4-spec-row reveal-v4" data-delay="3">
@@ -87,17 +88,17 @@ const productJsonLd = {
           </div>
           <div class="v4-spec">
             <div class="v4-spec-label">Codes</div>
-            <div class="v4-spec-value">~3,800</div>
+            <div class="v4-spec-value">6,444</div>
           </div>
           <div class="v4-spec">
             <div class="v4-spec-label">Cross-walks</div>
-            <div class="v4-spec-value">5-way</div>
+            <div class="v4-spec-value">by pair</div>
           </div>
         </div>
 
         <div class="v4-cta-row reveal-v4" data-delay="4">
           <a href="#buy" class="v4-btn v4-btn-primary">Buy — 399 CHF <span class="arrow">→</span></a>
-          <a href="/samples/classifications-sample.csv" download class="v4-btn v4-btn-secondary">CSV sample</a>
+          <a href="/api/catalog/classifications?format=csv" download class="v4-btn v4-btn-secondary">CSV sample</a>
         </div>
 
         <div class="v4-permission-line reveal-v4" data-delay="5">
@@ -118,7 +119,7 @@ const productJsonLd = {
 
 <TrustStrip
   sources={["BFS / OFS", "Eurostat", "UN Statistics"]}
-  badges={["5 unified nomenclatures", "5-way cross-walks", "Ed25519-signed manifest"]}
+  badges={["5 unified nomenclatures", "by pair cross-walks", "Ed25519-signed manifest"]}
 />
 
 <section class="v4-datasets ds-page">
@@ -126,7 +127,7 @@ const productJsonLd = {
     <div class="ds-meta-grid">
       <div class="ds-meta-card reveal-v4">
         <div class="ds-meta-label">Contents</div>
-        <div class="ds-meta-value">5 nomenclatures + 5-way cross-walks · 4 languages · CSV, JSON, Parquet, SQL · ~8-12 MB total</div>
+        <div class="ds-meta-value">5 nomenclatures + by pair cross-walks · FR/DE/IT/EN (NOGA/NACE), FR/EN/ES (ISIC) · CSV, JSON, Parquet, SQL</div>
       </div>
       <div class="ds-meta-card reveal-v4" data-delay="1">
         <div class="ds-meta-label">Updates</div>
@@ -143,7 +144,7 @@ const productJsonLd = {
       <h2 class="v4-section-h2">Five <span class="serif">standards</span> in a single bundle.</h2>
       <p class="v4-section-intro">
         All standards are normalised to the same table format, with the same fields (code, label_fr/de/it/en, parent, level).
-        You can switch between them via a single SQL join.
+        Each code retains its level and parent. Correspondences state their source and precision.
       </p>
 
       <div class="ds-table-wrap">
@@ -152,42 +153,21 @@ const productJsonLd = {
             <tr><th>Standard</th><th>Scope</th><th>Issuer</th><th>Languages</th></tr>
           </thead>
           <tbody>
-            <tr><td><strong>NOGA 2008</strong></td><td class="dim">Swiss economic activities (legacy)</td><td class="dim">BFS</td><td class="mono">FR/DE/IT</td></tr>
+            <tr><td><strong>NOGA 2008</strong></td><td class="dim">Swiss economic activities (legacy)</td><td class="dim">BFS</td><td class="mono">FR/DE/IT/EN</td></tr>
             <tr><td><strong>NOGA 2025</strong></td><td class="dim">Swiss economic activities (current, January 2026)</td><td class="dim">BFS</td><td class="mono">FR/DE/IT/EN</td></tr>
-            <tr><td><strong>NACE Rev 2</strong></td><td class="dim">European economic activities</td><td class="dim">Eurostat</td><td class="mono">EN</td></tr>
-            <tr><td><strong>NACE Rev 2.1</strong></td><td class="dim">European economic activities (revision)</td><td class="dim">Eurostat</td><td class="mono">EN</td></tr>
-            <tr><td><strong>ISIC Rev 4</strong></td><td class="dim">Worldwide economic activities (UN)</td><td class="dim">UN Statistics</td><td class="mono">EN</td></tr>
+            <tr><td><strong>NACE Rev 2</strong></td><td class="dim">European economic activities</td><td class="dim">Eurostat</td><td class="mono">FR/DE/IT/EN</td></tr>
+            <tr><td><strong>NACE Rev 2.1</strong></td><td class="dim">European economic activities (revision)</td><td class="dim">Eurostat</td><td class="mono">FR/DE/IT/EN</td></tr>
+            <tr><td><strong>ISIC Rev 4</strong></td><td class="dim">Worldwide economic activities (UN)</td><td class="dim">UN Statistics</td><td class="mono">FR/EN/ES</td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
+    <ClassificationsQuality lang="en" />
     <section class="ds-section reveal-v4">
-      <div class="v4-section-eyebrow">
-        <strong>Cross-walks</strong>
-        <span class="sep">/</span>
-        <span>One join is enough</span>
-      </div>
-      <h2 class="v4-section-h2"><span class="serif">5-way</span> cross-walks.</h2>
-      <p class="v4-section-intro">
-        A canonical table links each code to its equivalent in the other standards.
-        Example: a Swiss bank classified <code class="mono" style="background: var(--color-bg-alt); padding: 2px 6px; border-radius: 4px;">NOGA 2025 64.11</code> maps to:
-      </p>
-
-      <div class="ds-table-wrap">
-        <table class="ds-table">
-          <thead>
-            <tr><th>Standard</th><th>Code</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>NOGA 2025</strong></td><td class="mono">64.11</td><td class="dim">Central banking activities</td></tr>
-            <tr><td>NOGA 2008</td><td class="mono">64.11</td><td class="dim">Central banking activities</td></tr>
-            <tr><td>NACE Rev 2.1</td><td class="mono">64.11</td><td class="dim">Central banking</td></tr>
-            <tr><td>NACE Rev 2</td><td class="mono">64.11</td><td class="dim">Central banking</td></tr>
-            <tr><td>ISIC Rev 4</td><td class="mono">6411</td><td class="dim">Central banking</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <div class="v4-section-eyebrow"><strong>Explicit sources and precision</strong></div>
+      <h2 class="v4-section-h2">Correspondences with <span class="serif">clear precision.</span></h2>
+      <p class="v4-section-intro">The files document links between two classifications. An approximate relationship requires a review of the activity; it is not an exact equivalence.</p>
     </section>
 
     <section class="ds-section reveal-v4">
@@ -197,14 +177,13 @@ const productJsonLd = {
         <span>No sign-up</span>
       </div>
       <h2 class="v4-section-h2">Try it <span class="serif">for real</span>.</h2>
-      <p class="v4-section-intro">Search for an economic activity and instantly see its code in all 5 standards.</p>
+      <p class="v4-section-intro">Enter a code to inspect a sourced correspondence.</p>
       <ClassificationsLookup />
     </section>
 
     <div class="ds-sample reveal-v4">
-      <h3>Free sample — 30 NOGA 2025 codes + 20 cross-walks</h3>
-      <p>Curated preview on the Finance + Public Administration sectors. Contains the 5 standards and the bridges between them.</p>
-      <a href="/samples/classifications-sample.csv" download class="ds-sample-dl">
+      <h3>Free sample — 50 rows</h3><p>Ten rows per classification, taken from the distributed version. Preserve leading zeros in codes.</p>
+      <a href="/api/catalog/classifications?format=csv" download class="ds-sample-dl">
         <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v9M3 7l4 4 4-4M2 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Download classifications-sample.csv
       </a>
@@ -237,44 +216,7 @@ const productJsonLd = {
       </div>
     </section>
 
-    <section class="ds-section reveal-v4">
-      <div class="v4-section-eyebrow">
-        <strong>Pro tier</strong>
-        <span class="sep">/</span>
-        <span>For AI pipelines &amp; serious integrations</span>
-      </div>
-      <div class="cls-pro-card">
-        <span class="cls-pro-tag">New · Pro tier</span>
-        <h2 class="v4-section-h2" style="margin-top:8px;">Classifications <span class="serif">Pro</span>.</h2>
-        <p class="v4-section-intro" style="margin-bottom:24px;">
-          All Standard content <strong>+ 3 value-adds</strong> that save your data or compliance teams days of work:
-        </p>
-
-        <div class="cls-pro-grid">
-          <div class="cls-pro-item">
-            <div class="cls-pro-num">01 · DE/IT/EN embeddings</div>
-            <strong>Pre-computed multilingual 768d vectors</strong>
-            <p>On all 1,845 NOGA 2025 codes × 4 languages (FR + DE + IT + EN). Instant semantic search in your UI's language, no GPU. 7,380 Parquet vectors.</p>
-          </div>
-          <div class="cls-pro-item">
-            <div class="cls-pro-num">02 · NAICS 2022 cross-walks</div>
-            <strong>US NAICS ↔ ISIC ↔ NACE/NOGA</strong>
-            <p>Official US Census Bureau concordance (Public Domain) pivoted via ISIC Rev 4. Compatible reporting for US subsidiaries, Salesforce NAICS and Census data.</p>
-          </div>
-          <div class="cls-pro-item">
-            <div class="cls-pro-num">03 · EN labels NACE Rev 2.1</div>
-            <strong>Official Eurostat English labels</strong>
-            <p>Standalone projection of the 1,047 NACE Rev 2.1 codes in English (SKOS Eurostat re-use policy). Stand-alone CSV/Parquet — for compliance exports to international parent companies, no JOIN required.</p>
-          </div>
-        </div>
-
-        <a href="https://buy.stripe.com/00w9AVbls2tq0CHgKbes000" class="v4-btn v4-btn-primary" style="background:var(--ink);">
-          Buy Classifications Pro — 999 CHF
-          <span class="arrow">→</span>
-        </a>
-        <p class="ds-cta-sub" style="margin-top:16px;">Secure Stripe payment · Ed25519 + RFC-3161 signed manifest · 14-day refund if not downloaded</p>
-      </div>
-    </section>
+    <section class="ds-section"><h2 class="v4-section-h2">Classifications Pro</h2><p class="v4-section-intro">Classifications Pro is temporarily unavailable while its add-ons are reviewed. The Standard archive does not include multilingual vectors or NAICS mappings.</p></section>
 
     <ProductFaq productName="Classifications" />
 

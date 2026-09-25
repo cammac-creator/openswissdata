@@ -5,8 +5,13 @@ import { createHash, randomUUID } from "node:crypto";
 import { getObjectBuffer } from "./r2.js";
 
 export async function readTaresArchive(info: { r2_key: string; sha256: string; size_bytes: number }): Promise<Buffer> {
-  if (!/^tares\/[\d.]+\/tares\.zip$/.test(info.r2_key) || !/^[a-f0-9]{64}$/.test(info.sha256) || info.size_bytes <= 0 || info.size_bytes > 100_000_000) throw new Error("Métadonnées TARES invalides");
-  const root = join(dirname(resolve(process.env.DATABASE_PATH ?? "./data/openswissdata.db")), "bronze", "tares");
+  return readDatasetArchive("tares", info);
+}
+
+/** Cache bronze borné séparément pour chaque archive publique distribuée. */
+export async function readDatasetArchive(dataset: "tares" | "classifications", info: { r2_key: string; sha256: string; size_bytes: number }): Promise<Buffer> {
+  if (!new RegExp(`^${dataset}/[\\d.]+/${dataset}\\.zip$`).test(info.r2_key) || !/^[a-f0-9]{64}$/.test(info.sha256) || info.size_bytes <= 0 || info.size_bytes > 100_000_000) throw new Error(`Métadonnées ${dataset} invalides`);
+  const root = join(dirname(resolve(process.env.DATABASE_PATH ?? "./data/openswissdata.db")), "bronze", dataset);
   await mkdir(root, { recursive: true, mode: 0o700 });
   const today = new Date().toISOString().slice(0, 10), cutoff = Date.now() - 30 * 86_400_000;
   let used = 0;
@@ -31,11 +36,11 @@ export async function readTaresArchive(info: { r2_key: string; sha256: string; s
   const expectedPath = join(folder, info.sha256 + ".zip");
   try {
     const bytes = await readFile(expectedPath);
-    if (bytes.length !== info.size_bytes || createHash("sha256").update(bytes).digest("hex") !== info.sha256) throw new Error("Bronze TARES altéré");
+    if (bytes.length !== info.size_bytes || createHash("sha256").update(bytes).digest("hex") !== info.sha256) throw new Error(`Bronze ${dataset} altéré`);
     return bytes;
   } catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
   const space = await statfs(root);
-  if (used + info.size_bytes > 200_000_000 || space.bavail * space.bsize < info.size_bytes + 300_000_000) throw new Error("Espace bronze TARES insuffisant");
+  if (used + info.size_bytes > 200_000_000 || space.bavail * space.bsize < info.size_bytes + 300_000_000) throw new Error(`Espace bronze ${dataset} insuffisant`);
   const bytes = await getObjectBuffer(info.r2_key, { maxBytes: Math.min(100_000_000, info.size_bytes + 1_000_000) });
   const actual = createHash("sha256").update(bytes).digest("hex");
   // Le catalogue et le MCP peuvent lire ensemble : publier seulement le fichier complet.
@@ -45,6 +50,6 @@ export async function readTaresArchive(info: { r2_key: string; sha256: string; s
     try { await link(temporary, join(folder, actual + ".zip")); }
     catch (e) { if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e; }
   } finally { await unlink(temporary).catch(e => { if (e.code !== "ENOENT") throw e; }); }
-  if (bytes.length !== info.size_bytes || actual !== info.sha256) throw new Error("Empreinte TARES invalide");
+  if (bytes.length !== info.size_bytes || actual !== info.sha256) throw new Error(`Empreinte ${dataset} invalide`);
   return bytes;
 }

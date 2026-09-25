@@ -11,6 +11,7 @@ export interface NomenclatureRow {
   label_de?: string;
   label_it?: string;
   label_en?: string;
+  label_es?: string;
 }
 
 export interface CrossWalkRow {

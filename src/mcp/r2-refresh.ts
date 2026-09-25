@@ -2,23 +2,24 @@
  * Archives or FINMA et TARES dans R2 → lecture bornée et vérifiée → cartes MCP en mémoire.
  * Reprise au démarrage, après publication et toutes les douze heures. Chaque jeu
  * garde sa dernière version complète en cas d'échec ; état consultable dans le CRM.
- * FINMA et TARES restent indépendants. Les embeddings et classifications ne sont
- * pas actualisés par ce mécanisme.
+ * Les trois jeux restent indépendants. Les embeddings ne sont pas actualisés ici.
  */
 import { createHash } from "node:crypto";
 import yauzl from "yauzl";
 import { parse } from "csv-parse/sync";
 import { getDb } from "../lib/db.js";
-import { readTaresArchive } from "../lib/tares-archive.js";
+import { readTaresArchive, readDatasetArchive } from "../lib/tares-archive.js";
 import { getObjectBuffer } from "../lib/r2.js";
 import {
   setFinmaRegistry,
   setFinmaWarnings,
   setTares,
+  setClassificationLinks,
   type TaresRow,
   type FinmaRegistryRow,
   type FinmaWarningRow,
 } from "./data-loader.js";
+import { CLASSIFICATION_SCHEMES, isDocumentedOfsIdentity, type ClassificationLink, type ClassificationSource } from "../lib/classification-links.js";
 import { snapshotFromRows } from "./snapshots.js";
 
 export interface FreshnessState {
@@ -32,9 +33,10 @@ export interface FreshnessState {
   lastError: string | null;
 }
 
-const freshness: Record<"finma" | "tares", FreshnessState> = {
+const freshness: Record<"finma" | "tares" | "classifications", FreshnessState> = {
   finma: { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null },
   tares: { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null },
+  classifications: { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null },
 };
 
 /**
@@ -331,6 +333,51 @@ export function refreshTaresFromR2(): Promise<void> {
   return taresFlight;
 }
 
+let classificationsFlight: Promise<void> | null = null;
+let classificationsAgain = false;
+
+/** Les relations et leurs sources suivent la version vendue, sans chaînage implicite. */
+export function refreshClassificationsFromR2(): Promise<void> {
+  if (classificationsFlight) { classificationsAgain = true; return classificationsFlight; }
+  classificationsFlight = (async () => {
+    do {
+      classificationsAgain = false;
+      const state = freshness.classifications; state.lastAttemptAt = Date.now();
+      try {
+        if (!process.env.R2_ACCOUNT_ID || !process.env.R2_BUCKET) throw new Error("Accès R2 non configuré");
+        const db = getDb();
+        const current = () => (db.prepare("SELECT current_version FROM datasets WHERE id='classifications'").get() as {current_version?:string}|undefined)?.current_version;
+        const version = current();
+        if (!version) throw new Error("Version classifications absente");
+        if (version === state.loadedVersion) { state.lastError = null; continue; }
+        const info = db.prepare("SELECT r2_key,sha256,size_bytes FROM versions WHERE dataset_id='classifications' AND version=?").get(version) as {r2_key:string;sha256:string;size_bytes:number}|undefined;
+        if (!info) throw new Error("Métadonnées classifications absentes");
+        const bytes = await withTimeout(readDatasetArchive("classifications", info), R2_FETCH_TIMEOUT_MS, "Lecture classifications");
+        const quality = JSON.parse(await extractCsvFromZip(bytes, "quality.json"));
+        const links = JSON.parse(await extractCsvFromZip(bytes, "classification_links.json")) as ClassificationLink[];
+        const sources = JSON.parse(await extractCsvFromZip(bytes, "sources.json")) as ClassificationSource[];
+        if (quality.schema_version !== 2 || quality.orphan_parents !== 0 || !Array.isArray(links) || links.length < 6000 || links.length > 10000 || quality.links !== links.length || !Array.isArray(sources) || sources.length < 9 || sources.length > 32) throw new Error("Référentiel classifications incomplet");
+        const sourceIds = new Set(sources.map(s => s.source_id));
+        if (sourceIds.size !== sources.length || sources.some(s => s.version !== version || !/^[a-f0-9]{64}$/.test(s.sha256) || !s.url?.startsWith("https://"))) throw new Error("Provenance classifications invalide");
+        const keys = new Set<string>();
+        for (const l of links) {
+          const key = [l.source_scheme,l.source_code,l.target_scheme,l.target_code].join(":");
+          if (keys.has(key) || !CLASSIFICATION_SCHEMES.includes(l.source_scheme) || !CLASSIFICATION_SCHEMES.includes(l.target_scheme) || l.source_scheme === l.target_scheme || !/^([A-Z]|\d{2,6})$/.test(l.source_code) || !/^([A-Z]|\d{2,6})$/.test(l.target_code) || !sourceIds.has(l.source_id) || !["exactMatch","closeMatch","broadMatch","narrowMatch","relatedMatch"].includes(l.relation)) throw new Error("Lien classifications invalide");
+          if (l.relation === "exactMatch" && !isDocumentedOfsIdentity(l)) throw new Error("Équivalence classifications non contrôlée");
+          keys.add(key);
+        }
+        if (current() !== version) { classificationsAgain = true; continue; }
+        setClassificationLinks(links, sources); state.loadedVersion = version; state.lastRefreshAt = Date.now(); state.lastError = null;
+        console.log(`[mcp-refresh] Classifications ${version} : ${links.length} liens`);
+      } catch (error) {
+        state.lastError = error instanceof Error ? error.message : "Échec classifications";
+        console.error(`[mcp-refresh] Classifications conservées : ${state.lastError}`);
+      }
+    } while (classificationsAgain);
+  })().finally(() => { classificationsFlight = null; });
+  return classificationsFlight;
+}
+
 let _timer: ReturnType<typeof setInterval> | null = null;
 
 /**
@@ -340,8 +387,9 @@ let _timer: ReturnType<typeof setInterval> | null = null;
 export function startMcpDataRefresh(): void {
   void refreshFinmaFromR2();
   void refreshTaresFromR2();
+  void refreshClassificationsFromR2();
   if (!_timer) {
-    _timer = setInterval(() => { void refreshFinmaFromR2(); void refreshTaresFromR2(); }, REFRESH_INTERVAL_MS);
+    _timer = setInterval(() => { void refreshFinmaFromR2(); void refreshTaresFromR2(); void refreshClassificationsFromR2(); }, REFRESH_INTERVAL_MS);
     // Don't keep the event loop alive just for the timer.
     _timer.unref?.();
   }
@@ -352,6 +400,8 @@ export function _resetFreshnessForTest(): void {
   freshness.finma = { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null };
   freshness.tares = { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null };
   taresFlight = null; taresAgain = false;
+  freshness.classifications = { loadedVersion: null, lastRefreshAt: null, lastAttemptAt: null, lastError: null };
+  classificationsFlight = null; classificationsAgain = false;
   _inFlight = null;
   _rerun = false;
   if (_timer) {

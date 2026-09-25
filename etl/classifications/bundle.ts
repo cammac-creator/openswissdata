@@ -6,6 +6,7 @@ import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeSqlInsertsChunked, writeParquet } from "../shared/formats.js";
 import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
 import type { NomenclatureRow, CrossWalkRow, NomenclatureScheme } from "./types.js";
+import type { ClassificationLink, ClassificationSource } from "../../src/lib/classification-links.js";
 import type { IngestStatentResult } from "./ingest-statent.js";
 import {
   NOGA_EMBEDDING_DIMENSIONS,
@@ -25,6 +26,7 @@ const NOMENCLATURE_PARQUET_SCHEMA = new parquet.ParquetSchema({
   label_de: { type: "UTF8", optional: true },
   label_it: { type: "UTF8", optional: true },
   label_en: { type: "UTF8", optional: true },
+  label_es: { type: "UTF8", optional: true },
 });
 
 const CROSSWALK_PARQUET_SCHEMA = new parquet.ParquetSchema({
@@ -125,6 +127,9 @@ Contact: contact@openswissdata.com
 export interface ClassificationsBundleInput {
   rows: NomenclatureRow[];
   crossWalks: CrossWalkRow[];
+  links?: ClassificationLink[];
+  sources?: ClassificationSource[];
+  quality?: Record<string, unknown>;
   /**
    * Historical Pro tier add-on: STATENT (BFS structural establishments + FTE).
    * @deprecated Removed from the Pro tier 2026-04-30 — license `terms_by_ask`
@@ -171,6 +176,7 @@ function nomenclatureToCsvRow(r: NomenclatureRow): Record<string, unknown> {
     label_de: r.label_de ?? "",
     label_it: r.label_it ?? "",
     label_en: r.label_en ?? "",
+    label_es: r.label_es ?? "",
   };
 }
 
@@ -235,6 +241,7 @@ export async function buildBundle(
     label_de: r.label_de,
     label_it: r.label_it,
     label_en: r.label_en,
+    label_es: r.label_es,
   }));
   await writeParquet(
     allForParquet as unknown as Record<string, unknown>[],
@@ -264,6 +271,21 @@ export async function buildBundle(
     CROSSWALK_PARQUET_SCHEMA,
     join(workDir, "crosswalks.parquet"),
   );
+
+  const verifiedFiles: string[] = [];
+  if (input.links && input.sources && input.quality) {
+    const linkRows = input.links.map(l => ({ ...l }));
+    writeCsv(linkRows, join(workDir, "classification_links.csv"));
+    writeJson(input.links, join(workDir, "classification_links.json"));
+    writeSqlInserts("classification_links", linkRows, join(workDir, "classification_links.sql"));
+    await writeParquet(linkRows, new parquet.ParquetSchema(Object.fromEntries(
+      ["source_scheme", "source_code", "target_scheme", "target_code", "relation", "source_id"].map(k => [k, { type: "UTF8" }])
+    )), join(workDir, "classification_links.parquet"));
+    writeCsv(input.sources.map(s => ({ ...s })), join(workDir, "classification_sources.csv"));
+    writeJson(input.sources, join(workDir, "sources.json"));
+    writeJson(input.quality, join(workDir, "quality.json"));
+    verifiedFiles.push("classification_links.csv", "classification_links.json", "classification_links.sql", "classification_links.parquet", "classification_sources.csv", "sources.json", "quality.json");
+  }
 
   // STATENT (Pro tier — establishments + FTE × dimensions × year)
   const statentFiles: string[] = [];
@@ -442,7 +464,8 @@ export async function buildBundle(
   const schema = {
     $schema: "http://json-schema.org/draft-07/schema#",
     title: "Swiss Economic Classifications Bundle",
-    description: "Normalized NOGA 2008/2025 + NACE Rev 2/2.1 + ISIC Rev 4 with 5-way cross-walks",
+    description: "NOGA 2008/2025, NACE Rev 2/2.1 et ISIC Rev 4 ; correspondances directes sourcées par paire",
+    schema_version: input.links ? 2 : 1,
     definitions: {
       NomenclatureRow: {
         type: "object",
@@ -456,6 +479,7 @@ export async function buildBundle(
           label_de: { type: "string" },
           label_it: { type: "string" },
           label_en: { type: "string" },
+          label_es: { type: "string" },
         },
       },
       CrossWalkRow: {
@@ -564,6 +588,11 @@ export async function buildBundle(
       },
     };
   }
+  if (input.links) (schema.definitions as Record<string, unknown>).ClassificationLink = {
+    type: "object", required: ["source_scheme", "source_code", "target_scheme", "target_code", "relation", "source_id"],
+    properties: { source_scheme: { type: "string" }, source_code: { type: "string" }, target_scheme: { type: "string" }, target_code: { type: "string" },
+      relation: { enum: ["exactMatch", "closeMatch", "broadMatch", "narrowMatch", "relatedMatch"] }, source_id: { type: "string" } },
+  };
   writeJson(schema, join(workDir, "schema.json"));
 
   // README
@@ -622,7 +651,7 @@ Normalized economic activity classifications for Swiss and international reporti
 - **NACE Rev 2** (2.0) — ${nomenclatureCount["NACE_2.0"]} rows
 - **NACE Rev 2.1** — ${nomenclatureCount["NACE_2.1"]} rows
 - **ISIC Rev 4** — ${nomenclatureCount["ISIC_4"]} rows
-- **Cross-walks** — ${input.crossWalks.length} mappings (5-way NOGA↔NACE↔ISIC)
+- **Cross-walks** — ${input.crossWalks.length} relations directes par paire (pas de pont cinq voies présumé)
 ${input.statent ? `- **STATENT (Pro)** — ${input.statent.cantonDivision.length + input.statent.communeSector.length} rows (${input.statent.stats.years_ingested.length} years)` : ""}
 ${hasEmbeddings ? `- **NOGA 2025 embeddings (Pro)** — ${input.embeddings!.length} pre-computed semantic vectors (${NOGA_EMBEDDING_DIMENSIONS}d, FR/DE/IT/EN)` : ""}
 ${hasNaics ? `- **NAICS 2022 ↔ ISIC ↔ NACE/NOGA crosswalk (Pro)** — ${input.naics!.rows.length} mappings (US Census Bureau, Public Domain)` : ""}
@@ -644,7 +673,7 @@ ${hasNaceEnLabels ? `- **NACE Rev 2.1 EN labels (Pro)** — ${input.naceEnLabels
 
 ### Cross-walks
 
-- \`crosswalks.{csv,json,sql,parquet}\` — one row per NOGA 2025 class linking to the 4 other standards${statentSection}${
+- \`crosswalks.{csv,json,sql,parquet}\` — une paire documentée par ligne ; seules deux colonnes de nomenclature sont remplies${statentSection}${
     hasEmbeddings
       ? `
 
@@ -713,12 +742,20 @@ ${input.statent ? "- **STATENT** — BFS PX-Web JSON-stat2 API (px-x-0602010000_
 ${hasNaics ? "- **NAICS 2022 ↔ ISIC Rev 4 concordance** — U.S. Census Bureau (Public Domain — US Government Work). https://www.census.gov/naics/concordances/" : ""}
 ${hasEmbeddings ? "- **Embeddings model** — Xenova/paraphrase-multilingual-mpnet-base-v2 (Apache 2.0)" : ""}
 
-## Mapping principle
+## Correspondances et migration du schéma 2
 
-- NOGA 2025 codes are identical to NACE Rev 2.1 at the class level (4-digit).
-- NOGA 2008 codes are identical to NACE Rev 2.0 at the class level.
-- The explicit bridges are NACE 2.0 ↔ 2.1 (Eurostat) and NACE 2.1 ↔ ISIC 4 (UN Stats).
-- Cross-walks are anchored on NOGA 2025 classes. One NOGA 2025 class can produce multiple cross-walk rows if several NACE 2.0 or ISIC 4 codes match.
+- \`classification_links.{csv,json,sql,parquet}\` décrit chaque lien : source_scheme, source_code, target_scheme, target_code, relation et source_id.
+- \`sources.json\` et \`classification_sources.csv\` donnent les URL, empreintes SHA-256 et dates de collecte.
+- \`quality.json\` donne les volumes, contrôles de parenté et limites.
+- NOGA 2008 ↔ NACE Rev. 2 et NOGA 2025 ↔ NACE Rev. 2.1 : identité OFS aux niveaux 1 à 4.
+- Un genre suisse à six chiffres est rattaché à sa classe NACE par son parent OFS (broadMatch, perte de précision).
+- NACE Rev. 2.1 ↔ NACE Rev. 2 et NACE Rev. 2 ↔ ISIC Rev. 4 : relations closeMatch d'Eurostat conservées comme approchées.
+- Deux closeMatch successifs ne constituent pas une correspondance prouvée. Pas de conversion automatique NACE 2.1 → ISIC 4 par cette chaîne.
+- Le sens de broadMatch est « cible plus large » ; la relation inverse est narrowMatch.
+- Aucun lien n'est déduit de la seule identité des chiffres. Une absence de lien n'est pas une preuve d'absence d'équivalent.
+- Les fichiers historiques crosswalks conservent leurs colonnes mais représentent désormais des paires. Adapter les anciennes jointures à cinq colonnes ; utiliser classification_links pour le sens et la provenance.
+- NACE Rev. 2 contient 996 codes, dont 615 classes. Il ne doit pas être confondu avec NACE Rev. 2.1 (1 047 codes, 651 classes).
+- Langues : FR/DE/IT/EN pour NOGA et NACE ; FR/EN/ES pour ISIC. Aucun libellé officiel ISIC allemand ou italien n'est fourni.
 
 ## Dataset metadata
 
@@ -756,6 +793,7 @@ ${hasEmbeddings ? "- **Embeddings model** — Xenova/paraphrase-multilingual-mpn
     "crosswalks.sql",
     "crosswalks.parquet",
     "schema.json",
+    ...verifiedFiles,
     ...statentFiles,
     ...embeddingFiles,
     ...naicsFiles,

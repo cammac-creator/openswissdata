@@ -1,55 +1,51 @@
-# === noga_2025 (30 codes — section K Finance + section O Administration publique) ===
-scheme,code,level,parent,label_fr,label_de,label_it,label_en
-NOGA_2025,64,division,L,"Activités de services financiers, hors assurance et fonds de pension",Erbringung von Finanzdienstleistungen,"Attività dei servizi finanziari, escluse le assicurazioni e i fondi pensione","Financial service activities, except insurance and pension funding"
-NOGA_2025,641,group,64,Intermédiation monétaire,Zentralbanken und Kreditinstitute,Intermediazione monetaria,Monetary intermediation
-NOGA_2025,6411,class,641,Activités de banque centrale,Zentralbanken,Attività delle banche centrali,Central banking
-NOGA_2025,641100,subclass,6411,Activités de banque centrale,Zentralbanken,Attività delle banche centrali,Central banking
-NOGA_2025,6419,class,641,Autre intermédiation monétaire,"Kreditinstitute, ohne Spezialkreditinstitute",Altre intermediazioni monetarie,Other monetary intermediation
-NOGA_2025,641901,subclass,6419,Banques cantonales,Kantonalbanken,Banche cantonali,Cantonal banks
-NOGA_2025,641902,subclass,6419,Grandes banques,Grossbanken,Grandi banche,Big banks
-NOGA_2025,641903,subclass,6419,Banques régionales et caisses d'épargne,Regionalbanken und Sparkassen,Banche regionali e casse di risparmio,Regional banks and saving banks
-NOGA_2025,641904,subclass,6419,Banques Raiffeisen,Raiffeisenbanken,Banche Raiffeisen,Raiffeisen banks
-NOGA_2025,641905,subclass,6419,Banques boursières,Börsenbanken,Istituti specializzati nelle operazioni di borsa,Stock exchange banks
-NOGA_2025,641906,subclass,6419,Banques en mains étrangères,Ausländisch beherrschte Banken,Banche controllate da capitale estero,Foreign-controlled banks
-NOGA_2025,641907,subclass,6419,Succursales de banques étrangères,Filialen ausländischer Banken,Filiali di banche estere,Branches of foreign banks
-NOGA_2025,641908,subclass,6419,Banquiers privés,Privatbankiers,Banche private,Private bankers
-NOGA_2025,641909,subclass,6419,Autres banques,Andere Banken,Altre banche,Other banking institutions
-NOGA_2025,641919,subclass,6419,Autres intermédiations monétaires n.c.a.,Andere monetäre Finanzintermediäre a. n. g.,Altre intermediazioni monetarie n.c.a.,Other monetary intermediation n.e.c.
-NOGA_2025,84,division,P,Administration publique et défense; sécurité sociale obligatoire,"Öffentliche Verwaltung, Verteidigung; Sozialversicherung",Amministrazione pubblica e difesa; assicurazione sociale obbligatoria,Public administration and defence; compulsory social security
-NOGA_2025,841,group,84,"Administration générale, économique et sociale et environnementale",Öffentliche Verwaltung,"Amministrazione dello Stato e delle politiche economiche, sociali e ambientali della comunità","Administration of the State and the economic, social and environmental policies of the community"
-NOGA_2025,8411,class,841,Activités d’administration publique générale,Allgemeine öffentliche Verwaltung,Attività generali di amministrazione pubblica,General public administration activities
-NOGA_2025,841100,subclass,8411,Activités d’administration publique générale,Allgemeine öffentliche Verwaltung,Attività generali di amministrazione pubblica,General public administration activities
-NOGA_2025,8412,class,841,"Réglementation des soins de santé, de l’enseignement, des services culturels et des autres services sociaux","Öffentliche Verwaltung auf den Gebieten Gesundheitswesen, Bildung, Kultur und Sozialwesen","Regolamentazione dei servizi di assistenza sanitaria, istruzione, servizi culturali e di altri servizi sociali","Regulation of health care, education, cultural services and other social services"
-NOGA_2025,841200,subclass,8412,"Réglementation des soins de santé, de l’enseignement, des services culturels et des autres services sociaux","Öffentliche Verwaltung auf den Gebieten Gesundheitswesen, Bildung, Kultur und Sozialwesen","Regolamentazione dei servizi di assistenza sanitaria, istruzione, servizi culturali e di altri servizi sociali","Regulation of health care, education, cultural services and other social services"
-NOGA_2025,8413,class,841,Réglementation et contribution à l’amélioration de l’efficacité des activités économiques,"Wirtschaftsförderung, -ordnung und -aufsicht",Regolamentazione delle attività che contribuiscono a una più efficiente gestione delle attività economiche,Regulation of and contribution to more efficient operation of businesses
-NOGA_2025,841300,subclass,8413,Réglementation et contribution à l’amélioration de l’efficacité des activités économiques,"Wirtschaftsförderung, -ordnung und -aufsicht",Regolamentazione delle attività che contribuiscono a una più efficiente gestione delle attività economiche,Regulation of and contribution to more efficient operation of businesses
-NOGA_2025,842,group,84,Services de prérogative publique,"Auswärtige Angelegenheiten, Verteidigung, Rechtspflege/Justiz, öffentliche Sicherheit und Ordnung",Erogazione di servizi collettivi,Provision of services to the community as a whole
-NOGA_2025,8421,class,842,Affaires étrangères,Auswärtige Angelegenheiten,Affari esteri,Foreign affairs
-NOGA_2025,842100,subclass,8421,Affaires étrangères,Auswärtige Angelegenheiten,Affari esteri,Foreign affairs
-NOGA_2025,8422,class,842,Défense,Verteidigung,Difesa nazionale,Defence activities
-NOGA_2025,842201,subclass,8422,Défense,Verteidigung,Difesa,National defence
-NOGA_2025,842202,subclass,8422,Protection civile,Zivilschutz,Protezione civile,Civil defence
-NOGA_2025,8423,class,842,Justice,Rechtspflege/Justiz,Giustizia e attività giudiziarie,Justice and judicial activities
-
-# === crosswalks (20 mappings NOGA 2025 → NOGA 2008 / NACE 2.0 / NACE 2.1 / ISIC 4) ===
-noga_2008,noga_2025,nace_2_0,nace_2_1,isic_4,mapping_type,notes
-64,64,64,64,64,exact,
-641,641,641,641,641,exact,
-6411,6411,6411,6411,6411,exact,
-,641100,,,,derived,CH-specific subclass — no NACE counterpart
-6419,6419,6419,6419,6419,exact,
-,641901,,,,derived,CH-specific subclass — no NACE counterpart
-,641902,,,,derived,CH-specific subclass — no NACE counterpart
-,641903,,,,derived,CH-specific subclass — no NACE counterpart
-,641904,,,,derived,CH-specific subclass — no NACE counterpart
-,641905,,,,derived,CH-specific subclass — no NACE counterpart
-,641906,,,,derived,CH-specific subclass — no NACE counterpart
-,641907,,,,derived,CH-specific subclass — no NACE counterpart
-,641908,,,,derived,CH-specific subclass — no NACE counterpart
-,641909,,,,derived,CH-specific subclass — no NACE counterpart
-,641919,,,,derived,CH-specific subclass — no NACE counterpart
-93,84,93,84,84,exact,
-84,84,84,84,84,exact,
-841,841,841,841,841,exact,
-8411,8411,8411,8411,8411,exact,
-,841100,,,,derived,CH-specific subclass — no NACE counterpart
+scheme,code,level,parent,label_fr,label_de,label_it,label_en,label_es
+NOGA_2008,01,division,A,"Culture et production animale, chasse et services annexes","Landwirtschaft, Jagd und damit verbundene Tätigkeiten","Produzioni vegetali e animali, caccia e servizi connessi","Crop and animal production, hunting and related service activities",
+NOGA_2008,011,group,01,Cultures non permanentes,Anbau einjähriger Pflanzen,Coltivazione di colture agricole non permanenti,Growing of non-perennial crops,
+NOGA_2008,0111,class,011,"Culture de céréales (à l'exception du riz), de légumineuses et de graines oléagineuses","Anbau von Getreide (ohne Reis), Hülsenfrüchten und Ölsaaten","Coltivazione di cereali (tranne il riso), legumi da granella e semi oleosi","Growing of cereals (except rice), leguminous crops and oil seeds",
+NOGA_2008,011100,subclass,0111,"Culture de céréales (à l'exception du riz), de légumineuses et de graines oléagineuses","Anbau von Getreide (ohne Reis), Hülsenfrüchten und Ölsaaten","Coltivazione di cereali (tranne il riso), legumi da granella e semi oleosi","Growing of cereals (except rice), leguminous crops and oil seeds",
+NOGA_2008,0112,class,011,Culture du riz,Anbau von Reis,Coltivazione del riso,Growing of rice,
+NOGA_2008,011200,subclass,0112,Culture du riz,Anbau von Reis,Coltivazione del riso,Growing of rice,
+NOGA_2008,0113,class,011,"Culture de légumes, de melons, de racines et de tubercules",Anbau von Gemüse und Melonen sowie Wurzeln und Knollen,"Coltivazione di ortaggi e meloni, radici e tuberi","Growing of vegetables and melons, roots and tubers",
+NOGA_2008,011300,subclass,0113,"Culture de légumes, de melons, de racines et de tubercules",Anbau von Gemüse und Melonen sowie Wurzeln und Knollen,"Coltivazione di ortaggi e meloni, radici e tuberi","Growing of vegetables and melons, roots and tubers",
+NOGA_2008,0114,class,011,Culture de la canne à sucre,Anbau von Zuckerrohr,Coltivazione di canna da zucchero,Growing of sugar cane,
+NOGA_2008,011400,subclass,0114,Culture de la canne à sucre,Anbau von Zuckerrohr,Coltivazione di canna da zucchero,Growing of sugar cane,
+NOGA_2025,01,division,A,"Culture et production animale, chasse et services annexes","Landwirtschaft, Jagd und damit verbundene Tätigkeiten","Produzioni vegetali e animali, caccia e servizi connessi","Crop and animal production, hunting and related service activities",
+NOGA_2025,011,group,01,Cultures non permanentes,Anbau ein- und zweijähriger Pflanzen,Coltivazione di colture agricole non permanenti,Growing of non-perennial crops,
+NOGA_2025,0111,class,011,"Culture de céréales, à l’exception du riz, de légumineuses et de graines oléagineuses",Anbau von anderem Getreide als Reis sowie von Hülsenfrüchten und Ölsaaten,"Coltivazione di cereali, legumi da granella e semi oleosi, escluso il riso","Growing of cereals, other than rice, leguminous crops and oil seeds",
+NOGA_2025,011100,subclass,0111,"Culture de céréales, à l’exception du riz, de légumineuses et de graines oléagineuses",Anbau von anderem Getreide als Reis sowie von Hülsenfrüchten und Ölsaaten,"Coltivazione di cereali, legumi da granella e semi oleosi, escluso il riso","Growing of cereals, other than rice, leguminous crops and oil seeds",
+NOGA_2025,0112,class,011,Culture du riz,Anbau von Reis,Coltivazione di riso,Growing of rice,
+NOGA_2025,011200,subclass,0112,Culture du riz,Anbau von Reis,Coltivazione di riso,Growing of rice,
+NOGA_2025,0113,class,011,"Culture de légumes, de melons, de racines et de tubercules",Anbau von Gemüse und Melonen sowie Wurzeln und Knollen,"Coltivazione di ortaggi e meloni, radici e tuberi","Growing of vegetables and melons, roots and tubers",
+NOGA_2025,011300,subclass,0113,"Culture de légumes, de melons, de racines et de tubercules",Anbau von Gemüse und Melonen sowie Wurzeln und Knollen,"Coltivazione di ortaggi e meloni, radici e tuberi","Growing of vegetables and melons, roots and tubers",
+NOGA_2025,0114,class,011,Culture de la canne à sucre,Anbau von Zuckerrohr,Coltivazione di canna da zucchero,Growing of sugar cane,
+NOGA_2025,011400,subclass,0114,Culture de la canne à sucre,Anbau von Zuckerrohr,Coltivazione di canna da zucchero,Growing of sugar cane,
+NACE_2.0,01,division,A,"Culture et production animale, chasse et services annexes","Landwirtschaft, Jagd und damit verbundene Tätigkeiten","Produzioni vegetali e animali, caccia e servizi connessi","Crop and animal production, hunting and related service activities",
+NACE_2.0,011,group,01,01.1 Cultures non permanentes,01.1 Anbau einjähriger Pflanzen,01.1 Coltivazione di colture agricole non permanenti,01.1 Growing of non-perennial crops,
+NACE_2.0,0111,class,011,"01.11 Culture de céréales (à l'exception du riz), de légumineuses et de graines oléagineuses","01.11 Anbau von Getreide (ohne Reis), Hülsenfrüchten und Ölsaaten","01.11 Coltivazione di cereali (tranne il riso), legumi da granella e semi oleosi","01.11 Growing of cereals (except rice), leguminous crops and oil seeds",
+NACE_2.0,0112,class,011,01.12 Culture du riz,01.12 Anbau von Reis,01.12 Coltivazione del riso,01.12 Growing of rice,
+NACE_2.0,0113,class,011,"01.13 Culture de légumes, de melons, de racines et de tubercules",01.13 Anbau von Gemüse und Melonen sowie Wurzeln und Knollen,"01.13 Coltivazione di ortaggi e meloni, radici e tuberi","01.13 Growing of vegetables and melons, roots and tubers",
+NACE_2.0,0114,class,011,01.14 Culture de la canne à sucre,01.14 Anbau von Zuckerrohr,01.14 Coltivazione di canna da zucchero,01.14 Growing of sugar cane,
+NACE_2.0,0115,class,011,01.15 Culture du tabac,01.15 Anbau von Tabak,01.15 Coltivazione di tabacco,01.15 Growing of tobacco,
+NACE_2.0,0116,class,011,01.16 Culture de plantes à fibres,01.16 Anbau von Faserpflanzen,01.16 Coltivazione di piante tessili,01.16 Growing of fibre crops,
+NACE_2.0,0119,class,011,01.19 Autres cultures non permanentes,01.19 Anbau von sonstigen einjährigen Pflanzen,01.19 Coltivazione di altre colture non permanenti,01.19 Growing of other non-perennial crops,
+NACE_2.0,012,group,01,01.2 Cultures permanentes,01.2 Anbau mehrjähriger Pflanzen,01.2 Coltivazione di colture permanenti,01.2 Growing of perennial crops,
+NACE_2.1,01,division,A,"01 Culture et production animale, chasse et services annexes","01 Landwirtschaft, Jagd und damit verbundene Tätigkeiten","01 Produzioni vegetali e animali, caccia e servizi connessi","01 Crop and animal production, hunting and related service activities",
+NACE_2.1,011,group,01,01.1 Cultures non permanentes,01.1 Anbau ein- und zweijähriger Pflanzen,01.1 Coltivazione di colture agricole non permanenti,01.1 Growing of non-perennial crops,
+NACE_2.1,0111,class,011,"01.11 Culture de céréales, à l’exception du riz, de légumineuses et de graines oléagineuses",01.11 Anbau von anderem Getreide als Reis sowie von Hülsenfrüchten und Ölsaaten,"01.11 Coltivazione di cereali, legumi da granella e semi oleosi, escluso il riso","01.11 Growing of cereals, other than rice, leguminous crops and oil seeds",
+NACE_2.1,0112,class,011,01.12 Culture du riz,01.12 Anbau von Reis,01.12 Coltivazione di riso,01.12 Growing of rice,
+NACE_2.1,0113,class,011,"01.13 Culture de légumes, de melons, de racines et de tubercules",01.13 Anbau von Gemüse und Melonen sowie Wurzeln und Knollen,"01.13 Coltivazione di ortaggi e meloni, radici e tuberi","01.13 Growing of vegetables and melons, roots and tubers",
+NACE_2.1,0114,class,011,01.14 Culture de la canne à sucre,01.14 Anbau von Zuckerrohr,01.14 Coltivazione di canna da zucchero,01.14 Growing of sugar cane,
+NACE_2.1,0115,class,011,01.15 Culture du tabac,01.15 Anbau von Tabak,01.15 Coltivazione di tabacco,01.15 Growing of tobacco,
+NACE_2.1,0116,class,011,01.16 Culture de plantes à fibres,01.16 Anbau von Faserpflanzen,01.16 Coltivazione di piante tessili,01.16 Growing of fibre crops,
+NACE_2.1,0119,class,011,01.19 Autres cultures non permanentes,01.19 Anbau von sonstigen ein- und zweijährigen Pflanzen,01.19 Coltivazione di altre colture agricole non permanenti,01.19 Growing of other non-perennial crops,
+NACE_2.1,012,group,01,01.2 Cultures permanentes,01.2 Anbau mehrjähriger Pflanzen,01.2 Coltivazione di colture agricole permanenti,01.2 Growing of perennial crops,
+ISIC_4,01,division,A,"Culture et production animale, chasse et activités de services connexes",,,"Crop and animal production, hunting and related service activities","Agricultura, ganadería, caza y actividades de servicios conexas"
+ISIC_4,011,group,01,Cultures temporaires,,,Growing of non-perennial crops,Cultivo de plantas no perennes
+ISIC_4,0111,class,011,"Culture de céréales (à l’exception du riz), de légumineuses et de graines oléagineuses",,,"Growing of cereals (except rice), leguminous crops and oil seeds","Cultivo de cereales (excepto arroz), legumbres y semillas oleaginosas"
+ISIC_4,0112,class,011,Culture du riz,,,Growing of rice,Cultivo de arroz
+ISIC_4,0113,class,011,"Culture de légumes et de melons, de racines et tubercules",,,"Growing of vegetables and melons, roots and tubers","Cultivo de hortalizas y melones, raíces y tubérculos"
+ISIC_4,0114,class,011,Culture de canne à sucre,,,Growing of sugar cane,Cultivo de caña de azúcar
+ISIC_4,0115,class,011,Culture de tabac,,,Growing of tobacco,Cultivo de tabaco
+ISIC_4,0116,class,011,Culture de plantes à fibres textiles,,,Growing of fibre crops,Cultivo de plantas de fibra
+ISIC_4,0119,class,011,Autres cultures temporaires,,,Growing of other non-perennial crops,Cultivo de otras plantas no perennes
+ISIC_4,012,group,01,Cultures permanentes,,,Growing of perennial crops,Cultivo de plantas perennes
