@@ -1,7 +1,7 @@
 /** Archive or dans R2 → bronze de traitement daté sur le volume, avant lecture du contenu. */
-import { mkdir, readdir, stat, unlink, rmdir, writeFile, readFile, statfs } from "node:fs/promises";
+import { mkdir, readdir, stat, unlink, rmdir, writeFile, readFile, statfs, link } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { getObjectBuffer } from "./r2.js";
 
 export async function readTaresArchive(info: { r2_key: string; sha256: string; size_bytes: number }): Promise<Buffer> {
@@ -11,6 +11,12 @@ export async function readTaresArchive(info: { r2_key: string; sha256: string; s
   const today = new Date().toISOString().slice(0, 10), cutoff = Date.now() - 30 * 86_400_000;
   let used = 0;
   for (const day of await readdir(root, { withFileTypes: true })) {
+    if (day.isFile() && /^\.archive-[a-f0-9-]+\.tmp$/.test(day.name)) {
+      const path = join(root, day.name);
+      const info = await stat(path).catch(e => { if (e.code === "ENOENT") return null; throw e; });
+      if (info && info.mtimeMs < Date.now() - 3_600_000) await unlink(path).catch(e => { if (e.code !== "ENOENT") throw e; });
+      continue;
+    }
     if (!day.isDirectory() || !/^\d{4}-\d{2}-\d{2}$/.test(day.name)) continue;
     const folder = join(root, day.name);
     for (const file of await readdir(folder, { withFileTypes: true })) {
@@ -32,8 +38,13 @@ export async function readTaresArchive(info: { r2_key: string; sha256: string; s
   if (used + info.size_bytes > 200_000_000 || space.bavail * space.bsize < info.size_bytes + 300_000_000) throw new Error("Espace bronze TARES insuffisant");
   const bytes = await getObjectBuffer(info.r2_key, { maxBytes: Math.min(100_000_000, info.size_bytes + 1_000_000) });
   const actual = createHash("sha256").update(bytes).digest("hex");
-  try { await writeFile(join(folder, actual + ".zip"), bytes, { flag: "wx", mode: 0o600 }); }
-  catch (e) { if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e; }
+  // Le catalogue et le MCP peuvent lire ensemble : publier seulement le fichier complet.
+  const temporary = join(root, `.archive-${randomUUID()}.tmp`);
+  try {
+    await writeFile(temporary, bytes, { flag: "wx", mode: 0o600 });
+    try { await link(temporary, join(folder, actual + ".zip")); }
+    catch (e) { if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e; }
+  } finally { await unlink(temporary).catch(e => { if (e.code !== "ENOENT") throw e; }); }
   if (bytes.length !== info.size_bytes || actual !== info.sha256) throw new Error("Empreinte TARES invalide");
   return bytes;
 }
