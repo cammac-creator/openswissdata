@@ -9,14 +9,14 @@ export function crmKey(): Buffer {
 }
 export function seal(value: string): string { return encryptBackup(Buffer.from(value), crmKey()).toString("base64"); }
 export function unseal(value: string): string { return decryptBackup(Buffer.from(value, "base64"), crmKey()).toString(); }
-let nextBronzeSweep = 0;
-let bronzeBytes = 0;
-export async function bronze(source: string, raw: Buffer): Promise<void> {
-  const root = join(dirname(process.env.DATABASE_PATH ?? "./data/openswissdata.sqlite"), "bronze", "dashboard");
+const bronzeUsage = new Map<string, {nextSweep:number;bytes:number}>();
+export async function bronze(source: string, raw: Buffer, compartment: "dashboard" | "financial" = "dashboard"): Promise<void> {
+  const root = join(dirname(process.env.DATABASE_PATH ?? "./data/openswissdata.sqlite"), "bronze", compartment);
+  const usage = bronzeUsage.get(root) ?? {nextSweep:0,bytes:0};
+  bronzeUsage.set(root,usage);
   const folder = join(root, new Date().toISOString().slice(0, 10));
   await mkdir(folder, { recursive: true, mode: 0o700 });
-  if (Date.now() > nextBronzeSweep) {
-    nextBronzeSweep = Date.now() + 3600_000;
+  if (Date.now() > usage.nextSweep) {
     const cutoff = new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10);
     let total = 0;
     for (const entry of await readdir(root, { withFileTypes: true })) {
@@ -24,14 +24,16 @@ export async function bronze(source: string, raw: Buffer): Promise<void> {
       if (entry.name < cutoff) { await rm(join(root, entry.name), { recursive: true }); continue; }
       for (const file of await readdir(join(root, entry.name))) total += (await stat(join(root, entry.name, file))).size;
     }
-    bronzeBytes = total;
+    usage.bytes = total;
+    usage.nextSweep = Date.now() + 3600_000;
   }
   const disk = await statfs(root);
-  if (bronzeBytes + raw.length > 250_000_000 || disk.bavail * disk.bsize < 300_000_000) throw new Error("crm_bronze_capacity");
+  const limit = compartment === "financial" ? 64_000_000 : 250_000_000;
+  if (usage.bytes + raw.length > limit || disk.bavail * disk.bsize < 300_000_000) throw new Error("crm_bronze_capacity");
   const digest = createHash("sha256").update(raw).digest("hex");
   try {
     await writeFile(join(folder, `${source}-${digest}.enc`), encryptBackup(raw, crmKey()), { flag: "wx", mode: 0o600 });
-    bronzeBytes += raw.length + 36;
+    usage.bytes += raw.length + 36;
   } catch (error) { if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error; }
 }
 export async function sourceJson<T>(source: string, url: string, init: RequestInit = {}): Promise<T> {
@@ -45,7 +47,7 @@ export async function sourceJson<T>(source: string, url: string, init: RequestIn
     parts.push(chunk);
   }
   const raw = Buffer.concat(parts);
-  await bronze(source, raw);
+  await bronze(source, raw, source === "stripe-financial" ? "financial" : "dashboard");
   return JSON.parse(raw.toString()) as T;
 }
 let cacheGeneration = 0;
@@ -67,7 +69,7 @@ export async function clearMailboxBronze(account: "support" | "cam_project"): Pr
     if (!day.isDirectory() || !/^\d{4}-\d{2}-\d{2}$/.test(day.name)) continue;
     for (const name of await readdir(join(root, day.name))) if (name.startsWith(`imap-${account}-`)) await rm(join(root, day.name, name), { force: true });
   }
-  nextBronzeSweep = 0;
+  bronzeUsage.delete(root);
 }
 
 export type SearchRow = { keys?: string[]; clicks: number; impressions: number; ctr: number; position: number };

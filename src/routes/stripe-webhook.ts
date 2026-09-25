@@ -5,6 +5,8 @@ import { stripe } from "../lib/stripe.js";
 import { checkoutLanguage } from "../lib/crm-language.js";
 import { sendMcpCredentialsEmail, parseLocale } from "../lib/email.js";
 import { deliveryStatus } from "../lib/order-delivery.js";
+import { FINANCIAL_EVENTS, enqueueFinancialEvent, applyOrderFinancialState } from "../lib/stripe-financial.js";
+import { UPDATE_PERIOD_MS, refreshOrderRights } from "../lib/order-rights.js";
 import { generateClientId, generateClientSecret, hashToken } from "../mcp/oauth/crypto.js";
 import {
   insertClient,
@@ -15,8 +17,6 @@ import {
 import { TIER_DEFAULT_SCOPES, SKU_TO_TIER, type Tier } from "../mcp/oauth/scopes.js";
 
 export const stripeWebhookRoute = new Hono();
-
-const ENTITLEMENT_DAYS = 360;
 
 function mcpBaseUrl(): string {
   return (process.env.MCP_BASE_URL ?? "https://mcp.openswissdata.com").replace(/\/$/, "");
@@ -245,6 +245,18 @@ stripeWebhookRoute.post("/", async (c) => {
     return c.json({ error: "invalid_signature" }, 400);
   }
 
+  const key = process.env.STRIPE_SECRET_KEY ?? "";
+  const expectedLive = /^(sk|rk)_live_/.test(key) ? true : /^(sk|rk)_test_/.test(key) ? false : null;
+  if (expectedLive !== null && event.livemode !== expectedLive) return c.json({ error: "stripe_mode_mismatch" }, 400);
+  if (FINANCIAL_EVENTS.has(event.type)) {
+    try {
+      return c.json({received:true,financial_sync_queued:enqueueFinancialEvent(event)});
+    } catch {
+      console.error("[webhook] notification financière non enregistrée ; rejeu Stripe nécessaire");
+      return c.json({error:"financial_event_not_saved"},500);
+    }
+  }
+
   // Subscription lifecycle events (MCP paid tiers).
   if (event.type === "customer.subscription.deleted") {
     return handleSubscriptionDeleted(event, c);
@@ -267,8 +279,6 @@ stripeWebhookRoute.post("/", async (c) => {
   if (session.currency !== "chf" || !Number.isSafeInteger(session.amount_total) || session.amount_total! < 0) {
     return c.json({ error: "unsupported_payment" }, 400);
   }
-  const key = process.env.STRIPE_SECRET_KEY ?? "";
-  const expectedLive = /^(sk|rk)_live_/.test(key) ? true : /^(sk|rk)_test_/.test(key) ? false : null;
   if (expectedLive !== null && (event.livemode !== expectedLive || session.livemode !== expectedLive)) {
     return c.json({ error: "stripe_mode_mismatch" }, 400);
   }
@@ -313,14 +323,19 @@ stripeWebhookRoute.post("/", async (c) => {
         (customer_id,stripe_session_id,stripe_payment_intent,amount_chf,items_json,status,created_at)
         VALUES(?,?,?,?,?,'paid',?)`).run(customerId, session.id, intent, session.amount_total,
           JSON.stringify(datasetIds), now).lastInsertRowid);
+      // Conserver un droit manuel existant avant l'ajout d'une nouvelle commande.
+      db.prepare(`INSERT OR IGNORE INTO order_grants(order_id,dataset_id,updates_until,created_at)
+        SELECT e.order_id,e.dataset_id,e.updates_until,e.created_at FROM entitlements e
+        JOIN orders o ON o.id=e.order_id AND o.customer_id=e.customer_id JOIN datasets d ON d.id=e.dataset_id
+        WHERE e.customer_id=?`).run(customerId);
       for (const datasetId of datasets) {
-        db.prepare(`INSERT INTO entitlements(customer_id,dataset_id,order_id,updates_until,created_at) VALUES(?,?,?,?,?)
-          ON CONFLICT(customer_id,dataset_id) DO UPDATE SET
-          updates_until=CASE WHEN updates_until IS NULL THEN NULL ELSE MAX(updates_until,excluded.updates_until) END,
-          order_id=excluded.order_id`).run(customerId, datasetId, orderId, now + ENTITLEMENT_DAYS * 86400_000, now);
+        db.prepare("INSERT INTO order_grants(order_id,dataset_id,updates_until,created_at) VALUES(?,?,?,?)")
+          .run(orderId,datasetId,now + UPDATE_PERIOD_MS,now);
         db.prepare(`INSERT INTO order_deliveries(order_id,dataset_id,locale,next_attempt_at,created_at) VALUES(?,?,?,?,?)`)
           .run(orderId, datasetId, locale, now, now);
       }
+      refreshOrderRights(db,customerId);
+      applyOrderFinancialState(db,orderId,true);
       return { orderId, idempotent: false };
     })();
     // Accusé immédiat : le worker reprend la file durable chaque minute.

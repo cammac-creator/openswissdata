@@ -37,6 +37,9 @@ async function deliver(id: number): Promise<void> {
       .run(state, error, Date.now() + delay, sent ? Date.now() : null, clear, clear, id, job.attempts);
   };
   try {
+    const financialPending = db.prepare(`SELECT 1 FROM stripe_financial_jobs f JOIN orders o
+      ON o.stripe_payment_intent=f.payment_intent WHERE o.id=? AND f.checked_revision<f.revision`).get(job.order_id);
+    if (financialPending) return finish("pending", "financial_sync_pending");
     if (job.order_status !== "paid") return finish("cancelled", "order_not_paid");
     if (job.first_attempt_at !== null && now - job.first_attempt_at >= SAFE_RETRY_WINDOW_MS) {
       return finish("review", "delivery_confirmation_required");

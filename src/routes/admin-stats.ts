@@ -40,10 +40,10 @@ adminStatsRoute.get("/", async (c) => {
   const revenue = db.prepare(`
     SELECT
       SUM(CASE WHEN ${isLive} THEN 1 ELSE 0 END)                         AS orders_count,
-      COALESCE(SUM(CASE WHEN ${isLive} THEN amount_chf ELSE 0 END),0)    AS revenue_chf,
+      COALESCE(SUM(CASE WHEN ${isLive} THEN amount_chf-refunded_chf ELSE 0 END),0)    AS revenue_chf,
       COUNT(DISTINCT CASE WHEN ${isLive} THEN customer_id END)           AS paying_customers,
       SUM(CASE WHEN ${isTest} THEN 1 ELSE 0 END)                         AS test_orders_count,
-      COALESCE(SUM(CASE WHEN ${isTest} THEN amount_chf ELSE 0 END),0)    AS test_revenue_chf
+      COALESCE(SUM(CASE WHEN ${isTest} THEN amount_chf-refunded_chf ELSE 0 END),0)    AS test_revenue_chf
     FROM orders
     WHERE created_at >= ? AND status = 'paid'
   `).get(since) as {
@@ -54,10 +54,10 @@ adminStatsRoute.get("/", async (c) => {
   const revenueAllTime = db.prepare(`
     SELECT
       SUM(CASE WHEN ${isLive} THEN 1 ELSE 0 END)                         AS orders_count,
-      COALESCE(SUM(CASE WHEN ${isLive} THEN amount_chf ELSE 0 END),0)    AS revenue_chf,
+      COALESCE(SUM(CASE WHEN ${isLive} THEN amount_chf-refunded_chf ELSE 0 END),0)    AS revenue_chf,
       COUNT(DISTINCT CASE WHEN ${isLive} THEN customer_id END)           AS paying_customers,
       SUM(CASE WHEN ${isTest} THEN 1 ELSE 0 END)                         AS test_orders_count,
-      COALESCE(SUM(CASE WHEN ${isTest} THEN amount_chf ELSE 0 END),0)    AS test_revenue_chf
+      COALESCE(SUM(CASE WHEN ${isTest} THEN amount_chf-refunded_chf ELSE 0 END),0)    AS test_revenue_chf
     FROM orders
     WHERE status = 'paid'
   `).get() as {
@@ -70,7 +70,7 @@ adminStatsRoute.get("/", async (c) => {
     SELECT
       strftime('%Y-%m-%d', datetime(created_at/1000, 'unixepoch')) AS day,
       COUNT(*)              AS orders,
-      SUM(amount_chf)       AS revenue_chf
+      SUM(amount_chf-refunded_chf)       AS revenue_chf
     FROM orders
     WHERE created_at >= ? AND status = 'paid' AND ${isLive}
     GROUP BY day

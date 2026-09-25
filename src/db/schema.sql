@@ -40,6 +40,9 @@ CREATE TABLE IF NOT EXISTS orders (
   amount_chf INTEGER NOT NULL,
   items_json TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'paid',
+  refunded_chf INTEGER NOT NULL DEFAULT 0,
+  dispute_status TEXT,
+  financial_checked_at INTEGER,
   created_at INTEGER NOT NULL,
   FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
@@ -100,6 +103,43 @@ CREATE TABLE IF NOT EXISTS order_deliveries (
   UNIQUE(order_id,dataset_id)
 );
 CREATE INDEX IF NOT EXISTS idx_order_deliveries_pending ON order_deliveries(state,next_attempt_at);
+
+CREATE TABLE IF NOT EXISTS app_migrations (name TEXT PRIMARY KEY, applied_at INTEGER NOT NULL);
+-- Historique des droits : rembourser un achat ne retire pas les autres achats.
+CREATE TABLE IF NOT EXISTS order_grants (
+  order_id INTEGER NOT NULL REFERENCES orders(id),
+  dataset_id TEXT NOT NULL REFERENCES datasets(id),
+  updates_until INTEGER,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY(order_id,dataset_id)
+);
+-- Le webhook ne conserve que les identifiants ; les réponses Stripe vont au bronze chiffré.
+CREATE TABLE IF NOT EXISTS stripe_financial_events (
+  id TEXT PRIMARY KEY, charge_id TEXT NOT NULL, created_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS stripe_financial_jobs (
+  charge_id TEXT PRIMARY KEY,
+  payment_intent TEXT,
+  livemode INTEGER NOT NULL,
+  revision INTEGER NOT NULL DEFAULT 1,
+  checked_revision INTEGER NOT NULL DEFAULT 0,
+  state TEXT NOT NULL DEFAULT 'pending',
+  attempts INTEGER NOT NULL DEFAULT 0,
+  lease_until INTEGER,
+  next_attempt_at INTEGER NOT NULL,
+  last_error TEXT,
+  checked_at INTEGER
+);
+CREATE TABLE IF NOT EXISTS stripe_charge_states (
+  charge_id TEXT PRIMARY KEY,
+  payment_intent TEXT NOT NULL,
+  amount_chf INTEGER NOT NULL,
+  refunded_chf INTEGER NOT NULL,
+  dispute_status TEXT,
+  livemode INTEGER NOT NULL,
+  checked_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_stripe_charge_intent ON stripe_charge_states(payment_intent);
 
 -- =====================================================================
 -- MCP OAuth 2.1 (Phase 2 V2 / B.1)
