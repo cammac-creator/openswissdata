@@ -1,29 +1,25 @@
-name: Daily source canary
-
-# Surveille les sources amont (BAZG, FINMA, BFS) et ouvre une issue dès qu'une
-# rupture structurelle est détectée. Pas d'email — issue GitHub seulement, pour
-# éviter le bruit pendant la phase de tuning.
+name: Surveillance quotidienne des sources
 
 on:
   schedule:
-    # Quotidien 07:00 UTC (09:00 CEST). Après les fenêtres de publication
-    # habituelles des autorités fédérales, avant la journée de travail.
     - cron: "0 7 * * *"
   workflow_dispatch:
     inputs:
       update_baseline:
-        description: "Replace baseline with current hashes (use after a planned schema change)"
+        description: "Préparer une nouvelle référence à examiner dans les artefacts (ne publie rien)"
         required: false
         default: "false"
 
 permissions:
   contents: read
-  issues: write
+concurrency:
+  group: controle-sources
+  cancel-in-progress: false
 
 jobs:
   canary:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,117 +27,45 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-
-      - name: Run canary
+      - name: Contrôler les sources officielles
         id: canary
+        env:
+          UPDATE_BASELINE: ${{ inputs.update_baseline }}
         run: |
-          if [ "${{ github.event.inputs.update_baseline }}" = "true" ]; then
-            npx tsx scripts/monitor-sources.ts --update
+          if [ "$UPDATE_BASELINE" = "true" ]; then
+            node --import tsx scripts/monitor-sources.ts --update
           else
-            npx tsx scripts/monitor-sources.ts
+            node --import tsx scripts/monitor-sources.ts
           fi
         continue-on-error: true
-
-      - name: Read report
-        id: report
+      - name: Conserver le rapport et la référence consultée
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: controle-sources-${{ github.run_id }}
+          path: |
+            etl/canary-report.json
+            etl/canary-baseline.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Résumer le contrôle
         if: always()
         run: |
-          if [ -f etl/canary-report.json ]; then
-            cat etl/canary-report.json
-            echo "DRIFTS=$(jq '.drift' etl/canary-report.json)" >> $GITHUB_OUTPUT
-            echo "ERRORS=$(jq '.error' etl/canary-report.json)" >> $GITHUB_OUTPUT
-            echo "NEW=$(jq '.new' etl/canary-report.json)" >> $GITHUB_OUTPUT
-            echo "CRASHED=false" >> $GITHUB_OUTPUT
-          else
-            echo "::warning::Canary script crashed before writing the report"
-            echo "DRIFTS=0" >> $GITHUB_OUTPUT
-            echo "ERRORS=0" >> $GITHUB_OUTPUT
-            echo "NEW=0" >> $GITHUB_OUTPUT
-            echo "CRASHED=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Open issue on script crash
-        if: steps.report.outputs.CRASHED == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
+          node --input-type=module <<'NODE'
+          import {readFileSync,existsSync,appendFileSync} from 'node:fs';
+          const file='etl/canary-report.json';
+          if(!existsSync(file)){
+            appendFileSync(process.env.GITHUB_STEP_SUMMARY,'Le contrôle a échoué avant la création du rapport. Consulter les journaux.\n');
+            process.exit(1);
+          }
+          const r=JSON.parse(readFileSync(file,'utf8'));
+          const lines=['## Contrôle des sources',`${r.total} sources ; ${r.drift} modifiée(s), ${r.error} erreur(s), ${r.new} sans référence.`,'','Un fichier modifié demande un examen ; ce contrôle ne prouve pas sa qualité métier.',''];
+          for(const item of [...r.drifts,...r.errors,...r.new_sources])lines.push(`- ${item.id} : ${item.status}${item.error?' — '+item.error:''}`);
+          lines.push('','Aucune issue ni relance client automatique. Le rapport est conservé dans les artefacts pendant 14 jours. Une nouvelle référence proposée doit être examinée avant intégration.');
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join('\n')+'\n');
+          NODE
+      - name: Signaler une anomalie dans le résultat de la tâche
+        if: always() && steps.canary.outcome != 'success'
         run: |
-          DATE=$(date -u +%Y-%m-%d)
-          BODY=$(cat <<EOF
-          # 🔥 Canary script crashed — $DATE
-
-          Le script \`scripts/monitor-sources.ts\` n'a pas produit \`etl/canary-report.json\`. Cela signifie que le canary n'a surveillé aucune source aujourd'hui — **point aveugle complet** sur les ruptures amont.
-
-          ## Action attendue
-
-          1. Vérifier les logs du run : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          2. Si erreur Node/dépendance : corriger et redéployer.
-          3. Si erreur réseau transitoire : relancer manuellement avec \`gh workflow run monitor-sources.yml\`.
-          4. Une fois corrigé, vérifier que le run suivant produit bien le report.
-          EOF
-          )
-          gh issue create \
-            --title "🔥 Canary script crashed — $DATE" \
-            --label "canary,priority:high" \
-            --body "$BODY" \
-            --repo ${{ github.repository }}
-
-      - name: Open issue on drift
-        if: steps.report.outputs.DRIFTS != '0'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          DATE=$(date -u +%Y-%m-%d)
-          DRIFT_LIST=$(jq -r '.drifts[] | "- **\(.id)** — \(.description) · prev=`\(.previous_hash[0:12])` now=`\(.current_hash[0:12])` size=\(.size)b"' etl/canary-report.json)
-          BODY=$(cat <<EOF
-          # 🚨 Source canary drift — $DATE
-
-          Le canary quotidien a détecté une **rupture structurelle** sur ${{ steps.report.outputs.DRIFTS }} source(s) amont.
-
-          ## Sources qui ont changé
-
-          $DRIFT_LIST
-
-          ## Action attendue
-
-          1. Vérifier manuellement la nouvelle version de la source.
-          2. Adapter le parser ETL si nécessaire.
-          3. Notifier les clients impactés (changelog + email).
-          4. Mettre à jour la baseline : \`gh workflow run monitor-sources.yml -f update_baseline=true\`
-
-          ## Rapport complet
-
-          \`\`\`json
-          $(cat etl/canary-report.json)
-          \`\`\`
-          EOF
-          )
-          gh issue create \
-            --title "🚨 Source drift — $DATE (${{ steps.report.outputs.DRIFTS }} source(s))" \
-            --label "canary,priority:high" \
-            --body "$BODY" \
-            --repo ${{ github.repository }}
-
-      - name: Open issue on error
-        if: steps.report.outputs.ERRORS != '0' && steps.report.outputs.DRIFTS == '0'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          DATE=$(date -u +%Y-%m-%d)
-          ERROR_LIST=$(jq -r '.errors[] | "- **\(.id)** — \(.description) · `\(.error)`"' etl/canary-report.json)
-          BODY=$(cat <<EOF
-          # ⚠️ Source canary errors — $DATE
-
-          ${{ steps.report.outputs.ERRORS }} source(s) ont échoué (timeout, 4xx, etc.). Pas forcément une rupture — peut être transitoire.
-
-          ## Sources en erreur
-
-          $ERROR_LIST
-
-          Si les erreurs persistent >24h, vérifier manuellement les URLs.
-          EOF
-          )
-          gh issue create \
-            --title "⚠️ Source canary errors — $DATE" \
-            --label "canary,priority:medium" \
-            --body "$BODY" \
-            --repo ${{ github.repository }}
+          echo "::error::Le contrôle des sources demande une vérification. Consulter le rapport et le résumé."
+          exit 1
