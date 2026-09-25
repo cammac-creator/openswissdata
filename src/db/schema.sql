@@ -216,3 +216,34 @@ CREATE TABLE IF NOT EXISTS operation_checks (
   checked_at INTEGER NOT NULL,
   details_json TEXT NOT NULL
 );
+
+-- Suivi privé : données commerciales, tâches et connexions chiffrées.
+CREATE TABLE IF NOT EXISTS crm_profiles (
+  customer_id INTEGER PRIMARY KEY REFERENCES customers(id),
+  display_name TEXT NOT NULL DEFAULT '',
+  company TEXT NOT NULL DEFAULT '',
+  stage TEXT NOT NULL DEFAULT 'nouveau',
+  internal INTEGER NOT NULL DEFAULT 0,
+  updated_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS crm_notes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL REFERENCES customers(id),
+  body TEXT NOT NULL,
+  author_id INTEGER NOT NULL REFERENCES customers(id),
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_crm_notes_customer ON crm_notes(customer_id, created_at DESC);
+CREATE TABLE IF NOT EXISTS crm_tasks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER REFERENCES customers(id),
+  title TEXT NOT NULL,
+  due_on TEXT,
+  done_at INTEGER,
+  created_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS crm_connections (
+  name TEXT PRIMARY KEY,
+  secret_encrypted TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);
