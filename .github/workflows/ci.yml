@@ -12,6 +12,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Vérifier les fichiers destinés au dépôt public
+        run: node scripts/check-public-repository.mjs
       - uses: actions/setup-node@v4
         with:
           node-version: 22

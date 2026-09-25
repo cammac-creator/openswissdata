@@ -55,7 +55,7 @@ describe("download routes", () => {
     const body = await res.json();
     expect(body.download_url).toContain("signed.example.com");
     expect(body.share_token).toMatch(/^[A-Za-z0-9_-]{43}$/);
-    expect(body.share_url).toContain("/api/download/");
+    expect(body.share_url).toContain("/api/delivery/");
     const db = getDb();
     const t = db.prepare("SELECT dataset_id, version FROM download_tokens WHERE token = ?").get(body.share_token) as any;
     expect(t.dataset_id).toBe("tares");
@@ -117,6 +117,53 @@ describe("download routes", () => {
     const app = createApp();
     const res = await app.request(`/api/download/short`);
     expect(res.status).toBe(400);
+  });
+
+  it("conserve le lien si la signature du fichier échoue", async () => {
+    const app=createApp();
+    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const {share_token}=await issue.json();
+    signedUrlMock.mockRejectedValueOnce(new Error('Stockage indisponible'));
+    expect((await app.request(`/api/download/${share_token}`)).status).toBe(500);
+    expect(getDb().prepare('SELECT used_at FROM download_tokens WHERE token=?').get(share_token)).toEqual({used_at:null});
+    expect((await app.request(`/api/download/${share_token}`)).status).toBe(302);
+  });
+
+  it("refuse un droit retiré pendant la signature et ne consomme pas le lien", async () => {
+    const app=createApp();
+    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const {share_token}=await issue.json();
+    signedUrlMock.mockImplementationOnce(async()=>{getDb().prepare('DELETE FROM entitlements').run();return 'https://signed.example.test';});
+    expect((await app.request(`/api/download/${share_token}`)).status).toBe(403);
+    expect(getDb().prepare('SELECT used_at FROM download_tokens WHERE token=?').get(share_token)).toEqual({used_at:null});
+  });
+
+  it("ne permet qu'une utilisation même en concurrence",async()=>{
+    const app=createApp();
+    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const {share_token}=await issue.json();
+    const responses=await Promise.all([app.request(`/api/download/${share_token}`),app.request(`/api/download/${share_token}`)]);
+    expect(responses.map(r=>r.status).sort()).toEqual([302,410]);
+  });
+
+  it("la prévisualisation d'un mail ne consomme pas le lien, puis le bouton le télécharge",async()=>{
+    const app=createApp();
+    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const {share_token}=await issue.json();
+    const preview=await app.request(`/api/delivery/${share_token}?lang=de`);
+    expect(preview.status).toBe(200);
+    expect(await preview.text()).toContain('Datei herunterladen');
+    expect(preview.headers.get('referrer-policy')).toBe('no-referrer');
+    expect(preview.headers.get('content-security-policy')).toBe("default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://*.r2.cloudflarestorage.com; frame-ancestors 'none'; base-uri 'none'");
+    await app.request(`/api/delivery/${share_token}/`);
+    expect(JSON.stringify(getDb().prepare("SELECT name FROM events WHERE kind='api_request'").all())).not.toContain(share_token);
+    expect(getDb().prepare('SELECT used_at FROM download_tokens WHERE token=?').get(share_token)).toEqual({used_at:null});
+    expect((await app.request(`/api/delivery/${share_token}`,{method:'POST'})).status).toBe(302);
+    const first=getDb().prepare('SELECT used_at FROM download_tokens WHERE token=?').get(share_token);
+    expect((await app.request(`/api/delivery/${share_token}`,{method:'POST'})).status).toBe(302);
+    expect(getDb().prepare('SELECT used_at FROM download_tokens WHERE token=?').get(share_token)).toEqual(first);
+    getDb().prepare('UPDATE download_tokens SET used_at=? WHERE token=?').run(Date.now()-91_000,share_token);
+    expect((await app.request(`/api/delivery/${share_token}`,{method:'POST'})).status).toBe(410);
   });
 
   it("conserve la dernière version acquise après la fin des mises à jour, sans donner les suivantes", async () => {

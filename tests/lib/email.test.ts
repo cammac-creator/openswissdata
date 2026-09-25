@@ -5,6 +5,8 @@ import {
   renderMcpCredentialsEmail,
   renderMagicLinkEmail,
   renderDownloadEmail,
+  prepareDownloadEmail,
+  sendPreparedEmail,
 } from "../../src/lib/email.js";
 
 describe("lib/email graceful degradation", () => {
@@ -101,6 +103,18 @@ describe("lib/email graceful degradation", () => {
     const r = await sendMagicLinkEmail({ to: "a@b.com", magicUrl: "https://x" });
     expect(r.sent).toBe(false);
     expect(r.reason).toBe("resend_error");
+  });
+
+  it("conserve la requête préparée et sa clé malgré un changement de configuration",async()=>{
+    process.env.RESEND_API_KEY='re_factice';
+    process.env.RESEND_FROM_EMAIL='avant@example.test';
+    const payload=prepareDownloadEmail({to:'client@example.test',datasetName:'FINMA',downloadUrl:'https://example.test/lien',accountUrl:'https://example.test/account',version:'1'});
+    process.env.RESEND_FROM_EMAIL='apres@example.test';
+    await sendPreparedEmail(payload,'livraison-unique');
+    const opts=fetchMock.mock.calls[0][1];
+    expect(opts.headers['Idempotency-Key']).toBe('livraison-unique');
+    expect(JSON.parse(opts.body).from).toBe('avant@example.test');
+    expect(opts.signal).toBeInstanceOf(AbortSignal);
   });
 });
 

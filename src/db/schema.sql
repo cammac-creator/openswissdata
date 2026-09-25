@@ -81,6 +81,26 @@ CREATE INDEX IF NOT EXISTS idx_entitlements_customer ON entitlements(customer_id
 CREATE INDEX IF NOT EXISTS idx_versions_dataset ON versions(dataset_id, released_at DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
 
+-- Une livraison par fichier acheté. Aucun ancien achat n'est remis en file au démarrage.
+CREATE TABLE IF NOT EXISTS order_deliveries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id INTEGER NOT NULL REFERENCES orders(id),
+  dataset_id TEXT NOT NULL REFERENCES datasets(id),
+  locale TEXT NOT NULL DEFAULT 'fr',
+  state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','processing','sent','review','cancelled')),
+  attempts INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at INTEGER NOT NULL,
+  lease_until INTEGER,
+  first_attempt_at INTEGER,
+  payload_json TEXT,
+  download_token TEXT,
+  last_error TEXT,
+  sent_at INTEGER,
+  created_at INTEGER NOT NULL,
+  UNIQUE(order_id,dataset_id)
+);
+CREATE INDEX IF NOT EXISTS idx_order_deliveries_pending ON order_deliveries(state,next_attempt_at);
+
 -- =====================================================================
 -- MCP OAuth 2.1 (Phase 2 V2 / B.1)
 -- =====================================================================

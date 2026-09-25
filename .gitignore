@@ -37,3 +37,6 @@ docs/internal/
 etl/canary-report.json
 # MCP registry tokens (never commit — used by mcp-publisher CLI)
 .mcpregistry_*
+
+# Les listes de prospection restent dans les dossiers privés autorisés.
+docs/launch/mailing-list/*.csv

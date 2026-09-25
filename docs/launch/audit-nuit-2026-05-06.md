@@ -11,7 +11,7 @@
 - Fichier : `docs/preflight-14-stripe-live.md` (HEAD)
 - Commit d'origine : `6713d38` (feat(stripe): #14 LIVE switch — 25 avril 2026)
 - Repo `cammac-creator/openswissdata` est **public** (visibility: PUBLIC, isPrivate: false)
-- Secret exposé : `whsec_18KjrM93e9UuamnqHjiX0eFtQO6qvGn` (Stripe webhook signing secret LIVE)
+- Secret exposé : `[secret retiré du document public]` (Stripe webhook signing secret LIVE)
 - Le fichier expose aussi en clair : Account ID `acct_1TP3BlRenAUXTSv7`, 7 Price IDs LIVE, 4 Product IDs LIVE
 - Ouvert sur le web depuis le 25 avril (≈ 11 jours)
 
@@ -111,7 +111,7 @@ Aucun 404/500 détecté sur les URLs principales.
 ### 1.5 Sécurité
 
 **🔥 1 vrai secret leaké détecté** (cf. TL;DR ci-dessus) :
-- `whsec_18KjrM93e9UuamnqHjiX0eFtQO6qvGn` dans `docs/preflight-14-stripe-live.md` (HEAD) + git history (commit `6713d38`).
+- `[secret retiré du document public]` dans `docs/preflight-14-stripe-live.md` (HEAD) + git history (commit `6713d38`).
 - Repo public sur GitHub.
 
 **IDs métier exposés en clair dans le même fichier** (non secrets au sens strict, mais sensibles) :

@@ -6,6 +6,15 @@ export interface EmailSendResult {
   details?: string;
 }
 
+/** Contenu figé avant envoi, pour reprendre exactement la même requête. */
+export interface PreparedEmail {
+  from: string;
+  to: string[];
+  reply_to: string;
+  subject: string;
+  html: string;
+}
+
 /** Buyer-facing language for transactional emails. */
 export type Locale = "fr" | "de" | "en";
 
@@ -50,9 +59,12 @@ function replyToAddress(): string {
  * because those won't recover by waiting.
  */
 async function resendSend(to: string, subject: string, html: string): Promise<EmailSendResult> {
+  return sendPreparedEmail({ from: fromAddress(), to: [to], reply_to: replyToAddress(), subject, html });
+}
+
+export async function sendPreparedEmail(payload: PreparedEmail, idempotencyKey?: string): Promise<EmailSendResult> {
   const key = resendApiKey();
   if (!key) {
-    console.warn(`[email] skipping send to ${to} — RESEND_API_KEY not configured (subject: "${subject}")`);
     return { sent: false, reason: "no_api_key" };
   }
 
@@ -73,32 +85,26 @@ async function resendSend(to: string, subject: string, html: string): Promise<Em
         headers: {
           Authorization: `Bearer ${key}`,
           "Content-Type": "application/json",
+          ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}),
         },
-        body: JSON.stringify({
-          from: fromAddress(),
-          to: [to],
-          reply_to: replyToAddress(),
-          subject,
-          html,
-        }),
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(15_000),
       });
       if (res.ok) return { sent: true };
 
-      const body = await res.text();
       const isRetryable = res.status >= 500 || res.status === 429;
       console.error(
-        `[email] attempt ${attempt + 1}/${MAX_ATTEMPTS} — Resend returned ${res.status}: ${body}`,
+        `[email] tentative ${attempt + 1}/${MAX_ATTEMPTS} — Resend HTTP ${res.status}`,
       );
       lastError = { reason: "resend_error", details: `HTTP ${res.status}` };
       if (!isRetryable) return { sent: false, ...lastError };
-    } catch (err) {
-      // Network error → always retryable.
-      console.error(`[email] attempt ${attempt + 1}/${MAX_ATTEMPTS} — network error:`, err);
-      lastError = { reason: "resend_error", details: String(err) };
+    } catch {
+      console.error(`[email] tentative ${attempt + 1}/${MAX_ATTEMPTS} — délai dépassé ou réseau indisponible`);
+      lastError = { reason: "resend_error", details: "network_error" };
     }
   }
 
-  console.error(`[email] all ${MAX_ATTEMPTS} attempts failed for ${to}, subject="${subject}"`);
+  console.error(`[email] les ${MAX_ATTEMPTS} tentatives ont échoué`);
   return { sent: false, ...lastError };
 }
 
@@ -323,6 +329,11 @@ export function renderDownloadEmail(p: DownloadEmailParams): { subject: string; 
 export async function sendDownloadEmail(p: DownloadEmailParams): Promise<EmailSendResult> {
   const { subject, html } = renderDownloadEmail(p);
   return resendSend(p.to, subject, html);
+}
+
+export function prepareDownloadEmail(p: DownloadEmailParams): PreparedEmail {
+  const { subject, html } = renderDownloadEmail(p);
+  return { from: fromAddress(), to: [p.to], reply_to: replyToAddress(), subject, html };
 }
 
 export interface MagicLinkEmailParams {

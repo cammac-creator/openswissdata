@@ -7,6 +7,7 @@ import { cached, sourceJson, searchConsole } from "../lib/crm-source.js";
 import { customerLanguage, setCustomerLanguage } from "../lib/crm-language.js";
 import { isLanguage } from "../lib/languages.js";
 import { crmMailRoute } from "./crm-mail.js";
+import { deliveryStatus } from "../lib/order-delivery.js";
 
 export const crmRoute = new Hono<{ Variables: { customer_id: number; customer_email: string } }>();
 crmRoute.use("*", requireAdmin);
@@ -133,6 +134,6 @@ crmRoute.get("/operations", async c => {
       return { available: true, checked_at: Date.now(), items: flow.workflows.map(({ id, name, state, html_url }) => ({ id, name, state, html_url })), runs: runs.workflow_runs.map(({ id, workflow_id, name, status, conclusion, created_at, html_url }) => ({ id, workflow_id, name, status, conclusion, created_at, html_url })) };
     });
   } catch { /* L'indisponibilité reste visible, aucun succès n'est inventé. */ }
-  return c.json({ checked_at: Date.now(), datasets, checks, workflows, revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
+  return c.json({ checked_at: Date.now(), datasets, checks, workflows, deliveries: deliveryStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
 });
 crmRoute.route("/mail", crmMailRoute);
