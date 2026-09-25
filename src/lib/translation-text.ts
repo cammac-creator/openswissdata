@@ -3,7 +3,7 @@ export function protectTerms(text:string) {
   const terms:string[] = [];
   // Le marqueur est réservé : on refuse de le confondre avec un texte fourni.
   if (/ZXQ\d+XZ/i.test(text)) throw new Error('reserved_marker');
-  const protectedText = text.replace(/https?:\/\/\S+|[\w.+-]+@[\w.-]+|\b(?=[A-Z0-9_-]*[A-Z])[A-Z0-9][A-Z0-9_-]{1,39}\b|\d+(?:[.,’']\d+)*/g, term => `ZXQ${terms.push(term)-1}XZ`);
+  const protectedText = text.replace(/https?:\/\/\S+|[\w.+-]+@[\w.-]+|\b(?=[A-Z0-9_-]*[A-Z])[A-Z0-9][A-Z0-9_-]{0,38}[A-Z0-9]\b|\d+(?:[.,’']\d+)*/g, term => `ZXQ${terms.push(term)-1}XZ`).replace(/(ZXQ\d+XZ)-(?=[A-Z][a-z])/g, '$1 ');
   return { text:protectedText, restore(translated:string) {
     let result=translated;
     for (let index=0;index<terms.length;index++) {
