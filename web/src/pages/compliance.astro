@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const lastUpdated = new Date().toISOString().split("T")[0];
 ---
 <BaseLayout
   title="Sources et compliance — openswissdata.com"
@@ -18,7 +17,7 @@ const lastUpdated = new Date().toISOString().split("T")[0];
 
       <div class="legal-content">
         <h1>Sources et compliance</h1>
-        <div class="legal-meta">Page institutionnelle · Dernière mise à jour {lastUpdated}</div>
+        <div class="legal-meta">Page institutionnelle</div>
 
         <div style="background: var(--bg-card); border: 1px solid var(--line); border-left: 3px solid var(--ink); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0 28px; font-size: 13px; line-height: 1.55;">
           <strong style="display:block; margin-bottom: 4px;">Identité juridique de l'éditeur</strong>
@@ -187,7 +186,7 @@ const lastUpdated = new Date().toISOString().split("T")[0];
     </p>
 
         <p class="legal-meta" style="margin-top: 48px; padding-top: 16px; border-top: 1px dashed var(--line-strong); border-bottom: none;">
-          Page mise à jour {lastUpdated}. openswissdata.com est un service privé indépendant. Aucune affiliation avec opendata.swiss, BAZG, BFS, FINMA, Eurostat ou les Nations Unies.
+          openswissdata.com est un service privé indépendant. Aucune affiliation avec opendata.swiss, BAZG, BFS, FINMA, Eurostat ou les Nations Unies.
         </p>
       </div>
     </div>

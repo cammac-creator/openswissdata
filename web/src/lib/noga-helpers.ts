@@ -3,10 +3,13 @@
  * + cross-walks NACE 2.0 / NACE 2.1 / ISIC Rev 4.
  *
  * Lecture stricte au build time (Astro SSG). Aucune dépendance runtime.
- * Source : data/classifications/classifications-2026.04.29-test-work/*.csv
+ * Libellés NOGA : huit champs identiques aux 1 845 lignes de l’archive signée 2026.09.25.
+ * Relations : même référence sourcée que le MCP, dans src/mcp/data/.
  */
+import { parse } from "csv-parse/sync";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { CLASSIFICATION_SCHEMES, resolveClassificationLinks, type ClassificationLink, type ClassificationSource, type ClassificationRelation } from "../../../src/lib/classification-links";
 
 // Astro lance le build depuis web/. process.cwd() pointe donc sur web/.
 // Le dataset est dans repo-root/data/classifications/...
@@ -16,19 +19,8 @@ const DATA_DIR = resolve(
   "data/classifications/classifications-2026.04.29-test-work",
 );
 
-// Defensive: if the dataset is missing (e.g. partial clone, fresh CI runner
-// without the data dir), emit a warning and let the loaders return empty
-// arrays. Astro's getStaticPaths() then produces ZERO /codes/noga/* pages,
-// but the rest of the site still builds. Better than failing the whole
-// deploy on a missing optional asset.
-const DATASET_AVAILABLE = existsSync(DATA_DIR);
-if (!DATASET_AVAILABLE) {
-  console.warn(
-    `[noga-helpers] Classification dataset not found at ${DATA_DIR}. ` +
-      `SEO programmatic pages (/codes/noga/*) will be skipped. ` +
-      `cwd=${process.cwd()}`,
-  );
-}
+// Les fiches existantes ne doivent pas disparaître silencieusement au build.
+if (!existsSync(DATA_DIR)) throw new Error("Référentiel NOGA absent : publication interrompue.");
 
 export type Level = "section" | "division" | "group" | "class" | "subclass";
 
@@ -43,133 +35,40 @@ export interface NogaRow {
   label_en: string;
 }
 
-export interface NaceRow {
-  scheme: string;
-  code: string;
-  level: Level;
-  parent: string;
-  label_fr: string;
-  label_de: string;
-  label_it: string;
-  label_en: string;
-}
-
-export interface IsicRow {
-  scheme: string;
-  code: string;
-  level: Level;
-  parent: string;
-  label_fr: string;
-  label_de: string;
-  label_it: string;
-  label_en: string;
-}
-
-export interface CrosswalkRow {
-  noga_2008: string;
-  noga_2025: string;
-  nace_2_0: string;
-  nace_2_1: string;
-  isic_4: string;
-  mapping_type: string;
-  notes: string;
-}
-
-/**
- * Mini parseur CSV qui respecte les guillemets doubles (RFC 4180 simplifié).
- * Évite d'ajouter csv-parse comme dépendance dans web/.
- */
-function parseCsvLine(line: string): string[] {
-  const out: string[] = [];
-  let cur = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (inQuotes) {
-      if (ch === '"' && line[i + 1] === '"') {
-        cur += '"';
-        i++;
-      } else if (ch === '"') {
-        inQuotes = false;
-      } else {
-        cur += ch;
-      }
-    } else {
-      if (ch === ",") {
-        out.push(cur);
-        cur = "";
-      } else if (ch === '"') {
-        inQuotes = true;
-      } else {
-        cur += ch;
-      }
-    }
-  }
-  out.push(cur);
-  return out;
-}
-
-function parseCsv<T extends Record<string, string>>(text: string): T[] {
-  const lines = text.split(/\r?\n/).filter((l) => l.length > 0);
-  if (lines.length === 0) return [];
-  const headers = parseCsvLine(lines[0]);
-  const rows: T[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cells = parseCsvLine(lines[i]);
-    const row: Record<string, string> = {};
-    for (let j = 0; j < headers.length; j++) {
-      row[headers[j]] = cells[j] ?? "";
-    }
-    rows.push(row as T);
-  }
-  return rows;
+/** Lecture stricte, y compris les champs cités contenant des retours à la ligne. */
+function parseCsv<T>(text: string): T[] {
+  return parse(text, { columns: true, skip_empty_lines: true, bom: true }) as T[];
 }
 
 let _noga: NogaRow[] | null = null;
-let _nace21: NaceRow[] | null = null;
-let _nace20: NaceRow[] | null = null;
-let _isic: IsicRow[] | null = null;
-let _crosswalks: CrosswalkRow[] | null = null;
-
 export function loadNoga2025(): NogaRow[] {
   if (_noga) return _noga;
-  if (!DATASET_AVAILABLE) { _noga = []; return _noga; }
   const raw = readFileSync(resolve(DATA_DIR, "noga_2025.csv"), "utf-8");
-  _noga = parseCsv<NogaRow>(raw);
-  return _noga;
+  const rows = parseCsv<NogaRow>(raw);
+  if (rows.length !== 1845 || new Set(rows.map(r => r.code)).size !== rows.length) {
+    throw new Error("Le référentiel NOGA a changé : contrôler les fiches avant publication.");
+  }
+  _noga = rows;
+  return rows;
 }
 
-export function loadNace21(): NaceRow[] {
-  if (_nace21) return _nace21;
-  if (!DATASET_AVAILABLE) { _nace21 = []; return _nace21; }
-  const raw = readFileSync(resolve(DATA_DIR, "nace_2_1.csv"), "utf-8");
-  _nace21 = parseCsv<NaceRow>(raw);
-  return _nace21;
+let reference: { links: ClassificationLink[]; sources: ClassificationSource[]; version: string } | undefined;
+function getReference() {
+  if (reference) return reference;
+  const dir = resolve(REPO_ROOT, "src/mcp/data");
+  const links = parseCsv<Record<string, string>>(readFileSync(resolve(dir, "classification_links.csv"), "utf8")) as unknown as ClassificationLink[];
+  const sources = parseCsv<Record<string, string>>(readFileSync(resolve(dir, "classification_sources.csv"), "utf8")) as unknown as ClassificationSource[];
+  const versions = new Set(sources.map(s => s.version));
+  if (versions.size !== 1 || !sources.length || !links.length || sources.some(s => !/^https:\/\//.test(s.url) || !/^[a-f0-9]{64}$/.test(s.sha256) || !/^\d{4}\.\d{2}\.\d{2}$/.test(s.version)) ||
+      links.some(l => !sources.some(s => s.source_id === l.source_id) ||
+        !CLASSIFICATION_SCHEMES.includes(l.source_scheme) || !CLASSIFICATION_SCHEMES.includes(l.target_scheme) ||
+        !l.source_code || !l.target_code || !["exactMatch", "closeMatch", "broadMatch", "narrowMatch", "relatedMatch"].includes(l.relation))) {
+    throw new Error("Référentiel des correspondances incomplet ou de versions mélangées.");
+  }
+  reference = { links, sources, version: sources[0].version };
+  return reference;
 }
-
-export function loadNace20(): NaceRow[] {
-  if (_nace20) return _nace20;
-  if (!DATASET_AVAILABLE) { _nace20 = []; return _nace20; }
-  const raw = readFileSync(resolve(DATA_DIR, "nace_2_0.csv"), "utf-8");
-  _nace20 = parseCsv<NaceRow>(raw);
-  return _nace20;
-}
-
-export function loadIsic4(): IsicRow[] {
-  if (_isic) return _isic;
-  if (!DATASET_AVAILABLE) { _isic = []; return _isic; }
-  const raw = readFileSync(resolve(DATA_DIR, "isic_4.csv"), "utf-8");
-  _isic = parseCsv<IsicRow>(raw);
-  return _isic;
-}
-
-export function loadCrosswalks(): CrosswalkRow[] {
-  if (_crosswalks) return _crosswalks;
-  if (!DATASET_AVAILABLE) { _crosswalks = []; return _crosswalks; }
-  const raw = readFileSync(resolve(DATA_DIR, "crosswalks.csv"), "utf-8");
-  _crosswalks = parseCsv<CrosswalkRow>(raw);
-  return _crosswalks;
-}
+export function getClassificationReferenceVersion(): string { return getReference().version; }
 
 /**
  * Affiche un code NOGA en notation pointée pour l'humain.
@@ -262,46 +161,30 @@ function numericPrefix(code: string): number {
   return Number.isNaN(n) ? 0 : n;
 }
 
-/**
- * Cross-walks d'un code NOGA 2025 vers les autres standards.
- * Retourne un tableau (peut être >1 si mapping multi).
- */
+/** Même résolution sourcée que le MCP, sans chaîner deux approximations. */
 export interface ResolvedCrosswalk {
-  noga_2008: string;
-  noga_2008_label_fr: string;
-  nace_2_0: string;
-  nace_2_0_label_en: string;
-  nace_2_1: string;
-  nace_2_1_label_en: string;
-  isic_4: string;
-  isic_4_label_en: string;
-  mapping_type: string;
-  notes: string;
+  standard: string;
+  code: string;
+  relation: ClassificationRelation;
+  requires_review: boolean;
+  sources: ClassificationSource[];
 }
-
-export function getCrosswalksFor(noga2025Code: string): ResolvedCrosswalk[] {
-  const xw = loadCrosswalks().filter((r) => r.noga_2025 === noga2025Code);
-  if (xw.length === 0) return [];
-
-  const noga2008Index = new Map(
-    loadNoga2025().map((r) => [r.code, r]), // fallback FR pour NOGA 2008 (mêmes labels souvent)
-  );
-  const nace21Index = new Map(loadNace21().map((r) => [r.code, r]));
-  const nace20Index = new Map(loadNace20().map((r) => [r.code, r]));
-  const isicIndex = new Map(loadIsic4().map((r) => [r.code, r]));
-
-  return xw.map((row) => ({
-    noga_2008: row.noga_2008,
-    noga_2008_label_fr: noga2008Index.get(row.noga_2008)?.label_fr ?? "",
-    nace_2_0: row.nace_2_0,
-    nace_2_0_label_en: nace20Index.get(row.nace_2_0)?.label_en ?? "",
-    nace_2_1: row.nace_2_1,
-    nace_2_1_label_en: nace21Index.get(row.nace_2_1)?.label_en ?? "",
-    isic_4: row.isic_4,
-    isic_4_label_en: isicIndex.get(row.isic_4)?.label_en ?? "",
-    mapping_type: row.mapping_type,
-    notes: row.notes,
-  }));
+const resolved = new Map<string, ResolvedCrosswalk[]>();
+export function getCrosswalksFor(code: string): ResolvedCrosswalk[] {
+  const cached = resolved.get(code);
+  if (cached) return cached;
+  const ref = getReference();
+  const result: ResolvedCrosswalk[] = [];
+  for (const target of ["NACE_2.1", "NACE_2.0", "ISIC_4", "NOGA_2008"] as const) {
+    for (const mapping of resolveClassificationLinks(ref.links, "NOGA_2025", code, target)) {
+      const ids = new Set(mapping.path.map(step => step.source_id));
+      result.push({ standard: target.replaceAll("_", " "), code: mapping.target_code,
+        relation: mapping.relation, requires_review: mapping.requires_review,
+        sources: ref.sources.filter(s => ids.has(s.source_id)) });
+    }
+  }
+  resolved.set(code, result);
+  return result;
 }
 
 /**
@@ -336,102 +219,4 @@ export function getDivisionsBySection(section: string): NogaRow[] {
   return loadNoga2025()
     .filter((r) => r.level === "division" && r.parent === section)
     .sort((a, b) => a.code.localeCompare(b.code));
-}
-
-/**
- * Génère 4-5 phrases d'exemples concrets à partir du label NOGA.
- * Approche déterministe (pas d'IA) — basée sur des patterns de mots-clés.
- */
-export function generateActivityExamples(noga: NogaRow): string[] {
-  const label = noga.label_fr;
-  const lower = label.toLowerCase();
-  const examples: string[] = [];
-
-  // Verbe d'attaque selon thème
-  const isManufacturing =
-    lower.includes("fabrication") ||
-    lower.includes("production") ||
-    lower.includes("industrie");
-  const isService =
-    lower.includes("service") ||
-    lower.includes("activité") ||
-    lower.includes("conseil");
-  const isCommerce =
-    lower.includes("commerce") ||
-    lower.includes("vente") ||
-    lower.includes("réparation");
-  const isAgri =
-    lower.includes("culture") ||
-    lower.includes("élevage") ||
-    lower.includes("pêche") ||
-    lower.includes("forest");
-  const isConstruction =
-    lower.includes("construction") || lower.includes("bâtiment");
-  const isFinance =
-    lower.includes("banque") ||
-    lower.includes("assurance") ||
-    lower.includes("financier");
-
-  examples.push(
-    `Une entreprise dont l'activité principale relève de « ${label} » est classée sous le code NOGA ${dottedCode(
-      noga.code,
-    )}.`,
-  );
-
-  if (isManufacturing) {
-    examples.push(
-      `Cette catégorie regroupe les unités industrielles et ateliers qui transforment des matières premières ou des composants en produits finis ou semi-finis.`,
-    );
-    examples.push(
-      `Sont concernées : usines, manufactures, fabriques, ateliers de production, lignes d'assemblage et sites de transformation.`,
-    );
-  } else if (isService) {
-    examples.push(
-      `Cette catégorie regroupe les sociétés de services, cabinets, agences et entreprises individuelles dont la prestation principale correspond à cette activité.`,
-    );
-    examples.push(
-      `Sont concernées : sociétés de conseil, cabinets professionnels, prestataires indépendants et entreprises de services.`,
-    );
-  } else if (isCommerce) {
-    examples.push(
-      `Cette catégorie regroupe les commerces de gros et de détail, les revendeurs, distributeurs et points de vente concernés par cette activité.`,
-    );
-    examples.push(
-      `Sont concernés : magasins, boutiques, e-commerces, grossistes, distributeurs et chaînes de revente.`,
-    );
-  } else if (isAgri) {
-    examples.push(
-      `Cette catégorie regroupe les exploitations agricoles, fermes, domaines et structures de production primaire concernés.`,
-    );
-    examples.push(
-      `Sont concernés : exploitations familiales, domaines agricoles, coopératives de production et entreprises individuelles du secteur primaire.`,
-    );
-  } else if (isConstruction) {
-    examples.push(
-      `Cette catégorie regroupe les entreprises générales et de second œuvre, les artisans du bâtiment et les sociétés de génie civil.`,
-    );
-    examples.push(
-      `Sont concernées : entreprises de construction, artisans, sous-traitants, bureaux techniques et sociétés de génie civil.`,
-    );
-  } else if (isFinance) {
-    examples.push(
-      `Cette catégorie regroupe les institutions financières, banques, assureurs, courtiers et sociétés de gestion concernés.`,
-    );
-    examples.push(
-      `Sont concernés : banques, assureurs, sociétés de gestion d'actifs, courtiers, conseillers financiers et fintechs.`,
-    );
-  } else {
-    examples.push(
-      `Cette catégorie couvre l'ensemble des entreprises et entités dont l'activité économique principale correspond à cette description, quelle que soit leur taille.`,
-    );
-    examples.push(
-      `Sont concernés : indépendants, PME, grandes entreprises, succursales et établissements suisses dont l'activité dominante relève de ce périmètre.`,
-    );
-  }
-
-  examples.push(
-    `Le code est attribué selon le principe de l'activité économique principale : si une entité a plusieurs activités, c'est celle qui génère le plus de valeur ajoutée qui détermine la classification.`,
-  );
-
-  return examples;
 }

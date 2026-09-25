@@ -1,4 +1,5 @@
 ---
+import { jsonForHtml } from "../lib/html";
 import "../styles/global.css";
 import StatusBar from "../components/StatusBar.astro";
 import Footer from "../components/Footer.astro";
@@ -92,7 +93,7 @@ const orgDescription = lang === "de"
     {/* Organization-level Schema.org JSON-LD — applies sitewide.
         Dataset and FAQ pages can supplement this with their own JSON-LD
         in their <slot /> via additional <script> tags. */}
-    <script type="application/ld+json" set:html={JSON.stringify({
+    <script type="application/ld+json" set:html={jsonForHtml({
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "openswissdata",
@@ -118,11 +119,11 @@ const orgDescription = lang === "de"
     })} />
 
     {productJsonLd && (
-      <script type="application/ld+json" set:html={JSON.stringify(productJsonLd)} />
+      <script type="application/ld+json" set:html={jsonForHtml(productJsonLd)} />
     )}
 
     {datasetJsonLd && (
-      <script type="application/ld+json" set:html={JSON.stringify(datasetJsonLd)} />
+      <script type="application/ld+json" set:html={jsonForHtml(datasetJsonLd)} />
     )}
 
     {Astro.url.hostname === "www.openswissdata.com" && (

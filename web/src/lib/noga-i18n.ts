@@ -3,8 +3,7 @@
  *
  * Les libellés de codes (label_fr/de/it/en) viennent de la donnée OFS ; ici on
  * traduit l'enrobage éditorial + UI une seule fois, partagé par les ~1047 pages
- * de chaque langue. Détection de catégorie d'exemple faite sur label_fr (stable),
- * rendu de la prose dans la langue cible.
+ * de chaque langue. Aucune activité additionnelle déduite d’un simple mot du libellé.
  */
 import type { Lang } from "../i18n/utils";
 import { dottedCode, type NogaRow, type Level } from "./noga-helpers";
@@ -55,7 +54,7 @@ const BFS_URL: Record<Lang, string> = {
 export const NOGA_STR: Record<Lang, NogaStrings> = {
   fr: {
     bcHome: "accueil", bcCodes: "codes", bcScheme: "noga 2025",
-    ledeHtml: (href) => `Activité de la nomenclature générale des activités économiques suisse (NOGA 2025), publiée par l'Office fédéral de la statistique (OFS). Le dataset complet (cross-walks NACE 2.1 + ISIC 4) est inclus dans <a href="${href}">Classifications (399 CHF)</a>.`,
+    ledeHtml: (href) => `Activité de la nomenclature générale des activités économiques suisse (NOGA 2025), publiée par l'Office fédéral de la statistique (OFS). Le jeu de codes et de correspondances documentées est inclus dans <a href="${href}">Classifications (399 CHF)</a>.`,
     priceBoxLabel: "Niveau", rawCode: "Code brut :",
     descTitle: "Description", descTitleEm: "multilingue",
     descIntro: "La nomenclature NOGA 2025 fournit la désignation officielle dans les quatre langues utilisées par les autorités fédérales suisses et leurs équivalents européens.",
@@ -65,10 +64,10 @@ export const NOGA_STR: Record<Lang, NogaStrings> = {
     thLevel: "Niveau", thCode: "Code",
     subTitle: "Sous-niveaux", subTitleEm: "directs",
     subIntro: (n) => `Ce code se décompose en ${n} sous-${n === 1 ? "niveau plus précis" : "niveaux plus précis"}.`,
-    cwTitle: "Cross-walks", cwTitleEm: "officiels",
-    cwIntro: (d) => `Équivalence du code NOGA ${d} dans les standards européens (NACE) et internationaux (ISIC), issue des tables officielles de l'OFS et d'Eurostat.`,
+    cwTitle: "Correspondances", cwTitleEm: "documentées",
+    cwIntro: (d) => `Relations disponibles pour le code NOGA ${d}, établies à partir de sources OFS et Eurostat. Une correspondance approchée exige de vérifier l’activité concernée.`,
     thStandard: "Standard", thType: "Type",
-    cwNote: "Type exact = équivalence stricte 1:1. partial = recouvrement partiel. multi = un code source mappe vers plusieurs codes cibles.",
+    cwNote: "Deux relations non exactes ne sont jamais chaînées. Une absence de résultat ne prouve pas l’absence d’équivalent. Référence",
     neighTitle: "Codes", neighTitleEm: "voisins",
     neighIntro: (d) => `Codes NOGA proches du code ${d}, dans le même groupe parent ou au même niveau hiérarchique.`,
     exTitle: "Exemples", exTitleEm: "d'activités",
@@ -87,18 +86,18 @@ export const NOGA_STR: Record<Lang, NogaStrings> = {
     srcIntro: "Cette page reprend les informations du standard NOGA 2025 publié par l'Office fédéral de la statistique. Pour la version officielle :",
     srcLinkText: "bfs.admin.ch — NOGA — Nomenclature générale des activités économiques", srcUrl: BFS_URL.fr,
     mcpTitle: "NOGA à la", mcpTitleEm: "demande",
-    mcpIntro: "Classifiez du texte libre vers le top-3 NOGA et interrogez l'arbre complet (cross-walks NACE/ISIC inclus) via le serveur MCP — directement dans Claude Code, Cursor ou Cline. Gratuit pour tester, sans compte.",
+    mcpIntro: "Interrogez les correspondances avec cross_walk, accessible sans compte dans le serveur MCP. La classification de texte et les autres outils protégés exigent des droits distincts.",
     mcpCta: "Brancher le MCP — gratuit",
     fullTitle: "Données", fullTitleEm: "complètes",
-    fullIntro: "Besoin du dataset complet (1 845 codes NOGA 2025 + 5 nomenclatures alignées + cross-walks 5-way) pour vos systèmes ?",
+    fullIntro: "Besoin des fichiers pour vos systèmes ? Le jeu Classifications comprend cinq nomenclatures, dont NOGA 2025, et les correspondances documentées disponibles. Il ne garantit pas un équivalent pour chaque paire de codes.",
     fullCta: "Voir le bundle Classifications",
     footer: "Cette page est générée à partir de la nomenclature NOGA 2025 publiée par l'Office fédéral de la statistique (OFS / BFS). openswissdata.com n'est pas affilié à l'OFS. Désignations officielles utilisées avec attribution. Pour la version faisant foi, consultez bfs.admin.ch.",
     metaTitle: (d, l) => `Code NOGA ${d} — ${l} | openswissdata.com`,
-    metaDesc: (d, l) => `Définition du code NOGA ${d} (${l}), cross-walks NACE 2.1 et ISIC Rev 4, codes voisins. Source officielle OFS.`,
+    metaDesc: (d, l) => `Définition du code NOGA ${d} (${l}), correspondances documentées disponibles et codes voisins. Source officielle OFS.`,
   },
   de: {
     bcHome: "Startseite", bcCodes: "Codes", bcScheme: "noga 2025",
-    ledeHtml: (href) => `Tätigkeit der Allgemeinen Systematik der Wirtschaftszweige (NOGA 2025), herausgegeben vom Bundesamt für Statistik (BFS). Der vollständige Datensatz (Cross-Walks NACE 2.1 + ISIC 4) ist in <a href="${href}">Klassifikationen (399 CHF)</a> enthalten.`,
+    ledeHtml: (href) => `Tätigkeit der Allgemeinen Systematik der Wirtschaftszweige (NOGA 2025), herausgegeben vom Bundesamt für Statistik (BFS). Der Datensatz mit Codes und dokumentierten Zuordnungen ist in <a href="${href}">Klassifikationen (399 CHF)</a> enthalten.`,
     priceBoxLabel: "Ebene", rawCode: "Roher Code:",
     descTitle: "Bezeichnung", descTitleEm: "mehrsprachig",
     descIntro: "Die NOGA 2025 liefert die offizielle Bezeichnung in den vier von den Schweizer Bundesbehörden verwendeten Sprachen sowie deren europäische Entsprechung.",
@@ -108,10 +107,10 @@ export const NOGA_STR: Record<Lang, NogaStrings> = {
     thLevel: "Ebene", thCode: "Code",
     subTitle: "Direkte", subTitleEm: "Unterebenen",
     subIntro: (n) => `Dieser Code gliedert sich in ${n} genauere Unterebene${n === 1 ? "" : "n"}.`,
-    cwTitle: "Offizielle", cwTitleEm: "Cross-Walks",
-    cwIntro: (d) => `Entsprechung des NOGA-Codes ${d} in den europäischen (NACE) und internationalen (ISIC) Standards, gemäss den offiziellen Tabellen von BFS und Eurostat.`,
+    cwTitle: "Dokumentierte", cwTitleEm: "Zuordnungen",
+    cwIntro: (d) => `Verfügbare Beziehungen für NOGA ${d} auf Grundlage von BFS- und Eurostat-Quellen. Ungefähre Zuordnungen erfordern eine Prüfung der Tätigkeit.`,
     thStandard: "Standard", thType: "Typ",
-    cwNote: "Typ exact = strikte 1:1-Entsprechung. partial = teilweise Überschneidung. multi = ein Quellcode wird auf mehrere Zielcodes abgebildet.",
+    cwNote: "Zwei nicht exakte Beziehungen werden nicht verkettet. Ein fehlendes Ergebnis beweist nicht, dass es keine Entsprechung gibt. Referenz",
     neighTitle: "Benachbarte", neighTitleEm: "Codes",
     neighIntro: (d) => `NOGA-Codes in der Nähe von ${d}, in derselben übergeordneten Gruppe oder auf derselben Hierarchieebene.`,
     exTitle: "Tätigkeits-", exTitleEm: "beispiele",
@@ -130,18 +129,18 @@ export const NOGA_STR: Record<Lang, NogaStrings> = {
     srcIntro: "Diese Seite gibt die Informationen des vom Bundesamt für Statistik herausgegebenen Standards NOGA 2025 wieder. Für die offizielle Fassung:",
     srcLinkText: "bfs.admin.ch — NOGA — Allgemeine Systematik der Wirtschaftszweige", srcUrl: BFS_URL.de,
     mcpTitle: "NOGA auf", mcpTitleEm: "Abruf",
-    mcpIntro: "Klassifizieren Sie Freitext in die Top-3-NOGA-Codes und durchsuchen Sie den vollständigen Baum (inkl. NACE/ISIC-Cross-Walks) über den MCP-Server — direkt in Claude Code, Cursor oder Cline. Kostenlos testen, ohne Konto.",
+    mcpIntro: "Fragen Sie Zuordnungen mit cross_walk im MCP-Server ohne Konto ab. Textklassifikation und andere geschützte Werkzeuge benötigen separate Berechtigungen.",
     mcpCta: "MCP einbinden — gratis",
     fullTitle: "Vollständige", fullTitleEm: "Daten",
-    fullIntro: "Benötigen Sie den vollständigen Datensatz (1 845 NOGA-2025-Codes + 5 abgeglichene Systematiken + 5-Wege-Cross-Walks) für Ihre Systeme?",
+    fullIntro: "Benötigen Sie Dateien für Ihre Systeme? Der Datensatz enthält fünf Systematiken, darunter NOGA 2025, und verfügbare dokumentierte Zuordnungen. Eine Entsprechung für jedes Codepaar ist nicht garantiert.",
     fullCta: "Klassifikationen-Bundle ansehen",
     footer: "Diese Seite wird aus der vom Bundesamt für Statistik (BFS) herausgegebenen NOGA 2025 generiert. openswissdata.com ist nicht mit dem BFS verbunden. Offizielle Bezeichnungen mit Quellenangabe verwendet. Für die massgebende Fassung siehe bfs.admin.ch.",
     metaTitle: (d, l) => `NOGA-Code ${d} — ${l} | openswissdata.com`,
-    metaDesc: (d, l) => `Bedeutung des NOGA-Codes ${d} (${l}), Cross-Walks NACE 2.1 und ISIC Rev 4, benachbarte Codes. Offizielle Quelle BFS.`,
+    metaDesc: (d, l) => `Bedeutung des NOGA-Codes ${d} (${l}), verfügbare dokumentierte Zuordnungen und benachbarte Codes. Offizielle Quelle BFS.`,
   },
   en: {
     bcHome: "home", bcCodes: "codes", bcScheme: "noga 2025",
-    ledeHtml: (href) => `Activity from the Swiss General Classification of Economic Activities (NOGA 2025), published by the Federal Statistical Office (FSO). The full dataset (NACE 2.1 + ISIC 4 cross-walks) is included in <a href="${href}">Classifications (399 CHF)</a>.`,
+    ledeHtml: (href) => `Activity from the Swiss General Classification of Economic Activities (NOGA 2025), published by the Federal Statistical Office (FSO). The dataset of codes and documented mappings is included in <a href="${href}">Classifications (399 CHF)</a>.`,
     priceBoxLabel: "Level", rawCode: "Raw code:",
     descTitle: "Multilingual", descTitleEm: "description",
     descIntro: "NOGA 2025 provides the official designation in the four languages used by the Swiss federal authorities, alongside their European equivalents.",
@@ -151,10 +150,10 @@ export const NOGA_STR: Record<Lang, NogaStrings> = {
     thLevel: "Level", thCode: "Code",
     subTitle: "Direct", subTitleEm: "sub-levels",
     subIntro: (n) => `This code breaks down into ${n} more specific sub-level${n === 1 ? "" : "s"}.`,
-    cwTitle: "Official", cwTitleEm: "cross-walks",
-    cwIntro: (d) => `Equivalence of NOGA code ${d} in the European (NACE) and international (ISIC) standards, from the official FSO and Eurostat tables.`,
+    cwTitle: "Documented", cwTitleEm: "mappings",
+    cwIntro: (d) => `Available relationships for NOGA ${d}, based on FSO and Eurostat sources. Approximate mappings require a review of the business activity.`,
     thStandard: "Standard", thType: "Type",
-    cwNote: "Type exact = strict 1:1 equivalence. partial = partial overlap. multi = one source code maps to several target codes.",
+    cwNote: "Two non-exact relationships are never chained. A missing result does not prove there is no equivalent. Reference",
     neighTitle: "Neighbouring", neighTitleEm: "codes",
     neighIntro: (d) => `NOGA codes close to ${d}, within the same parent group or at the same hierarchical level.`,
     exTitle: "Activity", exTitleEm: "examples",
@@ -173,14 +172,14 @@ export const NOGA_STR: Record<Lang, NogaStrings> = {
     srcIntro: "This page reproduces information from the NOGA 2025 standard published by the Federal Statistical Office. For the official version:",
     srcLinkText: "bfs.admin.ch — NOGA — General Classification of Economic Activities", srcUrl: BFS_URL.en,
     mcpTitle: "NOGA on", mcpTitleEm: "demand",
-    mcpIntro: "Classify free text into the top-3 NOGA codes and query the full tree (NACE/ISIC cross-walks included) via the MCP server — straight from Claude Code, Cursor or Cline. Free to try, no account.",
+    mcpIntro: "Query mappings with cross_walk in the MCP server without an account. Text classification and other protected tools require separate access rights.",
     mcpCta: "Connect the MCP — free",
     fullTitle: "Complete", fullTitleEm: "dataset",
-    fullIntro: "Need the full dataset (1,845 NOGA 2025 codes + 5 aligned classifications + 5-way cross-walks) for your systems?",
+    fullIntro: "Need files for your systems? The Classifications dataset contains five classifications, including NOGA 2025, and available documented mappings. It does not guarantee an equivalent for every pair of codes.",
     fullCta: "See the Classifications bundle",
     footer: "This page is generated from the NOGA 2025 classification published by the Federal Statistical Office (FSO / BFS). openswissdata.com is not affiliated with the FSO. Official designations used with attribution. For the authoritative version, see bfs.admin.ch.",
     metaTitle: (d, l) => `NOGA code ${d} — ${l} | openswissdata.com`,
-    metaDesc: (d, l) => `Meaning of NOGA code ${d} (${l}), NACE 2.1 and ISIC Rev 4 cross-walks, neighbouring codes. Official FSO source.`,
+    metaDesc: (d, l) => `Meaning of NOGA code ${d} (${l}), available documented mappings and neighbouring codes. Official FSO source.`,
   },
 };
 
@@ -189,67 +188,4 @@ export function nogaMeta(row: NogaRow, lang: Lang): { title: string; description
   const label = labelFor(row, lang);
   const short = label.length > 80 ? label.slice(0, 77) + "..." : label;
   return { title: NOGA_STR[lang].metaTitle(dotted, short), description: NOGA_STR[lang].metaDesc(dotted, short) };
-}
-
-/**
- * Exemples d'activités localisés. Détection de catégorie sur label_fr (stable
- * dans toutes les langues), rendu de la prose dans la langue cible.
- */
-export function nogaExamples(row: NogaRow, lang: Lang): string[] {
-  const lower = row.label_fr.toLowerCase();
-  const label = labelFor(row, lang);
-  const dotted = dottedCode(row.code);
-  const cat: "manuf" | "service" | "commerce" | "agri" | "construction" | "finance" | "generic" =
-    lower.includes("fabrication") || lower.includes("production") || lower.includes("industrie") ? "manuf"
-    : lower.includes("service") || lower.includes("activité") || lower.includes("conseil") ? "service"
-    : lower.includes("commerce") || lower.includes("vente") || lower.includes("réparation") ? "commerce"
-    : lower.includes("culture") || lower.includes("élevage") || lower.includes("pêche") || lower.includes("forest") ? "agri"
-    : lower.includes("construction") || lower.includes("bâtiment") ? "construction"
-    : lower.includes("banque") || lower.includes("assurance") || lower.includes("financier") ? "finance"
-    : "generic";
-
-  const T: Record<Lang, { lead: string; cats: Record<string, string>; rule: string }> = {
-    fr: {
-      lead: `Une entreprise dont l'activité principale relève de « ${label} » est classée sous le code NOGA ${dotted}.`,
-      cats: {
-        manuf: "Cette catégorie regroupe les unités industrielles et ateliers qui transforment des matières premières ou des composants en produits finis ou semi-finis : usines, manufactures, fabriques, ateliers de production et sites de transformation.",
-        service: "Cette catégorie regroupe les sociétés de services, cabinets, agences et entreprises individuelles dont la prestation principale correspond à cette activité : sociétés de conseil, cabinets professionnels et prestataires indépendants.",
-        commerce: "Cette catégorie regroupe les commerces de gros et de détail, revendeurs et distributeurs : magasins, boutiques, e-commerces, grossistes et chaînes de revente.",
-        agri: "Cette catégorie regroupe les exploitations agricoles, fermes et domaines de production primaire : exploitations familiales, coopératives et entreprises du secteur primaire.",
-        construction: "Cette catégorie regroupe les entreprises générales et de second œuvre, artisans du bâtiment et sociétés de génie civil : entreprises de construction, sous-traitants et bureaux techniques.",
-        finance: "Cette catégorie regroupe les institutions financières, banques, assureurs, courtiers et sociétés de gestion : banques, assureurs, gestionnaires d'actifs, conseillers financiers et fintechs.",
-        generic: "Cette catégorie couvre l'ensemble des entreprises dont l'activité économique principale correspond à cette description, quelle que soit leur taille : indépendants, PME, grandes entreprises, succursales et établissements suisses.",
-      },
-      rule: "Le code est attribué selon le principe de l'activité économique principale : si une entité a plusieurs activités, c'est celle qui génère le plus de valeur ajoutée qui détermine la classification.",
-    },
-    de: {
-      lead: `Ein Unternehmen, dessen Haupttätigkeit unter „${label}" fällt, wird unter dem NOGA-Code ${dotted} klassifiziert.`,
-      cats: {
-        manuf: "Diese Kategorie umfasst Industrieeinheiten und Werkstätten, die Rohstoffe oder Komponenten in Fertig- oder Halbfertigprodukte umwandeln: Fabriken, Manufakturen, Produktionswerkstätten und Verarbeitungsbetriebe.",
-        service: "Diese Kategorie umfasst Dienstleistungsunternehmen, Kanzleien, Agenturen und Einzelunternehmen, deren Hauptleistung dieser Tätigkeit entspricht: Beratungsfirmen, Fachkanzleien und unabhängige Dienstleister.",
-        commerce: "Diese Kategorie umfasst Gross- und Detailhandel, Wiederverkäufer und Distributoren: Geschäfte, Läden, E-Commerce, Grosshändler und Vertriebsketten.",
-        agri: "Diese Kategorie umfasst landwirtschaftliche Betriebe, Höfe und Betriebe der Primärproduktion: Familienbetriebe, Genossenschaften und Unternehmen des Primärsektors.",
-        construction: "Diese Kategorie umfasst General- und Ausbauunternehmen, Bauhandwerker und Tiefbaufirmen: Bauunternehmen, Subunternehmer und technische Büros.",
-        finance: "Diese Kategorie umfasst Finanzinstitute, Banken, Versicherer, Makler und Vermögensverwalter: Banken, Versicherer, Vermögensverwalter, Finanzberater und Fintechs.",
-        generic: "Diese Kategorie umfasst alle Unternehmen, deren wirtschaftliche Haupttätigkeit dieser Beschreibung entspricht, unabhängig von ihrer Grösse: Selbstständige, KMU, Grossunternehmen, Filialen und Schweizer Niederlassungen.",
-      },
-      rule: "Der Code wird nach dem Prinzip der wirtschaftlichen Haupttätigkeit vergeben: Hat eine Einheit mehrere Tätigkeiten, ist diejenige mit der höchsten Wertschöpfung massgebend.",
-    },
-    en: {
-      lead: `A company whose main activity falls under "${label}" is classified under NOGA code ${dotted}.`,
-      cats: {
-        manuf: "This category covers industrial units and workshops that transform raw materials or components into finished or semi-finished products: factories, manufacturing plants, production workshops and processing sites.",
-        service: "This category covers service companies, firms, agencies and sole traders whose main offering matches this activity: consulting firms, professional practices and independent providers.",
-        commerce: "This category covers wholesale and retail trade, resellers and distributors: shops, stores, e-commerce, wholesalers and resale chains.",
-        agri: "This category covers farms, agricultural holdings and primary-production businesses: family farms, cooperatives and primary-sector companies.",
-        construction: "This category covers general and finishing contractors, building trades and civil-engineering firms: construction companies, subcontractors and technical offices.",
-        finance: "This category covers financial institutions, banks, insurers, brokers and asset managers: banks, insurers, asset managers, financial advisers and fintechs.",
-        generic: "This category covers all companies whose main economic activity matches this description, whatever their size: sole traders, SMEs, large companies, branches and Swiss establishments.",
-      },
-      rule: "The code is assigned on the principle of the main economic activity: if an entity has several activities, the one generating the most value added determines the classification.",
-    },
-  };
-
-  const t = T[lang];
-  return [t.lead, t.cats[cat], t.rule];
 }

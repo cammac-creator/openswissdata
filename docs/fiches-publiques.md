@@ -1,0 +1,9 @@
+# Fiches publiques — référence du 25 septembre 2026
+
+Les URLs existantes restent stables. Les fiches NOGA utilisent les mêmes correspondances sourcées que le MCP, depuis `classification_links.csv` et `classification_sources.csv`. Les identités documentées et les approximations sont distinguées ; deux approximations ne sont pas chaînées. Exemple : NOGA 18.11 → NACE 2.1 exact ; → NACE 2 approché ; aucun résultat ISIC déduit de deux approximations.
+
+Les 1 845 lignes NOGA et leurs huit champs utilisés dans les pages ont été comparés à l’archive signée 2026.09.25 : zéro différence. Les anciennes tables de correspondance et les anciens libellés NACE ne sont plus lus par ces pages. Les exemples d’activités auparavant déduits de mots-clés sont retirés. L’accès anonyme à `cross_walk` ne donne pas accès aux outils de classification protégés.
+
+Les fiches FINMA restent issues du fichier historique `web/src/data/finma.json`. Une publication quotidienne du produit téléchargeable ne les reconstruit pas avec de nouvelles lignes. Les pages et leurs métadonnées l’indiquent explicitement et renvoient à la FINMA pour vérifier le statut actuel. Ne pas interpréter la présence dans cette copie comme une autorisation actuelle. L’automatisation de la mise à jour de cet annuaire reste un chantier distinct, avec gestion des changements d’URL et des sorties de registre.
+
+Les résultats des recherches NOGA et FINMA utilisent des nœuds DOM et `textContent` ; leurs liens sont limités aux chemins de fiches attendus. Une erreur HTTP est affichée comme une indisponibilité, sans conclure à une absence de résultat. Les données JSON-LD échappent `<` pour empêcher la fermeture d’une balise script par une donnée. Les textes juridiques conservent leur numéro de version ; aucune date de modification n’est inventée à chaque construction. Le contenu juridique lui-même reste à revoir.

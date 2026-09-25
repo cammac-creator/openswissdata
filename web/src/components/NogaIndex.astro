@@ -1,4 +1,5 @@
 ---
+import { jsonForHtml } from "../lib/html";
 import { getSections, getDivisionsBySection, loadNoga2025, dottedCode } from "../lib/noga-helpers";
 import { labelFor } from "../lib/noga-i18n";
 import { localizePath, type Lang } from "../i18n/utils";
@@ -121,10 +122,10 @@ const indexJsonLd = {
       <div class="v4-section-eyebrow"><strong>{T.searchEyebrow}</strong></div>
       <h2 class="v4-section-h2">{T.searchTitle} <span class="serif">{T.searchTitleEm}</span></h2>
       <p class="v4-section-intro">{T.searchIntro}</p>
-      <input type="search" id="noga-search" data-index-url={searchUrl} placeholder={T.searchPlaceholder} autocomplete="off" spellcheck="false"
+      <input type="search" id="noga-search" aria-label={T.searchPlaceholder} data-index-url={searchUrl} placeholder={T.searchPlaceholder} autocomplete="off" spellcheck="false"
         style="width: 100%; padding: 14px 18px; font-size: 16px; border: 1px solid var(--color-line); border-radius: 12px; background: white; font-family: var(--font-sans); margin-bottom: 16px;" />
       <div id="noga-results" style="display: none; max-height: 480px; overflow-y: auto; border: 1px solid var(--color-line); border-radius: 12px; background: white;"></div>
-      <p id="noga-search-count" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
+      <p id="noga-search-count" role="status" aria-live="polite" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
     </section>
 
     <section class="ds-section reveal-v4">
@@ -196,9 +197,9 @@ const indexJsonLd = {
   </div>
 </section>
 
-<script type="application/ld+json" set:html={JSON.stringify(indexJsonLd)} />
+<script type="application/ld+json" set:html={jsonForHtml(indexJsonLd)} />
 
-<script define:vars={{ L: { loading: T.loading, noResult: T.noResult } }}>
+<script define:vars={{ L: { loading: T.loading, noResult: T.noResult, error: lang === "de" ? "Suche vorübergehend nicht verfügbar. Bitte erneut versuchen." : lang === "en" ? "Search temporarily unavailable. Please try again." : "Recherche momentanément indisponible. Réessayez." } }}>
   const input = document.getElementById("noga-search");
   const results = document.getElementById("noga-results");
   const countEl = document.getElementById("noga-search-count");
@@ -209,22 +210,36 @@ const indexJsonLd = {
     if (searchIndex) return Promise.resolve(searchIndex);
     if (loadingPromise) return loadingPromise;
     countEl.textContent = L.loading;
-    loadingPromise = fetch(indexUrl).then((r) => r.json()).then((data) => { searchIndex = data; countEl.textContent = ""; return data; })
-      .catch((err) => { countEl.textContent = "⚠"; loadingPromise = null; throw err; });
+    loadingPromise = fetch(indexUrl).then((r) => { if (!r.ok) throw new Error("index_unavailable"); return r.json(); }).then((data) => { if (!Array.isArray(data) || data.some(r => ![r.code, r.dotted, r.label].every(s => typeof s === "string"))) throw new Error("index_invalid"); searchIndex = data; countEl.textContent = ""; return data; })
+      .catch((err) => { countEl.textContent = L.error; loadingPromise = null; throw err; });
     return loadingPromise;
   }
   function normalize(s) { return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
   function render(matches) {
     if (matches.length === 0) { results.style.display = "none"; countEl.textContent = L.noResult; return; }
     results.style.display = "block";
-    results.innerHTML = matches.slice(0, 50).map((m) => `<div class="noga-result-item"><a href="${m.href}"><span class="noga-result-code">${m.dotted}</span><span class="noga-result-label">${m.label}</span></a></div>`).join("");
+    const fragment = document.createDocumentFragment();
+    for (const m of matches.slice(0, 50)) {
+      // Seules les adresses locales produites par cet index peuvent devenir des liens.
+      const validHref = typeof m.href === "string" && /^(?:\/(?:de|en))?\/codes\/noga\/[a-zA-Z0-9-]+\/?$/.test(m.href);
+      const row = document.createElement("div"); row.className = "noga-result-item";
+      const link = document.createElement(validHref ? "a" : "span");
+      if (validHref) link.setAttribute("href", m.href);
+      const first = document.createElement("span"); first.className = "noga-result-code";
+      first.textContent = m.dotted || "";
+      const second = document.createElement("span"); second.className = "noga-result-label";
+      second.textContent = m.label || "";
+      link.append(first, second); row.append(link); fragment.append(row);
+    }
+    results.replaceChildren(fragment);
     countEl.textContent = matches.length > 50 ? `${matches.length} / 50` : String(matches.length);
   }
   input?.addEventListener("focus", () => loadIndex().catch(() => {}), { once: true });
   input?.addEventListener("input", async (e) => {
     const q = normalize(e.target.value.trim());
     if (!q) { results.style.display = "none"; countEl.textContent = ""; return; }
-    const idx = await loadIndex();
+    const idx = await loadIndex().catch(() => null);
+    if (!idx || q !== normalize(input.value.trim())) return;
     const qNoDot = q.replace(/\./g, "");
     const matches = idx.filter((r) => r.code.startsWith(qNoDot) || r.dotted.startsWith(q) || normalize(r.label).includes(q));
     matches.sort((a, b) => {
