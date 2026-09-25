@@ -1,5 +1,5 @@
-import { mkdirSync, existsSync, statSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
+import { fetchBronze } from "../shared/bronze.js";
 import type { FinmaWarning } from "./types.js";
 
 /**
@@ -99,17 +99,11 @@ export async function downloadWarningsJson(
   cacheDir: string,
   opts: { maxAgeHours?: number } = {},
 ): Promise<string> {
-  if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
-  const path = join(cacheDir, "finma-warnings.json");
-  const maxAgeMs = (opts.maxAgeHours ?? 12) * 3600 * 1000;
-  if (existsSync(path) && Date.now() - statSync(path).mtimeMs < maxAgeMs) return path;
-
-  console.log(`[finma-warnings] downloading warning list ...`);
   const body = new URLSearchParams({
     ds: FINMA_WARNINGS_SOURCE,
     Order: FINMA_WARNINGS_ORDER,
   });
-  const res = await fetch(FINMA_WARNINGS_API_URL, {
+  return fetchBronze(FINMA_WARNINGS_API_URL, cacheDir, "finma-warnings.json", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -118,13 +112,7 @@ export async function downloadWarningsJson(
       "User-Agent": "openswissdata-etl/1.0 (+https://openswissdata.com)",
     },
     body: body.toString(),
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to download FINMA warning list: HTTP ${res.status}`);
-  }
-  const text = await res.text();
-  writeFileSync(path, text, "utf8");
-  return path;
+  }, opts.maxAgeHours ?? 12);
 }
 
 /**
@@ -133,7 +121,8 @@ export async function downloadWarningsJson(
 export function parseWarningsJson(path: string): FinmaWarning[] {
   const raw = readFileSync(path, "utf8");
   const parsed = JSON.parse(raw) as RawApiResponse;
-  if (!parsed || !Array.isArray(parsed.Items)) return [];
+  if (!parsed || !Array.isArray(parsed.Items)) throw new Error("Structure de la liste FINMA invalide");
+  if (parsed.Count !== undefined && parsed.Count !== parsed.Items.length) throw new Error("Liste d'avertissements FINMA incomplète");
   const out: FinmaWarning[] = [];
   for (const item of parsed.Items) {
     const mapped = mapRawWarning(item);

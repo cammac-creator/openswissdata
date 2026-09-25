@@ -209,3 +209,10 @@ CREATE INDEX IF NOT EXISTS idx_events_kind_ts ON events(kind, ts DESC);
 CREATE INDEX IF NOT EXISTS idx_events_name_ts ON events(name, ts DESC);
 CREATE INDEX IF NOT EXISTS idx_events_customer ON events(customer_id, ts DESC);
 CREATE INDEX IF NOT EXISTS idx_events_country_ts ON events(country, ts DESC);
+
+-- Témoins opérationnels : uniquement dates, tailles et résultat de contrôle.
+CREATE TABLE IF NOT EXISTS operation_checks (
+  name TEXT PRIMARY KEY,
+  checked_at INTEGER NOT NULL,
+  details_json TEXT NOT NULL
+);

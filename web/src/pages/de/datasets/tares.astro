@@ -231,6 +231,7 @@ const productJsonLd = {
     <ApiSwitch lang="de" />
     <div class="ds-cta" id="kaufen">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
+        <input type="hidden" name="locale" value="de" />
         <input type="hidden" name="dataset_ids" value="tares" />
         <button type="submit" class="v4-btn v4-btn-primary v4-btn-cta">
           TARES kaufen — 299 CHF

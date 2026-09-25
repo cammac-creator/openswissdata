@@ -15,12 +15,31 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import Database from "better-sqlite3";
-import { createReadStream, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { backupKey, encryptBackup, decryptBackup } from "../lib/backup-cipher.js";
 import { mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 export const adminRoute = new Hono();
+
+adminRoute.get("/operations", (c) => {
+  const secret = c.req.header("x-admin-secret");
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) return c.json({ error: "unauthorized" }, 401);
+  const checks = getDb().prepare("SELECT name,checked_at,details_json FROM operation_checks").all() as Array<{name: string; checked_at: number; details_json: string}>;
+  return c.json({ checks: checks.map(({ details_json, ...row }) => ({ ...row, details: JSON.parse(details_json) })) });
+});
+
+// Métadonnées publiques du produit uniquement ; aucune donnée client.
+adminRoute.get("/dataset-versions/:id", (c) => {
+  const secret = c.req.header("x-admin-secret");
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) return c.json({ error: "unauthorized" }, 401);
+  const db = getDb();
+  const dataset = db.prepare("SELECT id, current_version FROM datasets WHERE id=?").get(c.req.param("id"));
+  if (!dataset) return c.json({ error: "unknown_dataset" }, 404);
+  const versions = db.prepare("SELECT version, r2_key, sha256, size_bytes, released_at FROM versions WHERE dataset_id=? ORDER BY released_at ASC").all(c.req.param("id"));
+  return c.json({ dataset, versions });
+});
 
 const ReleaseSchema = z.object({
   dataset_id: z.string().min(1),
@@ -29,6 +48,7 @@ const ReleaseSchema = z.object({
   sha256: z.string().length(64).regex(/^[0-9a-f]{64}$/i),
   size_bytes: z.number().int().positive(),
   changelog: z.string().default(""),
+  expected_previous_version: z.string().nullable().optional(),
 });
 
 adminRoute.post("/seed", async (c) => {
@@ -43,7 +63,7 @@ adminRoute.post("/seed", async (c) => {
 /**
  * POST /api/admin/backup-to-r2
  *
- * Snapshot the live SQLite DB and upload to R2 under `backups/db-YYYY-MM-DD.sqlite`,
+ * Snapshot the live SQLite DB and upload to R2 under `backups/db-YYYY-MM-DD-TIMESTAMP.sqlite.enc`,
  * then prune backups older than 30 days. Runs ON Railway (where the DB volume
  * is mounted) — the GitHub Actions cron only fires a curl with ADMIN_SECRET
  * because the runner has no access to the Railway volume.
@@ -66,11 +86,13 @@ adminRoute.post("/backup-to-r2", async (c) => {
   if (!accountId || !accessKeyId || !secretAccessKey || !bucket) {
     return c.json({ error: "r2_credentials_missing" }, 500);
   }
+  let encryptionKey: Buffer;
+  try { encryptionKey = backupKey(); } catch { return c.json({ error: "backup_key_missing_or_invalid" }, 503); }
 
   const dateKey = new Date().toISOString().slice(0, 10);
   const tmp = await mkdir(join(tmpdir(), `osd-backup-${Date.now()}`), { recursive: true });
   const snapshotPath = join(tmp!, "snapshot.sqlite");
-  const r2Key = `backups/db-${dateKey}.sqlite`;
+  const r2Key = `backups/db-${dateKey}-${Date.now()}.sqlite.enc`;
 
   const client = new S3Client({
     region: "auto",
@@ -87,16 +109,24 @@ adminRoute.post("/backup-to-r2", async (c) => {
     } finally {
       db.close();
     }
-    uploadedBytes = statSync(snapshotPath).size;
+    const encrypted = encryptBackup(readFileSync(snapshotPath), encryptionKey);
+    uploadedBytes = encrypted.length;
     await client.send(
       new PutObjectCommand({
         Bucket: bucket,
         Key: r2Key,
-        Body: createReadStream(snapshotPath),
-        ContentType: "application/x-sqlite3",
+        Body: encrypted,
+        ContentType: "application/octet-stream",
         ContentLength: uploadedBytes,
+        IfNoneMatch: "*",
       }),
     );
+
+    // Relire la copie distante et restaurer en mémoire avant de la déclarer valide.
+    const restored = new Database(decryptBackup(await getObjectBuffer(r2Key, { maxBytes: uploadedBytes + 1 }), encryptionKey));
+    try {
+      if (restored.pragma("quick_check", { simple: true }) !== "ok") throw new Error("backup_restore_check_failed");
+    } finally { restored.close(); }
 
     // Retention: prune backups older than 30 days
     const cutoff = Date.now() - 30 * 24 * 3600 * 1000;
@@ -116,16 +146,20 @@ adminRoute.post("/backup-to-r2", async (c) => {
       500,
     );
   } finally {
-    await rm(snapshotPath, { force: true }).catch(() => {});
+    await rm(tmp!, { recursive: true, force: true });
   }
 
-  return c.json({
+  const proof = {
     ok: true,
     r2_key: r2Key,
     size_bytes: uploadedBytes,
     pruned_count: prunedCount,
     backed_up_at: new Date().toISOString(),
-  });
+    encrypted: true,
+    restore_check: "ok",
+  };
+  getDb().prepare("INSERT INTO operation_checks(name,checked_at,details_json) VALUES('backup',?,?) ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json").run(Date.now(), JSON.stringify(proof));
+  return c.json(proof);
 });
 
 /**
@@ -162,18 +196,27 @@ adminRoute.post("/release", async (c) => {
   const db = getDb();
   const now = Date.now();
 
-  const datasetExists = db.prepare("SELECT id FROM datasets WHERE id=?").get(parsed.dataset_id);
+  const datasetExists = db.prepare("SELECT id, current_version FROM datasets WHERE id=?").get(parsed.dataset_id) as { id: string; current_version: string | null } | undefined;
   if (!datasetExists) {
     return c.json({ error: "unknown_dataset" }, 404);
   }
 
-  db.prepare(`
+  if (parsed.expected_previous_version !== undefined && parsed.expected_previous_version !== datasetExists.current_version) {
+    return c.json({ error: "current_version_changed" }, 409);
+  }
+  if (db.prepare("SELECT 1 FROM versions WHERE dataset_id=? AND version=?").get(parsed.dataset_id, parsed.version)) {
+    return c.json({ error: "version_already_exists" }, 409);
+  }
+  const { expected_previous_version: _expected, ...release } = parsed;
+  db.transaction(() => {
+    db.prepare(`
     INSERT INTO versions (dataset_id, version, r2_key, sha256, size_bytes, changelog, released_at)
     VALUES (@dataset_id, @version, @r2_key, @sha256, @size_bytes, @changelog, @released_at)
-  `).run({ ...parsed, released_at: now });
+    `).run({ ...release, released_at: now });
 
   db.prepare("UPDATE datasets SET current_version = ? WHERE id = ?")
     .run(parsed.version, parsed.dataset_id);
+  })();
 
   // Refresh the in-memory MCP slices from the just-released ZIP — DECOUPLED:
   // fire-and-forget so a refresh failure can never fail the release response.

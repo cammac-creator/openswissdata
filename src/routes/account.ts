@@ -55,11 +55,35 @@ accountRoute.get("/datasets", (c) => {
   const customerId = c.get("customer_id");
   const db = getDb();
   const rows = db.prepare(`
-    SELECT d.id, d.name, d.slug, d.current_version, e.updates_until
+    SELECT d.id, d.name, d.slug,
+      CASE WHEN e.updates_until IS NOT NULL AND e.updates_until < @now
+        THEN (SELECT v.version FROM versions v WHERE v.dataset_id=d.id AND v.released_at<=e.updates_until ORDER BY v.released_at DESC,v.id DESC LIMIT 1)
+        ELSE d.current_version END AS current_version,
+      e.updates_until
     FROM entitlements e
     JOIN datasets d ON d.id = e.dataset_id
-    WHERE e.customer_id = ?
+    WHERE e.customer_id = @customerId
     ORDER BY d.id
-  `).all(customerId);
+  `).all({customerId,now:Date.now()});
   return c.json({ datasets: rows });
+});
+
+accountRoute.get("/orders", (c) => {
+  const orders = getDb().prepare("SELECT id, amount_chf, status, created_at FROM orders WHERE customer_id=? ORDER BY created_at DESC").all(c.get("customer_id"));
+  return c.json({ orders });
+});
+
+accountRoute.get("/orders/:id/receipt", async (c) => {
+  const order = getDb().prepare("SELECT stripe_payment_intent FROM orders WHERE id=? AND customer_id=?")
+    .get(c.req.param("id"), c.get("customer_id")) as { stripe_payment_intent: string | null } | undefined;
+  if (!order?.stripe_payment_intent) return c.json({ error: "receipt_not_found" }, 404);
+  try {
+    const intent = await stripe().paymentIntents.retrieve(order.stripe_payment_intent, { expand: ["latest_charge"] });
+    const charge = intent.latest_charge;
+    const url = typeof charge === "object" && charge ? charge.receipt_url : null;
+    if (!url) return c.json({ error: "receipt_not_found" }, 404);
+    return c.json({ url });
+  } catch {
+    return c.json({ error: "receipt_unavailable" }, 502);
+  }
 });

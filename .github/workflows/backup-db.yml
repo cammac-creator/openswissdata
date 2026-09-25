@@ -2,8 +2,8 @@ name: Daily SQLite backup → R2
 
 # Triggers a server-side backup on Railway via the /api/admin/backup-to-r2
 # endpoint. The endpoint snapshots the live SQLite DB (mounted on Railway's
-# persistent volume) and uploads to R2 under `backups/db-YYYY-MM-DD.sqlite`,
-# then prunes backups older than 30 days.
+# persistent volume) and uploads to R2 under `backups/db-YYYY-MM-DD-TIMESTAMP.sqlite.enc`,
+# restores the downloaded encrypted copy for integrity verification, then prunes backups older than 30 days.
 #
 # This workflow does NOT have direct access to the Railway DB volume — that's
 # why it just fires a curl. The actual work happens server-side, where the

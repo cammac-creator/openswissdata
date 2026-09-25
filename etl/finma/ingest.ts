@@ -1,6 +1,7 @@
 import XLSX from "xlsx";
 const { readFile, utils } = XLSX;
 import { readFileSync } from "node:fs";
+import { parse } from "csv-parse/sync";
 import type { FinmaEntity, FinmaSource } from "./types.js";
 import { unifyRow } from "./unify-schema.js";
 import {
@@ -35,16 +36,16 @@ export function parseUidCsv(path: string): FinmaEntity[] {
   // Strip UTF-8 BOM if present (FINMA's uid.csv ships with a BOM that would
   // otherwise corrupt the first header name).
   if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
-  const lines = content.split(/\r?\n/).filter(l => l.trim().length > 0);
-  if (lines.length === 0) return [];
-
-  const headers = parseCsvLine(lines[0]);
+  if (!content.trim()) return [];
+  const records = parse(content, {
+    delimiter: ";", skip_empty_lines: true,
+    columns: (headers: string[]) => {
+      if (!["Name", "City", "UID", "AuthorisationTypeEN"].every(h => headers.includes(h))) throw new Error("Colonnes FINMA inattendues : publication annulée");
+      return headers;
+    },
+  }) as Record<string, string>[];
   const out: FinmaEntity[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cells = parseCsvLine(lines[i]);
-    if (cells.length < headers.length) continue;
-    const raw: Record<string, unknown> = {};
-    for (let j = 0; j < headers.length; j++) raw[headers[j]] = cells[j];
+  for (const raw of records) {
     const unified = unifyRow(raw, FINMA_UID_CSV_SOURCE);
     if (!unified) continue;
     // Override entity_type using AuthorisationTypeEN mapping (the source's

@@ -1,12 +1,12 @@
-# OpenSwissData — en veille
+# OpenSwissData — reprise autorisée
 
 SaaS B2B de jeux de données fédéraux suisses normalisés : TARES, NOGA, FINMA.
 
-## ⏸️ État
+## État
 
-**Gelé depuis le 26.06.2026**, sur un verdict de monétisation défavorable. Ne pas relancer la construction : le dossier attend un fait nouveau, pas du code.
+**Reprise autorisée le 25.09.2026 par Claude-Alain**, après un premier achat externe. Priorité : qualité FINMA, livraison et suivi du client, puis audit général. Le tableau de bord demandé ensuite doit réunir clients, mails, ventes, fréquentation, visibilité et automatisations dans une interface agréable et adaptée au téléphone. Les données de clientèle restent privées.
 
-**Ne pas réveiller ce projet sans que Claude-Alain le demande.** Toute idée nouvelle passe d'abord par Radar
+Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte passe d'abord par Radar
 (`~/radar`), qui tient l'étal des projets vérifiés : c'est là qu'il choisit ce qui se construit.
 
 ## Où est le reste du contexte

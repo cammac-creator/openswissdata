@@ -31,12 +31,6 @@ describe("HSLookup live demos — source-level presence (commit c1d1e22)", () =>
     );
   });
 
-  it("datasets/finma.astro imports and uses FinmaLookup", () => {
-    const src = readFileSync(join(ROOT, "pages/datasets/finma.astro"), "utf8");
-    expect(src, "finma.astro should import FinmaLookup").toMatch(/import\s+FinmaLookup/);
-    expect(src, "finma.astro should render <FinmaLookup />").toMatch(/<FinmaLookup\s*\/>/);
-  });
-
   it("ClassificationsLookup.astro contains the 20-entry NOGA_SAMPLE with expected keys", () => {
     const src = readFileSync(
       join(ROOT, "components/ClassificationsLookup.astro"),
@@ -51,18 +45,12 @@ describe("HSLookup live demos — source-level presence (commit c1d1e22)", () =>
     expect(src, "should have isic field").toContain("isic");
   });
 
-  it("FinmaLookup.astro contains the 25-entry FINMA_SAMPLE with expected fields", () => {
-    const src = readFileSync(
-      join(ROOT, "components/FinmaLookup.astro"),
-      "utf8"
-    );
-    expect(src, "should have FINMA_SAMPLE constant").toContain("FINMA_SAMPLE");
-    // Verify known Swiss institutions are present
-    expect(src, "should contain UBS Switzerland AG").toContain("UBS Switzerland AG");
-    expect(src, "should contain PostFinance AG").toContain("PostFinance AG");
-    // Verify LEI field is present (object shorthand: `lei:`)
-    expect(src, "should expose lei field").toContain("lei:");
-    // Verify entity_type / uid fields
-    expect(src, "should expose uid field").toContain("uid:");
+  it("FINMA charge son échantillon publié et n'embarque plus des identifiants non vérifiés", () => {
+    const old=readFileSync(join(ROOT,"components/FinmaLookup.astro"),"utf8");
+    const product=readFileSync(join(ROOT,"components/FinmaProduct.astro"),"utf8");
+    expect(old).not.toContain("FINMA_SAMPLE");
+    expect(product).toContain("/api/catalog/finma");
+    expect(product).not.toContain("CHE-101.329.561");
+    expect(product).not.toContain("licdate:");
   });
 });

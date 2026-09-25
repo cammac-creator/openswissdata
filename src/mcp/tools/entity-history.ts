@@ -157,7 +157,7 @@ export function entityHistoryHandler(args: unknown): {
     status: row?.status ?? null,
     canton: row?.canton ?? null,
     city: row?.city ?? null,
-    is_warning_listed: row ? row.is_warning_listed === "true" : null,
+    is_warning_listed: null,
   };
 
   // Pull snapshots

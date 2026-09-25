@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import type { FinmaEntity } from "./types.js";
 
-export type DeltaChangeKind = "added" | "removed" | "status_changed" | "address_changed" | "licence_changed";
+export type DeltaChangeKind = "added" | "removed" | "status_changed" | "address_changed" | "licence_changed" | "name_changed" | "city_changed";
 
 export interface DeltaChange {
   kind: DeltaChangeKind;
@@ -11,6 +11,9 @@ export interface DeltaChange {
   source_list: string;
   before?: Partial<FinmaEntity>;
   after?: Partial<FinmaEntity>;
+  observed_at?: string;
+  previous_version?: string;
+  version?: string;
 }
 
 export interface DeltaResult {
@@ -23,7 +26,8 @@ export interface DeltaResult {
  * Create a stable composite key for entity matching. Prefer UID, fallback to name+entity_type.
  */
 function entityKey(e: FinmaEntity): string {
-  return e.uid ?? `${e.entity_type}::${e.name}`;
+  // Une société peut détenir plusieurs autorisations : aucune ne doit s'écraser.
+  return `${e.uid ?? e.name}::${e.entity_type}::${e.licence_type ?? ""}`;
 }
 
 export function computeDelta(previous: FinmaEntity[], current: FinmaEntity[]): DeltaResult {
@@ -63,6 +67,11 @@ export function computeDelta(previous: FinmaEntity[], current: FinmaEntity[]): D
   for (const [key, curr] of currMap) {
     const prev = prevMap.get(key);
     if (!prev) continue;
+    for (const field of ["name", "city"] as const) {
+      if ((prev[field] ?? null) !== (curr[field] ?? null)) {
+        changes.push({ kind: field === "name" ? "name_changed" : "city_changed", entity_type: curr.entity_type, name: curr.name, uid: curr.uid, source_list: curr.source_list, before: { [field]: prev[field] }, after: { [field]: curr[field] } });
+      }
+    }
     if ((prev.status ?? null) !== (curr.status ?? null)) {
       changes.push({ kind: "status_changed", entity_type: curr.entity_type, name: curr.name, uid: curr.uid, source_list: curr.source_list, before: { status: prev.status }, after: { status: curr.status } });
     }

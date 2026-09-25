@@ -34,7 +34,7 @@ export interface KycMatch {
   status: string;
   canton: string | null;
   city: string;
-  is_warning_listed: boolean;
+  is_warning_listed: boolean | null;
   source_url: string;
 }
 
@@ -88,7 +88,7 @@ export function kycCheckHandler(args: unknown): {
       status: r.status,
       canton: r.canton || null,
       city: r.city,
-      is_warning_listed: r.is_warning_listed === "true",
+      is_warning_listed: null,
       source_url: r.source_url,
     }));
 
@@ -124,7 +124,7 @@ export function kycCheckHandler(args: unknown): {
     lines.push("  (none)");
   } else {
     for (const m of registryMatches.slice(0, 5)) {
-      const flag = m.is_warning_listed ? " [warning-listed]" : "";
+      const flag = "";
       lines.push(`  - ${m.name} (${m.entity_type}, ${m.licence_type})${flag} — ${m.city || "?"} — ${m.uid || "no UID"}`);
     }
   }

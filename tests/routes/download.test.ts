@@ -119,23 +119,21 @@ describe("download routes", () => {
     expect(res.status).toBe(400);
   });
 
-  // H1: expired entitlement (updates_until < now) must return 403 subscription_expired
-  it("H1: POST /api/account/download-request returns 403 when updates_until is in the past", async () => {
-    const db = getDb();
-    // Overwrite the entitlement with an expired updates_until
-    db.prepare("UPDATE entitlements SET updates_until = ? WHERE customer_id = ? AND dataset_id = ?")
-      .run(Date.now() - 1000, custId, "tares");
-    closeDb();
-
-    const app = createApp();
-    const res = await app.request("/api/account/download-request", {
-      method: "POST",
-      headers: { "content-type": "application/json", cookie: `osd_session=${token}` },
-      body: JSON.stringify({ dataset_id: "tares" }),
-    });
-    expect(res.status).toBe(403);
-    const body = await res.json();
-    expect(body.error).toBe("subscription_expired");
+  it("conserve la dernière version acquise après la fin des mises à jour, sans donner les suivantes", async () => {
+    const db=getDb(); const end=Date.now()-1000;
+    db.prepare("UPDATE entitlements SET updates_until=?").run(end);
+    db.prepare("UPDATE versions SET released_at=? WHERE version='2026.04.22'").run(end-1000);
+    db.prepare("INSERT INTO versions(dataset_id,version,r2_key,sha256,size_bytes,released_at) VALUES('tares','2026.05.01','tares/future.zip',?,100,?)").run('a'.repeat(64),end+1000);
+    db.prepare("UPDATE datasets SET current_version='2026.05.01'").run();
+    const app=createApp(); const headers={"content-type":"application/json",cookie:`osd_session=${token}`};
+    const res=await app.request("/api/account/download-request",{method:"POST",headers,body:JSON.stringify({dataset_id:"tares"})});
+    expect(res.status).toBe(200); expect(signedUrlMock).toHaveBeenLastCalledWith("tares/2026.04.22.zip",300);
+    const body=await res.json(); expect((await app.request(`/api/download/${body.share_token}`)).status).toBe(302);
+    const account=await (await app.request('/api/account/datasets',{headers})).json(); expect(account.datasets[0].current_version).toBe('2026.04.22');
+    db.prepare("INSERT INTO download_tokens(token,customer_id,dataset_id,version,expires_at,created_at) VALUES(?,?,'tares','2026.05.01',?,?)").run('F'.repeat(43),custId,Date.now()+10000,Date.now());
+    expect((await app.request('/api/download/'+ 'F'.repeat(43))).status).toBe(403);
+    db.prepare("DELETE FROM entitlements WHERE customer_id=?").run(custId);
+    expect((await app.request('/api/account/download-request',{method:'POST',headers,body:JSON.stringify({dataset_id:'tares'})})).status).toBe(403);
   });
 
   // H1: null updates_until (perpetual entitlement) must still allow download

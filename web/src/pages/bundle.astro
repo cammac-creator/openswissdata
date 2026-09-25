@@ -152,7 +152,7 @@ const productJsonLd = {
         <a href="/datasets/finma" class="ds-bundle-card">
           <div class="ds-bundle-meta">Compliance · FINMA</div>
           <h3>FINMA Registry</h3>
-          <p>10 listes d'autorisation unifiées, enrichies UID + LEI.</p>
+          <p>Registre public FINMA et avertissements séparés. Enrichissement LEI selon disponibilité.</p>
           <div class="ds-bundle-price">299 CHF en standalone</div>
           <span class="ds-bundle-cta">Voir détails →</span>
         </a>
@@ -244,6 +244,7 @@ const productJsonLd = {
     <ApiSwitch lang="fr" />
     <div class="ds-cta" id="acheter">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
+        <input type="hidden" name="locale" value="fr" />
         <input type="hidden" name="dataset_ids" value="bundle" />
         <button type="submit" class="v4-btn v4-btn-primary v4-btn-cta">
           Acheter le bundle complet — 797 CHF
