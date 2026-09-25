@@ -247,3 +247,11 @@ CREATE TABLE IF NOT EXISTS crm_connections (
   secret_encrypted TEXT NOT NULL,
   updated_at INTEGER NOT NULL
 );
+
+-- Préférence explicite distincte de l’ancienne valeur française par défaut.
+CREATE TABLE IF NOT EXISTS crm_languages (
+  customer_id INTEGER PRIMARY KEY REFERENCES customers(id) ON DELETE CASCADE,
+  code TEXT NOT NULL,
+  source TEXT NOT NULL CHECK(source IN ('manual','checkout')),
+  updated_at INTEGER NOT NULL
+);

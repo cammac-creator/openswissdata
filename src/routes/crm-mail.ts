@@ -1,4 +1,8 @@
 import { Hono } from "hono";
+import { stream } from "hono/streaming";
+import { currentMessage, detectLanguage } from "../lib/crm-language.js";
+import { isLanguage } from "../lib/languages.js";
+import { translateMessage, translationBusy } from "../lib/crm-translation.js";
 import { z } from "zod";
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
@@ -82,7 +86,7 @@ crmMailRoute.get("/", async c => {
     const value = result.status === "fulfilled" ? result.value : { available: false, reason: "Connexion Infomaniak à vérifier.", items: [] as MailSummary[] };
     return { ...value, id, email: accounts()[id], scope: id === "cam_project" ? "Messages OpenSwissData uniquement" : "Boîte de support" };
   });
-  return c.json({ checked_at: Date.now(), outgoing: { ...out, items: undefined }, incoming: { available: incoming.every(a => a.available), accounts: incoming.map(a => ({ ...a, items: undefined })) }, items: [...out.items, ...incoming.flatMap(a => a.items)].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)) });
+  return c.json({ checked_at: Date.now(), outgoing: { ...out, items: undefined }, incoming: { available: incoming.every(a => a.available), accounts: incoming.map(a => ({ ...a, items: undefined })) }, items: [...out.items, ...incoming.flatMap(a => a.items)].map(m => ({ ...m, language: { ...detectLanguage(m.subject), basis: "subject" } })).sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)) });
 });
 crmMailRoute.get("/:source/:id", async c => {
   try {
@@ -92,7 +96,8 @@ crmMailRoute.get("/:source/:id", async c => {
       const m = await sourceJson<SentMail>("resend-detail", `https://api.resend.com/emails/${id}`, { headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` } });
       if (!ours(m)) return c.json({ error: "not_found" }, 404);
       const parsed = m.text ? null : await simpleParser(Buffer.from(`Content-Type: text/html; charset=utf-8\r\n\r\n${m.html ?? ""}`), { skipImageLinks: true, skipTextToHtml: true, maxHtmlLengthToParse: 500_000 });
-      return c.json({ subject: m.subject, from: m.from, to: m.to, created_at: m.created_at, status: m.last_event, text: redact(m.text ?? parsed?.text ?? "Contenu non disponible."), attachments: [] });
+      const text = redact(m.text ?? parsed?.text ?? "Contenu non disponible.");
+      return c.json({ language: detectLanguage(text), reading_text: currentMessage(text), subject: m.subject, from: m.from, to: m.to, created_at: m.created_at, status: m.last_event, text, attachments: [] });
     }
     if (c.req.param("source") !== "imap") return c.json({ error: "not_found" }, 404);
     const encoded = c.req.param("id");
@@ -118,8 +123,29 @@ crmMailRoute.get("/:source/:id", async c => {
       return { subject: parsed.subject ?? "Sans objet", from: parsed.from?.text ?? "", to: Array.isArray(parsed.to) ? parsed.to.map(a => a.text) : [parsed.to?.text ?? ""], text: redact(parsed.text ?? "Aucun texte disponible."), created_at: parsed.date?.toISOString(), truncated: (m.size ?? 0) > 1_000_000, attachments: parsed.attachments.map(a => ({ name: a.filename ?? "Pièce jointe", size: a.size })) };
     });
     assertConnection(id.account, auth);
-    return c.json(result);
+    return c.json({ ...result, language: detectLanguage(result.text), reading_text: currentMessage(result.text) });
   } catch { return c.json({ error: "mail_unavailable" }, 502); }
+});
+crmMailRoute.post("/translate", async c => {
+  const input = z.object({ language: z.string().refine(isLanguage), text: z.string().trim().min(1).max(5000) }).strict().safeParse(await c.req.json().catch(error => { if (error instanceof SyntaxError) return null; throw error; }));
+  if (!input.success) return c.json({ error: "invalid_body" }, 400);
+  if (translationBusy()) return c.json({ error: "translation_busy" }, 429);
+  c.header("Content-Type", "application/x-ndjson; charset=utf-8");
+  c.header("Cache-Control", "private, no-store, no-transform");
+  c.header("X-Accel-Buffering", "no");
+  return stream(c, async output => {
+    const abort = new AbortController();
+    output.onAbort(() => abort.abort());
+    const emit = async (event: unknown) => { await output.write(JSON.stringify(event) + "\n"); };
+    await emit({type:"waiting"});
+    const heartbeat = setInterval(() => { emit({type:"waiting"}).catch(() => abort.abort()); }, 10_000);
+    try {
+      if (input.data.language === "fr") { await emit({ type:"chunk", text:input.data.text, completed:1, total:1 }); await emit({type:"done"}); }
+      else await translateMessage(input.data.text, input.data.language, abort.signal, emit);
+    } catch (error) {
+      if (!abort.signal.aborted) await emit({ type:"error", error:error instanceof Error && ["translation_timeout", "translation_truncated", "translation_busy"].includes(error.message) ? error.message : "translation_failed" });
+    } finally { clearInterval(heartbeat); }
+  });
 });
 crmMailRoute.post("/connect", async c => {
   const input = z.object({ user: z.string().email().refine(user => Object.values(accounts()).includes(user)), pass: z.string().min(1).max(500), personal_scope_ack: z.boolean().optional() }).strict().safeParse(await c.req.json().catch(error => { if (error instanceof SyntaxError) return null; throw error; }));

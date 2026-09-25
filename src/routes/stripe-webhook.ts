@@ -2,6 +2,7 @@ import { Hono, type Context } from "hono";
 import type { Stripe } from "stripe";
 import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
+import { checkoutLanguage } from "../lib/crm-language.js";
 import { signedDownloadUrl } from "../lib/r2.js";
 import { sendDownloadEmail, sendMcpCredentialsEmail, parseLocale } from "../lib/email.js";
 import { generateClientId, generateClientSecret, hashToken } from "../mcp/oauth/crypto.js";
@@ -65,7 +66,7 @@ async function handleSubscriptionCheckout(
     // Buyer language carried from the localized checkout page → drives the
     // language of the credentials email and is stored for future emails.
     const metaLocale = session.metadata?.locale;
-    const locale = parseLocale(metaLocale);
+    let locale = parseLocale(metaLocale);
 
     // Idempotency: Stripe replays events. If this subscription already
     // provisioned a client, do nothing (no duplicate client / duplicate email).
@@ -95,16 +96,14 @@ async function handleSubscriptionCheckout(
           "UPDATE customers SET stripe_customer_id = COALESCE(stripe_customer_id, ?) WHERE id = ?",
         ).run(session.customer as string, customerId);
       }
-      // Follow the buyer's latest checkout language (only when explicitly set).
-      if (metaLocale) {
-        db.prepare("UPDATE customers SET locale = ? WHERE id = ?").run(locale, customerId);
-      }
     } else {
       const info = db
         .prepare("INSERT INTO customers (email, stripe_customer_id, locale, created_at) VALUES (?, ?, ?, ?)")
         .run(email, (session.customer as string | null) ?? null, locale, now);
       customerId = Number(info.lastInsertRowid);
     }
+
+    locale = checkoutLanguage(customerId, metaLocale);
 
     const authorizationEndpoint = `${mcpBaseUrl()}/oauth/authorize`;
     const tokenEndpoint = `${mcpBaseUrl()}/oauth/token`;
@@ -281,21 +280,20 @@ stripeWebhookRoute.post("/", async (c) => {
   const db = getDb();
   const now = Date.now();
   const metaLocale = session.metadata?.locale;
-  const locale = parseLocale(metaLocale);
+  let locale = parseLocale(metaLocale);
 
   // Find or create customer
   const customerRow = db.prepare("SELECT id FROM customers WHERE email = ?").get(email) as { id: number } | undefined;
   let customerId: number;
   if (customerRow) {
     customerId = customerRow.id;
-    if (metaLocale) {
-      db.prepare("UPDATE customers SET locale = ? WHERE id = ?").run(locale, customerId);
-    }
   } else {
     const info = db.prepare("INSERT INTO customers (email, stripe_customer_id, locale, created_at) VALUES (?, ?, ?, ?)")
       .run(email, (session.customer as string | null) ?? null, locale, now);
     customerId = Number(info.lastInsertRowid);
   }
+
+  locale = checkoutLanguage(customerId, metaLocale);
 
   // Decode dataset_ids from metadata
   const datasetIdsRaw = (session.metadata?.dataset_ids as string | undefined) ?? "";

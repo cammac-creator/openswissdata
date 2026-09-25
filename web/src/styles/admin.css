@@ -6,3 +6,7 @@
 @media(prefers-reduced-motion:reduce){.spinner{animation:none}}
 
 .account-popover{position:relative}.account-popover summary{cursor:pointer;list-style:none}.account-popover summary::-webkit-details-marker{display:none}.account-popover>div{position:absolute;right:0;top:42px;width:190px;z-index:15;padding:20px;background:white;border:1px solid var(--line);box-shadow:0 10px 30px #17202615;border-radius:12px}.account-popover button{margin-top:14px;color:var(--red)}
+
+.client-language{display:block;margin-top:7px}.client-language .pill{font-size:10px;padding:3px 7px}.mail-reading-head{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px;flex-wrap:wrap}.mail-reading-head .field{margin:0;min-width:180px;max-width:100%}.mail-reading-head select{max-width:260px}.translation-label{font-size:10px;letter-spacing:.08em;color:var(--muted,#66716b);margin-top:22px}.mail-body{overflow-wrap:anywhere}#translation-status{margin-bottom:18px}#translate-more{margin-top:18px}.client-language .pill{white-space:normal}@media(max-width:620px){.mail-reading-head{align-items:stretch}.mail-reading-head .field{width:100%}.mail-reading-head select{max-width:100%}.client-language{max-width:160px}}
+
+.translation-scope{padding:12px;background:#f4f6f5;border-radius:9px;margin-bottom:18px}.translation-scope .toggle{margin-top:10px}
