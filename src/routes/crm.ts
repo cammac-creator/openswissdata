@@ -8,6 +8,7 @@ import { customerLanguage, setCustomerLanguage } from "../lib/crm-language.js";
 import { isLanguage } from "../lib/languages.js";
 import { crmMailRoute } from "./crm-mail.js";
 import { deliveryStatus } from "../lib/order-delivery.js";
+import { financialStatus } from "../lib/stripe-financial.js";
 
 export const crmRoute = new Hono<{ Variables: { customer_id: number; customer_email: string } }>();
 crmRoute.use("*", requireAdmin);
@@ -35,7 +36,7 @@ function profiles(id?: number) {
     (SELECT COUNT(*) FROM orders o WHERE o.customer_id=c.id AND o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%') paid_orders,
     (SELECT COUNT(*) FROM orders o WHERE o.customer_id=c.id AND o.stripe_session_id LIKE 'cs_test_%') test_orders,
     (SELECT COUNT(*) FROM orders o WHERE o.customer_id=c.id AND o.stripe_session_id LIKE 'cs_live_%') live_orders,
-    (SELECT COALESCE(SUM(amount_chf),0) FROM orders o WHERE o.customer_id=c.id AND o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%') revenue_cents,
+    (SELECT COALESCE(SUM(amount_chf-refunded_chf),0) FROM orders o WHERE o.customer_id=c.id AND o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%') revenue_cents,
     (SELECT MAX(created_at) FROM orders o WHERE o.customer_id=c.id) last_order_at,
     (SELECT MAX(created_at) FROM sessions s WHERE s.customer_id=c.id AND s.expires_at-s.created_at > 86400000) last_login_at,
     (SELECT COUNT(*) FROM crm_tasks t WHERE t.customer_id=c.id AND t.done_at IS NULL) open_tasks
@@ -46,8 +47,8 @@ function profiles(id?: number) {
 crmRoute.get("/overview", c => {
   const db = getDb(), days = daysOf(c.req.query("days")), since = Date.now() - days * 86400_000;
   const real = realCustomerSql();
-  const rollup = (from: number) => db.prepare(`SELECT COUNT(*) orders,COUNT(DISTINCT o.customer_id) customers,COALESCE(SUM(o.amount_chf),0) revenue_cents FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%' AND o.created_at>=? AND ${real.sql}`).get(from, ...real.params);
-  const daily = db.prepare(`SELECT strftime('%Y-%m-%d',o.created_at/1000,'unixepoch') day,SUM(o.amount_chf) revenue_cents,COUNT(*) orders FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%' AND o.created_at>=? AND ${real.sql} GROUP BY day ORDER BY day`).all(since, ...real.params);
+  const rollup = (from: number) => db.prepare(`SELECT COUNT(*) orders,COUNT(DISTINCT o.customer_id) customers,COALESCE(SUM(o.amount_chf-o.refunded_chf),0) revenue_cents FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%' AND o.created_at>=? AND ${real.sql}`).get(from, ...real.params);
+  const daily = db.prepare(`SELECT strftime('%Y-%m-%d',o.created_at/1000,'unixepoch') day,SUM(o.amount_chf-o.refunded_chf) revenue_cents,COUNT(*) orders FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%' AND o.created_at>=? AND ${real.sql} GROUP BY day ORDER BY day`).all(since, ...real.params);
   const traffic = db.prepare(`SELECT COUNT(*) requests,COALESCE(ROUND(AVG(duration_ms)),0) average_ms,COALESCE(SUM(status>=500),0) errors FROM events WHERE kind='api_request' AND ts>=?`).get(since);
   const web = db.prepare(`SELECT COUNT(*) pageviews,COUNT(DISTINCT visitor_hash) visitor_days,MIN(ts) first_event FROM events WHERE kind='custom' AND name='page_view' AND ua_class IN ('desktop','mobile') AND ts>=?`).get(since);
   const coverage = db.prepare("SELECT MIN(ts) first_event FROM events WHERE kind='custom' AND name='page_view'").get();
@@ -59,7 +60,7 @@ crmRoute.get("/customers/:id", c => {
   const id = Number(c.req.param("id")), db = getDb();
   const customer = profiles(id)[0];
   if (!customer) return c.json({ error: "not_found" }, 404);
-  const orders = db.prepare("SELECT id,amount_chf,items_json,status,created_at,stripe_payment_intent,stripe_session_id FROM orders WHERE customer_id=? ORDER BY created_at DESC").all(id);
+  const orders = db.prepare("SELECT id,amount_chf,refunded_chf,dispute_status,financial_checked_at,items_json,status,created_at,stripe_payment_intent,stripe_session_id FROM orders WHERE customer_id=? ORDER BY created_at DESC").all(id);
   const entitlements = db.prepare("SELECT e.dataset_id,e.updates_until,d.current_version FROM entitlements e JOIN datasets d ON d.id=e.dataset_id WHERE e.customer_id=?").all(id);
   const notes = db.prepare("SELECT id,body,created_at FROM crm_notes WHERE customer_id=? ORDER BY created_at DESC").all(id);
   const tasks = db.prepare("SELECT * FROM crm_tasks WHERE customer_id=? ORDER BY done_at IS NOT NULL,due_on,created_at DESC").all(id);
@@ -134,6 +135,6 @@ crmRoute.get("/operations", async c => {
       return { available: true, checked_at: Date.now(), items: flow.workflows.map(({ id, name, state, html_url }) => ({ id, name, state, html_url })), runs: runs.workflow_runs.map(({ id, workflow_id, name, status, conclusion, created_at, html_url }) => ({ id, workflow_id, name, status, conclusion, created_at, html_url })) };
     });
   } catch { /* L'indisponibilité reste visible, aucun succès n'est inventé. */ }
-  return c.json({ checked_at: Date.now(), datasets, checks, workflows, deliveries: deliveryStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
+  return c.json({ checked_at: Date.now(), datasets, checks, workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
 });
 crmRoute.route("/mail", crmMailRoute);

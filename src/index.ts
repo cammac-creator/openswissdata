@@ -26,6 +26,7 @@ import { trackApiRequest, trackPageView } from "./lib/track.js";
 import { startMcpDataRefresh } from "./mcp/r2-refresh.js";
 import { loadEnv } from "./env.js";
 import { startOrderDeliveryWorker } from "./lib/order-delivery.js";
+import { startFinancialWorker } from "./lib/stripe-financial.js";
 
 export function createApp() {
   const app = new Hono();
@@ -265,11 +266,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // serves the committed seed until the first refresh lands. Never blocks boot.
   startMcpDataRefresh();
   const stopDeliveries = startOrderDeliveryWorker();
+  const stopFinancial = startFinancialWorker();
 
   // Flush Sentry events on graceful shutdown so errors right before
   // SIGTERM aren't lost.
   const shutdown = async (sig: string) => {
     stopDeliveries();
+    stopFinancial();
     console.log(`[shutdown] received ${sig}, flushing Sentry…`);
     await flushSentry(2000);
     process.exit(0);

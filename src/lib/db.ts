@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import { readFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { migrateOrderRights } from "./order-rights.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -33,6 +34,10 @@ export function getDb(path?: string): Database.Database {
   // Buyer language for transactional emails — added after `customers` first
   // shipped, so backfill on older DBs (constant DEFAULT makes the ALTER legal).
   ensureColumn(db, "customers", "locale", "TEXT NOT NULL DEFAULT 'fr'");
+  ensureColumn(db, "orders", "refunded_chf", "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn(db, "orders", "dispute_status", "TEXT");
+  ensureColumn(db, "orders", "financial_checked_at", "INTEGER");
+  migrateOrderRights(db);
   // UNIQUE (partial) so a given Stripe subscription can back at most one client.
   // Partial → multiple NULLs (free/registered clients) remain allowed. Turns a
   // concurrent double-provision into a catchable constraint error instead of
