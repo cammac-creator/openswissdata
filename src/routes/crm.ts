@@ -4,6 +4,8 @@ import { bodyLimit } from "hono/body-limit";
 import { getDb } from "../lib/db.js";
 import { requireAdmin } from "../lib/admin-middleware.js";
 import { cached, sourceJson, searchConsole } from "../lib/crm-source.js";
+import { customerLanguage, setCustomerLanguage } from "../lib/crm-language.js";
+import { isLanguage } from "../lib/languages.js";
 import { crmMailRoute } from "./crm-mail.js";
 
 export const crmRoute = new Hono<{ Variables: { customer_id: number; customer_email: string } }>();
@@ -38,7 +40,7 @@ function profiles(id?: number) {
     (SELECT COUNT(*) FROM crm_tasks t WHERE t.customer_id=c.id AND t.done_at IS NULL) open_tasks
     FROM customers c LEFT JOIN crm_profiles p ON p.customer_id=c.id ${id ? "WHERE c.id=?" : ""} ORDER BY last_order_at DESC,c.created_at DESC LIMIT 1000`).all(...(id ? [id] : [])) as Array<Record<string, unknown> & { id: number; email: string; internal: number }>;
   const owners = internalEmails();
-  return rows.map(r => ({ ...r, internal: Boolean(r.internal || owners.includes(r.email.toLowerCase()) || (Number(r.test_orders) > 0 && Number(r.live_orders) === 0)) }));
+  return rows.map(r => ({ ...r, language: customerLanguage(r.id, r.locale), internal: Boolean(r.internal || owners.includes(r.email.toLowerCase()) || (Number(r.test_orders) > 0 && Number(r.live_orders) === 0)) }));
 }
 crmRoute.get("/overview", c => {
   const db = getDb(), days = daysOf(c.req.query("days")), since = Date.now() - days * 86400_000;
@@ -72,6 +74,15 @@ crmRoute.patch("/customers/:id", async c => {
   const r = input.data;
   db.prepare("INSERT INTO crm_profiles(customer_id,display_name,company,stage,internal,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(customer_id) DO UPDATE SET display_name=excluded.display_name,company=excluded.company,stage=excluded.stage,internal=excluded.internal,updated_at=excluded.updated_at").run(id, r.display_name, r.company, r.stage, Number(r.internal), Date.now());
   return c.json({ ok: true });
+});
+crmRoute.patch("/customers/:id/language", async c => {
+  if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);
+  const input = z.object({ code: z.string().refine(isLanguage).nullable() }).strict().safeParse(await c.req.json().catch(error => { if (error instanceof SyntaxError) return null; throw error; }));
+  if (!input.success) return c.json({ error: "invalid_body" }, 400);
+  const db = getDb(), id = Number(c.req.param("id"));
+  if (!db.prepare("SELECT id FROM customers WHERE id=?").get(id)) return c.json({ error: "not_found" }, 404);
+  setCustomerLanguage(id, input.data.code);
+  return c.json({ ok: true, language: customerLanguage(id, (db.prepare("SELECT locale FROM customers WHERE id=?").get(id) as {locale:string}).locale) });
 });
 crmRoute.post("/customers/:id/notes", async c => {
   if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);

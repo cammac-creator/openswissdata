@@ -126,6 +126,17 @@ describe("POST /api/webhook/stripe", () => {
     expect(sendEmailMock.mock.calls[0][0].datasetName).toBe("TARES Dataset");
   });
 
+  it("livre un achat payé même si la table de langues CRM est indisponible", async () => {
+    const app = createApp();
+    getDb().exec('DROP TABLE crm_languages');
+    constructEventAsyncMock.mockResolvedValueOnce({ type:'checkout.session.completed', data:{ object:{ id:'cs_test_sans_langue', customer_email:'buyer@example.test', payment_intent:'pi_sans_langue', amount_total:29900, metadata:{dataset_ids:'tares',locale:'en'} } } });
+    const response = await app.request('/api/webhook/stripe', {method:'POST',headers:{'content-type':'application/json','stripe-signature':'ok'},body:'{}'});
+    expect(response.status).toBe(200);
+    expect(getDb().prepare('SELECT status FROM orders WHERE stripe_session_id=?').get('cs_test_sans_langue')).toEqual({status:'paid'});
+    expect(getDb().prepare('SELECT dataset_id FROM entitlements').all()).toEqual([{dataset_id:'tares'}]);
+    expect(sendEmailMock).toHaveBeenCalledWith(expect.objectContaining({to:'buyer@example.test',locale:'en'}));
+  });
+
   it("expands bundle to 3 datasets with 3 entitlements and 3 emails", async () => {
     constructEventAsyncMock.mockResolvedValueOnce({
       type: "checkout.session.completed",

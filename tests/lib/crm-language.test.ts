@@ -1,0 +1,23 @@
+import { beforeEach, afterEach, describe, it, expect } from 'vitest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { getDb, closeDb } from '../../src/lib/db.js';
+import { currentMessage, detectLanguage, customerLanguage, setCustomerLanguage, checkoutLanguage } from '../../src/lib/crm-language.js';
+const english = 'Hello, thank you for the updated file. We were able to open the spreadsheet. Could you please confirm whether the LEI identifiers are included in all records? We would like a CSV export as well.';
+const french = 'Bonjour, merci pour le fichier actualisé. Nous avons pu ouvrir le classeur. Pourriez-vous nous confirmer si les identifiants LEI sont inclus dans toutes les lignes ? Nous souhaitons également un export CSV.';
+describe('Langue réelle, préférence et repli', () => {
+ let temp:string,id:number;
+ beforeEach(()=>{temp=mkdtempSync(join(tmpdir(),'osd-lang-'));process.env.DATABASE_PATH=join(temp,'test.sqlite');id=Number(getDb().prepare('INSERT INTO customers(email,created_at) VALUES(?,?)').run('person@example.test',Date.now()).lastInsertRowid)});
+ afterEach(()=>{closeDb();rmSync(temp,{recursive:true,force:true});delete process.env.DATABASE_PATH});
+ it('ne transforme pas le français historique par défaut en préférence client',()=>{expect(customerLanguage(id,'fr')).toMatchObject({code:null,source:'unknown',transactional_code:'fr'})});
+ it.each([[english,'en'],[french,'fr'],['Guten Tag, vielen Dank für die aktualisierte Datei. Können Sie bitte bestätigen, ob die LEI-Identifikatoren in allen Datensätzen enthalten sind? Wir benötigen auch eine CSV-Datei.','de'],['Buongiorno, grazie per il file aggiornato. Vorremmo sapere se gli identificativi LEI sono presenti in tutti i record. È possibile ricevere anche un file CSV?','it']])('détecte le texte suffisamment long sans affirmer une préférence', (text,code)=>{expect(detectLanguage(text)).toMatchObject({code,confidence:'probable'})});
+ it('garde le doute pour une salutation ou une adresse seule',()=>{for(const text of ['Thanks','Merci','Sushma Reddy','person@example.test'])expect(detectLanguage(text).code).toBeNull()});
+ it('coupe les citations Outlook sans marqueurs et les transferts',()=>{expect(currentMessage('Danke!\n\nVon: Support\nGesendet: Freitag\n'+french)).toBe('Danke!');expect(currentMessage('Pour info\nBegin forwarded message:\n'+english)).toBe('Pour info')});
+ it('rétablit la table de préférences au démarrage sans perdre les clients',()=>{getDb().exec('DROP TABLE crm_languages');closeDb();expect(getDb().prepare('SELECT id FROM customers WHERE id=?').get(id)).toEqual({id});expect(customerLanguage(id,'fr').source).toBe('unknown')});
+ it('conserve la livraison et la langue existante si la table CRM est indisponible',()=>{getDb().prepare("UPDATE customers SET locale='de' WHERE id=?").run(id);getDb().exec('DROP TABLE crm_languages');expect(checkoutLanguage(id,'en')).toBe('de')});
+ it('ne déduit pas le français depuis notre message cité dans une réponse courte',()=>{const text='Thank you!\n\nOn Friday, Support wrote:\n'+french;expect(currentMessage(text)).toBe('Thank you!');expect(detectLanguage(text).code).toBeNull()});
+ it('distingue une page d’achat d’une préférence fixée et la conserve lors des achats suivants',()=>{expect(checkoutLanguage(id,'de')).toBe('de');expect(customerLanguage(id,'de').source).toBe('checkout');setCustomerLanguage(id,'en');expect(checkoutLanguage(id,'fr')).toBe('en');expect(checkoutLanguage(id,undefined)).toBe('en');expect(customerLanguage(id,'en')).toMatchObject({code:'en',source:'manual'})});
+ it('ne change pas la langue sur une métadonnée invalide ou absente',()=>{checkoutLanguage(id,'de');expect(checkoutLanguage(id,'xx')).toBe('de');expect(checkoutLanguage(id,null)).toBe('de')});
+ it('expose le repli anglais des modèles non traduits et permet de retirer une préférence',()=>{setCustomerLanguage(id,'it');expect(customerLanguage(id,'en')).toMatchObject({code:'it',transactional_code:'en'});setCustomerLanguage(id,null);expect(customerLanguage(id,'en')).toMatchObject({code:null,source:'unknown'});expect(()=>setCustomerLanguage(id,'../../fr')).toThrow()});
+});
