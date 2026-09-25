@@ -15,13 +15,17 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import Database from "better-sqlite3";
-import { readFileSync } from "node:fs";
+import { readFileSync, createReadStream, createWriteStream, mkdtempSync } from "node:fs";
 import { backupKey, encryptBackup, decryptBackup } from "../lib/backup-cipher.js";
-import { mkdir, rm } from "node:fs/promises";
+import { createGzip, createGunzip } from "node:zlib";
+import { pipeline } from "node:stream/promises";
+import { Readable } from "node:stream";
+import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 export const adminRoute = new Hono();
+let backupInProgress = false;
 
 adminRoute.get("/operations", (c) => {
   const secret = c.req.header("x-admin-secret");
@@ -88,11 +92,14 @@ adminRoute.post("/backup-to-r2", async (c) => {
   }
   let encryptionKey: Buffer;
   try { encryptionKey = backupKey(); } catch { return c.json({ error: "backup_key_missing_or_invalid" }, 503); }
+  if (backupInProgress) return c.json({ error: "backup_in_progress" }, 409);
 
   const dateKey = new Date().toISOString().slice(0, 10);
-  const tmp = await mkdir(join(tmpdir(), `osd-backup-${Date.now()}`), { recursive: true });
+  const tmp = mkdtempSync(join(tmpdir(), "osd-backup-"));
   const snapshotPath = join(tmp!, "snapshot.sqlite");
-  const r2Key = `backups/db-${dateKey}-${Date.now()}.sqlite.enc`;
+  const compressedPath = join(tmp!, "snapshot.sqlite.gz");
+  const restoredPath = join(tmp!, "restored.sqlite");
+  const r2Key = `backups/db-${dateKey}-${Date.now()}.sqlite.gz.enc`;
 
   const client = new S3Client({
     region: "auto",
@@ -102,14 +109,21 @@ adminRoute.post("/backup-to-r2", async (c) => {
 
   let uploadedBytes = 0;
   let prunedCount = 0;
+  backupInProgress = true;
   try {
     const db = new Database(dbPath, { readonly: true });
     try {
-      await db.backup(snapshotPath);
+      const started = Date.now();
+      await db.backup(snapshotPath, { progress: () => {
+        if (Date.now() - started > 150_000) throw new Error("backup_snapshot_timeout");
+        return 4096;
+      } });
     } finally {
       db.close();
     }
-    const encrypted = encryptBackup(readFileSync(snapshotPath), encryptionKey);
+    // La base peut être volumineuse : compresser en flux avant le chiffrement.
+    await pipeline(createReadStream(snapshotPath), createGzip(), createWriteStream(compressedPath, { mode: 0o600 }));
+    const encrypted = encryptBackup(readFileSync(compressedPath), encryptionKey);
     uploadedBytes = encrypted.length;
     await client.send(
       new PutObjectCommand({
@@ -120,10 +134,13 @@ adminRoute.post("/backup-to-r2", async (c) => {
         ContentLength: uploadedBytes,
         IfNoneMatch: "*",
       }),
+      { abortSignal: AbortSignal.timeout(120_000) },
     );
 
-    // Relire la copie distante et restaurer en mémoire avant de la déclarer valide.
-    const restored = new Database(decryptBackup(await getObjectBuffer(r2Key, { maxBytes: uploadedBytes + 1 }), encryptionKey));
+    // Restaurer le fichier en flux : une base WAL ne se désérialise pas toujours en mémoire.
+    const compressed = decryptBackup(await getObjectBuffer(r2Key, { maxBytes: uploadedBytes + 1, timeoutMs: 120_000 }), encryptionKey);
+    await pipeline(Readable.from([compressed]), createGunzip(), createWriteStream(restoredPath, { mode: 0o600 }));
+    const restored = new Database(restoredPath, { readonly: true, fileMustExist: true });
     try {
       if (restored.pragma("quick_check", { simple: true }) !== "ok") throw new Error("backup_restore_check_failed");
     } finally { restored.close(); }
@@ -146,6 +163,7 @@ adminRoute.post("/backup-to-r2", async (c) => {
       500,
     );
   } finally {
+    backupInProgress = false;
     await rm(tmp!, { recursive: true, force: true });
   }
 

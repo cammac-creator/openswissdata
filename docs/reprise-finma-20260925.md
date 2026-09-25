@@ -8,7 +8,7 @@ Le ZIP inclut Excel, un rapport de qualité et l’historique reconstitué à pa
 
 La page FINMA française, allemande et anglaise lit les volumes, la date et l’échantillon depuis l’archive réellement distribuée. Le parcours conserve la langue choisie ; l’espace client donne accès au reçu Stripe et aux versions acquises même après l’expiration des mises à jour. La facture au nom d’une entreprise reste traitée sur demande avec ses informations exactes.
 
-Les sauvegardes utilisent AES-256-GCM avec une clé dédiée conservée séparément. Chaque sauvegarde est téléchargée depuis R2, déchiffrée en mémoire et ouverte avec SQLite pour un `quick_check` avant validation. L’ancien script CLI délègue à cette voie unique.
+Les sauvegardes utilisent AES-256-GCM avec une clé dédiée conservée séparément. Chaque sauvegarde est téléchargée depuis R2, déchiffrée puis décompressée en flux dans un fichier temporaire et ouverte avec SQLite pour un `quick_check` avant validation. L’ancien script CLI délègue à cette voie unique.
 
 ## Exploitation
 
