@@ -1,13 +1,8 @@
 /**
- * Source canary — detects upstream schema/format ruptures *before* they hit our
- * pipelines. Computes a stable hash for each authoritative source we depend on
- * (TARES BAZG XLSX, FINMA UID CSV, BFS NOGA via i14y) and compares it to a
- * snapshot stored in `data/source-hashes.json`.
- *
- * If a hash diverges, exit code 2 — the GitHub workflow then opens an issue
- * with the diff. We act on it manually within the SLA we promise customers.
- *
- * Designed to be cheap (HEAD/GET only, no parsing) and never modify data.
+ * Surveille les sources publiques BAZG, FINMA et OFS : disponibilité et empreinte.
+ * Un changement de fichier ou de structure demande un examen, sans prouver une
+ * erreur métier. Référence suivie dans etl/canary-baseline.json ; rapport daté
+ * dans les artefacts GitHub, sans issue ni contact client automatique.
  */
 
 import { createHash } from "node:crypto";
@@ -15,7 +10,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
 
-interface SourceCanary {
+export interface SourceCanary {
   id: string;
   url: string;
   // `raw` hashes bytes — use for files published in discrete versions (e.g. XLSX
@@ -26,7 +21,7 @@ interface SourceCanary {
   description: string;
 }
 
-const CANARIES: SourceCanary[] = [
+export const CANARIES: SourceCanary[] = [
   // TARES — 7 official BAZG XLSX downloads
   {
     id: "tares.tariff_8_digit",
@@ -94,9 +89,9 @@ const CANARIES: SourceCanary[] = [
 ];
 
 // Baseline lives in `etl/` because `data/` is gitignored — this is config, not data.
-const HASH_FILE = "etl/canary-baseline.json";
-const REPORT_FILE = "etl/canary-report.json";
-const USER_AGENT = "openswissdata-canary/0.1 (+contact:contact@openswissdata.com)";
+const HASH_FILE = process.env.CANARY_BASELINE_FILE ?? "etl/canary-baseline.json";
+const REPORT_FILE = process.env.CANARY_REPORT_FILE ?? "etl/canary-report.json";
+const USER_AGENT = "openswissdata-source-monitor/1.0";
 
 interface HashSnapshot {
   [id: string]: { hash: string; checked_at: string; size?: number };
@@ -168,7 +163,9 @@ export function hashCsvShape(buf: Buffer): { hash: string; headers: string[]; se
   return { hash: createHash("sha256").update(signature).digest("hex"), headers, separator };
 }
 
-async function fetchAndHash(canary: SourceCanary): Promise<{ hash: string; size: number }> {
+// Sources publiques → bronze daté immuable → empreintes de contrôle.
+// Dans GitHub, le bronze reste dans l'espace temporaire du travail ; seul le rapport est conservé.
+export async function fetchAndHash(canary: SourceCanary): Promise<{ hash: string; size: number }> {
   const res = await fetch(canary.url, {
     headers: { "user-agent": USER_AGENT },
     signal: AbortSignal.timeout(30_000),
@@ -176,18 +173,32 @@ async function fetchAndHash(canary: SourceCanary): Promise<{ hash: string; size:
   if (!res.ok) {
     throw new Error(`HTTP ${res.status} ${res.statusText}`);
   }
+  if (!res.body) throw new Error("Réponse vide");
+  const parts:Uint8Array[]=[];let size=0;
+  for await (const chunk of res.body) {
+    size+=chunk.length;
+    if(size>50_000_000)throw new Error("Source trop volumineuse pour le contrôle (50 Mo)");
+    parts.push(chunk);
+  }
+  const buf=Buffer.concat(parts);
+  if(!/^[a-z0-9_.-]+$/i.test(canary.id))throw new Error("Identifiant de source invalide");
+  const folder=(process.env.CANARY_BRONZE_DIR??"data/bronze/canary")+"/"+new Date().toISOString().slice(0,10);
+  mkdirSync(folder,{recursive:true});
+  const path=folder+"/"+canary.id+"-"+createHash("sha256").update(buf).digest("hex")+".raw";
+  try { writeFileSync(path,buf,{flag:"wx"}); }
+  catch(error) { if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error; }
+  // Une page d'erreur HTML avec HTTP 200 n'est jamais une nouvelle référence valide.
+  if(/^\s*(?:<!doctype\s+html|<html)/i.test(buf.subarray(0,300).toString()))throw new Error("La source a renvoyé une page HTML");
   if (canary.mode === "raw") {
-    const buf = Buffer.from(await res.arrayBuffer());
+    if(buf.subarray(0,4).toString("hex")!=="504b0304")throw new Error("La source attendue n'est pas une archive XLSX");
     return { hash: createHash("sha256").update(buf).digest("hex"), size: buf.length };
   }
   if (canary.mode === "csv-shape") {
-    const buf = Buffer.from(await res.arrayBuffer());
     const { hash } = hashCsvShape(buf);
     return { hash, size: buf.length };
   }
-  const json = await res.json();
-  const text = JSON.stringify(json);
-  return { hash: hashJsonShape(json), size: text.length };
+  const json: unknown = JSON.parse(buf.toString("utf8"));
+  return { hash: hashJsonShape(json), size: buf.length };
 }
 
 function loadSnapshot(): HashSnapshot {
@@ -253,8 +264,8 @@ async function main() {
     `[canary] ${results.length} sources · ${drifts.length} drift · ${errors.length} error · ${newOnes.length} new`,
   );
 
-  // Write snapshot only if --update or first-run baseline
-  if (updateMode || Object.keys(previous).length === 0) {
+  // Une référence absente ne doit pas être approuvée silencieusement.
+  if (updateMode && errors.length === 0) {
     saveSnapshot(next);
     console.log(`[canary] snapshot written to ${HASH_FILE}`);
   }
@@ -270,11 +281,13 @@ async function main() {
     errors,
     new_sources: newOnes,
   };
+  mkdirSync(dirname(REPORT_FILE),{recursive:true});
   writeFileSync(REPORT_FILE, JSON.stringify(report, null, 2) + "\n");
 
   // Exit 2 on drift so the workflow can branch on it
   if (drifts.length > 0) process.exit(2);
   if (errors.length > 0) process.exit(3);
+  if (newOnes.length > 0 && !updateMode) process.exit(4);
   process.exit(0);
 }
 
