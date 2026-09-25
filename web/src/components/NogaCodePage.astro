@@ -1,13 +1,15 @@
 ---
+import { jsonForHtml } from "../lib/html";
 import {
   getAncestors,
   getChildren,
   getNeighbors,
   getCrosswalksFor,
+  getClassificationReferenceVersion,
   dottedCode,
   type NogaRow,
 } from "../lib/noga-helpers";
-import { NOGA_STR, LEVEL_LABEL, labelFor, nogaExamples } from "../lib/noga-i18n";
+import { NOGA_STR, LEVEL_LABEL, labelFor } from "../lib/noga-i18n";
 import { localizePath, type Lang } from "../i18n/utils";
 
 interface Props { row: NogaRow; lang: Lang; }
@@ -26,7 +28,7 @@ const ancestorsRaw = getAncestors(row.code);
 const childrenRaw = getChildren(row.code);
 const neighbors = getNeighbors(row.code, 8);
 const crosswalks = getCrosswalksFor(row.code);
-const examples = nogaExamples(row, lang);
+const referenceVersion = getClassificationReferenceVersion();
 
 interface HierarchyRow { levelLabel: string; code: string; display: string; label: string; href: string; current: boolean; }
 const ancestorsBase: HierarchyRow[] = ancestorsRaw.map((a) => ({
@@ -56,14 +58,12 @@ const children: HierarchyRow[] = childrenRaw.slice(0, 30).map((c) => ({
 }));
 const childrenTotal = childrenRaw.length;
 
-interface CrosswalkRowFlat { standard: string; code: string; label: string; mapping_type: string; }
-const crosswalkRows: CrosswalkRowFlat[] = [];
-for (const cw of crosswalks) {
-  if (cw.nace_2_1) crosswalkRows.push({ standard: "NACE Rev 2.1", code: dottedCode(cw.nace_2_1), label: cw.nace_2_1_label_en || "—", mapping_type: cw.mapping_type });
-  if (cw.nace_2_0) crosswalkRows.push({ standard: "NACE Rev 2.0", code: dottedCode(cw.nace_2_0), label: cw.nace_2_0_label_en || "—", mapping_type: cw.mapping_type });
-  if (cw.isic_4) crosswalkRows.push({ standard: "ISIC Rev 4", code: cw.isic_4, label: cw.isic_4_label_en || "—", mapping_type: cw.mapping_type });
-  if (cw.noga_2008) crosswalkRows.push({ standard: "NOGA 2008", code: dottedCode(cw.noga_2008), label: cw.noga_2008_label_fr || "—", mapping_type: cw.mapping_type });
-}
+const crosswalkRows = crosswalks;
+const relationLabels = {
+  fr: { exactMatch: "Identité documentée", closeMatch: "Correspondance approchée", broadMatch: "Périmètre cible plus large", narrowMatch: "Périmètre cible plus étroit", relatedMatch: "Concept associé" },
+  de: { exactMatch: "Dokumentierte Identität", closeMatch: "Ungefähre Zuordnung", broadMatch: "Breiterer Zielbereich", narrowMatch: "Engerer Zielbereich", relatedMatch: "Verwandter Begriff" },
+  en: { exactMatch: "Documented identity", closeMatch: "Approximate mapping", broadMatch: "Broader target scope", narrowMatch: "Narrower target scope", relatedMatch: "Related concept" },
+}[lang];
 
 const ORIGIN = "https://www.openswissdata.com";
 const jsonLd = {
@@ -206,20 +206,20 @@ const breadcrumbLd = {
         <p class="ds-section-intro">{S.cwIntro(dotted)}</p>
         <div class="ds-table-wrap">
           <table class="ds-table">
-            <thead><tr><th>{S.thStandard}</th><th>{S.thCode}</th><th>{S.thDesignation}</th><th>{S.thType}</th></tr></thead>
+            <thead><tr><th>{S.thStandard}</th><th>{S.thCode}</th><th>{S.thType}</th><th>Source</th></tr></thead>
             <tbody>
               {crosswalkRows.map((cw) => (
                 <tr>
                   <td>{cw.standard}</td>
                   <td class="mono">{cw.code}</td>
-                  <td class="dim">{cw.label}</td>
-                  <td class="dim">{cw.mapping_type}</td>
+                  <td class="dim">{relationLabels[cw.relation]}{cw.requires_review && <span> · {lang === "de" ? "zu prüfen" : lang === "en" ? "review required" : "à valider"}</span>}</td>
+                  <td class="dim">{cw.sources.map((source, i) => <span>{i > 0 && " · "}<a href={source.url} target="_blank" rel="noopener">{source.source_id === "ofs-methodologie" ? "OFS / BFS" : "Eurostat"}</a></span>)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p class="ds-section-note">{S.cwNote}</p>
+        <p class="ds-section-note">{S.cwNote} · {referenceVersion}</p>
       </section>
     )}
 
@@ -243,16 +243,6 @@ const breadcrumbLd = {
         </div>
       </section>
     )}
-
-    <section class="ds-section reveal">
-      <h2 class="ds-section-title">{S.exTitle} <span class="serif">{S.exTitleEm}</span></h2>
-      <p class="ds-section-intro">{S.exIntro(dotted)}</p>
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        {examples.map((ex) => (
-          <p style="margin: 0; font-size: 15px; line-height: 1.6; color: var(--color-ink-soft);">{ex}</p>
-        ))}
-      </div>
-    </section>
 
     <section class="ds-section reveal">
       <h2 class="ds-section-title">{S.usedTitle} <span class="serif">{S.usedTitleEm}</span></h2>
@@ -288,5 +278,5 @@ const breadcrumbLd = {
   </div>
 </section>
 
-<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-<script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+<script type="application/ld+json" set:html={jsonForHtml(jsonLd)} />
+<script type="application/ld+json" set:html={jsonForHtml(breadcrumbLd)} />

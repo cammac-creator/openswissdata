@@ -1,4 +1,5 @@
 ---
+import { jsonForHtml } from "../lib/html";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 // Les souscriptions restent fermées tant que leur livraison n’est pas validée.
@@ -271,8 +272,8 @@ const breadcrumbJsonLd = {
     </div>
   </section>
 
-  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
-  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  <script type="application/ld+json" set:html={jsonForHtml(faqJsonLd)} />
+  <script type="application/ld+json" set:html={jsonForHtml(breadcrumbJsonLd)} />
 
   <style>
     .pr-grid {

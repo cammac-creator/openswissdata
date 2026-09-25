@@ -1,4 +1,5 @@
 ---
+import { jsonForHtml } from "../lib/html";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import InstallBar from "./InstallBar.astro";
 import Fiche from "./Fiche.astro";
@@ -122,7 +123,7 @@ const products = [
  <section class="v4-how"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.howTitle}</h2><div class="home-steps">{copy.steps.map(([title,text],i)=><article class="reveal-v4"><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
  <section class="v4-faq"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.faqTitle}</h2><div class="v4-faq-list">{copy.faq.map(([q,a])=><details class="v4-faq-item reveal-v4"><summary>{q}</summary><p>{a}</p></details>)}</div><div class="v4-cta-row"><a href={`${lang==='de'?'/de':''}/legal/provenance`}>{copy.readProof} →</a><a href={`${lang==='de'?'/de':''}/legal/cgv`}>{copy.terms}</a><a href="mailto:contact@openswissdata.com">{copy.support}</a></div></div></section>
  <section class="v4-cta-final"><div class="container-v4"><h2 class="reveal-v4">{copy.finalTitle}</h2><p class="reveal-v4">{copy.finalText}</p><div class="v4-cta-final-row reveal-v4"><a href="#datasets" class="v4-btn v4-btn-primary">{copy.browse} →</a><a href="/api/catalog/tares?format=csv" class="v4-btn v4-btn-secondary" download>{copy.sample} ↓</a></div></div></section>
- <script type="application/ld+json" set:html={JSON.stringify({"@context":"https://schema.org","@type":"FAQPage",mainEntity:copy.faq.map(([q,a])=>({"@type":"Question",name:q,acceptedAnswer:{"@type":"Answer",text:a}}))})}/>
+ <script type="application/ld+json" set:html={jsonForHtml({"@context":"https://schema.org","@type":"FAQPage",mainEntity:copy.faq.map(([q,a])=>({"@type":"Question",name:q,acceptedAnswer:{"@type":"Answer",text:a}}))})}/>
  <script>
   const root=document.querySelector<HTMLElement>('[data-home-live]');
   if(root){

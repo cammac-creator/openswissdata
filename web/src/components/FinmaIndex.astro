@@ -1,4 +1,5 @@
 ---
+import { jsonForHtml } from "../lib/html";
 import { entitiesByType, typeCounts, loadFinma } from "../lib/finma-helpers";
 import { FINMA_STR, typeLabel } from "../lib/finma-i18n";
 import { localizePath, type Lang } from "../i18n/utils";
@@ -49,7 +50,7 @@ const indexJsonLd = {
       <div class="ds-price-box reveal-v4" data-delay="2">
         <div class="ds-price-box-label">{S.bcRegistry}</div>
         <div class="ds-price-box-amount" style="font-size: 36px;">{total}</div>
-        <div class="ds-price-box-renew">{lang === "de" ? "bewilligte Einträge" : lang === "en" ? "authorised entries" : "entrées autorisées"}</div>
+        <div class="ds-price-box-renew">{lang === "de" ? "Einträge dieser Kopie" : lang === "en" ? "entries in this copy" : "entrées dans cette copie"}</div>
       </div>
     </div>
   </div>
@@ -61,10 +62,10 @@ const indexJsonLd = {
       <div class="v4-section-eyebrow"><strong>{S.idxSearchTitle}</strong></div>
       <h2 class="v4-section-h2">{S.idxSearchTitle} <span class="serif">{S.idxSearchEm}</span></h2>
       <p class="v4-section-intro">{S.idxSearchIntro}</p>
-      <input type="search" id="finma-search" data-index-url={searchUrl} placeholder={S.idxSearchPlaceholder} autocomplete="off" spellcheck="false"
+      <input type="search" id="finma-search" aria-label={S.idxSearchPlaceholder} data-index-url={searchUrl} placeholder={S.idxSearchPlaceholder} autocomplete="off" spellcheck="false"
         style="width: 100%; padding: 14px 18px; font-size: 16px; border: 1px solid var(--color-line); border-radius: 12px; background: white; font-family: var(--font-sans); margin-bottom: 16px;" />
       <div id="finma-results" style="display: none; max-height: 480px; overflow-y: auto; border: 1px solid var(--color-line); border-radius: 12px; background: white;"></div>
-      <p id="finma-search-count" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
+      <p id="finma-search-count" role="status" aria-live="polite" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
     </section>
 
     <section class="ds-section reveal-v4">
@@ -106,9 +107,9 @@ const indexJsonLd = {
   </div>
 </section>
 
-<script type="application/ld+json" set:html={JSON.stringify(indexJsonLd)} />
+<script type="application/ld+json" set:html={jsonForHtml(indexJsonLd)} />
 
-<script define:vars={{ L: { loading: S.idxLoading, noResult: S.idxNoResult } }}>
+<script define:vars={{ L: { loading: S.idxLoading, noResult: S.idxNoResult, error: lang === "de" ? "Suche vorübergehend nicht verfügbar. Bitte erneut versuchen." : lang === "en" ? "Search temporarily unavailable. Please try again." : "Recherche momentanément indisponible. Réessayez." } }}>
   const input = document.getElementById("finma-search");
   const results = document.getElementById("finma-results");
   const countEl = document.getElementById("finma-search-count");
@@ -118,16 +119,28 @@ const indexJsonLd = {
     if (idx) return Promise.resolve(idx);
     if (loading) return loading;
     countEl.textContent = L.loading;
-    loading = fetch(indexUrl).then((r) => r.json()).then((d) => { idx = d; countEl.textContent = ""; return d; })
-      .catch(() => { countEl.textContent = "⚠"; loading = null; return []; });
+    loading = fetch(indexUrl).then((r) => { if (!r.ok) throw new Error("index_unavailable"); return r.json(); }).then((d) => { if (!Array.isArray(d) || d.some(r => typeof r.name !== "string")) throw new Error("index_invalid"); idx = d; countEl.textContent = ""; return d; })
+      .catch(() => { countEl.textContent = L.error; loading = null; return null; });
     return loading;
   }
   function norm(s) { return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
   function render(matches) {
     if (!matches.length) { results.style.display = "none"; countEl.textContent = L.noResult; return; }
     results.style.display = "block";
-    results.innerHTML = matches.slice(0, 50).map((m) =>
-      `<div class="finma-result-item"><a href="${m.href}"><span class="finma-result-name">${m.name}</span><span class="finma-result-meta">${m.city || ""}</span></a></div>`).join("");
+    const fragment = document.createDocumentFragment();
+    for (const m of matches.slice(0, 50)) {
+      // Seules les adresses locales produites par cet index peuvent devenir des liens.
+      const validHref = typeof m.href === "string" && /^(?:\/(?:de|en))?\/finma\/[a-zA-Z0-9-]+\/?$/.test(m.href);
+      const row = document.createElement("div"); row.className = "finma-result-item";
+      const link = document.createElement(validHref ? "a" : "span");
+      if (validHref) link.setAttribute("href", m.href);
+      const first = document.createElement("span"); first.className = "finma-result-name";
+      first.textContent = m.name || "";
+      const second = document.createElement("span"); second.className = "finma-result-meta";
+      second.textContent = m.city || "";
+      link.append(first, second); row.append(link); fragment.append(row);
+    }
+    results.replaceChildren(fragment);
     countEl.textContent = matches.length > 50 ? `${matches.length} / 50` : String(matches.length);
   }
   input?.addEventListener("focus", () => load(), { once: true });
@@ -135,6 +148,7 @@ const indexJsonLd = {
     const q = norm(e.target.value.trim());
     if (q.length < 2) { results.style.display = "none"; countEl.textContent = ""; return; }
     const data = await load();
+    if (!data || q !== norm(input.value.trim())) return;
     const matches = data.filter((r) => norm(r.name).includes(q));
     matches.sort((a, b) => {
       const as = norm(a.name).startsWith(q) ? 0 : 1, bs = norm(b.name).startsWith(q) ? 0 : 1;

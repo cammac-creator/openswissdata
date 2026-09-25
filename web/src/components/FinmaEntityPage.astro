@@ -1,4 +1,5 @@
 ---
+import { jsonForHtml } from "../lib/html";
 import { neighborsOfType, type FinmaEntity } from "../lib/finma-helpers";
 import { FINMA_STR, typeLabel, licenceFor, typeExplain } from "../lib/finma-i18n";
 import { localizePath, type Lang } from "../i18n/utils";
@@ -55,7 +56,7 @@ const breadcrumbLd = {
           <span>{tLabel}</span>
         </div>
         <h1 class="v4-h1 reveal-v4" data-delay="1">{entity.name}</h1>
-        <p class="v4-lede reveal-v4" data-delay="2" set:html={S.ledeAuthorized(entity.name)} />
+        <p class="v4-lede reveal-v4" data-delay="2" >{S.ledeAuthorized(entity.name)}</p>
       </div>
       <div class="ds-price-box reveal-v4" data-delay="2">
         <div class="ds-price-box-label">{S.fType}</div>
@@ -130,4 +131,4 @@ const breadcrumbLd = {
   </div>
 </section>
 
-<script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+<script type="application/ld+json" set:html={jsonForHtml(breadcrumbLd)} />
