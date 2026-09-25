@@ -1,0 +1,51 @@
+name: Publication des classifications contrôlée
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Préparer et vérifier sans publier"
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: classifications-production
+  cancel-in-progress: false
+jobs:
+  refresh-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Collecter, contrôler, signer et relire CLASSIFICATIONS
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          BASE_URL: https://www.openswissdata.com
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          OSD_SIGNING_KEY_ED25519: ${{ secrets.OSD_SIGNING_KEY_ED25519 }}
+          CLASSIFICATIONS_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '0' }}
+          CLASSIFICATIONS_TIER: "standard"
+        run: |
+          node --import tsx --input-type=module <<'NODE'
+          import { runRelease } from './etl/classifications/release.ts';
+          import { writeFileSync, appendFileSync } from 'node:fs';
+          const result = await runRelease();
+          const { zip_path, ...summary } = result;
+          writeFileSync('data/classifications/resultat.json', JSON.stringify(summary, null, 2));
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## CLASSIFICATIONS ${result.version}\n${result.entity_count} codes ; archive vérifiée, ${result.registered ? 'version enregistrée' : 'simulation sans publication'}.\nSHA-256 : ${result.sha256}\n\nRelations directes par paire ; closeMatch n’est pas une équivalence exacte. Les compléments Pro ne sont pas publiés par cette tâche.\n`);
+          NODE
+      - name: Conserver le témoin de résultat
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultat-classifications-${{ github.run_id }}
+          path: data/classifications/resultat.json
+          retention-days: 14
+          if-no-files-found: error

@@ -55,3 +55,20 @@ describe("Qualité publique TARES",()=>{
  it("refuse une archive dont l’empreinte diffère",async()=>{await publishTares();download.mockResolvedValue(Buffer.from('altéré'));expect((await createApp().request('/api/catalog/tares')).status).toBe(503);});
  it("exporte le même échantillon en CSV daté",async()=>{await publishTares();const res=await createApp().request('/api/catalog/tares?format=csv');expect(res.status).toBe(200);expect(res.headers.get('content-disposition')).toContain('tares-sample-2026.09.25');expect(res.headers.get('cache-control')).toBe('no-store');expect(await res.text()).toContain('Exemple 0');});
 });
+
+async function publishClassifications() {
+ const zip=archiver("zip"),parts:Buffer[]=[];const ready=new Promise<Buffer>((resolve,reject)=>{zip.on("data",c=>parts.push(c));zip.on("error",reject);zip.on("end",()=>resolve(Buffer.concat(parts)));});
+ const schemes=['noga_2008','noga_2025','nace_2_0','nace_2_1','isic_4'];
+ zip.append(JSON.stringify({schema_version:2,rows:100,links:150,orphan_parents:0,schemes:Object.fromEntries(schemes.map(s=>[s,{rows:20}]))}),{name:'quality.json'});
+ for(const scheme of schemes)zip.append(JSON.stringify(Array.from({length:20},(_,i)=>({scheme,code:String(i).padStart(4,'0'),level:'class',parent:null,label_fr:`Exemple ${i}`,label_es:scheme==='isic_4'?'Ejemplo':''}))),{name:scheme+'.json'});
+ await zip.finalize();const bytes=await ready,version=`2026.09.25.${++counter}`;
+ getDb().prepare("INSERT INTO datasets(id,name,slug,price_chf,stripe_price_id,current_version,created_at) VALUES('classifications','Classifications','classifications',0,'fictif',?,?)").run(version,Date.now());
+ getDb().prepare("INSERT INTO versions(dataset_id,version,r2_key,sha256,size_bytes,released_at) VALUES('classifications',?,?,?,?,?)").run(version,`classifications/${version}/classifications.zip`,createHash('sha256').update(bytes).digest('hex'),bytes.length,Date.now());download.mockResolvedValue(bytes);
+}
+describe('Catalogue classifications aligné sur l’archive',()=>{
+ it('extrait cinquante lignes réelles, dix de chaque nomenclature',async()=>{await publishClassifications();const res=await createApp().request('/api/catalog/classifications');expect(res.status).toBe(200);const data=await res.json();expect(data.rows).toBe(100);expect(data.sample).toHaveLength(50);expect(new Set(data.sample.map((x:any)=>x.scheme)).size).toBe(5);});
+ it('conserve les zéros et la langue espagnole dans le CSV',async()=>{await publishClassifications();const res=await createApp().request('/api/catalog/classifications?format=csv');expect(res.status).toBe(200);expect(res.headers.get('cache-control')).toBe('no-store');const text=await res.text();expect(text).toContain('0000');expect(text).toContain('label_es');expect(text).toContain('Ejemplo');});
+ it('refuse de servir des données dont l’archive est altérée',async()=>{await publishClassifications();download.mockResolvedValue(Buffer.from('autre'));expect((await createApp().request('/api/catalog/classifications')).status).toBe(503);});
+ it('expose la même nuance métier que le service IA pour 1811',async()=>{const res=await createApp().request('/api/catalog/classifications/mapping?source=NACE_2.0&target=ISIC_4&code=18.11');expect(res.status).toBe(200);const data=await res.json();expect(data.mappings[0].relation).toBe('closeMatch');expect(data.mappings[0].requires_review).toBe(true);});
+ it('rejette les paramètres de correspondance invalides',async()=>{expect((await createApp().request('/api/catalog/classifications/mapping?source=autre&target=ISIC_4&code=1811')).status).toBe(400);});
+});

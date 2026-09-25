@@ -1,147 +1,44 @@
 ---
-import { getLangFromPath, t, localizePath } from "../i18n/utils";
+import { getLangFromPath } from "../i18n/utils";
 const lang = getLangFromPath(Astro.url.pathname);
+const text = {
+ fr:{title:'Vérifier une correspondance',intro:'Saisissez un code et choisissez les deux nomenclatures. La réponse distingue identité, rapprochement et perte de précision.',code:'Code',source:'Depuis',target:'Vers',button:'Vérifier',empty:'Aucun lien établi dans ce référentiel. Un examen métier ou une table dédiée peut être nécessaire.',error:'La vérification est momentanément indisponible.',loading:'Vérification…',version:'Référentiel',exact:'Identité documentée',close:'Correspondance approchée — à vérifier',broad:'Cible plus large — perte de précision',narrow:'Cible plus étroite — choix à vérifier',related:'Relation indicative — à vérifier',sources:'Sources',limit:'Deux liens approchés ne sont pas chaînés automatiquement.'},
+ en:{title:'Check a correspondence',intro:'Enter a code and select two classifications. The result distinguishes identity, approximation and loss of detail.',code:'Code',source:'From',target:'To',button:'Check',empty:'No established link in this reference dataset. A dedicated table or business review may be required.',error:'The check is temporarily unavailable.',loading:'Checking…',version:'Reference',exact:'Documented identity',close:'Approximate match — review required',broad:'Broader target — less detail',narrow:'Narrower target — selection requires review',related:'Indicative relation — review required',sources:'Sources',limit:'Two approximate links are not chained automatically.'},
+ de:{title:'Eine Zuordnung prüfen',intro:'Geben Sie einen Code ein und wählen Sie zwei Klassifikationen. Das Ergebnis unterscheidet Identität, Annäherung und Detailverlust.',code:'Code',source:'Von',target:'Nach',button:'Prüfen',empty:'Keine belegte Zuordnung in diesem Datenbestand. Eine eigene Tabelle oder fachliche Prüfung kann erforderlich sein.',error:'Die Prüfung ist vorübergehend nicht verfügbar.',loading:'Wird geprüft…',version:'Datenstand',exact:'Dokumentierte Identität',close:'Ungefähre Zuordnung — Prüfung erforderlich',broad:'Breiteres Ziel — Detailverlust',narrow:'Engeres Ziel — Auswahl prüfen',related:'Hinweis auf Beziehung — Prüfung erforderlich',sources:'Quellen',limit:'Zwei ungefähre Zuordnungen werden nicht automatisch verkettet.'},
+}[lang];
+const schemes=['NOGA_2008','NOGA_2025','NACE_2.0','NACE_2.1','ISIC_4'];
 ---
-<div class="hs-lookup">
-  <div class="hs-lookup-header">
-    <div class="hs-lookup-title-row">
-      <div class="hs-lookup-badge">
-        <span class="badge-dot"></span>
-        Démo live
-      </div>
-      <div class="hs-lookup-meta">
-        20 codes NOGA 2025 + cross-walks réels
-      </div>
-    </div>
-    <h3 class="hs-lookup-title">Cherchez un code NOGA</h3>
-    <p class="hs-lookup-sub">Tapez une activité (banque, restaurant, conseil, transport...) ou un code NOGA. Vous verrez son équivalent dans NOGA 2008, NACE Rev 2 et ISIC Rev 4.</p>
-  </div>
-
-  <div class="hs-lookup-input-wrap">
-    <label for="cl-input" class="sr-only">Recherche d'un code NOGA, NACE ou ISIC par mot-clé ou code</label>
-    <svg class="hs-lookup-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
-      <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.6"/>
-      <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-    </svg>
-    <input
-      type="search"
-      id="cl-input"
-      class="hs-lookup-input"
-      placeholder="essayez : banque, restaurant, conseil, 64.11..."
-      autocomplete="off"
-      spellcheck="false"
-    />
-    <button class="hs-lookup-clear" id="cl-clear" type="button" aria-label="Effacer la recherche">
-      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    </button>
-  </div>
-
-  <div class="hs-lookup-suggestions">
-    <span class="hs-lookup-suggestions-label">Suggestions :</span>
-    <button class="cl-chip" data-q="banque">banque</button>
-    <button class="cl-chip" data-q="restaurant">restaurant</button>
-    <button class="cl-chip" data-q="conseil">conseil</button>
-    <button class="cl-chip" data-q="transport">transport</button>
-    <button class="cl-chip" data-q="logiciel">logiciel</button>
-    <button class="cl-chip" data-q="assurance">assurance</button>
-  </div>
-
-  <div class="hs-lookup-results" id="cl-results">
-    <div class="hs-lookup-empty">
-      <p>Tapez un terme ou cliquez une suggestion ci-dessus.</p>
-    </div>
-  </div>
-
-  <div class="hs-lookup-footer">
-    <span>Dataset complet : 1 047 codes NACE Rev 2 (24 langues UE) + 1 047 NOGA 2008 + 766 codes ISIC Rev 4 (FR/EN/ES) + 1 025 cross-walks</span>
-    <a href={localizePath("/bundle", lang)}>{t("lookup.see_bundle", lang)}</a>
-  </div>
+<div class="classification-demo" data-copy={JSON.stringify(text)}>
+ <h3>{text.title}</h3><p>{text.intro}</p>
+ <form>
+  <label>{text.code}<input name="code" value="18.11" required maxlength="16" autocomplete="off" /></label>
+  <label>{text.source}<select name="source">{schemes.map(s=><option value={s} selected={s==='NACE_2.0'}>{s.replaceAll('_',' ')}</option>)}</select></label>
+  <label>{text.target}<select name="target">{schemes.map(s=><option value={s} selected={s==='ISIC_4'}>{s.replaceAll('_',' ')}</option>)}</select></label>
+  <button class="v4-btn v4-btn-primary" type="submit">{text.button}</button>
+ </form>
+ <div data-result role="status" aria-live="polite"></div><p class="dim">{text.limit}</p>
 </div>
-
-<script is:inline>
-  const NOGA_SAMPLE = [
-    { noga25: "64.11", noga08: "64.11", nace: "64.11", isic: "6411", fr: "Activités de banque centrale" },
-    { noga25: "64.19", noga08: "64.19", nace: "64.19", isic: "6419", fr: "Autres intermédiations monétaires (banques commerciales)" },
-    { noga25: "65.11", noga08: "65.11", nace: "65.11", isic: "6511", fr: "Assurance-vie" },
-    { noga25: "65.12", noga08: "65.12", nace: "65.12", isic: "6512", fr: "Assurance autre que vie (dommages, santé)" },
-    { noga25: "66.12", noga08: "66.12", nace: "66.12", isic: "6612", fr: "Courtage de valeurs mobilières et marchandises" },
-    { noga25: "56.10", noga08: "56.10", nace: "56.10", isic: "5610", fr: "Restaurants et services de restauration mobile" },
-    { noga25: "55.10", noga08: "55.10", nace: "55.10", isic: "5510", fr: "Hôtels et hébergements similaires" },
-    { noga25: "62.01", noga08: "62.01", nace: "62.01", isic: "6201", fr: "Programmation informatique (édition de logiciels)" },
-    { noga25: "62.02", noga08: "62.02", nace: "62.02", isic: "6202", fr: "Conseil informatique et activités connexes" },
-    { noga25: "63.11", noga08: "63.11", nace: "63.11", isic: "6311", fr: "Traitement de données, hébergement (cloud)" },
-    { noga25: "70.22", noga08: "70.22", nace: "70.22", isic: "7020", fr: "Conseil pour les affaires et autres conseils de gestion" },
-    { noga25: "69.10", noga08: "69.10", nace: "69.10", isic: "6910", fr: "Activités juridiques (avocats, notaires)" },
-    { noga25: "69.20", noga08: "69.20", nace: "69.20", isic: "6920", fr: "Activités comptables, audit, conseil fiscal" },
-    { noga25: "49.41", noga08: "49.41", nace: "49.41", isic: "4923", fr: "Transports routiers de fret" },
-    { noga25: "47.11", noga08: "47.11", nace: "47.11", isic: "4711", fr: "Commerce de détail en magasin non spécialisé (alimentation)" },
-    { noga25: "47.91", noga08: "47.91", nace: "47.91", isic: "4791", fr: "Vente à distance (e-commerce)" },
-    { noga25: "86.10", noga08: "86.10", nace: "86.10", isic: "8610", fr: "Activités hospitalières" },
-    { noga25: "85.42", noga08: "85.42", nace: "85.42", isic: "8530", fr: "Enseignement supérieur" },
-    { noga25: "41.20", noga08: "41.20", nace: "41.20", isic: "4100", fr: "Construction de bâtiments résidentiels et non résidentiels" },
-    { noga25: "10.51", noga08: "10.51", nace: "10.51", isic: "1050", fr: "Exploitation de laiteries et fabrication de fromages" },
-  ];
-
-  function clSearch(q) {
-    if (!q || q.length < 2) return [];
-    const Q = q.toLowerCase().trim();
-    return NOGA_SAMPLE.filter(r =>
-      r.noga25.startsWith(Q.replace(/[^0-9.]/g, '')) && Q.match(/\d/) ||
-      r.fr.toLowerCase().includes(Q)
-    ).slice(0, 5);
-  }
-
-  function clRender(results) {
-    const el = document.getElementById('cl-results');
-    if (!results || results.length === 0) {
-      el.innerHTML = '<div class="hs-result-empty"><strong>Pas de résultat dans cet échantillon.</strong><br>Cet aperçu contient ' + NOGA_SAMPLE.length + ' codes. Le dataset complet contient ~3 100 codes (NACE Rev 2 + NOGA 2008 + ISIC Rev 4) avec 1 025 cross-walks.</div>';
-      return;
-    }
-    const rows = results.map(r => `
-      <div class="cl-result-row">
-        <div class="cl-result-head">
-          <div class="cl-result-fr">${r.fr}</div>
-        </div>
-        <div class="cl-result-walks">
-          <div class="cl-walk"><span class="cl-walk-label">NOGA 2025</span><span class="cl-walk-code primary">${r.noga25}</span></div>
-          <div class="cl-walk"><span class="cl-walk-label">NOGA 2008</span><span class="cl-walk-code">${r.noga08}</span></div>
-          <div class="cl-walk"><span class="cl-walk-label">NACE Rev 2</span><span class="cl-walk-code">${r.nace}</span></div>
-          <div class="cl-walk"><span class="cl-walk-label">ISIC Rev 4</span><span class="cl-walk-code">${r.isic}</span></div>
-        </div>
-      </div>
-    `).join('');
-    el.innerHTML = '<div class="hs-result-list">' + rows + '</div>';
-  }
-
-  function clShowEmpty() {
-    document.getElementById('cl-results').innerHTML = '<div class="hs-lookup-empty"><p>Tapez un terme ou cliquez une suggestion ci-dessus.</p></div>';
-  }
-
-  const clInput = document.getElementById('cl-input');
-  const clClear = document.getElementById('cl-clear');
-
-  clInput.addEventListener('input', (e) => {
-    const v = e.target.value;
-    clClear.classList.toggle('visible', v.length > 0);
-    if (!v) { clShowEmpty(); return; }
-    clRender(clSearch(v));
-  });
-
-  clClear.addEventListener('click', () => {
-    clInput.value = '';
-    clClear.classList.remove('visible');
-    clShowEmpty();
-    clInput.focus();
-  });
-
-  document.querySelectorAll('.cl-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const q = chip.dataset.q;
-      clInput.value = q;
-      clClear.classList.add('visible');
-      clRender(clSearch(q));
-      clInput.focus();
-    });
-  });
+<style>
+.classification-demo{border:1px solid var(--border,#ddd);border-radius:16px;padding:clamp(20px,4vw,32px)}.classification-demo form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:24px 0}.classification-demo label{display:flex;flex-direction:column;gap:8px;font-size:.85rem;min-width:0}.classification-demo input,.classification-demo select{font:inherit;font-size:1rem;border:1px solid var(--border,#ccc);border-radius:8px;padding:12px;background:var(--color-bg,#fff);color:inherit;min-width:0;width:100%;box-sizing:border-box}.classification-demo button{grid-column:1/-1;justify-self:start}.classification-demo p{line-height:1.6}.classification-demo :global(li){margin-block:12px;line-height:1.6;overflow-wrap:anywhere}.classification-demo :global(a){overflow-wrap:anywhere}@media(max-width:600px){.classification-demo form{grid-template-columns:1fr}}
+</style>
+<script>
+for(const element of document.querySelectorAll<HTMLElement>('.classification-demo')){
+ const copy=JSON.parse(element.dataset.copy!);const form=element.querySelector('form')!;const output=element.querySelector<HTMLElement>('[data-result]')!;
+ let controller:AbortController|undefined;
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();controller?.abort();controller=new AbortController();const current=controller;
+  output.replaceChildren();output.textContent=copy.loading;
+  try{
+   const params=new URLSearchParams();for(const [key,value] of new FormData(form))params.set(key,String(value));
+   const response=await fetch('/api/catalog/classifications/mapping?'+params,{signal:current.signal,cache:'no-cache'});
+   if(!response.ok)throw Error('indisponible');const data=await response.json();if(current!==controller)return;
+   output.replaceChildren();const version=document.createElement('p');version.textContent=copy.version+' '+data.reference_version;output.append(version);
+   if(!data.count){const note=document.createElement('p');note.textContent=copy.empty;output.append(note);return;}
+   const list=document.createElement('ul');const names:Record<string,string>={exactMatch:copy.exact,closeMatch:copy.close,broadMatch:copy.broad,narrowMatch:copy.narrow,relatedMatch:copy.related};
+   for(const mapping of data.mappings){const item=document.createElement('li');item.textContent=data.target_scheme.replaceAll('_',' ')+' '+mapping.target_code+' — '+names[mapping.relation];list.append(item);}output.append(list);
+   const sources=document.createElement('details');const summary=document.createElement('summary');summary.textContent=copy.sources;sources.append(summary);
+   for(const source of data.sources){const url=new URL(source.url);if(url.protocol!=='https:')continue;const p=document.createElement('p'),a=document.createElement('a');a.href=url.href;a.textContent=url.hostname+' · '+source.source_id;a.target='_blank';a.rel='noopener noreferrer';p.append(a);sources.append(p);}output.append(sources);
+  }catch{if(current===controller&&!current.signal.aborted)output.textContent=copy.error;}
+ });
+}
 </script>
-

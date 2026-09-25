@@ -1,7 +1,7 @@
 /** Source HTTP → bronze brut daté et immuable, avant toute lecture métier. */
-import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 export async function fetchBronze(
   url: string, cacheDir: string, filename: string,
@@ -11,13 +11,23 @@ export async function fetchBronze(
   mkdirSync(dir, { recursive: true });
   let path = join(dir, filename);
   if (existsSync(path)) {
-    if (Date.now() - statSync(path).mtimeMs < maxAgeHours * 3_600_000) return path;
-    path = join(dir, `${Date.now()}-${filename}`);
+    if (existsSync(`${path}.meta.json`) && Date.now() - statSync(path).mtimeMs < maxAgeHours * 3_600_000) {
+      const meta = JSON.parse(readFileSync(`${path}.meta.json`, "utf8"));
+      if (meta.url === url && meta.sha256 === createHash("sha256").update(readFileSync(path)).digest("hex")) return path;
+    }
+    path = join(dir, `${randomUUID()}-${filename}`);
   }
   const response = await fetch(url, { ...init, signal: AbortSignal.timeout(60_000) });
   if (!response.ok) throw new Error(`Source indisponible : HTTP ${response.status} (${new URL(url).hostname})`);
-  const bytes = Buffer.from(await response.arrayBuffer());
-  if (!bytes.length || bytes.length > 20_000_000) throw new Error("Taille de source invalide");
+  if (!response.body) throw new Error("Source sans contenu");
+  const parts: Uint8Array[] = []; let size = 0;
+  for await (const part of response.body) {
+    size += part.length;
+    if (size > 20_000_000) throw new Error("Taille de source invalide");
+    parts.push(part);
+  }
+  const bytes = Buffer.concat(parts);
+  if (!bytes.length) throw new Error("Taille de source invalide");
   writeFileSync(path, bytes, { flag: "wx" });
   writeFileSync(`${path}.meta.json`, JSON.stringify({
     url, fetched_at: new Date().toISOString(), status: response.status,

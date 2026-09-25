@@ -1,32 +1,15 @@
-import { mkdirSync, existsSync, statSync, createWriteStream, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Readable } from "node:stream";
-import { pipeline } from "node:stream/promises";
-// tsx (CJS interop) doesn't honour package.json exports for nace-codes,
-// so we point to the built ESM file directly.
-import { NACE } from "../../node_modules/nace-codes/dist/nace.js";
+import { parse } from "csv-parse/sync";
+import { fetchBronze } from "../shared/bronze.js";
+import { buildClassificationLinks, linksToLegacyCrossWalks, parseNaceIsicLinks, NACE_ISIC_URL } from "./links.js";
+import type { ClassificationLink } from "../../src/lib/classification-links.js";
+import { parseOfficialNace2, NACE2_URL } from "./nace-official.js";
+import type { ClassificationSource } from "../../src/lib/classification-links.js";
+import { OFS_METHODOLOGY_URL } from "./links.js";
 import type { NomenclatureRow, NomenclatureLevel, NomenclatureScheme, CrossWalkRow } from "./types.js";
 
-/**
- * Real ingestion of Classifications from authoritative open sources (v2 — 2026-04-29):
- *
- * - NACE Rev 2     → from npm `nace-codes` (Eurostat-derived, MIT license, 24 EU languages)
- * - NACE Rev 2.1   → from EU Vocabularies SKOS/XKOS RDF (publications.europa.eu, 24 EU languages,
- *                    incl. official `closeMatch` mappings to NACE Rev 2)
- * - NOGA 2008      → from i14y.admin.ch (Swiss interoperability platform, EN/DE/FR/IT, 1790 codes)
- * - NOGA 2025      → from i14y.admin.ch (EN/DE/FR/IT, 1845 codes incl. 6-digit CH-specific subclasses)
- * - ISIC Rev 4     → from UN Statistics CSV (EN + FR + ES) at unstats.un.org
- *
- * Cross-walks:
- * - NOGA_2008 ↔ NACE_2.0 : identity (BFS methodology, identical at section/division/group/class
- *   levels; the 5/6-digit CH-specific subclasses don't exist in NACE).
- * - NOGA_2025 ↔ NACE_2.1 : identity (BFS confirms NOGA 2025 is NACE 2.1 + CH 5/6-digit).
- * - NACE_2.0 ↔ NACE_2.1 : 1589 official `closeMatch` SKOS triples extracted from the NACE 2.1
- *   RDF, treated as `exact` mapping_type.
- * - NACE_2.x ↔ ISIC_4   : derived per-class. NACE Rev 2 was built directly on ISIC Rev 4, so
- *   the first 4 digits of NACE often match the 4-digit ISIC class.
- * - NOGA_2008 ↔ NOGA_2025 : derived via the chain NOGA_2008 → NACE_2.0 → NACE_2.1 → NOGA_2025.
- */
+/** Sources officielles archivées avant lecture ; liens explicites sans identité présumée. */
 
 const ISIC_CSV_BY_LANG: Record<"en" | "fr" | "es", string> = {
   en: "https://unstats.un.org/unsd/classifications/Econ/Download/In%20Text/ISIC_Rev_4_english_structure.Txt",
@@ -44,14 +27,6 @@ const NACE_2_1_RDF_URL =
 const NOGA_2025_CONCEPT_ID = "001bfaa8-fa57-4d66-acfd-c795d67fcf80"; // identifier=nogaCode v2.0.1
 const NOGA_2008_CONCEPT_ID = "08dc481b-2add-1232-b5fe-b1fae7a1ac02"; // identifier=nogaCode v1.0.0
 const I14Y_API = "https://api.i14y.admin.ch/api/public/v1";
-
-async function downloadIfStale(url: string, path: string, maxAgeHours = 24 * 7): Promise<void> {
-  if (existsSync(path) && Date.now() - statSync(path).mtimeMs < maxAgeHours * 3600 * 1000) return;
-  console.log(`[classifications] downloading ${url}`);
-  const res = await fetch(url);
-  if (!res.ok || !res.body) throw new Error(`Failed to download ${url}: HTTP ${res.status}`);
-  await pipeline(Readable.fromWeb(res.body as Parameters<typeof Readable.fromWeb>[0]), createWriteStream(path));
-}
 
 function levelFromCode(code: string, level?: number): NomenclatureLevel {
   if (level !== undefined) {
@@ -78,59 +53,32 @@ function parentFromCode(code: string): string | null {
 }
 
 /**
- * Pull all NACE Rev 2 codes from nace-codes and convert to NomenclatureRow[].
- * The library exposes 1047 codes across all 5 levels with descriptions in
- * 24 EU official languages; we keep the four we publish (EN/FR/DE/IT) plus
- * source label_en for completeness.
- */
-export function loadNaceFromPackage(): NomenclatureRow[] {
-  const nace = new NACE();
-  const all = nace.getAllCodes();
-  const out: NomenclatureRow[] = [];
-  for (const c of all) {
-    const code = c.code.replace(/\./g, "");
-    const desc = c.description as Record<string, string | undefined>;
-    out.push({
-      scheme: "NACE_2.0",
-      code,
-      level: levelFromCode(code, c.level),
-      parent: c.parent ? c.parent.replace(/\./g, "") : parentFromCode(code),
-      label_en: desc.en,
-      label_fr: desc.fr,
-      label_de: desc.de,
-      label_it: desc.it,
-    });
-  }
-  return out;
-}
-
-/**
  * Parse the UN ISIC Rev 4 plain CSV. Each row : "code","description". Hierarchy
  * is recovered by string length (or letter for sections). CSV is double-quoted,
  * encoded latin-1 for FR/ES (the UN file uses Windows-1252, not UTF-8).
  */
 export function parseIsicCsvLatin(path: string, lang: "en" | "fr" | "es"): NomenclatureRow[] {
-  const buf = readFileSync(path);
-  const decoder = new TextDecoder(lang === "en" ? "utf-8" : "windows-1252");
-  const content = decoder.decode(buf);
-  const lines = content.split(/\r?\n/).filter(l => l.trim().length > 0);
-  if (lines.length === 0) return [];
+  // Certains Node macOS assimilent windows-1252 à latin1 : décodage explicite
+  // des 32 positions particulières selon https://encoding.spec.whatwg.org/index-windows-1252.txt.
+  const cp1252 = [0x20ac,0x81,0x201a,0x192,0x201e,0x2026,0x2020,0x2021,0x2c6,0x2030,0x160,0x2039,0x152,0x8d,0x17d,0x8f,0x90,0x2018,0x2019,0x201c,0x201d,0x2022,0x2013,0x2014,0x2dc,0x2122,0x161,0x203a,0x153,0x9d,0x17e,0x178];
+  const bytes = readFileSync(path);
+  const content = lang === "en" ? new TextDecoder("utf-8", { fatal: true }).decode(bytes) :
+    bytes.toString("latin1").replace(/[\u0080-\u009f]/g, char => String.fromCodePoint(cp1252[char.charCodeAt(0) - 0x80]));
+  if (/[\u0080-\u009f\ufffd]/.test(content)) throw new Error("Encodage ONU ISIC invalide");
+  const records = parse(content, { skip_empty_lines: true, bom: true }) as string[][];
+  if (records.length < 2 || records[0].length !== 2 || !/code/i.test(records[0][0])) throw new Error("Structure ONU ISIC invalide");
   const out: NomenclatureRow[] = [];
-  const labelKey = lang === "en" ? "label_en" : lang === "fr" ? "label_fr" : "label_es";
-  for (let i = 1; i < lines.length; i++) {
-    const cells = parseCsvLine(lines[i], ",");
-    if (cells.length < 2) continue;
-    const code = cells[0].replace(/\./g, "").trim();
-    const description = cells[1].trim();
-    if (!code) continue;
-    const row: NomenclatureRow = {
-      scheme: "ISIC_4",
-      code,
-      level: levelFromCode(code),
-      parent: parentFromCode(code),
-    };
-    (row as Record<string, unknown>)[labelKey] = description;
-    out.push(row);
+  const seen = new Set<string>();
+  let section: string | null = null;
+  for (const cells of records.slice(1)) {
+    const code = cells[0]?.trim();
+    if (cells.length !== 2 || !/^([A-Z]|\d{2,4})$/.test(code) || !cells[1]?.trim() || seen.has(code)) throw new Error("Ligne ONU ISIC invalide ou dupliquée");
+    const level = levelFromCode(code);
+    if (level === "section") section = code;
+    const parent = level === "section" ? null : level === "division" ? section : code.slice(0, -1);
+    if (level !== "section" && (!parent || !seen.has(parent))) throw new Error(`Parent ONU ISIC absent avant ${code}`);
+    out.push({ scheme: "ISIC_4", code, level, parent, [lang === "en" ? "label_en" : lang === "fr" ? "label_fr" : "label_es"]: cells[1].trim() });
+    seen.add(code);
   }
   return out;
 }
@@ -144,6 +92,7 @@ export function mergeIsicByLang(perLang: NomenclatureRow[][]): NomenclatureRow[]
     for (const r of arr) {
       const cur = byCode.get(r.code);
       if (cur) {
+        if (cur.parent !== r.parent || cur.level !== r.level) throw new Error(`Hiérarchie ISIC différente selon la langue : ${r.code}`);
         for (const k of ["label_en", "label_fr", "label_de", "label_it"] as const) {
           if (!cur[k] && r[k]) cur[k] = r[k];
         }
@@ -194,17 +143,12 @@ interface I14yConceptResponse {
   data: { codeListEntries: I14yCodeListEntry[] };
 }
 
-async function fetchI14yConcept(conceptId: string, cachePath: string): Promise<I14yCodeListEntry[]> {
-  if (!existsSync(cachePath) || Date.now() - statSync(cachePath).mtimeMs > 7 * 24 * 3600 * 1000) {
-    const url = `${I14Y_API}/concepts/${conceptId}?includeCodeListEntries=true`;
-    console.log(`[classifications] downloading ${url}`);
-    const res = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!res.ok) throw new Error(`i14y fetch failed for concept ${conceptId}: HTTP ${res.status}`);
-    const buf = Buffer.from(await res.arrayBuffer());
-    writeFileSync(cachePath, buf);
-  }
-  const parsed = JSON.parse(readFileSync(cachePath, "utf8")) as I14yConceptResponse;
-  return parsed.data?.codeListEntries ?? [];
+async function fetchI14yConcept(conceptId: string, cacheDir: string): Promise<I14yCodeListEntry[]> {
+  const url = `${I14Y_API}/concepts/${conceptId}?includeCodeListEntries=true`;
+  const path = await fetchBronze(url, cacheDir, `i14y-${conceptId}.json`, { headers: { Accept: "application/json" } });
+  const parsed = JSON.parse(readFileSync(path, "utf8")) as I14yConceptResponse;
+  if (!Array.isArray(parsed.data?.codeListEntries) || !parsed.data.codeListEntries.length) throw new Error("Liste i14y vide ou invalide");
+  return parsed.data.codeListEntries;
 }
 
 function nogaLevelFromCode(code: string): NomenclatureLevel {
@@ -240,14 +184,12 @@ function i14yToNomenclatureRows(
 }
 
 export async function loadNoga2025FromI14y(cacheDir: string): Promise<NomenclatureRow[]> {
-  const path = join(cacheDir, "noga_2025_i14y.json");
-  const entries = await fetchI14yConcept(NOGA_2025_CONCEPT_ID, path);
+  const entries = await fetchI14yConcept(NOGA_2025_CONCEPT_ID, cacheDir);
   return i14yToNomenclatureRows(entries, "NOGA_2025");
 }
 
 export async function loadNoga2008FromI14y(cacheDir: string): Promise<NomenclatureRow[]> {
-  const path = join(cacheDir, "noga_2008_i14y.json");
-  const entries = await fetchI14yConcept(NOGA_2008_CONCEPT_ID, path);
+  const entries = await fetchI14yConcept(NOGA_2008_CONCEPT_ID, cacheDir);
   return i14yToNomenclatureRows(entries, "NOGA_2008");
 }
 
@@ -346,108 +288,20 @@ function decodeXmlEntities(s: string): string {
  * Cross-walks
  * ------------------------------------------------------------------ */
 
-/**
- * Build cross-walks across all 5 schemes anchored on NOGA 2025 codes (one row per
- * NOGA 2025 entity above section level — sections are letters and don't carry
- * mappings).
- *
- * Mapping strategy:
- *
- *  - NOGA_2025 ↔ NACE_2.1  : identity at section/division/group/class. CH-specific
- *    5/6-digit subclasses do not have a NACE 2.1 counterpart → nace_2_1 = null.
- *  - NACE_2.1 ↔ NACE_2.0   : official `skos:closeMatch` triples extracted from the
- *    Eurostat RDF (1589 mappings). When present, mapping_type starts as `exact`.
- *  - NACE_2.0 ↔ NOGA_2008  : identity at all levels (BFS methodology).
- *  - NACE_2.x ↔ ISIC_4     : exact when the 4-digit code matches in both, partial otherwise.
- *  - NOGA_2008 ↔ NOGA_2025 : transitive via the NOGA_2008 → NACE_2.0 → NACE_2.1 → NOGA_2025
- *    chain. mapping_type degrades to `partial` if any step is partial / mismatched.
- *
- * If a NOGA 2025 code has no NACE 2.0 closeMatch, we fall back to identity (it
- * means the code is unchanged across the revision — typical for the majority).
- */
-export function buildRealCrossWalks(
-  rows: NomenclatureRow[],
-  closeMatchNace21toNace2: Map<string, string[]>,
-): CrossWalkRow[] {
-  // Build per-scheme code sets for fast presence lookup.
-  const set = (scheme: NomenclatureScheme) =>
-    new Set(rows.filter(r => r.scheme === scheme).map(r => r.code));
-  const nace20Set = set("NACE_2.0");
-  const nace21Set = set("NACE_2.1");
-  const noga2008Set = set("NOGA_2008");
-  const isicSet = set("ISIC_4");
-
-  // NOGA 2025 anchor — keep all levels except section (matches existing scope).
-  const noga2025Anchors = rows.filter(r => r.scheme === "NOGA_2025" && r.level !== "section");
-
-  const out: CrossWalkRow[] = [];
-  for (const row of noga2025Anchors) {
-    const code = row.code;
-    // NACE 2.1 mirror exists when the same code is in NACE 2.1 (true at section/div/group/class).
-    const nace21 = nace21Set.has(code) ? code : null;
-
-    // NACE 2.0 candidates from the official closeMatch table (only at granularity ≤ class).
-    const closeList = nace21 ? closeMatchNace21toNace2.get(nace21) ?? [] : [];
-    const nace20Candidates: string[] = closeList.length
-      ? closeList.filter(c => nace20Set.has(c))
-      : nace20Set.has(code)
-        ? [code] // identity fallback when no explicit mapping = no change between revisions
-        : [];
-
-    // ISIC 4 — match at class level if both classifications share the code.
-    const isic = isicSet.has(code) ? code : null;
-
-    if (nace20Candidates.length === 0) {
-      // No NACE 2.0 path → emit a row anyway with NOGA_2025 only and best-effort ISIC.
-      out.push({
-        noga_2008: null,
-        noga_2025: code,
-        nace_2_0: null,
-        nace_2_1: nace21,
-        isic_4: isic,
-        mapping_type: nace21 ? "partial" : "derived",
-        notes: nace21
-          ? "no NACE 2.0 closeMatch — likely a new code introduced in NACE 2.1"
-          : "CH-specific subclass — no NACE counterpart",
-      });
-      continue;
-    }
-
-    for (const n20 of nace20Candidates) {
-      const noga2008 = noga2008Set.has(n20) ? n20 : null;
-      // mapping_type heuristic:
-      // - exact iff there's an official closeMatch AND ISIC class matches
-      // - partial otherwise (one or more bridges missing / approximate)
-      const closeMatched = closeList.includes(n20);
-      const exact = closeMatched && isic !== null;
-      const mappingType: CrossWalkRow["mapping_type"] = exact
-        ? "exact"
-        : closeMatched
-          ? "partial"
-          : "derived"; // identity fallback
-      out.push({
-        noga_2008: noga2008,
-        noga_2025: code,
-        nace_2_0: n20,
-        nace_2_1: nace21,
-        isic_4: isic,
-        mapping_type: mappingType,
-        notes: closeMatched
-          ? undefined
-          : "derived by code identity (no explicit closeMatch in source RDF)",
-      });
-    }
-  }
-  return out;
+/** Compatibilité des colonnes historiques, avec relations directes uniquement. */
+export function buildRealCrossWalks(rows: NomenclatureRow[], closeMatchNace21toNace2: Map<string, string[]>, naceIsic: ClassificationLink[] = []): CrossWalkRow[] {
+  return linksToLegacyCrossWalks(buildClassificationLinks(rows, closeMatchNace21toNace2, naceIsic));
 }
 
 /**
  * Top-level orchestrator: download what we need, load all 5 schemes from real
  * sources, build cross-walks. Returns everything ready for `buildBundle`.
  */
-export async function ingestRealClassifications(opts: { cacheDir: string }): Promise<{
+export async function ingestRealClassifications(opts: { cacheDir: string; maxAgeHours?: number }): Promise<{
   rows: NomenclatureRow[];
   crossWalks: CrossWalkRow[];
+  links: ClassificationLink[];
+  sources: ClassificationSource[];
   stats: {
     nace_2_0: number;
     nace_2_1: number;
@@ -459,23 +313,31 @@ export async function ingestRealClassifications(opts: { cacheDir: string }): Pro
 }> {
   if (!existsSync(opts.cacheDir)) mkdirSync(opts.cacheDir, { recursive: true });
 
-  // 1. NACE Rev 2 from package
-  const nace20 = loadNaceFromPackage();
-
-  // 2. NACE Rev 2.1 from EU Vocabularies SKOS RDF
-  const nace21RdfPath = join(opts.cacheDir, "ESTAT-NACE2.1.rdf");
-  await downloadIfStale(NACE_2_1_RDF_URL, nace21RdfPath);
-  const nace21Result = parseNace21Rdf(nace21RdfPath);
-
-  // 3. NOGA 2008 + NOGA 2025 from i14y.admin.ch (Swiss interoperability platform)
-  const noga2008 = await loadNoga2008FromI14y(opts.cacheDir);
-  const noga2025 = await loadNoga2025FromI14y(opts.cacheDir);
+  const sources: ClassificationSource[] = [];
+  const source = async (id: string, url: string, filename: string): Promise<string> => {
+    const path = await fetchBronze(url, opts.cacheDir, filename, {}, opts.maxAgeHours ?? 12);
+    const meta = JSON.parse(readFileSync(`${path}.meta.json`, "utf8"));
+    sources.push({ source_id: id, url, sha256: meta.sha256, fetched_at: meta.fetched_at,
+      version: new Date().toISOString().slice(0, 10).replaceAll("-", ".") });
+    return path;
+  };
+  const nace20 = parseOfficialNace2(await source("eurostat-nace2", NACE2_URL, "nace2-structure.json"));
+  const nace21Result = parseNace21Rdf(await source("eurostat-nace21", NACE_2_1_RDF_URL, "ESTAT-NACE2.1.rdf"));
+  const noga = async (id: string, sourceId: string, scheme: NomenclatureScheme) => {
+    const path = await source(sourceId, `${I14Y_API}/concepts/${id}?includeCodeListEntries=true`, `${sourceId}.json`);
+    const data = JSON.parse(readFileSync(path, "utf8"));
+    if (!Array.isArray(data.data?.codeListEntries) || !data.data.codeListEntries.length) throw new Error("NOGA i14y vide ou invalide");
+    return i14yToNomenclatureRows(data.data.codeListEntries, scheme);
+  };
+  const noga2008 = await noga(NOGA_2008_CONCEPT_ID, "ofs-noga2008", "NOGA_2008");
+  const noga2025 = await noga(NOGA_2025_CONCEPT_ID, "ofs-noga2025", "NOGA_2025");
+  const methodology = await source("ofs-methodologie", OFS_METHODOLOGY_URL, "ofs-methodologie.pdf");
+  if (readFileSync(methodology).subarray(0, 5).toString() !== "%PDF-") throw new Error("Méthodologie OFS non PDF");
 
   // 4. ISIC Rev 4 from UN, three languages
   const perLang: NomenclatureRow[][] = [];
   for (const lang of ["en", "fr", "es"] as const) {
-    const path = join(opts.cacheDir, `isic_rev4_${lang}.txt`);
-    await downloadIfStale(ISIC_CSV_BY_LANG[lang], path);
+    const path = await source(`onu-isic4-${lang}`, ISIC_CSV_BY_LANG[lang], `isic_rev4_${lang}.txt`);
     perLang.push(parseIsicCsvLatin(path, lang));
   }
   const isic = mergeIsicByLang(perLang);
@@ -484,11 +346,15 @@ export async function ingestRealClassifications(opts: { cacheDir: string }): Pro
   const rows = [...noga2008, ...noga2025, ...nace20, ...nace21Result.rows, ...isic];
 
   // 6. Cross-walks (using NACE 2.1 closeMatch triples extracted above)
-  const crossWalks = buildRealCrossWalks(rows, nace21Result.closeMatchToNace2);
+  const naceIsicPath = await source("eurostat-nace2-isic4", NACE_ISIC_URL, "nace2-isic4.json");
+  const links = buildClassificationLinks(rows, nace21Result.closeMatchToNace2, parseNaceIsicLinks(naceIsicPath));
+  const crossWalks = linksToLegacyCrossWalks(links);
 
   return {
     rows,
     crossWalks,
+    links,
+    sources,
     stats: {
       nace_2_0: nace20.length,
       nace_2_1: nace21Result.rows.length,

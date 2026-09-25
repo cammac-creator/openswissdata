@@ -22,6 +22,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "csv-parse/sync";
 import parquet from "parquetjs-lite";
+import type { ClassificationLink, ClassificationSource } from "../lib/classification-links.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "data");
@@ -113,6 +114,8 @@ let _taresByHs8: Map<string, TaresRow> | null = null;
 let _finmaRegistry: FinmaRegistryRow[] | null = null;
 let _finmaWarnings: FinmaWarningRow[] | null = null;
 let _crosswalks: CrosswalkRow[] | null = null;
+let _classificationLinks: ClassificationLink[] | null = null;
+let _classificationSources: ClassificationSource[] | null = null;
 let _statent: StatentRow[] | null = null;
 let _taresEmbeddingsPromise: Promise<EmbeddingRow[]> | null = null;
 let _nogaEmbeddingsPromise: Promise<EmbeddingRow[]> | null = null;
@@ -185,6 +188,21 @@ export function getCrosswalks(): readonly CrosswalkRow[] {
     _crosswalks = loadCsv<CrosswalkRow>("crosswalks.csv");
   }
   return _crosswalks;
+}
+
+/** Révision et sources du référentiel effectivement embarqué dans le service. */
+export function getClassificationLinks(): { links: readonly ClassificationLink[]; sources: readonly ClassificationSource[]; version: string } {
+  _classificationLinks ??= loadCsv<ClassificationLink>("classification_links.csv");
+  _classificationSources ??= loadCsv<ClassificationSource>("classification_sources.csv");
+  const versions = new Set(_classificationSources.map(s => s.version));
+  if (versions.size !== 1 || !_classificationLinks.length) throw new Error("Référentiel classifications incohérent");
+  return { links: _classificationLinks, sources: _classificationSources, version: _classificationSources[0].version };
+}
+
+/** Remplacement atomique des relations et de leur provenance après contrôle. */
+export function setClassificationLinks(links: ClassificationLink[], sources: ClassificationSource[]): void {
+  _classificationLinks = links;
+  _classificationSources = sources;
 }
 
 export function getStatent(): readonly StatentRow[] {
@@ -270,6 +288,8 @@ export function _resetDataLoaderCache(): void {
   _finmaRegistry = null;
   _finmaWarnings = null;
   _crosswalks = null;
+  _classificationLinks = null;
+  _classificationSources = null;
   _taresEmbeddingsPromise = null;
   _nogaEmbeddingsPromise = null;
 }

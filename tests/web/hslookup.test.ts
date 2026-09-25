@@ -31,19 +31,7 @@ describe("HSLookup live demos — source-level presence (commit c1d1e22)", () =>
     );
   });
 
-  it("ClassificationsLookup.astro contains the 20-entry NOGA_SAMPLE with expected keys", () => {
-    const src = readFileSync(
-      join(ROOT, "components/ClassificationsLookup.astro"),
-      "utf8"
-    );
-    expect(src, "should have NOGA_SAMPLE constant").toContain("NOGA_SAMPLE");
-    // Verify at least one well-known entry is present
-    expect(src, "should contain banque centrale code").toContain("64.11");
-    // Verify cross-walk fields are present
-    expect(src, "should have noga25 field").toContain("noga25");
-    expect(src, "should have nace field").toContain("nace");
-    expect(src, "should have isic field").toContain("isic");
-  });
+  // Le démonstrateur classifications est vérifié par ses réponses réelles dans routes/catalog.test.ts.
 
   it("FINMA charge son échantillon publié et n'embarque plus des identifiants non vérifiés", () => {
     const old=readFileSync(join(ROOT,"components/FinmaLookup.astro"),"utf8");

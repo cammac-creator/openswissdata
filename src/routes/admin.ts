@@ -4,7 +4,7 @@ import { getDb } from "../lib/db.js";
 import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
 import { runCleanup } from "../lib/cleanup.js";
-import { refreshFinmaFromR2, refreshTaresFromR2, getMcpFreshness, extractCsvFromZip } from "../mcp/r2-refresh.js";
+import { refreshFinmaFromR2, refreshTaresFromR2, refreshClassificationsFromR2, getMcpFreshness, extractCsvFromZip } from "../mcp/r2-refresh.js";
 import { getObjectBuffer } from "../lib/r2.js";
 import { snapshotFromRows, getReleasedAt, type SnapshotDataset } from "../mcp/snapshots.js";
 import { parse as parseCsvSync } from "csv-parse/sync";
@@ -245,6 +245,7 @@ adminRoute.post("/release", async (c) => {
     void refreshFinmaFromR2();
   }
   if (parsed.dataset_id === "tares") void refreshTaresFromR2();
+  if (parsed.dataset_id === "classifications") void refreshClassificationsFromR2();
 
   return c.json({ ok: true, dataset_id: parsed.dataset_id, version: parsed.version });
 });

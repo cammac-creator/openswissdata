@@ -1,0 +1,33 @@
+---
+interface Props { lang?: 'fr' | 'en' | 'de' }
+const { lang = 'fr' } = Astro.props;
+const text = {
+  fr: { title:'Le référentiel distribué', loading:'Lecture de l’archive disponible…', version:'Version', rows:'Codes et niveaux', links:'Liens directs sourcés', note:'Les relations exactes et approchées sont distinguées. Deux correspondances approchées ne prouvent pas une équivalence. Les genres suisses à six chiffres ne sont pas des classes NACE.', languages:'NOGA et NACE : FR/DE/IT/EN. ISIC : FR/EN/ES, sans allemand ni italien officiels dans ce fichier.', sample:'50 lignes de cette version — CSV', fallback:'Fiche qualité temporairement indisponible. Réessayez avant de télécharger l’échantillon.', migration:'Schéma 2 : les correspondances sont décrites par paire, avec source et sens de la relation. Les anciennes jointures à cinq colonnes doivent être adaptées.' },
+  en: { title:'The distributed reference dataset', loading:'Reading the available archive…', version:'Version', rows:'Codes across all levels', links:'Sourced direct links', note:'Exact and approximate relationships are distinguished. Two approximate links do not prove equivalence. Six-digit Swiss subclasses are not NACE classes.', languages:'NOGA and NACE: FR/DE/IT/EN. ISIC: FR/EN/ES; no official German or Italian labels in this file.', sample:'50 rows from this version — CSV', fallback:'Quality report temporarily unavailable. Please retry before downloading the sample.', migration:'Schema 2: mappings are documented by pair, with source and direction. Existing five-column joins need to be updated.' },
+  de: { title:'Der ausgelieferte Datenbestand', loading:'Verfügbares Archiv wird gelesen…', version:'Version', rows:'Codes aller Ebenen', links:'Belegte direkte Zuordnungen', note:'Exakte und ungefähre Beziehungen werden unterschieden. Zwei ungefähre Zuordnungen beweisen keine Gleichwertigkeit. Sechsstellige Schweizer Unterklassen sind keine NACE-Klassen.', languages:'NOGA und NACE: FR/DE/IT/EN. ISIC: FR/EN/ES; keine offiziellen deutschen oder italienischen Bezeichnungen in dieser Datei.', sample:'50 Zeilen dieser Version — CSV', fallback:'Qualitätsbericht vorübergehend nicht verfügbar. Bitte vor dem Herunterladen erneut versuchen.', migration:'Schema 2: Zuordnungen werden paarweise mit Quelle und Richtung beschrieben. Bestehende Verknüpfungen über fünf Spalten müssen angepasst werden.' },
+}[lang];
+---
+<section class="ds-section classifications-quality" data-lang={lang} data-fallback={text.fallback}>
+  <h2 class="v4-section-h2">{text.title}</h2>
+  <p data-status role="status">{text.loading}</p>
+  <div data-quality hidden>
+    <dl><div><dt>{text.version}</dt><dd data-version></dd></div><div><dt>{text.rows}</dt><dd data-rows></dd></div><div><dt>{text.links}</dt><dd data-links></dd></div></dl>
+    <p>{text.note}</p><p>{text.languages}</p><p class="migration">{text.migration}</p>
+    <a href="/api/catalog/classifications?format=csv" download class="v4-btn v4-btn-secondary">{text.sample} ↓</a>
+  </div>
+</section>
+<style>
+.classifications-quality{border:1px solid var(--border,#ddd);border-radius:16px;padding:clamp(20px,4vw,36px);margin-block:36px}.classifications-quality dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:24px 0}.classifications-quality dt{font-size:.85rem;opacity:.7}.classifications-quality dd{margin:8px 0;font-size:1.5rem;font-weight:650;overflow-wrap:anywhere}.classifications-quality p{line-height:1.65}.classifications-quality a{white-space:normal}.migration{padding:16px;background:var(--color-bg-alt,#f2f4f5);border-radius:8px}@media(max-width:600px){.classifications-quality dl{grid-template-columns:1fr;gap:12px}}
+</style>
+<script>
+for(const element of document.querySelectorAll<HTMLElement>('.classifications-quality')){
+  const status=element.querySelector<HTMLElement>('[data-status]')!;
+  fetch('/api/catalog/classifications',{cache:'no-cache'}).then(async response=>{
+    if(!response.ok)throw Error('indisponible');const data=await response.json();
+    if(data.schema_version!==2||data.orphan_parents!==0||!Number.isInteger(data.rows)||!Number.isInteger(data.links))throw Error('incomplet');
+    const number=new Intl.NumberFormat(element.dataset.lang);
+    for(const [key,value] of [['version',data.version],['rows',number.format(data.rows)],['links',number.format(data.links)]])element.querySelector<HTMLElement>(`[data-${key}]`)!.textContent=value;
+    status.hidden=true;element.querySelector<HTMLElement>('[data-quality]')!.hidden=false;
+  }).catch(()=>{status.textContent=element.dataset.fallback!;});
+}
+</script>
