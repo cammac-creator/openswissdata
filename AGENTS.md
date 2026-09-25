@@ -86,3 +86,10 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Recherche et collectes vectorielles utilisent le même moteur Transformers.js 3.8.1. Modèle mpnet à révision figée, tailles/SHA dans `embedding-model.ts`, préchargé au build ; aucun téléchargement pendant une requête. Pour une collecte vectorielle seule : `npm run models:prepare:embedding`.
 - Les caches de reprise exigent modèle, révision/moteur et dimension courants. Les index livrés restent ceux des collectes historiques tant qu’une régénération distincte n’a pas été validée.
 - Le démonstrateur navigateur appelle `/mcp/jsonrpc` sur la même origine, compatible avec la CSP ; une URL de sous-domaine nécessite CORS et CSP et ne doit pas être utilisée ici.
+
+## Contrôles de publication et pages publiques
+- Railway attend les suites GitHub (`source.checkSuites=true`, relu le 25.09.2026). Ne pas désactiver pour contourner un test en échec. Ce réglage porte sur les publications automatiques GitHub ; une intervention manuelle demande toujours une vérification explicite de la CI et du SHA servi. Référence : https://docs.railway.com/deployments/github-autodeploys.
+- Les tests racine importent aussi des utilitaires du site. Installer `npm --prefix web ci` avant ces tests dans un environnement vierge : le tsconfig Astro est nécessaire. La CI le fait explicitement depuis le 25.09.2026.
+- Après chaque build du site, `npm run seo:check` contrôle les liens internes, canonical, hreflang réciproques et sitemap. Ne pas remettre une date `lastmod` fabriquée à la construction.
+- Les fiches FINMA publiques sont une copie historique distincte du produit quotidien. Les correspondances des fiches NOGA viennent des mêmes références sourcées que le MCP. Voir `docs/fiches-publiques.md`.
+- Recherche et traduction vérifient leurs fichiers de modèle par taille et SHA-256 au build. Les modèles figés et les index vectoriels historiques restent deux sujets distincts ; aucun téléchargement ni envoi de texte à un fournisseur pendant la traduction.
