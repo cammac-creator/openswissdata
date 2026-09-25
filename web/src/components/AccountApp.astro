@@ -762,6 +762,7 @@ const stepsLang = steps[lang];
         loginEl.classList.add("hidden");
         dashEl.classList.remove("hidden");
         emailLabelEl.textContent = customer ? customer.email : "";
+        loadReceipts().catch(() => console.warn("Reçus temporairement indisponibles"));
         listEl.innerHTML = "";
         if (!datasets || datasets.length === 0) {
           emptyEl.classList.remove("hidden");
@@ -809,6 +810,8 @@ const stepsLang = steps[lang];
               }
               const body = await r.json();
               window.location.href = body.download_url;
+              btn.disabled = false;
+              btn.textContent = osdAcct.s.dlDownload;
             } catch (e) {
               btn.disabled = false;
               btn.textContent = osdAcct.s.dlRetry;
@@ -820,6 +823,37 @@ const stepsLang = steps[lang];
           li.appendChild(btn);
           listEl.appendChild(li);
         }
+      }
+
+      async function loadReceipts() {
+        const r = await fetch("/api/account/orders", { credentials: "include" });
+        if (!r.ok) return;
+        const { orders } = await r.json();
+        if (!orders.length) return;
+        const box = document.createElement("div");
+        box.style.cssText = "margin-top:24px;padding:20px;border:1px solid #ddd;border-radius:12px";
+        const title = document.createElement("h3");
+        const lang = document.documentElement.lang;
+        title.textContent = lang === "en" ? "Payment receipts" : lang === "de" ? "Zahlungsbelege" : "Reçus de paiement";
+        box.appendChild(title);
+        for (const order of orders) {
+          const button = document.createElement("button");
+          button.className = "ds-item-btn";
+          button.textContent = new Date(order.created_at).toLocaleDateString(osdAcct.dateLocale) + " · " + (order.amount_chf / 100).toFixed(2) + " CHF";
+          button.addEventListener("click", async () => {
+            button.disabled = true;
+            try {
+              const receipt = await fetch("/api/account/orders/" + order.id + "/receipt", { credentials: "include" });
+              if (!receipt.ok) throw new Error("receipt_unavailable");
+              const data = await receipt.json();
+              window.location.href = data.url;
+            } catch {
+              alert(lang === "en" ? "Please contact contact@openswissdata.com for your receipt or business invoice." : lang === "de" ? "Für Ihren Beleg oder Ihre Firmenrechnung wenden Sie sich bitte an contact@openswissdata.com." : "Pour votre reçu ou une facture professionnelle, contactez contact@openswissdata.com.");
+            } finally { button.disabled = false; }
+          });
+          box.appendChild(button);
+        }
+        dashEl.appendChild(box);
       }
 
       const TIER_LABELS = { standalone: osdAcct.s.tierStandalone, business: osdAcct.s.tierBusiness, pro: osdAcct.s.tierPro, standard: osdAcct.s.tierStandard, free: osdAcct.s.tierFree };

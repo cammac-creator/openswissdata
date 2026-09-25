@@ -2,10 +2,12 @@ import { ingestOneSource, ingestFromFinmaCsv } from "./ingest.js";
 import { FINMA_SOURCES } from "./sources.js";
 import { buildBundle } from "./bundle.js";
 import { ingestFinmaWarnings } from "./ingest-warnings.js";
-import { flagWarningsOnRegistry } from "./unify-schema.js";
+import { ingestGleif } from "./ingest-gleif.js";
+import { readPublishedSnapshots, buildHistory, versionDate, type PublishedVersion } from "./history.js";
+import { fetchBronze } from "../shared/bronze.js";
 import { fetchZefixForUids, type ZefixData } from "./ingest-zefix.js";
 import { uploadZip } from "../../src/lib/r2.js";
-import { mkdirSync, existsSync } from "node:fs";
+import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FinmaEntity, FinmaWarning } from "./types.js";
 
@@ -31,7 +33,7 @@ const FIXTURE_MAP: Array<{ entity_type: string; path: string }> = [
 ];
 
 export async function runRelease(
-  opts: { useFixture?: boolean; version?: string; outDir?: string } = {}
+  opts: { useFixture?: boolean; version?: string; outDir?: string; dryRun?: boolean } = {}
 ): Promise<ReleaseResult> {
   const baseUrl = process.env.BASE_URL;
   const adminSecret = process.env.ADMIN_SECRET;
@@ -39,12 +41,30 @@ export async function runRelease(
   if (!adminSecret) throw new Error("ADMIN_SECRET env var is required");
 
   const version = opts.version ?? process.env.FINMA_VERSION ?? todayVersion();
-  const outDir = opts.outDir ?? "./data/finma";
+  const outDir = opts.outDir ?? process.env.FINMA_OUT_DIR ?? "./data/finma";
+  const dryRun = opts.dryRun ?? process.env.FINMA_DRY_RUN === "1";
   const useFixture = opts.useFixture ?? process.env.USE_FIXTURE === "1";
 
   console.log(`[release-finma] version ${version} targeting ${baseUrl}`);
 
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
+
+  const cacheDir = process.env.FINMA_CACHE_DIR ?? join(outDir, "finma-cache");
+  let published: PublishedVersion[] = [];
+  let currentVersion: string | null = null;
+  if (!useFixture) {
+    const metadataPath = process.env.FINMA_PREVIOUS_VERSIONS_FILE ?? await fetchBronze(
+      `${baseUrl.replace(/\/$/, "")}/api/admin/dataset-versions/finma`, cacheDir,
+      "versions-production.json", { headers: { "x-admin-secret": adminSecret } }, 0,
+    );
+    const metadata = JSON.parse(readFileSync(metadataPath, "utf8")) as { dataset: { current_version: string }; versions: PublishedVersion[] };
+    currentVersion = metadata.dataset.current_version;
+    if (!dryRun && metadata.versions.some(v => v.version === version)) throw new Error("Version déjà publiée : choisir une nouvelle version, sans écraser l'archive");
+    const cutoff = Date.parse(versionDate(version)) - 90 * 86_400_000;
+    const sorted = metadata.versions.filter(v => v.released_at <= Date.now()).sort((a, b) => a.released_at - b.released_at);
+    const first = sorted.findIndex(v => Date.parse(versionDate(v.version)) >= cutoff);
+    published = first < 0 ? sorted.slice(-1) : sorted.slice(Math.max(0, first - 1));
+  }
 
   let entities: FinmaEntity[] = [];
   let warnings: FinmaWarning[] = [];
@@ -57,7 +77,6 @@ export async function runRelease(
       console.log(`[release-finma] ${f.entity_type}: ${rows.length} rows`);
     }
   } else {
-    const cacheDir = join(outDir, "finma-cache");
     console.log(`[release-finma] ingesting from FINMA uid.csv (cache=${cacheDir})...`);
     const result = await ingestFromFinmaCsv({ cacheDir });
     entities = result.entities;
@@ -68,8 +87,10 @@ export async function runRelease(
     warnings = warn.warnings;
     console.log(`[release-finma] ingested ${warnings.length} warnings. categories: ${JSON.stringify(warn.stats.categoryCounts)}`);
 
-    const flagged = flagWarningsOnRegistry(entities, warnings, 0.8);
-    console.log(`[release-finma] cross-ref: ${flagged} authorised entities flagged is_warning_listed=true`);
+    if (entities.length < 2_000 || warnings.length < 1_000) throw new Error("Sources FINMA incomplètes : publication annulée");
+    for (const entity of entities) entity.is_warning_listed = null;
+    const gleif = await ingestGleif(entities, cacheDir);
+    console.log(`[release-finma] GLEIF : ${gleif.matched} lignes enrichies, ${gleif.ambiguous_uids} UID ambigus non attribués`);
   }
   console.log(`[release-finma] total ${entities.length} entities, ${warnings.length} warnings`);
 
@@ -105,13 +126,22 @@ export async function runRelease(
     zefixByUid = r.data;
   }
 
-  const bundle = await buildBundle({ entities, warnings, zefixByUid }, version, outDir);
+  const snapshots = useFixture ? [] : await readPublishedSnapshots(published, cacheDir);
+  const previous = snapshots.at(-1);
+  if (previous && Math.abs(entities.length - previous.entities.length) / previous.entities.length > 0.1) throw new Error("Variation FINMA supérieure à 10 % : contrôle humain nécessaire");
+  const history = buildHistory(snapshots, { version, entities });
+  writeFileSync(join(outDir, `controle-${version}.json`), JSON.stringify({ version, registry_rows: entities.length, warnings: warnings.length, lei_rows: entities.filter(e => e.lei).length, history: history.coverage, changes: history.changes.length }, null, 2));
+  const bundle = await buildBundle({ entities, warnings, zefixByUid, recentChanges: history.changes, historyCoverage: history.coverage }, version, outDir);
   console.log(
     `[release-finma] bundle sha256 ${bundle.sha256.slice(0, 12)}..., ${(bundle.sizeBytes / 1024).toFixed(1)} KB`
   );
 
   const r2_key = `finma/${version}/finma.zip`;
-  await uploadZip(bundle.zipPath, r2_key);
+  if (dryRun) {
+    console.log(`[release-finma] Préparation vérifiée, sans publication : ${bundle.zipPath}`);
+    return { version, r2_key, sha256: bundle.sha256, size_bytes: bundle.sizeBytes, entity_count: entities.length, registered: false };
+  }
+  await uploadZip(bundle.zipPath, r2_key, { immutable: true });
   console.log(`[release-finma] uploaded to r2://${process.env.R2_BUCKET ?? "?"}/${r2_key}`);
 
   const endpoint = `${baseUrl.replace(/\/$/, "")}/api/admin/release`;
@@ -124,6 +154,7 @@ export async function runRelease(
     },
     body: JSON.stringify({
       dataset_id: "finma",
+      expected_previous_version: currentVersion,
       version,
       r2_key,
       sha256: bundle.sha256,

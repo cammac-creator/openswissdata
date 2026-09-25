@@ -2,5 +2,18 @@
   "$schema": "https://railway.com/railway.schema.json",
   "deploy": {
     "startCommand": "node dist/index.js"
+  },
+  "build": {
+    "watchPatterns": [
+      "src/**",
+      "web/**",
+      "packages/**",
+      "package.json",
+      "package-lock.json",
+      "tsconfig.json",
+      "railway.json",
+      "Dockerfile",
+      "nixpacks.toml"
+    ]
   }
 }

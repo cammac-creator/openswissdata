@@ -311,6 +311,7 @@ const productJsonLd = {
     <ApiSwitch lang="fr" />
     <div class="ds-cta" id="acheter">
       <form method="POST" action="/api/checkout/start" class="ds-cta-form">
+        <input type="hidden" name="locale" value="fr" />
         <input type="hidden" name="dataset_ids" value="classifications" />
         <button type="submit" class="v4-btn v4-btn-primary v4-btn-cta">
           Acheter Classifications Standard — 399 CHF

@@ -29,29 +29,26 @@ downloadRoute.post("/account/download-request", requireAuth, async (c) => {
   const ent = db.prepare("SELECT updates_until FROM entitlements WHERE customer_id = ? AND dataset_id = ?")
     .get(customerId, parsed.dataset_id) as { updates_until: number | null } | undefined;
   if (!ent) return c.json({ error: "no_entitlement" }, 403);
-  // H1: enforce updates_until — expired customers must renew before downloading
-  if (ent.updates_until !== null && ent.updates_until < Date.now()) {
-    return c.json({ error: "subscription_expired" }, 403);
-  }
-
-  const dataset = db.prepare("SELECT current_version FROM datasets WHERE id = ?").get(parsed.dataset_id) as { current_version: string | null } | undefined;
-  if (!dataset?.current_version) return c.json({ error: "no_version" }, 404);
-
-  const version = db.prepare("SELECT r2_key FROM versions WHERE dataset_id = ? AND version = ?").get(parsed.dataset_id, dataset.current_version) as { r2_key: string } | undefined;
-  if (!version) return c.json({ error: "no_file" }, 404);
+  // Les 360 jours limitent les nouvelles versions, jamais l’accès aux fichiers acquis.
+  const dataset = db.prepare("SELECT current_version FROM datasets WHERE id=?").get(parsed.dataset_id) as {current_version: string | null} | undefined;
+  const version = ent.updates_until !== null && ent.updates_until < Date.now()
+    ? db.prepare("SELECT version,r2_key FROM versions WHERE dataset_id=? AND released_at<=? ORDER BY released_at DESC,id DESC LIMIT 1").get(parsed.dataset_id,ent.updates_until) as {version:string;r2_key:string} | undefined
+    : db.prepare("SELECT version,r2_key FROM versions WHERE dataset_id=? AND version=?").get(parsed.dataset_id,dataset?.current_version ?? "") as {version:string;r2_key:string} | undefined;
+  if (!version) return c.json({ error: "no_eligible_version" }, 404);
 
   const token = generateToken();
   const now = Date.now();
   const expiresAt = now + DOWNLOAD_TOKEN_TTL_MS;
   db.prepare("INSERT INTO download_tokens (token, customer_id, dataset_id, version, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)")
-    .run(token, customerId, parsed.dataset_id, dataset.current_version, expiresAt, now);
+    .run(token, customerId, parsed.dataset_id, version.version, expiresAt, now);
 
   const signedUrl = await signedDownloadUrl(version.r2_key, R2_SIGNED_TTL_S);
   return c.json({
     download_url: signedUrl,
     share_token: token,
     share_url: `${(process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "")}/api/download/${token}`,
-    expires_at: expiresAt,
+    expires_at: now + R2_SIGNED_TTL_S * 1000,
+    share_expires_at: expiresAt,
   });
 });
 
@@ -83,9 +80,9 @@ publicDownload.get("/download/:token", async (c) => {
     )
     .get(row.customer_id, row.dataset_id) as { updates_until: number | null } | undefined;
   if (!ent) return c.text("entitlement revoked", 403);
-  if (ent.updates_until !== null && ent.updates_until < Date.now()) {
-    return c.text("entitlement expired", 403);
-  }
+  const entitledVersion = db.prepare("SELECT released_at FROM versions WHERE dataset_id=? AND version=?").get(row.dataset_id,row.version) as {released_at:number} | undefined;
+  if (!entitledVersion) return c.text("version missing", 404);
+  if (ent.updates_until !== null && entitledVersion.released_at > ent.updates_until) return c.text("version outside entitlement",403);
 
   // Atomic single-use claim: only redeem if still unused.
   const claim = db

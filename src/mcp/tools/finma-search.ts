@@ -166,7 +166,7 @@ export interface FinmaSearchMatch {
   status: string;
   city: string;
   canton: string | null;
-  is_warning_listed: boolean;
+  is_warning_listed: boolean | null;
   source_url: string;
   score: number;
 }
@@ -231,7 +231,7 @@ export function finmaSearchHandler(args: unknown): {
     status: s.row.status,
     city: s.row.city,
     canton: s.row.canton || null,
-    is_warning_listed: s.row.is_warning_listed === "true",
+    is_warning_listed: null,
     source_url: s.row.source_url,
     score: Number(s.score.toFixed(4)),
   }));
@@ -266,7 +266,7 @@ export function finmaSearchHandler(args: unknown): {
   const lines: string[] = [];
   lines.push(`FINMA registry fuzzy search for "${name}" (normalised: "${queryNorm}") — top ${matches.length}:`);
   for (const m of matches) {
-    const flag = m.is_warning_listed ? " [warning-listed]" : "";
+    const flag = "";
     lines.push(
       `  ${m.score.toFixed(3)}  ${m.name} (${m.entity_type}, ${m.licence_type})${flag} — ${m.city || "?"} — ${m.uid || "no UID"}${m.lei ? ` — LEI ${m.lei}` : ""}`,
     );

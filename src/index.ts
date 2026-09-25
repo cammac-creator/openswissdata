@@ -11,6 +11,7 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { existsSync } from "node:fs";
 import { healthRoute } from "./routes/health.js";
+import { catalogRoute } from "./routes/catalog.js";
 import { adminRoute } from "./routes/admin.js";
 import { adminStatsRoute } from "./routes/admin-stats.js";
 import { checkoutRoute } from "./routes/checkout.js";
@@ -104,7 +105,7 @@ export function createApp() {
     }
     if (
       path.startsWith("/_astro/") ||
-      path.startsWith("/samples/") ||
+      (path.startsWith("/samples/") && path !== "/samples/finma-sample.csv") ||
       path === "/favicon.svg" ||
       path === "/favicon.ico" ||
       path === "/og-default.png" ||
@@ -175,6 +176,7 @@ export function createApp() {
 
   // --- API routes ---
   app.route("/api/health", healthRoute);
+  app.route("/api/catalog", catalogRoute);
   app.route("/api/admin", adminRoute);
   app.route("/api/admin/stats", adminStatsRoute);
   app.route("/api/checkout", checkoutRoute);
@@ -188,6 +190,9 @@ export function createApp() {
   // --- MCP server (mcp.openswissdata.com / openswissdata.com/mcp/*) ---
   // MUST be mounted BEFORE the static catch-all below.
   app.route("/mcp", mcpRoute);
+
+  // Les liens historiques pointent désormais vers un échantillon de la version publiée.
+  app.get("/samples/finma-sample.csv", (c) => c.redirect("/api/catalog/finma?format=csv", 302));
 
   // --- Static Astro frontend ---
   // web/dist is relative to repo root (Railway runs node dist/index.js from root)

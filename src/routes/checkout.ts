@@ -125,11 +125,14 @@ async function buildSession(
     // every method enabled in the dashboard (card, TWINT, Apple/Google Pay, …).
     // Activate TWINT in Stripe Dashboard → Settings → Payment methods to give
     // CH PMEs and self-employed buyers their preferred rail.
-    success_url: `${baseUrl}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${baseUrl}/${hasStandalone ? "mcp" : "bundle"}?checkout=cancelled`,
+    success_url: `${baseUrl}${locale && locale !== "fr" ? `/${locale}` : ""}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}${locale && locale !== "fr" ? `/${locale}` : ""}/${hasStandalone ? "mcp" : "bundle"}?checkout=cancelled`,
     metadata,
     allow_promotion_codes: true,
+    billing_address_collection: "required",
+    custom_fields: [{ key: "company", label: { type: "custom", custom: locale === "en" ? "Company / legal entity" : locale === "de" ? "Unternehmen / Firmenname" : "Entreprise / raison sociale" }, type: "text", optional: true }],
   };
+  if (mode === "payment") params.customer_creation = "always";
   if (email) params.customer_email = email;
   // Render the Stripe Checkout UI in the buyer's language (default: Stripe auto).
   if (locale) params.locale = locale;

@@ -15,7 +15,17 @@ export const healthRoute = new Hono();
  * Always returns 200 if the process is up. Does not exercise any dependency.
  */
 healthRoute.get("/", (c) => {
-  return c.json({ status: "ok", version: APP_VERSION });
+  return c.json({ status: "ok", version: APP_VERSION, revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? null });
+});
+
+// Une application disponible peut distribuer des données anciennes : signal distinct.
+healthRoute.get("/freshness", (c) => {
+  const row = getDb().prepare("SELECT current_version FROM datasets WHERE id='finma'").get() as { current_version: string | null } | undefined;
+  const version = row?.current_version;
+  const date = version ? `${version.slice(0, 4)}-${version.slice(5, 7)}-${version.slice(8, 10)}` : "";
+  const ageHours = (Date.now() - Date.parse(date)) / 3_600_000;
+  const ok = Number.isFinite(ageHours) && ageHours >= 0 && ageHours < 72;
+  return c.json({ status: ok ? "ok" : "stale", finma_version: version ?? null, age_hours: Number.isFinite(ageHours) ? Math.round(ageHours) : null }, ok ? 200 : 503);
 });
 
 

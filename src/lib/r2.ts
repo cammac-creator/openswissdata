@@ -30,7 +30,8 @@ function requireBucket(): string {
 
 export async function uploadZip(
   localPath: string,
-  r2Key: string
+  r2Key: string,
+  opts: { immutable?: boolean } = {},
 ): Promise<void> {
   const body = readFileSync(localPath);
   const client = buildClient();
@@ -40,6 +41,7 @@ export async function uploadZip(
       Key: r2Key,
       Body: body,
       ContentType: "application/zip",
+      ...(opts.immutable ? { IfNoneMatch: "*" } : {}),
     })
   );
 }

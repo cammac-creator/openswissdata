@@ -89,6 +89,12 @@ describe("POST /api/checkout/session", () => {
     const call = sessionCreateMock.mock.calls[0][0];
     expect(call.locale).toBe("de");
     expect(call.metadata.locale).toBe("de");
+    expect(call.success_url).toContain("/de/account?checkout=success");
+    expect(call.cancel_url).toContain("/de/bundle");
+    expect(call.billing_address_collection).toBe("required");
+    expect(call.custom_fields[0].key).toBe("company");
+    expect(call.customer_creation).toBe("always");
+    expect(call.invoice_creation).toBeUndefined();
   });
 
   it("omits locale from params and metadata when not provided", async () => {

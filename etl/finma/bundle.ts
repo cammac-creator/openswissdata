@@ -1,6 +1,7 @@
 import { mkdirSync, rmSync, existsSync, createWriteStream, readFileSync, statSync, writeFileSync, copyFileSync } from "node:fs";
 import { join } from "node:path";
 import archiver from "archiver";
+import XLSX from "xlsx";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
@@ -14,6 +15,10 @@ const FINMA_PARQUET_SCHEMA = new parquet.ParquetSchema({
   name: { type: "UTF8" },
   uid: { type: "UTF8", optional: true },
   lei: { type: "UTF8", optional: true },
+  lei_source_url: { type: "UTF8", optional: true },
+  lei_registration_status: { type: "UTF8", optional: true },
+  lei_updated_at: { type: "UTF8", optional: true },
+  address_source_url: { type: "UTF8", optional: true },
   licence_type: { type: "UTF8", optional: true },
   licence_type_de: { type: "UTF8", optional: true },
   licence_type_fr: { type: "UTF8", optional: true },
@@ -47,6 +52,10 @@ const FINMA_WITH_ZEFIX_PARQUET_SCHEMA = new parquet.ParquetSchema({
   name: { type: "UTF8" },
   uid: { type: "UTF8", optional: true },
   lei: { type: "UTF8", optional: true },
+  lei_source_url: { type: "UTF8", optional: true },
+  lei_registration_status: { type: "UTF8", optional: true },
+  lei_updated_at: { type: "UTF8", optional: true },
+  address_source_url: { type: "UTF8", optional: true },
   licence_type: { type: "UTF8", optional: true },
   licence_type_de: { type: "UTF8", optional: true },
   licence_type_fr: { type: "UTF8", optional: true },
@@ -114,7 +123,8 @@ Contact: contact@openswissdata.com
 export interface FinmaBundleInput {
   entities: FinmaEntity[];
   warnings?: FinmaWarning[];
-  recentChanges?: DeltaChange[]; // 90-day delta, optional
+  recentChanges?: DeltaChange[]; // Historique réellement observé.
+  historyCoverage?: Record<string, unknown>;
   /** Tier "FINMA + Zefix Sync": Zefix data keyed by FINMA UID. Optional. */
   zefixByUid?: Map<string, ZefixData>;
 }
@@ -139,6 +149,10 @@ function toCsvRow(e: FinmaEntity): Record<string, unknown> {
     name: e.name,
     uid: e.uid ?? "",
     lei: e.lei ?? "",
+    lei_source_url: e.lei_source_url ?? "",
+    lei_registration_status: e.lei_registration_status ?? "",
+    lei_updated_at: e.lei_updated_at ?? "",
+    address_source_url: e.address_source_url ?? "",
     licence_type: e.licence_type ?? "",
     licence_type_de: e.licence_type_de ?? "",
     licence_type_fr: e.licence_type_fr ?? "",
@@ -150,7 +164,7 @@ function toCsvRow(e: FinmaEntity): Record<string, unknown> {
     address: e.address ?? "",
     source_list: e.source_list,
     source_url: e.source_url,
-    is_warning_listed: e.is_warning_listed === true ? "true" : "false",
+    is_warning_listed: typeof e.is_warning_listed === "boolean" ? String(e.is_warning_listed) : "",
   };
 }
 
@@ -169,6 +183,9 @@ function warningToCsvRow(w: FinmaWarning): Record<string, unknown> {
 
 function deltaToCsvRow(c: DeltaChange): Record<string, unknown> {
   return {
+    observed_at: c.observed_at ?? "",
+    previous_version: c.previous_version ?? "",
+    version: c.version ?? "",
     kind: c.kind,
     entity_type: c.entity_type,
     name: c.name,
@@ -215,6 +232,10 @@ export async function buildBundle(
     name: e.name,
     uid: e.uid,
     lei: e.lei,
+    lei_source_url: e.lei_source_url,
+    lei_registration_status: e.lei_registration_status,
+    lei_updated_at: e.lei_updated_at,
+    address_source_url: e.address_source_url,
     licence_type: e.licence_type,
     licence_type_de: e.licence_type_de,
     licence_type_fr: e.licence_type_fr,
@@ -226,7 +247,7 @@ export async function buildBundle(
     address: e.address,
     source_list: e.source_list,
     source_url: e.source_url,
-    is_warning_listed: e.is_warning_listed === true,
+    is_warning_listed: e.is_warning_listed ?? undefined,
   }));
   await writeParquet(parquetRows as Record<string, unknown>[], FINMA_PARQUET_SCHEMA, join(workDir, "finma_registry.parquet"));
 
@@ -266,6 +287,10 @@ export async function buildBundle(
       name: e.name,
       uid: e.uid ?? "",
       lei: e.lei ?? "",
+    lei_source_url: e.lei_source_url ?? "",
+    lei_registration_status: e.lei_registration_status ?? "",
+    lei_updated_at: e.lei_updated_at ?? "",
+    address_source_url: e.address_source_url ?? "",
       licence_type: e.licence_type ?? "",
       licence_type_de: e.licence_type_de ?? "",
       licence_type_fr: e.licence_type_fr ?? "",
@@ -277,7 +302,7 @@ export async function buildBundle(
       address: e.address ?? "",
       source_list: e.source_list,
       source_url: e.source_url,
-      is_warning_listed: e.is_warning_listed === true ? "true" : "false",
+      is_warning_listed: typeof e.is_warning_listed === "boolean" ? String(e.is_warning_listed) : "",
       zefix_status: e.zefix_status ?? "",
       zefix_capital: e.zefix_capital ?? "",
       zefix_capital_currency: e.zefix_capital_currency ?? "",
@@ -296,6 +321,10 @@ export async function buildBundle(
       name: e.name,
       uid: e.uid,
       lei: e.lei,
+    lei_source_url: e.lei_source_url,
+    lei_registration_status: e.lei_registration_status,
+    lei_updated_at: e.lei_updated_at,
+    address_source_url: e.address_source_url,
       licence_type: e.licence_type,
       licence_type_de: e.licence_type_de,
       licence_type_fr: e.licence_type_fr,
@@ -307,7 +336,7 @@ export async function buildBundle(
       address: e.address,
       source_list: e.source_list,
       source_url: e.source_url,
-      is_warning_listed: e.is_warning_listed === true,
+      is_warning_listed: e.is_warning_listed ?? undefined,
       zefix_status: e.zefix_status,
       zefix_capital: e.zefix_capital,
       zefix_capital_currency: e.zefix_capital_currency,
@@ -351,6 +380,31 @@ export async function buildBundle(
   const changes = input.recentChanges ?? [];
   writeCsv(changes.map(deltaToCsvRow), join(workDir, "changelog_90d.csv"));
   writeJson(changes, join(workDir, "changelog_90d.json"));
+  if (!changes.length) writeFileSync(join(workDir, "changelog_90d.csv"), "observed_at,previous_version,version,kind,entity_type,name,uid,source_list,before,after\n");
+  const quality = {
+    version, generated_at: new Date().toISOString(), registry_rows: input.entities.length,
+    unique_uids: new Set(input.entities.map(e => e.uid).filter(Boolean)).size,
+    non_empty_types: Object.values(countByType).filter(n => n > 0).length,
+    populated_fields: Object.fromEntries(["uid", "lei", "licence_date", "status", "canton", "city", "address"].map(field => [field, input.entities.filter(e => Boolean(e[field as keyof FinmaEntity])).length])),
+    warning_rows: warnings.length,
+    warning_matching: "Aucune identité déduite d'une ressemblance de noms. is_warning_listed est indéterminé. Consulter la liste d'avertissements séparée et ses liens FINMA.",
+    lei_matching: "UID suisse exact et LEI unique ; identifiants ambigus non attribués. Un LEI LAPSED est non renouvelé ; ce statut n'est pas un statut d'autorisation FINMA.",
+    missing_fields: "Le CSV FINMA ne fournit ni date d'autorisation ni statut détaillé. Les valeurs absentes restent vides. Adresses et cantons proviennent de GLEIF lorsque l'UID correspond exactement.",
+    history: input.historyCoverage ?? { available_from: null, note: "Historique non fourni pour cette archive." },
+  };
+  writeJson(quality, join(workDir, "quality.json"));
+  // Or bureautique : cellules texte explicites, sans formule provenant des sources.
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(csvRows), "Registre");
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(warningCsvRows), "Avertissements");
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet([
+    { information: "Version", valeur: version },
+    { information: "LEI", valeur: quality.lei_matching },
+    { information: "Avertissements", valeur: quality.warning_matching },
+    { information: "Champs absents", valeur: quality.missing_fields },
+    { information: "Historique", valeur: "Voir quality.json pour les périodes couvertes et les interruptions." },
+  ]), "Lire avant utilisation");
+  XLSX.writeFile(workbook, join(workDir, "finma.xlsx"));
 
   // Schema
   const schema = {
@@ -372,7 +426,15 @@ export async function buildBundle(
         address: { type: "string" },
         source_list: { type: "string" },
         source_url: { type: "string", format: "uri" },
-        is_warning_listed: { type: "boolean" },
+        lei_source_url: { type: "string", format: "uri" },
+        lei_registration_status: { type: "string" },
+        lei_updated_at: { type: "string" },
+        address_source_url: { type: "string", format: "uri" },
+        city: { type: "string" },
+        licence_type_de: { type: "string" },
+        licence_type_fr: { type: "string" },
+        licence_type_it: { type: "string" },
+        is_warning_listed: { type: ["boolean", "null"], description: "Indéterminé : une ressemblance de nom ne prouve pas une identité." },
       },
     },
   };
@@ -437,61 +499,48 @@ export async function buildBundle(
 - Schema: \`schema_with_zefix.json\`
 - v1 limitation: LINDAS exposes \`legal_form\`, \`legal_form_code\`, \`purpose\`, \`zefix_id\`. Other fields (\`capital\`, \`organes\`, \`status\`, \`last_update\`) require the authenticated Zefix REST API and remain undefined in this release. See \`SOURCES.md\` in the repo for details.`
     : "";
-  const readme = `# FINMA Registry Dataset — version ${version}
+  const readme = `# Registre FINMA — version ${version}
 
-Unified registry of financial institutions authorised by FINMA (Swiss Financial Market Supervisory Authority), plus the FINMA Warning List of unauthorised providers (cross-referenced).
+${input.entities.length} lignes d'autorisation, réparties dans ${Object.values(countByType).filter(n => n > 0).length} catégories présentes.
+${quality.unique_uids} UID distincts. Une même société peut avoir plusieurs autorisations.
+${warnings.length} entrées dans la liste d'avertissements séparée.
 
-${input.entities.length} authorised entities across ${entityTypes.length} entity types.
-${warnings.length} entries in the FINMA Warning List.
-${warningListedFlagCount} authorised entities flagged \`is_warning_listed=true\` (cross-ref).${includeZefix ? `\n${zefixEnrichedCount} entities enriched with Zefix data (LINDAS).` : ""}
+## Utilisation
 
-## Files
+- finma.xlsx : classeur Excel, registre et avertissements dans deux feuilles distinctes.
+- finma_registry.csv / .json / .sql / .parquet : registre normalisé.
+- finma_<type>.csv : fichiers des catégories non vides.
+- finma_warnings.csv / .json / .sql / .parquet : avertissements officiels et liens de détail.
+- changelog_90d.csv / .json : changements réellement observés entre les versions disponibles.
+- quality.json : couverture exacte des champs et de l'historique, y compris les interruptions.
+- schema.json / schema_warnings.json : schémas de données.
+- checksums.sha256 et provenance.json : intégrité, signature Ed25519 et horodatage.
+- LICENSE.txt : conditions d'utilisation.
 
-### Unified registry (all entity types — authorised institutions)
+## Lire avant utilisation
 
-- \`finma_registry.csv\` — UTF-8 comma-separated (now includes \`is_warning_listed\`)
-- \`finma_registry.json\` — JSON array
-- \`finma_registry.sql\` — CREATE TABLE + INSERT statements
-- \`finma_registry.parquet\` — Apache Parquet (columnar)
+${quality.lei_matching}
+${quality.warning_matching}
+${quality.missing_fields}
 
-### Per entity type (CSV only)
+Un champ vide signifie inconnu, et non absence d'autorisation ou absence de risque.
+La présence dans le registre est celle observée à la date de collecte. Elle ne remplace pas la vérification sur finma.ch.
+Les dates du changelog sont des dates d'observation, pas des dates de décision de la FINMA.
+Le champ historique is_warning_listed est désormais vide/null : les anciennes valeurs fondées sur la ressemblance des noms ne confirmaient pas une identité et ne doivent pas être utilisées comme telles.
 
-${entityTypes.map(t => `- \`finma_${t}.csv\` — ${countByType[t] ?? 0} entries`).join("\n")}
+## Couverture par catégorie
 
-### FINMA Warning List (unauthorised providers)
+${entityTypes.filter(t => countByType[t] > 0).map(t => `- ${t} : ${countByType[t]} lignes`).join("\n")}
 
-- \`finma_warnings.csv\` / \`.json\` / \`.sql\` / \`.parquet\` — ${warnings.length} entries
-- Source: https://www.finma.ch/en/finma-public/warnungen/warning-list/${zefixSection}
+## Sources
 
-### Delta
+- FINMA : https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/
+- Avertissements : https://www.finma.ch/en/finma-public/warnungen/warning-list/
+- GLEIF : https://www.gleif.org/en/lei-data/gleif-api ; rapprochement par UID suisse exact.
 
-- \`changelog_90d.{csv,json}\` — changes vs the last snapshot (additions, removals, status/address/licence changes)
-
-### Metadata
-
-- \`schema.json\` / \`schema_warnings.json\`${includeZefix ? " / `schema_with_zefix.json`" : ""} — JSON Schema (Draft-07)
-- \`checksums.sha256\`
-- \`provenance.json\` — Ed25519-signed manifest + RFC-3161 timestamp (verify with \`npx tsx etl/shared/verify-provenance.ts <zip>\`; public key at \`packages/schemas/openswissdata.pubkey.ed25519\`)
-- \`LICENSE.txt\`
-
-## Attribution
-
-Source: Swiss Financial Market Supervisory Authority (FINMA). https://www.finma.ch/${includeZefix ? "\nSecondary source (Zefix Sync tier): Federal Office of Justice / EHRA via LINDAS. https://register.ld.admin.ch/" : ""}
-
-Republication authorised in writing by FINMA Communication on 2026-05-06 (ref. \`FINMA-PERMISSION-2026-05-06-NADINE-BUCHER\`), subject to respecting FINMA copyright and the integrity of source documents. FINMA Terms of Use: https://www.finma.ch/en/terms-and-conditions/
-
-## Disclaimer
-
-Source: FINMA. No warranty as to accuracy, reliability or timeliness. openswissdata.com is not affiliated with FINMA, does not represent FINMA, and its data does not substitute for direct consultation of finma.ch.
-
-## Dataset metadata
-
-- Authorised entities: ${input.entities.length}
-- Warnings: ${warnings.length}
-- Authorised entities cross-flagged on warning list: ${warningListedFlagCount}${includeZefix ? `\n- Zefix-enriched entities: ${zefixEnrichedCount}` : ""}
-- Changes in last snapshot: ${changes.length}
-- Version: ${version}
-- Generated: ${new Date().toISOString()}
+Autorisation FINMA de redistribution reçue le 6 mai 2026, sous réserve de ses conditions et de l'intégrité des documents sources.
+OpenSwissData est un service indépendant, non affilié à la FINMA.
+${zefixSection}
 `;
   writeFileSync(join(workDir, "README.md"), readme, "utf8");
   writeFileSync(join(workDir, "LICENSE.txt"), DATASET_LICENSE, "utf8");
@@ -502,7 +551,7 @@ Source: FINMA. No warranty as to accuracy, reliability or timeliness. openswissd
     ...entityTypes.filter(t => countByType[t] > 0).map(t => `finma_${t}.csv`),
     "finma_warnings.csv", "finma_warnings.json", "finma_warnings.sql", "finma_warnings.parquet",
     "changelog_90d.csv", "changelog_90d.json",
-    "schema.json", "schema_warnings.json",
+    "schema.json", "schema_warnings.json", "quality.json", "finma.xlsx",
     ...(includeZefix
       ? [
           "finma_with_zefix.csv",

@@ -18,6 +18,10 @@ export interface FinmaEntity {
   name: string;
   uid?: string;             // Swiss UID (CHE-xxx.xxx.xxx)
   lei?: string;             // Legal Entity Identifier (GLEIF) — optional, not in uid.csv
+  lei_source_url?: string;
+  lei_registration_status?: string;
+  lei_updated_at?: string;
+  address_source_url?: string;
   licence_type?: string;    // raw AuthorisationType label (EN preferred)
   licence_type_de?: string; // German label
   licence_type_fr?: string; // French label
@@ -30,10 +34,10 @@ export interface FinmaEntity {
   source_list: string;      // e.g. "finma-uid-csv"
   source_url: string;
   /**
-   * True if a fuzzy-name match (score >= 0.8) was found against the FINMA
-   * Warning List. Computed during cross-reference, not from upstream.
+   * Champ historique retiré du calcul : une ressemblance de nom ne prouve
+   * aucune identité. Null signifie non établi ; consulter la liste séparée.
    */
-  is_warning_listed?: boolean;
+  is_warning_listed?: boolean | null;
 }
 
 export interface FinmaSource {

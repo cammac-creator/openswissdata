@@ -1,7 +1,4 @@
-import { mkdirSync, existsSync, statSync, createWriteStream } from "node:fs";
-import { join } from "node:path";
-import { Readable } from "node:stream";
-import { pipeline } from "node:stream/promises";
+import { fetchBronze } from "../shared/bronze.js";
 import type { FinmaSource } from "./types.js";
 
 /**
@@ -194,15 +191,5 @@ export async function downloadUidCsv(
   cacheDir: string,
   opts: { maxAgeHours?: number } = {},
 ): Promise<string> {
-  if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
-  const path = join(cacheDir, "uid.csv");
-  const maxAgeMs = (opts.maxAgeHours ?? 12) * 3600 * 1000;
-  if (existsSync(path) && Date.now() - statSync(path).mtimeMs < maxAgeMs) return path;
-  console.log(`[finma] downloading uid.csv ...`);
-  const res = await fetch(FINMA_UID_CSV_URL);
-  if (!res.ok || !res.body) {
-    throw new Error(`Failed to download FINMA uid.csv: HTTP ${res.status}`);
-  }
-  await pipeline(Readable.fromWeb(res.body as Parameters<typeof Readable.fromWeb>[0]), createWriteStream(path));
-  return path;
+  return fetchBronze(FINMA_UID_CSV_URL, cacheDir, "uid.csv", {}, opts.maxAgeHours ?? 12);
 }
