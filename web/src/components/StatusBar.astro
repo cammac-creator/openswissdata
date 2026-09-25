@@ -1,7 +1,6 @@
 ---
 import { getLangFromPath, t, localizePath } from "../i18n/utils";
 import LangSwitcher from "./LangSwitcher.astro";
-import datasetVersions from "../data/dataset-versions.json";
 
 interface Props {
   monolingual?: boolean;
@@ -10,15 +9,10 @@ interface Props {
 const { monolingual = false } = Astro.props;
 const lang = getLangFromPath(Astro.url.pathname);
 const homeHref = localizePath("/", lang);
-const blogHref = localizePath("/blog", lang);
+const blogHref = "/blog";
 const mcpHref = localizePath("/mcp", lang);
 
-// Édition = version la plus récente parmi les datasets (manifest généré par
-// `npm run sync:versions`, jamais éditée à la main). Évite le badge figé.
-const edition = [datasetVersions.tares, datasetVersions.classifications, datasetVersions.finma]
-  .sort()
-  .slice(-1)[0]
-  .slice(0, 7);
+
 ---
 <div class="v4-status" id="v4-status">
   <div class="v4-status-left">
@@ -26,11 +20,7 @@ const edition = [datasetVersions.tares, datasetVersions.classifications, dataset
       <img class="v4-status-logo-mark" src="/logo.png" alt="" width="20" height="20" />
       openswissdata
     </a>
-    <div class="v4-status-meta">
-      <span>{t("statusbar.edition", lang)} <strong>{edition}</strong></span>
-      <span>{t("statusbar.version", lang)}<strong>1.0.0</strong></span>
-      <span>{t("statusbar.for", lang)}</span>
-    </div>
+
   </div>
   <div class="v4-status-right">
     <nav class="v4-status-nav">
@@ -41,7 +31,7 @@ const edition = [datasetVersions.tares, datasetVersions.classifications, dataset
       <a href={blogHref}>{t("nav.blog", lang)}</a>
     </nav>
     <LangSwitcher variant="compact" monolingual={monolingual} />
-    <span><span class="v4-status-dot"></span>{t("statusbar.live", lang)}</span>
+    <a href="/api/health/ready">{lang === "de" ? "Dienststatus" : lang === "en" ? "Service status" : "État du service"}</a>
   </div>
 </div>
 

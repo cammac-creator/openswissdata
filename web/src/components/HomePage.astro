@@ -1,0 +1,149 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import InstallBar from "./InstallBar.astro";
+import Fiche from "./Fiche.astro";
+import TrustStrip from "./TrustStrip.astro";
+import { getLangFromPath } from "../i18n/utils";
+const lang = getLangFromPath(Astro.url.pathname);
+const prefix = lang === "fr" ? "" : `/${lang}`;
+const copy = {
+ fr: {
+  title: "Données fédérales suisses, normalisées", description: "TARES, NOGA/NACE/ISIC et registre FINMA : fichiers structurés, sources documentées et versions vérifiables. Consultez les échantillons avant votre achat.",
+  eyebrow: "Données suisses · Service indépendant", hero: "Données fédérales suisses,", accent: "prêtes à travailler.", intro: "Tarifs douaniers, classifications économiques et registre FINMA. Consultez les données via le serveur MCP ou téléchargez des fichiers structurés, versionnés et accompagnés de leur provenance.",
+  connect: "Tester le MCP — gratuit", browse: "Explorer les fichiers", sample: "Échantillon CSV", datasets: "Jeux de données", formats: "Formats ouverts", provenance: "Provenance", current: "Versions disponibles", loading: "Vérification…", unavailable: "Version non vérifiable pour le moment", details: "Contenu et qualité", codes: "codes", rows: "lignes du registre", links: "relations documentées", updated: "Relu dans le catalogue distribué", independent: "Les dates indiquent la collecte publiée, pas la date d’une décision officielle.",
+  valueTitle: "Une base structurée pour vos outils.", valueIntro: "Examinez le contenu et ses limites avant de l’intégrer à votre activité.", benefits: [
+   ["Importer", "CSV, JSON, Parquet et SQL", "Des fichiers tabulaires avec schémas et guide de lecture. Le registre FINMA comprend aussi un classeur Excel."],
+   ["Vérifier", "Sources et signatures", "Un manifeste signé Ed25519 et les empreintes SHA-256 permettent de contrôler les fichiers reçus. Les sources et dates de collecte sont documentées."],
+   ["Interpréter", "Des limites explicites", "Unités et conditions douanières conservées, correspondances exactes ou approchées distinguées, avertissements FINMA séparés du registre."]],
+  catalogTitle: "Choisissez le fichier adapté à votre besoin.", catalogIntro: "Trois produits indépendants ou un bundle commun. Paiement unique en CHF ; 360 jours de mises à jour inclus.",
+  taresTitle: "Tarif douanier", taresSub: "HS8 · Descriptions DE/FR/IT", taresDesc: "Codes suisses et lignes de taux avec unités, dates et conditions. Un résumé absent ne signifie pas un droit nul.",
+  classSub: "5 nomenclatures · Langues selon la source", classDesc: "NOGA 2008/2025, NACE 2/2.1 et ISIC 4. Relations sourcées, avec indication de leur précision et des limites de migration.",
+  finmaTitle: "Registre FINMA + avertissements", finmaSub: "Autorisations · UID · LEI disponibles", finmaDesc: "Registre UID public et liste d’avertissement séparée. Enrichissement GLEIF par UID exact, sans assimilation sur une ressemblance de nom.",
+  bundleTitle: "Les trois fichiers ensemble", bundleDesc: "TARES, Classifications Standard et FINMA au même achat. Les fiches qualité de chaque produit précisent le périmètre effectivement livré.", all: "Tous les fichiers", bundleLabel: "BUNDLE 3-EN-1", bundleCta: "Voir le bundle", saving: "200 CHF de moins que les achats séparés", buy: "Voir les détails",
+  howTitle: "De l’échantillon à votre intégration.", steps: [
+   ["Vérifier le contenu", "Téléchargez l’échantillon et lisez la fiche qualité : champs disponibles, langues, formats et limites."],
+   ["Confirmer l’achat", "Le paiement est traité par Stripe en CHF. L’accès est accordé après confirmation du paiement."],
+   ["Récupérer les fichiers", "Un email permet d’ouvrir la page de téléchargement. Vos fichiers sont également accessibles dans l’espace client."],
+   ["Intégrer et contrôler", "Vérifiez la signature et les empreintes, puis adaptez l’import à votre outil. Le temps nécessaire dépend de votre système."]],
+  faqTitle: "Les points à connaître avant l’achat.", faq: [
+   ["À quelle fréquence les données sont-elles actualisées ?", "La collecte FINMA est planifiée chaque jour et TARES chaque semaine. Les classifications sont publiées après contrôle des sources officielles. Une collecte peut être bloquée si les contrôles échouent ; la date réellement disponible est affichée sur chaque fiche."],
+   ["Que signifie la qualité affichée ?", "Elle décrit l’archive actuellement distribuée : volumes, champs renseignés et contrôles de cohérence. Elle ne constitue pas une validation de chaque décision métier ni une garantie d’exhaustivité des sources officielles."],
+   ["Puis-je relier automatiquement deux classifications ?", "Seulement lorsque la relation le permet. Les rapprochements approchés et les regroupements exigent un contrôle de l’activité. Une migration entre genres suisses à six chiffres nécessite une table dédiée."],
+   ["Que se passe-t-il si le format change ?", "La surveillance quotidienne repère les changements des sources suivies. Les collectes refusent les formats inattendus. Les évolutions de schéma sont expliquées dans le README et la fiche qualité ; consultez-les avant de remplacer une version dans votre système."],
+   ["Comment contrôler la provenance ?", "Le manifeste provenance.json décrit les fichiers et leurs empreintes. Sa signature Ed25519 se vérifie avec la clé publique ; les empreintes concernent les fichiers du manifeste, pas le ZIP qui le contient. La page Provenance détaille la méthode et les autorisations documentées."],
+   ["L’achat installe-t-il les données dans mon ERP ?", "Les formats sont destinés à l’intégration par votre équipe. Aucun connecteur SAP, Odoo ou Sage prêt à installer n’est inclus par défaut. Testez l’échantillon dans votre environnement."],
+   ["Comment demander de l’aide ou un remboursement ?", "Contactez contact@openswissdata.com avec votre besoin ou votre référence d’achat. Les modalités de remboursement sous 14 jours figurent dans les conditions de vente."]],
+  readProof: "Provenance et autorisations", terms: "Conditions de vente", support: "Contacter le support", finalTitle: "Commencez par les données réelles.", finalText: "Consultez les fiches et leurs échantillons, ou testez les outils gratuits du serveur MCP. Les nouvelles souscriptions MCP payantes et Classifications Pro sont actuellement fermées.",
+ },
+ de: {
+  title: "Schweizer Bundesdaten, normalisiert", description: "TARES, NOGA/NACE/ISIC und FINMA-Register: strukturierte Dateien, dokumentierte Quellen und überprüfbare Versionen. Prüfen Sie die Muster vor dem Kauf.",
+  eyebrow: "Schweizer Daten · Unabhängiger Dienst", hero: "Schweizer Bundesdaten,", accent: "direkt verwendbar.", intro: "Zolltarife, Wirtschaftsklassifikationen und FINMA-Register. Nutzen Sie den MCP-Server oder laden Sie strukturierte, versionierte Dateien mit dokumentierter Herkunft herunter.",
+  connect: "MCP kostenlos testen", browse: "Dateien ansehen", sample: "CSV-Muster", datasets: "Datensätze", formats: "Offene Formate", provenance: "Herkunft", current: "Verfügbare Versionen", loading: "Wird geprüft…", unavailable: "Version derzeit nicht überprüfbar", details: "Inhalt und Qualität", codes: "Codes", rows: "Registerzeilen", links: "dokumentierte Beziehungen", updated: "Im ausgelieferten Katalog geprüft", independent: "Die Daten beziehen sich auf die veröffentlichte Erhebung, nicht auf behördliche Entscheide.",
+  valueTitle: "Strukturierte Daten für Ihre Werkzeuge.", valueIntro: "Prüfen Sie Inhalt und Grenzen vor dem Einsatz.", benefits: [
+   ["Importieren", "CSV, JSON, Parquet und SQL", "Tabellarische Dateien mit Schemata und Leseanleitung. Das FINMA-Register enthält zusätzlich eine Excel-Arbeitsmappe."],
+   ["Prüfen", "Quellen und Signaturen", "Ein Ed25519-signiertes Manifest und SHA-256-Prüfsummen ermöglichen die Kontrolle der gelieferten Dateien. Quellen und Erhebungsdaten sind dokumentiert."],
+   ["Einordnen", "Klare Grenzen", "Zolleinheiten und Bedingungen bleiben erhalten. Exakte und ungefähre Zuordnungen sind getrennt; FINMA-Warnliste und Register ebenfalls."]],
+  catalogTitle: "Wählen Sie die passende Datei.", catalogIntro: "Drei einzelne Produkte oder ein gemeinsames Bundle. Einmalzahlung in CHF; 360 Tage Aktualisierungen inklusive.",
+  taresTitle: "Zolltarif", taresSub: "HS8 · Bezeichnungen DE/FR/IT", taresDesc: "Schweizer Codes und Tarifzeilen mit Einheiten, Zeiträumen und Bedingungen. Ein fehlender Kurzansatz bedeutet keine Zollfreiheit.",
+  classSub: "5 Nomenklaturen · Sprachen je Quelle", classDesc: "NOGA 2008/2025, NACE 2/2.1 und ISIC 4. Quellenbelegte Beziehungen mit Angaben zu Genauigkeit und Migrationsgrenzen.",
+  finmaTitle: "FINMA-Register + Warnliste", finmaSub: "Bewilligungen · UID · verfügbare LEIs", finmaDesc: "Öffentliches UID-Register und separate Warnliste. GLEIF-Ergänzung über exakte UID, ohne Gleichsetzung aufgrund ähnlicher Namen.",
+  bundleTitle: "Alle drei Dateien gemeinsam", bundleDesc: "TARES, Classifications Standard und FINMA mit einem Kauf. Die Qualitätsseiten beschreiben den tatsächlich gelieferten Umfang jedes Produkts.", all: "Alle Dateien", bundleLabel: "3-IN-1 BUNDLE", bundleCta: "Bundle ansehen", saving: "200 CHF weniger als Einzelkäufe", buy: "Details ansehen",
+  howTitle: "Vom Muster zur Integration.", steps: [
+   ["Inhalt prüfen", "Muster herunterladen und Qualitätsseite lesen: verfügbare Felder, Sprachen, Formate und Grenzen."],
+   ["Kauf bestätigen", "Stripe verarbeitet die Zahlung in CHF. Der Zugriff wird nach Zahlungsbestätigung gewährt."],
+   ["Dateien herunterladen", "Eine E-Mail führt zur Download-Seite. Die Dateien stehen auch im Kundenkonto bereit."],
+   ["Prüfen und integrieren", "Signatur und Prüfsummen kontrollieren, dann den Import an Ihr System anpassen. Der Aufwand hängt von Ihrer Umgebung ab."]],
+  faqTitle: "Wissenswertes vor dem Kauf.", faq: [
+   ["Wie oft werden die Daten aktualisiert?", "Die FINMA-Erhebung ist täglich, TARES wöchentlich geplant. Klassifikationen werden nach Prüfung der offiziellen Quellen veröffentlicht. Bei fehlgeschlagenen Kontrollen kann eine Erhebung ausgesetzt werden; jede Produktseite zeigt die tatsächlich verfügbare Version."],
+   ["Was bedeutet die angezeigte Qualität?", "Sie beschreibt das aktuell gelieferte Archiv: Umfang, gefüllte Felder und Konsistenzkontrollen. Sie bestätigt keine einzelne fachliche Entscheidung und garantiert nicht die Vollständigkeit der amtlichen Quellen."],
+   ["Kann ich Klassifikationen automatisch verbinden?", "Nur wenn die Beziehung dies erlaubt. Ungefähre Zuordnungen und Zusammenfassungen erfordern eine fachliche Prüfung. Für die Migration sechsstelliger Schweizer Wirtschaftsarten ist eine eigene Tabelle erforderlich."],
+   ["Was geschieht bei Formatänderungen?", "Die tägliche Überwachung erkennt Änderungen der beobachteten Quellen. Unerwartete Formate werden bei der Erhebung abgelehnt. Schemaänderungen sind in README und Qualitätsseite erklärt; prüfen Sie diese vor dem Versionswechsel."],
+   ["Wie prüfe ich die Herkunft?", "provenance.json beschreibt Dateien und Prüfsummen. Die Ed25519-Signatur wird mit dem öffentlichen Schlüssel geprüft; Prüfsummen beziehen sich auf die aufgeführten Dateien, nicht auf das umschliessende ZIP. Die Herkunftsseite erläutert Methode und dokumentierte Bewilligungen."],
+   ["Installiert der Kauf die Daten in meinem ERP?", "Die Formate dienen der Integration durch Ihr Team. Ein installierbarer SAP-, Odoo- oder Sage-Konnektor ist standardmässig nicht enthalten. Testen Sie das Muster in Ihrer Umgebung."],
+   ["Wie erhalte ich Hilfe oder eine Rückerstattung?", "Schreiben Sie mit Ihrem Anliegen oder Ihrer Kaufreferenz an contact@openswissdata.com. Die Bedingungen für Rückerstattungen innerhalb von 14 Tagen stehen in den Verkaufsbedingungen."]],
+  readProof: "Herkunft und Bewilligungen", terms: "Verkaufsbedingungen", support: "Support kontaktieren", finalTitle: "Beginnen Sie mit den tatsächlichen Daten.", finalText: "Prüfen Sie Produktseiten und Muster oder testen Sie die kostenlosen MCP-Werkzeuge. Neue kostenpflichtige MCP-Abonnements und Classifications Pro sind derzeit geschlossen.",
+ },
+ en: {
+  title: "Swiss federal data, normalised", description: "TARES, NOGA/NACE/ISIC and the FINMA registry: structured files, documented sources and verifiable versions. Check the samples before purchasing.",
+  eyebrow: "Swiss data · Independent service", hero: "Swiss federal data,", accent: "ready to use.", intro: "Customs tariffs, economic classifications and the FINMA registry. Query the MCP server or download structured, versioned files with documented provenance.",
+  connect: "Try MCP for free", browse: "Explore the files", sample: "CSV sample", datasets: "Datasets", formats: "Open formats", provenance: "Provenance", current: "Available versions", loading: "Checking…", unavailable: "Version cannot currently be verified", details: "Content and quality", codes: "codes", rows: "registry rows", links: "documented relations", updated: "Checked against the distributed catalogue", independent: "Dates identify the published collection, not the date of an official decision.",
+  valueTitle: "Structured data for your tools.", valueIntro: "Review the content and limitations before integrating it into your work.", benefits: [
+   ["Import", "CSV, JSON, Parquet and SQL", "Tabular files with schemas and a reading guide. The FINMA registry also includes an Excel workbook."],
+   ["Verify", "Sources and signatures", "An Ed25519-signed manifest and SHA-256 checksums let you check delivered files. Sources and collection dates are documented."],
+   ["Interpret", "Explicit limitations", "Customs units and conditions are preserved, exact and approximate mappings are distinguished, and FINMA warnings remain separate from the registry."]],
+  catalogTitle: "Choose the file that fits your needs.", catalogIntro: "Three independent products or one bundle. One-time payment in CHF; 360 days of updates included.",
+  taresTitle: "Customs tariff", taresSub: "HS8 · Descriptions DE/FR/IT", taresDesc: "Swiss codes and tariff rows with units, dates and conditions. A missing summary does not mean zero duty.",
+  classSub: "5 classifications · Languages vary by source", classDesc: "NOGA 2008/2025, NACE 2/2.1 and ISIC 4. Sourced relations with explicit precision and migration limits.",
+  finmaTitle: "FINMA registry + warnings", finmaSub: "Authorisations · UIDs · available LEIs", finmaDesc: "Public UID registry and separate warning list. GLEIF enrichment uses exact UID matches, with no identity inferred from similar names.",
+  bundleTitle: "All three files together", bundleDesc: "TARES, Classifications Standard and FINMA in one purchase. Each product’s quality page explains the content actually delivered.", all: "All files", bundleLabel: "3-IN-1 BUNDLE", bundleCta: "View the bundle", saving: "CHF 200 less than separate purchases", buy: "View details",
+  howTitle: "From sample to integration.", steps: [
+   ["Check the content", "Download a sample and review the quality page: available fields, languages, formats and limitations."],
+   ["Confirm your purchase", "Stripe processes the payment in CHF. Access is granted after payment confirmation."],
+   ["Download the files", "The delivery email opens a download page. Your files are also available in your account."],
+   ["Verify and integrate", "Check signatures and checksums, then adapt the import to your tools. The time needed depends on your system."]],
+  faqTitle: "What to know before purchasing.", faq: [
+   ["How often is the data updated?", "FINMA collection is scheduled daily and TARES weekly. Classifications are published after official sources have been checked. Failed checks can block a collection; each product page shows the version actually available."],
+   ["What does the quality information mean?", "It describes the archive currently distributed: volumes, populated fields and consistency checks. It does not validate individual business decisions or guarantee the completeness of official sources."],
+   ["Can I map classifications automatically?", "Only when the relation supports it. Approximate mappings and aggregations require a review of the activity. Migrating six-digit Swiss activity codes requires a dedicated table."],
+   ["What happens when a format changes?", "Daily monitoring detects changes to tracked sources. Collection rejects unexpected formats. Schema changes are explained in the README and quality page; review these before replacing a version in your system."],
+   ["How can I verify provenance?", "provenance.json describes the files and their checksums. Its Ed25519 signature is checked using the public key; checksums refer to the listed files, not the ZIP containing the manifest. The provenance page explains the method and documented permissions."],
+   ["Does a purchase install the data in my ERP?", "The formats are intended for integration by your team. A ready-to-install SAP, Odoo or Sage connector is not included by default. Test the sample in your environment."],
+   ["How do I request support or a refund?", "Contact contact@openswissdata.com with your request or purchase reference. The sales terms describe refunds within 14 days."]],
+  readProof: "Provenance and permissions", terms: "Sales terms", support: "Contact support", finalTitle: "Start with the actual data.", finalText: "Review the product pages and samples, or try the free MCP tools. New paid MCP subscriptions and Classifications Pro are currently closed.",
+ },
+}[lang];
+const products = [
+ {id:"tares",label:"TARES",source:"BAZG",title:copy.taresTitle,sub:copy.taresSub,desc:copy.taresDesc,price:"299"},
+ {id:"classifications",label:"CLASSIFICATIONS",source:"OFS · Eurostat · ONU",title:"NOGA · NACE · ISIC",sub:copy.classSub,desc:copy.classDesc,price:"399"},
+ {id:"finma",label:"FINMA",source:"FINMA · GLEIF",title:copy.finmaTitle,sub:copy.finmaSub,desc:copy.finmaDesc,price:"299"},
+];
+---
+<BaseLayout title={`openswissdata — ${copy.title}`} description={copy.description}>
+ <div class="bg-grid"></div>
+ <section class="v4-hero"><div class="container-v4"><div class="v4-hero-grid">
+  <div><div class="v4-eyebrow reveal-v4">{copy.eyebrow}</div><h1 class="v4-h1 reveal-v4">{copy.hero}<br/><span class="accent">{copy.accent}</span></h1>
+   <p class="v4-lede reveal-v4">{copy.intro}</p>
+   <div class="v4-spec-row reveal-v4"><div class="v4-spec"><div class="v4-spec-label">{copy.datasets}</div><div class="v4-spec-value">3 + bundle</div></div><div class="v4-spec"><div class="v4-spec-label">{copy.formats}</div><div class="v4-spec-value">CSV · JSON · SQL</div></div><div class="v4-spec"><div class="v4-spec-label">{copy.provenance}</div><div class="v4-spec-value">Ed25519</div></div></div>
+   <div class="v4-cta-row reveal-v4"><a href={`${prefix}/mcp#install`} class="v4-btn v4-btn-primary">{copy.connect} →</a><a href="#datasets" class="v4-btn v4-btn-secondary">{copy.browse}</a></div>
+   <InstallBar command="claude mcp add --transport http openswissdata https://mcp.openswissdata.com/mcp/jsonrpc"/>
+  </div>
+  <aside class="home-live reveal-v4" aria-label={copy.current} data-home-live data-lang={lang} data-copy={JSON.stringify({loading:copy.loading,unavailable:copy.unavailable,codes:copy.codes,rows:copy.rows,links:copy.links})}>
+   <p class="live-label">{copy.current}</p><h2>{copy.updated}</h2>
+   {products.map(p=><a class="live-row" href={`${prefix}/datasets/${p.id}`}><span class="live-name">{p.label}</span><strong data-live-version={p.id}>{copy.loading}</strong><span class="live-count" data-live-count={p.id}>{copy.details} →</span></a>)}
+   <p class="live-note">{copy.independent}</p>
+  </aside>
+ </div></div></section>
+ <TrustStrip sources={["BAZG", "OFS", "Eurostat", "ONU", "FINMA", "GLEIF"]} badges={["SHA-256 · Ed25519", "CSV · JSON · Parquet · SQL"]}/>
+ <section class="v4-personas"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.valueTitle}</h2><p class="v4-section-intro reveal-v4">{copy.valueIntro}</p><div class="v4-persona-grid">{copy.benefits.map(([tag,title,text])=><article class="home-benefit reveal-v4"><span>{tag}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+ <section class="v4-datasets" id="datasets"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.catalogTitle}</h2><p class="v4-section-intro reveal-v4">{copy.catalogIntro}</p><div class="v4-dataset-grid">
+  {products.map((p,i)=><Fiche ribbonLabel={p.label} ribbonSource={p.source} datasetId={p.id} pillText={copy.loading} title={p.title} sub={p.sub} desc={p.desc} formats={p.id==='finma'?["EXCEL","CSV","JSON","PARQUET","SQL"]:["CSV","JSON","PARQUET","SQL"]} price={p.price} href={`${prefix}/datasets/${p.id}`} ctaLabel={copy.buy} delay={i+1}/>)}
+  <Fiche ribbonLabel={copy.bundleLabel} ribbonSource={copy.all} pillText="−20 %" title={copy.bundleTitle} sub="TARES + Classifications + FINMA" desc={copy.bundleDesc} formats={["CSV","JSON","PARQUET","SQL"]} price="797" href={`${prefix}/bundle`} ctaLabel={copy.bundleCta} theme="bundle" roiText={copy.saving} strikePrice="997" delay={4}/>
+ </div></div></section>
+ <section class="v4-how"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.howTitle}</h2><div class="home-steps">{copy.steps.map(([title,text],i)=><article class="reveal-v4"><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+ <section class="v4-faq"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.faqTitle}</h2><div class="v4-faq-list">{copy.faq.map(([q,a])=><details class="v4-faq-item reveal-v4"><summary>{q}</summary><p>{a}</p></details>)}</div><div class="v4-cta-row"><a href={`${lang==='de'?'/de':''}/legal/provenance`}>{copy.readProof} →</a><a href={`${lang==='de'?'/de':''}/legal/cgv`}>{copy.terms}</a><a href="mailto:contact@openswissdata.com">{copy.support}</a></div></div></section>
+ <section class="v4-cta-final"><div class="container-v4"><h2 class="reveal-v4">{copy.finalTitle}</h2><p class="reveal-v4">{copy.finalText}</p><div class="v4-cta-final-row reveal-v4"><a href="#datasets" class="v4-btn v4-btn-primary">{copy.browse} →</a><a href="/api/catalog/tares?format=csv" class="v4-btn v4-btn-secondary" download>{copy.sample} ↓</a></div></div></section>
+ <script type="application/ld+json" set:html={JSON.stringify({"@context":"https://schema.org","@type":"FAQPage",mainEntity:copy.faq.map(([q,a])=>({"@type":"Question",name:q,acceptedAnswer:{"@type":"Answer",text:a}}))})}/>
+ <script>
+  const root=document.querySelector<HTMLElement>('[data-home-live]');
+  if(root){
+   const copy=JSON.parse(root.dataset.copy!),number=new Intl.NumberFormat(root.dataset.lang);
+   for(const id of ['tares','classifications','finma']){
+    const version=document.querySelector<HTMLElement>(`[data-live-version="${id}"]`)!,count=document.querySelector<HTMLElement>(`[data-live-count="${id}"]`)!;
+    const pills=document.querySelectorAll<HTMLElement>(`[data-dataset-version="${id}"]`);
+    fetch(`/api/catalog/${id}`,{cache:'no-store',signal:AbortSignal.timeout(12000)}).then(async r=>{
+     if(!r.ok)throw new Error('Catalogue indisponible');const data=await r.json();
+     if(!/^\d{4}\.\d{2}\.\d{2}/.test(data.version))throw new Error('Version absente');
+     version.textContent='v'+data.version;pills.forEach(p=>p.textContent='v'+data.version);
+     count.textContent=id==='finma'?`${number.format(data.registry_rows)} ${copy.rows}`:`${number.format(data.rows)} ${copy.codes}`;
+     if(id==='classifications')count.textContent+=` · ${number.format(data.links)} ${copy.links}`;
+    }).catch(()=>{version.textContent=copy.unavailable;pills.forEach(p=>p.textContent=copy.unavailable);});
+   }
+  }
+ </script>
+ <style>
+  .home-live{border:1px solid var(--line);background:var(--bg-card);border-radius:20px;padding:28px;box-shadow:0 16px 48px #00000008;min-width:0}
+  .live-label{text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--accent);margin-bottom:12px}.home-live h2{font-size:22px;line-height:1.35;letter-spacing:-.03em;margin-bottom:22px}.live-row{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:19px 0;border-top:1px solid var(--line);text-decoration:none;color:var(--ink);overflow-wrap:anywhere}.live-name{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--ink-soft)}.live-row strong{font-size:18px}.live-count,.live-note{font-size:13px;color:var(--ink-soft);line-height:1.65}.live-note{margin-top:18px}.home-benefit{padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--bg-card)}.home-benefit>span{color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.home-benefit h3,.home-steps h3{font-size:20px;margin:14px 0;line-height:1.3}.home-benefit p,.home-steps p{font-size:15px;line-height:1.8;color:var(--ink-soft)}.home-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px}.step-number{font-family:var(--font-mono);font-size:28px;color:var(--accent)}
+  @media(max-width:768px){.home-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.home-live{padding:22px}.v4-spec-value{font-size:14px}}
+  @media(max-width:480px){.home-steps{grid-template-columns:1fr;gap:24px}.home-steps article{border-top:1px solid var(--line);padding-top:18px}.v4-spec-row{gap:18px}.v4-spec-value{font-size:12px}}
+ </style>
+</BaseLayout>

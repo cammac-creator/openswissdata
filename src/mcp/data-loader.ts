@@ -97,17 +97,6 @@ export interface EmbeddingRow {
   vector: Float32Array;
 }
 
-export interface StatentRow {
-  canton_code: string;
-  canton_name: string;
-  noga_division: string;
-  noga_label: string;
-  year: string;
-  etablissements: string;
-  emplois: string;
-  emplois_eq_plein_temps: string;
-}
-
 let _taresVersion: string | null = null;
 let _tares: TaresRow[] | null = null;
 let _taresByHs8: Map<string, TaresRow> | null = null;
@@ -116,7 +105,6 @@ let _finmaWarnings: FinmaWarningRow[] | null = null;
 let _crosswalks: CrosswalkRow[] | null = null;
 let _classificationLinks: ClassificationLink[] | null = null;
 let _classificationSources: ClassificationSource[] | null = null;
-let _statent: StatentRow[] | null = null;
 let _taresEmbeddingsPromise: Promise<EmbeddingRow[]> | null = null;
 let _nogaEmbeddingsPromise: Promise<EmbeddingRow[]> | null = null;
 
@@ -203,13 +191,6 @@ export function getClassificationLinks(): { links: readonly ClassificationLink[]
 export function setClassificationLinks(links: ClassificationLink[], sources: ClassificationSource[]): void {
   _classificationLinks = links;
   _classificationSources = sources;
-}
-
-export function getStatent(): readonly StatentRow[] {
-  if (!_statent) {
-    _statent = loadCsv<StatentRow>("statent.csv");
-  }
-  return _statent;
 }
 
 /**

@@ -24,8 +24,8 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
             <span class="serif">{t("footer.tagline_line2", lang)}</span>
           </p>
           <div class="footer-status">
-            <span class="status-dot"></span>
-            {t("footer.operational", lang)}
+
+            <a href="/api/health/ready">{lang === "de" ? "Dienststatus prüfen" : lang === "en" ? "Check service status" : "Vérifier l’état du service"}</a>
           </div>
         </div>
       </div>

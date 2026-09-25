@@ -1,93 +1,71 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const mcpConfigJson = `{
-  "mcpServers": {
-    "openswissdata": {
-      "url": "https://mcp.openswissdata.com/mcp/jsonrpc",
-      "transport": "http"
-    }
-  }
-}`;
+const mcpConfigJson = "claude mcp add --transport http openswissdata https://mcp.openswissdata.com/mcp/jsonrpc";
+const freeTools = ["tariff_lookup", "kyc_check", "cross_walk"];
 
 const tools = [
   {
     pack: "TARES",
     name: "tariff_lookup",
-    desc: "Lookup a Swiss customs tariff (HS8) and return full row + parents + non-official disclaimer.",
-    args: { hs8: "0901.10.10", lang: "fr" },
-    status: "live",
+    desc: "Recherche d’un tarif suisse à huit chiffres, avec unité, conditions et limites du résumé.",
+    args: { hs8: "09011100", lang: "fr" },
     scope: "tariff:read",
   },
   {
     pack: "TARES",
     name: "tariff_semantic_search",
-    desc: "Semantic search across TARES descriptions (sentence-transformers paraphrase-multilingual-mpnet-base-v2, 768d, ~7 500 vecteurs FR).",
+    desc: "Recherche par similarité dans un index distinct des fichiers : son actualisation n’est pas automatique.",
     args: { query: "bijoux en or 18 carats", top_k: 5 },
-    status: "live",
     scope: "tariff:semantic",
   },
   {
     pack: "TARES",
     name: "tariff_changelog",
-    desc: "Historical changelog of MFN duty rates for an HS8 code over a 12-24 month rolling window. Irreplicable by scraping.",
-    args: { hs8: "0901.10.10", since: "2025-01-01" },
-    status: "live",
+    desc: "Changements observés entre les versions TARES archivées. La profondeur dépend des versions disponibles.",
+    args: { hs8: "09011100", since: "2025-01-01" },
     scope: "tariff:semantic",
   },
   {
     pack: "Classifications",
     name: "cross_walk",
-    desc: "Translate a code between NOGA 2008/2025, NACE 2.0/2.1, ISIC 4.",
-    args: { code: "47.29", source: "NOGA_2025", target: "NACE_2.1" },
-    status: "live",
+    desc: "Correspondances sourcées entre NOGA, NACE et ISIC, avec relation exacte ou approchée et limites explicites.",
+    args: { code: "62.10", source: "NOGA_2025", target: "NACE_2.1" },
     scope: "classifications:read",
   },
   {
     pack: "Classifications",
     name: "classify_text",
-    desc: "Classify free-text into top-K NOGA 2025 codes with confidence scores.",
+    desc: "Suggestions de codes NOGA 2025 à partir d’un texte. Le score de similarité n’est pas une probabilité ni une décision officielle.",
     args: { text: "vente de café en grain et torréfaction", top_k: 3 },
-    status: "live",
     scope: "classifications:semantic",
   },
   {
     pack: "FINMA",
     name: "kyc_check",
-    desc: "Unified KYC : FINMA registry + warnings list cross-referenced.",
+    desc: "Recherche par nom dans le registre FINMA et, séparément, les avertissements. Un nom similaire ne prouve pas une identité.",
     args: { name: "UBS Switzerland AG" },
-    status: "live",
     scope: "finma:read",
   },
   {
     pack: "FINMA",
     name: "finma_search",
-    desc: "Fuzzy search FINMA registry by name (Levenshtein, normalised noise tokens AG/SA/Sàrl).",
+    desc: "Recherche approchée par nom dans le registre FINMA ; les avertissements restent distincts.",
     args: { name: "Vontobel", top_k: 5, include_warnings: true },
-    status: "live",
     scope: "finma:read",
   },
   {
     pack: "FINMA",
     name: "entity_history",
-    desc: "Timeline of changes for a FINMA-supervised entity : registration, authorization changes, withdrawals.",
+    desc: "Changements observés dans les instantanés disponibles. Les dates d’observation ne sont pas des dates de décision officielle.",
     args: { uid: "CHE-101.329.561" },
-    status: "live",
     scope: "finma:history",
-  },
-  {
-    pack: "Classifications",
-    name: "statent_lookup",
-    desc: "Swiss enterprise statistics (BFS STATENT 2023) for a NOGA division × canton: number of establishments, jobs, and full-time equivalents (FTE). 2 270 rows of pre-aggregated public-domain BFS data.",
-    args: { noga_division: "62", canton_code: "1" },
-    status: "live",
-    scope: "statent:read",
   },
 ];
 ---
 <BaseLayout
   title="MCP server openswissdata — datasets fédéraux suisses pour Claude Code & Cursor"
-  description="Premier MCP server suisse pour AI agents. 9 tools : tariff_lookup, semantic_search, classify_text, kyc_check, finma_search, entity_history, statent_lookup… Standard JSON-RPC 2.0. Free tier 100 req/jour."
+  description="TARES, NOGA et FINMA via JSON-RPC. Trois outils sans compte, 100 requêtes par jour et par IP. Autres outils soumis aux droits existants."
 >
 
 <div class="bg-grid"></div>
@@ -99,11 +77,11 @@ const tools = [
       <div class="v4-eyebrow">
         <span>Model Context Protocol</span>
         <span style="opacity:.4">·</span>
-        <span class="check">v0.2.0 · 9 tools live</span>
+        <span class="check">3 outils sans compte · 100 requêtes/jour/IP</span>
       </div>
 
       <h1 class="v4-h1" style="max-width:24ch;">
-        Le premier MCP server suisse pour <span class="accent">Claude Code &amp; Cursor.</span>
+        Un serveur MCP suisse pour <span class="accent">Claude Code &amp; Cursor.</span>
       </h1>
 
       <p class="v4-lede" style="max-width:62ch;">
@@ -113,7 +91,7 @@ const tools = [
       <div class="v4-spec-row">
         <div class="v4-spec">
           <div class="v4-spec-label">Endpoints</div>
-          <div class="v4-spec-value">9 tools</div>
+          <div class="v4-spec-value">8 tools</div>
         </div>
         <div class="v4-spec">
           <div class="v4-spec-label">URL</div>
@@ -121,7 +99,7 @@ const tools = [
         </div>
         <div class="v4-spec">
           <div class="v4-spec-label">Spec</div>
-          <div class="v4-spec-value">MCP 2025-06-18</div>
+          <div class="v4-spec-value">MCP 2025-11-25</div>
         </div>
       </div>
 
@@ -136,7 +114,7 @@ const tools = [
         <span style="opacity:.4">·</span>
         <span><strong>Auth :</strong> Bearer token (OAuth 2.1 disponible)</span>
         <span style="opacity:.4">·</span>
-        <span class="ok">Hébergement Suisse-EU</span>
+        <span class="ok">Hébergement européen</span>
       </div>
     </div>
   </div>
@@ -148,26 +126,24 @@ const tools = [
     <div class="v4-section-eyebrow">
       <strong>Installation</strong>
       <span class="sep">/</span>
-      <span>30 secondes</span>
+      <span>Connexion HTTP</span>
     </div>
-    <h2 class="v4-section-h2">Connectez openswissdata à Claude Code en 30 secondes.</h2>
+    <h2 class="v4-section-h2">Connectez openswissdata à Claude Code.</h2>
 
     <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:28px;margin-top:24px;">
       <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Étape 1 · Ajouter le serveur</p>
-      <p style="margin-bottom:14px;">Dans <code style="font-family:var(--font-mono);background:var(--bg-soft);padding:2px 8px;border-radius:4px;">~/.claude/mcp.json</code> ou via <code style="font-family:var(--font-mono);background:var(--bg-soft);padding:2px 8px;border-radius:4px;">claude mcp add</code> :</p>
+      <p style="margin-bottom:14px;">Dans un terminal où Claude Code est installé :</p>
 
       <pre style="background:#0A0A0C;color:#fafafa;padding:18px 22px;border-radius:8px;font-family:var(--font-mono);font-size:13px;line-height:1.6;overflow-x:auto;margin-bottom:24px;">{mcpConfigJson}</pre>
 
       <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Étape 2 · Redémarrer Claude Code</p>
-      <p style="margin-bottom:14px;">Les 8 outils apparaîtront automatiquement dans le picker MCP de Claude Code (commande <code style="font-family:var(--font-mono);background:var(--bg-soft);padding:2px 8px;border-radius:4px;">/mcp</code>).</p>
+      <p style="margin-bottom:14px;">Vérifiez la connexion avec <code>/mcp</code>. Trois outils sont accessibles sans compte ; les autres nécessitent des droits existants.</p>
 
       <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Étape 3 · Tester</p>
-      <p>Tapez par exemple : <em style="color:var(--ink);">"trouve le code TARES pour bijoux en or 18 carats"</em> et l'agent appellera <code style="font-family:var(--font-mono);background:var(--bg-soft);padding:2px 8px;border-radius:4px;">tariff_semantic_search</code> automatiquement.</p>
+      <p>Demandez par exemple : <em>« Consulte le tarif TARES 09011100 avec tariff_lookup »</em>. Vérifiez ensuite l’unité et les conditions retournées.</p>
     </div>
 
-    <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin-top:14px;">
-      Configuration similaire pour Cursor (<code>~/.cursor/mcp.json</code>) et autres clients MCP-compatible. Doc complète sur <a href="https://github.com/openswissdata" style="color:var(--ink);">github.com/openswissdata</a>.
-    </p>
+    <p style="font-size:13px;margin-top:14px;">Installation Claude Code : <a href="https://code.claude.com/docs/en/mcp">documentation officielle</a>. Les exemples JSON-RPC ci-dessous permettent aussi de tester le service.</p>
   </div>
 </section>
 
@@ -175,27 +151,28 @@ const tools = [
 <section class="v4-datasets" id="tools">
   <div class="container-v4">
     <div class="v4-section-eyebrow">
-      <strong>9 tools disponibles</strong>
+      <strong>8 tools disponibles</strong>
       <span class="sep">/</span>
       <span>JSON-RPC 2.0</span>
       <span class="sep">/</span>
-      <span>spec 2025-06-18</span>
+      <span>spec 2025-11-25</span>
     </div>
-    <h2 class="v4-section-h2">Trois packs de données. Neuf endpoints.</h2>
+    <h2 class="v4-section-h2">Trois packs de données. Huit outils.</h2>
 
     {["TARES", "Classifications", "FINMA"].map(packName => (
       <div style="margin-bottom:32px;">
         <h3 style="font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;font-weight:600;">{`// pack ${packName}`}</h3>
         <div style="display:grid;grid-template-columns:1fr;gap:14px;">
           {tools.filter(t => t.pack === packName).map(tool => {
+            const authHeader = freeTools.includes(tool.name) ? "" : '  -H "Authorization: Bearer <access_token>" \\\n';
             const curlExample = `curl -X POST https://mcp.openswissdata.com/mcp/jsonrpc \\
   -H "Content-Type: application/json" \\
-  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: tool.name, arguments: tool.args } }, null, 2)}'`;
+${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: tool.name, arguments: tool.args } }, null, 2)}'`;
             return (
               <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:22px;">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:8px;">
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;">
                   <code style="font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--ink);">{tool.name}</code>
-                  <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:var(--green-soft);color:var(--green);border:1px solid rgba(21,128,61,.2);padding:3px 8px;border-radius:4px;font-weight:600;white-space:nowrap;">✓ live</span>
+                  <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:var(--green-soft);color:var(--green);border:1px solid rgba(21,128,61,.2);padding:3px 8px;border-radius:4px;font-weight:600;white-space:nowrap;">{freeTools.includes(tool.name) ? 'Sans compte' : 'Droits requis'}</span>
                 </div>
                 <p style="font-size:14px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">{tool.desc}</p>
                 <details style="font-family:var(--font-mono);font-size:12px;">
@@ -215,6 +192,7 @@ const tools = [
 </section>
 
 <!-- ========== PLAYGROUND ========== -->
+<div class="container-v4"><p class="mcp-availability" style="padding:20px;border:1px solid var(--line);border-radius:12px;line-height:1.8;margin:24px 0;">Accès sans compte : tariff_lookup, kyc_check et cross_walk (100 requêtes/jour par IP). Les autres outils exigent les droits correspondants ; les nouvelles souscriptions payantes sont fermées. STATENT est suspendu en attente de preuve de droit de redistribution. Les index vectoriels ne sont pas actualisés par les collectes de fichiers.</p></div>
 <section class="v4-personas" id="playground">
   <div class="container-v4">
     <div class="v4-section-eyebrow">
@@ -229,7 +207,7 @@ const tools = [
         <div>
           <label for="pg-tool" style="display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Tool</label>
           <select id="pg-tool" style="width:100%;padding:10px 14px;font-family:var(--font-mono);font-size:13px;border:1px solid var(--line-strong);border-radius:8px;background:var(--bg);color:var(--ink);">
-            {tools.map(t => <option value={t.name}>{t.name}</option>)}
+            {tools.filter(t => freeTools.includes(t.name)).map(t => <option value={t.name}>{t.name}</option>)}
           </select>
         </div>
         <div>
@@ -293,11 +271,11 @@ const tools = [
 <!-- ========== CTA FINAL ========== -->
 <section class="v4-cta-final">
   <div class="container-v4">
-    <h2>Le premier MCP suisse pour vos agents.</h2>
-    <p>Free tier 100 req/jour. Aucun compte requis pour tester. Open spec MCP 2025-06-18.</p>
+    <h2>Des données suisses pour vos agents.</h2>
+    <p>Free tier 100 req/jour. Aucun compte requis pour tester. Open spec MCP 2025-11-25.</p>
     <div class="v4-cta-final-row">
       <a href="#install" class="v4-btn v4-btn-primary">Connecter maintenant <span class="arrow">→</span></a>
-      <a href="/datasets/classifications" class="v4-btn v4-btn-secondary">Voir Classifications Pro</a>
+      <a href="/datasets/classifications" class="v4-btn v4-btn-secondary">Voir les classifications</a>
       <a href="/legal/provenance" class="v4-btn-mono">Provenance &amp; signature</a>
     </div>
   </div>
@@ -375,15 +353,14 @@ const tools = [
 
 <script is:inline>
   const TOOL_DEFAULTS = {
-    "tariff_lookup": { hs8: "01011010", lang: "fr" },
+    "tariff_lookup": { hs8: "09011100", lang: "fr" },
     "tariff_semantic_search": { query: "bijoux en or 18 carats", top_k: 5 },
-    "tariff_changelog": { hs8: "01011010", since: "2025-01-01" },
-    "cross_walk": { code: "47.29", source: "NOGA_2025", target: "NACE_2.1" },
+    "tariff_changelog": { hs8: "09011100", since: "2025-01-01" },
+    "cross_walk": { code: "62.10", source: "NOGA_2025", target: "NACE_2.1" },
     "classify_text": { text: "vente de café en grain et torréfaction", top_k: 3 },
     "kyc_check": { name: "UBS Switzerland AG" },
     "finma_search": { name: "Vontobel", top_k: 5 },
     "entity_history": { uid: "CHE-101.329.561" },
-    "statent_lookup": { noga_division: "62", canton_code: "1" }
   };
   const sel = document.getElementById('pg-tool');
   const args = document.getElementById('pg-args');
