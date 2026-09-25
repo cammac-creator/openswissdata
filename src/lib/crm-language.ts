@@ -19,12 +19,12 @@ export function currentMessage(text: string): string {
   return result.join('\n').trim();
 }
 export function detectLanguage(text: string) {
-  const sample = currentMessage(text).split(/\n\s*--\s*\n/)[0].replace(/https?:\/\/\S+|\b\S+@\S+\b/g, '').slice(0, 2400);
+  const sample = currentMessage(text).split(/\n\s*--\s*\n/)[0].replace(/https?:\/\/\S+|\b\S+@\S+\b|\[lien de [^\]]+masqué\]/g, '').slice(0, 2400);
   const letters = sample.match(/\p{L}/gu)?.length ?? 0;
   const results = letters >= 45 ? francAll(sample, { minLength: 45 }) : [];
   const code = iso[results[0]?.[0]];
   const margin = results.length > 1 ? results[0][1] - results[1][1] : 0;
-  const certainEnough = isLanguage(code) && margin >= 0.10;
+  const certainEnough = isLanguage(code) && margin >= (letters >= 180 ? 0.02 : 0.10);
   return { code: certainEnough ? code : null, label: certainEnough ? languageName(code) : 'Langue à confirmer', source: 'detection', confidence: certainEnough ? 'probable' : 'uncertain' };
 }
 export type CustomerLanguage = { code: string | null; label: string; source: 'unknown' | 'manual' | 'checkout'; transactional_code: Locale; updated_at: number | null };

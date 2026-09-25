@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import { currentMessage, detectLanguage } from "../lib/crm-language.js";
-import { isLanguage } from "../lib/languages.js";
+import { isLanguage, languageName } from "../lib/languages.js";
 import { translateMessage, translationBusy } from "../lib/crm-translation.js";
 import { z } from "zod";
 import { ImapFlow } from "imapflow";
@@ -95,9 +95,12 @@ crmMailRoute.get("/:source/:id", async c => {
       if (!/^[a-f0-9-]{36}$/.test(id)) return c.json({ error: "invalid_id" }, 400);
       const m = await sourceJson<SentMail>("resend-detail", `https://api.resend.com/emails/${id}`, { headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` } });
       if (!ours(m)) return c.json({ error: "not_found" }, 404);
-      const parsed = m.text ? null : await simpleParser(Buffer.from(`Content-Type: text/html; charset=utf-8\r\n\r\n${m.html ?? ""}`), { skipImageLinks: true, skipTextToHtml: true, maxHtmlLengthToParse: 500_000 });
-      const text = redact(m.text ?? parsed?.text ?? "Contenu non disponible.");
-      return c.json({ language: detectLanguage(text), reading_text: currentMessage(text), subject: m.subject, from: m.from, to: m.to, created_at: m.created_at, status: m.last_event, text, attachments: [] });
+      const parsed = m.text?.trim() ? null : await simpleParser(Buffer.from(`Content-Type: text/html; charset=utf-8\r\n\r\n${m.html ?? ""}`), { skipImageLinks: true, skipTextToHtml: true, maxHtmlLengthToParse: 500_000 });
+      const rawText = m.text?.trim() ? m.text : parsed?.text ?? "Contenu non disponible.";
+      const text = redact(rawText);
+      const declared = m.html?.match(/<html\b[^>]*\blang\s*=\s*["']([a-z]{2,3})(?:-[a-z]+)?["']/i)?.[1]?.toLowerCase();
+      const language = isLanguage(declared) ? { code:declared, label:languageName(declared), source:"template", confidence:"declared" } : detectLanguage(rawText);
+      return c.json({ language, reading_text: currentMessage(text), subject: m.subject, from: m.from, to: m.to, created_at: m.created_at, status: m.last_event, text, attachments: [] });
     }
     if (c.req.param("source") !== "imap") return c.json({ error: "not_found" }, 404);
     const encoded = c.req.param("id");
