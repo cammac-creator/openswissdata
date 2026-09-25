@@ -86,7 +86,7 @@ export function createApp() {
   //   - /_astro/* (hashed assets): 1 year, immutable (Astro fingerprints filenames)
   //   - /favicon.* /og-default.png /samples/*: 1 year (rarely change)
   //   - /api/*, explicit MCP API endpoints: no-store (auth-bearing or dynamic)
-  //   - HTML pages (incl. `/mcp` public docs): 5 min browser, 10 min CDN, SWR 1 day
+  //   - Pages HTML : revalidation navigateur, 5 minutes au CDN, sans ancienne version de secours
   // Only set if the route handler did not set its own Cache-Control.
   // Note: `/mcp` and `/mcp/` are the Astro public docs page — only explicit
   // MCP API paths below get no-store.
@@ -126,10 +126,10 @@ export function createApp() {
       );
       return;
     }
-    // HTML pages — fresh-ish but cacheable at edge with SWR fallback
+    // Revalider la page pour éviter de montrer les anciennes promesses commerciales.
     c.res.headers.set(
       "Cache-Control",
-      "public, max-age=300, s-maxage=600, stale-while-revalidate=86400",
+      "public, max-age=0, s-maxage=300, must-revalidate",
     );
   });
 
