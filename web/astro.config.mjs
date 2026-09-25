@@ -19,13 +19,12 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      filter: (page) =>
-        !page.includes('/account') &&
-        !page.includes('/famille') &&
-        !page.includes('/admin'),
-      changefreq: 'weekly',
-      priority: 0.7,
-      lastmod: new Date(),
+      filter: (page) => {
+        const path = new URL(page).pathname.replace(/^\/(de|en)(?=\/|$)/, '');
+        return !/^\/(account|famille|admin|404)(\/|\.html|$)/.test(path) && !path.endsWith('.json');
+      },
+      // Une date de build ne décrit pas la dernière modification du contenu.
+      // Omettre lastmod tant qu'une date significative par page n'est pas disponible.
       i18n: {
         defaultLocale: 'fr',
         locales: { fr: 'fr-CH', de: 'de-CH', en: 'en' },

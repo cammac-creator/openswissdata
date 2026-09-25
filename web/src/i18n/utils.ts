@@ -96,5 +96,9 @@ export function localizePathOrFallback(
  * Used to render <link rel="alternate"> tags in <head>.
  */
 export function getHreflangAlternates(pathname: string): Array<{ lang: Lang; url: string }> {
-  return LANGS.map((lang) => ({ lang, url: localizePath(pathname, lang) }));
+  const path = localizePath(pathname, "fr").replace(/\/+$/, "") || "/";
+  // Ne déclarer que les traductions réellement présentes dans les routes.
+  const available: Lang[] = path.startsWith("/legal/") ? ["fr", "de"]
+    : /^\/(blog(?:\/|$)|pricing$|404(?:\.html)?$|admin$|famille$)/.test(path) ? ["fr"] : LANGS;
+  return available.map((lang) => ({ lang, url: localizePath(pathname, lang) }));
 }

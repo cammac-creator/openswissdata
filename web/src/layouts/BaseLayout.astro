@@ -49,17 +49,17 @@ const orgDescription = lang === "de"
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={finalDescription} />
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     {noindex && <meta name="robots" content="noindex,nofollow" />}
 
-    {!monolingual && hreflangs.map(({ lang: l, url }) => (
+    {!monolingual && !noindex && hreflangs.map(({ lang: l, url }) => (
       <link
         rel="alternate"
         hreflang={l === "fr" ? "fr-CH" : l === "de" ? "de-CH" : "en"}
         href={new URL(url, Astro.site).toString()}
       />
     ))}
-    {!monolingual && (
+    {!monolingual && !noindex && (
       <link
         rel="alternate"
         hreflang="x-default"
