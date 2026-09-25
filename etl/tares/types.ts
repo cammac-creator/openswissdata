@@ -28,6 +28,7 @@ export interface TaresRow {
   duty_mfn_unit?: string;        // e.g. "par 100 kg brut" / "par 1 pièce(s)"
   duty_mfn_currency?: string;    // always "CHF" but kept explicit for downstream consumers
 
+  duty_rates_count?: number; // Nombre de lignes détaillées dans tares_rates, sans choix du taux minimal.
   preferential_regimes: Record<string, number | "free">;
   restrictions_codes: string[];           // extra-customs restrictions (REACH, CITES, dual-use…) — empty in v1
   customs_relief_codes?: string[];        // BAZG ZCO customs facility codes (Zollerleichterungen)

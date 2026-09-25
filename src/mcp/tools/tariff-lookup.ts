@@ -30,7 +30,17 @@ const DISCLAIMERS = {
   en: "UNOFFICIAL NOTICE: this data is an OpenSwissData copy of TARES (BAZG/FOCBS) and does not replace the official consultation on xtares.admin.ch. OpenSwissData does not warrant accuracy or freshness and is not liable for any customs decision based on it.",
 } as const;
 
+const SUMMARY_NOTES = {
+  fr: "Résumé tarifaire : les variantes conditionnelles peuvent être absentes. Consulter les taux détaillés du fichier vendu et Tares officiel ; une absence ne signifie pas gratuité. unit_stat est un ancien alias de l'unité du droit.",
+  de: "Tarifübersicht: Bedingte Varianten können fehlen. Die detaillierten Sätze im Datensatz und das offizielle Tares prüfen; fehlende Werte bedeuten keine Zollfreiheit. unit_stat ist eine frühere Bezeichnung der Abgabeneinheit.",
+  it: "Riepilogo tariffario: le varianti condizionali possono mancare. Consultare le aliquote dettagliate nel dataset e Tares ufficiale; un valore assente non significa esenzione. unit_stat è un nome storico dell'unità del dazio.",
+  en: "Tariff summary: conditional variants may be omitted. Check the detailed rates in the purchased dataset and official Tares; missing values do not mean duty-free. unit_stat is a legacy alias for the duty unit.",
+} as const;
+
 export interface TariffLookupResult {
+  version: string | null;
+  duty_rates_count: number | null;
+  summary_note: string;
   hs8: string;
   hs6: string;
   chapter: string;
@@ -69,7 +79,7 @@ export function tariffLookupHandler(args: unknown): {
     };
   }
   const { hs8, lang } = parsed.data;
-  const { byHs8 } = getTares();
+  const { byHs8, version } = getTares();
   const row = byHs8.get(hs8);
   if (!row) {
     return {
@@ -83,6 +93,7 @@ export function tariffLookupHandler(args: unknown): {
   const dutyValue = dutyValueRaw && dutyValueRaw !== "" ? Number(dutyValueRaw) : null;
 
   const result: TariffLookupResult = {
+    version, duty_rates_count: row.duty_rates_count ? Number(row.duty_rates_count) : null, summary_note: SUMMARY_NOTES[lang],
     hs8: row.hs8,
     hs6: row.hs6,
     chapter: row.chapter,
@@ -112,11 +123,13 @@ export function tariffLookupHandler(args: unknown): {
   // so a model passing `content[0].text` to a downstream caller cannot drop it.
   const text = [
     DISCLAIMERS[lang],
+    SUMMARY_NOTES[lang],
+    `Version: ${version ?? "unknown (bundled data)"}`,
     "",
     `HS8 ${result.hs8} — ${result.designation}`,
     `Chapter ${result.chapter} / Heading ${result.heading} / HS6 ${result.hs6}`,
     `MFN duty: ${result.duty_mfn.value ?? "n/a"} ${result.duty_mfn.unit ?? ""} ${result.duty_mfn.currency ?? ""}`.trim(),
-    `Statistical unit: ${result.unit_stat}`,
+    `Duty unit (legacy unit_stat): ${result.unit_stat}`,
     `Valid from: ${result.valid_from}`,
     `Source: ${result.source_url}`,
   ].join("\n");

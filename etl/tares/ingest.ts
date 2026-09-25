@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import type { TaresRow } from "./types.js";
-import { downloadAllSources } from "./sources.js";
+import { downloadAllSources, BAZG_SOURCES } from "./sources.js";
+import { createHash } from "node:crypto";
 import { buildTaresRows } from "./build-rows.js";
 
 /**
@@ -20,11 +21,13 @@ export function ingestFromFixture(fixturePath: string): TaresRow[] {
  * Downloads all 7 source files into `cacheDir`, parses them, joins them
  * into the canonical TaresRow[] schema, and validates BAZG compliance.
  */
-export async function ingestFromBazg(opts: { cacheDir: string; today?: string }): Promise<{
+export async function ingestFromBazg(opts: { cacheDir: string; today?: string; maxAgeHours?: number }): Promise<{
   rows: TaresRow[];
+  rates: ReturnType<typeof buildTaresRows>["rates"];
   stats: ReturnType<typeof buildTaresRows>["stats"];
+  sources: Array<{ id: string; url: string; sha256: string; bytes: number; fetched_at: string }>;
 }> {
-  const paths = await downloadAllSources(opts.cacheDir);
+  const paths = await downloadAllSources(opts.cacheDir, { maxAgeHours: opts.maxAgeHours });
   const result = buildTaresRows({
     today: opts.today,
     sources: {
@@ -39,5 +42,11 @@ export async function ingestFromBazg(opts: { cacheDir: string; today?: string })
       customs_facilities: paths.customs_facilities,
     },
   });
-  return result;
+  const sources = Object.entries(paths).map(([id, path]) => {
+    const bytes = readFileSync(path);
+    // La date vient de la dernière lecture HTTP, même si les octets sont inchangés.
+    const meta = JSON.parse(readFileSync(`${opts.cacheDir}/${id}.cache.json`, "utf8"));
+    return { id, url: BAZG_SOURCES[id].url, sha256: createHash("sha256").update(bytes).digest("hex"), bytes: bytes.length, fetched_at: meta.fetched_at };
+  });
+  return { ...result, sources };
 }

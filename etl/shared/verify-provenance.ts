@@ -23,7 +23,7 @@ import { mkdtempSync, rmSync, readFileSync, existsSync, readdirSync, statSync } 
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { createPublicKey, verify, createHash } from "node:crypto";
 import { canonicalize, type SignedProvenanceManifest } from "./provenance.js";
 
@@ -43,7 +43,7 @@ export interface VerifyResult {
 }
 
 function unzipTo(zipPath: string, dest: string): void {
-  execSync(`unzip -o -q "${zipPath}" -d "${dest}"`, { stdio: "ignore" });
+  execFileSync("unzip", ["-o", "-q", zipPath, "-d", dest], { stdio: "ignore" });
 }
 
 export async function verifyProvenanceZip(

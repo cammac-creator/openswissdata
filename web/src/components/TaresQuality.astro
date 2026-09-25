@@ -1,0 +1,47 @@
+---
+interface Props { lang?: 'fr' | 'en' | 'de' }
+const { lang = 'fr' } = Astro.props;
+const text = {
+  fr: { title: 'Le fichier disponible aujourd’hui', loading: 'Lecture de la version distribuée…', version: 'Version', codes: 'Codes HS8', rates: 'Lignes de taux détaillées', sample: 'Échantillon de cette version — CSV', note: 'Les taux varient selon l’origine, les contingents, les conditions et les unités. Le résumé omet les cas ambigus : une case vide ne signifie pas gratuité. Les fichiers tares_rates.csv et tares_rates.json conservent les conditions source. Les vecteurs de recherche ne sont pas inclus dans cette actualisation.', missing: 'codes sans résumé MFN unique ; consulter le détail.', fallback: 'La fiche qualité est momentanément indisponible. Réessayez avant de télécharger l’échantillon.', schema: 'Schéma 2 · contrôle qualité et comparaison inclus' },
+  en: { title: 'The file available today', loading: 'Reading the distributed version…', version: 'Version', codes: 'HS8 codes', rates: 'Detailed rate rows', sample: 'Sample from this version — CSV', note: 'Rates depend on origin, quotas, conditions and units. Ambiguous summaries are omitted: a blank does not mean duty-free. tares_rates.csv and tares_rates.json preserve the source conditions. Search vectors are not included in this update.', missing: 'codes without a unique MFN summary; check the detailed rates.', fallback: 'The quality report is temporarily unavailable. Please retry before downloading the sample.', schema: 'Schema 2 · quality checks and comparison included' },
+  de: { title: 'Die heute verfügbare Datei', loading: 'Ausgelieferte Version wird gelesen…', version: 'Version', codes: 'HS8-Codes', rates: 'Detaillierte Tarifzeilen', sample: 'Muster dieser Version — CSV', note: 'Zollsätze hängen von Ursprung, Kontingenten, Bedingungen und Einheiten ab. Mehrdeutige Zusammenfassungen fehlen: ein leeres Feld bedeutet keine Zollfreiheit. tares_rates.csv und tares_rates.json enthalten die Bedingungen der Quelle. Suchvektoren sind in dieser Aktualisierung nicht enthalten.', missing: 'Codes ohne eindeutige MFN-Zusammenfassung; Details prüfen.', fallback: 'Der Qualitätsbericht ist vorübergehend nicht verfügbar. Bitte vor dem Herunterladen des Musters erneut versuchen.', schema: 'Schema 2 · Qualitätskontrolle und Vergleich enthalten' },
+}[lang];
+---
+<section class="ds-section tares-quality" data-lang={lang} data-fallback={text.fallback}>
+  <h2 class="v4-section-h2">{text.title}</h2>
+  <p data-status role="status">{text.loading}</p>
+  <div data-quality hidden>
+    <p class="dim">{text.schema}</p>
+    <dl>
+      <div><dt>{text.version}</dt><dd data-version></dd></div>
+      <div><dt>{text.codes}</dt><dd data-codes></dd></div>
+      <div><dt>{text.rates}</dt><dd data-rates></dd></div>
+    </dl>
+    <p><span data-missing></span> {text.missing}</p>
+    <p>{text.note}</p>
+    <a class="v4-btn v4-btn-secondary" href="/api/catalog/tares?format=csv" download>{text.sample} ↓</a>
+  </div>
+</section>
+<style>
+.tares-quality { border:1px solid var(--border,#dcdfe0); border-radius:16px; padding:clamp(20px,4vw,36px); margin-block:36px; }
+.tares-quality dl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; margin:24px 0; }
+.tares-quality dt { font-size:.82rem; opacity:.72; }.tares-quality dd { margin:8px 0; font-size:1.6rem; font-weight:650; overflow-wrap:anywhere; }
+.tares-quality p { line-height:1.65; }.tares-quality a { margin-top:16px; white-space:normal; }
+@media(max-width:600px) { .tares-quality dl { grid-template-columns:1fr; gap:12px; }.tares-quality dd { font-size:1.35rem; } }
+</style>
+<script>
+for (const element of document.querySelectorAll<HTMLElement>('.tares-quality')) {
+  const status = element.querySelector<HTMLElement>('[data-status]')!;
+  fetch('/api/catalog/tares', { cache:'no-cache' }).then(async response => {
+    if (!response.ok) throw new Error('indisponible');
+    const value = await response.json();
+    if (value.schema_version !== 2 || !Number.isInteger(value.rows) || !Number.isInteger(value.rates)) throw new Error('incomplet');
+    const number = new Intl.NumberFormat(element.dataset.lang);
+    for (const [selector, text] of [['version',value.version],['codes',number.format(value.rows)],['rates',number.format(value.rates)],['missing',number.format(value.missing_mfn_summary)]]) {
+      element.querySelector<HTMLElement>(`[data-${selector}]`)!.textContent = text;
+    }
+    element.querySelector<HTMLElement>('[data-quality]')!.hidden = false;
+    status.hidden = true;
+  }).catch(() => { status.textContent = element.dataset.fallback!; });
+}
+</script>

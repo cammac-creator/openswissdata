@@ -2,9 +2,13 @@ import { mkdirSync, rmSync, existsSync, createWriteStream, readFileSync, statSyn
 import { join } from "node:path";
 import archiver from "archiver";
 import { createHash } from "node:crypto";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import { stringify as csvStream } from "csv-stringify";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
 import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
+import type { DutyRateRow } from "./parse-bazg-xlsx.js";
 import type { TaresRow } from "./types.js";
 import {
   TARES_EMBEDDING_DIMENSIONS,
@@ -15,6 +19,7 @@ import {
 
 const TARES_PARQUET_SCHEMA = new parquet.ParquetSchema({
   hs8: { type: "UTF8" },
+  duty_rates_count: { type: "INT32", optional: true },
   hs6: { type: "UTF8" },
   chapter: { type: "INT32" },
   heading: { type: "UTF8" },
@@ -54,6 +59,7 @@ const TARES_JSON_SCHEMA = {
     type: "object",
     required: ["hs8", "hs6", "chapter", "heading", "designation_fr", "designation_de", "designation_it", "unit_stat", "valid_from", "source_url"],
     properties: {
+      duty_rates_count: { type: "integer", minimum: 0 },
       hs8: { type: "string", pattern: "^[0-9]{8}$" },
       hs6: { type: "string", pattern: "^[0-9]{6}$" },
       chapter: { type: "integer", minimum: 1, maximum: 99 },
@@ -151,6 +157,9 @@ export interface BuildBundleOptions {
    * compatibility with releases predating Phase 1 / T1 (and to keep tests fast).
    */
   embeddings?: TaresEmbedding[];
+  rates?: DutyRateRow[];
+  quality?: Record<string, unknown>;
+  sources?: unknown;
 }
 
 export async function buildBundle(
@@ -177,6 +186,7 @@ export async function buildBundle(
   // Parquet — map to schema-compatible shape (rename nested fields)
   const parquetRows = rows.map(r => ({
     hs8: r.hs8,
+    duty_rates_count: r.duty_rates_count,
     hs6: r.hs6,
     chapter: r.chapter,
     heading: r.heading,
@@ -224,6 +234,23 @@ export async function buildBundle(
     );
   }
 
+  // Les lignes détaillées restent séparées : une ligne par condition et unité BAZG.
+  if (opts.rates) {
+    // Écriture en flux : le détail complet ne doit pas devenir une chaîne géante en mémoire.
+    const rates = function* () {
+      for (const r of opts.rates!) yield { hs8: r.hs8, valid_from: r.validFrom, valid_to: r.validTo, source_file: r.source_file, ...r.source_record };
+    };
+    const json = function* () {
+      yield "[\n"; let first = true;
+      for (const row of rates()) { yield (first ? "" : ",\n") + JSON.stringify(row); first = false; }
+      yield "\n]\n";
+    };
+    await pipeline(Readable.from(json()), createWriteStream(join(workDir, "tares_rates.json")));
+    await pipeline(Readable.from(rates()), csvStream({ header: true }), createWriteStream(join(workDir, "tares_rates.csv")));
+  }
+  if (opts.quality) writeJson(opts.quality, join(workDir, "quality.json"));
+  if (opts.sources) writeJson(opts.sources, join(workDir, "sources.json"));
+
   // README
   const lastUpdatedAt = new Date().toISOString();
   const readme = `# TARES Dataset — version ${version}
@@ -240,7 +267,18 @@ Authoritative source: https://xtares.admin.ch/
 
 Last updated: ${lastUpdatedAt}
 
-Normalized (form only) Swiss customs tariff codes (HS8). Values are preserved verbatim from the authoritative source.
+Swiss customs tariff codes (HS8), normalized into a summary and a detailed rate table.
+${opts.rates ? `
+## Lecture des taux — schéma 2
+
+- \`tares_rates.json\` / \`tares_rates.csv\` conservent chaque ligne de taux en vigueur et ses cellules source, avec les noms de colonnes BAZG : code LDG, ZCO, séquence, unité, validité et conditions. Les colonnes ajoutées hs8, valid_from, valid_to et source_file facilitent la jointure et la traçabilité ; les dates source Excel restent présentes.
+- Le résumé MFN retient uniquement un taux de base non ambigu (ZCO 00, séquence 1, sans texte conditionnel). Aucune sélection du taux le plus bas.
+- Le résumé préférentiel n'inclut que les groupes sans variantes conditionnelles, avec la même unité que le résumé MFN. Une absence ne signifie jamais gratuité. Les clés connues sont eu/efta/uk/cn/jp/tr ; les autres gardent leur identifiant ldg_<code>.
+- Dans le détail, \`ANS Einheit\` conserve l'unité source (Fr. ou %). Un pourcentage n’est jamais converti en CHF ; sa base doit être vérifiée dans la source.
+- Les préférences restent soumises à l'origine et aux conditions douanières : ce fichier n'est pas un calculateur de dédouanement. Vérifier sur xtares.admin.ch.
+- \`unit_stat\` est conservé pour compatibilité comme ancien alias de l'unité du droit, pas une unité statistique autonome.
+- Les changements portent sur les champs communs avec la version précédente ; l'ajout des détails n'est pas un changement tarifaire en soi.
+` : ""}
 
 ## Files
 
@@ -248,12 +286,12 @@ Normalized (form only) Swiss customs tariff codes (HS8). Values are preserved ve
 - \`tares.parquet\` — Apache Parquet
 - \`tares.json\` — hierarchical JSON (all nested fields preserved)
 - \`tares.sql\` — CREATE TABLE + INSERT statements (PostgreSQL/MySQL/SQLite compatible)
-- \`schema.json\` — JSON Schema (Draft-07)${hasEmbeddings ? `
-- \`tares_embeddings.parquet\` — pre-computed multilingual semantic embeddings (Phase 1 / T1).
+- \`schema.json\` — JSON Schema (Draft-07)${opts.rates ? "\n- `tares_rates.csv` et `tares_rates.json` — taux détaillés et cellules source" : ""}${opts.quality ? "\n- `quality.json` — contrôles et changements observés" : ""}${opts.sources ? "\n- `sources.json` — provenance des sept sources" : ""}${hasEmbeddings ? `
+- \`tares_embeddings.parquet\` — pre-computed semantic embeddings of French descriptions.
   Columns: \`hs_code\`, \`lang\`, \`description\`, \`embedding\` (list<float>, ${TARES_EMBEDDING_DIMENSIONS}d),
   \`model\` (\`${TARES_EMBEDDING_MODEL}\`), \`model_version\` (\`${TARES_EMBEDDING_MODEL_VERSION}\`).
   Vectors are L2-normalised so cosine similarity reduces to a dot product.
-  See SOURCES.md → "Embeddings (Phase 1 / T1)" for a Python load + search snippet.` : ""}
+  The lang column identifies the language actually encoded.` : ""}
 - \`checksums.sha256\`
 - \`provenance.json\` — Ed25519-signed manifest + RFC-3161 timestamp (see "Provenance" below)
 - \`LICENSE.txt\`
@@ -309,6 +347,9 @@ https://www.bazg.admin.ch/
     "tares.json",
     "tares.sql",
     "schema.json",
+    ...(opts.rates ? ["tares_rates.json", "tares_rates.csv"] : []),
+    ...(opts.quality ? ["quality.json"] : []),
+    ...(opts.sources ? ["sources.json"] : []),
     ...(hasEmbeddings ? ["tares_embeddings.parquet"] : []),
   ];
   const checksums = dataFiles.map(f => {
