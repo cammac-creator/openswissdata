@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import archiver from "archiver";
 const { download } = vi.hoisted(() => ({ download: vi.fn() }));
 vi.mock("../../src/lib/r2.js", () => ({ getObjectBuffer: download }));
+import { readTaresArchive } from "../../src/lib/tares-archive.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
 import { getTares, _resetDataLoaderCache } from "../../src/mcp/data-loader.js";
 import { refreshTaresFromR2, getMcpFreshness, _resetFreshnessForTest, extractCsvFromZip } from "../../src/mcp/r2-refresh.js";
@@ -21,5 +22,11 @@ describe("TARES réellement servi par le MCP", () => {
   it("refuse les doublons", async () => { const bytes = await zip(csv().replace("01000001", "01000000")); record(bytes); download.mockResolvedValue(bytes); await refreshTaresFromR2(); expect(getTares().version).toBeNull(); expect(getMcpFreshness().tares.lastError).toContain("invalides"); });
   it("refuse une empreinte distante différente", async () => { const bytes = await zip(csv()); record(bytes); download.mockResolvedValue(Buffer.from("altéré")); await refreshTaresFromR2(); expect(getMcpFreshness().tares.lastError).toContain("Empreinte"); });
   it("ne charge pas une ancienne version si une nouvelle arrive pendant la lecture", async () => { const old = await zip(csv()), latest = await zip(csv(6_000, "Nouveau")); record(old); let resolve!: (bytes: Buffer) => void; download.mockImplementationOnce(() => new Promise<Buffer>(r => { resolve = r; })).mockResolvedValue(latest); const loading = refreshTaresFromR2(); await vi.waitFor(() => expect(download).toHaveBeenCalledOnce()); record(latest, "2026.09.25.2"); resolve(old); await loading; expect(getTares().version).toBe("2026.09.25.2"); expect(getTares().rows[0].designation_fr).toBe("Nouveau"); });
+  it("deux lecteurs obtiennent une archive complète sans laisser de fichier temporaire", async () => {
+    const bytes = await zip(csv()); const info = { r2_key: "tares/2026.09.25/tares.zip", sha256: createHash("sha256").update(bytes).digest("hex"), size_bytes: bytes.length };
+    download.mockResolvedValue(bytes); const loaded = await Promise.all([readTaresArchive(info), readTaresArchive(info)]);
+    expect(loaded[0]).toEqual(bytes); expect(loaded[1]).toEqual(bytes);
+    expect(readdirSync(join(temp, "bronze/tares")).filter(n => n.endsWith(".tmp"))).toEqual([]);
+  });
   it("borne aussi la taille décompressée du fichier lu", async () => { const bytes = await zip("x".repeat(200)); await expect(extractCsvFromZip(bytes, "tares.csv", 100)).rejects.toThrow("volumineux"); });
 });
