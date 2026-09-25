@@ -1,0 +1,29 @@
+{
+  "version": "2026.09.25",
+  "collected_on": "2026-09-25",
+  "registry_rows": 2943,
+  "unique_uids": 2748,
+  "warning_rows": 2345,
+  "populated_fields": {
+    "uid": 2858,
+    "lei": 783,
+    "licence_date": 0,
+    "status": 0,
+    "canton": 674,
+    "city": 2943,
+    "address": 783
+  },
+  "history": {
+    "available_from": "2026-06-26",
+    "available_until": "2026-09-25",
+    "snapshots": 61,
+    "gaps": [
+      {
+        "from": "2026.08.24",
+        "to": "2026.09.25",
+        "days": 32
+      }
+    ],
+    "interpretation": "Changements observés entre deux versions ; la date exacte du changement à la source peut être antérieure. Une autorisation retirée du fichier n'est pas une décision de sanction."
+  }
+}
