@@ -1,7 +1,7 @@
 import { mkdirSync, rmSync, existsSync, createWriteStream, readFileSync, statSync, writeFileSync, copyFileSync } from "node:fs";
 import { join } from "node:path";
 import archiver from "archiver";
-import XLSX from "xlsx";
+import XLSX from "../shared/xlsx.js";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";

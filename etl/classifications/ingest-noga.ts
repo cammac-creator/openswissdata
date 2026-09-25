@@ -1,4 +1,4 @@
-import XLSX from "xlsx";
+import XLSX from "../shared/xlsx.js";
 import type { NomenclatureRow, NomenclatureScheme, NomenclatureLevel } from "./types.js";
 
 const { readFile, utils } = XLSX;

@@ -152,7 +152,7 @@ Activation : `CLASSIFICATIONS_TIER=pro` (default = `standard`, qui ne livre pas 
 
 | Champ | Valeur |
 |---|---|
-| Modèle | `Xenova/paraphrase-multilingual-mpnet-base-v2` (sentence-transformers, ONNX/WASM via `@xenova/transformers`) |
+| Modèle | `Xenova/paraphrase-multilingual-mpnet-base-v2` (sentence-transformers, ONNX/WASM via `@huggingface/transformers`) |
 | Dimensions | 768 |
 | Pooling | Mean-pooled |
 | Normalisation | L2 (cosine = dot product) |

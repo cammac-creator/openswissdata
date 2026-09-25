@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, rmSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import xlsx from "xlsx";
+import xlsx from "../../etl/shared/xlsx.js";
 import { downloadAllSources } from "../../etl/tares/sources.js";
 import { parseDutyRates } from "../../etl/tares/parse-bazg-xlsx.js";
 let temp: string;

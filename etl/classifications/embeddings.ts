@@ -1,3 +1,4 @@
+import { createEmbeddingExtractor, EMBEDDING_REVISION } from "../../src/lib/embedding-model.js";
 /**
  * NOGA 2025 embeddings — pre-computed multilingual semantic vectors per code.
  *
@@ -11,7 +12,7 @@
  *   - One vector per NOGA 2025 code, FR description only (most-used language)
  *   - Model: `Xenova/paraphrase-multilingual-mpnet-base-v2` (sentence-transformers,
  *     768 dimensions, mean-pooled + L2-normalised, 50+ langues including FR/DE/IT/EN)
- *   - Local inference via `@xenova/transformers` (ONNX/WASM, runs in Node)
+ *   - Local inference via `@huggingface/transformers` (ONNX/WASM, runs in Node)
  *   - Resumable cache (`embeddings-cache-fr.json`) so a crashed run resumes
  *     instead of recomputing 4-6 minutes of CPU work
  *   - Reuses the exact setup proven in `etl/tares/embeddings.ts` (T1)
@@ -47,12 +48,8 @@ export interface GenerateEmbeddingsOptions {
 }
 
 export const NOGA_EMBEDDING_MODEL = "Xenova/paraphrase-multilingual-mpnet-base-v2";
-/**
- * Model "version" — short fingerprint that lets buyers detect when we change models.
- * NOT a cryptographic hash of the weights; just "<repo>@<readable-tag>" so consumers
- * can compare across releases. Bumped manually whenever we change the model.
- */
-export const NOGA_EMBEDDING_MODEL_VERSION = "Xenova/paraphrase-multilingual-mpnet-base-v2@2024-04";
+/** La reprise exige la même révision de poids et le même moteur de calcul. */
+export const NOGA_EMBEDDING_MODEL_VERSION = `${NOGA_EMBEDDING_MODEL}@${EMBEDDING_REVISION}:transformers-3.8.1:q8:mean-l2`;
 export const NOGA_EMBEDDING_DIMENSIONS = 768;
 
 /** Pick the description for the requested language, with a fallback so we never emit empty text. */
@@ -103,6 +100,7 @@ function loadCache(path: string): CacheShape | null {
       raw &&
       typeof raw === "object" &&
       raw.model === NOGA_EMBEDDING_MODEL &&
+      raw.model_version === NOGA_EMBEDDING_MODEL_VERSION &&
       raw.dimensions === NOGA_EMBEDDING_DIMENSIONS &&
       raw.entries &&
       typeof raw.entries === "object"
@@ -169,24 +167,8 @@ export async function generateNogaEmbeddings(
     // Skip the heavyweight model load entirely when everything is cached.
     log(`[noga-embeddings] all embeddings cached, skipping inference (no model load)`);
   } else {
-    // Lazy import: @xenova/transformers is a heavyweight dependency we only need
-    // at ETL time, never at server runtime. Importing it eagerly would slow down
-    // every tsx invocation in the repo. We also keep it INSIDE the inference branch
-    // so warm-cache runs (and tests that prime the cache) don't pay the model load.
-    // @ts-expect-error — package exports CJS named exports without bundled types
-    const { pipeline, env } = await import("@xenova/transformers");
-    // @ts-expect-error — env shape exposed by transformers.js at runtime
-    env.allowRemoteModels = true;
-    // @ts-expect-error — env shape exposed by transformers.js at runtime
-    env.allowLocalModels = true;
-
-    log(`[noga-embeddings] loading model ${NOGA_EMBEDDING_MODEL}...`);
-    // `feature-extraction` returns the last hidden state; we ask for mean-pooling
-    // + L2 normalisation so the output is directly comparable with cosine.
-    // @ts-expect-error — pipeline() typing relaxed in @xenova/transformers v2
-    const extractor = await pipeline("feature-extraction", NOGA_EMBEDDING_MODEL, {
-      quantized: true, // quantised ONNX is ~4x faster on CPU and quality is fine for our use case
-    });
+    // Même modèle figé que celui utilisé pour les requêtes MCP.
+    const extractor = await createEmbeddingExtractor();
     log(`[noga-embeddings] model loaded`);
 
     const startedAt = Date.now();

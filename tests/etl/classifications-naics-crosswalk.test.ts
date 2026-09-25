@@ -8,7 +8,7 @@ import type { NomenclatureRow } from "../../etl/classifications/types.js";
 import { mkdtempSync, rmSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import XLSX from "xlsx";
+import XLSX from "../../etl/shared/xlsx.js";
 
 /* ------------------------------------------------------------------ *
  * Fixture builders

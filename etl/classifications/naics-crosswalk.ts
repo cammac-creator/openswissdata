@@ -32,7 +32,7 @@
 
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
-import XLSX from "xlsx";
+import XLSX from "../shared/xlsx.js";
 import type { NomenclatureRow } from "./types.js";
 
 /* ------------------------------------------------------------------ *
