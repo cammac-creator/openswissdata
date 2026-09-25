@@ -38,7 +38,7 @@ export function buildHistory(snapshots: FinmaSnapshot[], current: FinmaSnapshot)
   const changes: DeltaChange[] = [];
   const gaps: { from: string; to: string; days: number }[] = [];
   // Comparer uniquement les champs FINMA : ajouter GLEIF n'est pas un changement d'autorisation.
-  const sourceRows = (rows: FinmaEntity[]) => rows.map(row => ({ ...row, address: row.address_source_url ? undefined : row.address }));
+  const sourceRows = (rows: FinmaEntity[]) => rows.map(row => ({ ...row, name: row.name.replaceAll('"', ""), address: row.address_source_url ? undefined : row.address }));
   for (let i = 1; i < ordered.length; i++) {
     const before = ordered[i - 1], after = ordered[i];
     const observed = versionDate(after.version);
