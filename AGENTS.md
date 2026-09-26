@@ -106,6 +106,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Node >=22.12 ; CI/Railway sur Node 22. `README.md` décrit les commandes actuelles et les frontières entre application, ETL, données distribuées et fiches publiques.
 - Les clés de test sont éphémères et passées explicitement à la signature. Aucun remplacement, même temporaire, de `packages/schemas/openswissdata.pubkey.ed25519`. Ne pas injecter une clé de test dans l’environnement global d’une collecte.
 - `db:migrate` appelle le schéma et les migrations idempotentes de `getDb` ; l’ancienne migration Business manuelle n’est pas incluse. Base fictive et chemin distinct obligatoires pour les essais.
+- Ne pas lancer les tests racine en même temps que `npm run build` : le build réinstalle les dépendances Astro et peut faire disparaître temporairement son tsconfig. Terminer les tests avant le build, ou utiliser deux copies distinctes.
 - La CI exige des fichiers suivis inchangés après les tests. Les secrets et bases réels ne sont pas nécessaires au typage, aux tests ou au build.
 
 ## Chronologie du service — 26.09.2026
@@ -119,3 +120,8 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Les cinq familles sont servies localement, fichiers WOFF2 officiels inchangés et empreintes produites par Astro. Aucun téléchargement de police au build ni connexion du navigateur à Google Fonts.
 - Les provenances et SHA sont dans `web/src/assets/fonts/provenance.json`, les licences OFL sont distribuées dans `/fonts/licenses/`. Le contrôle `fonts:check`, obligatoire après le build, vérifie les octets, les licences, les liens CSS et l’absence d’appels Google Fonts.
 - Importer `fonts-geist.css` dans les nouveaux gabarits qui utilisent Geist. Ne pas rétablir de domaine tiers dans `style-src` ou `font-src` pour charger une police.
+
+## Diagnostic des dépendances — 26.09.2026
+- `/api/health/deep` est privé, exige la session administrateur et ne retourne aucun message fournisseur brut. Le bouton de l’espace Automatisations le déclenche à la demande ; aucun appel profond au chargement du CRM.
+- Une seule vérification simultanée par processus, cache de 60 secondes y compris les échecs, délai de 3 secondes par dépendance. Stripe : délai SDK 2,5 secondes et aucune relance ; R2 : une tentative, signal d’annulation et client détruit.
+- Les moniteurs publics utilisent `/ready` (base et site) et `/freshness` (FINMA), sans appel à un fournisseur. Une vérification de connexion réussie ne prouve ni livraison, ni droits, ni téléchargement complet. Le cache n’est pas partagé entre réplicas ; réévaluer avant de multiplier les instances.
