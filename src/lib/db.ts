@@ -37,6 +37,9 @@ export function getDb(path?: string): Database.Database {
   ensureColumn(db, "orders", "refunded_chf", "INTEGER NOT NULL DEFAULT 0");
   ensureColumn(db, "orders", "dispute_status", "TEXT");
   ensureColumn(db, "orders", "financial_checked_at", "INTEGER");
+  ensureColumn(db, "order_deliveries", "provider_message_id", "TEXT");
+  ensureColumn(db, "download_tokens", "activity_id", "INTEGER REFERENCES download_activity(id) ON DELETE SET NULL");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_download_tokens_activity ON download_tokens(activity_id)");
   migrateOrderRights(db);
   // UNIQUE (partial) so a given Stripe subscription can back at most one client.
   // Partial → multiple NULLs (free/registered clients) remain allowed. Turns a

@@ -107,3 +107,10 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Les clés de test sont éphémères et passées explicitement à la signature. Aucun remplacement, même temporaire, de `packages/schemas/openswissdata.pubkey.ed25519`. Ne pas injecter une clé de test dans l’environnement global d’une collecte.
 - `db:migrate` appelle le schéma et les migrations idempotentes de `getDb` ; l’ancienne migration Business manuelle n’est pas incluse. Base fictive et chemin distinct obligatoires pour les essais.
 - La CI exige des fichiers suivis inchangés après les tests. Les secrets et bases réels ne sont pas nécessaires au typage, aux tests ou au build.
+
+## Chronologie du service — 26.09.2026
+- `download_activity` conserve au plus 180 jours de traces minimales : compte, produit, version, origine et dates ; aucun lien secret, IP ou contenu de mail. Les liens email sont rattachés à leur commande ; les accès du compte ne sont pas attribués arbitrairement à un achat. Aucun remplissage rétroactif.
+- Un HTTP 2xx Resend prouve l’acceptation de la demande, pas la livraison/lecture. Son identifiant est conservé dans `order_deliveries`, puis effacé après 180 jours. Un corps 2xx illisible ne déclenche jamais un second envoi.
+- Une prévisualisation GET du nouveau lien ne produit pas de trace d’utilisation. Une autorisation réussie ne prouve ni identité du lecteur, ni téléchargement complet, ni ouverture du fichier. Les anciens liens GET peuvent être consultés par des robots.
+- Le CRM expose uniquement les métadonnées nécessaires ; les liens de connexion/livraison sont masqués avant affichage. Les originaux des connecteurs restent bruts, chiffrés dans le bronze autorisé, avec purge distincte.
+- Retour arrière : garder une version de nettoyage compatible avec `download_activity` et `provider_message_id`. Ne pas désactiver leur purge en restaurant l’ancien code. Un futur effacement de compte doit traiter ces traces avec les autres clés étrangères ; aucun effacement de compte/commande automatique n’existe actuellement.

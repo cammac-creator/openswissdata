@@ -28,14 +28,14 @@ async function deliver(id: number): Promise<void> {
   })();
   if (!job) return;
 
-  const finish = (state: string, error: string | null, sent = false) => {
+  const finish = (state: string, error: string | null, sent = false, providerId: string | null = null) => {
     const delay = Math.min(3600_000, 60_000 * 2 ** Math.min(job.attempts - 1, 6));
     const clear = ["sent", "review", "cancelled"].includes(state) ? 1 : 0;
-    db.prepare(`UPDATE order_deliveries SET state=?,last_error=?,lease_until=NULL,next_attempt_at=?,sent_at=?,
+    db.prepare(`UPDATE order_deliveries SET state=?,last_error=?,lease_until=NULL,next_attempt_at=?,sent_at=?,provider_message_id=COALESCE(?,provider_message_id),
       payload_json=CASE WHEN ?=1 THEN NULL ELSE payload_json END,
       download_token=CASE WHEN ?=1 THEN NULL ELSE download_token END
       WHERE id=? AND state='processing' AND attempts=?`)
-      .run(state, error, Date.now() + delay, sent ? Date.now() : null, clear, clear, id, job.attempts);
+      .run(state, error, Date.now() + delay, sent ? Date.now() : null, providerId, clear, clear, id, job.attempts);
   };
   try {
     const financialPending = db.prepare(`SELECT 1 FROM stripe_financial_jobs f JOIN orders o
@@ -65,20 +65,24 @@ async function deliver(id: number): Promise<void> {
         termsUrl: attachment && legal.url ? base + legal.url : undefined });
       if (attachment) payload.attachments = [attachment];
       db.transaction(() => {
-        db.prepare(`INSERT INTO download_tokens(token,customer_id,dataset_id,version,expires_at,created_at) VALUES(?,?,?,?,?,?)`)
-          .run(token, job.customer_id, job.dataset_id, version.version, now + TOKEN_TTL_MS, now);
-        db.prepare("UPDATE order_deliveries SET payload_json=?,download_token=?,first_attempt_at=? WHERE id=? AND state='processing' AND attempts=?")
+        const activity = db.prepare(`INSERT INTO download_activity(customer_id,dataset_id,version,order_id,source,created_at) VALUES(?,?,?,?,'email',?)`)
+          .run(job.customer_id, job.dataset_id, version.version, job.order_id, now);
+        db.prepare(`INSERT INTO download_tokens(token,customer_id,dataset_id,version,expires_at,created_at,activity_id) VALUES(?,?,?,?,?,?,?)`)
+          .run(token, job.customer_id, job.dataset_id, version.version, now + TOKEN_TTL_MS, now, Number(activity.lastInsertRowid));
+        const prepared = db.prepare("UPDATE order_deliveries SET payload_json=?,download_token=?,first_attempt_at=? WHERE id=? AND state='processing' AND attempts=?")
           .run(JSON.stringify(payload), token, now, id, job.attempts);
-      })();
+        if (prepared.changes !== 1) throw new Error("delivery_lease_lost");
+      }).immediate();
     }
 
     const result = await sendPreparedEmail(payload, `osd-download-${job.stripe_session_id}-${job.dataset_id}`);
     if (result.sent) {
-      finish("sent", null, true);
+      finish("sent", null, true, result.providerId ?? null);
     } else {
       if (job.first_attempt_at === null && (result.reason === "no_api_key" || result.reason === "placeholder_key")) {
         // Aucun appel externe : le prochain essai peut préparer un nouveau lien de 48 h.
         db.transaction(() => {
+          db.prepare("DELETE FROM download_activity WHERE id=(SELECT activity_id FROM download_tokens WHERE token=(SELECT download_token FROM order_deliveries WHERE id=? AND state='processing' AND attempts=?))").run(id, job.attempts);
           db.prepare("DELETE FROM download_tokens WHERE token=(SELECT download_token FROM order_deliveries WHERE id=? AND state='processing' AND attempts=?)").run(id, job.attempts);
           db.prepare("UPDATE order_deliveries SET payload_json=NULL,download_token=NULL,first_attempt_at=NULL WHERE id=? AND state='processing' AND attempts=?").run(id, job.attempts);
         })();

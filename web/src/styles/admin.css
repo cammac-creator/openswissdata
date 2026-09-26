@@ -13,3 +13,16 @@
 
 /* Les états restent compacts, même si la description occupe plusieurs lignes. */
 .flow-row>.pill{align-self:flex-start}.flow-row>div{min-width:0}
+
+/* Chronologie factuelle des commandes, lisible aussi dans la fiche mobile. */
+.service-history{margin:12px 0 22px;border:1px solid var(--line,#dedfd7);border-radius:14px;background:#fafbf8;padding:0 16px 12px;overflow-wrap:anywhere}
+.service-history summary{cursor:pointer;font-weight:650;padding:16px 0;min-height:44px;display:list-item;box-sizing:border-box}
+.service-history summary:focus-visible{outline:3px solid #b76c29;outline-offset:3px}
+.service-timeline{list-style:none;margin:6px 0 16px;padding:0}
+.service-timeline li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:12px;padding:9px 0;position:relative}
+.service-timeline li:not(:last-child)::before{content:"";position:absolute;left:5px;top:25px;bottom:-8px;width:1px;background:#d2dcd5}
+.service-dot{margin-top:7px;width:11px;height:11px;border-radius:50%;background:#35715b}
+.service-alert{background:#b46e2d}
+.service-timeline strong{font-size:14px;color:#243d32}
+.service-timeline p{margin:4px 0;font-size:13px;color:#536358;line-height:1.5}
+.service-timeline .text-button{min-height:44px;text-align:left;white-space:normal}

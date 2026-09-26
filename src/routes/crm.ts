@@ -1,3 +1,4 @@
+import { orderService, accountDownloadHistory } from "../lib/customer-service.js";
 import { orderLegalSummary } from "../lib/order-legal.js";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -65,8 +66,7 @@ crmRoute.get("/customers/:id", c => {
   const entitlements = db.prepare("SELECT e.dataset_id,e.updates_until,d.current_version FROM entitlements e JOIN datasets d ON d.id=e.dataset_id WHERE e.customer_id=?").all(id);
   const notes = db.prepare("SELECT id,body,created_at FROM crm_notes WHERE customer_id=? ORDER BY created_at DESC").all(id);
   const tasks = db.prepare("SELECT * FROM crm_tasks WHERE customer_id=? ORDER BY done_at IS NOT NULL,due_on,created_at DESC").all(id);
-  const downloads = db.prepare("SELECT dataset_id,version,created_at,used_at FROM download_tokens WHERE customer_id=? ORDER BY created_at DESC LIMIT 30").all(id);
-  return c.json({ customer, orders: (orders as Array<{id:number}>).map(order => ({ ...order, legal: orderLegalSummary(db, order.id) })), entitlements, notes, tasks, downloads });
+  return c.json({ customer, orders: (orders as Array<{id:number}>).map(order => ({ ...order, service: orderService(db, id, order.id), legal: orderLegalSummary(db, order.id) })), entitlements, notes, tasks, account_downloads: accountDownloadHistory(db, id) });
 });
 crmRoute.patch("/customers/:id", async c => {
   if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);
