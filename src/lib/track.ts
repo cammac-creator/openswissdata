@@ -1,4 +1,5 @@
-import { createHash } from "node:crypto";
+import { visitorHashFromRequest } from './visitor-identity.js';
+export { visitorHashFromRequest } from './visitor-identity.js';
 import type { Context, MiddlewareHandler } from "hono";
 import { getDb } from "./db.js";
 import { queueEvent, reportEventFailure } from "./event-budget.js";
@@ -6,24 +7,16 @@ import { queueEvent, reportEventFailure } from "./event-budget.js";
 /**
  * Mesures du bureau : l’origine décrit qui a enregistré la trace.
  * « server » atteste une observation applicative, pas la présence d’un humain.
- * Les identifiants temporaires sont pseudonymes et tournent encore à minuit UTC.
+ * Les identifiants temporaires sont pseudonymes et tournent à minuit en Suisse depuis le format v2.
  * L’écriture différée reste facultative ; une panne de mesure ne bloque pas le service.
  */
 
 export type { TrackArgs } from './event-types.js';
 import type { TrackArgs } from './event-types.js';
 
-export function track(args: TrackArgs): void {
-  try { queueEvent(getDb(), args, Date.now()); }
+export function track(args: TrackArgs, timestamp = Date.now()): void {
+  try { queueEvent(getDb(), args, timestamp); }
   catch { reportEventFailure(); }
-}
-
-export function visitorHashFromRequest(c: Context): string {
-  const ip = (c.req.header("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
-  const ua = c.req.header("user-agent") ?? "";
-  const salt = process.env.SESSION_SECRET ?? "dev-salt";
-  const day = new Date().toISOString().slice(0, 10);
-  return createHash("sha256").update(`${ip}|${ua}|${salt}|${day}`).digest("hex").slice(0, 24);
 }
 
 export function countryFromRequest(c: Context): string | null {
@@ -85,6 +78,7 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
     customer_id = null;
   }
 
+  const recordedAt = Date.now();
   track({
     kind: "api_request",
     origin: 'server',
@@ -93,11 +87,11 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
     status: c.res.status,
     duration_ms,
     customer_id,
-    visitor_hash: visitorHashFromRequest(c),
+    visitor_hash: visitorHashFromRequest(c, recordedAt),
     country: countryFromRequest(c),
     referer: refererOrigin(c),
     ua_class: uaClassFromRequest(c),
-  });
+  }, recordedAt);
 };
 
 // Pages publiques servies : mesure séparée des appels API, sans paramètres d'URL.
@@ -109,5 +103,6 @@ export const trackPageView: MiddlewareHandler = async (c, next) => {
   if (/^\/(api|admin|account|_astro)(\/|$)/.test(path) || /^\/(en|de)\/account/.test(path)) return;
   const referer = refererOrigin(c);
   const own = referer && /\/(www\.)?openswissdata\.com$/.test(referer);
-  track({ kind: "custom", name: "page_view", origin: 'server', visitor_hash: visitorHashFromRequest(c), ua_class: uaClassFromRequest(c), country: countryFromRequest(c), referer: own ? null : referer, meta_json: JSON.stringify({ path }) });
+  const recordedAt = Date.now();
+  track({ kind: "custom", name: "page_view", origin: 'server', visitor_hash: visitorHashFromRequest(c, recordedAt), ua_class: uaClassFromRequest(c), country: countryFromRequest(c), referer: own ? null : referer, meta_json: JSON.stringify({ path }) }, recordedAt);
 };

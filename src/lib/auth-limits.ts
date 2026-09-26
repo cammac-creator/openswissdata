@@ -1,8 +1,7 @@
 import { createHmac } from 'node:crypto';
-import { isIP } from 'node:net';
 import type Database from 'better-sqlite3';
 import type { Context } from 'hono';
-import { getConnInfo } from '@hono/node-server/conninfo';
+import { abuseIp, trustedRequestIp } from './request-ip.js';
 
 export const AUTH_EMAIL_REFILL_MS = 12 * 60_000;
 const MAX_IDENTITIES = { ip: 10_000, email: 200_000 } as const;
@@ -26,35 +25,10 @@ export function reportAuthLimitFailure(error: unknown): void {
   console.warn(`[connexion] protection temporairement indisponible : ${reason}`);
 }
 
-/** Un même préfixe IPv6 /64 partage la limite, comme les utilisateurs derrière un NAT IPv4. */
-export function normalizeAuthIp(value: string): string {
-  if (value.length > 64 || value.includes('%')) return 'unknown';
-  if (isIP(value) === 4) return value;
-  if (isIP(value) !== 6) return 'unknown';
-  try {
-    const address = new URL(`http://[${value}]/`).hostname.slice(1, -1);
-    const [head, tail] = address.split('::');
-    const left = head ? head.split(':') : [], right = tail ? tail.split(':') : [];
-    const words = (tail === undefined ? left : [...left, ...Array(8 - left.length - right.length).fill('0'), ...right]).map(x => parseInt(x, 16));
-    if (words.length !== 8 || words.some(x => !Number.isInteger(x))) return 'unknown';
-    if (words.slice(0, 5).every(x => x === 0) && words[5] === 0xffff) {
-      return [words[6] >> 8, words[6] & 255, words[7] >> 8, words[7] & 255].join('.');
-    }
-    return words.slice(0, 4).map(x => x.toString(16)).join(':') + '::/64';
-  } catch { return 'unknown'; }
-}
-
-/** Le proxy HTTP Railway fournit X-Real-IP ; aucun préfixe X-Forwarded-For n’est cru. */
+/** Conserver le préfixe /64 des limites existantes, sans réduire l’adresse des visiteurs. */
+export const normalizeAuthIp = abuseIp;
 export function authRequestIp(c: Context): string {
-  if (process.env.RAILWAY_ENVIRONMENT_ID) {
-    const value = c.req.header('x-real-ip')?.trim() ?? '';
-    return normalizeAuthIp(value);
-  }
-  // Hors de ce déploiement, utiliser la connexion réelle, jamais un en-tête libre.
-  try {
-    const value = getConnInfo(c).remote.address ?? '';
-    return normalizeAuthIp(value);
-  } catch { return 'unknown'; }
+  return abuseIp(trustedRequestIp(c) ?? '');
 }
 
 function identityKey(scope: Scope, identity: string): string {

@@ -70,16 +70,17 @@ eventsRoute.post("/track", async (c) => {
     meta_json = s;
   }
 
+  const recordedAt = Date.now();
   track({
     kind: body.kind,
     origin: 'client',
     name: body.name,
-    visitor_hash: visitorHashFromRequest(c),
+    visitor_hash: visitorHashFromRequest(c, recordedAt),
     country: countryFromRequest(c),
     referer: refererOrigin(c),
     ua_class: uaClassFromRequest(c),
     meta_json,
-  });
+  }, recordedAt);
 
   return c.json({ ok: true });
 });
