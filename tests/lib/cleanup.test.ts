@@ -114,10 +114,10 @@ describe('Conservation appliquée et témoin du nettoyage', () => {
   it('ne laisse pas un ancien témoin vert masquer une tâche désactivée ou un échec plus récent', async () => {
     const proof = await runFullCleanup(getDb(), NOW);
     const items = [{ id: 1, state: 'disabled_inactivity', html_url: 'https://github.com/example/repo/actions/workflows/cleanup-expired.yml' }];
-    expect(renderCleanupStatus(proof, NOW, cleanupSchedule({ available: true, items }))).toContain('Programmation à vérifier');
+    expect(renderCleanupStatus(proof, NOW, cleanupSchedule({ available: true, items }))).toContain('Contrôle extérieur à réactiver');
     items[0].state = 'active';
     const schedule = cleanupSchedule({ available: true, items, runs: [{ workflow_id: 1, created_at: new Date(NOW + 1).toISOString(), status: 'completed', conclusion: 'failure' }] });
-    expect(renderCleanupStatus(proof, NOW + 2, schedule)).toContain('Dernière exécution en échec');
+    expect(renderCleanupStatus(proof, NOW + 2, schedule)).toContain('Contrôle extérieur en échec');
     expect(cleanupSchedule({ available: false })).toBeUndefined();
   });
   it('ne suit pas les liens symboliques et ignore les noms non datés ou impossibles', async () => {
