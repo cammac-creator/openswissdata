@@ -1,0 +1,27 @@
+name: Surveillance publique extérieure
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: surveillance-publique
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1, version figée
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/monitor-public.mjs
+          sparse-checkout-cone-mode: false
+      - name: Contrôler le service public sans secret métier
+        env:
+          MONITOR_BRONZE_DIR: ${{ runner.temp }}/bronze/monitor-${{ github.run_id }}-${{ github.run_attempt }}
+        run: node scripts/monitor-public.mjs

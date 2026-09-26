@@ -28,6 +28,19 @@ describe('Bureau privé et suivi client',()=>{
   expect(getDb().prepare('SELECT COUNT(*) AS n FROM crm_tasks').get()).toEqual({n:0});
  });
  it('exclut propriétaire, tests et remboursements des ventes',async()=>{const r=await createApp().request('/api/admin/crm/overview',{headers});const body=await r.json();expect(r.status).toBe(200);expect(r.headers.get('cache-control')).toBe('private, no-store');expect(body.revenue).toEqual({orders:1,customers:1,revenue_cents:29900});expect(body.customers.find((c:{id:number})=>c.id===admin).internal).toBe(true);expect(JSON.stringify(body)).not.toContain(token)});
+ it('lit cent passages de main et garde la provenance horaire sans publier le contenu tiers brut',async()=>{
+  const run={id:9,workflow_id:4,name:'Surveillance publique extérieure',status:'completed',conclusion:'success',created_at:new Date().toISOString(),updated_at:new Date().toISOString(),event:'schedule',head_branch:'main',html_url:'https://github.com/cammac-creator/openswissdata/actions/runs/9',private_extra:'ne_pas_transmettre'};
+  const fetcher=vi.fn(async(input:RequestInfo|URL)=>String(input).includes('/runs?')?Response.json({workflow_runs:[run]}):Response.json({workflows:[{id:4,name:run.name,path:'.github/workflows/monitor-public.yml',state:'active',html_url:'https://github.com/cammac-creator/openswissdata/actions/workflows/monitor-public.yml'}]}));vi.stubGlobal('fetch',fetcher);
+  const r=await createApp().request('/api/admin/crm/operations',{headers}),body=await r.json();
+  expect(r.status).toBe(200);expect(body.workflows.available).toBe(true);expect(body.workflows.items[0].path).toBe('.github/workflows/monitor-public.yml');expect(body.workflows.runs[0].event).toBe('schedule');expect(body.workflows.runs[0].head_branch).toBe('main');expect(body.workflows.runs[0].updated_at).toBe(run.updated_at);expect(JSON.stringify(body)).not.toContain('ne_pas_transmettre');
+  expect(fetcher.mock.calls.map(args=>String(args[0]))).toContain('https://api.github.com/repos/cammac-creator/openswissdata/actions/runs?per_page=100&branch=main');
+  await createApp().request('/api/admin/crm/operations',{headers});expect(fetcher).toHaveBeenCalledTimes(2);
+ });
+ it('met aussi en cache une indisponibilité GitHub pour ne pas aggraver sa limitation',async()=>{
+  const fetcher=vi.fn(async()=>new Response('',{status:403}));vi.stubGlobal('fetch',fetcher);
+  for(let i=0;i<3;i++){const r=await createApp().request('/api/admin/crm/operations',{headers});expect(r.status).toBe(200);expect((await r.json()).workflows.available).toBe(false)}
+  expect(fetcher).toHaveBeenCalledTimes(2);
+ });
  it('déduit les remboursements partiels et sépare une contestation des ventes',async()=>{
   const db=getDb(),app=createApp();db.prepare("UPDATE orders SET refunded_chf=5000 WHERE stripe_session_id='cs_live_buyer'").run();
   const partial=await(await app.request('/api/admin/crm/overview',{headers})).json();

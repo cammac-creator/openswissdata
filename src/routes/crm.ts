@@ -1,3 +1,4 @@
+import { readCrmWorkflows } from '../lib/crm-workflows.js';
 import {readDeliveryIncidentPage,readDeliveryIncidentEvents} from '../lib/delivery-incidents.js';
 import { customerPage, customerProfiles, internalEmails, prepareCustomerFunctions, searchText } from '../lib/crm-customers.js';
 import { isCalendarDate } from '../lib/calendar-date.js';
@@ -11,7 +12,7 @@ import { z } from "zod";
 import { bodyLimit } from "hono/body-limit";
 import { getDb } from "../lib/db.js";
 import { requireAdmin } from "../lib/admin-middleware.js";
-import { cached, sourceJson, searchConsole } from "../lib/crm-source.js";
+import { cached, searchConsole } from "../lib/crm-source.js";
 import { customerLanguage, setCustomerLanguage } from "../lib/crm-language.js";
 import { isLanguage } from "../lib/languages.js";
 import { crmMailRoute } from "./crm-mail.js";
@@ -163,11 +164,7 @@ crmRoute.get("/operations", async c => {
   const checks = readBackupChecks(db);
   let workflows: { available: boolean; checked_at?: number; items?: unknown[]; runs?: unknown[] } = { available: false };
   try {
-    workflows = await cached("workflows", 600_000, async () => {
-      const base = "https://api.github.com/repos/cammac-creator/openswissdata/actions", headers = { Accept: "application/vnd.github+json", "User-Agent": "OpenSwissData-dashboard" };
-      const [flow, runs] = await Promise.all([sourceJson<{ workflows: Array<{ id: number; name: string; state: string; html_url: string }> }>("github", `${base}/workflows`, { headers }), sourceJson<{ workflow_runs: Array<{ id: number; workflow_id: number; name: string; status: string; conclusion: string | null; created_at: string; html_url: string }> }>("github", `${base}/runs?per_page=30`, { headers })]);
-      return { available: true, checked_at: Date.now(), items: flow.workflows.map(({ id, name, state, html_url }) => ({ id, name, state, html_url })), runs: runs.workflow_runs.map(({ id, workflow_id, name, status, conclusion, created_at, html_url }) => ({ id, workflow_id, name, status, conclusion, created_at, html_url })) };
-    });
+    workflows = await cached("workflows", 600_000, readCrmWorkflows);
   } catch { /* L'indisponibilité reste visible, aucun succès n'est inventé. */ }
   return c.json({ checked_at: Date.now(), datasets, checks, cleanup: readCleanupProof(db), incidents:(()=>{try{return readDeliveryIncidentPage(db,'open',1)}catch{return null}})(), workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
 });
