@@ -1,4 +1,5 @@
 ---
+import CheckoutNotice from "../../components/CheckoutNotice.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import HSLookup from "../../components/HSLookup.astro";
 import TrustStrip from "../../components/TrustStrip.astro";
@@ -267,6 +268,7 @@ const productJsonLd = {
           <span class="arrow">→</span>
         </button>
       </form>
+      <CheckoutNotice />
       <p class="ds-cta-sub">Paiement sécurisé Stripe · Téléchargement immédiat par email · Remboursement 14 jours sans condition</p>
       <p class="ds-cta-alt">Ou prenez le <a href="/bundle">bundle complet (TARES + Classifications + FINMA) à 797 CHF</a> — économie 200 CHF (20 %).</p>
     </div>

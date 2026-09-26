@@ -1,4 +1,5 @@
 ---
+import CheckoutNotice from "../../../components/CheckoutNotice.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import HSLookup from "../../../components/HSLookup.astro";
 import TrustStrip from "../../../components/TrustStrip.astro";
@@ -241,6 +242,7 @@ const productJsonLd = {
           <span class="arrow">→</span>
         </button>
       </form>
+      <CheckoutNotice />
       <p class="ds-cta-sub">Secure Stripe payment · Immediate download by email · 14-day refund, no questions asked</p>
       <p class="ds-cta-alt">Or take the <a href="/en/bundle">complete bundle (TARES + Classifications + FINMA) for 797 CHF</a> — save 200 CHF (20%).</p>
     </div>

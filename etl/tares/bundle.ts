@@ -1,3 +1,4 @@
+import { datasetLicense } from "../shared/dataset-license.js";
 import { mkdirSync, rmSync, existsSync, createWriteStream, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import archiver from "archiver";
@@ -81,57 +82,7 @@ const TARES_JSON_SCHEMA = {
   },
 };
 
-const DATASET_LICENSE = `openswissdata.com — TARES Dataset License v1.0
-
-Copyright © 2026 Claude-Alain Martin · openswissdata.com
-
-═══════════════════════════════════════════════════════════════════
-OFFICIAL NOTICE — NON-OFFICIAL PUBLICATION / NICHT-OFFIZIELL / PUBLICATION NON OFFICIELLE
-═══════════════════════════════════════════════════════════════════
-
-DE: Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.
-
-FR: Ceci n'est pas une publication officielle. Seules les publications de la Chancellerie fédérale et de l'Office fédéral de la douane et de la sécurité des frontières BAZG font foi.
-
-EN: This is not an official publication. Only the publications of the Federal Chancellery and the Federal Office for Customs and Border Security (FOCBS) are authoritative.
-
-═══════════════════════════════════════════════════════════════════
-LICENSE
-═══════════════════════════════════════════════════════════════════
-
-This dataset is licensed, not sold.
-
-PERMITTED USES:
-- Commercial use within your organization
-- Derivation and transformation of FORM (format, encoding, indexing) ONLY
-- Integration into your products or services (without redistributing the raw dataset)
-
-PROHIBITED USES:
-- Modification of the data CONTENT (tariff codes, duties, preferential regimes, designations must not be altered)
-- Public redistribution of the dataset or substantial portions thereof
-- Resale of the dataset in original or modified form
-- Use of "Gebrauchszolltarif", "Tares", or similar denominations in a way that suggests this is an official BAZG publication
-- Redistribution of BAZG Erläuterungen (explanatory notes) or Entscheide (classification decisions) — these are excluded from this dataset by design
-- Use of BAZG logos, headers, or official branding
-
-ATTRIBUTION:
-Mandatory attribution in any derived product: the disclaimer above (DE/FR/EN) must be displayed verbatim, and users should be directed to https://xtares.admin.ch/ as the authoritative source.
-
-WARRANTY:
-The Federal Office for Customs and Border Security (BAZG) provides NO warranty, NO support, and NO interpretation assistance for this data. Errors arising from the use of this dataset or its derivatives cannot be invoked against customs clearance, duty collection, or criminal proceedings.
-openswissdata.com provides this dataset AS-IS with no warranty of accuracy or fitness for purpose.
-
-LIABILITY:
-Liability capped at the purchase price of this dataset. No liability for indirect, consequential, or incidental damages.
-
-GOVERNING LAW:
-Swiss law. Jurisdiction: Bern (for TARES-related disputes specifically, per BAZG requirement 2026-04-21).
-
-TERMINATION:
-License terminates automatically upon breach of any prohibited use.
-
-Contact: contact@openswissdata.com · Source: https://xtares.admin.ch/
-`;
+const DATASET_LICENSE = datasetLicense("tares");
 
 export interface BundleResult {
   zipPath: string;

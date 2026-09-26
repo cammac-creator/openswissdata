@@ -21,7 +21,7 @@ export default defineConfig({
     sitemap({
       filter: (page) => {
         const path = new URL(page).pathname.replace(/^\/(de|en)(?=\/|$)/, '');
-        return !/^\/(account|famille|admin|404)(\/|\.html|$)/.test(path) && !path.endsWith('.json');
+        return !/^\/(account|famille|admin|404)(\/|\.html|$)/.test(path) && !path.endsWith('.json') && !path.endsWith('.txt') && !/^\/legal\/(archives|versions)\//.test(path);
       },
       // Une date de build ne décrit pas la dernière modification du contenu.
       // Omettre lastmod tant qu'une date significative par page n'est pas disponible.

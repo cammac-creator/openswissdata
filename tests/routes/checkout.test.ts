@@ -58,8 +58,22 @@ describe("POST /api/checkout/session", () => {
       mode: "payment",
       customer_email: "alice@example.com",
       line_items: [{ price: "price_test_tares", quantity: 1 }],
-      metadata: { dataset_ids: "tares" },
+      metadata: expect.objectContaining({ dataset_ids: "tares", locale: "fr", terms_version: "2026-09-26", terms_locale: "fr" }),
+      consent_collection: { terms_of_service: "required" },
     }));
+  });
+
+  it.each(["fr","de","en"])("impose le contrat %s côté serveur et ignore les métadonnées forgées par le navigateur", async locale => {
+    const response = await createApp().request("/api/checkout/session", {
+      method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({dataset_ids:["finma"],locale,metadata:{terms_version:"faux",terms_sha256:"faux"},consent_collection:{terms_of_service:"none"}}),
+    });
+    expect(response.status).toBe(200);
+    const params = sessionCreateMock.mock.calls[0][0];
+    expect(params.consent_collection).toEqual({terms_of_service:"required"});
+    expect(params.metadata).toMatchObject({terms_version:"2026-09-26",terms_locale:locale,terms_sha256:expect.stringMatching(/^[a-f0-9]{64}$/)});
+    expect(params.custom_text.terms_of_service_acceptance.message).toContain(`https://www.openswissdata.com${locale === "fr" ? "" : "/"+locale}/legal/versions/2026-09-26/cgv`);
+    expect(params.custom_text.submit.message).toContain("14");
   });
 
   it("creates a session for multiple datasets", async () => {
@@ -97,7 +111,7 @@ describe("POST /api/checkout/session", () => {
     expect(call.invoice_creation).toBeUndefined();
   });
 
-  it("omits locale from params and metadata when not provided", async () => {
+  it("fixe le français si la langue est absente pour aligner le paiement et le contrat", async () => {
     const app = createApp();
     const res = await app.request("/api/checkout/session", {
       method: "POST",
@@ -106,8 +120,8 @@ describe("POST /api/checkout/session", () => {
     });
     expect(res.status).toBe(200);
     const call = sessionCreateMock.mock.calls[0][0];
-    expect(call.locale).toBeUndefined();
-    expect(call.metadata.locale).toBeUndefined();
+    expect(call.locale).toBe("fr");
+    expect(call.metadata.locale).toBe("fr");
   });
 
   it("uses bundle price when dataset_ids=['bundle']", async () => {

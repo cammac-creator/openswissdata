@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
 import { checkoutBucket, checkRateLimit, getClientIp } from "../lib/rate-limit.js";
+import { checkoutLegal } from "../lib/order-legal.js";
 
 export const checkoutRoute = new Hono();
 
@@ -115,8 +116,10 @@ async function buildSession(
     }
   }
 
-  const metadata: Record<string, string> = { dataset_ids: dataset_ids.join(",") };
-  if (locale) metadata.locale = locale;
+  // Une langue explicite évite d'afficher un contrat français dans un paiement auto-traduit.
+  const buyerLocale = locale ?? "fr";
+  const legal = mode === "payment" ? checkoutLegal(buyerLocale, baseUrl) : undefined;
+  const metadata: Record<string, string> = { dataset_ids: dataset_ids.join(","), locale: buyerLocale, ...legal?.metadata };
 
   const params: Stripe.Checkout.SessionCreateParams = {
     mode,
@@ -128,6 +131,7 @@ async function buildSession(
     success_url: `${baseUrl}${locale && locale !== "fr" ? `/${locale}` : ""}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}${locale && locale !== "fr" ? `/${locale}` : ""}/${hasStandalone ? "mcp" : "bundle"}?checkout=cancelled`,
     metadata,
+    ...(legal ? { consent_collection: legal.consent_collection, custom_text: legal.custom_text } : {}),
     allow_promotion_codes: true,
     billing_address_collection: "required",
     custom_fields: [{ key: "company", label: { type: "custom", custom: locale === "en" ? "Company / legal entity" : locale === "de" ? "Unternehmen / Firmenname" : "Entreprise / raison sociale" }, type: "text", optional: true }],
@@ -135,7 +139,7 @@ async function buildSession(
   if (mode === "payment") params.customer_creation = "always";
   if (email) params.customer_email = email;
   // Render the Stripe Checkout UI in the buyer's language (default: Stripe auto).
-  if (locale) params.locale = locale;
+  params.locale = buyerLocale;
 
   try {
     const session = await stripe().checkout.sessions.create(params);
@@ -143,7 +147,7 @@ async function buildSession(
     return { ok: true, url: session.url, session_id: session.id };
   } catch (err) {
     // H4: log full error server-side, never expose Stripe internals to clients
-    console.error("[checkout] stripe error:", err);
+    console.error("[checkout] création de session Stripe interrompue");
     return { ok: false, status: 502, error: "checkout_failed" };
   }
 }

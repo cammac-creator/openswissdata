@@ -52,6 +52,20 @@ describe("account routes", () => {
     const list=await (await app.request('/api/account/orders',{headers})).json(); expect(list.orders).toHaveLength(1); expect(list.orders[0].stripe_payment_intent).toBeUndefined();
   });
 
+  it("réserve la preuve des conditions aux commandes du titulaire du compte", async () => {
+    const db=getDb();
+    const ownId=(db.prepare("SELECT id FROM orders WHERE customer_id=?").get(custId) as {id:number}).id;
+    db.prepare("INSERT INTO order_legal(order_id,status,terms_version,locale,document_sha256,event_id,event_created_at,recorded_at) VALUES(?, 'accepted', '2026-09-26', 'en', ?, 'evt_private', ?, ?)").run(ownId,"a".repeat(64),Date.now(),Date.now());
+    const foreign=db.prepare("INSERT INTO customers(email,created_at) VALUES('second@example.test',?)").run(Date.now());
+    db.prepare("INSERT INTO orders(customer_id,stripe_session_id,amount_chf,items_json,created_at) VALUES(?, 'cs_foreign', 10, '[]', ?)").run(foreign.lastInsertRowid,Date.now());
+    const app=createApp();
+    expect((await app.request('/api/account/orders')).status).toBe(401);
+    const body=await (await app.request('/api/account/orders',{headers:{cookie:`osd_session=${token}`}})).json();
+    expect(body.orders).toHaveLength(1);
+    expect(body.orders[0].legal).toMatchObject({status:"accepted",locale:"en",url:"/en/legal/versions/2026-09-26/cgv"});
+    expect(body.orders[0].legal.event_id).toBeUndefined();
+  });
+
   it("GET /api/account returns customer info when authenticated", async () => {
     const app = createApp();
     const res = await app.request("/api/account", { headers: { cookie: `osd_session=${token}` } });

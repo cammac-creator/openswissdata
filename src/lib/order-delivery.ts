@@ -1,6 +1,7 @@
 import { getDb } from "./db.js";
 import { generateToken } from "./tokens.js";
 import { prepareDownloadEmail, sendPreparedEmail, parseLocale, type PreparedEmail } from "./email.js";
+import { orderTermsAttachment, orderLegalSummary } from "./order-legal.js";
 
 const LEASE_MS = 120_000;
 // Resend conserve ses clés pendant 24 h : une marge évite un second envoi incertain.
@@ -57,8 +58,12 @@ async function deliver(id: number): Promise<void> {
       const token = generateToken();
       const base = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
       const locale = parseLocale(job.locale);
+      const legal = orderLegalSummary(db, job.order_id);
+      const attachment = orderTermsAttachment(db, job.order_id);
       payload = prepareDownloadEmail({ to: job.email, datasetName: version.name, version: version.version, locale,
-        downloadUrl: `${base}/api/delivery/${token}?lang=${locale}`, accountUrl: `${base}${locale === "fr" ? "" : `/${locale}`}/account` });
+        downloadUrl: `${base}/api/delivery/${token}?lang=${locale}`, accountUrl: `${base}${locale === "fr" ? "" : `/${locale}`}/account`,
+        termsUrl: attachment && legal.url ? base + legal.url : undefined });
+      if (attachment) payload.attachments = [attachment];
       db.transaction(() => {
         db.prepare(`INSERT INTO download_tokens(token,customer_id,dataset_id,version,expires_at,created_at) VALUES(?,?,?,?,?,?)`)
           .run(token, job.customer_id, job.dataset_id, version.version, now + TOKEN_TTL_MS, now);

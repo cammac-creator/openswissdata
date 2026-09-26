@@ -14,6 +14,8 @@ import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
 import { processOrderDeliveries, deliveryStatus } from "../../src/lib/order-delivery.js";
 
+import { checkoutLegal, termsText, termsDigest } from "../../src/lib/order-legal.js";
+
 const construct = vi.fn();
 vi.mocked(stripe).mockReturnValue({webhooks:{constructEventAsync:construct}} as any);
 const send = vi.mocked(sendPreparedEmail);
@@ -50,6 +52,49 @@ describe("Paiements et livraisons durables", () => {
     send.mockReset().mockResolvedValue({sent:true});
   });
   afterEach(() => { closeDb();rmSync(tmp,{recursive:true,force:true});vi.unstubAllEnvs(); });
+
+  it("conserve une preuve signée et joint exactement les CGV allemandes acceptées, sans doublon au rejeu", async () => {
+    const meta = {...checkoutLegal("de", "https://www.openswissdata.com").metadata, dataset_ids:"tares", locale:"de"};
+    const confirmed = {...event({metadata:meta,consent:{terms_of_service:"accepted"}}),created:1790400000};
+    construct.mockResolvedValue(confirmed);
+    await post(); await post();
+    expect(rows("order_legal")).toHaveLength(1);
+    expect(rows("order_legal")[0]).toMatchObject({status:"accepted",terms_version:"2026-09-26",locale:"de",document_sha256:termsDigest("de"),event_id:"evt_test",event_created_at:1790400000000});
+    // Une préférence de correspondance différente ne doit pas changer le contrat joint.
+    getDb().prepare("UPDATE order_deliveries SET locale='fr'").run();
+    send.mockResolvedValueOnce({sent:false,reason:"network_error"});
+    await processOrderDeliveries();
+    const first = structuredClone(send.mock.calls[0][0]);
+    expect(first.subject).toContain("Votre");
+    expect(first.html).toContain("/de/legal/versions/2026-09-26/cgv");
+    expect(first.attachments).toHaveLength(1);
+    expect(first.attachments![0].filename).toBe("openswissdata-cgv-2026-09-26-de.txt");
+    expect(Buffer.from(first.attachments![0].content,"base64").toString("utf8")).toBe(termsText("de"));
+    retryNow(); await processOrderDeliveries();
+    expect(send.mock.calls[1][0]).toEqual(first);
+    expect(rows("order_deliveries")[0].state).toBe("sent");
+  });
+  it.each([
+    {metadata:{dataset_ids:"tares"},status:"legacy"},
+    {metadata:{dataset_ids:"tares",...checkoutLegal("fr","https://www.openswissdata.com").metadata},status:"unverified"},
+    {metadata:{dataset_ids:"tares",...checkoutLegal("fr","https://www.openswissdata.com").metadata,terms_sha256:"faux"},consent:{terms_of_service:"accepted"},status:"unverified"},
+    {metadata:{dataset_ids:"tares",terms_version:"2099-01-01",terms_locale:"en"},consent:{terms_of_service:"accepted"},status:"unverified"},
+  ])("ne fabrique pas une acceptation absente ou non identifiable, mais livre les droits payés : $status", async ({status,...session}) => {
+    construct.mockResolvedValue(event(session));
+    expect((await post()).status).toBe(200);
+    expect(rows("order_legal")[0].status).toBe(status);
+    await processOrderDeliveries();
+    expect(send).toHaveBeenCalledOnce();
+    expect(send.mock.calls[0][0].attachments).toBeUndefined();
+    construct.mockResolvedValue(event({metadata:{dataset_ids:"tares",...checkoutLegal("en","https://www.openswissdata.com").metadata},consent:{terms_of_service:"accepted"}}));
+    await post();
+    expect(rows("order_legal")[0].status).toBe(status);
+  });
+  it("annule ensemble la commande et ses droits si la preuve contractuelle ne peut pas être enregistrée", async () => {
+    getDb().exec("CREATE TRIGGER refus_preuve BEFORE INSERT ON order_legal BEGIN SELECT RAISE(ABORT, 'simulation'); END;");
+    expect((await post()).status).toBe(500);
+    for (const table of ["orders","order_legal","order_grants","order_deliveries"]) expect(rows(table)).toHaveLength(0);
+  });
 
   it("refuse une signature absente ou invalide",async()=>{
     expect((await createApp().request("/api/webhook/stripe",{method:"POST",body:"{}"})).status).toBe(400);

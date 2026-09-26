@@ -84,6 +84,18 @@ CREATE INDEX IF NOT EXISTS idx_entitlements_customer ON entitlements(customer_id
 CREATE INDEX IF NOT EXISTS idx_versions_dataset ON versions(dataset_id, released_at DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
 
+-- Preuve reçue de Stripe, sans ajout rétroactif pour les anciennes commandes.
+CREATE TABLE IF NOT EXISTS order_legal (
+  order_id INTEGER PRIMARY KEY REFERENCES orders(id),
+  status TEXT NOT NULL CHECK(status IN ('accepted','unverified','legacy')),
+  terms_version TEXT,
+  locale TEXT CHECK(locale IN ('fr','de','en')),
+  document_sha256 TEXT,
+  event_id TEXT NOT NULL,
+  event_created_at INTEGER,
+  recorded_at INTEGER NOT NULL
+);
+
 -- Une livraison par fichier acheté. Aucun ancien achat n'est remis en file au démarrage.
 CREATE TABLE IF NOT EXISTS order_deliveries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

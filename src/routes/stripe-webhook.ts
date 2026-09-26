@@ -3,6 +3,7 @@ import type { Stripe } from "stripe";
 import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
 import { checkoutLanguage } from "../lib/crm-language.js";
+import { recordOrderLegal } from "../lib/order-legal.js";
 import { sendMcpCredentialsEmail, parseLocale } from "../lib/email.js";
 import { deliveryStatus } from "../lib/order-delivery.js";
 import { FINANCIAL_EVENTS, enqueueFinancialEvent, applyOrderFinancialState } from "../lib/stripe-financial.js";
@@ -323,6 +324,7 @@ stripeWebhookRoute.post("/", async (c) => {
         (customer_id,stripe_session_id,stripe_payment_intent,amount_chf,items_json,status,created_at)
         VALUES(?,?,?,?,?,'paid',?)`).run(customerId, session.id, intent, session.amount_total,
           JSON.stringify(datasetIds), now).lastInsertRowid);
+      recordOrderLegal(db, orderId, session, event);
       // Conserver un droit manuel existant avant l'ajout d'une nouvelle commande.
       db.prepare(`INSERT OR IGNORE INTO order_grants(order_id,dataset_id,updates_until,created_at)
         SELECT e.order_id,e.dataset_id,e.updates_until,e.created_at FROM entitlements e
