@@ -21,6 +21,7 @@ import { deliveryStatus } from "../lib/order-delivery.js";
 import { financialStatus } from "../lib/stripe-financial.js";
 import { crmPeriod, periodRanges, swissDay } from "../lib/crm-period.js";
 import { readCrmAudience } from "../lib/crm-audience.js";
+import { readOrderJourney } from "../lib/order-journey.js";
 
 export const crmRoute = new Hono<{ Variables: { customer_id: number; customer_email: string } }>();
 crmRoute.use("*", requireAdmin);
@@ -163,7 +164,19 @@ crmRoute.patch("/tasks/:id", async c => {
 });
 crmRoute.get("/audience", c => {
   const db = getDb(), now = Date.now(), period = crmPeriod(daysOf(c.req.query("days")), now);
-  return c.json(db.transaction(() => ({ checked_at: now, ...readCrmAudience(db, period) }))());
+  const real = realCustomerSql();
+  return c.json(db.transaction(() => {
+    const audience = readCrmAudience(db, period);
+    let journey: ReturnType<typeof readOrderJourney> | null = null;
+    try { journey = readOrderJourney(db, period, real, now); }
+    catch (error) {
+      const code=(error as {code?:unknown})?.code;
+      const category=typeof code==='string'&&['SQLITE_ERROR','SQLITE_BUSY','SQLITE_LOCKED','SQLITE_FULL','SQLITE_IOERR','SQLITE_CORRUPT','SQLITE_NOTADB','SQLITE_NOMEM'].includes(code)?code:'unknown';
+      // Une catégorie fermée aide le diagnostic sans publier le SQL ou une valeur cliente.
+      console.error("[crm] lecture des preuves après achat indisponible", {category});
+    }
+    return { checked_at: now, ...audience, journey };
+  })());
 });
 crmRoute.get("/visibility", async c => {
   try { return c.json(await searchConsole(daysOf(c.req.query("days")))); }

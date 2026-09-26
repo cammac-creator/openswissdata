@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS download_activity (
   authorized_at INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_download_activity_customer ON download_activity(customer_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_download_activity_order ON download_activity(order_id,created_at);
 
 CREATE TABLE IF NOT EXISTS download_tokens (
   token TEXT PRIMARY KEY,

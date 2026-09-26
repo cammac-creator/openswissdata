@@ -1,3 +1,4 @@
+import {DOWNLOAD_ACTIVITY_RETENTION_MS} from './service-retention.js';
 // Or SQLite et bronze technique chiffré → expiration contrôlée ; aucune suppression des achats ou droits.
 import type Database from 'better-sqlite3';
 import { bronzePath } from './data-paths.js';
@@ -24,7 +25,7 @@ export function runCleanup(db: Database.Database, now = Date.now()): CleanupResu
     // Table historique absente du schéma actuel : son absence seule est normale, pas une erreur SQL quelconque.
     { name: 'request_log', sql: 'DELETE FROM request_log WHERE timestamp < ?', cutoff: now - 30 * DAY, optional: true },
     { name: 'events', sql: 'DELETE FROM events WHERE ts < ?', cutoff: now - EVENT_RETENTION_MS },
-    { name: 'download_activity', sql: 'DELETE FROM download_activity WHERE created_at < ?', cutoff: now - 180 * DAY },
+    { name: 'download_activity', sql: 'DELETE FROM download_activity WHERE created_at < ?', cutoff: now - DOWNLOAD_ACTIVITY_RETENTION_MS },
     { name: 'delivery_incident_events', sql: 'DELETE FROM delivery_incident_events WHERE recorded_at < ?', cutoff: now - 180 * DAY, clock: 'recorded_at' },
     { name: 'delivery_incidents', sql: "DELETE FROM delivery_incidents WHERE state<>'open' AND MAX(closed_at,last_seen_at) < ? AND EXISTS(SELECT 1 FROM order_deliveries d WHERE d.id=delivery_incidents.delivery_id AND ((delivery_incidents.state='accepted' AND d.state='sent') OR (delivery_incidents.state='cancelled' AND d.state='cancelled')))", cutoff: now - 180 * DAY, clock: 'closed_at', extraClock: 'last_seen_at', scope: "state<>'open' AND " },
     { name: 'delivery_message_references', sql: 'UPDATE order_deliveries SET provider_message_id=NULL WHERE provider_message_id IS NOT NULL AND COALESCE(sent_at,created_at) < ?', cutoff: now - 180 * DAY, unit: 'references' },
