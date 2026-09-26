@@ -14,7 +14,7 @@ const mcpHref = localizePath("/mcp", lang);
 
 
 ---
-<div class="v4-status" id="v4-status">
+<header class="v4-status" id="v4-status">
   <div class="v4-status-left">
     <a href={homeHref} class="v4-status-logo">
       <img class="v4-status-logo-mark" src="/logo.png" alt="" width="20" height="20" />
@@ -33,7 +33,7 @@ const mcpHref = localizePath("/mcp", lang);
     <LangSwitcher variant="compact" monolingual={monolingual} />
     <a href="/api/health/ready">{lang === "de" ? "Dienststatus" : lang === "en" ? "Service status" : "État du service"}</a>
   </div>
-</div>
+</header>
 
 <script is:inline>
   (() => {

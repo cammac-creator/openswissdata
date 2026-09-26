@@ -164,3 +164,8 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - La CSP du fichier admin/index.html est durcie après secureHeaders, sur le fichier réellement trouvé par serveStatic, pas sur un préfixe d’URL présumé. Scripts de même origine seulement (le build impose des modules), aucun script inline ou gestionnaire HTML, pas de base ni d’objet intégré. Les styles inline et les anciennes pages publiques/compte restent des sujets distincts.
 - admin:csp:check fait partie de web:build ; il exige le module local produit par Astro et refuse toute réintroduction de script inline dans l’artefact. Ne pas rétablir unsafe-inline pour faire passer une interface cassée. Sources et limites : docs/securite-du-bureau.md.
 - createApp({webRoot}) accepte un dossier explicite pour les tests statiques temporaires ; aucun paramètre HTTP et aucun démarrage de worker. Ne pas écrire une fausse page admin dans le build partagé pour tester ses en-têtes.
+
+
+## Annuaire FINMA et parcours fichiers — 26.09.2026
+- Les index FR/DE/EN conservent la recherche historique et proposent le véritable échantillon `/api/catalog/finma?format=csv` ainsi que la fiche produit localisée. Ne pas présenter la copie historique comme le produit quotidien, ni l’absence d’un résultat comme une sanction ou une absence dans le registre officiel.
+- Les contenus essentiels et les liens restent visibles sans animation ni JavaScript. La fraîcheur du produit se lit sur sa fiche, pas dans une date figée au build de l’annuaire. Aucun gain SEO ne se déduit de la seule publication ; voir `docs/fiches-publiques.md`.
