@@ -6,6 +6,7 @@ import { BACKUP_CHECK_ERRORS, BackupInspectionError, type BackupInspection } fro
 export const backupInspectionSchema = z.object({
   version: z.literal(1), byte_match: z.literal(true), integrity: z.literal('ok'), foreign_keys: z.literal('ok'),
   required_schema: z.literal('ok'), current_versions: z.literal('ok'), duration_ms: z.number().int().nonnegative().safe(),
+  schema_profile: z.literal('service-crm-2026-09-26').optional(),
 });
 
 /** Isole le contrôle SQLite coûteux et borne sa durée sans bloquer les requêtes du serveur. */

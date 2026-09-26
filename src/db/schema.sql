@@ -359,6 +359,13 @@ CREATE TABLE IF NOT EXISTS crm_tasks (
   done_at INTEGER,
   created_at INTEGER NOT NULL
 );
+-- Une action au plus par incident ; sa conservation reste indépendante du journal.
+CREATE TABLE IF NOT EXISTS delivery_incident_tasks (
+  incident_id INTEGER PRIMARY KEY REFERENCES delivery_incidents(id) ON DELETE CASCADE,
+  task_id INTEGER NOT NULL UNIQUE REFERENCES crm_tasks(id) ON DELETE CASCADE,
+  created_by INTEGER NOT NULL REFERENCES customers(id),
+  created_at INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS crm_connections (
   name TEXT PRIMARY KEY,
   secret_encrypted TEXT NOT NULL,

@@ -45,7 +45,7 @@ jobs:
               print('::error::Réponse de sauvegarde illisible ; aucun succès déclaré.')
               sys.exit(1)
           check=data.get('restore_verification') if isinstance(data,dict) else None
-          valid=isinstance(check,dict) and check.get('version')==1 and check.get('byte_match') is True and all(check.get(k)=='ok' for k in ('integrity','foreign_keys','required_schema','current_versions'))
+          valid=isinstance(check,dict) and check.get('version')==1 and check.get('schema_profile')=='service-crm-2026-09-26' and check.get('byte_match') is True and all(check.get(k)=='ok' for k in ('integrity','foreign_keys','required_schema','current_versions'))
           print('HTTP',sys.argv[2])
           if sys.argv[2]!='200' or not isinstance(data,dict) or data.get('ok') is not True or data.get('encrypted') is not True or data.get('restore_check')!='ok' or data.get('verified_manifest') is not True or data.get('retention_status')!='ok' or not valid:
               print('::error::Sauvegarde ou restauration non vérifiée ; consulter le bureau privé.')
