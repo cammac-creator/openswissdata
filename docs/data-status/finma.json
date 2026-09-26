@@ -1,6 +1,6 @@
 {
-  "version": "2026.09.25",
-  "collected_on": "2026-09-25",
+  "version": "2026.09.26",
+  "collected_on": "2026-09-26",
   "registry_rows": 2943,
   "unique_uids": 2748,
   "warning_rows": 2345,
@@ -14,8 +14,8 @@
     "address": 783
   },
   "history": {
-    "available_from": "2026-06-26",
-    "available_until": "2026-09-25",
+    "available_from": "2026-06-27",
+    "available_until": "2026-09-26",
     "snapshots": 61,
     "gaps": [
       {
