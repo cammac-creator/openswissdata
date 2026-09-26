@@ -1,3 +1,4 @@
+import { customerPage, customerProfiles, internalEmails, prepareCustomerFunctions, searchText } from '../lib/crm-customers.js';
 import { isCalendarDate } from '../lib/calendar-date.js';
 import { readTaskOverview, taskOrderSql } from '../lib/crm-tasks.js';
 import { readBackupChecks } from "../lib/backup-state.js";
@@ -33,43 +34,37 @@ crmRoute.use("*", async (c, next) => {
 });
 const daysOf = (v?: string) => [7, 30, 90, 365].includes(Number(v)) ? Number(v) : 30;
 const validId = (v: string) => /^\d{1,10}$/.test(v) && Number(v) > 0;
-const internalEmails = () => [...new Set(`${process.env.ADMIN_EMAILS ?? ""},${process.env.CRM_INTERNAL_EMAILS ?? ""}`.split(",").map(s => s.trim().toLowerCase()).filter(Boolean))];
 export function realCustomerSql(alias = "c"): { sql: string; params: string[] } {
+  prepareCustomerFunctions(getDb());
   const emails = internalEmails();
-  return { sql: `COALESCE(p.internal,0)=0${emails.length ? ` AND lower(${alias}.email) NOT IN (${emails.map(() => "?").join(",")})` : ""}`, params: emails };
-}
-function profiles(id?: number) {
-  const db = getDb();
-  const rows = db.prepare(`SELECT c.id,c.email,c.locale,c.created_at,COALESCE(p.display_name,'') display_name,COALESCE(p.company,'') company,COALESCE(p.stage,'nouveau') stage,COALESCE(p.internal,0) internal,
-    (SELECT COUNT(*) FROM orders o WHERE o.customer_id=c.id AND o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%') paid_orders,
-    (SELECT COUNT(*) FROM orders o WHERE o.customer_id=c.id AND o.stripe_session_id LIKE 'cs_test_%') test_orders,
-    (SELECT COUNT(*) FROM orders o WHERE o.customer_id=c.id AND o.stripe_session_id LIKE 'cs_live_%') live_orders,
-    (SELECT COALESCE(SUM(amount_chf-refunded_chf),0) FROM orders o WHERE o.customer_id=c.id AND o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%') revenue_cents,
-    (SELECT MAX(created_at) FROM orders o WHERE o.customer_id=c.id) last_order_at,
-    (SELECT MAX(created_at) FROM sessions s WHERE s.customer_id=c.id AND s.expires_at-s.created_at > 86400000) last_login_at,
-    (SELECT COUNT(*) FROM crm_tasks t WHERE t.customer_id=c.id AND t.done_at IS NULL) open_tasks
-    FROM customers c LEFT JOIN crm_profiles p ON p.customer_id=c.id ${id ? "WHERE c.id=?" : ""} ORDER BY last_order_at DESC,c.created_at DESC LIMIT 1000`).all(...(id ? [id] : [])) as Array<Record<string, unknown> & { id: number; email: string; internal: number }>;
-  const owners = internalEmails();
-  return rows.map(r => ({ ...r, language: customerLanguage(r.id, r.locale), internal: Boolean(r.internal || owners.includes(r.email.toLowerCase()) || (Number(r.test_orders) > 0 && Number(r.live_orders) === 0)) }));
+  return { sql: `COALESCE(p.internal,0)=0${emails.length ? ` AND crm_email_key(${alias}.email) NOT IN (${emails.map(() => "?").join(",")})` : ""}`, params: emails };
 }
 crmRoute.get("/overview", c => {
   const db = getDb(), now = Date.now(), days = daysOf(c.req.query("days")), period = crmPeriod(days, now);
   const real = realCustomerSql();
   return c.json(db.transaction(() => {
-    const selection = `FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%' AND o.created_at>=? AND o.created_at<? AND ${real.sql}`;
+    const selection = `FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE o.status='paid' AND o.stripe_session_id GLOB 'cs_live_*' AND o.created_at>=? AND o.created_at<? AND ${real.sql}`;
     const rollup = (from: number) => db.prepare(`SELECT COUNT(*) orders,COUNT(DISTINCT o.customer_id) customers,COALESCE(SUM(o.amount_chf-o.refunded_chf),0) revenue_cents ${selection}`).get(from, period.end_at, ...real.params);
     const dayQuery = db.prepare(`SELECT COALESCE(SUM(o.amount_chf-o.refunded_chf),0) revenue_cents,COUNT(*) orders ${selection}`);
     const daily = periodRanges(period).map(range => ({ day: range.day, ...dayQuery.get(range.start, range.end, ...real.params) as { revenue_cents: number; orders: number } }));
     const { traffic, web, coverage } = readCrmAudience(db, period, false);
-    const taskOverview = readTaskOverview(db, period.end), customers = profiles();
+    const taskOverview = readTaskOverview(db, period.end), customers = customerProfiles();
     const customerTotal = (db.prepare('SELECT COUNT(*) total FROM customers').get() as {total:number}).total;
     return { checked_at: now, days, period, revenue: rollup(period.start_at), all_time: rollup(0), daily, traffic, web, coverage, ...taskOverview, customers, customer_list: { returned: customers.length, total: customerTotal, limit: 1000, truncated: customerTotal > customers.length }, revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" };
   })());
 });
+// Le texte recherché reste dans le corps privé, jamais dans l’URL.
+crmRoute.post('/customers/search',async c=>{
+ if(c.req.raw.signal.aborted)return new Response(null,{status:499});
+ const input=z.object({q:z.string().trim().max(180).refine(value=>!/[\u0000-\u001f\u007f]/.test(value)&&(value===''||searchText(value).trim().length>0)).default(''),page:z.number().int().min(1).max(1_000_000).default(1),include_internal:z.boolean().default(false)}).strict().safeParse(await c.req.json().catch(error=>{if(error instanceof SyntaxError)return null;throw error}));
+ if(!input.success)return c.json({error:'invalid_body'},400);
+ if(c.req.raw.signal.aborted)return new Response(null,{status:499});
+ return c.json(customerPage(input.data));
+});
 crmRoute.get("/customers/:id", c => {
   if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);
   const id = Number(c.req.param("id")), db = getDb();
-  const customer = profiles(id)[0];
+  const customer = customerProfiles(id)[0];
   if (!customer) return c.json({ error: "not_found" }, 404);
   const orders = db.prepare("SELECT id,amount_chf,refunded_chf,dispute_status,financial_checked_at,items_json,status,created_at,stripe_payment_intent,stripe_session_id FROM orders WHERE customer_id=? ORDER BY created_at DESC").all(id);
   const entitlements = db.prepare("SELECT e.dataset_id,e.updates_until,d.current_version FROM entitlements e JOIN datasets d ON d.id=e.dataset_id WHERE e.customer_id=?").all(id);
