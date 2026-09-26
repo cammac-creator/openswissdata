@@ -5,7 +5,7 @@ import archiver from "archiver";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeSqlInsertsChunked, writeParquet } from "../shared/formats.js";
-import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
+import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
 import type { NomenclatureRow, CrossWalkRow, NomenclatureScheme } from "./types.js";
 import type { ClassificationLink, ClassificationSource } from "../../src/lib/classification-links.js";
 import type { IngestStatentResult } from "./ingest-statent.js";
@@ -165,6 +165,8 @@ function crossWalkToCsvRow(w: CrossWalkRow): Record<string, unknown> {
 export interface ClassificationsBuildBundleOptions {
   /** Skip the RFC-3161 timestamp call (used in offline tests). */
   withTimestamp?: boolean;
+  /** Injection explicite pour les tests ; les collectes ne passent pas cette option. */
+  signing?: SignProvenanceOptions;
 }
 
 export async function buildBundle(
@@ -800,6 +802,7 @@ ${hasEmbeddings ? "- **Embeddings model** — Xenova/paraphrase-multilingual-mpn
     permissionAuthority: profile.permissionAuthority,
     jurisdiction: profile.jurisdiction,
     withTimestamp: opts.withTimestamp,
+    signing: opts.signing,
   });
   writeFileSync(join(workDir, "provenance.json"), JSON.stringify(provenance, null, 2), "utf8");
 

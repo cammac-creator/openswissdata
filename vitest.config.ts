@@ -6,7 +6,6 @@ process.env.NODE_ENV = "test";
 
 export default defineConfig({
   test: {
-    globalSetup: ["./tests/global-setup.ts"],
     env: {
       NODE_ENV: "test",
     },

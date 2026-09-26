@@ -101,3 +101,9 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Les CGV acceptées sont jointes au mail, dans leur langue contractuelle même si la correspondance est dans une autre langue. Le corps et la pièce jointe sont figés ensemble avant le premier essai. Les liens sont visibles dans le compte du titulaire et le CRM autorisé.
 - Les CGV 1.1 FR/DE sont archivées ; les anciennes archives de données signées ne sont pas réécrites. Les nouvelles licences des ZIP rappellent la priorité des conditions convenues lors de chaque achat et les droits propres aux sources.
 - Les textes ne constituent pas une validation d’avocat. Le suivi privé A29 conserve les vérifications contractuelles des prestataires, des transferts et des droits de sources encore nécessaires. Ne pas déclarer un DPA signé ou une conformité générale sur la seule présence d’un document public chez un fournisseur.
+
+## Environnement et tests isolés — 26.09.2026
+- Node >=22.12 ; CI/Railway sur Node 22. `README.md` décrit les commandes actuelles et les frontières entre application, ETL, données distribuées et fiches publiques.
+- Les clés de test sont éphémères et passées explicitement à la signature. Aucun remplacement, même temporaire, de `packages/schemas/openswissdata.pubkey.ed25519`. Ne pas injecter une clé de test dans l’environnement global d’une collecte.
+- `db:migrate` appelle le schéma et les migrations idempotentes de `getDb` ; l’ancienne migration Business manuelle n’est pas incluse. Base fictive et chemin distinct obligatoires pour les essais.
+- La CI exige des fichiers suivis inchangés après les tests. Les secrets et bases réels ne sont pas nécessaires au typage, aux tests ou au build.

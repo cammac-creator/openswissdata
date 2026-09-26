@@ -417,6 +417,8 @@ export const PERMISSION_PROFILES = {
 // ---------------------------------------------------------------------------
 
 export interface BuildSignedProvenanceArgs extends GenerateProvenanceArgs {
+  /** Clés explicites pour les tests isolés ; sans option, les clés de publication restent obligatoires. */
+  signing?: SignProvenanceOptions;
   /** If false, do not contact a TSA (used in offline tests). */
   withTimestamp?: boolean;
   /** Override TSA URLs — primarily for tests. */
@@ -427,7 +429,7 @@ export async function buildSignedProvenance(
   args: BuildSignedProvenanceArgs
 ): Promise<SignedProvenanceManifest> {
   const manifest = generateProvenance(args);
-  const { signature } = signProvenance(manifest);
+  const { signature } = signProvenance(manifest, args.signing);
 
   // `withTimestamp: false` (explicit), or env `OSD_SKIP_RFC3161=1` (test/CI),
   // both bypass the network call.

@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { buildBundle } from "../../etl/classifications/bundle.js";
+import { buildBundle as buildProductionBundle } from "../../etl/classifications/bundle.js";
+import { withTestSignature } from "../helpers/signature.js";
+const buildBundle = withTestSignature(buildProductionBundle);
 import { parseNaceCsv } from "../../etl/classifications/ingest-nace.js";
 import type { IngestStatentResult } from "../../etl/classifications/ingest-statent.js";
 import { mkdtempSync, rmSync, existsSync } from "node:fs";

@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { buildBundle } from "../../etl/classifications/bundle.js";
+import { buildBundle as buildProductionBundle } from "../../etl/classifications/bundle.js";
+import { withTestSignature } from "../helpers/signature.js";
+const buildBundle = withTestSignature(buildProductionBundle);
 import { parseNogaXlsx } from "../../etl/classifications/ingest-noga.js";
 import { parseNaceCsv } from "../../etl/classifications/ingest-nace.js";
 import { parseIsicCsv } from "../../etl/classifications/ingest-isic.js";

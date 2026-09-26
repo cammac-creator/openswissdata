@@ -6,7 +6,7 @@ import XLSX from "../shared/xlsx.js";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
-import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
+import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
 import type { FinmaEntity, FinmaEntityType, FinmaWarning } from "./types.js";
 import type { ZefixData } from "./ingest-zefix.js";
 import type { DeltaChange } from "./delta.js";
@@ -161,6 +161,8 @@ function deltaToCsvRow(c: DeltaChange): Record<string, unknown> {
 export interface FinmaBuildBundleOptions {
   /** Skip the RFC-3161 timestamp call (used in offline tests). */
   withTimestamp?: boolean;
+  /** Injection explicite pour les tests ; les collectes ne passent pas cette option. */
+  signing?: SignProvenanceOptions;
 }
 
 export async function buildBundle(
@@ -552,6 +554,7 @@ ${zefixSection}
     permissionAuthority: profile.permissionAuthority,
     jurisdiction: profile.jurisdiction,
     withTimestamp: opts.withTimestamp,
+    signing: opts.signing,
   });
   writeFileSync(join(workDir, "provenance.json"), JSON.stringify(provenance, null, 2), "utf8");
 
