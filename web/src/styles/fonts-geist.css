@@ -1,0 +1,15 @@
+/* Geist 1.7.2 : distribution officielle, licence SIL OFL dans /fonts/licenses/. */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../assets/fonts/geist-variable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../assets/fonts/geist-mono-variable.woff2') format('woff2');
+}

@@ -1,0 +1,126 @@
+{
+  "date": "2026-09-26",
+  "licence": "SIL Open Font License 1.1",
+  "fichiers": [
+    {
+      "fichier": "src/assets/fonts/geist-variable.woff2",
+      "source": "https://raw.githubusercontent.com/vercel/geist-font/a73329da8fc62afc917f796555202e4997f79b7c/fonts/Geist/webfonts/Geist%5Bwght%5D.woff2",
+      "sha256": "2ffebe993e969069a9789d15164b7715d42491b5835516c5e3b935d5f81b05f1",
+      "octets": 69760
+    },
+    {
+      "fichier": "src/assets/fonts/geist-mono-variable.woff2",
+      "source": "https://raw.githubusercontent.com/vercel/geist-font/a73329da8fc62afc917f796555202e4997f79b7c/fonts/GeistMono/webfonts/GeistMono%5Bwght%5D.woff2",
+      "sha256": "afaacc4c5fbba89d2ebf7a02dc4070208540874592a5504d57175782fe893101",
+      "octets": 71596
+    },
+    {
+      "fichier": "public/fonts/licenses/geist-OFL.txt",
+      "source": "https://raw.githubusercontent.com/vercel/geist-font/a73329da8fc62afc917f796555202e4997f79b7c/OFL.txt",
+      "sha256": "c683bfbcc7e087f5d37a54ef628f10387c451a83ddc459b151403a164ac46c90",
+      "octets": 4383
+    },
+    {
+      "fichier": "public/fonts/licenses/caveat-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/23e54b51ddffbc7713c583748e3bd86f62b1fa4a/ofl/caveat/OFL.txt",
+      "sha256": "1f9d81d094273d82f3898a1ee8b598a717d050ecbf5ff7bede105b704880157b",
+      "octets": 4385
+    },
+    {
+      "fichier": "public/fonts/licenses/fredoka-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/23e54b51ddffbc7713c583748e3bd86f62b1fa4a/ofl/fredoka/OFL.txt",
+      "sha256": "5c9e7eee5c6b25f4b05b8d53b2e470ea4962f9ced742d044a98f7d95d1375bab",
+      "octets": 4388
+    },
+    {
+      "fichier": "public/fonts/licenses/inter-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/23e54b51ddffbc7713c583748e3bd86f62b1fa4a/ofl/inter/OFL.txt",
+      "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57",
+      "octets": 4377
+    },
+    {
+      "fichier": "src/assets/fonts/caveat-cyrillic-ext.woff2",
+      "source": "https://fonts.gstatic.com/s/caveat/v23/Wnz6HAc5bAfYB2Q7azYYmg8.woff2",
+      "sha256": "4956ec7b19798cb8418f2e44349e90c0ab7310594350c4b9c2998dc092122d5a",
+      "octets": 42856
+    },
+    {
+      "fichier": "src/assets/fonts/caveat-cyrillic.woff2",
+      "source": "https://fonts.gstatic.com/s/caveat/v23/Wnz6HAc5bAfYB2Q7YjYYmg8.woff2",
+      "sha256": "6276a2f5a5554c16b422f00f114773a8d4013a81df18a338f7c216d80103c9af",
+      "octets": 77216
+    },
+    {
+      "fichier": "src/assets/fonts/caveat-latin-ext.woff2",
+      "source": "https://fonts.gstatic.com/s/caveat/v23/Wnz6HAc5bAfYB2Q7aDYYmg8.woff2",
+      "sha256": "f626b95c1efa95cf6b7c9b043d3bbe8862b6abbe5f55a082102f33f7de2fd4f9",
+      "octets": 29472
+    },
+    {
+      "fichier": "src/assets/fonts/caveat-latin.woff2",
+      "source": "https://fonts.gstatic.com/s/caveat/v23/Wnz6HAc5bAfYB2Q7ZjYY.woff2",
+      "sha256": "891951df5e8b5b0f0bc760d31375405e795c666b5add70437de12d4a6482b33f",
+      "octets": 74932
+    },
+    {
+      "fichier": "src/assets/fonts/fredoka-hebrew.woff2",
+      "source": "https://fonts.gstatic.com/s/fredoka/v17/X7n64b87HvSqjb_WIi2yDCRwoQ_k7367_DWs89XyHw.woff2",
+      "sha256": "ab46fdbead875af9c6e967705a149f398554e9bb0f2f50c19d13b54ea4fa3195",
+      "octets": 8852
+    },
+    {
+      "fichier": "src/assets/fonts/fredoka-latin-ext.woff2",
+      "source": "https://fonts.gstatic.com/s/fredoka/v17/X7n64b87HvSqjb_WIi2yDCRwoQ_k7367_DWg89XyHw.woff2",
+      "sha256": "18a1723c878c0d8acc2e45a108fd62fbb976e408337804afa2908982fac13e2a",
+      "octets": 4576
+    },
+    {
+      "fichier": "src/assets/fonts/fredoka-latin.woff2",
+      "source": "https://fonts.gstatic.com/s/fredoka/v17/X7n64b87HvSqjb_WIi2yDCRwoQ_k7367_DWu89U.woff2",
+      "sha256": "99d6c78e043710d4f83ed90716779798b7b04eb690f73e0ad0e8f32d1f0e98c2",
+      "octets": 29732
+    },
+    {
+      "fichier": "src/assets/fonts/inter-cyrillic-ext.woff2",
+      "source": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2",
+      "sha256": "ca157063339ac4ad418f214f3abfed119b0798ab4d377386ce5c9e5a7a435ebd",
+      "octets": 25960
+    },
+    {
+      "fichier": "src/assets/fonts/inter-cyrillic.woff2",
+      "source": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2",
+      "sha256": "71d5ee93cc1e9f1d520a3a8b66456de18c7879d8df09d57fcd2eaff75fef0075",
+      "octets": 18748
+    },
+    {
+      "fichier": "src/assets/fonts/inter-greek-ext.woff2",
+      "source": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2",
+      "sha256": "6e9e020a25f9b56d418f2c085b1d3c09725a4da23fe693a5b463064606732190",
+      "octets": 11232
+    },
+    {
+      "fichier": "src/assets/fonts/inter-greek.woff2",
+      "source": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2",
+      "sha256": "1be3448e292fbf05ffe176fe1e43f135013d50b1e7d324ad1a558f623d3bb6f6",
+      "octets": 18996
+    },
+    {
+      "fichier": "src/assets/fonts/inter-vietnamese.woff2",
+      "source": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2",
+      "sha256": "5c66f9e07e90c6d4ac4922cc68d60de26c17b1858e677fb5e603fce3952b3ff2",
+      "octets": 10252
+    },
+    {
+      "fichier": "src/assets/fonts/inter-latin-ext.woff2",
+      "source": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2",
+      "sha256": "34b9c504cab7a73e37b746343a449132e56cf7b5481af2cb81dc74dcff25c956",
+      "octets": 85068
+    },
+    {
+      "fichier": "src/assets/fonts/inter-latin.woff2",
+      "source": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+      "sha256": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62",
+      "octets": 48256
+    }
+  ]
+}

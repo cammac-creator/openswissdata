@@ -1,0 +1,2 @@
+# Copies intactes des licences amont, y compris leurs espaces de fin de ligne.
+web/public/fonts/licenses/*.txt -text whitespace=-blank-at-eol
