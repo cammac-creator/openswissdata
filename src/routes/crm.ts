@@ -1,6 +1,6 @@
 import { customerPage, customerProfiles, internalEmails, prepareCustomerFunctions, searchText } from '../lib/crm-customers.js';
 import { isCalendarDate } from '../lib/calendar-date.js';
-import { readTaskOverview, taskOrderSql } from '../lib/crm-tasks.js';
+import { readTaskOverview, taskOrderSql, readTaskPage, TASK_FILTERS } from '../lib/crm-tasks.js';
 import { readBackupChecks } from "../lib/backup-state.js";
 import { readCleanupProof } from "../lib/cleanup.js";
 import { orderService, accountDownloadHistory } from "../lib/customer-service.js";
@@ -16,7 +16,7 @@ import { isLanguage } from "../lib/languages.js";
 import { crmMailRoute } from "./crm-mail.js";
 import { deliveryStatus } from "../lib/order-delivery.js";
 import { financialStatus } from "../lib/stripe-financial.js";
-import { crmPeriod, periodRanges } from "../lib/crm-period.js";
+import { crmPeriod, periodRanges, swissDay } from "../lib/crm-period.js";
 import { readCrmAudience } from "../lib/crm-audience.js";
 
 export const crmRoute = new Hono<{ Variables: { customer_id: number; customer_email: string } }>();
@@ -32,6 +32,7 @@ crmRoute.use("*", async (c, next) => {
   }
   await next();
 });
+const searchQuery = z.string().trim().max(180).refine(value=>!/[\u0000-\u001f\u007f]/.test(value)&&(value===''||searchText(value).trim().length>0)).default('');
 const daysOf = (v?: string) => [7, 30, 90, 365].includes(Number(v)) ? Number(v) : 30;
 const validId = (v: string) => /^\d{1,10}$/.test(v) && Number(v) > 0;
 export function realCustomerSql(alias = "c"): { sql: string; params: string[] } {
@@ -56,21 +57,21 @@ crmRoute.get("/overview", c => {
 // Le texte recherché reste dans le corps privé, jamais dans l’URL.
 crmRoute.post('/customers/search',async c=>{
  if(c.req.raw.signal.aborted)return new Response(null,{status:499});
- const input=z.object({q:z.string().trim().max(180).refine(value=>!/[\u0000-\u001f\u007f]/.test(value)&&(value===''||searchText(value).trim().length>0)).default(''),page:z.number().int().min(1).max(1_000_000).default(1),include_internal:z.boolean().default(false)}).strict().safeParse(await c.req.json().catch(error=>{if(error instanceof SyntaxError)return null;throw error}));
+ const input=z.object({q:searchQuery,page:z.number().int().min(1).max(1_000_000).default(1),include_internal:z.boolean().default(false)}).strict().safeParse(await c.req.json().catch(error=>{if(error instanceof SyntaxError)return null;throw error}));
  if(!input.success)return c.json({error:'invalid_body'},400);
  if(c.req.raw.signal.aborted)return new Response(null,{status:499});
  return c.json(customerPage(input.data));
 });
 crmRoute.get("/customers/:id", c => {
   if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);
-  const id = Number(c.req.param("id")), db = getDb();
+  const id = Number(c.req.param("id")), db = getDb(), now = Date.now();
   const customer = customerProfiles(id)[0];
   if (!customer) return c.json({ error: "not_found" }, 404);
   const orders = db.prepare("SELECT id,amount_chf,refunded_chf,dispute_status,financial_checked_at,items_json,status,created_at,stripe_payment_intent,stripe_session_id FROM orders WHERE customer_id=? ORDER BY created_at DESC").all(id);
   const entitlements = db.prepare("SELECT e.dataset_id,e.updates_until,d.current_version FROM entitlements e JOIN datasets d ON d.id=e.dataset_id WHERE e.customer_id=?").all(id);
   const notes = db.prepare("SELECT id,body,created_at FROM crm_notes WHERE customer_id=? ORDER BY created_at DESC").all(id);
   const tasks = db.prepare(`SELECT t.* FROM crm_tasks t WHERE t.customer_id=? ORDER BY t.done_at IS NOT NULL,${taskOrderSql}`).all(id);
-  return c.json({ customer, orders: (orders as Array<{id:number}>).map(order => ({ ...order, service: orderService(db, id, order.id), legal: orderLegalSummary(db, order.id) })), entitlements, notes, tasks, account_downloads: accountDownloadHistory(db, id) });
+  return c.json({ today: swissDay(now), customer, orders: (orders as Array<{id:number}>).map(order => ({ ...order, service: orderService(db, id, order.id), legal: orderLegalSummary(db, order.id) })), entitlements, notes, tasks, account_downloads: accountDownloadHistory(db, id) });
 });
 crmRoute.patch("/customers/:id", async c => {
   if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);
@@ -100,6 +101,13 @@ crmRoute.post("/customers/:id/notes", async c => {
   const result = db.prepare("INSERT INTO crm_notes(customer_id,body,author_id,created_at) VALUES(?,?,?,?)").run(id, input.data.body, c.get("customer_id"), Date.now());
   return c.json({ ok: true, id: Number(result.lastInsertRowid) }, 201);
 });
+crmRoute.post('/tasks/search',async c=>{
+ if(c.req.raw.signal.aborted)return new Response(null,{status:499});
+ const input=z.object({q:searchQuery,page:z.number().int().min(1).max(1_000_000).default(1),status:z.enum(TASK_FILTERS).default('open')}).strict().safeParse(await c.req.json().catch(error=>{if(error instanceof SyntaxError)return null;throw error}));
+ if(!input.success)return c.json({error:'invalid_body'},400);
+ if(c.req.raw.signal.aborted)return new Response(null,{status:499});
+ const now=Date.now();return c.json({checked_at:now,...readTaskPage(getDb(),input.data,swissDay(now))});
+});
 crmRoute.post("/tasks", async c => {
   const input = z.object({ title: z.string().trim().min(1).max(240), customer_id: z.number().int().positive().nullable().default(null), due_on: z.string().refine(isCalendarDate).nullable().default(null) }).strict().safeParse(await c.req.json().catch(error => { if (error instanceof SyntaxError) return null; throw error; }));
   if (!input.success) return c.json({ error: "invalid_body" }, 400);
@@ -110,13 +118,23 @@ crmRoute.post("/tasks", async c => {
 });
 crmRoute.patch("/tasks/:id", async c => {
   if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);
-  const body = z.object({ done: z.boolean().optional(), due_on: z.string().refine(isCalendarDate).nullable().optional() }).strict().refine(value => value.done !== undefined || value.due_on !== undefined).safeParse(await c.req.json().catch(error => { if (error instanceof SyntaxError) return null; throw error; }));
-  if (!body.success) return c.json({ error: "invalid_body" }, 400);
-  const fields: string[] = [], values: Array<string | number | null> = [];
-  if (body.data.done !== undefined) { fields.push(body.data.done ? 'done_at=COALESCE(done_at,?)' : 'done_at=?'); values.push(body.data.done ? Date.now() : null); }
-  if (body.data.due_on !== undefined) { fields.push('due_on=?'); values.push(body.data.due_on); }
-  const r = getDb().prepare(`UPDATE crm_tasks SET ${fields.join(',')} WHERE id=?`).run(...values, Number(c.req.param("id")));
-  return c.json({ ok: r.changes === 1 }, r.changes === 1 ? 200 : 404);
+  const body=z.object({done:z.boolean().optional(),due_on:z.string().refine(isCalendarDate).nullable().optional(),expected_state:z.object({done_at:z.number().int().safe().nullable(),due_on:z.string().nullable()}).strict().optional()}).strict().refine(value=>value.done!==undefined||value.due_on!==undefined).safeParse(await c.req.json().catch(error=>{if(error instanceof SyntaxError)return null;throw error}));
+  if(!body.success)return c.json({error:'invalid_body'},400);
+  const db=getDb(),id=Number(c.req.param('id'));
+  const result=db.transaction(()=>{
+    const before=db.prepare('SELECT done_at,due_on FROM crm_tasks WHERE id=?').get(id) as {done_at:number|null;due_on:string|null}|undefined;
+    if(!before)return {status:'not_found'} as const;
+    const expected=body.data.expected_state;
+    if(expected&&(expected.done_at!==before.done_at||expected.due_on!==before.due_on))return {status:'conflict'} as const;
+    const done=body.data.done===undefined?before.done_at:body.data.done?(before.done_at??Date.now()):null;
+    const due=body.data.due_on===undefined?before.due_on:body.data.due_on;
+    if(done===before.done_at&&due===before.due_on)return {status:'ok',changed:false} as const;
+    db.prepare('UPDATE crm_tasks SET done_at=?,due_on=? WHERE id=?').run(done,due,id);
+    return {status:'ok',changed:true} as const;
+  })();
+  if(result.status==='not_found')return c.json({error:'not_found'},404);
+  if(result.status==='conflict')return c.json({error:'task_conflict'},409);
+  return c.json({ok:true,changed:result.changed});
 });
 crmRoute.get("/audience", c => {
   const db = getDb(), now = Date.now(), period = crmPeriod(daysOf(c.req.query("days")), now);

@@ -65,3 +65,10 @@
 #client-page-label{scroll-margin-block:110px 20px}#client-search-status:empty{min-height:1.1em}
 #client-results[aria-busy="true"]{opacity:.65}
 #client-search-form{flex-wrap:wrap}#client-search-form .search{min-width:0;flex:1 1 260px}
+
+/* Filtres des actions et pagination gardent leur place sur petit écran. */
+#task-search-form{flex-wrap:wrap;align-items:end}#task-search-form .search{min-width:0;flex:1 1 230px}
+#task-search-form select{min-height:44px;font-size:16px}#task-page-label{scroll-margin-block:110px 20px}
+#task-search-status:empty{min-height:1.1em}#task-results[aria-busy="true"]{opacity:.65}
+
+#task-title,#client-count{scroll-margin-block:110px 20px}#task-panel>.panel-heading{flex-wrap:wrap}
