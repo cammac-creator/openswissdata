@@ -31,6 +31,23 @@ describe("lib/email graceful degradation", () => {
     delete process.env.RESEND_REPLY_TO;
   });
 
+  it("conserve l’identifiant de remise, sans confondre acceptation et livraison", async () => {
+    process.env.RESEND_API_KEY = "fictif";
+    const id = "11111111-1111-4111-8111-111111111111";
+    fetchMock.mockResolvedValue(Response.json({ id }));
+    const result = await sendPreparedEmail({from:"support@example.test",to:["client@example.test"],reply_to:"support@example.test",subject:"Fictif",html:"Test"});
+    expect(result).toEqual({sent:true,providerId:id});
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("ne renvoie pas un mail accepté si le corps de réponse est illisible", async () => {
+    process.env.RESEND_API_KEY = "fictif";
+    fetchMock.mockResolvedValue(new Response("illisible",{status:200}));
+    const result = await sendPreparedEmail({from:"support@example.test",to:["client@example.test"],reply_to:"support@example.test",subject:"Fictif",html:"Test"});
+    expect(result).toEqual({sent:true});
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("returns sent:false when RESEND_API_KEY is missing", async () => {
     delete process.env.RESEND_API_KEY;
     const r = await sendDownloadEmail({

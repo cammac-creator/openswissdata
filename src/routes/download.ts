@@ -40,15 +40,19 @@ downloadRoute.post("/account/download-request", requireAuth, async (c) => {
   const now = Date.now();
   const expiresAt = now + DOWNLOAD_TOKEN_TTL_MS;
   const signedUrl = await signedDownloadUrl(version.r2_key, R2_SIGNED_TTL_S);
-  const currentEnt = db.prepare("SELECT updates_until FROM entitlements WHERE customer_id=? AND dataset_id=?")
-    .get(customerId, parsed.dataset_id) as {updates_until: number | null} | undefined;
-  const release = db.prepare("SELECT released_at FROM versions WHERE dataset_id=? AND version=?")
-    .get(parsed.dataset_id, version.version) as {released_at:number};
-  if (!currentEnt || (currentEnt.updates_until !== null && release.released_at > currentEnt.updates_until)) {
-    return c.json({error:"no_entitlement"},403);
-  }
-  db.prepare("INSERT INTO download_tokens (token, customer_id, dataset_id, version, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)")
-    .run(token, customerId, parsed.dataset_id, version.version, expiresAt, now);
+  const issued = db.transaction(() => {
+    const currentEnt = db.prepare("SELECT updates_until FROM entitlements WHERE customer_id=? AND dataset_id=?")
+      .get(customerId, parsed.dataset_id) as {updates_until: number | null} | undefined;
+    const release = db.prepare("SELECT released_at FROM versions WHERE dataset_id=? AND version=?")
+      .get(parsed.dataset_id, version.version) as {released_at:number} | undefined;
+    if (!release || !currentEnt || (currentEnt.updates_until !== null && release.released_at > currentEnt.updates_until)) return false;
+    const activity = db.prepare("INSERT INTO download_activity(customer_id,dataset_id,version,source,created_at) VALUES(?,?,?,'account',?)")
+      .run(customerId, parsed.dataset_id, version.version, now);
+    db.prepare("INSERT INTO download_tokens (token, customer_id, dataset_id, version, expires_at, created_at, activity_id) VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .run(token, customerId, parsed.dataset_id, version.version, expiresAt, now, Number(activity.lastInsertRowid));
+    return true;
+  }).immediate();
+  if (!issued) return c.json({error:"no_entitlement"},403);
   return c.json({
     download_url: signedUrl,
     share_token: token,
@@ -70,10 +74,10 @@ async function redeemDownload(c: Context) {
   const db = getDb();
   const row = db
     .prepare(
-      "SELECT customer_id, dataset_id, version, expires_at, used_at FROM download_tokens WHERE token = ?",
+      "SELECT customer_id, dataset_id, version, expires_at, used_at, activity_id FROM download_tokens WHERE token = ?",
     )
     .get(token) as
-    | { customer_id: number; dataset_id: string; version: string; expires_at: number; used_at: number | null }
+    | { customer_id: number; dataset_id: string; version: string; expires_at: number; used_at: number | null; activity_id: number | null }
     | undefined;
   if (!row) return c.text("token not found", 404);
   if (row.expires_at < Date.now()) return c.text("token expired", 410);
@@ -97,15 +101,22 @@ async function redeemDownload(c: Context) {
   if (!versionRow) return c.text("version missing", 500);
   const signedUrl = await signedDownloadUrl(versionRow.r2_key, R2_SIGNED_TTL_S);
   // Ne consommer le lien qu'après la signature réussie, en revérifiant les droits.
-  const currentEnt = db.prepare("SELECT updates_until FROM entitlements WHERE customer_id=? AND dataset_id=?")
-    .get(row.customer_id,row.dataset_id) as {updates_until:number|null} | undefined;
-  if (!currentEnt || (currentEnt.updates_until !== null && entitledVersion.released_at > currentEnt.updates_until)) {
-    return c.text("entitlement revoked",403);
-  }
-  const claim = db.prepare(`UPDATE download_tokens SET used_at=COALESCE(used_at,?) WHERE token=?
-    AND (used_at IS NULL OR (? > 0 AND used_at>=?)) AND expires_at>=?`)
-    .run(Date.now(),token,graceMs,Date.now()-graceMs,Date.now());
-  if (!claim.changes) return c.text("token expired or already used",410);
+  const claimed = db.transaction(() => {
+    const currentEnt = db.prepare("SELECT updates_until FROM entitlements WHERE customer_id=? AND dataset_id=?")
+      .get(row.customer_id,row.dataset_id) as {updates_until:number|null} | undefined;
+    if (!currentEnt || (currentEnt.updates_until !== null && entitledVersion.released_at > currentEnt.updates_until)) return "revoked";
+    const now = Date.now();
+    const claim = db.prepare(`UPDATE download_tokens SET used_at=COALESCE(used_at,?) WHERE token=?
+      AND (used_at IS NULL OR (? > 0 AND used_at>=?)) AND expires_at>=?`)
+      .run(now,token,graceMs,now-graceMs,now);
+    if (claim.changes && row.activity_id !== null) {
+      db.prepare("UPDATE download_activity SET authorized_at=COALESCE(authorized_at,?) WHERE id=? AND customer_id=? AND dataset_id=? AND version=?")
+        .run(now,row.activity_id,row.customer_id,row.dataset_id,row.version);
+    }
+    return claim.changes > 0 ? "authorized" : "unavailable";
+  }).immediate();
+  if (claimed === "revoked") return c.text("entitlement revoked",403);
+  if (claimed !== "authorized") return c.text("token expired or already used",410);
   return c.redirect(signedUrl, 302);
 }
 publicDownload.get("/download/:token", redeemDownload);

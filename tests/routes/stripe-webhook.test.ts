@@ -53,6 +53,35 @@ describe("Paiements et livraisons durables", () => {
   });
   afterEach(() => { closeDb();rmSync(tmp,{recursive:true,force:true});vi.unstubAllEnvs(); });
 
+  it("rattache mail et trace à la commande, conserve le résultat au rejeu", async () => {
+    const providerId="11111111-1111-4111-8111-111111111111";
+    send.mockResolvedValue({sent:true,providerId});
+    await post();await processOrderDeliveries();await post();await processOrderDeliveries();
+    expect(rows('order_deliveries')).toHaveLength(1);
+    expect(rows('order_deliveries')[0]).toMatchObject({state:'sent',provider_message_id:providerId,payload_json:null,download_token:null});
+    expect(rows('download_activity')).toHaveLength(1);
+    expect(rows('download_activity')[0]).toMatchObject({order_id:rows('orders')[0].id,customer_id:rows('orders')[0].customer_id,source:'email',authorized_at:null});
+    expect(rows('download_tokens')[0].activity_id).toBe(rows('download_activity')[0].id);
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("annule la trace et le jeton quand la préparation ne peut plus être revendiquée",async()=>{
+    await post();
+    getDb().exec("CREATE TRIGGER refus_preparation BEFORE UPDATE OF payload_json ON order_deliveries WHEN NEW.payload_json IS NOT NULL BEGIN SELECT RAISE(IGNORE); END;");
+    await processOrderDeliveries();
+    expect(rows('download_activity')).toHaveLength(0);expect(rows('download_tokens')).toHaveLength(0);
+    expect(send).not.toHaveBeenCalled();
+    expect(rows('order_deliveries')[0]).toMatchObject({state:'pending',payload_json:null,last_error:'delivery_error'});
+  });
+
+  it("retire la préparation sans envoi lorsqu’aucune connexion mail n’existe", async () => {
+    send.mockResolvedValue({sent:false,reason:'no_api_key'});
+    await post();await processOrderDeliveries();
+    expect(rows('download_activity')).toHaveLength(0);
+    expect(rows('download_tokens')).toHaveLength(0);
+    expect(rows('order_deliveries')[0]).toMatchObject({state:'pending',first_attempt_at:null,provider_message_id:null});
+  });
+
   it("conserve une preuve signée et joint exactement les CGV allemandes acceptées, sans doublon au rejeu", async () => {
     const meta = {...checkoutLegal("de", "https://www.openswissdata.com").metadata, dataset_ids:"tares", locale:"de"};
     const confirmed = {...event({metadata:meta,consent:{terms_of_service:"accepted"}}),created:1790400000};

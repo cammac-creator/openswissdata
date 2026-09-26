@@ -15,7 +15,7 @@ type MailSummary = { mailbox?: string; id: string; source: string; from: string;
 const ours = (mail: SentMail) => /@openswissdata\.com>?\s*$/i.test(mail.from);
 const redact = (text: string) => text
   .replace(/https?:\/\/[^\s<>"']+\/api\/auth\/verify[^\s<>"']*/g, "[lien de connexion personnel masqué]")
-  .replace(/https?:\/\/[^\s<>"']+\/api\/download\/[^\s<>"']*/g, "[lien de téléchargement personnel masqué]")
+  .replace(/(?:https?:\/\/[^\s<>"']+)?\/api\/(?:download|delivery)\/[^\s<>"']*/gi, "[lien de téléchargement personnel masqué]")
   .replace(/https?:\/\/[^\s<>"']+X-Amz-[^\s<>"']*/gi, "[lien de téléchargement temporaire masqué]");
 const accounts = () => ({ support: "contact@openswissdata.com", cam_project: process.env.CRM_PROJECT_MAILBOX?.trim().toLowerCase() ?? "" });
 type Account = "support" | "cam_project";

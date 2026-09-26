@@ -67,5 +67,16 @@ export function runCleanup(db: Database.Database): CleanupResult {
     });
   }
 
+  // Même durée que les traces techniques publiées : aucun historique de téléchargement illimité.
+  const activity = db.prepare("DELETE FROM download_activity WHERE created_at < ?").run(now - EVENTS_RETENTION_MS);
+  entries.push({ name: "download_activity", deleted: activity.changes });
+  totalDeleted += activity.changes;
+
+  // L’identifiant du mail n’a plus d’utilité de support après la même fenêtre ; la preuve d’acceptation reste datée.
+  const messages = db.prepare("UPDATE order_deliveries SET provider_message_id=NULL WHERE provider_message_id IS NOT NULL AND COALESCE(sent_at,created_at) < ?")
+    .run(now - EVENTS_RETENTION_MS);
+  entries.push({ name: "delivery_message_references", deleted: messages.changes });
+  totalDeleted += messages.changes;
+
   return { entries, totalDeleted };
 }

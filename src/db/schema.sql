@@ -68,8 +68,22 @@ CREATE TABLE IF NOT EXISTS sessions (
   FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
 
+-- Traces limitées du service : aucun jeton, lien signé, IP ou contenu de mail.
+CREATE TABLE IF NOT EXISTS download_activity (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL REFERENCES customers(id),
+  dataset_id TEXT NOT NULL REFERENCES datasets(id),
+  version TEXT NOT NULL,
+  order_id INTEGER REFERENCES orders(id),
+  source TEXT NOT NULL CHECK(source IN ('account','email')),
+  created_at INTEGER NOT NULL,
+  authorized_at INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_download_activity_customer ON download_activity(customer_id,created_at DESC);
+
 CREATE TABLE IF NOT EXISTS download_tokens (
   token TEXT PRIMARY KEY,
+  activity_id INTEGER REFERENCES download_activity(id) ON DELETE SET NULL,
   customer_id INTEGER NOT NULL,
   dataset_id TEXT NOT NULL,
   version TEXT NOT NULL,
@@ -109,6 +123,7 @@ CREATE TABLE IF NOT EXISTS order_deliveries (
   first_attempt_at INTEGER,
   payload_json TEXT,
   download_token TEXT,
+  provider_message_id TEXT,
   last_error TEXT,
   sent_at INTEGER,
   created_at INTEGER NOT NULL,

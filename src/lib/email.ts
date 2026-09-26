@@ -2,6 +2,7 @@ import type { Tier } from "../mcp/oauth/scopes.js";
 
 export interface EmailSendResult {
   sent: boolean;
+  providerId?: string;
   reason?: "no_api_key" | "placeholder_key" | "resend_error";
   details?: string;
 }
@@ -91,7 +92,12 @@ export async function sendPreparedEmail(payload: PreparedEmail, idempotencyKey?:
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(15_000),
       });
-      if (res.ok) return { sent: true };
+      if (res.ok) {
+        // Un 2xx confirme l’acceptation, même si son corps est illisible : aucun second envoi pour récupérer l’identifiant.
+        const data: unknown = await res.json().catch(() => null);
+        const id = data && typeof data === "object" && "id" in data ? data.id : undefined;
+        return { sent: true, ...(typeof id === "string" && /^[a-f0-9-]{36}$/i.test(id) ? { providerId: id } : {}) };
+      }
 
       const isRetryable = res.status >= 500 || res.status === 429;
       console.error(

@@ -198,4 +198,39 @@ describe("download routes", () => {
     });
     expect(res.status).toBe(200);
   });
+  it("sépare lien fourni, prévisualisation et autorisation, sans prolonger la première trace", async () => {
+    const app=createApp(),db=getDb();
+    const result=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const {share_token}=await result.json();
+    const activity=()=>db.prepare('SELECT source,order_id,authorized_at FROM download_activity').get();
+    expect(activity()).toEqual({source:'account',order_id:null,authorized_at:null});
+    await app.request('/api/delivery/'+share_token);
+    expect(activity()).toEqual({source:'account',order_id:null,authorized_at:null});
+    expect((await app.request('/api/delivery/'+share_token,{method:'POST'})).status).toBe(302);
+    const first=activity();expect(first).toMatchObject({authorized_at:expect.any(Number)});
+    await app.request('/api/delivery/'+share_token,{method:'POST'});
+    expect(activity()).toEqual(first);
+    db.prepare('DELETE FROM download_tokens').run();
+    expect(activity()).toEqual(first);
+  });
+
+  it("ne produit aucune autorisation de téléchargement quand les droits sont retirés", async () => {
+    const app=createApp(),db=getDb();
+    const result=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const {share_token}=await result.json();
+    db.prepare('DELETE FROM entitlements').run();
+    expect((await app.request('/api/delivery/'+share_token,{method:'POST'})).status).toBe(403);
+    expect(db.prepare('SELECT authorized_at FROM download_activity').get()).toEqual({authorized_at:null});
+  });
+
+  it("revérifie les droits après la signature distante avant création ou consommation",async()=>{
+    const app=createApp(),db=getDb();
+    const result=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const {share_token}=await result.json();
+    signedUrlMock.mockImplementationOnce(async()=>{db.prepare('DELETE FROM entitlements').run();return 'https://signed.example.test/secret'});
+    expect((await app.request('/api/delivery/'+share_token,{method:'POST'})).status).toBe(403);
+    expect(db.prepare('SELECT authorized_at FROM download_activity').get()).toEqual({authorized_at:null});
+    expect(db.prepare('SELECT used_at FROM download_tokens').get()).toEqual({used_at:null});
+  });
+
 });
