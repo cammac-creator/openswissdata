@@ -75,6 +75,7 @@ interface AccountJsCopy {
   loginSending: string;
   loginSuccess: string;
   loginError: string;
+  loginLimited: string;
   loginNetworkError: string;
   loadError: string;
 }
@@ -178,6 +179,7 @@ const JS: Record<Lang, AccountJsCopy> = {
     mcpPortalError: "Impossible d'ouvrir le portail de facturation. Réessayez plus tard.",
     loginSending: "Envoi en cours…",
     loginSuccess: "✓ Vérifiez votre boîte de réception — le lien est valable 15 minutes.",
+    loginLimited: "Trop de demandes rapprochées. Patientez avant de réessayer, ou ouvrez un lien déjà reçu.",
     loginError: "Une erreur est survenue. Veuillez réessayer.",
     loginNetworkError: "Erreur réseau. Veuillez réessayer.",
     loadError: "Impossible de charger votre espace client. Veuillez actualiser la page.",
@@ -205,6 +207,7 @@ const JS: Record<Lang, AccountJsCopy> = {
     mcpPortalError: "Das Abrechnungsportal kann nicht geöffnet werden. Bitte versuchen Sie es später erneut.",
     loginSending: "Wird gesendet…",
     loginSuccess: "✓ Prüfen Sie Ihren Posteingang — der Link ist 15 Minuten gültig.",
+    loginLimited: "Zu viele Anfragen kurz hintereinander. Warten Sie vor einem neuen Versuch oder öffnen Sie einen bereits erhaltenen Link.",
     loginError: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     loginNetworkError: "Netzwerkfehler. Bitte versuchen Sie es erneut.",
     loadError: "Ihr Kundenbereich kann nicht geladen werden. Bitte aktualisieren Sie die Seite.",
@@ -232,6 +235,7 @@ const JS: Record<Lang, AccountJsCopy> = {
     mcpPortalError: "Unable to open the billing portal. Please try again later.",
     loginSending: "Sending…",
     loginSuccess: "✓ Check your inbox — the link is valid for 15 minutes.",
+    loginLimited: "Too many requests in a short time. Wait before trying again, or open a link you have already received.",
     loginError: "An error occurred. Please try again.",
     loginNetworkError: "Network error. Please try again.",
     loadError: "Unable to load your account. Please refresh the page.",
@@ -314,7 +318,7 @@ const stepsLang = steps[lang];
                   {c.submitBtn} <span class="arrow">→</span>
                 </button>
               </div>
-              <p id="login-msg" class="account-msg"></p>
+              <p id="login-msg" class="account-msg" role="status" aria-atomic="true"></p>
             </form>
             <p class="account-login-reassure">
               <span class="account-lock" aria-hidden="true"></span>
@@ -479,7 +483,7 @@ const stepsLang = steps[lang];
   /* Message de retour (textContent piloté par le JS) */
   .account-msg { font-size: 13px; line-height: 1.5; color: var(--ink-mute); margin: 14px 0 0; min-height: 1px; }
   .account-msg.ok  { color: var(--green); }
-  .account-msg.err { color: var(--accent); }
+  .account-msg.err { color: #b42332; }
 
   .account-login-reassure {
     display: flex;
@@ -933,7 +937,7 @@ const stepsLang = steps[lang];
             msgEl.textContent = osdAcct.s.loginSuccess;
             msgEl.className = "account-msg ok";
           } else {
-            msgEl.textContent = osdAcct.s.loginError;
+            msgEl.textContent = r.status === 429 ? osdAcct.s.loginLimited : osdAcct.s.loginError;
             msgEl.className = "account-msg err";
           }
         } catch (err) {

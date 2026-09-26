@@ -342,3 +342,16 @@ CREATE TABLE IF NOT EXISTS crm_languages (
   source TEXT NOT NULL CHECK(source IN ('manual','checkout')),
   updated_at INTEGER NOT NULL
 );
+
+-- Limites de connexion : identifiants HMAC, sans adresse IP ni email en clair.
+CREATE TABLE IF NOT EXISTS auth_request_limits (
+  scope TEXT NOT NULL CHECK(scope IN ('ip','email')),
+  identity_key TEXT NOT NULL CHECK(length(identity_key)=64),
+  budget_ms INTEGER NOT NULL CHECK(typeof(budget_ms)='integer' AND budget_ms >= 0),
+  updated_at INTEGER NOT NULL,
+  accepted_at INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL,
+  PRIMARY KEY(scope,identity_key)
+);
+CREATE INDEX IF NOT EXISTS idx_auth_request_limits_expiry ON auth_request_limits(expires_at);
+CREATE INDEX IF NOT EXISTS idx_auth_request_limits_scope_expiry ON auth_request_limits(scope,expires_at);
