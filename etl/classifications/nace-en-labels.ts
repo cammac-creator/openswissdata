@@ -15,9 +15,9 @@
  * `data/classifications/classifications-cache/`). We just project the
  * already-parsed `NomenclatureRow` array — no extra network call.
  *
- * Re-use policy: Eurostat publishes NACE under their re-use policy (free
- * for commercial use with attribution). See
- * https://ec.europa.eu/eurostat/web/main/about-us/policies/copyright
+ * Réutilisation : politique Eurostat avec attribution, indication des modifications
+ * et réserve des notices particulières/droits tiers. Suivi : docs/droits-des-sources.md.
+ * https://ec.europa.eu/eurostat/help/copyright-notice
  */
 
 import type { NomenclatureRow } from "./types.js";
