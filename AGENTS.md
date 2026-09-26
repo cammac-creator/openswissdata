@@ -114,3 +114,8 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Une prévisualisation GET du nouveau lien ne produit pas de trace d’utilisation. Une autorisation réussie ne prouve ni identité du lecteur, ni téléchargement complet, ni ouverture du fichier. Les anciens liens GET peuvent être consultés par des robots.
 - Le CRM expose uniquement les métadonnées nécessaires ; les liens de connexion/livraison sont masqués avant affichage. Les originaux des connecteurs restent bruts, chiffrés dans le bronze autorisé, avec purge distincte.
 - Retour arrière : garder une version de nettoyage compatible avec `download_activity` et `provider_message_id`. Ne pas désactiver leur purge en restaurant l’ancien code. Un futur effacement de compte doit traiter ces traces avec les autres clés étrangères ; aucun effacement de compte/commande automatique n’existe actuellement.
+
+## Polices et confidentialité — 26.09.2026
+- Les cinq familles sont servies localement, fichiers WOFF2 officiels inchangés et empreintes produites par Astro. Aucun téléchargement de police au build ni connexion du navigateur à Google Fonts.
+- Les provenances et SHA sont dans `web/src/assets/fonts/provenance.json`, les licences OFL sont distribuées dans `/fonts/licenses/`. Le contrôle `fonts:check`, obligatoire après le build, vérifie les octets, les licences, les liens CSS et l’absence d’appels Google Fonts.
+- Importer `fonts-geist.css` dans les nouveaux gabarits qui utilisent Geist. Ne pas rétablir de domaine tiers dans `style-src` ou `font-src` pour charger une police.
