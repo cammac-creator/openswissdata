@@ -16,6 +16,7 @@ export function runCleanup(db: Database.Database, now = Date.now()): CleanupResu
   const plans: Array<{ name: CleanupEntry['name']; sql: string; cutoff: number; optional?: boolean; unit?: CleanupEntry['unit'] }> = [
     // Les liens de connexion actuels sont dans sessions ; conserver la purge de l’ancienne table si elle existe.
     { name: 'magic_links', sql: 'DELETE FROM magic_links WHERE expires_at < ?', cutoff: now, optional: true },
+    { name: 'auth_request_limits', sql: 'DELETE FROM auth_request_limits WHERE expires_at <= ?', cutoff: now, optional: true },
     { name: 'sessions', sql: 'DELETE FROM sessions WHERE expires_at < ?', cutoff: now },
     { name: 'download_tokens', sql: 'DELETE FROM download_tokens WHERE expires_at < ?', cutoff: now },
     { name: 'mcp_oauth_codes', sql: 'DELETE FROM mcp_oauth_codes WHERE expires_at < ?', cutoff: now },
@@ -93,7 +94,7 @@ const proofSchema = z.object({
     name: z.enum(CLEANUP_CATEGORIES), deleted: z.number().int().nonnegative().safe(),
     status: z.enum(['ok', 'not_applicable', 'error']), unit: z.enum(['rows', 'references', 'folders']),
     error: z.enum(['database_error', 'storage_error', 'proof_error', 'timestamp_format']).optional(),
-  })).min(10).max(11),
+  })).min(10).max(12),
 });
 
 /** N’expose que le témoin connu et cohérent ; un ancien/mauvais JSON n’est pas une preuve de réussite. */

@@ -1,5 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
+import { bodyLimit } from "hono/body-limit";
+import { HTTPException } from "hono/http-exception";
+import { authRequestIp, consumeAuthLimit, reportAuthLimitFailure } from "../lib/auth-limits.js";
 import { getDb } from "../lib/db.js";
 import { generateToken, isValidTokenFormat } from "../lib/tokens.js";
 import { sendMagicLinkEmail, parseLocale } from "../lib/email.js";
@@ -9,45 +12,38 @@ export const authRoute = new Hono();
 const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;      // 15 min
 const SESSION_TTL_MS = 30 * 24 * 3600 * 1000;  // 30 days
 
-// H3: per-IP rate limit for magic-link endpoint.
-// Map<ip, lastRequestTimestamp>. Capped at 10 000 entries (oldest evicted first).
-const RATE_LIMIT_WINDOW_MS = 10_000; // 10 seconds between requests per IP
-const RATE_LIMIT_MAX_ENTRIES = 10_000;
-export const magicLinkRateMap = new Map<string, number>();
-
-function getRateLimitIp(c: { req: { header: (name: string) => string | undefined } }): string {
-  const xff = c.req.header("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-  return "unknown";
-}
+// Réponses de connexion privées, y compris les redirections et les refus.
+authRoute.use('*', async (c, next) => { c.header('Cache-Control', 'no-store'); await next(); });
+authRoute.use('/magic-link', bodyLimit({ maxSize: 4096, onError: c => c.json({ error: 'body_too_large' }, 413) }));
 
 function isProd(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
 authRoute.post("/magic-link", async (c) => {
-  // H3: per-IP rate limit
-  const ip = getRateLimitIp(c);
-  const lastRequest = magicLinkRateMap.get(ip);
-  const now = Date.now();
-  if (lastRequest !== undefined && now - lastRequest < RATE_LIMIT_WINDOW_MS) {
-    return c.json({ error: "too_many_requests" }, 429);
-  }
-  // Evict oldest entries if at capacity
-  if (magicLinkRateMap.size >= RATE_LIMIT_MAX_ENTRIES) {
-    const oldest = magicLinkRateMap.keys().next().value;
-    if (oldest !== undefined) magicLinkRateMap.delete(oldest);
-  }
-  magicLinkRateMap.set(ip, now);
+  const db = getDb();
+  try {
+    if (!consumeAuthLimit(db, 'ip', authRequestIp(c))) {
+      c.header('Retry-After', '60');
+      return c.json({ error: 'too_many_requests' }, 429);
+    }
+  } catch (error) { reportAuthLimitFailure(error); return c.json({ error: 'temporarily_unavailable' }, 503); }
 
   let parsed;
   try {
-    parsed = z.object({ email: z.string().email(), return_to: z.literal("admin").optional() }).parse(await c.req.json());
-  } catch {
+    parsed = z.object({ email: z.string().trim().max(320).email(), return_to: z.literal("admin").optional() }).parse(await c.req.json());
+  } catch (error) {
+    if (error instanceof HTTPException && error.status === 413) return c.json({ error: "body_too_large" }, 413);
     return c.json({ error: "invalid_body" }, 400);
   }
   const { email } = parsed;
-  const db = getDb();
+  // Même compteur pour une adresse connue ou inconnue, avant toute recherche de compte.
+  try {
+    if (!consumeAuthLimit(db, 'email', email)) {
+      c.header('Retry-After', '60');
+      return c.json({ error: 'too_many_requests' }, 429);
+    }
+  } catch (error) { reportAuthLimitFailure(error); return c.json({ error: 'temporarily_unavailable' }, 503); }
   const row = db.prepare("SELECT id, locale FROM customers WHERE email = ?").get(email) as
     | { id: number; locale: string | null }
     | undefined;

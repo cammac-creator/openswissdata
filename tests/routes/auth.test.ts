@@ -12,7 +12,6 @@ vi.mock("../../src/lib/email.js", () => ({
 
 import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
-import { magicLinkRateMap } from "../../src/routes/auth.js";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -29,14 +28,16 @@ describe("auth routes", () => {
     db.prepare("INSERT INTO customers (email, created_at) VALUES (?, ?)").run("alice@example.com", Date.now());
     closeDb();
     sendMagicLinkMock.mockClear();
-    // Clear rate-limit map between tests so requests don't bleed across test cases
-    magicLinkRateMap.clear();
+    vi.stubEnv("RAILWAY_ENVIRONMENT_ID", "environnement-fictif");
+    vi.stubEnv("SESSION_SECRET", "cle-de-limitation-fictive-pour-tests");
   });
   afterEach(() => {
     closeDb();
     rmSync(tmp, { recursive: true, force: true });
     delete process.env.DATABASE_PATH;
     delete process.env.BASE_URL;
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
   });
 
   describe("POST /api/auth/magic-link — rate limiting (H3)", () => {
@@ -47,7 +48,7 @@ describe("auth routes", () => {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-forwarded-for": "1.2.3.4",
+          "x-real-ip": "1.2.3.4",
         },
         body: JSON.stringify({ email: "alice@example.com" }),
       });
@@ -58,20 +59,20 @@ describe("auth routes", () => {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-forwarded-for": "1.2.3.4",
+          "x-real-ip": "1.2.3.4",
         },
         body: JSON.stringify({ email: "alice@example.com" }),
       });
       expect(r2.status).toBe(429);
     });
 
-    it("H3: different IPs are not rate-limited by each other", async () => {
+    it("Des IP différentes restent indépendantes pour des adresses différentes", async () => {
       const app = createApp();
       const r1 = await app.request("/api/auth/magic-link", {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-forwarded-for": "10.0.0.1",
+          "x-real-ip": "10.0.0.1",
         },
         body: JSON.stringify({ email: "alice@example.com" }),
       });
@@ -82,9 +83,9 @@ describe("auth routes", () => {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-forwarded-for": "10.0.0.2",
+          "x-real-ip": "10.0.0.2",
         },
-        body: JSON.stringify({ email: "alice@example.com" }),
+        body: JSON.stringify({ email: "autre@example.test" }),
       });
       expect(r2.status).toBe(200);
     });
@@ -124,6 +125,69 @@ describe("auth routes", () => {
         body: JSON.stringify({ email: "not-an-email" }),
       });
       expect(res.status).toBe(400);
+    });
+  });
+
+  describe("Limites persistantes de demande de connexion", () => {
+    const now = 1_790_415_000_000;
+    const request = (app: ReturnType<typeof createApp>, email: string, ip: string, extra = {}) => app.request("/api/auth/magic-link", {
+      method: "POST", headers: { "content-type": "application/json", "x-real-ip": ip, ...extra }, body: JSON.stringify({ email }),
+    });
+    it("protège la même adresse malgré un changement de réseau et après réouverture de la base", async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(now);
+      expect((await request(createApp(), 'alice@example.com', '192.0.2.1')).status).toBe(200);
+      closeDb();
+      const refused = await request(createApp(), 'alice@example.com', '192.0.2.2');
+      expect(refused.status).toBe(429);expect(refused.headers.get('cache-control')).toBe('no-store');
+      expect(refused.headers.get('retry-after')).toBe('60');expect(sendMagicLinkMock).toHaveBeenCalledTimes(1);
+    });
+    it("la limite IP survit à une réouverture et ignore un préfixe X-Forwarded-For forgé", async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(now);
+      expect((await request(createApp(), 'inconnu1@example.test', '192.0.2.3', {'x-forwarded-for':'198.51.100.1'})).status).toBe(200);
+      closeDb();
+      expect((await request(createApp(), 'inconnu2@example.test', '192.0.2.3', {'x-forwarded-for':'198.51.100.2'})).status).toBe(429);
+    });
+    it("applique le même refus aux adresses inconnues et à leurs variantes de casse", async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(now);
+      const first = await request(createApp(), 'inconnu@example.test', '192.0.2.4');
+      const second = await request(createApp(), 'INCONNU@example.test', '192.0.2.5');
+      expect(first.status).toBe(200);expect(await first.json()).toEqual({ok:true});
+      expect(second.status).toBe(429);expect(await second.json()).toEqual({error:'too_many_requests'});
+      expect(sendMagicLinkMock).not.toHaveBeenCalled();
+    });
+    it("un refus ne retire ni les liens reçus ni les sessions déjà actives", async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(now);
+      const app=createApp();await request(app, 'alice@example.com', '192.0.2.6');
+      const token=(getDb().prepare('SELECT token FROM sessions').get() as {token:string}).token;
+      expect((await request(app, 'alice@example.com', '192.0.2.7')).status).toBe(429);
+      const verified=await app.request('/api/auth/verify?token='+token);
+      expect(verified.status).toBe(302);expect(verified.headers.get('location')).toBe('/account?auth=ok');
+      const cookie=verified.headers.get('set-cookie')!.split(';')[0];
+      expect((await app.request('/api/account',{headers:{cookie}})).status).toBe(200);
+    });
+    it("refuse un corps trop volumineux avant de créer un jeton", async () => {
+      const response=await createApp().request('/api/auth/magic-link',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:'alice@example.com',extra:'x'.repeat(5000)})});
+      expect(response.status).toBe(413);expect(sendMagicLinkMock).not.toHaveBeenCalled();
+      expect((getDb().prepare('SELECT COUNT(*) AS n FROM sessions').get() as {n:number}).n).toBe(0);
+    });
+    it("ne permet pas de varier des en-têtes invalides pour changer le compteur commun", async () => {
+      const app=createApp();
+      expect((await request(app,'inconnu-a@example.test','invalide-a')).status).toBe(200);
+      expect((await request(app,'inconnu-b@example.test','invalide-b')).status).toBe(429);
+      expect(sendMagicLinkMock).not.toHaveBeenCalled();
+    });
+    it("borne aussi un corps transmis en flux sans longueur déclarée", async () => {
+      const bytes=new TextEncoder().encode(JSON.stringify({email:'alice@example.com',extra:'x'.repeat(5000)}));
+      const stream=new ReadableStream({start(controller){controller.enqueue(bytes);controller.close()}});
+      const init={method:'POST',headers:{'content-type':'application/json'},body:stream,duplex:'half'} as RequestInit & {duplex:'half'};
+      const response=await createApp().request('/api/auth/magic-link',init);
+      expect(response.status).toBe(413);expect(sendMagicLinkMock).not.toHaveBeenCalled();
+    });
+    it("reste fermé si le stockage des limites est indisponible", async () => {
+      getDb().exec('DROP TABLE auth_request_limits');
+      const response=await request(createApp(),'alice@example.com','192.0.2.8');
+      expect(response.status).toBe(503);expect(await response.json()).toEqual({error:'temporarily_unavailable'});
+      expect(sendMagicLinkMock).not.toHaveBeenCalled();
     });
   });
 
