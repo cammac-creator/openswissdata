@@ -41,6 +41,8 @@ export function getDb(path?: string, options: { fileMustExist?: boolean } = {}):
   ensureColumn(db, "orders", "dispute_status", "TEXT");
   ensureColumn(db, "orders", "financial_checked_at", "INTEGER");
   ensureColumn(db, "order_deliveries", "provider_message_id", "TEXT");
+  // Une trace ancienne ne reçoit pas rétroactivement une origine serveur supposée.
+  ensureColumn(db, "events", "origin", "TEXT NOT NULL DEFAULT 'legacy' CHECK (origin IN ('legacy','server','client'))");
   ensureColumn(db, "download_tokens", "activity_id", "INTEGER REFERENCES download_activity(id) ON DELETE SET NULL");
   db.exec("CREATE INDEX IF NOT EXISTS idx_download_tokens_activity ON download_tokens(activity_id)");
   migrateOrderRights(db);

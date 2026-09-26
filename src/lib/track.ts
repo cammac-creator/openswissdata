@@ -3,22 +3,17 @@ import type { Context, MiddlewareHandler } from "hono";
 import { getDb } from "./db.js";
 
 /**
- * Event tracking for the /admin dashboard.
- *
- * Privacy model: visitor_hash = SHA256(ip + ua + SESSION_SECRET + day-bucket).
- * The day-bucket suffix means the same IP+UA produces a *different* hash each
- * day — sufficient to count unique visitors over a window without persisting a
- * stable identifier. Aligned with /legal/privacy ("statistiques anonymes").
- *
- * Writes are best-effort and never block the request: we wrap the INSERT in a
- * setImmediate + try/catch so a tracking failure (disk full, schema drift)
- * never breaks the user-facing route.
+ * Mesures du bureau : l’origine décrit qui a enregistré la trace.
+ * « server » atteste une observation applicative, pas la présence d’un humain.
+ * Les identifiants temporaires sont pseudonymes et tournent encore à minuit UTC.
+ * L’écriture différée reste facultative ; une panne de mesure ne bloque pas le service.
  */
 
 type EventKind = "api_request" | "custom" | "conversion";
 
 export type TrackArgs = {
   kind: EventKind;
+  origin: 'server' | 'client';
   name?: string | null;
   status?: number | null;
   duration_ms?: number | null;
@@ -30,15 +25,17 @@ export type TrackArgs = {
   meta_json?: string | null;
 };
 
+let lastFailureLog = 0;
 export function track(args: TrackArgs): void {
+  const timestamp = Date.now();
   setImmediate(() => {
     try {
       const db = getDb();
       db.prepare(`
         INSERT INTO events (
           kind, name, status, duration_ms, customer_id,
-          visitor_hash, country, referer, ua_class, meta_json, ts
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          visitor_hash, country, referer, ua_class, meta_json, origin, ts
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         args.kind,
         args.name ?? null,
@@ -50,7 +47,8 @@ export function track(args: TrackArgs): void {
         args.referer ?? null,
         args.ua_class ?? null,
         args.meta_json ?? null,
-        Date.now(),
+        args.origin,
+        timestamp,
       );
     } catch (err) {
       // Best-effort tracking — never break the response. We silence
@@ -59,7 +57,11 @@ export function track(args: TrackArgs): void {
       // other error is logged once.
       const code = (err as { code?: string } | undefined)?.code;
       if (typeof code !== "string" || !code.startsWith("SQLITE_CONSTRAINT")) {
-        console.warn("[track] insert failed", err);
+        const now = Date.now();
+        if (!lastFailureLog || now < lastFailureLog || now - lastFailureLog >= 60_000) {
+          lastFailureLog = now;
+          console.warn('[mesures] enregistrement momentanément indisponible');
+        }
       }
     }
   });
@@ -74,28 +76,30 @@ export function visitorHashFromRequest(c: Context): string {
 }
 
 export function countryFromRequest(c: Context): string | null {
-  // Cloudflare proxy header (preferred), then Vercel-style, then null.
-  return (
-    c.req.header("cf-ipcountry") ??
-    c.req.header("x-vercel-ip-country") ??
-    null
-  );
+  // Valeur déclarée et bornée, pas une géolocalisation vérifiée par l’application.
+  const country = c.req.header('cf-ipcountry') ?? c.req.header('x-vercel-ip-country');
+  return country && /^[A-Za-z]{2}$/.test(country) ? country.toUpperCase() : null;
 }
 
 export function uaClassFromRequest(c: Context): string {
-  const ua = (c.req.header("user-agent") ?? "").toLowerCase();
-  if (!ua) return "other";
+  const raw = c.req.header("user-agent") ?? '';
+  if (!raw || raw.length > 1024) return 'other';
+  const ua = raw.toLowerCase();
   if (/bot|crawl|spider|slurp|preview|fetch/.test(ua)) return "bot";
-  if (/curl|wget|python|node|postman|httpie|go-http|headless|scanner/.test(ua)) return "automation";
+  if (/curl|wget|python|node|postman|httpie|go-http|headless|scanner|okhttp|dalvik|libwww|httpclient/.test(ua)) return "automation";
+  // La présence d’un nom de navigateur reste une déclaration, jamais une preuve humaine.
+  const browser = /mozilla\//.test(ua) && (/(firefox|fxios|chrome|crios|edg|edga|edgios|opr)\/[\d.]+/.test(ua) || (/version\/[\d.]+/.test(ua) && /safari\/[\d.]+/.test(ua)) || /trident\/[\d.]+/.test(ua));
+  if (!browser) return 'other';
   if (/mobile|android|iphone|ipad/.test(ua)) return "mobile";
   return "desktop";
 }
 
 export function refererOrigin(c: Context): string | null {
   const ref = c.req.header("referer") ?? c.req.header("referrer");
-  if (!ref) return null;
+  if (!ref || ref.length > 2048) return null;
   try {
-    return new URL(ref).origin;
+    const url = new URL(ref);
+    return ['https:', 'http:'].includes(url.protocol) && Buffer.byteLength(url.origin, 'utf8') <= 255 ? url.origin : null;
   } catch {
     return null;
   }
@@ -132,6 +136,7 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
 
   track({
     kind: "api_request",
+    origin: 'server',
     // Un lien de livraison porte un droit d'accès ; seul le type de route est mesuré.
     name: path.replace(/^\/api\/(download|delivery)\/.*/, "/api/$1/:token"),
     status: c.res.status,
@@ -153,5 +158,5 @@ export const trackPageView: MiddlewareHandler = async (c, next) => {
   if (/^\/(api|admin|account|_astro)(\/|$)/.test(path) || /^\/(en|de)\/account/.test(path)) return;
   const referer = refererOrigin(c);
   const own = referer && /\/(www\.)?openswissdata\.com$/.test(referer);
-  track({ kind: "custom", name: "page_view", visitor_hash: visitorHashFromRequest(c), ua_class: uaClassFromRequest(c), country: countryFromRequest(c), referer: own ? null : referer, meta_json: JSON.stringify({ path }) });
+  track({ kind: "custom", name: "page_view", origin: 'server', visitor_hash: visitorHashFromRequest(c), ua_class: uaClassFromRequest(c), country: countryFromRequest(c), referer: own ? null : referer, meta_json: JSON.stringify({ path }) });
 };

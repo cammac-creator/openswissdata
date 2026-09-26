@@ -290,6 +290,7 @@ CREATE TABLE IF NOT EXISTS events (
   referer TEXT,
   ua_class TEXT,
   meta_json TEXT,
+  origin TEXT NOT NULL DEFAULT 'legacy' CHECK (origin IN ('legacy','server','client')),
   ts INTEGER NOT NULL
 );
 

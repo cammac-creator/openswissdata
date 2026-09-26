@@ -55,6 +55,7 @@ export function trackMcpToolCall(
 
       track({
         kind: "custom",
+        origin: 'server',
         name: "mcp_tool_call",
         status,
         duration_ms: durationMs,

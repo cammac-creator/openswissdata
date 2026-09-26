@@ -1,5 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
+import { bodyLimit } from 'hono/body-limit';
+import { HTTPException } from 'hono/http-exception';
+import { authRequestIp } from '../lib/auth-limits.js';
 import {
   track,
   visitorHashFromRequest,
@@ -14,32 +17,29 @@ const Body = z.object({
   name: z.string().min(1).max(64).regex(/^[a-z0-9_.\-:]+$/i),
   kind: z.enum(["custom", "conversion"]).default("custom"),
   meta: z.record(z.unknown()).optional(),
-});
+}).strict();
 
-// Caps to keep meta_json bounded — stops a hostile client from filling the DB.
+// Limiter le corps et les métadonnées avant tout stockage.
 const MAX_META_BYTES = 2048;
 
-// Per-IP token bucket: 60 events / 60 s. Capped at 10k IPs (oldest evicted).
-// Without this a script can fill the events table arbitrarily fast since the
-// endpoint is unauthenticated by design (front-end CTA tracking).
+// Fenêtre fixe : 60 déclarations par minute et origine du proxy, en mémoire.
+// Limite locale au processus, pas une protection durable ou distribuée.
+// Les statistiques restent déclaratives même si cette limite est respectée.
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX_PER_WINDOW = 60;
 const RATE_MAX_ENTRIES = 10_000;
 type Bucket = { count: number; windowStart: number };
 const rateMap = new Map<string, Bucket>();
-
-function rateLimitIp(c: { req: { header: (n: string) => string | undefined } }): string {
-  const xff = c.req.header("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-  return "unknown";
-}
+const reserved = new Set(['page_view', 'mcp_tool_call', 'checkout_started', 'payment_paid', 'delivery_sent', 'download_authorized']);
+eventsRoute.use('*', async (c, next) => { c.header('Cache-Control', 'no-store'); await next(); });
+eventsRoute.use('*', bodyLimit({ maxSize: 4096, onError: c => c.json({ error: 'body_too_large' }, 413) }));
 
 eventsRoute.post("/track", async (c) => {
-  // Rate limit before parsing body so a flood is cheap to reject.
-  const ip = rateLimitIp(c);
+  // Refuser les demandes trop nombreuses avant de décoder le JSON.
+  const ip = authRequestIp(c);
   const now = Date.now();
   let bucket = rateMap.get(ip);
-  if (!bucket || now - bucket.windowStart > RATE_WINDOW_MS) {
+  if (!bucket || now - bucket.windowStart >= RATE_WINDOW_MS) {
     bucket = { count: 0, windowStart: now };
     rateMap.set(ip, bucket);
   }
@@ -55,14 +55,16 @@ eventsRoute.post("/track", async (c) => {
   let body: z.infer<typeof Body>;
   try {
     body = Body.parse(await c.req.json());
-  } catch {
+  } catch (error) {
+    if (error instanceof HTTPException) throw error;
     return c.json({ error: "invalid_body" }, 400);
   }
+  if (reserved.has(body.name.toLowerCase()) || body.name.toLowerCase().startsWith('server.')) return c.json({ error: 'reserved_event' }, 400);
 
   let meta_json: string | null = null;
   if (body.meta) {
     const s = JSON.stringify(body.meta);
-    if (s.length > MAX_META_BYTES) {
+    if (Buffer.byteLength(s, 'utf8') > MAX_META_BYTES) {
       return c.json({ error: "meta_too_large" }, 413);
     }
     meta_json = s;
@@ -70,6 +72,7 @@ eventsRoute.post("/track", async (c) => {
 
   track({
     kind: body.kind,
+    origin: 'client',
     name: body.name,
     visitor_hash: visitorHashFromRequest(c),
     country: countryFromRequest(c),
