@@ -15,8 +15,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-// trackMcpToolCall defers via setImmediate, then track() defers the INSERT via
-// a nested setImmediate — drain several ticks to be safe.
+// Attendre la file bornée avant de relire les événements fictifs.
 const flush = async () => {
   for (let i = 0; i < 5; i++) await new Promise((r) => setImmediate(r));
 };
