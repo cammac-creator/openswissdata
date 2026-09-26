@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { buildBundle } from "../../etl/finma/bundle.js";
+import { buildBundle as buildProductionBundle } from "../../etl/finma/bundle.js";
+import { withTestSignature } from "../helpers/signature.js";
+const buildBundle = withTestSignature(buildProductionBundle);
 import { ingestOneSource } from "../../etl/finma/ingest.js";
 import { FINMA_SOURCES } from "../../etl/finma/sources.js";
 import { mkdtempSync, rmSync, existsSync } from "node:fs";

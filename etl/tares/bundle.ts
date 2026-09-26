@@ -8,7 +8,7 @@ import { pipeline } from "node:stream/promises";
 import { stringify as csvStream } from "csv-stringify";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
-import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile } from "../shared/provenance.js";
+import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
 import type { DutyRateRow } from "./parse-bazg-xlsx.js";
 import type { TaresRow } from "./types.js";
 import {
@@ -99,6 +99,8 @@ export interface BuildBundleOptions {
    * depend on freetsa.org. Defaults to `true` in production releases.
    */
   withTimestamp?: boolean;
+  /** Injection explicite pour les tests ; les collectes ne passent pas cette option. */
+  signing?: SignProvenanceOptions;
   /**
    * Optional pre-computed embeddings (one row per HS8 × lang). When provided,
    * a `tares_embeddings.parquet` file is added to the bundle, listed in
@@ -332,6 +334,7 @@ https://www.bazg.admin.ch/
     permissionDate: profile.permissionDate,
     jurisdiction: profile.jurisdiction,
     withTimestamp: opts.withTimestamp,
+    signing: opts.signing,
   });
   writeFileSync(join(workDir, "provenance.json"), JSON.stringify(provenance, null, 2), "utf8");
 

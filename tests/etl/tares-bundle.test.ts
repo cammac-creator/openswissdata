@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { ingestFromFixture } from "../../etl/tares/ingest.js";
-import { buildBundle } from "../../etl/tares/bundle.js";
+import { buildBundle as buildProductionBundle } from "../../etl/tares/bundle.js";
+import { withTestSignature } from "../helpers/signature.js";
+const buildBundle = withTestSignature(buildProductionBundle);
 import { mkdtempSync, rmSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

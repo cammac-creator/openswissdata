@@ -12,17 +12,11 @@ import {
 } from "../../etl/shared/provenance.js";
 import { verifyProvenanceZip } from "../../etl/shared/verify-provenance.js";
 import { ingestFromFixture } from "../../etl/tares/ingest.js";
-import { buildBundle } from "../../etl/tares/bundle.js";
+import { buildBundle as buildProductionBundle } from "../../etl/tares/bundle.js";
+import { withTestSignature, testSigning } from "../helpers/signature.js";
+const buildBundle = withTestSignature(buildProductionBundle);
 
-/**
- * Global Vitest setup (`tests/setup.ts`) provisions:
- *   - a temporary Ed25519 key pair (env `OSD_SIGNING_KEY_ED25519` + the public key
- *     written over `packages/schemas/openswissdata.pubkey.ed25519` for the suite)
- *   - `OSD_SKIP_RFC3161=1` so the bundle pipeline does not call freetsa.org
- *
- * These tests therefore exercise the real signing path against a test pubkey.
- */
-
+// La paire de test est injectée explicitement, sans variable globale ni écriture dans les sources.
 const PUBKEY_PATH = resolve(process.cwd(), "packages/schemas/openswissdata.pubkey.ed25519");
 
 describe("canonicalize()", () => {
@@ -73,7 +67,7 @@ describe("signProvenance()", () => {
       permissionDate: PERMISSION_PROFILES.tares.permissionDate,
       jurisdiction: PERMISSION_PROFILES.tares.jurisdiction,
     });
-    const { signature } = signProvenance(manifest);
+    const { signature } = signProvenance(manifest, testSigning);
     expect(signature.algorithm).toBe("Ed25519");
     expect(signature.signature).toMatch(/^[A-Za-z0-9+/=]+$/);
     expect(signature.signed_payload_hash).toMatch(/^[0-9a-f]{64}$/);
@@ -91,7 +85,7 @@ describe("signProvenance()", () => {
       permissionReference: "X",
       permissionAuthority: "Y",
     });
-    expect(() => signProvenance(manifest, { privateKeyBase64: otherPriv })).toThrow(
+    expect(() => signProvenance(manifest, { ...testSigning, privateKeyBase64: otherPriv })).toThrow(
       /private key in env does NOT match committed public key/
     );
   });
@@ -99,10 +93,13 @@ describe("signProvenance()", () => {
 
 describe("buildBundle() — TARES with provenance", () => {
   let workDir: string;
+  let testPublicKeyPath: string;
   const fixturePath = join(process.cwd(), "etl/tares/fixtures/sample-5-rows.json");
 
   beforeEach(() => {
     workDir = mkdtempSync(join(tmpdir(), "osd-prov-"));
+    testPublicKeyPath = join(workDir, "cle-test.pem");
+    writeFileSync(testPublicKeyPath, testSigning.publicKeyPem);
   });
 
   afterEach(() => {
@@ -137,13 +134,23 @@ describe("buildBundle() — TARES with provenance", () => {
     const rows = ingestFromFixture(fixturePath);
     const result = await buildBundle(rows, "2026.04.29", workDir, { withTimestamp: false });
 
-    const verification = await verifyProvenanceZip(result.zipPath, PUBKEY_PATH);
+    const verification = await verifyProvenanceZip(result.zipPath, testPublicKeyPath);
     expect(verification.errors).toEqual([]);
     expect(verification.ok).toBe(true);
     expect(verification.signatureValid).toBe(true);
     expect(verification.fileChecks.every((c) => c.ok)).toBe(true);
     // Without timestamp, we expect a warning — not an error
     expect(verification.warnings.some((w) => /no RFC-3161 timestamp/.test(w))).toBe(true);
+  });
+
+  it("refuse une archive de test sous la clé publique officielle, qui reste intacte", async () => {
+    const publicKeyBefore = readFileSync(PUBKEY_PATH);
+    const rows = ingestFromFixture(fixturePath);
+    const result = await buildBundle(rows, "2026.04.29", workDir);
+    const verification = await verifyProvenanceZip(result.zipPath);
+    expect(verification.ok).toBe(false);
+    expect(verification.signatureValid).toBe(false);
+    expect(readFileSync(PUBKEY_PATH)).toEqual(publicKeyBefore);
   });
 
   it("verifyProvenanceZip() detects tampering of a payload file", async () => {
@@ -157,7 +164,7 @@ describe("buildBundle() — TARES with provenance", () => {
     const tamperedZip = join(workDir, "tampered.zip");
     execSync(`cd "${ext}" && zip -r -q "${tamperedZip}" .`);
 
-    const verification = await verifyProvenanceZip(tamperedZip, PUBKEY_PATH);
+    const verification = await verifyProvenanceZip(tamperedZip, testPublicKeyPath);
     expect(verification.ok).toBe(false);
     expect(verification.errors.some((e) => /file integrity mismatch/.test(e))).toBe(true);
   });
@@ -175,7 +182,7 @@ describe("buildBundle() — TARES with provenance", () => {
     const tamperedZip = join(workDir, "tampered2.zip");
     execSync(`cd "${ext}" && zip -r -q "${tamperedZip}" .`);
 
-    const verification = await verifyProvenanceZip(tamperedZip, PUBKEY_PATH);
+    const verification = await verifyProvenanceZip(tamperedZip, testPublicKeyPath);
     expect(verification.ok).toBe(false);
     expect(verification.signatureValid).toBe(false);
   });
