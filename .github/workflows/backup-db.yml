@@ -1,44 +1,54 @@
-name: Daily SQLite backup → R2
+name: Sauvegarde et restauration SQLite
 
-# Triggers a server-side backup on Railway via the /api/admin/backup-to-r2
-# endpoint. The endpoint snapshots the live SQLite DB (mounted on Railway's
-# persistent volume) and uploads to R2 under `backups/db-YYYY-MM-DD-TIMESTAMP.sqlite.enc`,
-# restores the downloaded encrypted copy for integrity verification, then prunes backups older than 30 days.
-#
-# This workflow does NOT have direct access to the Railway DB volume — that's
-# why it just fires a curl. The actual work happens server-side, where the
-# DB file is reachable.
-
+# Copie de sûreté de l’or créée sur le serveur, chiffrée avant R2 puis relue.
+# Réponse brute dans le bronze éphémère du runner ; preuves durables dans le bureau privé.
+# Aucun fichier client, clé de sauvegarde ou contenu de base ne transite par GitHub.
 on:
   schedule:
-    # Daily at 03:15 UTC (05:15 CEST), 15 min after the typical Railway redeploy
-    # window so we don't snapshot during a deploy.
     - cron: "15 3 * * *"
   workflow_dispatch:
+
+permissions: {}
+concurrency:
+  group: sauvegarde-sqlite
+  cancel-in-progress: false
 
 jobs:
   trigger-backup:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - name: Trigger Railway backup endpoint
+      - name: Déclencher et vérifier la restauration isolée de la base
         env:
           ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
         run: |
           if [ -z "$ADMIN_SECRET" ]; then
-            echo "::error::ADMIN_SECRET secret not configured"
+            echo "::error::Secret de sauvegarde non configuré"
             exit 1
           fi
-          response=$(curl -sS -w "\n%{http_code}" -X POST \
-            -H "x-admin-secret: $ADMIN_SECRET" \
-            -H "content-type: application/json" \
-            https://www.openswissdata.com/api/admin/backup-to-r2)
-          body=$(echo "$response" | head -n -1)
-          status=$(echo "$response" | tail -n 1)
-          echo "Body: $body"
-          echo "Status: $status"
-          if [ "$status" != "200" ]; then
-            echo "::error::Backup failed with HTTP $status"
-            exit 1
-          fi
-          echo "::notice::Backup OK — $body"
+          umask 077
+          folder="$RUNNER_TEMP/bronze/$(date -u +%F)/backup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          mkdir -p "$folder"
+          report="$folder/reponse.json"
+          auth_header=$(mktemp)
+          trap 'rm -f "$auth_header"' EXIT
+          printf 'x-admin-secret: %s\n' "$ADMIN_SECRET" > "$auth_header"
+          status=$(curl -sS --connect-timeout 10 --max-time 540 -o "$report" -w '%{http_code}' -X POST \
+            -H "@$auth_header" -H "content-type: application/json" \
+            https://www.openswissdata.com/api/admin/backup-to-r2) || { echo "::error::Serveur de sauvegarde injoignable ou délai dépassé"; exit 1; }
+          python3 - "$report" "$status" <<'PYTHON'
+          import json,sys
+          try:
+              with open(sys.argv[1]) as source:
+                  data=json.load(source)
+          except (OSError,ValueError):
+              print('::error::Réponse de sauvegarde illisible ; aucun succès déclaré.')
+              sys.exit(1)
+          check=data.get('restore_verification') if isinstance(data,dict) else None
+          valid=isinstance(check,dict) and check.get('version')==1 and check.get('byte_match') is True and all(check.get(k)=='ok' for k in ('integrity','foreign_keys','required_schema','current_versions'))
+          print('HTTP',sys.argv[2])
+          if sys.argv[2]!='200' or not isinstance(data,dict) or data.get('ok') is not True or data.get('encrypted') is not True or data.get('restore_check')!='ok' or data.get('verified_manifest') is not True or data.get('retention_status')!='ok' or not valid:
+              print('::error::Sauvegarde ou restauration non vérifiée ; consulter le bureau privé.')
+              sys.exit(1)
+          print('::notice::Copie chiffrée restaurée ; octets, intégrité, liens, schéma et versions vérifiés. Détail conservé dans le bureau privé.')
+          PYTHON

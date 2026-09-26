@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { getDb } from "../lib/db.js";
+import { getDb, currentDatabasePath } from "../lib/db.js";
+import { verifyRestoredBackup } from "../lib/backup-verification.js";
+import { BackupInspectionError, type BackupInspection } from "../lib/backup-inspection.js";
+import { writeBackupAttempt } from "../lib/backup-state.js";
 import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
 import { runFullCleanup } from "../lib/cleanup.js";
@@ -23,6 +26,7 @@ import { Readable } from "node:stream";
 import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createHash } from "node:crypto";
 
 export const adminRoute = new Hono();
 let backupInProgress = false;
@@ -77,12 +81,13 @@ adminRoute.post("/seed", async (c) => {
  * because the Hono server runs against the same file in WAL mode).
  */
 adminRoute.post("/backup-to-r2", async (c) => {
+  c.header("Cache-Control", "private, no-store");
   const secret = c.req.header("x-admin-secret");
   if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) {
     return c.json({ error: "unauthorized" }, 401);
   }
 
-  const dbPath = process.env.DATABASE_PATH ?? "./data/openswissdata.sqlite";
+  const dbPath = currentDatabasePath();
   const accountId = process.env.R2_ACCOUNT_ID;
   const accessKeyId = process.env.R2_ACCESS_KEY_ID;
   const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
@@ -109,13 +114,23 @@ adminRoute.post("/backup-to-r2", async (c) => {
 
   let uploadedBytes = 0;
   let prunedCount = 0;
+  let restoreVerification: BackupInspection;
+  let phase = "snapshot";
+  let retentionStatus: 'ok' | 'error' = 'ok';
+  const deadline = Date.now() + 480_000;
+  const remaining = (limit: number) => {
+    const time = Math.min(limit, deadline - Date.now());
+    if (time <= 0) throw new Error("backup_deadline");
+    return time;
+  };
   backupInProgress = true;
   try {
-    const db = new Database(dbPath, { readonly: true });
+    writeBackupAttempt(getDb(), "running", phase);
+    const db = new Database(dbPath, { readonly: true, fileMustExist: true });
     try {
       const started = Date.now();
       await db.backup(snapshotPath, { progress: () => {
-        if (Date.now() - started > 150_000) throw new Error("backup_snapshot_timeout");
+        if (Date.now() - started > 150_000 || Date.now() >= deadline) throw new Error("backup_snapshot_timeout");
         return 4096;
       } });
     } finally {
@@ -125,6 +140,7 @@ adminRoute.post("/backup-to-r2", async (c) => {
     await pipeline(createReadStream(snapshotPath), createGzip(), createWriteStream(compressedPath, { mode: 0o600 }));
     const encrypted = encryptBackup(readFileSync(compressedPath), encryptionKey);
     uploadedBytes = encrypted.length;
+    phase = "upload";
     await client.send(
       new PutObjectCommand({
         Bucket: bucket,
@@ -134,50 +150,77 @@ adminRoute.post("/backup-to-r2", async (c) => {
         ContentLength: uploadedBytes,
         IfNoneMatch: "*",
       }),
-      { abortSignal: AbortSignal.timeout(120_000) },
+      { abortSignal: AbortSignal.timeout(remaining(120_000)) },
     );
 
     // Restaurer le fichier en flux : une base WAL ne se désérialise pas toujours en mémoire.
-    const compressed = decryptBackup(await getObjectBuffer(r2Key, { maxBytes: uploadedBytes + 1, timeoutMs: 120_000 }), encryptionKey);
+    phase = "restore";
+    const downloaded = await getObjectBuffer(r2Key, { maxBytes: uploadedBytes + 1, timeoutMs: remaining(120_000) });
+    if (!downloaded.equals(encrypted)) throw new Error("backup_object_mismatch");
+    const compressed = decryptBackup(downloaded, encryptionKey);
     await pipeline(Readable.from([compressed]), createGunzip(), createWriteStream(restoredPath, { mode: 0o600 }));
-    const restored = new Database(restoredPath, { readonly: true, fileMustExist: true });
-    try {
-      if (restored.pragma("quick_check", { simple: true }) !== "ok") throw new Error("backup_restore_check_failed");
-    } finally { restored.close(); }
+    restoreVerification = await verifyRestoredBackup(snapshotPath, restoredPath, remaining(60_000));
 
-    // Retention: prune backups older than 30 days
-    const cutoff = Date.now() - 30 * 24 * 3600 * 1000;
-    const listed = await client.send(
-      new ListObjectsV2Command({ Bucket: bucket, Prefix: "backups/" }),
-    );
-    for (const obj of listed.Contents ?? []) {
-      if (!obj.Key) continue;
-      if ((obj.LastModified?.getTime() ?? 0) < cutoff) {
-        await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: obj.Key }));
-        prunedCount += 1;
-      }
-    }
+    // Témoin indépendant de la base : candidat de reprise, à recontrôler après récupération.
+    phase = "manifest";
+    const manifestKey = `backups/verified/${r2Key.slice('backups/'.length)}.json`;
+    const manifest = Buffer.from(JSON.stringify({ version: 1, backup_key: r2Key, encrypted_sha256: createHash('sha256').update(encrypted).digest('hex'), size_bytes: uploadedBytes, verified_at: new Date().toISOString(), encryption: 'aes-256-gcm', checks: restoreVerification }));
+    await client.send(new PutObjectCommand({ Bucket: bucket, Key: manifestKey, Body: manifest, ContentType: 'application/json', IfNoneMatch: '*' }), { abortSignal: AbortSignal.timeout(remaining(30_000)) });
+    if (!(await getObjectBuffer(manifestKey, { maxBytes: 8192, timeoutMs: remaining(30_000) })).equals(manifest)) throw new Error('backup_manifest_mismatch');
+
+    phase = "retention";
+    // Une copie validée reste retrouvable même si l’élagage échoue ensuite.
+    try {
+      const cutoff = Date.now() - 30 * 24 * 3600 * 1000;
+      let continuation: string | undefined;
+      const seen = new Set<string>();
+      do {
+        const listed = await client.send(
+          new ListObjectsV2Command({ Bucket: bucket, Prefix: "backups/", ContinuationToken: continuation }),
+          { abortSignal: AbortSignal.timeout(remaining(30_000)) },
+        );
+        for (const obj of listed.Contents ?? []) {
+          // Garder le résultat de ce passage même si l’horloge du serveur est incorrecte.
+          if (!obj.Key || obj.Key === r2Key || obj.Key === manifestKey) continue;
+          const modified = obj.LastModified?.getTime();
+          if (modified === undefined || !Number.isFinite(modified) || modified >= cutoff) continue;
+          await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: obj.Key }), { abortSignal: AbortSignal.timeout(remaining(30_000)) });
+          prunedCount += 1;
+        }
+        continuation = listed.IsTruncated ? listed.NextContinuationToken : undefined;
+        if (listed.IsTruncated && (!continuation || seen.has(continuation))) throw new Error('backup_retention_pagination');
+        if (continuation) seen.add(continuation);
+      } while (continuation);
+    } catch { retentionStatus = 'error'; }
+
+    const proof = {
+      ok: true,
+      r2_key: r2Key,
+      size_bytes: uploadedBytes,
+      pruned_count: prunedCount,
+      backed_up_at: new Date().toISOString(),
+      encrypted: true,
+      restore_check: "ok",
+      restore_verification: restoreVerification,
+      manifest_key: manifestKey,
+      verified_manifest: true,
+      retention_status: retentionStatus,
+    };
+    phase = "proof";
+    getDb().transaction(() => {
+      getDb().prepare("INSERT INTO operation_checks(name,checked_at,details_json) VALUES('backup',?,?) ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json").run(Date.now(), JSON.stringify(proof));
+      writeBackupAttempt(getDb(), retentionStatus === 'ok' ? "success" : "failed", retentionStatus === 'ok' ? "complete" : "retention", retentionStatus === 'error' ? 'backup_failed_retention' : undefined);
+    })();
+    return c.json(proof, retentionStatus === 'ok' ? 200 : 503);
   } catch (err) {
-    return c.json(
-      { error: "backup_failed", details: err instanceof Error ? err.message : String(err) },
-      500,
-    );
+    const code = err instanceof BackupInspectionError ? err.code : "backup_failed_" + phase;
+    try { writeBackupAttempt(getDb(), "failed", phase, code); } catch { /* Le workflow reste en échec même si le témoin ne peut être écrit. */ }
+    return c.json({ error: code }, 503);
   } finally {
     backupInProgress = false;
+    client.destroy();
     await rm(tmp!, { recursive: true, force: true });
   }
-
-  const proof = {
-    ok: true,
-    r2_key: r2Key,
-    size_bytes: uploadedBytes,
-    pruned_count: prunedCount,
-    backed_up_at: new Date().toISOString(),
-    encrypted: true,
-    restore_check: "ok",
-  };
-  getDb().prepare("INSERT INTO operation_checks(name,checked_at,details_json) VALUES('backup',?,?) ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json").run(Date.now(), JSON.stringify(proof));
-  return c.json(proof);
 });
 
 /**
