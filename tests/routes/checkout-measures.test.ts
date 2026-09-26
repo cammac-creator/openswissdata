@@ -93,11 +93,13 @@ describe('Créations Checkout observées, sans appeler Stripe', () => {
     expect(r.status).toBe(400);expect(await r.json()).toEqual({error:('origin' in extra || 'meta_json' in extra)?'invalid_body':'reserved_event'});expect(create).not.toHaveBeenCalled();expect(await rows()).toEqual([]);
   });
   it('la vraie protection du journal couvre aussi la mesure API globale après un succès',async()=>{
+    // Initialiser comme en CI, sans site construit, avant de simuler la panne du journal de mesure.
+    const app=createApp({webRoot:join(temp,'site-absent')});
     // Dépasser la dernière alerte du module pour prouver l’appel effectif du journal.
     vi.spyOn(Date,'now').mockReturnValue(Date.parse('2027-01-20T12:00:00Z'));
     vi.spyOn(budget,'queueEvent').mockImplementation(()=>{throw new Error('file fictive indisponible')});
     const log=vi.spyOn(console,'warn').mockImplementation(()=>{throw new Error('sortie de journal fictive indisponible')});
-    const r=await request();expect(r.status).toBe(200);expect(await r.json()).toEqual({url:'https://checkout.stripe.com/fictif1',session_id:'cs_live_fictif1'});
+    const r=await request(['finma'],'api','fr',app);expect(r.status).toBe(200);expect(await r.json()).toEqual({url:'https://checkout.stripe.com/fictif1',session_id:'cs_live_fictif1'});
     expect(log).toHaveBeenCalledTimes(1);expect(create).toHaveBeenCalledTimes(1);expect(await rows()).toEqual([]);
   });
 });
