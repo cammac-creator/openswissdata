@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { Context, MiddlewareHandler } from "hono";
 import { getDb } from "./db.js";
+import { queueEvent, reportEventFailure } from "./event-budget.js";
 
 /**
  * Mesures du bureau : l’origine décrit qui a enregistré la trace.
@@ -9,62 +10,12 @@ import { getDb } from "./db.js";
  * L’écriture différée reste facultative ; une panne de mesure ne bloque pas le service.
  */
 
-type EventKind = "api_request" | "custom" | "conversion";
+export type { TrackArgs } from './event-types.js';
+import type { TrackArgs } from './event-types.js';
 
-export type TrackArgs = {
-  kind: EventKind;
-  origin: 'server' | 'client';
-  name?: string | null;
-  status?: number | null;
-  duration_ms?: number | null;
-  customer_id?: number | null;
-  visitor_hash?: string | null;
-  country?: string | null;
-  referer?: string | null;
-  ua_class?: string | null;
-  meta_json?: string | null;
-};
-
-let lastFailureLog = 0;
 export function track(args: TrackArgs): void {
-  const timestamp = Date.now();
-  setImmediate(() => {
-    try {
-      const db = getDb();
-      db.prepare(`
-        INSERT INTO events (
-          kind, name, status, duration_ms, customer_id,
-          visitor_hash, country, referer, ua_class, meta_json, origin, ts
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        args.kind,
-        args.name ?? null,
-        args.status ?? null,
-        args.duration_ms ?? null,
-        args.customer_id ?? null,
-        args.visitor_hash ?? null,
-        args.country ?? null,
-        args.referer ?? null,
-        args.ua_class ?? null,
-        args.meta_json ?? null,
-        args.origin,
-        timestamp,
-      );
-    } catch (err) {
-      // Best-effort tracking — never break the response. We silence
-      // SQLITE_CONSTRAINT_* (FK on stale rows from older schemas, CHECK on
-      // unknown kind) since those are deterministic and non-actionable; any
-      // other error is logged once.
-      const code = (err as { code?: string } | undefined)?.code;
-      if (typeof code !== "string" || !code.startsWith("SQLITE_CONSTRAINT")) {
-        const now = Date.now();
-        if (!lastFailureLog || now < lastFailureLog || now - lastFailureLog >= 60_000) {
-          lastFailureLog = now;
-          console.warn('[mesures] enregistrement momentanément indisponible');
-        }
-      }
-    }
-  });
+  try { queueEvent(getDb(), args, Date.now()); }
+  catch { reportEventFailure(); }
 }
 
 export function visitorHashFromRequest(c: Context): string {
@@ -122,7 +73,7 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
 
   const started = Date.now();
   await next();
-  const duration_ms = Date.now() - started;
+  const duration_ms = Math.max(0, Date.now() - started);
 
   // c.var.customer_id is set by requireAuth; may be undefined for anon routes.
   // We read defensively because not all routes mount that middleware.

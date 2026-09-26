@@ -63,10 +63,10 @@ describe('Bureau privé et suivi client',()=>{
   const app=createApp(),a=await(await app.request('/api/admin/crm/audience?days=7',{headers})).json();
   const o=await(await app.request('/api/admin/crm/overview?days=7',{headers})).json();
   expect(a.web).toEqual({pageviews:4,visitor_days:3});expect(o.web).toEqual(a.web);expect(a.daily).toHaveLength(7);
-  expect(a.daily.find((x:{day:string})=>x.day==='2026-09-24')).toEqual({day:'2026-09-24',views:1,visitors:1,partial:true});
-  expect(a.daily.find((x:{day:string})=>x.day==='2026-09-25')).toEqual({day:'2026-09-25',views:3,visitors:2,partial:false});
-  expect(a.daily.at(-1)).toEqual({day:'2026-09-26',views:0,visitors:0,partial:true});
-  expect(a.daily[0]).toEqual({day:'2026-09-20',views:null,visitors:null,partial:false});
+  expect(a.daily.find((x:{day:string})=>x.day==='2026-09-24')).toEqual({day:'2026-09-24',views:1,visitors:1,partial:true,incomplete:false});
+  expect(a.daily.find((x:{day:string})=>x.day==='2026-09-25')).toEqual({day:'2026-09-25',views:3,visitors:2,partial:false,incomplete:false});
+  expect(a.daily.at(-1)).toEqual({day:'2026-09-26',views:0,visitors:0,partial:true,incomplete:false});
+  expect(a.daily[0]).toEqual({day:'2026-09-20',views:null,visitors:null,partial:false,incomplete:false});
   expect(a.split.find((x:{label:string})=>x.label==='bot').count).toBe(1);
   expect(a.daily.reduce((sum:number,x:{visitors:number|null})=>sum+(x.visitors??0),0)).toBe(a.web.visitor_days);
   const year=await(await app.request('/api/admin/crm/audience?days=365',{headers})).json();

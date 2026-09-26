@@ -1,3 +1,5 @@
+import { performance } from 'node:perf_hooks';
+import { readEventCoverage } from '../../src/lib/event-budget.js';
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
@@ -91,11 +93,11 @@ describe("POST /api/events/track", () => {
     const r=await createApp().fetch(req);expect(r.status).toBe(413);expect(r.headers.get('cache-control')).toBe('no-store');await new Promise(r=>setImmediate(r));expect(getDb().prepare('SELECT COUNT(*) n FROM events').get()).toEqual({n:0});
   });
   it('ignore les préfixes X-Forwarded-For forgés pour la limite de l’origine',async()=>{
-    vi.stubEnv('RAILWAY_ENVIRONMENT_ID','fictif');const app=createApp();
+    vi.stubEnv('RAILWAY_ENVIRONMENT_ID','fictif');vi.spyOn(performance,'now').mockReturnValue(0);const app=createApp();
     for(let i=0;i<61;i++){
       const r=await app.request('/api/events/track',{method:'POST',headers:{'content-type':'application/json','x-real-ip':'192.0.2.9','x-forwarded-for':`198.51.100.${i+1}`},body:JSON.stringify({name:'cta_fictive'})});expect(r.status).toBe(i<60?200:429);
     }
-    await new Promise(r=>setImmediate(r));expect(getDb().prepare('SELECT COUNT(*) n FROM events').get()).toEqual({n:60});
+    await new Promise(r=>setImmediate(r));expect(getDb().prepare('SELECT COUNT(*) n FROM events').get()).toEqual({n:20});expect(readEventCoverage(getDb()).gaps[0].dropped).toBe(40);
   });
 
 });

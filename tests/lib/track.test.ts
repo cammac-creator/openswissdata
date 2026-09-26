@@ -1,3 +1,4 @@
+import { readBackupChecks } from '../../src/lib/backup-state.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Hono } from 'hono';
 import Database from 'better-sqlite3';
@@ -5,7 +6,8 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getDb, closeDb } from '../../src/lib/db.js';
-import { track, trackPageView, uaClassFromRequest, countryFromRequest, refererOrigin } from '../../src/lib/track.js';
+import { readEventCoverage, flushEventCoverage } from '../../src/lib/event-budget.js';
+import { track, trackApiRequest, trackPageView, uaClassFromRequest, countryFromRequest, refererOrigin } from '../../src/lib/track.js';
 
 describe('Origine des mesures et agents présumés', () => {
   let temp: string;
@@ -45,11 +47,17 @@ describe('Origine des mesures et agents présumés', () => {
     expect(rows).toEqual([{ origin: 'server', name: 'page_view', meta_json: '{"path":"/exemple"}' }]);
     expect(JSON.stringify(rows)).not.toContain('prive@example');
   });
+  it('garde la trace API si l’horloge murale recule pendant la requête', async () => {
+    getDb(); const clock = vi.spyOn(Date, 'now').mockReturnValue(1790400001000);
+    const app = new Hono(); app.use('*', trackApiRequest); app.get('/api/exemple', c => { clock.mockReturnValue(1790400000900); return c.text('Fictif'); });
+    expect((await app.request('/api/exemple')).status).toBe(200); await new Promise(r => setImmediate(r));
+    expect(getDb().prepare('SELECT kind,duration_ms FROM events').get()).toEqual({kind:'api_request',duration_ms:0});
+  });
   it('borne les erreurs de stockage sans afficher le contenu brut', async () => {
     const db = getDb(); db.exec('DROP TABLE events'); const log = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(Date, 'now').mockReturnValue(1790400000000);
     for (let i = 0; i < 3; i++) track({ kind: 'custom', origin: 'server', name: 'prive@example.test' });
-    await new Promise(r => setImmediate(r)); expect(log).toHaveBeenCalledTimes(1); expect(log).toHaveBeenCalledWith('[mesures] enregistrement momentanément indisponible');
+    await new Promise(r => setImmediate(r)); expect(log).toHaveBeenCalledTimes(1); expect(log).toHaveBeenCalledWith('[mesures] enregistrement momentanément indisponible'); flushEventCoverage(db); expect(readBackupChecks(db)).toEqual([]); const proof = readEventCoverage(db); expect(proof.gaps[0].reasons.write).toBe(3); expect(proof.pending).toBe(false); expect(proof.available).toBe(true); expect(db.prepare("SELECT name FROM operation_checks WHERE name='event_collection'").get()).toEqual({name:'event_collection'}); expect(JSON.stringify(proof)).not.toContain('prive@example');
   });
   it('borne les en-têtes conservés et retire paramètres et identifiants du référent', async () => {
     const app = new Hono(); app.get('/', c => c.json({country:countryFromRequest(c),referer:refererOrigin(c)}));
