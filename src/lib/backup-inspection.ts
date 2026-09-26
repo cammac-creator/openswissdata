@@ -8,6 +8,7 @@ export const BACKUP_CHECK_ERRORS = ['backup_bytes_differ', 'backup_integrity_fai
 export type BackupCheckError = typeof BACKUP_CHECK_ERRORS[number];
 export type BackupInspection = {
   version: 1; byte_match: true; integrity: 'ok'; foreign_keys: 'ok'; required_schema: 'ok'; current_versions: 'ok'; duration_ms: number;
+  schema_profile?: 'service-crm-2026-09-26';
 };
 export class BackupInspectionError extends Error {
   constructor(readonly code: BackupCheckError) { super(code); }
@@ -38,12 +39,20 @@ export async function inspectRestoredBackup(snapshotPath: string, restoredPath: 
         'SELECT order_id,status,terms_version,document_sha256 FROM order_legal LIMIT 0',
         'SELECT order_id,state,next_attempt_at FROM order_deliveries LIMIT 0',
         'SELECT token,customer_id,expires_at FROM sessions LIMIT 0',
+        'SELECT id,delivery_id,state,reason FROM delivery_incidents LIMIT 0',
+        'SELECT incident_id,kind,recorded_at FROM delivery_incident_events LIMIT 0',
+        'SELECT incident_id,task_id,created_by,created_at FROM delivery_incident_tasks LIMIT 0',
+        'SELECT id,customer_id,title,due_on,done_at,created_at FROM crm_tasks LIMIT 0',
+        'SELECT customer_id,body,author_id,created_at FROM crm_notes LIMIT 0',
+        'SELECT customer_id,display_name,company,stage,internal FROM crm_profiles LIMIT 0',
+        'SELECT name,secret_encrypted,updated_at FROM crm_connections LIMIT 0',
+        'SELECT customer_id,code,source FROM crm_languages LIMIT 0',
       ]) db.prepare(sql).all();
     } catch { throw new BackupInspectionError('backup_schema_failed'); }
     if (db.prepare('SELECT 1 FROM datasets d WHERE d.current_version IS NOT NULL AND NOT EXISTS (SELECT 1 FROM versions v WHERE v.dataset_id=d.id AND v.version=d.current_version) LIMIT 1').get()) {
       throw new BackupInspectionError('backup_versions_failed');
     }
-    return { version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok', duration_ms: Date.now() - started };
+    return { version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok', duration_ms: Date.now() - started, schema_profile: 'service-crm-2026-09-26' };
   } finally { db.close(); }
 }
 

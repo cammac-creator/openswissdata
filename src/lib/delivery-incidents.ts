@@ -89,14 +89,20 @@ export function readIncidentScan(db:Database.Database):IncidentScan|null{
  }catch{return null}
 }
 
-export type DeliveryIncidentRow=Pick<Incident,'id'|'delivery_id'|'state'|'reason'|'first_seen_at'|'last_seen_at'|'last_checked_at'|'closed_at'|'observations'|'last_attempts'|'accepted_at'>&{order_id:number;customer_id:number;dataset_id:string};
+export type IncidentTask = {id:number;customer_id:number;title:string;due_on:string|null;done_at:number|null;created_at:number};
+export type DeliveryIncidentRow=Pick<Incident,'id'|'delivery_id'|'state'|'reason'|'first_seen_at'|'last_seen_at'|'last_checked_at'|'closed_at'|'observations'|'last_attempts'|'accepted_at'>&{order_id:number;customer_id:number;dataset_id:string;task:IncidentTask|null};
 export type DeliveryIncidentEvent={id:number;kind:'opened'|'changed'|'reopened'|'accepted'|'cancelled'|'acceptance_uncertain';reason:DeliveryIncidentReason;attempts:number;recorded_at:number;accepted_at:number|null};
 export function readDeliveryIncidentPage(db:Database.Database,state:DeliveryIncidentState,page:number,now=Date.now()){
  return db.transaction(()=>{
   const count=(value:DeliveryIncidentState)=>(db.prepare('SELECT COUNT(*) n FROM delivery_incidents WHERE state=?').get(value) as {n:number}).n;
   const summary={open:count('open'),accepted:count('accepted'),cancelled:count('cancelled')},total=summary[state],limit=20,pages=Math.max(1,Math.ceil(total/limit)),number=Math.min(page,pages);
-  const rows=db.prepare(`SELECT i.id,i.delivery_id,i.state,i.reason,i.first_seen_at,i.last_seen_at,i.last_checked_at,i.closed_at,i.observations,i.last_attempts,i.accepted_at,d.order_id,o.customer_id,d.dataset_id
-   FROM delivery_incidents i JOIN order_deliveries d ON d.id=i.delivery_id JOIN orders o ON o.id=d.order_id WHERE i.state=? ORDER BY i.last_seen_at DESC,i.id DESC LIMIT ? OFFSET ?`).all(state,limit,(number-1)*limit) as DeliveryIncidentRow[];
+  type TaskColumns={task_id:number|null;task_customer_id:number|null;task_title:string|null;task_due_on:string|null;task_done_at:number|null;task_created_at:number|null};
+  const raw=db.prepare(`SELECT i.id,i.delivery_id,i.state,i.reason,i.first_seen_at,i.last_seen_at,i.last_checked_at,i.closed_at,i.observations,i.last_attempts,i.accepted_at,d.order_id,o.customer_id,d.dataset_id,
+   t.id task_id,t.customer_id task_customer_id,t.title task_title,t.due_on task_due_on,t.done_at task_done_at,t.created_at task_created_at
+   FROM delivery_incidents i JOIN order_deliveries d ON d.id=i.delivery_id JOIN orders o ON o.id=d.order_id
+   LEFT JOIN delivery_incident_tasks link ON link.incident_id=i.id LEFT JOIN crm_tasks t ON t.id=link.task_id
+   WHERE i.state=? ORDER BY i.last_seen_at DESC,i.id DESC LIMIT ? OFFSET ?`).all(state,limit,(number-1)*limit) as Array<Omit<DeliveryIncidentRow,'task'>&TaskColumns>;
+  const rows:DeliveryIncidentRow[]=raw.map(({task_id,task_customer_id,task_title,task_due_on,task_done_at,task_created_at,...row})=>({...row,task:task_id===null?null:{id:task_id,customer_id:task_customer_id!,title:task_title!,due_on:task_due_on,done_at:task_done_at,created_at:task_created_at!}}));
   return {checked_at:now,state,summary,scan:readIncidentScan(db),retention_days:180,incidents:rows,page:{number,total_pages:pages,total,returned:rows.length,limit,has_previous:number>1,has_next:number<pages}};
  })();
 }

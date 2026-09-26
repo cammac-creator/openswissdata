@@ -41,5 +41,29 @@ describe('Consultation privée du registre de livraison',()=>{
   getDb().exec('DROP TABLE delivery_incident_events; DROP TABLE delivery_incidents');vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response('{}',{status:503})));
   try{const r=await read('/operations');expect(r.status).toBe(200);const d=await r.json();expect(d.incidents).toBeNull();expect(d.datasets).toHaveLength(1)}finally{vi.unstubAllGlobals()}
  });
+ const write=(id=1,body:unknown={due_on:null},headers:Record<string,string>={})=>createApp().request('/api/admin/crm/incidents/'+id+'/task',{method:'POST',headers:{cookie,origin:'https://www.openswissdata.com','content-type':'application/json','x-osd-csrf':'dashboard',...headers},body:JSON.stringify(body)});
+ it('crée une action unique malgré deux demandes simultanées et la retrouve dans la fiche exacte',async()=>{
+  vi.stubEnv('BASE_URL','https://www.openswissdata.com');add(1);observeDeliveryIncident(getDb(),1,now);
+  const responses=await Promise.all([write(1,{due_on:'2026-09-28'}),write(1,{due_on:'2026-09-28'})]);expect(responses.map(r=>r.status).sort()).toEqual([200,201]);
+  const bodies=await Promise.all(responses.map(r=>r.json()));expect(new Set(bodies.map(b=>b.task.id)).size).toBe(1);expect(bodies[0].task.customer_id).toBe(2);
+  const detail=await(await read('/customers/2')).json();expect(detail.tasks).toHaveLength(1);expect(detail.tasks[0].due_on).toBe('2026-09-28');
+  const page=await(await read()).json();expect(page.incidents[0].task.id).toBe(detail.tasks[0].id);expect(page.incidents[0].state).toBe('open');expect(responses[0].headers.get('cache-control')).toBe('private, no-store');
+  expect(getDb().prepare('SELECT created_by FROM delivery_incident_tasks').get()).toEqual({created_by:1});
+ });
+ it('protège la création par session, origine et CSRF avant toute écriture',async()=>{
+  vi.stubEnv('BASE_URL','https://www.openswissdata.com');add(1);observeDeliveryIncident(getDb(),1,now);
+  for(const [headers,status] of [[{cookie:''},401],[{cookie:'osd_session='+'E'.repeat(43)},403],[{origin:'https://example.test'},403],[{'x-osd-csrf':''},403]] as const)expect((await write(1,{},headers)).status).toBe(status);
+  expect((await write(1,{due_on:'2026-02-31'})).status).toBe(400);expect((await write(1,{created_by:2})).status).toBe(400);expect((await write(999)).status).toBe(404);
+  expect(getDb().prepare('SELECT COUNT(*) n FROM crm_tasks').get()).toEqual({n:0});
+ });
+ it('refuse une nouvelle action si l’envoi est désormais accepté et ne modifie pas un rejeu existant',async()=>{
+  vi.stubEnv('BASE_URL','https://www.openswissdata.com');add(1);observeDeliveryIncident(getDb(),1,now);getDb().prepare("UPDATE order_deliveries SET state='sent',sent_at=? WHERE id=1").run(now);expect((await write()).status).toBe(409);
+  add(2);observeDeliveryIncident(getDb(),2,now);const first=await(await write(2)).json();getDb().prepare('UPDATE crm_tasks SET done_at=? WHERE id=?').run(now,first.task.id);
+  const again=await(await write(2,{due_on:'2026-10-01'})).json();expect(again.created).toBe(false);expect(again.task).toMatchObject({id:first.task.id,done_at:now,due_on:null});expect((await(await read()).json()).incidents.find(i=>i.delivery_id===2).state).toBe('open');
+ });
+ it('retourne un conflit explicite lors d’un recul d’horloge, sans créer d’action',async()=>{
+  vi.stubEnv('BASE_URL','https://www.openswissdata.com');add(1);observeDeliveryIncident(getDb(),1,now+1);
+  const response=await write();expect(response.status).toBe(409);expect(await response.json()).toEqual({error:'incident_clock_pending'});expect(getDb().prepare('SELECT COUNT(*) n FROM crm_tasks').get()).toEqual({n:0});
+ });
 
 });

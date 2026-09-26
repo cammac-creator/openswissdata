@@ -40,7 +40,10 @@ describe('Sauvegarde chiffrée et restauration de bout en bout sur données fict
   it('snapshot → chiffrement → stockage fictif → récupération → vérification isolée → témoins', async () => {
     const r = await request(), proof = await r.json();
     expect(r.status).toBe(200);
-    expect(proof).toMatchObject({ ok: true, encrypted: true, restore_check: 'ok', restore_verification: { version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok' } });
+    expect(proof).toMatchObject({ ok: true, encrypted: true, restore_check: 'ok', restore_verification: { version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok', schema_profile:'service-crm-2026-09-26' } });
+    expect(readBackupChecks(getDb()).find(check=>check.name==='backup')?.restore_verification?.schema_profile).toBe('service-crm-2026-09-26');
+    const stored=getDb().prepare("SELECT details_json FROM operation_checks WHERE name='backup'").get() as {details_json:string};expect(JSON.parse(stored.details_json).restore_verification.schema_profile).toBe('service-crm-2026-09-26');
+    expect(JSON.parse(cloud.objects.get(proof.manifest_key)!.toString()).checks.schema_profile).toBe('service-crm-2026-09-26');
     expect(cloud.bytes.subarray(0, 8).toString()).toBe('OSDBAK01');
     expect(cloud.bytes.includes(Buffer.from('personne@example.test'))).toBe(false);
     expect(cloud.read).toHaveBeenCalledTimes(2); expect(cloud.destroy).toHaveBeenCalledOnce();

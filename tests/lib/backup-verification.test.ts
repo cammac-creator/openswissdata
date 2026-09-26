@@ -23,7 +23,7 @@ describe('Restauration isolée et preuve explicite', () => {
   it('vérifie les deux fichiers en processus séparé sans modifier la copie restaurée', async () => {
     const before = readFileSync(restored);
     const proof = await verifyRestoredBackup(source, restored);
-    expect(proof).toMatchObject({ version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok' });
+    expect(proof).toMatchObject({ version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok', schema_profile: 'service-crm-2026-09-26' });
     expect(readFileSync(restored)).toEqual(before);
     expect(JSON.stringify(proof)).not.toContain('personne'); expect(JSON.stringify(proof)).not.toContain(dir);
   });
@@ -44,6 +44,9 @@ describe('Restauration isolée et preuve explicite', () => {
   it('détecte une version courante sans archive référencée', async () => {
     modify("INSERT INTO datasets(id,name,slug,price_chf,stripe_price_id,current_version,created_at) VALUES('fictif','Fictif','fictif',0,'price_fictif','absente',1790410000000)");
     await expect(inspectRestoredBackup(source, restored)).rejects.toMatchObject({ code: 'backup_versions_failed' });
+  });
+  it.each(['DROP TABLE crm_connections','ALTER TABLE crm_tasks RENAME COLUMN due_on TO ancien_champ','DROP TABLE delivery_incident_tasks'])('refuse aussi la perte du suivi privé : %s',async sql=>{
+    modify(sql);await expect(inspectRestoredBackup(source,restored)).rejects.toMatchObject({code:'backup_schema_failed'});
   });
   it('borne réellement la vie du sous-processus', async () => {
     await expect(verifyRestoredBackup(source, restored, 1)).rejects.toMatchObject({ code: 'backup_inspection_timeout' });
@@ -85,5 +88,12 @@ describe('Restauration isolée et preuve explicite', () => {
     const html = renderBackupStatus([{ name: 'backup', checked_at: now, encrypted: true, restore_check: 'ok', retention_status: 'error' }, { name: 'backup_attempt', checked_at: now, state: 'failed', phase: 'retention', error: 'backup_failed_retention' }], now);
     expect(html).toContain('Copie restaurée ; élagage à reprendre'); expect(html).not.toContain('pill green');
     expect(html).toContain('le retrait des anciennes sauvegardes reste à reprendre');
+  });
+  it('distingue l’ancien socle de schéma et le contrôle récent du suivi client', async () => {
+    const proof=await inspectRestoredBackup(source,restored),now=Date.now();
+    const old={...proof};delete old.schema_profile;
+    const base={name:'backup' as const,checked_at:now,encrypted:true,restore_check:'ok'};
+    expect(renderBackupStatus([{...base,restore_verification:old}],now)).toContain('Contrôle de schéma historique : socle achats');
+    expect(renderBackupStatus([{...base,restore_verification:proof}],now)).toContain('inclut les actions, notes, connexions et incidents');
   });
 });

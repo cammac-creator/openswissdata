@@ -1,4 +1,5 @@
 import { readCrmWorkflows } from '../lib/crm-workflows.js';
+import { createIncidentTask } from '../lib/incident-tasks.js';
 import {readDeliveryIncidentPage,readDeliveryIncidentEvents} from '../lib/delivery-incidents.js';
 import { customerPage, customerProfiles, internalEmails, prepareCustomerFunctions, searchText } from '../lib/crm-customers.js';
 import { isCalendarDate } from '../lib/calendar-date.js';
@@ -63,6 +64,16 @@ crmRoute.post('/customers/search',async c=>{
  if(!input.success)return c.json({error:'invalid_body'},400);
  if(c.req.raw.signal.aborted)return new Response(null,{status:499});
  return c.json(customerPage(input.data));
+});
+crmRoute.post('/incidents/:id/task',async c=>{
+ if(!validId(c.req.param('id')))return c.json({error:'invalid_id'},400);
+ const body=z.object({due_on:z.string().refine(isCalendarDate).nullable().default(null)}).strict().safeParse(await c.req.json().catch(error=>{if(error instanceof SyntaxError)return null;throw error}));
+ if(!body.success)return c.json({error:'invalid_body'},400);
+ const result=createIncidentTask(getDb(),Number(c.req.param('id')),c.get('customer_id'),body.data.due_on);
+ if(result.status==='not_found')return c.json({error:'not_found'},404);
+ if(result.status==='closed')return c.json({error:'incident_closed'},409);
+ if(result.status==='clock')return c.json({error:'incident_clock_pending'},409);
+ return c.json({ok:true,created:result.created,task:result.task},result.created?201:200);
 });
 crmRoute.get('/incidents',c=>{
  const input=z.object({state:z.enum(['open','accepted','cancelled']).default('open'),page:z.coerce.number().int().min(1).max(1_000_000).default(1)}).strict().safeParse(c.req.query());
