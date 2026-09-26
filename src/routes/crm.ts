@@ -1,3 +1,4 @@
+import { readCleanupProof } from "../lib/cleanup.js";
 import { orderService, accountDownloadHistory } from "../lib/customer-service.js";
 import { orderLegalSummary } from "../lib/order-legal.js";
 import { Hono } from "hono";
@@ -127,7 +128,10 @@ crmRoute.get("/visibility", async c => {
 crmRoute.get("/operations", async c => {
   const db = getDb();
   const datasets = db.prepare("SELECT d.id,d.name,d.current_version,v.released_at,v.size_bytes FROM datasets d LEFT JOIN versions v ON v.dataset_id=d.id AND v.version=d.current_version").all();
-  const checks = (db.prepare("SELECT name,checked_at,details_json FROM operation_checks").all() as Array<{ name: string; checked_at: number; details_json: string }>).map(r => { const d = JSON.parse(r.details_json); return { name: r.name, checked_at: r.checked_at, encrypted: d.encrypted, restore_check: d.restore_check, size_bytes: d.size_bytes }; });
+  let checks: Array<{name:string;checked_at:number;encrypted?:boolean;restore_check?:string;size_bytes?:number}> = [];
+  try {
+    checks = (db.prepare("SELECT name,checked_at,details_json FROM operation_checks WHERE name='backup'").all() as Array<{ name: string; checked_at: number; details_json: string }>).map(r => { const d = JSON.parse(r.details_json); return { name: r.name, checked_at: r.checked_at, encrypted: d.encrypted, restore_check: d.restore_check, size_bytes: d.size_bytes }; });
+  } catch { /* Aucun témoin disponible : le bureau demande une vérification, sans état vert inventé. */ }
   let workflows: { available: boolean; checked_at?: number; items?: unknown[]; runs?: unknown[] } = { available: false };
   try {
     workflows = await cached("workflows", 600_000, async () => {
@@ -136,6 +140,6 @@ crmRoute.get("/operations", async c => {
       return { available: true, checked_at: Date.now(), items: flow.workflows.map(({ id, name, state, html_url }) => ({ id, name, state, html_url })), runs: runs.workflow_runs.map(({ id, workflow_id, name, status, conclusion, created_at, html_url }) => ({ id, workflow_id, name, status, conclusion, created_at, html_url })) };
     });
   } catch { /* L'indisponibilité reste visible, aucun succès n'est inventé. */ }
-  return c.json({ checked_at: Date.now(), datasets, checks, workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
+  return c.json({ checked_at: Date.now(), datasets, checks, cleanup: readCleanupProof(db), workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
 });
 crmRoute.route("/mail", crmMailRoute);

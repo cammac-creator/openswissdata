@@ -1,41 +1,60 @@
-name: Cleanup expired rows
+name: Nettoyage périodique
 
-# Triggers a server-side cleanup on Railway via the /api/admin/cleanup-expired
-# endpoint. The endpoint deletes expired sessions, magic_links, download_tokens,
-# mcp_oauth_codes, and prunes old request_log/events rows.
-#
-# This workflow does NOT have direct access to the Railway DB volume — that's
-# why it just fires a curl. The actual work happens server-side, where the
-# DB file is reachable.
-
+# Or SQLite et bronze technique → expiration sur le serveur, puis réponse brute
+# écrite dans un bronze temporaire daté du runner avant contrôle, détruit en fin de job.
+# Le témoin durable et ses quantités restent dans le CRM privé. Aucun accès direct à la base.
 on:
   schedule:
-    - cron: "0 */6 * * *"  # every 6 hours
+    - cron: "0 */6 * * *"
   workflow_dispatch:
+
+permissions: {}
+concurrency:
+  group: nettoyage-periodique
+  cancel-in-progress: false
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Trigger Railway cleanup endpoint
+      - name: Lancer et vérifier le nettoyage du serveur
         env:
           ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
         run: |
           if [ -z "$ADMIN_SECRET" ]; then
-            echo "::error::ADMIN_SECRET secret not configured"
+            echo "::error::Secret de nettoyage non configuré"
             exit 1
           fi
-          response=$(curl -sS -w "\n%{http_code}" -X POST \
-            -H "x-admin-secret: $ADMIN_SECRET" \
+          folder="$RUNNER_TEMP/bronze/$(date -u +%F)/cleanup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          mkdir -p "$folder"
+          report="$folder/reponse.json"
+          umask 077
+          auth_header=$(mktemp)
+          trap 'rm -f "$auth_header"' EXIT
+          printf 'x-admin-secret: %s\n' "$ADMIN_SECRET" > "$auth_header"
+          status=$(curl -sS --connect-timeout 10 --max-time 120 -o "$report" -w '%{http_code}' -X POST \
+            -H "@$auth_header" \
             -H "content-type: application/json" \
             https://www.openswissdata.com/api/admin/cleanup-expired)
-          body=$(echo "$response" | head -n -1)
-          status=$(echo "$response" | tail -n 1)
-          echo "Body: $body"
-          echo "Status: $status"
-          if [ "$status" != "200" ]; then
-            echo "::error::Cleanup failed with HTTP $status"
-            exit 1
-          fi
-          echo "::notice::Cleanup OK — $body"
+          python3 - "$report" "$status" <<'PYTHON'
+          import json,sys
+          try:
+              with open(sys.argv[1]) as source:
+                  data=json.load(source)
+          except (OSError,ValueError):
+              print('::error::Réponse de nettoyage illisible ; aucun succès déclaré.')
+              sys.exit(1)
+          print('HTTP',sys.argv[2])
+          expected={'magic_links','sessions','download_tokens','mcp_oauth_codes','request_log','events','download_activity','delivery_message_references','bronze_dashboard','bronze_financial'}
+          entries=data.get('entries') if isinstance(data,dict) else None
+          valid=isinstance(entries,list) and all(isinstance(e,dict) and isinstance(e.get('name'),str) and e.get('name') in expected|{'cleanup_proof'} and e.get('status') in ('ok','not_applicable','error') for e in entries)
+          if valid:
+              for entry in entries:
+                  print(entry['name']+': '+entry['status'])
+          complete=valid and len(entries)==10 and {e['name'] for e in entries}==expected and all(e['status']!='error' for e in entries)
+          if sys.argv[2]!='200' or not isinstance(data,dict) or data.get('ok') is not True or not complete:
+              print('::error::Nettoyage incomplet ou preuve absente ; consulter le CRM privé.')
+              sys.exit(1)
+          print('::notice::Nettoyage complet ; témoin et quantités conservés dans le CRM privé.')
+          PYTHON

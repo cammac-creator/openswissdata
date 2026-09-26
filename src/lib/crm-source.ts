@@ -1,7 +1,10 @@
 // Sources distantes → bronze chiffré daté → vues privées du dashboard.
 import { mkdir, writeFile, readdir, rm, stat, statfs } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { createHmac, createSign, createHash } from "node:crypto";
+import { purgeExpiredBronze } from "./bronze-retention.js";
+import { bronzePath } from './data-paths.js';
+import { currentDatabasePath } from './db.js';
 import { backupKey, encryptBackup, decryptBackup } from "./backup-cipher.js";
 
 export function crmKey(): Buffer {
@@ -10,18 +13,19 @@ export function crmKey(): Buffer {
 export function seal(value: string): string { return encryptBackup(Buffer.from(value), crmKey()).toString("base64"); }
 export function unseal(value: string): string { return decryptBackup(Buffer.from(value, "base64"), crmKey()).toString(); }
 const bronzeUsage = new Map<string, {nextSweep:number;bytes:number}>();
+export function invalidateBronzeUsage(root: string): void { bronzeUsage.delete(root); }
 export async function bronze(source: string, raw: Buffer, compartment: "dashboard" | "financial" = "dashboard"): Promise<void> {
-  const root = join(dirname(process.env.DATABASE_PATH ?? "./data/openswissdata.sqlite"), "bronze", compartment);
+  const root = bronzePath(compartment, currentDatabasePath());
   const usage = bronzeUsage.get(root) ?? {nextSweep:0,bytes:0};
   bronzeUsage.set(root,usage);
   const folder = join(root, new Date().toISOString().slice(0, 10));
   await mkdir(folder, { recursive: true, mode: 0o700 });
   if (Date.now() > usage.nextSweep) {
-    const cutoff = new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10);
+    const purge = await purgeExpiredBronze(root);
+    if (purge.failed) throw new Error('crm_bronze_cleanup_failed');
     let total = 0;
     for (const entry of await readdir(root, { withFileTypes: true })) {
       if (!entry.isDirectory() || !/^\d{4}-\d{2}-\d{2}$/.test(entry.name)) continue;
-      if (entry.name < cutoff) { await rm(join(root, entry.name), { recursive: true }); continue; }
       for (const file of await readdir(join(root, entry.name))) total += (await stat(join(root, entry.name, file))).size;
     }
     usage.bytes = total;
@@ -64,7 +68,7 @@ export async function cached<T>(key: string, duration: number, fn: () => Promise
 export function clearCrmCache(): void { cacheGeneration++; cache.clear(); pending.clear(); }
 // Les originaux restent chez Infomaniak ; seules les copies temporaires de ce compte sont retirées.
 export async function clearMailboxBronze(account: "support" | "cam_project"): Promise<void> {
-  const root = join(dirname(process.env.DATABASE_PATH ?? "./data/openswissdata.sqlite"), "bronze", "dashboard");
+  const root = bronzePath('dashboard', currentDatabasePath());
   for (const day of await readdir(root, { withFileTypes: true }).catch(() => [])) {
     if (!day.isDirectory() || !/^\d{4}-\d{2}-\d{2}$/.test(day.name)) continue;
     for (const name of await readdir(join(root, day.name))) if (name.startsWith(`imap-${account}-`)) await rm(join(root, day.name, name), { force: true });

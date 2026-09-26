@@ -1,3 +1,4 @@
+// Or SQLite et bronze technique → expiration et témoin minimal ; achats et droits conservés.
 /**
  * Cleanup expired ephemeral rows.
  *
@@ -19,20 +20,20 @@
  * the admin endpoint calls.
  */
 
-import { getDb } from "../src/lib/db.js";
-import { runCleanup } from "../src/lib/cleanup.js";
+import { getDb, closeDb } from "../src/lib/db.js";
+import { runFullCleanup } from "../src/lib/cleanup.js";
+import { resolveDatabasePath } from '../src/lib/data-paths.js';
 
-function main() {
-  const db = getDb();
-  const result = runCleanup(db);
-  for (const entry of result.entries) {
-    if (entry.skipped) {
-      console.warn(`[cleanup] ${entry.name}: skipped (${entry.skipped})`);
-    } else {
-      console.log(`[cleanup] ${entry.name}: deleted ${entry.deleted} rows`);
+async function main() {
+  try {
+    if (resolveDatabasePath() === ':memory:') throw new Error('database_path_required');
+    const result = await runFullCleanup(getDb(undefined, { fileMustExist: true }));
+    for (const entry of result.entries) {
+      const detail = entry.status === 'error' ? `ÉCHEC ${entry.error}` : entry.status === 'not_applicable' ? 'table historique absente' : `${entry.deleted} éléments retirés (${entry.unit})`;
+      console.log(`[nettoyage] ${entry.name} : ${detail}`);
     }
-  }
-  console.log(`[cleanup] done. Total rows deleted: ${result.totalDeleted}`);
+    console.log(`[nettoyage] ${result.ok ? 'Terminé' : 'INCOMPLET'} ; total : ${result.totalDeleted}.`);
+    if (!result.ok) process.exitCode = 1;
+  } finally { closeDb(); }
 }
-
-main();
+main().catch(() => { console.error('[nettoyage] Échec du passage ; aucun succès déclaré.'); process.exitCode = 1; });
