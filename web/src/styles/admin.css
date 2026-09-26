@@ -48,3 +48,13 @@
 
 /* Les champs et cases restent repérables sans dépendre d’une bordure presque blanche. */
 .search,.period select,label.field input,label.field select,label.field textarea,.note-form textarea,.task-form input,.gate input,.action-check{border-color:#7d8983}
+
+/* Échéances modifiables sans quitter la liste, avec cibles tactiles et libellés visibles. */
+.task-edit{margin-top:4px}.task-edit summary{font-size:12px;min-height:44px;padding:12px 0;cursor:pointer}.task-date-form{display:flex;flex-wrap:wrap;align-items:end;gap:8px;padding:8px 0}.task-date-form label{flex:1;min-width:150px}.task-date-form input{width:100%;min-height:44px}.task-date-form p{width:100%}.action-copy strong{overflow-wrap:anywhere}
+@media(max-width:600px){.task-date-form input{font-size:16px}.action-row{flex-wrap:wrap}.action-row>.pill{margin-left:34px}}
+
+/* La clôture reste facile à viser sur téléphone. */
+.action-check{min-width:44px;min-height:44px;flex-shrink:0}
+
+/* Garder l’échéance focalisée à distance des bords du dialogue et de son en-tête. */
+.task-edit summary{scroll-margin-block:80px 16px}

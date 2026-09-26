@@ -1,3 +1,5 @@
+import { isCalendarDate } from '../lib/calendar-date.js';
+import { readTaskOverview, taskOrderSql } from '../lib/crm-tasks.js';
 import { readBackupChecks } from "../lib/backup-state.js";
 import { readCleanupProof } from "../lib/cleanup.js";
 import { orderService, accountDownloadHistory } from "../lib/customer-service.js";
@@ -59,8 +61,9 @@ crmRoute.get("/overview", c => {
     const dayQuery = db.prepare(`SELECT COALESCE(SUM(o.amount_chf-o.refunded_chf),0) revenue_cents,COUNT(*) orders ${selection}`);
     const daily = periodRanges(period).map(range => ({ day: range.day, ...dayQuery.get(range.start, range.end, ...real.params) as { revenue_cents: number; orders: number } }));
     const { traffic, web, coverage } = readCrmAudience(db, period, false);
-    const tasks = db.prepare(`SELECT t.*,c.email,COALESCE(p.display_name,'') display_name FROM crm_tasks t LEFT JOIN customers c ON c.id=t.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE t.done_at IS NULL ORDER BY t.due_on IS NULL,t.due_on,t.created_at DESC LIMIT 100`).all();
-    return { checked_at: now, days, period, revenue: rollup(period.start_at), all_time: rollup(0), daily, traffic, web, coverage, tasks, customers: profiles(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" };
+    const taskOverview = readTaskOverview(db, period.end), customers = profiles();
+    const customerTotal = (db.prepare('SELECT COUNT(*) total FROM customers').get() as {total:number}).total;
+    return { checked_at: now, days, period, revenue: rollup(period.start_at), all_time: rollup(0), daily, traffic, web, coverage, ...taskOverview, customers, customer_list: { returned: customers.length, total: customerTotal, limit: 1000, truncated: customerTotal > customers.length }, revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" };
   })());
 });
 crmRoute.get("/customers/:id", c => {
@@ -71,7 +74,7 @@ crmRoute.get("/customers/:id", c => {
   const orders = db.prepare("SELECT id,amount_chf,refunded_chf,dispute_status,financial_checked_at,items_json,status,created_at,stripe_payment_intent,stripe_session_id FROM orders WHERE customer_id=? ORDER BY created_at DESC").all(id);
   const entitlements = db.prepare("SELECT e.dataset_id,e.updates_until,d.current_version FROM entitlements e JOIN datasets d ON d.id=e.dataset_id WHERE e.customer_id=?").all(id);
   const notes = db.prepare("SELECT id,body,created_at FROM crm_notes WHERE customer_id=? ORDER BY created_at DESC").all(id);
-  const tasks = db.prepare("SELECT * FROM crm_tasks WHERE customer_id=? ORDER BY done_at IS NOT NULL,due_on,created_at DESC").all(id);
+  const tasks = db.prepare(`SELECT t.* FROM crm_tasks t WHERE t.customer_id=? ORDER BY t.done_at IS NOT NULL,${taskOrderSql}`).all(id);
   return c.json({ customer, orders: (orders as Array<{id:number}>).map(order => ({ ...order, service: orderService(db, id, order.id), legal: orderLegalSummary(db, order.id) })), entitlements, notes, tasks, account_downloads: accountDownloadHistory(db, id) });
 });
 crmRoute.patch("/customers/:id", async c => {
@@ -103,7 +106,7 @@ crmRoute.post("/customers/:id/notes", async c => {
   return c.json({ ok: true, id: Number(result.lastInsertRowid) }, 201);
 });
 crmRoute.post("/tasks", async c => {
-  const input = z.object({ title: z.string().trim().min(1).max(240), customer_id: z.number().int().positive().nullable().default(null), due_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().default(null) }).strict().safeParse(await c.req.json().catch(error => { if (error instanceof SyntaxError) return null; throw error; }));
+  const input = z.object({ title: z.string().trim().min(1).max(240), customer_id: z.number().int().positive().nullable().default(null), due_on: z.string().refine(isCalendarDate).nullable().default(null) }).strict().safeParse(await c.req.json().catch(error => { if (error instanceof SyntaxError) return null; throw error; }));
   if (!input.success) return c.json({ error: "invalid_body" }, 400);
   const db = getDb(), r = input.data;
   if (r.customer_id && !db.prepare("SELECT id FROM customers WHERE id=?").get(r.customer_id)) return c.json({ error: "not_found" }, 404);
@@ -112,9 +115,12 @@ crmRoute.post("/tasks", async c => {
 });
 crmRoute.patch("/tasks/:id", async c => {
   if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);
-  const body = z.object({ done: z.boolean() }).strict().safeParse(await c.req.json().catch(error => { if (error instanceof SyntaxError) return null; throw error; }));
+  const body = z.object({ done: z.boolean().optional(), due_on: z.string().refine(isCalendarDate).nullable().optional() }).strict().refine(value => value.done !== undefined || value.due_on !== undefined).safeParse(await c.req.json().catch(error => { if (error instanceof SyntaxError) return null; throw error; }));
   if (!body.success) return c.json({ error: "invalid_body" }, 400);
-  const r = getDb().prepare("UPDATE crm_tasks SET done_at=? WHERE id=?").run(body.data.done ? Date.now() : null, Number(c.req.param("id")));
+  const fields: string[] = [], values: Array<string | number | null> = [];
+  if (body.data.done !== undefined) { fields.push(body.data.done ? 'done_at=COALESCE(done_at,?)' : 'done_at=?'); values.push(body.data.done ? Date.now() : null); }
+  if (body.data.due_on !== undefined) { fields.push('due_on=?'); values.push(body.data.due_on); }
+  const r = getDb().prepare(`UPDATE crm_tasks SET ${fields.join(',')} WHERE id=?`).run(...values, Number(c.req.param("id")));
   return c.json({ ok: r.changes === 1 }, r.changes === 1 ? 200 : 404);
 });
 crmRoute.get("/audience", c => {
