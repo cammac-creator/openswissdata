@@ -1,3 +1,4 @@
+import { readBackupChecks } from "../lib/backup-state.js";
 import { readCleanupProof } from "../lib/cleanup.js";
 import { orderService, accountDownloadHistory } from "../lib/customer-service.js";
 import { orderLegalSummary } from "../lib/order-legal.js";
@@ -128,10 +129,7 @@ crmRoute.get("/visibility", async c => {
 crmRoute.get("/operations", async c => {
   const db = getDb();
   const datasets = db.prepare("SELECT d.id,d.name,d.current_version,v.released_at,v.size_bytes FROM datasets d LEFT JOIN versions v ON v.dataset_id=d.id AND v.version=d.current_version").all();
-  let checks: Array<{name:string;checked_at:number;encrypted?:boolean;restore_check?:string;size_bytes?:number}> = [];
-  try {
-    checks = (db.prepare("SELECT name,checked_at,details_json FROM operation_checks WHERE name='backup'").all() as Array<{ name: string; checked_at: number; details_json: string }>).map(r => { const d = JSON.parse(r.details_json); return { name: r.name, checked_at: r.checked_at, encrypted: d.encrypted, restore_check: d.restore_check, size_bytes: d.size_bytes }; });
-  } catch { /* Aucun témoin disponible : le bureau demande une vérification, sans état vert inventé. */ }
+  const checks = readBackupChecks(db);
   let workflows: { available: boolean; checked_at?: number; items?: unknown[]; runs?: unknown[] } = { available: false };
   try {
     workflows = await cached("workflows", 600_000, async () => {

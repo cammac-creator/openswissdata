@@ -49,6 +49,8 @@ Une base vide permet de démarrer, mais ne satisfait pas `/api/health/ready` : c
 
 Les archives vendues résident dans R2. La base référence leurs versions ; catalogue, échantillons et caches MCP suivent les publications validées. Les fiches publiques FINMA et les index vectoriels historiques sont distincts : voir `docs/fiches-publiques.md` et les limites dans `AGENTS.md`.
 
+La [procédure de sauvegarde et de reprise](docs/sauvegarde-et-reprise.md) distingue les contrôles réels de la base, les témoins indépendants dans le stockage et l’exercice complet du service restant à réaliser.
+
 ## Publication et contrôles
 
 `main` alimente Railway, qui attend les tests GitHub puis `/api/health/ready`. Un changement uniquement documentaire ou ETL peut être ignoré par les filtres de `railway.json` : le SHA de l’application demeure alors celui du dernier déploiement. Un push réussi ne prouve pas la publication.

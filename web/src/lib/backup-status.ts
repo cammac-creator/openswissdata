@@ -1,0 +1,24 @@
+import type { BackupCheck } from '../../../src/lib/backup-state';
+
+export function renderBackupStatus(checks: BackupCheck[], now = Date.now()): string {
+  const backup = checks.find(check => check.name === 'backup');
+  const attempt = checks.find(check => check.name === 'backup_attempt');
+  const latestAttempt = attempt && attempt.checked_at >= (backup?.checked_at ?? 0) ? attempt : undefined;
+  const pending = latestAttempt?.state === 'running';
+  const failed = latestAttempt?.state === 'failed';
+  const retentionFailed = failed && latestAttempt.phase === 'retention';
+  const sourceInconsistent = failed && ['backup_foreign_keys_failed', 'backup_versions_failed', 'backup_schema_failed', 'backup_integrity_failed'].includes(latestAttempt.error ?? '');
+  const age = backup ? now - backup.checked_at : Infinity;
+  const healthy = backup?.encrypted === true && backup.restore_check === 'ok' && age >= 0 && age < 60 * 3_600_000 && !pending && !failed && backup.retention_status !== 'error';
+  const active = pending && now - latestAttempt.checked_at >= 0 && now - latestAttempt.checked_at < 10 * 60_000;
+  const title = active ? 'Sauvegarde et contrôle en cours.' : pending ? 'Le dernier contrôle semble interrompu.' : retentionFailed ? 'Copie restaurée ; élagage à reprendre.' : sourceInconsistent ? 'La copie révèle une base à examiner.' : failed ? 'Le dernier essai de sauvegarde a échoué.' : healthy ? 'La sauvegarde a été restaurée avec succès.' : 'La sauvegarde demande une vérification.';
+  const formatDate = (time: number) => new Intl.DateTimeFormat('fr-CH', { timeZone: 'Europe/Zurich', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(time);
+  const date = backup ? `Dernier succès : ${formatDate(backup.checked_at)} · heure suisse.` : 'Aucun succès de restauration disponible.';
+  const size = backup && Number.isFinite(backup.size_bytes) ? ` ${((backup.size_bytes ?? 0) / 1e6).toFixed(1)} Mo chiffrés.` : '';
+  const detailed = backup?.restore_verification;
+  const reasons: Record<string, string> = { backup_bytes_differ: 'Le fichier récupéré diffère du snapshot.', backup_foreign_keys_failed: 'Des liens entre tables sont incohérents dans la copie de la base source.', backup_versions_failed: 'Une version courante ne possède pas sa référence d’archive.', backup_schema_failed: 'Des colonnes nécessaires à la reprise sont absentes.', backup_integrity_failed: 'SQLite signale une incohérence interne.', backup_inspection_timeout: 'Le contrôle isolé a dépassé une minute.', backup_inspection_failed: 'Le contrôle isolé n’a pas pu aboutir.', backup_failed_snapshot: 'La création du snapshot n’a pas abouti.', backup_failed_upload: 'Le stockage de la copie chiffrée n’a pas abouti.', backup_failed_restore: 'La récupération ou le déchiffrement n’a pas abouti.', backup_failed_manifest: 'Le témoin indépendant n’a pas pu être confirmé dans le stockage.', backup_failed_retention: 'La copie est validée, mais le retrait des anciennes sauvegardes reste à reprendre.', backup_failed_proof: 'Le témoin n’a pas pu être enregistré dans la base.' };
+  const reason = failed ? reasons[latestAttempt.error ?? ''] ?? 'Consulter le contrôle de sauvegarde avant de considérer cet essai comme réussi.' : '';
+  // Ces chemins ne sont jamais des URL d’accès ; le serveur impose leur format technique avant exposition.
+  const key = backup?.r2_key && /^backups\/db-[\d-]+\.sqlite(?:\.gz)?\.enc$/.test(backup.r2_key) ? backup.r2_key : null;
+  return `<section class="panel" style="margin-bottom:24px"><div class="panel-heading"><div><h2>${title}</h2><p>${date}${size}</p></div><span class="pill ${healthy ? 'green' : 'amber'}">${active ? 'En cours' : healthy ? 'Vérifiée' : 'À vérifier'}</span></div>${latestAttempt && (failed || pending) ? `<p class="fine">Dernier essai : ${formatDate(latestAttempt.checked_at)} · heure suisse. ${reason || 'Le résultat reste à confirmer.'}</p>` : ''}<p class="fine">${detailed ? 'Copie récupérée depuis le stockage et déchiffrée : octets identiques au snapshot, intégrité SQLite complète, liens entre tables, colonnes essentielles et versions courantes contrôlés.' : 'Le témoin disponible couvre le déchiffrement et le contrôle SQLite historique. Les vérifications approfondies ne sont pas présumées pour cet ancien passage.'}</p>${key ? `<details><summary>Repère pour retrouver la copie</summary><p class="fine" style="overflow-wrap:anywhere">${key}</p><p class="fine">${backup?.manifest_key ? 'Un témoin de validation existe aussi dans le dossier backups/verified du stockage privé.' : 'Aucun témoin indépendant n’est attesté pour cet ancien passage.'}</p></details>` : ''}<p class="source-note">Ce contrôle porte sur la base. Une reprise complète nécessite aussi les archives de données, les paramètres et les clés conservés séparément. Elle reste à exercer dans un environnement isolé.</p></section>`;
+}
