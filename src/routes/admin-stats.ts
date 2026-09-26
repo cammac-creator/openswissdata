@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { getDb } from "../lib/db.js";
 import { requireAdmin } from "../lib/admin-middleware.js";
+import { readEventCoverage } from '../lib/event-budget.js';
 
 export const adminStatsRoute = new Hono<{
   Variables: { customer_id: number; customer_email: string };
@@ -275,6 +276,7 @@ adminStatsRoute.get("/", async (c) => {
     topReferers,
     uaSplit,
     customEvents,
+    collection: readEventCoverage(db, Date.now(), since),
     measurement_notes: { historical_origin: "Les lignes legacy gardent une origine inconnue ; une déclaration client ne prouve aucune conversion.", visitor_identity: "Identifiants quotidiens estimés, pas des personnes uniques.", country: "Pays déclaré, non vérifié par l’application." },
     mcpHuman7d,
     mcpCallerSplit,
