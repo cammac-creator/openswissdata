@@ -23,6 +23,7 @@ import { crmPeriod, periodRanges, swissDay } from "../lib/crm-period.js";
 import { readCrmAudience } from "../lib/crm-audience.js";
 import { readOrderJourney } from "../lib/order-journey.js";
 import { readSampleMeasures } from "../lib/sample-measures.js";
+import { readCheckoutMeasures } from "../lib/checkout-measures.js";
 
 export const crmRoute = new Hono<{ Variables: { customer_id: number; customer_email: string } }>();
 crmRoute.use("*", requireAdmin);
@@ -183,7 +184,14 @@ crmRoute.get("/audience", c => {
       const category=typeof code==='string'&&['SQLITE_ERROR','SQLITE_BUSY','SQLITE_LOCKED','SQLITE_FULL','SQLITE_IOERR','SQLITE_CORRUPT','SQLITE_NOTADB','SQLITE_NOMEM'].includes(code)?code:'unknown';
       console.error('[crm] lecture des mesures d’échantillons indisponible', {category});
     }
-    return { checked_at: now, ...audience, journey, samples };
+    let checkouts: ReturnType<typeof readCheckoutMeasures> | null = null;
+    try { checkouts = readCheckoutMeasures(db, period, now); }
+    catch (error) {
+      const code=(error as {code?:unknown})?.code;
+      const category=typeof code==='string'&&['SQLITE_ERROR','SQLITE_BUSY','SQLITE_LOCKED','SQLITE_FULL','SQLITE_IOERR','SQLITE_CORRUPT','SQLITE_NOTADB','SQLITE_NOMEM'].includes(code)?code:'unknown';
+      console.error('[crm] lecture des créations de paiement indisponible', {category});
+    }
+    return { checked_at: now, ...audience, journey, samples, checkouts };
   })());
 });
 crmRoute.get("/visibility", async c => {

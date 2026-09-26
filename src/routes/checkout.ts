@@ -6,6 +6,7 @@ import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
 import { checkoutBucket, checkRateLimit, getClientIp } from "../lib/rate-limit.js";
 import { checkoutLegal } from "../lib/order-legal.js";
+import { checkoutObservation, recordCheckoutCreated, type CheckoutObservation } from "../lib/checkout-measures.js";
 
 export const checkoutRoute = new Hono();
 
@@ -48,7 +49,7 @@ function isDatasetId(s: string): s is DatasetId {
 }
 
 type SessionResult =
-  | { ok: true; url: string; session_id: string }
+  | { ok: true; url: string; session_id: string; observation: CheckoutObservation | null }
   | { ok: false; status: number; error: string };
 
 async function buildSession(
@@ -141,15 +142,18 @@ async function buildSession(
   // Render the Stripe Checkout UI in the buyer's language (default: Stripe auto).
   params.locale = buyerLocale;
 
+  let session: Stripe.Checkout.Session;
   try {
-    const session = await stripe().checkout.sessions.create(params);
+    session = await stripe().checkout.sessions.create(params);
     if (!session.url) return { ok: false, status: 502, error: "stripe_no_session_url" };
-    return { ok: true, url: session.url, session_id: session.id };
   } catch (err) {
     // H4: log full error server-side, never expose Stripe internals to clients
     console.error("[checkout] création de session Stripe interrompue");
     return { ok: false, status: 502, error: "checkout_failed" };
   }
+  // La mesure reste hors de la gestion d’échec de l’appel Stripe déjà réussi.
+  return { ok: true, url: session.url, session_id: session.id,
+    observation: checkoutObservation(session, dataset_ids, buyerLocale) };
 }
 
 // JSON API — used by tests, programmatic clients
@@ -190,6 +194,7 @@ checkoutRoute.post("/session", async (c) => {
     }
     return c.json({ error: result.error }, result.status as ContentfulStatusCode);
   }
+  recordCheckoutCreated(c, result.observation, 'api');
   return c.json({ url: result.url, session_id: result.session_id });
 });
 
@@ -236,5 +241,6 @@ checkoutRoute.post("/start", async (c) => {
     }
     return c.text(result.error, result.status as ContentfulStatusCode);
   }
+  recordCheckoutCreated(c, result.observation, 'form');
   return c.redirect(result.url, 303);
 });
