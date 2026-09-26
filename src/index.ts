@@ -27,6 +27,7 @@ import { startMcpDataRefresh } from "./mcp/r2-refresh.js";
 import { loadEnv } from "./env.js";
 import { startOrderDeliveryWorker } from "./lib/order-delivery.js";
 import { startFinancialWorker } from "./lib/stripe-financial.js";
+import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
 
 export function createApp() {
@@ -269,6 +270,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const stopDeliveries = startOrderDeliveryWorker();
   const stopFinancial = startFinancialWorker();
   const stopCleanup = startCleanupWorker();
+  const stopIncidents = startDeliveryIncidentWorker();
 
   // Flush Sentry events on graceful shutdown so errors right before
   // SIGTERM aren't lost.
@@ -276,6 +278,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     stopDeliveries();
     stopFinancial();
     stopCleanup();
+    stopIncidents();
     console.log(`[shutdown] received ${sig}, flushing Sentry…`);
     await flushSentry(2000);
     process.exit(0);

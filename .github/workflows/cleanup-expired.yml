@@ -46,7 +46,7 @@ jobs:
               print('::error::Réponse de nettoyage illisible ; aucun succès déclaré.')
               sys.exit(1)
           print('HTTP',sys.argv[2])
-          expected={'magic_links','sessions','download_tokens','mcp_oauth_codes','request_log','events','download_activity','delivery_message_references','bronze_dashboard','bronze_financial','auth_request_limits'}
+          expected={'magic_links','sessions','download_tokens','mcp_oauth_codes','request_log','events','download_activity','delivery_message_references','bronze_dashboard','bronze_financial','auth_request_limits','delivery_incident_events','delivery_incidents'}
           entries=data.get('entries') if isinstance(data,dict) else None
           valid=isinstance(entries,list) and all(isinstance(e,dict) and isinstance(e.get('name'),str) and e.get('name') in expected|{'cleanup_proof'} and e.get('status') in ('ok','not_applicable','error') for e in entries)
           if valid:

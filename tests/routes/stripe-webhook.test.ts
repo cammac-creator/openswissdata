@@ -53,6 +53,26 @@ describe("Paiements et livraisons durables", () => {
   });
   afterEach(() => { closeDb();rmSync(tmp,{recursive:true,force:true});vi.unstubAllEnvs(); });
 
+  it("garde la suspension et signale une acceptation arrivée après le changement d’état",async()=>{
+    send.mockImplementationOnce(async()=>{getDb().prepare("UPDATE orders SET status='disputed'").run();getDb().prepare("UPDATE order_deliveries SET state='cancelled',last_error='financial_access_suspended'").run();return {sent:true}});
+    await post();await processOrderDeliveries();retryNow();await processOrderDeliveries();
+    expect(send).toHaveBeenCalledTimes(1);expect(rows('order_deliveries')[0].state).toBe('cancelled');expect(rows('orders')[0].status).toBe('disputed');expect(rows('delivery_incidents')[0]).toMatchObject({state:'open',reason:'acceptance_after_state_change'});expect(rows('delivery_incident_events')[0].kind).toBe('acceptance_uncertain');
+  });
+  it("un bail remplacé pendant l’envoi garde son état et une acceptation incertaine distincte",async()=>{
+    send.mockImplementationOnce(async()=>{getDb().prepare("UPDATE order_deliveries SET attempts=attempts+1,lease_until=?").run(Date.now()+3600000);return {sent:true}});
+    await post();await processOrderDeliveries();await processOrderDeliveries();expect(send).toHaveBeenCalledTimes(1);expect(rows('order_deliveries')[0]).toMatchObject({state:'processing',attempts:2});expect(rows('delivery_incidents')[0]).toMatchObject({state:'open',reason:'acceptance_after_state_change'});expect(rows('delivery_incident_events')[0]).toMatchObject({kind:'acceptance_uncertain',attempts:1});
+  });
+
+  it("une panne du registre après acceptation ne provoque pas un second envoi",async()=>{
+    send.mockResolvedValueOnce({sent:false,reason:'resend_error'}).mockResolvedValue({sent:true});
+    await post();await processOrderDeliveries();
+    expect(rows('delivery_incidents')).toHaveLength(1);expect(rows('delivery_incidents')[0].state).toBe('open');
+    getDb().exec("CREATE TRIGGER incident_journal_indisponible BEFORE INSERT ON delivery_incident_events BEGIN SELECT RAISE(ABORT,'fictif'); END");
+    const log=vi.spyOn(console,'error').mockImplementation(()=>{});
+    try{retryNow();await processOrderDeliveries();retryNow();await processOrderDeliveries();expect(send).toHaveBeenCalledTimes(2);expect(rows('order_deliveries')[0].state).toBe('sent');expect(rows('delivery_incidents')[0].state).toBe('open');expect(log).toHaveBeenCalled()}
+    finally{log.mockRestore()}
+  });
+
   it("rattache mail et trace à la commande, conserve le résultat au rejeu", async () => {
     const providerId="11111111-1111-4111-8111-111111111111";
     send.mockResolvedValue({sent:true,providerId});
