@@ -73,7 +73,7 @@ describe("POST /api/events/track", () => {
     });
     expect(res.status).toBe(413);
   });
-  it.each(['page_view','PAGE_VIEW','mcp_tool_call','checkout_started','payment_paid','delivery_sent','download_authorized','server.commande'])('refuse le nom interne %s sans créer de preuve',async name=>{
+  it.each(['page_view','PAGE_VIEW','mcp_tool_call','checkout_started','payment_paid','delivery_sent','download_authorized','sample_served','SAMPLE_SERVED','server.commande'])('refuse le nom interne %s sans créer de preuve',async name=>{
     const r=await createApp().request('/api/events/track',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name,kind:'conversion'})});
     expect(r.status).toBe(400);expect(await r.json()).toEqual({error:'reserved_event'});await new Promise(r=>setImmediate(r));expect(getDb().prepare('SELECT COUNT(*) n FROM events').get()).toEqual({n:0});
   });
