@@ -103,7 +103,7 @@ adminStatsRoute.get("/", async (c) => {
       SUM(CASE WHEN status >= 500 THEN 1 ELSE 0 END) AS errors_5xx,
       SUM(CASE WHEN status >= 400 AND status < 500 THEN 1 ELSE 0 END) AS errors_4xx
     FROM events
-    WHERE kind='api_request' AND ts >= ?
+    WHERE kind='api_request' AND origin IN ('server','legacy') AND ts >= ?
   `).get(since) as {
     total_requests: number;
     unique_visitors: number;
@@ -118,7 +118,7 @@ adminStatsRoute.get("/", async (c) => {
       COUNT(*) AS requests,
       COUNT(DISTINCT visitor_hash) AS visitors
     FROM events
-    WHERE kind='api_request' AND ts >= ?
+    WHERE kind='api_request' AND origin IN ('server','legacy') AND ts >= ?
     GROUP BY day
     ORDER BY day ASC
   `).all(since) as Array<{ day: string; requests: number; visitors: number }>;
@@ -126,17 +126,17 @@ adminStatsRoute.get("/", async (c) => {
   const topPaths = db.prepare(`
     SELECT name AS path, COUNT(*) AS hits, COALESCE(AVG(duration_ms),0) AS avg_ms
     FROM events
-    WHERE kind='api_request' AND ts >= ?
+    WHERE kind='api_request' AND origin IN ('server','legacy') AND ts >= ?
     GROUP BY name
     ORDER BY hits DESC
     LIMIT 15
   `).all(since) as Array<{ path: string; hits: number; avg_ms: number }>;
 
   const topCountries = db.prepare(`
-    SELECT COALESCE(country,'??') AS country, COUNT(*) AS hits
+    SELECT COALESCE(CASE WHEN length(country)=2 AND upper(country) GLOB '[A-Z][A-Z]' THEN upper(country) END,'??') AS country, COUNT(*) AS hits
     FROM events
-    WHERE kind='api_request' AND ts >= ?
-    GROUP BY country
+    WHERE kind='api_request' AND origin IN ('server','legacy') AND ts >= ?
+    GROUP BY 1
     ORDER BY hits DESC
     LIMIT 10
   `).all(since) as Array<{ country: string; hits: number }>;
@@ -144,7 +144,7 @@ adminStatsRoute.get("/", async (c) => {
   const topReferers = db.prepare(`
     SELECT COALESCE(referer,'(direct)') AS referer, COUNT(*) AS hits
     FROM events
-    WHERE kind='api_request' AND ts >= ?
+    WHERE kind='api_request' AND origin IN ('server','legacy') AND ts >= ?
     GROUP BY referer
     ORDER BY hits DESC
     LIMIT 10
@@ -153,7 +153,7 @@ adminStatsRoute.get("/", async (c) => {
   const uaSplit = db.prepare(`
     SELECT COALESCE(ua_class,'other') AS ua, COUNT(*) AS hits
     FROM events
-    WHERE kind='api_request' AND ts >= ?
+    WHERE kind='api_request' AND origin IN ('server','legacy') AND ts >= ?
     GROUP BY ua
     ORDER BY hits DESC
   `).all(since) as Array<{ ua: string; hits: number }>;
@@ -162,13 +162,13 @@ adminStatsRoute.get("/", async (c) => {
   // Exclude mcp_tool_call: it has its own dedicated gate blocks below and would
   // otherwise saturate this top-20 and bury the real cta_* conversion events.
   const customEvents = db.prepare(`
-    SELECT name, COUNT(*) AS count
+    SELECT name, origin, COUNT(*) AS count
     FROM events
     WHERE kind IN ('custom','conversion') AND name <> 'mcp_tool_call' AND ts >= ?
-    GROUP BY name
+    GROUP BY name, origin
     ORDER BY count DESC
     LIMIT 20
-  `).all(since) as Array<{ name: string; count: number }>;
+  `).all(since) as Array<{ name: string; origin: string; count: number }>;
 
   // --- MCP kill-gate metrics (FIXED 7-day window, independent of ?days) ---
   // The Sept 15 2026 gate: ~20 human MCP calls/week (excl. bots), 0 third-party
@@ -184,7 +184,7 @@ adminStatsRoute.get("/", async (c) => {
       COUNT(*)                                              AS human_calls,
       COUNT(DISTINCT json_extract(meta_json,'$.client_id')) AS distinct_clients
     FROM events
-    WHERE kind='custom' AND name='mcp_tool_call' AND ts >= ?
+    WHERE kind='custom' AND name='mcp_tool_call' AND origin IN ('server','legacy') AND ts >= ?
       AND ua_class = 'human_authenticated'
       AND COALESCE(json_extract(meta_json,'$.admin'), 0) = 0
   `).get(since7d) as { human_calls: number; distinct_clients: number };
@@ -193,7 +193,7 @@ adminStatsRoute.get("/", async (c) => {
   const mcpCallerSplit = db.prepare(`
     SELECT COALESCE(ua_class,'unknown') AS caller_class, COUNT(*) AS calls
     FROM events
-    WHERE kind='custom' AND name='mcp_tool_call' AND ts >= ?
+    WHERE kind='custom' AND name='mcp_tool_call' AND origin IN ('server','legacy') AND ts >= ?
     GROUP BY caller_class
     ORDER BY calls DESC
   `).all(since7d) as Array<{ caller_class: string; calls: number }>;
@@ -275,6 +275,7 @@ adminStatsRoute.get("/", async (c) => {
     topReferers,
     uaSplit,
     customEvents,
+    measurement_notes: { historical_origin: "Les lignes legacy gardent une origine inconnue ; une déclaration client ne prouve aucune conversion.", visitor_identity: "Identifiants quotidiens estimés, pas des personnes uniques.", country: "Pays déclaré, non vérifié par l’application." },
     mcpHuman7d,
     mcpCallerSplit,
     mcpPaying,

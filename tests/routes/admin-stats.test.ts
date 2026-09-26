@@ -80,6 +80,19 @@ describe("GET /api/admin/stats", () => {
     expect(body.plausible.available).toBe(false);
   });
 
+  it('sépare aussi les déclarations de l’ancienne route statistique',async()=>{
+    const db=getDb(),now=Date.now();db.prepare("INSERT INTO events(kind,name,origin,ua_class,meta_json,ts) VALUES('custom','mcp_tool_call','client','human_authenticated','{\"admin\":false,\"client_id\":\"fictif\"}',?)").run(now);
+    db.prepare("INSERT INTO events(kind,name,origin,ts) VALUES('conversion','paiement_fictif','client',?)").run(now);
+    const r=await createApp().request('/api/admin/stats',{headers:{cookie:`osd_session=${token}`}});const body=await r.json();
+    expect(body.mcpHuman7d.human_calls).toBe(0);expect(body.customEvents.find((x:{name:string})=>x.name==='paiement_fictif')).toMatchObject({origin:'client',count:1});expect(body.customEvents.find((x:{name:string})=>x.name==='cta_pricing').origin).toBe('legacy');expect(body.measurement_notes.historical_origin).toContain('aucune conversion');
+  });
+
+  it('présente un pays historique invalide comme inconnu sans réécrire sa trace',async()=>{
+    const raw='<img src=x onerror=alert(1)>';getDb().prepare('UPDATE events SET country=?').run(raw);
+    const r=await createApp().request('/api/admin/stats',{headers:{cookie:`osd_session=${token}`}});const body=await r.json();
+    expect(body.topCountries).toEqual([{country:'??',hits:1}]);expect(getDb().prepare("SELECT country FROM events WHERE kind='api_request'").get()).toEqual({country:raw});
+  });
+
   it("clamps days param to allowed range", async () => {
     const app = createApp();
     const res = await app.request("/api/admin/stats?days=99999", {
