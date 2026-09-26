@@ -173,3 +173,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 ## Demandes d’échantillons — 26.09.2026
 - `sample_served` observe seulement les réponses GET CSV 200 des trois produits ; nom réservé au serveur. Réutiliser les budgets de collecte et la purge à 180 jours, sans client, email ou URL dans la trace. Une panne de mesure ne doit jamais bloquer le fichier.
 - Le CRM sépare demandes, navigateurs présumés et visiteurs-jours valides, dédupliqués entre produits. Ni HTTP 200 ni première trace conservée ne prouvent réception, présence humaine ou début de collecte. Aucun taux de conversion inventé ; règles et limites dans `docs/mesures-echantillons.md`.
+
+## Créations Checkout — 26.09.2026
+- `checkout_started` est observé uniquement après une réponse Stripe de création attestant URL, mode réel et paiement de fichiers. Le formulaire peut aussi retourner 303 en erreur : ne jamais assimiler le seul statut à une création. Aucun identifiant Stripe ou client dans cette mesure facultative.
+- Ne pas modifier le parcours d’achat ni relancer Stripe lorsqu’une statistique échoue. Les preuves de vente restent transactionnelles et séparées. Les créations observées ne prouvent ni affichage de Checkout, ni abandon, ni paiement ; détails dans `docs/mesures-checkout.md`.

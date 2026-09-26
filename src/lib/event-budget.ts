@@ -11,9 +11,11 @@ export const EVENT_LIMITS = { queued: 100, queuedBytes: 512 * 1024, eventBytes: 
 const CLIENT_LIMITS = { ...EVENT_LIMITS, queued: 20, queuedBytes: 64 * 1024, burst: 20, perMinute: 120, byteBurst: 64 * 1024, bytesPerMinute: 256 * 1024 };
 let lastFailureLog = -Infinity;
 export function reportEventFailure(): void {
-  const now = Date.now();
-  if (now >= lastFailureLog && now - lastFailureLog < 60_000) return;
-  lastFailureLog = now; console.warn('[mesures] enregistrement momentanément indisponible');
+  try {
+    const now = Date.now();
+    if (now >= lastFailureLog && now - lastFailureLog < 60_000) return;
+    lastFailureLog = now; console.warn('[mesures] enregistrement momentanément indisponible');
+  } catch { /* La panne du journal d’une mesure facultative ne doit pas interrompre le service. */ }
 }
 class InvalidProof extends Error {}
 const reasons = ['queue', 'rate', 'size', 'storage', 'write', 'format'] as const;
