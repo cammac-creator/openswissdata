@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getDb } from "../lib/db.js";
 import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
-import { runCleanup } from "../lib/cleanup.js";
+import { runFullCleanup } from "../lib/cleanup.js";
 import { refreshFinmaFromR2, refreshTaresFromR2, refreshClassificationsFromR2, getMcpFreshness, extractCsvFromZip } from "../mcp/r2-refresh.js";
 import { getObjectBuffer } from "../lib/r2.js";
 import { snapshotFromRows, getReleasedAt, type SnapshotDataset } from "../mcp/snapshots.js";
@@ -194,8 +194,8 @@ adminRoute.post("/cleanup-expired", async (c) => {
     return c.json({ error: "unauthorized" }, 401);
   }
   const db = getDb();
-  const result = runCleanup(db);
-  return c.json({ ok: true, ...result, ran_at: new Date().toISOString() });
+  const result = await runFullCleanup(db);
+  return c.json({ ...result, ran_at: new Date(result.checked_at).toISOString() }, result.ok ? 200 : 503);
 });
 
 adminRoute.post("/release", async (c) => {

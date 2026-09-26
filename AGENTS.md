@@ -125,3 +125,14 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - `/api/health/deep` est privé, exige la session administrateur et ne retourne aucun message fournisseur brut. Le bouton de l’espace Automatisations le déclenche à la demande ; aucun appel profond au chargement du CRM.
 - Une seule vérification simultanée par processus, cache de 60 secondes y compris les échecs, délai de 3 secondes par dépendance. Stripe : délai SDK 2,5 secondes et aucune relance ; R2 : une tentative, signal d’annulation et client détruit.
 - Les moniteurs publics utilisent `/ready` (base et site) et `/freshness` (FINMA), sans appel à un fournisseur. Une vérification de connexion réussie ne prouve ni livraison, ni droits, ni téléchargement complet. Le cache n’est pas partagé entre réplicas ; réévaluer avant de multiplier les instances.
+
+## Conservation périodique et preuve — 26.09.2026
+- Le nettoyage toutes les six heures traite SQLite et les deux bronzes techniques dashboard/financial, même sans consultation du CRM. Aucune commande, preuve contractuelle, note, droit acquis, boîte d’origine ou sauvegarde n’est supprimée par cette tâche.
+- Seules magic_links et request_log sont des tables historiques facultatives (les liens actuels résident dans sessions). Toute erreur SQL réelle, même dans une table facultative présente, rend le passage incomplet. Les catégories indépendantes continuent ; HTTP503 et code CLI1 signalent l’échec, sans message SQL brut.
+- Bronze : même frontière de trente jours calendaires UTC que la purge à la consultation ; seuls les répertoires datés reconnus sont concernés, aucun lien symbolique suivi. Les fichiers conservés ne sont ni lus ni réécrits.
+- operation_checks/cleanup garde le dernier témoin minimal (dates, catégories, quantités, résultat). Le CRM expose uniquement un témoin validé ; un passage ancien ou incomplet demande vérification. Un échec d’enregistrement fait échouer la tâche.
+- Aucun élargissement de la rétention aux notes ou courriers originaux : ces durées et les sauvegardes restent des sujets distincts de la roadmap.
+
+- Les chemins de base et bronze sont partagés dans data-paths.ts ; les connecteurs suivent la base réellement ouverte, même avec un chemin explicite différent de DATABASE_PATH. La CLI de nettoyage exige un fichier de base existant ; elle ne crée pas de base vierge.
+- Précontrôle des dates avant suppression : entiers en millisecondes, cohérents avec les écritures de l’application depuis 2025. Un format historique en secondes/texte demande examen et laisse la catégorie intacte.
+- Le workflow public n’affiche que les noms de catégories et statuts ; les quantités restent privées. Sa réponse brute est temporaire dans le runner, pas une sauvegarde durable. Un secret à portée réduite et la relève des déclenchements GitHub restent à traiter séparément.

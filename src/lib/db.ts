@@ -3,19 +3,22 @@ import { readFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { migrateOrderRights } from "./order-rights.js";
+import { resolveDatabasePath } from './data-paths.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 let _db: Database.Database | null = null;
 
-export function getDb(path?: string): Database.Database {
-  const dbPath = path ?? process.env.DATABASE_PATH ?? "./data/openswissdata.sqlite";
+export function currentDatabasePath(): string { return _db?.name ?? resolveDatabasePath(); }
+
+export function getDb(path?: string, options: { fileMustExist?: boolean } = {}): Database.Database {
+  const dbPath = resolveDatabasePath(path);
   if (_db) return _db;
 
   const dir = dirname(dbPath);
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  if (!options.fileMustExist && !existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-  const db = new Database(dbPath);
+  const db = new Database(dbPath, options);
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
 
