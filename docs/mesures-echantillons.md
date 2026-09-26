@@ -9,7 +9,7 @@ Le panneau Audience distingue les réponses CSV préparées par le serveur, les 
 - Aucun identifiant client, email, référence Stripe, URL, référent, adresse IP ou agent utilisateur brut n’est ajouté à cette trace. Les paramètres supplémentaires de l’URL ne sont pas conservés dans l’événement. Les mesures API existantes restent distinctes.
 - Le pseudonyme quotidien HMAC et la classe d’agent réutilisent les règles existantes. Un navigateur déclaré peut être un robot. Les requêtes techniques peuvent apparaître parmi les outils automatisés.
 - File facultative, budgets existants et conservation de 180 jours. Aucune nouvelle table ni politique de conservation. Une panne d’écriture ne bloque pas l’échantillon ; les pertes connues apparaissent dans l’état de collecte général, sans ventilation par produit.
-- Ces statistiques partagent le budget des autres mesures facultatives. Les preuves financières et de service restent dans leurs tables transactionnelles (`orders`, `order_legal`, `order_deliveries`, `download_activity`) et ne passent pas par cette file. Les noms financiers réservés ne sont actuellement pas utilisés pour écrire des événements. Une rafale peut perdre des statistiques, jamais une preuve d’achat par épuisement de ce budget.
+- Ces statistiques partagent le budget des autres mesures facultatives, notamment les créations de sessions Checkout. Les preuves financières et de service restent dans leurs tables transactionnelles (`orders`, `order_legal`, `order_deliveries`, `download_activity`) et ne passent pas par cette file. Une rafale peut perdre des statistiques, jamais une preuve d’achat par épuisement de ce budget.
 
 ## Lecture
 
@@ -25,4 +25,4 @@ La route CSV impose actuellement `Cache-Control: no-store`. Seules les réponses
 
 Les lectures utilisent l’index existant sur nom et date. Le panneau isole ses erreurs et laisse les autres mesures disponibles. Les tests utilisent des archives et bases entièrement fictives. Une vérification sur le site réel doit se déclarer comme outil automatisé ; ne pas fabriquer une visite humaine ou une vente pour valider le compteur.
 
-Un retour arrière laisse seulement des événements supplémentaires que les anciennes versions savent conserver et purger. Les anciens compteurs ne doivent pas être remplis rétroactivement. Le suivi du début de paiement reste un chantier séparé.
+Un retour arrière laisse seulement des événements supplémentaires que les anciennes versions savent conserver et purger. Les anciens compteurs ne doivent pas être remplis rétroactivement. Le suivi des créations Checkout est décrit séparément dans `docs/mesures-checkout.md` ; aucun rapprochement individuel avec ces échantillons n’est effectué.
