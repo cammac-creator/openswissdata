@@ -49,6 +49,13 @@ describe("GET /api/admin/stats", () => {
     delete process.env.ADMIN_EMAILS;
   });
 
+  it("ignore les préfixes voisins des modes Stripe dans les deux totaux", async () => {
+    const db=getDb(),insert=db.prepare("INSERT INTO orders(customer_id,stripe_session_id,amount_chf,items_json,status,created_at) VALUES(?,?,99999,'[]','paid',?)");
+    for(const value of ['csXliveXfictif','csXtestXfictif','CS_LIVE_fictif','CS_TEST_fictif'])insert.run(cid,value,Date.now());
+    const r=await createApp().request('/api/admin/stats',{headers:{cookie:`osd_session=${token}`}});expect(r.status).toBe(200);const body=await r.json();
+    for(const totals of [body.revenue,body.revenueAllTime])expect(totals).toMatchObject({orders_count:1,test_orders_count:1,revenue_chf:29900,test_revenue_chf:29900});
+  });
+
   it("returns 401 without session cookie", async () => {
     const app = createApp();
     const res = await app.request("/api/admin/stats");

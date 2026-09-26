@@ -35,8 +35,8 @@ adminStatsRoute.get("/", async (c) => {
   //   cs_test_*  → test-mode dashboard (fake money)
   //   cs_live_*  → production (real money)
   // We split the rollup so a pre-launch dashboard isn't drowned in fake revenue.
-  const isTest = `stripe_session_id LIKE 'cs_test_%'`;
-  const isLive = `stripe_session_id LIKE 'cs_live_%'`;
+  const isTest = `stripe_session_id GLOB 'cs_test_*'`;
+  const isLive = `stripe_session_id GLOB 'cs_live_*'`;
 
   const revenue = db.prepare(`
     SELECT

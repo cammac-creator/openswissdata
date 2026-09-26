@@ -58,3 +58,10 @@
 
 /* Garder l’échéance focalisée à distance des bords du dialogue et de son en-tête. */
 .task-edit summary{scroll-margin-block:80px 16px}
+
+/* Pages de clients : commandes et position restent lisibles au téléphone. */
+.client-pagination{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:16px 0;font-size:13px}
+.client-pagination>div{display:flex;flex-wrap:wrap;gap:8px}.client-pagination button{min-height:44px}
+#client-page-label{scroll-margin-block:110px 20px}#client-search-status:empty{min-height:1.1em}
+#client-results[aria-busy="true"]{opacity:.65}
+#client-search-form{flex-wrap:wrap}#client-search-form .search{min-width:0;flex:1 1 260px}
