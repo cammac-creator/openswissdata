@@ -15,6 +15,44 @@ const homeHref = localizePath("/", lang);
 const registryHref = localizePath("/finma/", lang);
 const entHref = (slug: string) => localizePath(`/finma/${slug}`, lang);
 const mcpHref = localizePath("/mcp#install", lang);
+const productHref = localizePath("/datasets/finma", lang);
+const officialHref = {
+  fr: "https://www.finma.ch/fr/finma-public/etablissements-personnes-et-produits-autorises/",
+  de: "https://www.finma.ch/de/finma-public/bewilligte-institute-personen-und-produkte/",
+  en: "https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/",
+}[lang];
+const files = {
+  fr: {
+    search: "Rechercher une institution", discover: "Découvrir les fichiers", label: "Pour travailler avec les données",
+    title: "Le registre FINMA dans Excel.", intro: "Un jeu de données à télécharger pour vos listes, vos rapprochements et vos outils internes.",
+    product: "Voir le contenu et le prix", sample: "Télécharger l’échantillon CSV", sampleNote: "Échantillon de la version publiée, sans compte. Jusqu’à 20 lignes par catégorie présente.",
+    heading: "Passer de la recherche", accent: "aux fichiers.", summary: "Le produit normalise le fichier public de la FINMA avec ses champs UID. Il est distinct de la copie historique consultable sur cette page.",
+    cards: [["01", "Ouvrir et filtrer", "Classeur Excel avec plusieurs onglets, CSV unifié et par catégorie. JSON, Parquet et SQL sont également inclus."], ["02", "Relier les identifiants", "UID de la source et LEI disponibles, rapprochés par UID exact dans GLEIF. Une correspondance absente reste vide."], ["03", "Connaître la version", "La fiche produit donne la version publiée, la couverture des champs et les lacunes observées dans l’historique."]],
+    distinction: "Deux périmètres, deux usages", directory: "Annuaire historique", directoryNote: "Les fiches ci-dessous ne sont pas actualisées à chaque collecte du produit. Elles ne confirment pas le statut actuel d’une institution.",
+    dataset: "Fichiers FINMA avec UID", datasetNote: "Une entreprise peut avoir plusieurs autorisations. Les champs disponibles et la liste d’avertissement séparée sont expliqués sur la fiche produit.",
+    official: "Vérifier auprès de la FINMA", independent: "Service indépendant, sans affiliation à la FINMA ni à GLEIF.", entries: "entrées dans la copie historique", formats: "Formats du produit", paths: "Choisir un usage", noScript: "La recherche nécessite JavaScript. Vous pouvez parcourir les catégories ci-dessous et consulter les fichiers sans l’activer.",
+  },
+  de: {
+    search: "Ein Institut suchen", discover: "Datensatz entdecken", label: "Mit den Daten arbeiten",
+    title: "Das FINMA-Register in Excel.", intro: "Ein Datensatz zum Herunterladen für Ihre Listen, Datenabgleiche und internen Werkzeuge.",
+    product: "Inhalt und Preis ansehen", sample: "CSV-Muster herunterladen", sampleNote: "Muster aus der veröffentlichten Version, ohne Konto. Bis zu 20 Zeilen je vorhandener Kategorie.",
+    heading: "Von der Suche", accent: "zu den Dateien.", summary: "Der Datensatz normalisiert den öffentlichen FINMA-Export mit seinen UID-Feldern. Er ist von der historischen Kopie auf dieser Seite zu unterscheiden.",
+    cards: [["01", "Öffnen und filtern", "Excel-Arbeitsmappe mit mehreren Blättern, CSV gesamt und je Kategorie. JSON, Parquet und SQL sind ebenfalls enthalten."], ["02", "Kennungen zuordnen", "UID aus der Quelle und verfügbare LEIs, über exakte UID-Zuordnung in GLEIF ergänzt. Fehlende Zuordnungen bleiben leer."], ["03", "Die Version prüfen", "Die Produktseite zeigt die veröffentlichte Version, die Abdeckung der Felder und beobachtete Lücken im Verlauf."]],
+    distinction: "Zwei Datenbestände, zwei Zwecke", directory: "Historisches Verzeichnis", directoryNote: "Die Einträge unten werden nicht bei jeder Erhebung des Datensatzes aktualisiert. Sie bestätigen nicht den aktuellen Status eines Instituts.",
+    dataset: "FINMA-Dateien mit UID", datasetNote: "Ein Unternehmen kann mehrere Bewilligungen haben. Verfügbare Felder und die separate Warnliste werden auf der Produktseite erläutert.",
+    official: "Bei der FINMA prüfen", independent: "Unabhängiger Dienst ohne Verbindung zur FINMA oder GLEIF.", entries: "Einträge der historischen Kopie", formats: "Formate des Datensatzes", paths: "Verwendung wählen", noScript: "Die Suche benötigt JavaScript. Die Kategorien und Datensatzlinks können Sie auch ohne JavaScript nutzen.",
+  },
+  en: {
+    search: "Find an institution", discover: "Explore the dataset", label: "Work with the data",
+    title: "The FINMA registry in Excel.", intro: "A downloadable dataset for your lists, data matching and internal tools.",
+    product: "See contents and price", sample: "Download CSV sample", sampleNote: "Sample from the published version, no account needed. Up to 20 rows per available category.",
+    heading: "From a search", accent: "to your files.", summary: "The dataset normalises FINMA’s public export with its UID fields. It is separate from the historical copy you can browse on this page.",
+    cards: [["01", "Open and filter", "Multi-sheet Excel workbook, unified and per-category CSV. JSON, Parquet and SQL are also included."], ["02", "Match identifiers", "Source UIDs and available LEIs, enriched through exact UID matches in GLEIF. Missing matches remain empty."], ["03", "Check the version", "The product page shows the published version, field coverage and observed gaps in the history."]],
+    distinction: "Two collections, two uses", directory: "Historical directory", directoryNote: "The entries below are not updated with each dataset collection. They do not confirm an institution’s current status.",
+    dataset: "FINMA files with UIDs", datasetNote: "A company may hold several authorisations. Available fields and the separate warning list are explained on the product page.",
+    official: "Check with FINMA", independent: "Independent service, not affiliated with FINMA or GLEIF.", entries: "entries in the historical copy", formats: "Dataset formats", paths: "Choose a use", noScript: "Search requires JavaScript. You can still browse the categories below and follow the dataset links without it.",
+  },
+}[lang];
 
 const ORIGIN = "https://www.openswissdata.com";
 const indexJsonLd = {
@@ -30,7 +68,7 @@ const indexJsonLd = {
 };
 ---
 <div class="bg-grid"></div>
-<section class="v4-hero ds-page">
+<section class="v4-hero ds-page finma-directory">
   <div class="container-v4">
     <nav class="ds-breadcrumb">
       <a href={homeHref}>{S.bcHome}</a>
@@ -39,36 +77,57 @@ const indexJsonLd = {
     </nav>
     <div class="v4-hero-grid">
       <div>
-        <div class="v4-eyebrow reveal-v4">
+        <div class="v4-eyebrow">
           <span>{S.idxEyebrow}</span>
           <span style="opacity:.4">·</span>
           <span class="check">FINMA</span>
         </div>
-        <h1 class="v4-h1 reveal-v4" data-delay="1">{S.idxH1a}<br><span class="accent">{S.idxH1b}</span></h1>
-        <p class="v4-lede reveal-v4" data-delay="2">{S.idxLede}</p>
+        <h1 class="v4-h1">{S.idxH1a}<br><span class="accent">{S.idxH1b}</span></h1>
+        <p class="v4-lede">{S.idxLede}</p>
+        <nav class="v4-cta-row directory-paths" aria-label={files.paths}>
+          <a href="#rechercher" class="v4-btn v4-btn-primary">{files.search}<span aria-hidden="true">↓</span></a>
+          <a href="#fichiers" class="v4-btn v4-btn-secondary">{files.discover}<span aria-hidden="true">↓</span></a>
+        </nav>
+        <p class="directory-count"><strong>{new Intl.NumberFormat(lang).format(total)}</strong> {files.entries}</p>
       </div>
-      <div class="ds-price-box reveal-v4" data-delay="2">
-        <div class="ds-price-box-label">{S.bcRegistry}</div>
-        <div class="ds-price-box-amount" style="font-size: 36px;">{total}</div>
-        <div class="ds-price-box-renew">{lang === "de" ? "Einträge dieser Kopie" : lang === "en" ? "entries in this copy" : "entrées dans cette copie"}</div>
-      </div>
+      <aside class="file-card" aria-labelledby="finma-files-intro">
+        <p class="file-eyebrow">{files.label}</p>
+        <h2 id="finma-files-intro">{files.title}</h2>
+        <p>{files.intro}</p>
+        <ul class="file-formats" aria-label={files.formats}>{["Excel", "CSV", "JSON", "Parquet", "SQL"].map(format => <li>{format}</li>)}</ul>
+        <a href={productHref} class="v4-btn v4-btn-primary" data-finma-product-link>{files.product}<span aria-hidden="true">→</span></a>
+        <a href="/api/catalog/finma?format=csv" class="file-sample" data-finma-sample-link>{files.sample}<span aria-hidden="true">↓</span></a>
+        <p class="file-note">{files.sampleNote}</p>
+      </aside>
     </div>
   </div>
 </section>
 
 <section class="v4-datasets ds-page">
   <div class="container-v4">
-    <section class="ds-section reveal-v4">
+    <section class="ds-section directory-search" id="rechercher" aria-labelledby="finma-search-title">
       <div class="v4-section-eyebrow"><strong>{S.idxSearchTitle}</strong></div>
-      <h2 class="v4-section-h2">{S.idxSearchTitle} <span class="serif">{S.idxSearchEm}</span></h2>
+      <h2 class="v4-section-h2" id="finma-search-title">{S.idxSearchTitle} <span class="serif">{S.idxSearchEm}</span></h2>
       <p class="v4-section-intro">{S.idxSearchIntro}</p>
+      <p class="directory-scope">{files.directoryNote} <a href={officialHref}>{files.official}<span aria-hidden="true"> ↗</span></a></p>
       <input type="search" id="finma-search" aria-label={S.idxSearchPlaceholder} data-index-url={searchUrl} placeholder={S.idxSearchPlaceholder} autocomplete="off" spellcheck="false"
         style="width: 100%; padding: 14px 18px; font-size: 16px; border: 1px solid var(--color-line); border-radius: 12px; background: white; font-family: var(--font-sans); margin-bottom: 16px;" />
       <div id="finma-results" style="display: none; max-height: 480px; overflow-y: auto; border: 1px solid var(--color-line); border-radius: 12px; background: white;"></div>
+      <noscript><p class="directory-scope">{files.noScript}</p></noscript>
       <p id="finma-search-count" role="status" aria-live="polite" style="font-size: 12px; color: var(--color-ink-mute); margin-top: 8px;"></p>
     </section>
 
-    <section class="ds-section reveal-v4">
+    <section class="ds-section file-section" id="fichiers" aria-labelledby="finma-files-title">
+      <p class="file-eyebrow">Excel · UID · LEI</p>
+      <h2 class="v4-section-h2" id="finma-files-title">{files.heading} <span class="serif">{files.accent}</span></h2>
+      <p class="v4-section-intro">{files.summary}</p>
+      <div class="file-use-grid">{files.cards.map(([step,title,text]) => <article><span class="file-step" aria-hidden="true">{step}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
+      <section class="file-coverage" aria-labelledby="finma-coverage-title"><h3 id="finma-coverage-title">{files.distinction}</h3><dl><div><dt>{files.directory}</dt><dd>{files.directoryNote}</dd></div><div><dt>{files.dataset}</dt><dd>{files.datasetNote}</dd></div></dl></section>
+      <div class="v4-cta-row"><a href={productHref} class="v4-btn v4-btn-primary" data-finma-product-link>{files.product}<span aria-hidden="true">→</span></a><a href="/api/catalog/finma?format=csv" class="v4-btn v4-btn-secondary" data-finma-sample-link>{files.sample}<span aria-hidden="true">↓</span></a></div>
+      <p class="file-note">{files.sampleNote} {files.independent}</p>
+    </section>
+
+    <section class="ds-section">
       <div class="v4-section-eyebrow"><strong>API</strong></div>
       <h2 class="v4-section-h2">{S.mcpCtaTitle} <span class="serif">{S.mcpCtaEm}</span></h2>
       <p class="v4-section-intro">{S.mcpCtaIntro}</p>
@@ -77,7 +136,7 @@ const indexJsonLd = {
       </div>
     </section>
 
-    <section class="ds-section reveal-v4">
+    <section class="ds-section">
       <div class="v4-section-eyebrow"><strong>{S.idxBrowseTitle}</strong></div>
       <h2 class="v4-section-h2">{S.idxBrowseTitle} <span class="serif">{S.idxBrowseEm}</span></h2>
       <p class="ds-section-intro">{S.idxBrowseIntro}</p>
@@ -159,6 +218,33 @@ const indexJsonLd = {
 </script>
 
 <style>
+  .directory-paths { margin:24px 0; }
+  .directory-count { font-size:14px; color:var(--ink-soft); margin:20px 0 0; }
+  .directory-count strong { color:var(--ink); font-family:var(--font-mono); margin-right:6px; }
+  .file-card { padding:30px; border:1px solid var(--line-strong); border-top:4px solid var(--accent); border-radius:16px; background:var(--bg-card); box-shadow:0 14px 36px rgba(30,30,30,.04); }
+  .file-eyebrow { font:500 11px var(--font-mono); text-transform:uppercase; letter-spacing:.1em; color:var(--ink-soft); margin:0 0 18px; }
+  .file-card h2 { font-size:clamp(24px,3vw,34px); line-height:1.14; letter-spacing:-.025em; margin:0 0 16px; }
+  .file-card p:not(.file-eyebrow) { color:var(--ink-soft); line-height:1.6; }
+  .file-formats { display:flex; flex-wrap:wrap; gap:7px; padding:0; margin:22px 0; list-style:none; }
+  .file-formats li { font:500 12px var(--font-mono); border:1px solid var(--line); border-radius:5px; padding:7px 9px; }
+  .file-formats li:first-child { color:var(--ink); background:var(--bg-soft); }
+  .file-card .v4-btn { display:flex; justify-content:center; width:100%; text-align:center; }
+  .file-sample { display:flex; justify-content:center; align-items:center; gap:12px; min-height:48px; margin-top:8px; color:var(--ink); font-size:14px; font-weight:600; text-align:center; text-decoration:underline; text-underline-offset:4px; }
+  .file-note { font-size:12px; line-height:1.65; color:var(--ink-soft); margin:14px 0 0; }
+  .directory-search,.file-section { scroll-margin-top:110px; }
+  .directory-scope { max-width:78ch; font-size:13px; line-height:1.65; margin:-10px 0 22px; color:var(--ink-soft); }
+  .directory-scope a { color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+  .file-use-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; margin:32px 0; }
+  .file-use-grid article { border-top:1px solid var(--line-strong); padding-top:18px; min-width:0; }
+  .file-step { font:500 12px var(--font-mono); color:#B71726; }
+  .file-use-grid h3 { font-size:18px; margin:14px 0 10px; }
+  .file-use-grid p,.file-coverage dd { font-size:14px; line-height:1.7; color:var(--ink-soft); margin:0; }
+  .file-coverage { border:1px solid var(--line); border-radius:12px; padding:24px; margin:28px 0; background:var(--bg-soft); }
+  .file-coverage h3 { font-size:15px; margin:0 0 18px; }
+  .file-coverage dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px; margin:0; }
+  .file-coverage dt { font-size:14px; font-weight:650; margin-bottom:8px; }
+  .file-card :focus-visible,.directory-paths :focus-visible,.file-section :focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+  @media(max-width:640px) { .file-card { padding:24px; } .file-use-grid,.file-coverage dl { grid-template-columns:minmax(0,1fr); } .file-coverage { padding:20px; } }
   .finma-tree { display: flex; flex-direction: column; gap: 8px; }
   .finma-group { background: white; border: 1px solid var(--color-line); border-radius: 12px; overflow: hidden; }
   .finma-group > summary { padding: 16px 20px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 16px; transition: background .15s ease; }
