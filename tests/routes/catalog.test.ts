@@ -8,6 +8,10 @@ const { download } = vi.hoisted(() => ({ download: vi.fn() }));
 vi.mock("../../src/lib/r2.js", () => ({ getObjectBuffer: download, signedDownloadUrl: vi.fn() }));
 import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
+import { readEventCoverage, flushEventCoverage } from '../../src/lib/event-budget.js';
+import * as tracking from '../../src/lib/track.js';
+import { Hono } from 'hono';
+import { catalogRoute } from '../../src/routes/catalog.js';
 let tmp: string;
 let counter = 0;
 beforeEach(() => {
@@ -15,7 +19,7 @@ beforeEach(() => {
  getDb().prepare("INSERT INTO datasets(id,name,slug,price_chf,stripe_price_id,created_at) VALUES('finma','FINMA','finma',29900,'price',?)").run(Date.now());
  download.mockReset();
 });
-afterEach(() => { closeDb(); rmSync(tmp,{recursive:true,force:true}); delete process.env.DATABASE_PATH; });
+afterEach(async () => { await new Promise(r => setImmediate(r)); closeDb(); rmSync(tmp,{recursive:true,force:true}); delete process.env.DATABASE_PATH; vi.restoreAllMocks(); });
 async function publish() {
  const zip = archiver("zip"); const chunks: Buffer[] = [];
  const ready = new Promise<Buffer>((resolve,reject) => { zip.on("data", c => chunks.push(c)); zip.on("error",reject); zip.on("end",() => resolve(Buffer.concat(chunks))); });
@@ -39,6 +43,46 @@ describe("Qualité publique FINMA", () => {
   expect((await createApp().request("/api/health/freshness")).status).toBe(503);
   getDb().prepare("UPDATE datasets SET current_version=? WHERE id='finma'").run(new Date().toISOString().slice(0,10).replaceAll("-","."));
   expect((await createApp().request("/api/health/freshness")).status).toBe(200);
+ });
+});
+
+describe('Demandes d’échantillons observées sur les vraies routes', () => {
+ const rows = () => getDb().prepare("SELECT kind,origin,name,status,visitor_hash,customer_id,referer,country,meta_json,ua_class FROM events WHERE name='sample_served'").all();
+ const flush = () => new Promise(r => setImmediate(r));
+ it.each([
+  ['finma', publish], ['tares', publishTares], ['classifications', publishClassifications],
+ ] as const)('mesure chaque réponse CSV %s, même quand le catalogue est en cache', async (id, prepare) => {
+  await prepare(); const app=createApp(); const url=`/api/catalog/${id}?format=csv&email=prive@example.test`;
+  const headers={'user-agent':'curl/8.0','referer':'https://example.test/secret?token=prive'};
+  for(let i=0;i<2;i++) {
+   const response=await app.request(url,{headers}); expect(response.status).toBe(200);expect(response.headers.get('content-type')).toContain('text/csv');expect((await response.text()).length).toBeGreaterThan(0);
+  }
+  await flush();expect(rows()).toHaveLength(2);
+  expect(rows()[0]).toEqual({kind:'conversion',origin:'server',name:'sample_served',status:200,visitor_hash:null,customer_id:null,referer:null,country:null,meta_json:JSON.stringify({schema:1,dataset:id}),ua_class:'automation'});
+  expect(JSON.stringify(rows())).not.toMatch(/prive|@|token|secret|curl/);
+ });
+ it('ne compte ni JSON, ni HEAD, ni mapping, ni route inconnue', async () => {
+  await publish(); const app=createApp();
+  expect((await app.request('/api/catalog/finma')).status).toBe(200);
+  expect((await app.request('/api/catalog/finma?format=csv',{method:'HEAD'})).status).toBe(200);
+  expect((await app.request('/api/catalog/classifications/mapping?source=NACE_2.0&target=ISIC_4&code=18.11&format=csv')).status).toBe(200);
+  expect((await app.request('/api/catalog/inconnu?format=csv')).status).toBe(404);
+  await flush();expect(rows()).toHaveLength(0);
+ });
+ it('ne compte pas une version absente ou une archive altérée', async () => {
+  const app=createApp();expect((await app.request('/api/catalog/finma?format=csv')).status).toBe(503);
+  await publish();download.mockResolvedValue(Buffer.from('archive altérée'));expect((await app.request('/api/catalog/finma?format=csv')).status).toBe(503);
+  await flush();expect(rows()).toHaveLength(0);
+ });
+ it('la perte du stockage de mesure ne bloque pas le CSV et reste signalée', async () => {
+  await publish(); const db=getDb();db.exec('DROP TABLE events');vi.spyOn(console,'warn').mockImplementation(()=>{});
+  const response=await createApp().request('/api/catalog/finma?format=csv');expect(response.status).toBe(200);expect(await response.text()).toContain('Institution 0');
+  await flush();flushEventCoverage(db);expect(readEventCoverage(db).gaps.some(g => (g.reasons.write??0)>0)).toBe(true);
+ });
+ it('une exception synchrone de préparation de mesure conserve la réponse déjà construite',async()=>{
+  await publish();vi.spyOn(tracking,'uaClassFromRequest').mockImplementation(()=>{throw new Error('erreur fictive privée')});vi.spyOn(console,'warn').mockImplementation(()=>{});
+  const app=new Hono().route('/api/catalog',catalogRoute),r=await app.request('/api/catalog/finma?format=csv');
+  expect(r.status).toBe(200);expect(await r.text()).toContain('Institution 0');await flush();expect(rows()).toEqual([]);
  });
 });
 

@@ -6,8 +6,10 @@ import { getObjectBuffer } from "../lib/r2.js";
 import { extractCsvFromZip } from "../mcp/r2-refresh.js";
 import { stringify } from "csv-stringify/sync";
 import { crossWalkHandler } from "../mcp/tools/cross-walk.js";
+import { trackSampleResponse } from "../lib/sample-measures.js";
 
 export const catalogRoute = new Hono();
+catalogRoute.use('*', trackSampleResponse);
 catalogRoute.get("/classifications/mapping", c => {
   const result = crossWalkHandler({ code: c.req.query("code"), source: c.req.query("source"), target: c.req.query("target") });
   if (result.isError) return c.json({ error: "invalid_mapping_request" }, 400);

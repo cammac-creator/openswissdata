@@ -79,3 +79,6 @@
 
 /* Preuves de service : trois mesures lisibles, sans simuler un entonnoir. */
 .order-journey{margin-bottom:24px}.journey-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:24px 0}.journey-summary>div{display:flex;flex-direction:column;gap:8px;min-width:0}.journey-summary strong{font-size:15px;line-height:1.5}.journey-summary span:last-child{font-size:13px;line-height:1.6;color:var(--muted)}.journey-number{font-size:40px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums}.journey-details summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:600;line-height:1.5}.journey-breakdown{margin:12px 0}.journey-breakdown>div{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}.journey-breakdown dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}.order-journey .button{margin-top:8px}@media(max-width:700px){.journey-summary{grid-template-columns:1fr;gap:20px}.journey-summary>div+div{border-top:1px solid var(--line);padding-top:20px}.journey-number{font-size:36px}}
+
+.sample-scroll-help { display:none; }
+@media (max-width:700px) { .sample-scroll-help { display:block; margin-bottom:12px; } }

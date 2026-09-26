@@ -22,6 +22,7 @@ import { financialStatus } from "../lib/stripe-financial.js";
 import { crmPeriod, periodRanges, swissDay } from "../lib/crm-period.js";
 import { readCrmAudience } from "../lib/crm-audience.js";
 import { readOrderJourney } from "../lib/order-journey.js";
+import { readSampleMeasures } from "../lib/sample-measures.js";
 
 export const crmRoute = new Hono<{ Variables: { customer_id: number; customer_email: string } }>();
 crmRoute.use("*", requireAdmin);
@@ -175,7 +176,14 @@ crmRoute.get("/audience", c => {
       // Une catégorie fermée aide le diagnostic sans publier le SQL ou une valeur cliente.
       console.error("[crm] lecture des preuves après achat indisponible", {category});
     }
-    return { checked_at: now, ...audience, journey };
+    let samples: ReturnType<typeof readSampleMeasures> | null = null;
+    try { samples = readSampleMeasures(db, period, now); }
+    catch (error) {
+      const code=(error as {code?:unknown})?.code;
+      const category=typeof code==='string'&&['SQLITE_ERROR','SQLITE_BUSY','SQLITE_LOCKED','SQLITE_FULL','SQLITE_IOERR','SQLITE_CORRUPT','SQLITE_NOTADB','SQLITE_NOMEM'].includes(code)?code:'unknown';
+      console.error('[crm] lecture des mesures d’échantillons indisponible', {category});
+    }
+    return { checked_at: now, ...audience, journey, samples };
   })());
 });
 crmRoute.get("/visibility", async c => {
