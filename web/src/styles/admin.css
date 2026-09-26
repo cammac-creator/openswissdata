@@ -72,3 +72,6 @@
 #task-search-status:empty{min-height:1.1em}#task-results[aria-busy="true"]{opacity:.65}
 
 #task-title,#client-count{scroll-margin-block:110px 20px}#task-panel>.panel-heading{flex-wrap:wrap}
+
+/* Registre privé de livraison : lecture mobile et historique à la demande. */
+#delivery-incidents{margin-bottom:24px} .incident-filters{display:flex;flex-wrap:wrap;margin:16px 0}.incident-filters button{min-height:44px}.incident-filters [aria-pressed=true]{background:#ffe9ed;color:#b20c32}.incident-card{padding:22px 0;border-top:1px solid var(--line,#e4e8eb)}.incident-card h3{font-size:15px;margin:0;overflow-wrap:anywhere}.incident-card .panel-heading{flex-wrap:wrap;gap:10px}.incident-card p{margin:12px 0}.incident-history{margin-top:14px}.incident-history summary{min-height:44px;align-content:center}.incident-events{padding-left:22px}.incident-events li{margin:16px 0;line-height:1.65;overflow-wrap:anywhere}#incident-page-label,#incident-title{scroll-margin-top:115px}

@@ -14,7 +14,7 @@ const running = new WeakMap<Database.Database, Promise<CleanupProof>>();
 
 export function runCleanup(db: Database.Database, now = Date.now()): CleanupResult {
   const entries: CleanupEntry[] = [];
-  const plans: Array<{ name: CleanupEntry['name']; sql: string; cutoff: number; optional?: boolean; unit?: CleanupEntry['unit'] }> = [
+  const plans: Array<{ name: CleanupEntry['name']; sql: string; cutoff: number; optional?: boolean; unit?: CleanupEntry['unit']; clock?:string; extraClock?:string; scope?:string }> = [
     // Les liens de connexion actuels sont dans sessions ; conserver la purge de l’ancienne table si elle existe.
     { name: 'magic_links', sql: 'DELETE FROM magic_links WHERE expires_at < ?', cutoff: now, optional: true },
     { name: 'auth_request_limits', sql: 'DELETE FROM auth_request_limits WHERE expires_at <= ?', cutoff: now, optional: true },
@@ -25,6 +25,8 @@ export function runCleanup(db: Database.Database, now = Date.now()): CleanupResu
     { name: 'request_log', sql: 'DELETE FROM request_log WHERE timestamp < ?', cutoff: now - 30 * DAY, optional: true },
     { name: 'events', sql: 'DELETE FROM events WHERE ts < ?', cutoff: now - EVENT_RETENTION_MS },
     { name: 'download_activity', sql: 'DELETE FROM download_activity WHERE created_at < ?', cutoff: now - 180 * DAY },
+    { name: 'delivery_incident_events', sql: 'DELETE FROM delivery_incident_events WHERE recorded_at < ?', cutoff: now - 180 * DAY, clock: 'recorded_at' },
+    { name: 'delivery_incidents', sql: "DELETE FROM delivery_incidents WHERE state<>'open' AND MAX(closed_at,last_seen_at) < ? AND EXISTS(SELECT 1 FROM order_deliveries d WHERE d.id=delivery_incidents.delivery_id AND ((delivery_incidents.state='accepted' AND d.state='sent') OR (delivery_incidents.state='cancelled' AND d.state='cancelled')))", cutoff: now - 180 * DAY, clock: 'closed_at', extraClock: 'last_seen_at', scope: "state<>'open' AND " },
     { name: 'delivery_message_references', sql: 'UPDATE order_deliveries SET provider_message_id=NULL WHERE provider_message_id IS NOT NULL AND COALESCE(sent_at,created_at) < ?', cutoff: now - 180 * DAY, unit: 'references' },
   ];
   for (const plan of plans) {
@@ -35,11 +37,11 @@ export function runCleanup(db: Database.Database, now = Date.now()): CleanupResu
         continue;
       }
       const table = plan.name === 'delivery_message_references' ? 'order_deliveries' : plan.name;
-      const clock = plan.name === 'request_log' ? 'timestamp' : plan.name === 'events' ? 'ts' : plan.name === 'download_activity' ? 'created_at' : plan.name === 'delivery_message_references' ? 'COALESCE(sent_at,created_at)' : 'expires_at';
-      const scope = plan.name === 'delivery_message_references' ? 'provider_message_id IS NOT NULL AND ' : '';
+      const clock = plan.clock ?? (plan.name === 'request_log' ? 'timestamp' : plan.name === 'events' ? 'ts' : plan.name === 'download_activity' ? 'created_at' : plan.name === 'delivery_message_references' ? 'COALESCE(sent_at,created_at)' : 'expires_at');
+      const scope = plan.scope ?? (plan.name === 'delivery_message_references' ? 'provider_message_id IS NOT NULL AND ' : '');
       // Toutes les dates produites par cette application sont des entiers en millisecondes.
       // Une table historique en secondes ou en texte est conservée pour examen, jamais vidée par erreur.
-      if (db.prepare(`SELECT 1 FROM ${table} WHERE ${scope}(typeof(${clock}) <> 'integer' OR ${clock} < 1000000000000) LIMIT 1`).get()) {
+      if ([clock,...(plan.extraClock?[plan.extraClock]:[])].some(field=>db.prepare(`SELECT 1 FROM ${table} WHERE ${scope}(typeof(${field}) <> 'integer' OR ${field} < 1000000000000) LIMIT 1`).get())) {
         entries.push({ name: plan.name, deleted: 0, status: 'error', unit, error: 'timestamp_format' });
         continue;
       }
@@ -95,7 +97,7 @@ const proofSchema = z.object({
     name: z.enum(CLEANUP_CATEGORIES), deleted: z.number().int().nonnegative().safe(),
     status: z.enum(['ok', 'not_applicable', 'error']), unit: z.enum(['rows', 'references', 'folders']),
     error: z.enum(['database_error', 'storage_error', 'proof_error', 'timestamp_format']).optional(),
-  })).min(10).max(12),
+  })).min(13).max(14),
 });
 
 /** N’expose que le témoin connu et cohérent ; un ancien/mauvais JSON n’est pas une preuve de réussite. */
@@ -107,7 +109,7 @@ export function readCleanupProof(db: Database.Database): CleanupProof | null {
     if (!parsed.success) return null;
     const result = parsed.data, names = new Set(result.entries.map(e => e.name));
     if (result.checked_at !== row.checked_at || names.size !== result.entries.length ||
-      CLEANUP_CATEGORIES.slice(0, 10).some(name => !names.has(name)) ||
+      CLEANUP_CATEGORIES.filter(name=>name!=='cleanup_proof').some(name => !names.has(name)) ||
       result.totalDeleted !== result.entries.reduce((sum, e) => sum + e.deleted, 0) ||
       result.ok !== result.entries.every(e => e.status !== 'error')) return null;
     return result;

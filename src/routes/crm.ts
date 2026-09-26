@@ -1,3 +1,4 @@
+import {readDeliveryIncidentPage,readDeliveryIncidentEvents} from '../lib/delivery-incidents.js';
 import { customerPage, customerProfiles, internalEmails, prepareCustomerFunctions, searchText } from '../lib/crm-customers.js';
 import { isCalendarDate } from '../lib/calendar-date.js';
 import { readTaskOverview, taskOrderSql, readTaskPage, TASK_FILTERS } from '../lib/crm-tasks.js';
@@ -61,6 +62,18 @@ crmRoute.post('/customers/search',async c=>{
  if(!input.success)return c.json({error:'invalid_body'},400);
  if(c.req.raw.signal.aborted)return new Response(null,{status:499});
  return c.json(customerPage(input.data));
+});
+crmRoute.get('/incidents',c=>{
+ const input=z.object({state:z.enum(['open','accepted','cancelled']).default('open'),page:z.coerce.number().int().min(1).max(1_000_000).default(1)}).strict().safeParse(c.req.query());
+ if(!input.success)return c.json({error:'invalid_filter'},400);
+ return c.json(readDeliveryIncidentPage(getDb(),input.data.state,input.data.page));
+});
+crmRoute.get('/incidents/:id/events',c=>{
+ if(!validId(c.req.param('id')))return c.json({error:'invalid_id'},400);
+ const input=z.object({before:z.coerce.number().int().min(1).max(Number.MAX_SAFE_INTEGER).optional()}).strict().safeParse(c.req.query());
+ if(!input.success)return c.json({error:'invalid_filter'},400);
+ const result=readDeliveryIncidentEvents(getDb(),Number(c.req.param('id')),input.data.before);
+ return result?c.json(result):c.json({error:'not_found'},404);
 });
 crmRoute.get("/customers/:id", c => {
   if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);
@@ -156,6 +169,6 @@ crmRoute.get("/operations", async c => {
       return { available: true, checked_at: Date.now(), items: flow.workflows.map(({ id, name, state, html_url }) => ({ id, name, state, html_url })), runs: runs.workflow_runs.map(({ id, workflow_id, name, status, conclusion, created_at, html_url }) => ({ id, workflow_id, name, status, conclusion, created_at, html_url })) };
     });
   } catch { /* L'indisponibilité reste visible, aucun succès n'est inventé. */ }
-  return c.json({ checked_at: Date.now(), datasets, checks, cleanup: readCleanupProof(db), workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
+  return c.json({ checked_at: Date.now(), datasets, checks, cleanup: readCleanupProof(db), incidents:(()=>{try{return readDeliveryIncidentPage(db,'open',1)}catch{return null}})(), workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
 });
 crmRoute.route("/mail", crmMailRoute);

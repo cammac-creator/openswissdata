@@ -132,6 +132,34 @@ CREATE TABLE IF NOT EXISTS order_deliveries (
 );
 CREATE INDEX IF NOT EXISTS idx_order_deliveries_pending ON order_deliveries(state,next_attempt_at);
 
+-- Registre privé : un dossier par livraison, sans recopier de mail ni de lien secret.
+CREATE TABLE IF NOT EXISTS delivery_incidents (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  delivery_id INTEGER NOT NULL UNIQUE REFERENCES order_deliveries(id),
+  state TEXT NOT NULL CHECK(state IN ('open','accepted','cancelled')),
+  reason TEXT NOT NULL,
+  first_seen_at INTEGER NOT NULL,
+  last_seen_at INTEGER NOT NULL,
+  last_checked_at INTEGER NOT NULL,
+  closed_at INTEGER,
+  observations INTEGER NOT NULL DEFAULT 1,
+  last_attempts INTEGER NOT NULL,
+  last_delivery_state TEXT NOT NULL,
+  last_order_state TEXT NOT NULL,
+  accepted_at INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_incidents_state ON delivery_incidents(state,last_seen_at DESC,id DESC);
+CREATE TABLE IF NOT EXISTS delivery_incident_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  incident_id INTEGER NOT NULL REFERENCES delivery_incidents(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL CHECK(kind IN ('opened','changed','reopened','accepted','cancelled','acceptance_uncertain')),
+  reason TEXT NOT NULL,
+  attempts INTEGER NOT NULL,
+  recorded_at INTEGER NOT NULL,
+  accepted_at INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_incident_events ON delivery_incident_events(incident_id,id DESC);
+
 CREATE TABLE IF NOT EXISTS app_migrations (name TEXT PRIMARY KEY, applied_at INTEGER NOT NULL);
 -- Historique des droits : rembourser un achat ne retire pas les autres achats.
 CREATE TABLE IF NOT EXISTS order_grants (

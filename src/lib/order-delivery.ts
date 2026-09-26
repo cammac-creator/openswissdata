@@ -1,3 +1,4 @@
+import { safelyObserveDeliveryIncident } from './delivery-incidents.js';
 import { getDb } from "./db.js";
 import { generateToken } from "./tokens.js";
 import { prepareDownloadEmail, sendPreparedEmail, parseLocale, type PreparedEmail } from "./email.js";
@@ -31,11 +32,13 @@ async function deliver(id: number): Promise<void> {
   const finish = (state: string, error: string | null, sent = false, providerId: string | null = null) => {
     const delay = Math.min(3600_000, 60_000 * 2 ** Math.min(job.attempts - 1, 6));
     const clear = ["sent", "review", "cancelled"].includes(state) ? 1 : 0;
-    db.prepare(`UPDATE order_deliveries SET state=?,last_error=?,lease_until=NULL,next_attempt_at=?,sent_at=?,provider_message_id=COALESCE(?,provider_message_id),
+    const updated=db.prepare(`UPDATE order_deliveries SET state=?,last_error=?,lease_until=NULL,next_attempt_at=?,sent_at=?,provider_message_id=COALESCE(?,provider_message_id),
       payload_json=CASE WHEN ?=1 THEN NULL ELSE payload_json END,
       download_token=CASE WHEN ?=1 THEN NULL ELSE download_token END
       WHERE id=? AND state='processing' AND attempts=?`)
       .run(state, error, Date.now() + delay, sent ? Date.now() : null, providerId, clear, clear, id, job.attempts);
+    if(updated.changes) safelyObserveDeliveryIncident(db,id);
+    else if(sent) safelyObserveDeliveryIncident(db,id,job.attempts);
   };
   try {
     const financialPending = db.prepare(`SELECT 1 FROM stripe_financial_jobs f JOIN orders o

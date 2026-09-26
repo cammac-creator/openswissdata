@@ -18,7 +18,7 @@ describe('Résultat vérifiable du nettoyage planifié', () => {
     const response = await createApp().request('/api/admin/cleanup-expired', { method: 'POST', headers });
     const body = await response.json();
     expect(response.status).toBe(200); expect(body.ok).toBe(true);
-    expect(body.entries).toHaveLength(11);
+    expect(body.entries).toHaveLength(13);
     expect(body.entries).toContainEqual({ name: 'auth_request_limits', deleted: 0, status: 'ok', unit: 'rows' });
     expect(getDb().prepare("SELECT checked_at FROM operation_checks WHERE name='cleanup'").get()).toEqual({ checked_at: body.checked_at });
     expect(JSON.stringify(body)).not.toContain(dir);

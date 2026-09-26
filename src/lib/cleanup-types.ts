@@ -1,4 +1,4 @@
-export const CLEANUP_CATEGORIES = ['magic_links', 'sessions', 'download_tokens', 'mcp_oauth_codes', 'request_log', 'events', 'download_activity', 'delivery_message_references', 'bronze_dashboard', 'bronze_financial', 'auth_request_limits', 'cleanup_proof'] as const;
+export const CLEANUP_CATEGORIES = ['magic_links', 'sessions', 'download_tokens', 'mcp_oauth_codes', 'request_log', 'events', 'download_activity', 'delivery_message_references', 'bronze_dashboard', 'bronze_financial', 'auth_request_limits', 'delivery_incident_events', 'delivery_incidents', 'cleanup_proof'] as const;
 export type CleanupEntry = {
   name: typeof CLEANUP_CATEGORIES[number];
   deleted: number;
