@@ -13,6 +13,8 @@ import { isLanguage } from "../lib/languages.js";
 import { crmMailRoute } from "./crm-mail.js";
 import { deliveryStatus } from "../lib/order-delivery.js";
 import { financialStatus } from "../lib/stripe-financial.js";
+import { crmPeriod, periodRanges } from "../lib/crm-period.js";
+import { readCrmAudience } from "../lib/crm-audience.js";
 
 export const crmRoute = new Hono<{ Variables: { customer_id: number; customer_email: string } }>();
 crmRoute.use("*", requireAdmin);
@@ -49,15 +51,17 @@ function profiles(id?: number) {
   return rows.map(r => ({ ...r, language: customerLanguage(r.id, r.locale), internal: Boolean(r.internal || owners.includes(r.email.toLowerCase()) || (Number(r.test_orders) > 0 && Number(r.live_orders) === 0)) }));
 }
 crmRoute.get("/overview", c => {
-  const db = getDb(), days = daysOf(c.req.query("days")), since = Date.now() - days * 86400_000;
+  const db = getDb(), now = Date.now(), days = daysOf(c.req.query("days")), period = crmPeriod(days, now);
   const real = realCustomerSql();
-  const rollup = (from: number) => db.prepare(`SELECT COUNT(*) orders,COUNT(DISTINCT o.customer_id) customers,COALESCE(SUM(o.amount_chf-o.refunded_chf),0) revenue_cents FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%' AND o.created_at>=? AND ${real.sql}`).get(from, ...real.params);
-  const daily = db.prepare(`SELECT strftime('%Y-%m-%d',o.created_at/1000,'unixepoch') day,SUM(o.amount_chf-o.refunded_chf) revenue_cents,COUNT(*) orders FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%' AND o.created_at>=? AND ${real.sql} GROUP BY day ORDER BY day`).all(since, ...real.params);
-  const traffic = db.prepare(`SELECT COUNT(*) requests,COALESCE(ROUND(AVG(duration_ms)),0) average_ms,COALESCE(SUM(status>=500),0) errors FROM events WHERE kind='api_request' AND ts>=?`).get(since);
-  const web = db.prepare(`SELECT COUNT(*) pageviews,COUNT(DISTINCT visitor_hash) visitor_days,MIN(ts) first_event FROM events WHERE kind='custom' AND name='page_view' AND ua_class IN ('desktop','mobile') AND ts>=?`).get(since);
-  const coverage = db.prepare("SELECT MIN(ts) first_event FROM events WHERE kind='custom' AND name='page_view'").get();
-  const tasks = db.prepare(`SELECT t.*,c.email,COALESCE(p.display_name,'') display_name FROM crm_tasks t LEFT JOIN customers c ON c.id=t.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE t.done_at IS NULL ORDER BY t.due_on IS NULL,t.due_on,t.created_at DESC LIMIT 100`).all();
-  return c.json({ checked_at: Date.now(), days, revenue: rollup(since), all_time: rollup(0), daily, traffic, web, coverage, tasks, customers: profiles(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
+  return c.json(db.transaction(() => {
+    const selection = `FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE o.status='paid' AND o.stripe_session_id LIKE 'cs_live_%' AND o.created_at>=? AND o.created_at<? AND ${real.sql}`;
+    const rollup = (from: number) => db.prepare(`SELECT COUNT(*) orders,COUNT(DISTINCT o.customer_id) customers,COALESCE(SUM(o.amount_chf-o.refunded_chf),0) revenue_cents ${selection}`).get(from, period.end_at, ...real.params);
+    const dayQuery = db.prepare(`SELECT COALESCE(SUM(o.amount_chf-o.refunded_chf),0) revenue_cents,COUNT(*) orders ${selection}`);
+    const daily = periodRanges(period).map(range => ({ day: range.day, ...dayQuery.get(range.start, range.end, ...real.params) as { revenue_cents: number; orders: number } }));
+    const { traffic, web, coverage } = readCrmAudience(db, period, false);
+    const tasks = db.prepare(`SELECT t.*,c.email,COALESCE(p.display_name,'') display_name FROM crm_tasks t LEFT JOIN customers c ON c.id=t.customer_id LEFT JOIN crm_profiles p ON p.customer_id=c.id WHERE t.done_at IS NULL ORDER BY t.due_on IS NULL,t.due_on,t.created_at DESC LIMIT 100`).all();
+    return { checked_at: now, days, period, revenue: rollup(period.start_at), all_time: rollup(0), daily, traffic, web, coverage, tasks, customers: profiles(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" };
+  })());
 });
 crmRoute.get("/customers/:id", c => {
   if (!validId(c.req.param("id"))) return c.json({ error: "invalid_id" }, 400);
@@ -114,13 +118,8 @@ crmRoute.patch("/tasks/:id", async c => {
   return c.json({ ok: r.changes === 1 }, r.changes === 1 ? 200 : 404);
 });
 crmRoute.get("/audience", c => {
-  const db = getDb(), since = Date.now() - daysOf(c.req.query("days")) * 86400_000;
-  const daily = db.prepare(`SELECT strftime('%Y-%m-%d',ts/1000,'unixepoch') day,COUNT(*) views,COUNT(DISTINCT visitor_hash) visitors FROM events WHERE name='page_view' AND kind='custom' AND ua_class IN ('desktop','mobile') AND ts>=? GROUP BY day ORDER BY day`).all(since);
-  const groups = (column: string) => db.prepare(`SELECT COALESCE(${column},'inconnu') label,COUNT(*) count FROM events WHERE name='page_view' AND kind='custom' AND ua_class IN ('desktop','mobile') AND ts>=? GROUP BY label ORDER BY count DESC LIMIT 12`).all(since);
-  const split = db.prepare("SELECT COALESCE(ua_class,'inconnu') label,COUNT(*) count FROM events WHERE name='page_view' AND kind='custom' AND ts>=? GROUP BY label ORDER BY count DESC").all(since);
-  const api = db.prepare("SELECT COALESCE(ua_class,'inconnu') label,COUNT(*) count FROM events WHERE kind='api_request' AND ts>=? GROUP BY label ORDER BY count DESC").all(since);
-  const actions = db.prepare("SELECT name label,COUNT(*) count FROM events WHERE kind IN ('custom','conversion') AND name NOT IN ('page_view','mcp_tool_call') AND ts>=? GROUP BY name ORDER BY count DESC LIMIT 15").all(since);
-  return c.json({ checked_at: Date.now(), daily, pages: groups("json_extract(meta_json,'$.path')"), sources: groups("referer"), countries: groups("country"), split, api, actions });
+  const db = getDb(), now = Date.now(), period = crmPeriod(daysOf(c.req.query("days")), now);
+  return c.json(db.transaction(() => ({ checked_at: now, ...readCrmAudience(db, period) }))());
 });
 crmRoute.get("/visibility", async c => {
   try { return c.json(await searchConsole(daysOf(c.req.query("days")))); }

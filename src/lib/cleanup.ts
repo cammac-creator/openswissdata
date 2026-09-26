@@ -6,6 +6,7 @@ import { invalidateBronzeUsage } from './crm-source.js';
 import type { CleanupEntry, CleanupResult, CleanupProof } from './cleanup-types.js';
 import { CLEANUP_CATEGORIES } from './cleanup-types.js';
 import { z } from 'zod';
+import { EVENT_RETENTION_MS } from './event-retention.js';
 export type { CleanupEntry, CleanupResult } from './cleanup-types.js';
 
 const DAY = 86_400_000;
@@ -22,7 +23,7 @@ export function runCleanup(db: Database.Database, now = Date.now()): CleanupResu
     { name: 'mcp_oauth_codes', sql: 'DELETE FROM mcp_oauth_codes WHERE expires_at < ?', cutoff: now },
     // Table historique absente du schéma actuel : son absence seule est normale, pas une erreur SQL quelconque.
     { name: 'request_log', sql: 'DELETE FROM request_log WHERE timestamp < ?', cutoff: now - 30 * DAY, optional: true },
-    { name: 'events', sql: 'DELETE FROM events WHERE ts < ?', cutoff: now - 180 * DAY },
+    { name: 'events', sql: 'DELETE FROM events WHERE ts < ?', cutoff: now - EVENT_RETENTION_MS },
     { name: 'download_activity', sql: 'DELETE FROM download_activity WHERE created_at < ?', cutoff: now - 180 * DAY },
     { name: 'delivery_message_references', sql: 'UPDATE order_deliveries SET provider_message_id=NULL WHERE provider_message_id IS NOT NULL AND COALESCE(sent_at,created_at) < ?', cutoff: now - 180 * DAY, unit: 'references' },
   ];

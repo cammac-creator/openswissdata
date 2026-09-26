@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS download_tokens (
 CREATE INDEX IF NOT EXISTS idx_entitlements_customer ON entitlements(customer_id);
 CREATE INDEX IF NOT EXISTS idx_versions_dataset ON versions(dataset_id, released_at DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
 
 -- Preuve reçue de Stripe, sans ajout rétroactif pour les anciennes commandes.
 CREATE TABLE IF NOT EXISTS order_legal (
