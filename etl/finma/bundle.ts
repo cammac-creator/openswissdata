@@ -1,3 +1,4 @@
+import { datasetLicense } from "../shared/dataset-license.js";
 import { mkdirSync, rmSync, existsSync, createWriteStream, readFileSync, statSync, writeFileSync, copyFileSync } from "node:fs";
 import { join } from "node:path";
 import archiver from "archiver";
@@ -79,46 +80,7 @@ const FINMA_WITH_ZEFIX_PARQUET_SCHEMA = new parquet.ParquetSchema({
   zefix_id: { type: "UTF8", optional: true },
 });
 
-const DATASET_LICENSE = `openswissdata.com — Dataset License v1.0
-
-Copyright © 2026 Claude-Alain Martin · openswissdata.com
-
-This dataset is licensed, not sold.
-
-PERMITTED USES:
-- Commercial use within your organization
-- Derivation and transformation for internal projects
-- Integration into your products or services (without redistributing the raw dataset)
-
-PROHIBITED USES:
-- Public redistribution of the dataset or substantial portions thereof
-- Resale of the dataset in original or modified form
-- Republishing on public data marketplaces (Kaggle, data.world, etc.)
-
-ATTRIBUTION:
-Attribution is appreciated but not required. Suggested:
-"Data provided by openswissdata.com (source: FINMA — Swiss Financial Market Supervisory Authority)"
-
-WARRANTY:
-Provided "AS IS" without warranty. Data is normalized from official FINMA lists.
-openswissdata.com is not responsible for errors in the underlying official sources.
-openswissdata.com is not affiliated with FINMA, does not represent FINMA, and its
-data does not substitute for direct consultation of finma.ch.
-
-SOURCE PERMISSION:
-Republication authorised in writing by FINMA Communication on 2026-05-06
-(ref. FINMA-PERMISSION-2026-05-06-NADINE-BUCHER), subject to respecting FINMA
-copyright and the integrity of source documents. Source: FINMA, www.finma.ch.
-FINMA Terms of Use: https://www.finma.ch/en/terms-and-conditions/
-
-LIABILITY:
-Liability capped at the purchase price of this dataset.
-
-GOVERNING LAW:
-Swiss law. For: Vaud, Switzerland (1045 Ogens).
-
-Contact: contact@openswissdata.com
-`;
+const DATASET_LICENSE = datasetLicense("finma");
 
 export interface FinmaBundleInput {
   entities: FinmaEntity[];

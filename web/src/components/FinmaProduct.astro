@@ -1,4 +1,5 @@
 ---
+import CheckoutNotice from "./CheckoutNotice.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import TrustStrip from "./TrustStrip.astro";
 import { getLangFromPath } from "../i18n/utils";
@@ -95,7 +96,8 @@ const datasetJsonLd = { "@context": "https://schema.org", "@type": "Dataset", na
   <section class="ds-section"><h2 class="v4-section-h2">{copy.preview}</h2><p class="v4-section-intro">{copy.previewNote}</p><label for="finma-search" class="sr-only">{copy.search}</label><input type="search" id="finma-search" placeholder={copy.search} class="hs-lookup-input"/><div class="ds-table-wrap"><table class="ds-table"><thead><tr>{copy.columns.map(c => <th>{c}</th>)}</tr></thead><tbody id="finma-preview"></tbody></table></div><p id="finma-preview-status" role="status"></p><a href="/api/catalog/finma?format=csv" class="v4-btn v4-btn-secondary">{copy.sample} ↓</a></section>
   <section class="ds-section"><h2 class="v4-section-h2">{copy.history}</h2><p id="finma-history">{copy.waiting}</p></section>
   <section class="ds-section"><h2 class="v4-section-h2">{copy.service}</h2><p class="v4-section-intro">{copy.serviceText}</p><div class="v4-cta-row"><a href="mailto:contact@openswissdata.com">{copy.contact}</a><a href={`${prefix}/account`}>{copy.account} →</a></div></section>
-  <div class="ds-cta" id="acheter"><form method="POST" action="/api/checkout/start" class="ds-cta-form"><input type="hidden" name="locale" value={lang}/><input type="hidden" name="dataset_ids" value="finma"/><button class="v4-btn v4-btn-primary v4-btn-cta" type="submit">{copy.buy} · 299 CHF →</button></form><p class="ds-cta-sub">{copy.updates}</p><p class="ds-cta-sub">{copy.independent}</p></div>
+  <div class="ds-cta" id="acheter"><form method="POST" action="/api/checkout/start" class="ds-cta-form"><input type="hidden" name="locale" value={lang}/><input type="hidden" name="dataset_ids" value="finma"/><button class="v4-btn v4-btn-primary v4-btn-cta" type="submit">{copy.buy} · 299 CHF →</button></form>
+      <CheckoutNotice /><p class="ds-cta-sub">{copy.updates}</p><p class="ds-cta-sub">{copy.independent}</p></div>
  </div>
 </section>
 <script>

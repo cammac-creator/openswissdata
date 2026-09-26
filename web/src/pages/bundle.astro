@@ -1,4 +1,5 @@
 ---
+import CheckoutNotice from "../components/CheckoutNotice.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import TrustStrip from "../components/TrustStrip.astro";
 import ProductFaq from "../components/ProductFaq.astro";
@@ -249,6 +250,7 @@ const productJsonLd = {
           <span class="arrow">→</span>
         </button>
       </form>
+      <CheckoutNotice />
       <p class="ds-cta-sub">Paiement Stripe · Accès après confirmation du paiement · Support par email · Remboursement selon les CGV</p>
     </div>
   </div>

@@ -13,6 +13,7 @@ export interface PreparedEmail {
   reply_to: string;
   subject: string;
   html: string;
+  attachments?: Array<{ filename: string; content: string }>;
 }
 
 /** Buyer-facing language for transactional emails. */
@@ -269,6 +270,7 @@ export interface DownloadEmailParams {
   accountUrl: string;
   version: string;
   locale?: Locale;
+  termsUrl?: string;
 }
 
 export function renderDownloadEmail(p: DownloadEmailParams): { subject: string; html: string } {
@@ -286,7 +288,7 @@ export function renderDownloadEmail(p: DownloadEmailParams): { subject: string; 
       intro: `Merci pour votre achat de ${strong(name)} (version ${escapeHtml(p.version)}). Votre archive est prête.`,
       button: "Télécharger le ZIP",
       validity: "Ce lien de téléchargement est valide 48&nbsp;heures.",
-      access: `Accès permanent depuis votre ${accountLink("espace client")}.`,
+      access: `Retrouvez les versions comprises dans vos droits depuis votre ${accountLink("espace client")}. Conservez une copie des fichiers.`,
     },
     de: {
       eyebrow: "Download bereit",
@@ -296,7 +298,7 @@ export function renderDownloadEmail(p: DownloadEmailParams): { subject: string; 
       intro: `Vielen Dank für Ihren Kauf von ${strong(name)} (Version ${escapeHtml(p.version)}). Ihr Archiv ist bereit.`,
       button: "ZIP herunterladen",
       validity: "Dieser Download-Link ist 48&nbsp;Stunden gültig.",
-      access: `Dauerhafter Zugriff über Ihren ${accountLink("Kundenbereich")}.`,
+      access: `Ihre erworbenen Versionen finden Sie im ${accountLink("Kundenbereich")}. Bewahren Sie eine Kopie der Dateien auf.`,
     },
     en: {
       eyebrow: "Download ready",
@@ -306,7 +308,7 @@ export function renderDownloadEmail(p: DownloadEmailParams): { subject: string; 
       intro: `Thank you for purchasing ${strong(name)} (version ${escapeHtml(p.version)}). Your archive is ready.`,
       button: "Download the ZIP",
       validity: "This download link is valid for 48&nbsp;hours.",
-      access: `Permanent access from your ${accountLink("account")}.`,
+      access: `Find the versions covered by your rights in your ${accountLink("account")}. Keep a copy of your files.`,
     },
   }[locale];
 
@@ -320,7 +322,11 @@ export function renderDownloadEmail(p: DownloadEmailParams): { subject: string; 
     // Hairline separator before the secondary access note.
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr>` +
     `<td style="height:1px;line-height:1px;font-size:1px;background:${BRAND.line};">&nbsp;</td></tr></table>` +
-    para(copy.access);
+    para(copy.access) + (p.termsUrl ? para(`<a href="${escapeHtmlAttr(p.termsUrl)}">${{
+      fr: "Conditions de cet achat (copie également jointe). Garantie commerciale de remboursement de 14 jours selon les CGV.",
+      de: "Bedingungen dieses Kaufs (Kopie auch im Anhang). Freiwillige Erstattung innerhalb von 14 Tagen gemäss AGB.",
+      en: "Terms for this purchase (copy also attached). 14-day commercial refund guarantee under the terms.",
+    }[locale]}</a>`) : "");
 
   const html = emailShell({ heading: copy.heading, bodyHtml: body, preheader: copy.preheader, locale });
   return { subject: copy.subject, html };

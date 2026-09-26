@@ -1,0 +1,149 @@
+import { terms, type LegalDocument, type LegalLocale } from "../../../src/legal/terms-2026-09-26";
+
+export const legalDate = "2026-09-26";
+export const privacy: Record<LegalLocale, LegalDocument> = {
+  fr: {
+    title: "Confidentialité et données personnelles",
+    summary: "Ce que nous traitons pour fournir OpenSwissData, vous assister et protéger le service. Information mise à jour le 26 septembre 2026.",
+    highlights: ["Pas de vente des coordonnées clients", "Statistiques internes pseudonymisées", "Traduction des messages sur notre serveur", "Un contact pour exercer vos droits"],
+    sections: [
+      { id: "responsable", title: "1. Responsable et contact", paragraphs: ["Claude-Alain Martin, exploitant d’OpenSwissData en nom propre, Rue de l’Église 23, 1045 Ogens, Suisse, est responsable des traitements décrits ici. Pour toute demande : contact@openswissdata.com. Cette notice informe sur nos pratiques ; accepter les conditions de vente ne vaut pas consentement à la publicité."] },
+      { id: "informations", title: "2. Informations traitées", paragraphs: [
+        "Compte et achat : email, identité et entreprise lorsqu’elles sont fournies, adresse de facturation et données de paiement traitées par Stripe, références de transaction, produits, montants, remboursements, contestations, droits d’accès et preuve de la version des conditions acceptées. Nous ne conservons pas le numéro complet de carte ni son code de sécurité.",
+        "Relation client : coordonnées professionnelles, langue choisie ou estimée, messages et pièces jointes reçus dans nos boîtes de support, historique des envois, notes de suivi et demandes. La détection de langue est indicative ; les traductions de lecture peuvent comporter des erreurs et l’original est conservé chez le fournisseur de messagerie.",
+        "Fonctionnement et sécurité : adresse IP et navigateur nécessaires aux connexions et à la limitation des abus, cookies de connexion, accès aux produits, codes de réponse et durées techniques. Les statistiques internes enregistrent pages ou types d’appels, pays s’il est disponible, domaine référent, catégorie de navigateur et identifiant pseudonymisé changeant chaque jour. Un appel authentifié peut être rattaché au compte. Pseudonymisé ne signifie pas anonyme.",
+        "Sources publiques : certaines données diffusées, notamment les registres et avertissements FINMA ou les données LEI/GLEIF, peuvent concerner des personnes physiques ou des indépendants. Elles proviennent des sources citées dans les fichiers et fiches, pas d’une collecte auprès de toutes les personnes concernées. Une mention reflète le contexte et la date de la source ; elle n’est pas une appréciation indépendante de la personne."
+      ] },
+      { id: "finalites", title: "3. Finalités et fondements", paragraphs: [
+        "Nous utilisons ces informations pour préparer et exécuter les achats, fournir l’accès, traiter le support et les réclamations, rapprocher les remboursements, prévenir les abus, vérifier la disponibilité, mesurer l’utilisation et améliorer le service. Les pièces nécessaires sont conservées pour les obligations comptables et la défense de droits.",
+        "La loi suisse sur la protection des données encadre ces traitements. Lorsque le RGPD s’applique, les fondements pertinents sont l’exécution du contrat ou de mesures précontractuelles, les obligations légales, et nos intérêts légitimes à assurer un service sûr, à répondre aux demandes et à en mesurer l’usage, sous réserve des droits des personnes. Un consentement est demandé lorsqu’il est requis et peut être retiré pour l’avenir.",
+        "Les champs indispensables sont signalés dans les formulaires ; sans email accessible ou paiement confirmé, nous ne pouvons pas fournir l’achat. Le choix de recevoir des publicités n’est pas nécessaire. Nous ne prenons pas, par un modèle de langue, de décision individuelle produisant des effets juridiques sur un client. Les rapprochements financiers et limitations de sécurité peuvent faire l’objet d’un examen humain."
+      ] },
+      { id: "support", title: "4. Messages, CRM et traduction", paragraphs: [
+        "Le bureau de suivi est réservé à l’exploitant autorisé. Il peut réunir les messages adressés au support et les échanges relatifs à OpenSwissData reçus sur la boîte professionnelle personnelle de l’exploitant. Les autres échanges de cette boîte sont exclus du périmètre du CRM. Les originaux restent chez Infomaniak et les envois chez Resend.",
+        "La traduction pour la lecture interne s’effectue sur le serveur de l’application avec des modèles installés localement. Le texte n’est pas envoyé à un prestataire de traduction ou de génération de texte. La traduction n’est pas conservée comme un nouveau message et n’est pas envoyée automatiquement à son auteur. Évitez d’envoyer des secrets, données de carte ou informations sensibles sans nécessité."
+      ] },
+      { id: "prestataires", title: "5. Destinataires et lieux", paragraphs: [
+        "L’exploitant et les prestataires nécessaires à leurs missions ont accès aux informations concernées. Stripe traite les paiements (entité européenne en Irlande et traitements internationaux, notamment aux États-Unis) ; Resend assure les envois et leur statut (États-Unis) ; Infomaniak héberge les boîtes de courrier (Suisse). Stripe peut aussi agir comme responsable distinct pour ses obligations propres.",
+        "Railway héberge l’application et sa base dans la région Amsterdam, aux Pays-Bas ; son exploitation et son assistance peuvent impliquer les États-Unis. Cloudflare fournit le réseau et le stockage R2, notamment les archives distribuées et les sauvegardes chiffrées ; son réseau est international et une résidence exclusive à Francfort n’est pas annoncée. Les lieux détaillés dépendent du service et de ses sous-traitants.",
+        "Plausible mesure l’audience sans cookies publicitaires (prestataire européen, infrastructure documentée en Allemagne). Sentry reçoit des erreurs techniques filtrées, avec traitement possible aux États-Unis selon la région du compte ; les corps de requêtes, cookies, utilisateurs et fils d’activité sont retirés avant envoi. Google fournit les statistiques Search Console et, sur les pages utilisant Google Fonts, reçoit les données de connexion nécessaires au chargement des polices (traitements possibles aux États-Unis). La newsletter ouverte via le lien externe Substack relève aussi de sa propre notice.",
+        "Pour les transferts hors de Suisse, les règles applicables exigent un niveau de protection adéquat ou des garanties appropriées, notamment des clauses contractuelles types adaptées à la Suisse. Les notices, accords de traitement et listes de sous-traitants des fournisseurs sont référencés ci-dessous ; une localisation européenne du serveur ne garantit pas à elle seule l’absence de transfert. Nous pouvons préciser sur demande les destinataires et garanties concernant vos données. Aucune certification globale de conformité n’est revendiquée ici."
+      ] },
+      { id: "durees", title: "6. Conservation", paragraphs: [
+        "Compte et droits d’accès : pendant la relation et aussi longtemps que nécessaire pour les versions acquises. Commandes, preuves comptables et justificatifs contractuels : durée légale applicable, généralement dix ans pour les pièces comptables suisses, avec conservation adaptée en cas de litige. Une suppression de compte ne supprime pas les pièces dont la conservation est imposée.",
+        "Sessions : validité maximale de 30 jours ; liens de connexion : 15 minutes ; liens de livraison : 48 heures. Les éléments expirés sont retirés lors du nettoyage périodique. Les événements statistiques internes sont supprimés au-delà de 180 jours lors de ce nettoyage.",
+        "Copies techniques chiffrées des connecteurs CRM et du rapprochement financier : conservation de 30 jours, purge lors des consultations suivantes et plafonds de volume. Les originaux de courrier chez les fournisseurs et les notes utiles au suivi suivent la durée nécessaire à la relation, aux réclamations et aux obligations légales ; ils ne sont pas tous effacés par cette purge technique.",
+        "Les sauvegardes chiffrées servent à la reprise après incident. Une suppression peut n’y devenir effective qu’à l’expiration de leur cycle de conservation ; en cas de restauration, les demandes de suppression encore applicables doivent être réappliquées. Nous examinons les demandes d’effacement pour limiter les données conservées au nécessaire."
+      ] },
+      { id: "cookies", title: "7. Cookies et mesure d’audience", paragraphs: [
+        "Le cookie osd_session est nécessaire à la connexion et protégé par les attributs HttpOnly, Secure en production et SameSite. Les liens de paiement conduisent à Stripe, dont les cookies et la notice s’appliquent à sa page. Le site n’utilise pas de cookie publicitaire OpenSwissData ; Plausible fonctionne sans cookie. Cela ne signifie pas qu’aucune donnée technique ne soit traitée.",
+        "Vous pouvez supprimer les cookies dans votre navigateur ; cela ferme la session. Les mesures internes côté serveur utilisent les données techniques décrites ci-dessus, sans identifiant stable d’un jour à l’autre. Vous pouvez contacter le responsable pour exercer votre opposition lorsque le droit applicable le permet."
+      ] },
+      { id: "droits", title: "8. Vos droits et signalements", paragraphs: [
+        "Selon le droit applicable, vous pouvez demander accès, rectification, effacement, limitation, opposition et remise ou transmission de vos données, sous les conditions prévues par la loi. Écrivez à contact@openswissdata.com en précisant votre demande ; nous pouvons vérifier votre identité de façon proportionnée. Une demande d’accès reçoit en principe une réponse dans les 30 jours, sous réserve des exceptions légales qui vous seront expliquées.",
+        "Pour une donnée issue d’un registre public, indiquez la fiche, la source et l’inexactitude alléguée. Nous examinons une correction, une indication de contexte ou un retrait justifié sans altérer silencieusement un document officiel. Vous pouvez saisir le Préposé fédéral à la protection des données et à la transparence (PFPDT), ou l’autorité compétente de votre pays lorsque le RGPD s’applique."
+      ] },
+      { id: "modifications", title: "9. Modifications de la notice", paragraphs: ["La date de cette page correspond à une révision éditoriale réelle. Une évolution des traitements peut nécessiter sa mise à jour et, lorsque la loi le demande, une information spécifique ou un nouveau consentement. Une nouvelle notice ne vaut pas consentement rétroactif."] }
+    ]
+  },
+  de: {
+    title: "Datenschutz und Personendaten",
+    summary: "Welche Daten wir für OpenSwissData, Support und Sicherheit bearbeiten. Information vom 26. September 2026.",
+    highlights: ["Kein Verkauf von Kundenkontaktdaten", "Pseudonymisierte interne Statistik", "Nachrichtenübersetzung auf unserem Server", "Ein Kontakt für Ihre Rechte"],
+    sections: [
+      { id: "responsable", title: "1. Verantwortlicher und Kontakt", paragraphs: ["Claude-Alain Martin, Betreiber von OpenSwissData im eigenen Namen, Rue de l’Église 23, 1045 Ogens, Schweiz, ist für die hier beschriebenen Bearbeitungen verantwortlich. Kontakt: contact@openswissdata.com. Diese Erklärung informiert; die Annahme der Verkaufsbedingungen ist keine Werbeeinwilligung."] },
+      { id: "informations", title: "2. Bearbeitete Informationen", paragraphs: [
+        "Konto und Kauf: E-Mail, angegebene Identität und Firma, von Stripe bearbeitete Rechnungsadresse und Zahlungsdaten, Transaktionsreferenzen, Produkte, Beträge, Erstattungen, Zahlungsstreitigkeiten, Zugriffsrechte und Nachweis der akzeptierten Bedingungen. Wir speichern weder die vollständige Kartennummer noch den Sicherheitscode.",
+        "Kundenbeziehung: berufliche Kontaktdaten, gewählte oder geschätzte Sprache, Nachrichten und Anhänge in unseren Supportpostfächern, Versandhistorie, Notizen und Anfragen. Spracherkennung ist eine Schätzung; Übersetzungen können Fehler enthalten. Das Original bleibt beim Mailanbieter.",
+        "Betrieb und Sicherheit: IP-Adresse und Browser für Verbindungen und Missbrauchsschutz, Sitzungscookies, Produktzugriffe, Antwortcodes und technische Laufzeiten. Interne Statistiken erfassen Seiten oder Aufruftypen, verfügbares Land, Herkunftsdomäne, Browserkategorie und eine täglich wechselnde pseudonymisierte Kennung. Ein authentifizierter Aufruf kann dem Konto zugeordnet werden. Pseudonymisiert bedeutet nicht anonym.",
+        "Öffentliche Quellen: Verbreitete Daten, insbesondere FINMA-Register und Warnungen oder LEI-/GLEIF-Daten, können natürliche Personen und Selbstständige betreffen. Sie stammen aus den in Dateien und Seiten genannten Quellen, nicht aus einer Erhebung bei allen Betroffenen. Ein Eintrag gibt Kontext und Datum der Quelle wieder, keine unabhängige Bewertung der Person."
+      ] },
+      { id: "finalites", title: "3. Zwecke und Grundlagen", paragraphs: [
+        "Wir verwenden die Informationen für Vorbereitung und Durchführung von Käufen, Zugang, Support, Beschwerden, Erstattungsabgleich, Missbrauchsschutz, Verfügbarkeit, Nutzungsstatistik und Verbesserung des Dienstes. Erforderliche Belege dienen Buchführungspflichten und der Rechtsverteidigung.",
+        "Es gilt das schweizerische Datenschutzgesetz. Soweit die DSGVO anwendbar ist, sind die relevanten Grundlagen Vertragserfüllung oder vorvertragliche Massnahmen, gesetzliche Pflichten und berechtigte Interessen an einem sicheren Dienst, der Beantwortung von Anfragen und der Nutzungsmessung unter Wahrung der Betroffenenrechte. Wo erforderlich, wird eine für die Zukunft widerrufbare Einwilligung eingeholt.",
+        "Pflichtfelder sind gekennzeichnet. Ohne erreichbare E-Mail oder bestätigte Zahlung können wir den Kauf nicht bereitstellen. Werbung ist keine Voraussetzung. Wir treffen mit Sprachmodellen keine individuellen Entscheidungen mit rechtlicher Wirkung für Kunden. Finanzabgleiche und Sicherheitssperren können menschlich überprüft werden."
+      ] },
+      { id: "support", title: "4. Nachrichten, CRM und Übersetzung", paragraphs: [
+        "Der Kundenbereich für die Verwaltung ist nur dem berechtigten Betreiber zugänglich. Er kann Supportnachrichten und OpenSwissData-bezogene Korrespondenz aus dem persönlichen beruflichen Postfach des Betreibers zusammenführen. Andere Nachrichten dieses Postfachs sind vom CRM ausgeschlossen. Originale verbleiben bei Infomaniak, versandte Nachrichten bei Resend.",
+        "Leseübersetzungen erfolgen auf dem Anwendungsserver mit lokal installierten Modellen. Texte werden keinem externen Übersetzungs- oder Textgenerierungsanbieter übermittelt. Übersetzungen werden nicht als neue Nachricht gespeichert oder automatisch an den Absender verschickt. Übermitteln Sie keine unnötigen Geheimnisse, Kartendaten oder sensiblen Informationen."
+      ] },
+      { id: "prestataires", title: "5. Empfänger und Orte", paragraphs: [
+        "Der Betreiber und erforderliche Dienstleister haben im Rahmen ihrer Aufgaben Zugriff. Stripe verarbeitet Zahlungen (europäische Gesellschaft in Irland, internationale Bearbeitung insbesondere in den USA), Resend Versand und Versandstatus (USA), Infomaniak Postfächer (Schweiz). Stripe kann für eigene Pflichten auch selbst verantwortlich sein.",
+        "Railway hostet Anwendung und Datenbank in der Region Amsterdam, Niederlande; Betrieb und Support können die USA einbeziehen. Cloudflare stellt Netzwerk und R2-Speicher bereit, insbesondere für Archive und verschlüsselte Sicherungen. Sein Netzwerk ist international; ein ausschliesslicher Standort Frankfurt wird nicht behauptet. Einzelheiten hängen vom Dienst und seinen Unterauftragnehmern ab.",
+        "Plausible misst die Nutzung ohne Werbecookies (europäischer Anbieter, dokumentierte Infrastruktur in Deutschland). Sentry erhält gefilterte technische Fehler mit möglicher Bearbeitung in den USA je nach Kontoregion; Anfrageinhalte, Cookies, Nutzer und Aktivitätsverläufe werden vor Versand entfernt. Google liefert Search-Console-Statistiken und erhält beim Laden von Google Fonts erforderliche Verbindungsdaten (mögliche Bearbeitung in den USA). Für den über einen externen Link geöffneten Substack-Newsletter gilt ebenfalls dessen eigene Erklärung.",
+        "Übermittlungen ausserhalb der Schweiz verlangen nach anwendbarem Recht ein angemessenes Schutzniveau oder geeignete Garantien, insbesondere für die Schweiz angepasste Standardvertragsklauseln. Anbieterinformationen, Auftragsbearbeitungsverträge und Unterauftragnehmerlisten sind unten verlinkt. Ein europäischer Serverstandort allein schliesst Übermittlungen nicht aus. Auf Anfrage erläutern wir Empfänger und Garantien für Ihre Daten. Eine umfassende Konformitätszertifizierung wird hier nicht behauptet."
+      ] },
+      { id: "durees", title: "6. Aufbewahrung", paragraphs: [
+        "Konto und Zugriffsrechte: während der Beziehung und soweit für erworbene Versionen erforderlich. Bestellungen, Buchungs- und Vertragsbelege: anwendbare gesetzliche Dauer, für Schweizer Buchungsbelege grundsätzlich zehn Jahre, bei Streitigkeiten entsprechend angepasst. Eine Kontolöschung entfernt keine gesetzlich aufzubewahrenden Belege.",
+        "Sitzungen: höchstens 30 Tage gültig; Anmeldelinks: 15 Minuten; Lieferlinks: 48 Stunden. Abgelaufene Einträge werden bei der periodischen Bereinigung entfernt. Interne Statistikereignisse werden dabei nach 180 Tagen gelöscht.",
+        "Verschlüsselte technische Kopien von CRM-Konnektoren und Finanzabgleichen: 30 Tage, Löschung bei folgenden Abfragen und Volumenbegrenzung. Originalmails beim Anbieter und nützliche Notizen folgen den Erfordernissen der Kundenbeziehung, Beschwerden und gesetzlichen Pflichten; die technische Bereinigung löscht nicht alles.",
+        "Verschlüsselte Sicherungen dienen der Wiederherstellung nach Vorfällen. Eine Löschung kann darin erst mit Ablauf des Aufbewahrungszyklus wirksam werden; nach einer Wiederherstellung sind weiterhin gültige Löschbegehren erneut umzusetzen. Wir prüfen Löschbegehren, um die Aufbewahrung auf das Erforderliche zu beschränken."
+      ] },
+      { id: "cookies", title: "7. Cookies und Statistik", paragraphs: [
+        "Das notwendige Anmeldecookie osd_session ist durch HttpOnly, Secure in Produktion und SameSite geschützt. Zahlungslinks führen zu Stripe, dessen Cookies und Informationen auf seiner Seite gelten. Die Website verwendet kein OpenSwissData-Werbecookie; Plausible funktioniert ohne Cookies. Technische Daten können dennoch bearbeitet werden.",
+        "Sie können Cookies im Browser löschen und damit die Sitzung beenden. Serverseitige Messungen verwenden die oben beschriebenen technischen Daten ohne über Tage stabile Kennung. Soweit gesetzlich vorgesehen, können Sie beim Verantwortlichen Widerspruch einlegen."
+      ] },
+      { id: "droits", title: "8. Rechte und Meldungen", paragraphs: [
+        "Je nach anwendbarem Recht können Sie Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch sowie Herausgabe oder Übertragung Ihrer Daten unter den gesetzlichen Voraussetzungen verlangen. Schreiben Sie an contact@openswissdata.com mit Ihrem Anliegen; eine verhältnismässige Identitätsprüfung ist möglich. Auskunft wird grundsätzlich innerhalb von 30 Tagen erteilt, vorbehaltlich erläuterter gesetzlicher Ausnahmen.",
+        "Nennen Sie bei Registerdaten den Eintrag, die Quelle und den behaupteten Fehler. Wir prüfen Berichtigung, Kontextangabe oder begründete Entfernung ohne stille Änderung amtlicher Dokumente. Sie können sich an den Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten (EDÖB) oder bei anwendbarer DSGVO an die zuständige Behörde Ihres Landes wenden."
+      ] },
+      { id: "modifications", title: "9. Änderungen", paragraphs: ["Das Datum bezeichnet eine tatsächliche redaktionelle Überarbeitung. Veränderte Bearbeitungen können eine Aktualisierung sowie gesetzlich erforderliche besondere Informationen oder neue Einwilligungen verlangen. Eine neue Erklärung ist keine rückwirkende Einwilligung."] }
+    ]
+  },
+  en: {
+    title: "Privacy and personal data",
+    summary: "What we process to provide OpenSwissData, assist you and protect the service. Notice updated on 26 September 2026.",
+    highlights: ["No sale of customer contact details", "Pseudonymised internal statistics", "Message translation on our server", "One contact to exercise your rights"],
+    sections: [
+      { id: "responsable", title: "1. Controller and contact", paragraphs: ["Claude-Alain Martin, operating OpenSwissData in his own name, Rue de l’Église 23, 1045 Ogens, Switzerland, is responsible for the processing described here. Contact: contact@openswissdata.com. This notice provides information; accepting sales terms does not constitute marketing consent."] },
+      { id: "informations", title: "2. Information processed", paragraphs: [
+        "Account and purchase: email, identity and company when provided, billing address and payment details processed by Stripe, transaction references, products, amounts, refunds, disputes, access rights and evidence of the accepted terms version. We do not store full card numbers or security codes.",
+        "Customer relationship: business contact details, chosen or estimated language, messages and attachments received in our support mailboxes, sending history, notes and requests. Language detection is indicative; reading translations may contain errors and originals remain with the mail provider.",
+        "Operation and security: IP address and browser needed for connections and abuse prevention, session cookies, product access, response codes and technical timings. Internal statistics record pages or call types, country if available, referring domain, browser category and a pseudonymised identifier changing daily. An authenticated call may be linked to the account. Pseudonymised does not mean anonymous.",
+        "Public sources: some distributed data, including FINMA registers and warnings or LEI/GLEIF data, may concern individuals or sole traders. They come from sources cited in files and pages, not from direct collection from every person. An entry reflects its source context and date, not an independent assessment of a person."
+      ] },
+      { id: "finalites", title: "3. Purposes and grounds", paragraphs: [
+        "We use information to prepare and fulfil purchases, provide access, handle support and complaints, reconcile refunds, prevent abuse, check availability, measure use and improve the service. Necessary records support accounting obligations and the defence of rights.",
+        "Swiss data protection law governs these activities. Where the GDPR applies, relevant grounds are contract performance or pre-contract steps, legal obligations and legitimate interests in secure service, answering requests and measuring use, subject to individuals’ rights. Consent is requested where required and can be withdrawn for the future.",
+        "Required fields are indicated. Without an accessible email or confirmed payment, we cannot fulfil a purchase. Receiving advertisements is not required. We do not use a language model to make individual decisions with legal effects on a customer. Financial reconciliation and security restrictions can be reviewed by a person."
+      ] },
+      { id: "support", title: "4. Messages, CRM and translation", paragraphs: [
+        "The management dashboard is restricted to the authorised operator. It may combine support messages with OpenSwissData correspondence from the operator’s personal business mailbox. Other correspondence from that mailbox is excluded from the CRM. Originals remain with Infomaniak and outgoing mail with Resend.",
+        "Reading translations run on the application server using locally installed models. Text is not sent to an external translation or text-generation provider. Translations are not stored as new messages or automatically sent to their authors. Avoid unnecessary secrets, card details or sensitive information."
+      ] },
+      { id: "prestataires", title: "5. Recipients and locations", paragraphs: [
+        "The operator and necessary providers access relevant information for their tasks. Stripe handles payments (European entity in Ireland and international processing, including the United States); Resend handles sending and status (United States); Infomaniak hosts mailboxes (Switzerland). Stripe may also act as an independent controller for its own obligations.",
+        "Railway hosts the application and database in the Amsterdam region, Netherlands; operations and support may involve the United States. Cloudflare provides the network and R2 storage, including distributed archives and encrypted backups. Its network is international; exclusive Frankfurt residency is not claimed. Detailed locations depend on the service and its subprocessors.",
+        "Plausible measures audience without advertising cookies (European provider, documented infrastructure in Germany). Sentry receives filtered technical errors, with possible US processing depending on the account region; request bodies, cookies, users and activity trails are removed before sending. Google provides Search Console statistics and receives connection data when Google Fonts load (possible US processing). The external Substack newsletter also has its own notice.",
+        "Transfers outside Switzerland require an adequate protection level or appropriate safeguards under applicable rules, including standard contractual clauses adapted to Switzerland. Provider notices, processing agreements and subprocessor lists are referenced below; a European server location alone does not rule out transfers. On request we can clarify recipients and safeguards concerning your data. No overall compliance certification is claimed here."
+      ] },
+      { id: "durees", title: "6. Retention", paragraphs: [
+        "Accounts and access rights: during the relationship and as needed for acquired versions. Orders, accounting and contract evidence: the applicable legal period, generally ten years for Swiss accounting records, adjusted where a dispute requires retention. Account deletion does not remove records whose retention is required by law.",
+        "Sessions: valid for up to 30 days; sign-in links: 15 minutes; delivery links: 48 hours. Expired entries are removed during periodic cleanup. Internal statistical events are deleted after 180 days during cleanup.",
+        "Encrypted technical copies from CRM connectors and financial reconciliation: 30 days, purged on subsequent consultations and subject to volume caps. Original provider mail and useful notes are retained as needed for the relationship, complaints and legal duties; technical cleanup does not erase them all.",
+        "Encrypted backups support incident recovery. Deletion may take effect there only when the retention cycle expires; applicable deletion requests must be reapplied after restoration. We review erasure requests to limit retained data to what is needed."
+      ] },
+      { id: "cookies", title: "7. Cookies and audience measurement", paragraphs: [
+        "The osd_session cookie is necessary for sign-in and protected by HttpOnly, Secure in production and SameSite. Payment links lead to Stripe, whose cookies and notice apply on its page. The site uses no OpenSwissData advertising cookie; Plausible works without cookies. This does not mean no technical data are processed.",
+        "You can remove cookies in your browser, ending the session. Server-side measurement uses the technical data described above without an identifier stable across days. You may contact the controller to object where applicable law provides that right."
+      ] },
+      { id: "droits", title: "8. Your rights and reports", paragraphs: [
+        "Depending on applicable law, you may request access, correction, erasure, restriction, objection and delivery or transfer of your data under statutory conditions. Email contact@openswissdata.com describing your request; proportionate identity verification may be needed. Access requests are normally answered within 30 days, subject to explained statutory exceptions.",
+        "For public-register data, identify the entry, source and alleged error. We review correction, context or justified removal without silently altering official documents. You may contact the Swiss Federal Data Protection and Information Commissioner (FDPIC), or your competent national authority where the GDPR applies."
+      ] },
+      { id: "modifications", title: "9. Notice changes", paragraphs: ["The date reflects an actual editorial revision. Changed processing may require an update and, where legally required, specific information or fresh consent. A new notice is not retrospective consent."] }
+    ]
+  }
+};
+
+export const providerLinks = [
+  ["Railway — DPA", "https://railway.com/legal/dpa"], ["Railway — régions", "https://docs.railway.com/deployments/regions"],
+  ["Stripe — DPA", "https://stripe.com/legal/dpa"], ["Stripe — confidentialité", "https://stripe.com/privacy"],
+  ["Resend — DPA", "https://resend.com/legal/dpa"], ["Cloudflare — DPA", "https://www.cloudflare.com/cloudflare-customer-dpa/"],
+  ["Infomaniak — confidentialité", "https://www.infomaniak.com/fr/cgv/politique-de-confidentialite"],
+  ["Plausible — données", "https://plausible.io/data-policy"], ["Sentry — DPA", "https://sentry.io/legal/dpa/"],
+  ["Google — confidentialité", "https://policies.google.com/privacy"], ["Substack — confidentialité", "https://substack.com/privacy"],
+  ["PFPDT / EDÖB / FDPIC", "https://www.edoeb.admin.ch/"]
+] as const;
+
+export { terms };

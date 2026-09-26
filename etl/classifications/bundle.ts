@@ -1,3 +1,4 @@
+import { datasetLicense } from "../shared/dataset-license.js";
 import { mkdirSync, rmSync, existsSync, createWriteStream, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import archiver from "archiver";
@@ -91,38 +92,7 @@ const NACE_EN_LABELS_PARQUET_SCHEMA = new parquet.ParquetSchema({
   label_en: { type: "UTF8" },
 });
 
-const DATASET_LICENSE = `openswissdata.com — Dataset License v1.0
-
-Copyright © 2026 Claude-Alain Martin · openswissdata.com
-
-This dataset is licensed, not sold.
-
-PERMITTED USES:
-- Commercial use within your organization
-- Derivation and transformation for internal projects
-- Integration into your products or services (without redistributing the raw dataset)
-
-PROHIBITED USES:
-- Public redistribution of the dataset or substantial portions thereof
-- Resale of the dataset in original or modified form
-- Republishing on public data marketplaces (Kaggle, data.world, etc.)
-
-ATTRIBUTION:
-Attribution is appreciated but not required. Suggested:
-"Data provided by openswissdata.com (sources: BFS, Eurostat Ramon, UN Statistics)"
-
-WARRANTY:
-Provided "AS IS" without warranty. Data is normalized from official sources.
-openswissdata.com is not responsible for errors in the underlying official sources.
-
-LIABILITY:
-Liability capped at the purchase price of this dataset.
-
-GOVERNING LAW:
-Swiss law. For: Vaud, Switzerland (1045 Ogens).
-
-Contact: contact@openswissdata.com
-`;
+const DATASET_LICENSE = datasetLicense("classifications");
 
 export interface ClassificationsBundleInput {
   rows: NomenclatureRow[];

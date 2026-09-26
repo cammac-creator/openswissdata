@@ -98,7 +98,7 @@ export function localizePathOrFallback(
 export function getHreflangAlternates(pathname: string): Array<{ lang: Lang; url: string }> {
   const path = localizePath(pathname, "fr").replace(/\/+$/, "") || "/";
   // Ne déclarer que les traductions réellement présentes dans les routes.
-  const available: Lang[] = path.startsWith("/legal/") ? ["fr", "de"]
+  const available: Lang[] = path.startsWith("/legal/archives/") ? ["fr", "de"]
     : /^\/(blog(?:\/|$)|pricing$|404(?:\.html)?$|admin$|famille$)/.test(path) ? ["fr"] : LANGS;
   return available.map((lang) => ({ lang, url: localizePath(pathname, lang) }));
 }

@@ -1,0 +1,11 @@
+---
+import { getLangFromPath, localizePath } from "../i18n/utils";
+const lang = getLangFromPath(Astro.url.pathname);
+const text = {
+ fr: ["Achat professionnel · Paiement unique, sans renouvellement automatique.","CGV et remboursement 14 jours","Données personnelles","Vous pourrez vérifier et corriger vos informations chez Stripe avant de confirmer le paiement et d’accepter les CGV."],
+ de: ["Geschäftlicher Kauf · Einmalzahlung ohne automatische Verlängerung.","AGB und 14-Tage-Erstattung","Datenschutz","Bei Stripe können Sie Ihre Angaben vor Zahlung und AGB-Zustimmung prüfen und berichtigen."],
+ en: ["Business purchase · One-off payment, no automatic renewal.","Terms and 14-day refund","Privacy notice","You can review and correct your details at Stripe before confirming payment and accepting the terms."],
+}[lang];
+---
+<p class="checkout-legal"><strong>{text[0]}</strong><span><a href={localizePath('/legal/cgv',lang)}>{text[1]}</a> · <a href={localizePath('/legal/privacy',lang)}>{text[2]}</a></span><span>{text[3]}</span></p>
+<style>.checkout-legal{font-size:12px;line-height:1.65;max-width:52ch;margin:12px 0 20px;color:var(--color-ink-soft);text-align:left;overflow-wrap:anywhere}.checkout-legal strong{font-weight:500}.checkout-legal span{display:block;margin-top:5px}.checkout-legal a{color:inherit;text-decoration:underline;text-underline-offset:3px}</style>

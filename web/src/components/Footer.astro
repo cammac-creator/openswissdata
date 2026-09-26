@@ -1,5 +1,5 @@
 ---
-import { getLangFromPath, t, localizePath, localizePathOrFallback } from "../i18n/utils";
+import { getLangFromPath, t, localizePath } from "../i18n/utils";
 import LangSwitcher from "./LangSwitcher.astro";
 
 interface Props {
@@ -10,7 +10,7 @@ const { monolingual = false } = Astro.props;
 const year = new Date().getFullYear();
 const lang = getLangFromPath(Astro.url.pathname);
 const L = (path: string) => localizePath(path, lang);
-const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]);
+const Llegal = (path: string) => localizePath(path, lang);
 ---
 <footer class="site-footer">
   <div class="footer-split">
@@ -51,6 +51,8 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
         </div>
         <div>
           <div class="footer-col-title">{t("footer.col_legal", lang)}</div>
+          <a href={Llegal("/legal/")}>{lang === "de" ? "Alle Rechtsinformationen" : lang === "en" ? "All legal information" : "Tous les documents"}</a>
+          <a href={Llegal("/legal/usage")}>{lang === "de" ? "Nutzungsbedingungen" : lang === "en" ? "Terms of use" : "Conditions d’utilisation"}</a>
           <a href={Llegal("/legal/cgv")}>{t("footer.link_cgv", lang)}</a>
           <a href={Llegal("/legal/privacy")}>{t("footer.link_privacy", lang)}</a>
           <a href={Llegal("/legal/provenance")}>{t("footer.link_provenance", lang)}</a>
@@ -75,7 +77,7 @@ const Llegal = (path: string) => localizePathOrFallback(path, lang, ["fr", "de"]
         <strong>{t("footer.disclaimer_title", lang)}</strong> {t("footer.disclaimer_body", lang)}
       </div>
       <div class="footer-bottom">
-        <div>© {year} · Claude-Alain Martin · openswissdata.com</div>
+        <div>© {year} · OpenSwissData</div>
         <div class="footer-bottom-right">
           <LangSwitcher variant="footer" monolingual={monolingual} />
           <a href="https://ibanforge.com" rel="noopener">{t("footer.studio", lang)}</a>

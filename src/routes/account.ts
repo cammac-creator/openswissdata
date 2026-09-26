@@ -1,3 +1,4 @@
+import { orderLegalSummary } from "../lib/order-legal.js";
 import { Hono } from "hono";
 import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
@@ -70,7 +71,7 @@ accountRoute.get("/datasets", (c) => {
 
 accountRoute.get("/orders", (c) => {
   const orders = getDb().prepare("SELECT id, amount_chf, refunded_chf, dispute_status, status, created_at FROM orders WHERE customer_id=? ORDER BY created_at DESC").all(c.get("customer_id"));
-  return c.json({ orders });
+  return c.json({ orders: (orders as Array<{id:number}>).map(order => ({ ...order, legal: orderLegalSummary(getDb(), order.id) })) });
 });
 
 accountRoute.get("/orders/:id/receipt", async (c) => {

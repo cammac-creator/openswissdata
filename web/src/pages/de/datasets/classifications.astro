@@ -1,4 +1,5 @@
 ---
+import CheckoutNotice from "../../../components/CheckoutNotice.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import ClassificationsLookup from "../../../components/ClassificationsLookup.astro";
 import ClassificationsQuality from "../../../components/ClassificationsQuality.astro";
@@ -230,6 +231,7 @@ const productJsonLd = {
           <span class="arrow">→</span>
         </button>
       </form>
+      <CheckoutNotice />
       <p class="ds-cta-sub">Sichere Stripe-Zahlung · Sofortiger Download per E-Mail · 14-Tage-Rückerstattung ohne Bedingungen</p>
       <p class="ds-cta-alt">Oder nehmen Sie das <a href="/de/bundle">Komplett-Bundle (TARES + Classifications + FINMA) für 797 CHF</a> — Ersparnis 200 CHF (20 %).</p>
     </div>

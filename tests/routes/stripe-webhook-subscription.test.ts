@@ -249,6 +249,7 @@ describe("Stripe webhook — MCP subscription delivery", () => {
 
   it("non-regression: a one-shot ZIP checkout (mode=payment) does NOT touch mcp_clients", async () => {
     constructEventAsyncMock.mockResolvedValueOnce({
+      id: "evt_oneshot", created: 1790400000,
       type: "checkout.session.completed",
       livemode: false,
       data: {
