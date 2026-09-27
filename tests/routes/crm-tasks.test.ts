@@ -15,7 +15,7 @@ describe('Actions complètes et échéances du bureau',()=>{
  let root:string;
  beforeEach(()=>{
   root=mkdtempSync(join(tmpdir(),'osd-actions-'));vi.stubEnv('DATABASE_PATH',join(root,'fictive.sqlite'));vi.stubEnv('ADMIN_EMAILS','owner@example.test');vi.stubEnv('BASE_URL','https://www.openswissdata.com');vi.spyOn(Date,'now').mockReturnValue(now);
-  const db=getDb();db.prepare("INSERT INTO customers(id,email,created_at) VALUES(1,'owner@example.test',?)").run(now);db.prepare('INSERT INTO sessions(token,customer_id,expires_at,created_at) VALUES(?,1,?,?)').run('D'.repeat(43),now+86400000,now);
+  const db=getDb();db.prepare("INSERT INTO customers(id,email,created_at) VALUES(1,'owner@example.test',?)").run(now);db.prepare("INSERT INTO sessions(purpose,token,customer_id,expires_at,created_at) VALUES ('session',?,1,?,?)").run('D'.repeat(43),now+86400000,now);
  });
  afterEach(()=>{closeDb();vi.restoreAllMocks();vi.unstubAllEnvs();rmSync(root,{recursive:true,force:true})});
  const insert=(due:string|null,done=false)=>Number(getDb().prepare('INSERT INTO crm_tasks(title,due_on,done_at,created_at) VALUES(?,?,?,?)').run('Action fictive',due,done?now:null,now).lastInsertRowid);

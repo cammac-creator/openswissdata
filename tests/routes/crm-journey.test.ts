@@ -16,7 +16,7 @@ describe('Preuves après achat, sans attribution inventée',()=>{
   vi.stubEnv('DATABASE_PATH',join(temp,'fictif.sqlite'));vi.stubEnv('ADMIN_EMAILS','OWNER@example.test');vi.stubEnv('CRM_INTERNAL_EMAILS','interne@example.test');vi.stubEnv('BASE_URL','https://www.openswissdata.com');
   const db=getDb();for(const [id,email] of [[1,'owner@example.test'],[2,'buyer@example.test'],[3,'other@example.test'],[4,'Interne@example.test'],[5,'marque@example.test']] as const)db.prepare('INSERT INTO customers(id,email,created_at) VALUES(?,?,?)').run(id,email,now-day);
   db.prepare('INSERT INTO crm_profiles(customer_id,internal,updated_at) VALUES(5,1,?)').run(now);
-  for(const [token,id] of [['D'.repeat(43),1],['E'.repeat(43),2]])db.prepare('INSERT INTO sessions(token,customer_id,created_at,expires_at) VALUES(?,?,?,?)').run(token,id,now,now+day);
+  for(const [token,id] of [['D'.repeat(43),1],['E'.repeat(43),2]])db.prepare("INSERT INTO sessions(purpose,token,customer_id,created_at,expires_at) VALUES ('session',?,?,?,?)").run(token,id,now,now+day);
   for(const id of ['finma','tares','classifications'])db.prepare('INSERT INTO datasets(id,name,slug,price_chf,stripe_price_id,created_at) VALUES(?,?,?,29900,?,?)').run(id,id,id,'price_fictif',now-day);
  });
  afterEach(()=>{closeDb();rmSync(temp,{recursive:true,force:true});vi.restoreAllMocks();vi.unstubAllEnvs()});

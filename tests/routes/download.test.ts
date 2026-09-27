@@ -29,7 +29,7 @@ describe("download routes", () => {
     const info = db.prepare("INSERT INTO customers (email, created_at) VALUES (?, ?)").run("c@d.com", now);
     custId = Number(info.lastInsertRowid);
     token = "A".repeat(43);
-    db.prepare("INSERT INTO sessions (token, customer_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
+    db.prepare("INSERT INTO sessions(purpose,token, customer_id, expires_at, created_at) VALUES ('session',?, ?, ?, ?)")
       .run(token, custId, now + 3600_000, now);
     db.prepare("INSERT INTO datasets (id, name, slug, price_chf, stripe_price_id, current_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
       .run("tares", "TARES", "tares", 29900, "p_t", "2026.04.22", now);

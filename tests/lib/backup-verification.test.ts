@@ -32,7 +32,7 @@ describe('Restauration isolée et preuve explicite', () => {
     await expect(verifyRestoredBackup(source, restored)).rejects.toMatchObject({ code: 'backup_bytes_differ' });
   });
   it('détecte des liens cassés même lorsque les deux copies sont identiques', async () => {
-    modify("PRAGMA foreign_keys=OFF; INSERT INTO sessions VALUES('jeton-fictif',999,1790420000000,1790410000000)");
+    modify("PRAGMA foreign_keys=OFF; INSERT INTO sessions(token,customer_id,expires_at,created_at) VALUES('jeton-fictif',999,1790420000000,1790410000000)");
     await expect(inspectRestoredBackup(source, restored)).rejects.toMatchObject({ code: 'backup_foreign_keys_failed' });
   });
   it('refuse un schéma incomplet sans le migrer pour masquer le problème', async () => {

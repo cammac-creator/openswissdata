@@ -12,7 +12,7 @@ describe('Bureau privé et suivi client',()=>{
  beforeEach(()=>{
   temp=mkdtempSync(join(tmpdir(),'osd-crm-'));process.env.DATABASE_PATH=join(temp,'test.sqlite');process.env.ADMIN_EMAILS='owner@example.test';process.env.BASE_URL='https://www.openswissdata.com';process.env.OSD_BACKUP_KEY='a'.repeat(64);delete process.env.GSC_SERVICE_ACCOUNT_JSON;
   const db=getDb(),now=Date.now();admin=Number(db.prepare('INSERT INTO customers(email,created_at) VALUES(?,?)').run('owner@example.test',now).lastInsertRowid);buyer=Number(db.prepare('INSERT INTO customers(email,created_at) VALUES(?,?)').run('buyer@example.test',now).lastInsertRowid);
-  for(const [t,id] of [[token,admin],[other,buyer]])db.prepare('INSERT INTO sessions(token,customer_id,expires_at,created_at) VALUES(?,?,?,?)').run(t,id,now+86400000,now);
+  for(const [t,id] of [[token,admin],[other,buyer]])db.prepare("INSERT INTO sessions(purpose,token,customer_id,expires_at,created_at) VALUES ('session',?,?,?,?)").run(t,id,now+86400000,now);
   for(const [id,session,amount,status] of [[admin,'cs_live_owner',100,'paid'],[buyer,'cs_live_buyer',29900,'paid'],[buyer,'cs_test_buyer',29900,'paid'],[buyer,'cs_live_refunded',29900,'refunded']])db.prepare('INSERT INTO orders(customer_id,stripe_session_id,amount_chf,items_json,status,created_at) VALUES(?,?,?,?,?,?)').run(id,session,amount,'["finma"]',status,now);
  });
  afterEach(()=>{closeDb();rmSync(temp,{recursive:true,force:true});for(const key of ['DATABASE_PATH','ADMIN_EMAILS','BASE_URL','OSD_BACKUP_KEY'])delete process.env[key];clearCrmCache();vi.restoreAllMocks();vi.unstubAllGlobals()});
@@ -54,7 +54,7 @@ describe('Bureau privé et suivi client',()=>{
  });
  it('réconcilie chaque achat avec le bon jour suisse et exclut les bornes hors période',async()=>{
   const now=Date.parse('2026-10-26T00:30:00Z');vi.spyOn(Date,'now').mockReturnValue(now);
-  const db=getDb();db.prepare('UPDATE sessions SET expires_at=?').run(now+86400000);db.prepare('DELETE FROM orders').run();
+  const db=getDb();db.prepare('UPDATE sessions SET created_at=?,expires_at=?').run(now,now+86400000);db.prepare('DELETE FROM orders').run();
   const insert=db.prepare("INSERT INTO orders(customer_id,stripe_session_id,amount_chf,refunded_chf,items_json,status,created_at) VALUES(?,?,?,?,?,'paid',?)");
   const rows=[['avant','2026-10-19T21:59:59.999Z',900,0],['debut','2026-10-19T22:00:00Z',1000,0],['jour25debut','2026-10-24T22:00:00Z',2000,500],['heure_double1','2026-10-25T00:30:00Z',3000,0],['heure_double2','2026-10-25T01:30:00Z',4000,0],['jour25fin','2026-10-25T22:59:59.999Z',5000,0],['jour26','2026-10-25T23:00:00Z',6000,0],['maintenant','2026-10-26T00:30:00Z',7000,0],['futur','2026-10-26T00:30:00.001Z',8000,0]] as const;
   for(const [id,at,amount,refund] of rows)insert.run(buyer,'cs_live_'+id,amount,refund,'["finma"]',Date.parse(at));
@@ -69,7 +69,7 @@ describe('Bureau privé et suivi client',()=>{
  });
  it('présente une audience cohérente, ses jours absents et la limite de conservation',async()=>{
   const now=Date.parse('2026-09-26T12:00:00Z');vi.spyOn(Date,'now').mockReturnValue(now);
-  const db=getDb();db.prepare('UPDATE sessions SET expires_at=?').run(now+86400000);
+  const db=getDb();db.prepare('UPDATE sessions SET created_at=?,expires_at=?').run(now,now+86400000);
   const insert=db.prepare("INSERT INTO events(kind,name,visitor_hash,ua_class,ts) VALUES('custom','page_view',?,?,?)");
   // Le même identifiant ancien apparaît de part et d’autre d’un minuit suisse.
   for(const [at,hash,ua] of [['2026-09-24T21:59:00Z','ancien-hash','desktop'],['2026-09-24T22:01:00Z','ancien-hash','desktop'],['2026-09-24T22:02:00Z','ancien-hash','desktop'],['2026-09-24T23:59:00Z','second','mobile'],['2026-09-25T00:01:00Z','robot','bot'],['2026-09-26T12:00:00.001Z','futur','desktop'],['2026-01-01T00:00:00Z','trop-ancien','desktop']])insert.run(hash,ua,Date.parse(at));
@@ -96,14 +96,14 @@ describe('Bureau privé et suivi client',()=>{
   ['2026-03-30T12:00:00Z','2026-03-28T23:00:00Z','2026-03-29T21:59:59.999Z','2026-03-29'],
   ['2026-10-26T12:00:00Z','2026-10-24T22:00:00Z','2026-10-25T22:59:59.999Z','2026-10-25'],
  ])('regroupe les événements du changement d’heure, relevé %s',async(nowText,from,until,day)=>{
-  const now=Date.parse(nowText);vi.spyOn(Date,'now').mockReturnValue(now);const db=getDb();db.prepare('UPDATE sessions SET expires_at=?').run(now+86400000);
+  const now=Date.parse(nowText);vi.spyOn(Date,'now').mockReturnValue(now);const db=getDb();db.prepare('UPDATE sessions SET created_at=?,expires_at=?').run(now,now+86400000);
   const event=db.prepare("INSERT INTO events(kind,name,visitor_hash,ua_class,ts) VALUES('custom','page_view',?,'desktop',?)");
   event.run('fictif-1',Date.parse(from));event.run('fictif-2',Date.parse(until));event.run('jour-suivant',Date.parse(until)+1);
   const a=await(await createApp().request('/api/admin/crm/audience?days=7',{headers})).json();
   expect(a.daily.find((x:{day:string})=>x.day===day)).toMatchObject({views:2,visitors:2});expect(a.web).toEqual({pageviews:3,visitor_days:3});
  });
  it('utilise la frontière de purge réelle même lorsque des traces plus anciennes subsistent',async()=>{
-  const now=Date.parse('2026-09-26T12:00:00Z'),cutoff=now-180*86400000;vi.spyOn(Date,'now').mockReturnValue(now);const db=getDb();db.prepare('UPDATE sessions SET expires_at=?').run(now+86400000);
+  const now=Date.parse('2026-09-26T12:00:00Z'),cutoff=now-180*86400000;vi.spyOn(Date,'now').mockReturnValue(now);const db=getDb();db.prepare('UPDATE sessions SET created_at=?,expires_at=?').run(now,now+86400000);
   const event=db.prepare("INSERT INTO events(kind,name,visitor_hash,ua_class,ts) VALUES('custom','page_view',?,'desktop',?)");
   event.run('avant',cutoff-1);event.run('frontiere',cutoff);event.run('apres',cutoff+1);
   const a=await(await createApp().request('/api/admin/crm/audience?days=365',{headers})).json();

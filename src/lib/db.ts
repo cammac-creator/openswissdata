@@ -36,6 +36,9 @@ export function getDb(path?: string, options: { fileMustExist?: boolean } = {}):
   // and the Stripe subscription webhook), then build its index. The 'business'
   // tier's CHECK-constraint widening cannot be done with ALTER — it lives in
   // src/db/migrations/003 and must be applied manually before selling Business.
+  // Les anciennes lignes restent non typées ; aucun jeton ni propriétaire réécrit.
+  ensureColumn(db, "sessions", "purpose", "TEXT NOT NULL DEFAULT 'legacy' CHECK (purpose IN ('legacy','magic_link','session'))");
+  ensureColumn(db, "sessions", "return_to", "TEXT NOT NULL DEFAULT 'account' CHECK (return_to IN ('account','admin'))");
   ensureColumn(db, "mcp_clients", "stripe_subscription_id", "TEXT");
   // Buyer language for transactional emails — added after `customers` first
   // shipped, so backfill on older DBs (constant DEFAULT makes the ALTER legal).

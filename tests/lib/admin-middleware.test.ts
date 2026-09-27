@@ -35,7 +35,7 @@ describe("requireAdmin middleware", () => {
   function seedSession(email: string, token: string, expiresInMs: number) {
     const db = getDb();
     const cust = db.prepare("SELECT id FROM customers WHERE email = ?").get(email) as { id: number };
-    db.prepare("INSERT INTO sessions (token, customer_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
+    db.prepare("INSERT INTO sessions(purpose,token, customer_id, expires_at, created_at) VALUES ('session',?, ?, ?, ?)")
       .run(token, cust.id, Date.now() + expiresInMs, Date.now());
     closeDb();
     return cust.id;

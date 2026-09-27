@@ -83,7 +83,7 @@ adminStatsRoute.get("/", async (c) => {
     SELECT
       (SELECT COUNT(*) FROM customers)                                AS total,
       (SELECT COUNT(*) FROM customers WHERE created_at >= ?)          AS new_in_window,
-      (SELECT COUNT(*) FROM sessions WHERE expires_at > ?)            AS active_sessions
+      (SELECT COUNT(*) FROM sessions WHERE expires_at > ? AND (purpose='session' OR (purpose='legacy' AND expires_at-created_at=2592000000)))            AS active_sessions
   `).get(since, Date.now()) as { total: number; new_in_window: number; active_sessions: number };
 
   // --- Entitlements per dataset ---

@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS entitlements (
 
 CREATE TABLE IF NOT EXISTS sessions (
   token TEXT PRIMARY KEY,
+  purpose TEXT NOT NULL DEFAULT 'legacy' CHECK (purpose IN ('legacy','magic_link','session')),
+  return_to TEXT NOT NULL DEFAULT 'account' CHECK (return_to IN ('account','admin')),
   customer_id INTEGER NOT NULL,
   expires_at INTEGER NOT NULL,
   created_at INTEGER NOT NULL,

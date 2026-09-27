@@ -4,13 +4,11 @@ import { bodyLimit } from "hono/body-limit";
 import { HTTPException } from "hono/http-exception";
 import { authRequestIp, consumeAuthLimit, reportAuthLimitFailure } from "../lib/auth-limits.js";
 import { getDb } from "../lib/db.js";
-import { generateToken, isValidTokenFormat } from "../lib/tokens.js";
+import {isValidTokenFormat} from '../lib/tokens.js';
+import {issueMagicLink, exchangeMagicLink, deleteAccountSession, SESSION_TTL_MS} from '../lib/account-session.js';
 import { sendMagicLinkEmail, parseLocale } from "../lib/email.js";
 
 export const authRoute = new Hono();
-
-const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;      // 15 min
-const SESSION_TTL_MS = 30 * 24 * 3600 * 1000;  // 30 days
 
 // Réponses de connexion privées, y compris les redirections et les refus.
 authRoute.use('*', async (c, next) => { c.header('Cache-Control', 'no-store'); await next(); });
@@ -21,8 +19,9 @@ function isProd(): boolean {
 }
 
 authRoute.post("/magic-link", async (c) => {
-  const db = getDb();
+  let db;
   try {
+    db = getDb();
     if (!consumeAuthLimit(db, 'ip', authRequestIp(c))) {
       c.header('Retry-After', '60');
       return c.json({ error: 'too_many_requests' }, 429);
@@ -44,61 +43,55 @@ authRoute.post("/magic-link", async (c) => {
       return c.json({ error: 'too_many_requests' }, 429);
     }
   } catch (error) { reportAuthLimitFailure(error); return c.json({ error: 'temporarily_unavailable' }, 503); }
-  const row = db.prepare("SELECT id, locale FROM customers WHERE email = ?").get(email) as
-    | { id: number; locale: string | null }
-    | undefined;
-  if (row) {
-    const token = generateToken();
-    const now = Date.now();
-    // sessions table is used both for login magic-links (short-TTL) and active sessions (long-TTL).
-    // Magic links stored with expires_at = now + 15min. On verify, we rotate it to a long-lived one.
-    db.prepare("INSERT INTO sessions (token, customer_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
-      .run(token, row.id, now + MAGIC_LINK_TTL_MS, now);
+  let row;
+  let token;
+  try {
+    row = db.prepare("SELECT id,locale FROM customers WHERE email=?").get(email) as {id: number; locale: string | null} | undefined;
+    if (row) token = issueMagicLink(row.id, parsed.return_to === 'admin' ? 'admin' : 'account');
+  } catch {
+    console.warn('[connexion] lien non enregistré');
+    c.header('Retry-After', '1');
+    return c.json({error: 'temporarily_unavailable'}, 503);
+  }
+  if (row && token) {
     const baseUrl = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-    const magicUrl = `${baseUrl}/api/auth/verify?token=${token}${parsed.return_to === "admin" ? "&return_to=admin" : ""}`;
-    await sendMagicLinkEmail({ to: email, magicUrl, locale: parseLocale(row.locale) });
+    const magicUrl = `${baseUrl}/api/auth/verify?token=${token}`;
+    try { await sendMagicLinkEmail({to: email, magicUrl, locale: parseLocale(row.locale)}); }
+    catch { console.warn('[connexion] remise du lien non confirmée'); }
   }
-  // Always return 200 to avoid email enumeration.
+  // Même réponse pour une adresse connue ou inconnue.
   return c.json({ ok: true });
 });
 
-authRoute.get("/verify", async (c) => {
-  const token = c.req.query("token");
-  if (!token || !isValidTokenFormat(token)) {
-    return c.redirect("/account?auth=invalid", 302);
+authRoute.get("/verify", (c) => {
+  const query = new URL(c.req.url).searchParams;
+  const tokens = query.getAll('token');
+  const targets = query.getAll('return_to');
+  if (c.req.url.length > 4096 || tokens.length !== 1 || !isValidTokenFormat(tokens[0]) || targets.length > 1) {
+    return c.redirect('/account?auth=invalid', 302);
   }
-  const db = getDb();
-  const now = Date.now();
-  const session = db.prepare("SELECT token, customer_id, expires_at FROM sessions WHERE token = ?").get(token) as { token: string; customer_id: number; expires_at: number } | undefined;
-  if (!session || session.expires_at < now) {
-    return c.redirect("/account?auth=expired", 302);
+  let session;
+  try { session = exchangeMagicLink(tokens[0], targets[0] === 'admin' ? 'admin' : 'account'); }
+  catch {
+    console.warn('[connexion] échange non enregistré ; lien conservé');
+    c.header('Retry-After', '1');
+    return c.json({error: 'temporarily_unavailable'}, 503);
   }
-  // Rotate: delete the short-TTL magic link, create a long-TTL session.
-  const longToken = generateToken();
-  db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
-  db.prepare("INSERT INTO sessions (token, customer_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
-    .run(longToken, session.customer_id, now + SESSION_TTL_MS, now);
-
-  const cookie = `osd_session=${longToken}; HttpOnly; ${isProd() ? "Secure; " : ""}SameSite=Lax; Max-Age=${Math.floor(SESSION_TTL_MS / 1000)}; Path=/`;
-  c.header("Set-Cookie", cookie);
-  // Land on the account page in the customer's language.
-  const cust = db.prepare("SELECT locale FROM customers WHERE id = ?").get(session.customer_id) as
-    | { locale: string | null }
-    | undefined;
-  const loc = parseLocale(cust?.locale);
-  const accountPath = loc === "fr" ? "/account" : `/${loc}/account`;
-  // Seul ce chemin interne fixe est accepté comme retour du bureau.
-  if (c.req.query("return_to") === "admin") return c.redirect("/admin", 302);
-  return c.redirect(`${accountPath}?auth=ok`, 302);
+  if (!session) return c.redirect('/account?auth=expired', 302);
+  // Le cookie n'est émis qu'après la validation de toute la transaction.
+  c.header('Set-Cookie', `osd_session=${session.token}; HttpOnly; ${isProd() ? 'Secure; ' : ''}SameSite=Lax; Max-Age=${Math.floor(SESSION_TTL_MS / 1000)}; Path=/`);
+  if (session.target === 'admin') return c.redirect('/admin', 302);
+  const locale = parseLocale(session.locale);
+  return c.redirect(`${locale === 'fr' ? '' : '/' + locale}/account?auth=ok`, 302);
 });
 
-authRoute.post("/logout", async (c) => {
-  const cookie = c.req.header("cookie") ?? "";
-  const m = cookie.match(/(?:^|;\s*)osd_session=([A-Za-z0-9_-]{43})/);
-  if (m) {
-    const db = getDb();
-    db.prepare("DELETE FROM sessions WHERE token = ?").run(m[1]);
+authRoute.post('/logout', (c) => {
+  try { deleteAccountSession(c.req.header('cookie')); }
+  catch {
+    console.warn('[connexion] déconnexion non enregistrée');
+    c.header('Retry-After', '1');
+    return c.json({error: 'temporarily_unavailable'}, 503);
   }
-  c.header("Set-Cookie", `osd_session=; HttpOnly; ${isProd() ? "Secure; " : ""}SameSite=Lax; Max-Age=0; Path=/`);
-  return c.json({ ok: true });
+  c.header('Set-Cookie', `osd_session=; HttpOnly; ${isProd() ? 'Secure; ' : ''}SameSite=Lax; Max-Age=0; Path=/`);
+  return c.json({ok: true});
 });

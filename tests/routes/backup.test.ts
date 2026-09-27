@@ -63,7 +63,7 @@ describe('Sauvegarde chiffrée et restauration de bout en bout sur données fict
   });
   it('signale un lien cassé de la base source sans altérer la source ni valider la restauration', async () => {
     const db = getDb();
-    db.exec("PRAGMA foreign_keys=OFF; INSERT INTO sessions VALUES('fictif',999,1790420000000,1790410000000); PRAGMA foreign_keys=ON");
+    db.exec("PRAGMA foreign_keys=OFF; INSERT INTO sessions(token,customer_id,expires_at,created_at) VALUES('fictif',999,1790420000000,1790410000000); PRAGMA foreign_keys=ON");
     const r = await request();
     expect(r.status).toBe(503); expect(await r.json()).toEqual({ error: 'backup_foreign_keys_failed' });
     expect(db.prepare("SELECT COUNT(*) n FROM sessions WHERE token='fictif'").get()).toEqual({ n: 1 });

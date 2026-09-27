@@ -47,7 +47,7 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
       c.header('Content-Security-Policy', authorizationCsp(destination));
     }
     if (isCheckoutNotice(c)) c.header('Content-Security-Policy', CHECKOUT_NOTICE_CSP);
-    if (/^\/api\/(delivery|download)\//.test(c.req.path)) c.header("Referrer-Policy", "no-referrer");
+    if (/^\/api\/(delivery|download|auth)\//.test(c.req.path)) c.header("Referrer-Policy", "no-referrer");
     if (c.req.path.startsWith("/api/delivery/")) {
       c.header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://*.r2.cloudflarestorage.com; frame-ancestors 'none'; base-uri 'none'");
     }

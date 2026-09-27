@@ -18,7 +18,7 @@ describe('Accès privé au diagnostic profond', () => {
     const db = getDb(), now = Date.now();
     for (const [email, token, expiry] of [['admin@example.test', admin, now + 60_000], ['client@example.test', buyer, now + 60_000], ['expired@example.test', expired, now - 1]]) {
       const id = db.prepare('INSERT INTO customers(email,created_at) VALUES(?,?)').run(email, now).lastInsertRowid;
-      db.prepare('INSERT INTO sessions(token,customer_id,expires_at,created_at) VALUES(?,?,?,?)').run(token, id, expiry, now);
+      db.prepare("INSERT INTO sessions(purpose,token,customer_id,expires_at,created_at) VALUES ('session',?,?,?,?)").run(token, id, expiry, now);
     }
     diagnostic.mockReset().mockResolvedValue({ status: 'ok', checked_at: now, valid_until: now + 60_000, checks: { db: { ok: true }, r2: { ok: true }, stripe: { ok: true } } });
   });

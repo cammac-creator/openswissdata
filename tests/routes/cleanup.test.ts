@@ -38,7 +38,7 @@ describe('Résultat vérifiable du nettoyage planifié', () => {
     const db = getDb(), now = Date.now(), token = 'Q'.repeat(43);
     process.env.ADMIN_EMAILS = 'admin@example.test';
     db.prepare("INSERT INTO customers(email,created_at) VALUES('admin@example.test',?)").run(now);
-    db.prepare('INSERT INTO sessions(token,customer_id,expires_at,created_at) VALUES(?,1,?,?)').run(token, now + 60_000, now);
+    db.prepare("INSERT INTO sessions(purpose,token,customer_id,expires_at,created_at) VALUES ('session',?,1,?,?)").run(token, now + 60_000, now);
     db.prepare("INSERT INTO operation_checks(name,checked_at,details_json) VALUES('cleanup',?,'{')").run(now);
     vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 503 })));
     const response = await createApp().request('/api/admin/crm/operations', { headers: { cookie: `osd_session=${token}` } });

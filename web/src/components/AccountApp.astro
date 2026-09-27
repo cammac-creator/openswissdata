@@ -78,6 +78,7 @@ interface AccountJsCopy {
   loginLimited: string;
   loginNetworkError: string;
   loadError: string;
+  logoutError: string;
 }
 
 const COPY: Record<Lang, AccountCopy> = {
@@ -182,6 +183,7 @@ const JS: Record<Lang, AccountJsCopy> = {
     loginLimited: "Trop de demandes rapprochées. Patientez avant de réessayer, ou ouvrez un lien déjà reçu.",
     loginError: "Une erreur est survenue. Veuillez réessayer.",
     loginNetworkError: "Erreur réseau. Veuillez réessayer.",
+    logoutError: "La déconnexion n’a pas pu être confirmée. Réessayez avant de quitter cet appareil.",
     loadError: "Impossible de charger votre espace client. Veuillez actualiser la page.",
   },
   de: {
@@ -210,6 +212,7 @@ const JS: Record<Lang, AccountJsCopy> = {
     loginLimited: "Zu viele Anfragen kurz hintereinander. Warten Sie vor einem neuen Versuch oder öffnen Sie einen bereits erhaltenen Link.",
     loginError: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     loginNetworkError: "Netzwerkfehler. Bitte versuchen Sie es erneut.",
+    logoutError: "Die Abmeldung konnte nicht bestätigt werden. Versuchen Sie es erneut, bevor Sie dieses Gerät verlassen.",
     loadError: "Ihr Kundenbereich kann nicht geladen werden. Bitte aktualisieren Sie die Seite.",
   },
   en: {
@@ -238,6 +241,7 @@ const JS: Record<Lang, AccountJsCopy> = {
     loginLimited: "Too many requests in a short time. Wait before trying again, or open a link you have already received.",
     loginError: "An error occurred. Please try again.",
     loginNetworkError: "Network error. Please try again.",
+    logoutError: "Sign-out could not be confirmed. Please try again before leaving this device.",
     loadError: "Unable to load your account. Please refresh the page.",
   },
 };
@@ -947,8 +951,18 @@ const stepsLang = steps[lang];
       });
 
       document.getElementById("logout-btn").addEventListener("click", async function () {
-        await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-        window.location.href = osdAcct.accountPath;
+        const button = this;
+        button.disabled = true;
+        try {
+          const response = await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+          if (!response.ok) throw new Error("logout_unconfirmed");
+          window.location.href = osdAcct.accountPath;
+        } catch {
+          banner.textContent = osdAcct.s.logoutError;
+          banner.className = "account-banner error";
+          banner.scrollIntoView({ block: "nearest" });
+          button.disabled = false;
+        }
       });
 
       load();

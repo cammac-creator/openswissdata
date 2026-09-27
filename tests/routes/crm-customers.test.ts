@@ -10,7 +10,7 @@ describe('Recherche exhaustive des fiches clients privées',()=>{
  let root:string;
  beforeEach(()=>{
   root=mkdtempSync(join(tmpdir(),'osd-clients-'));vi.stubEnv('DATABASE_PATH',join(root,'fictive.sqlite'));vi.stubEnv('ADMIN_EMAILS','OWNER@example.test');vi.stubEnv('CRM_INTERNAL_EMAILS','staff@example.test');vi.stubEnv('BASE_URL','https://www.openswissdata.com');vi.spyOn(Date,'now').mockReturnValue(now);
-  const db=getDb();db.prepare("INSERT INTO customers(id,email,created_at) VALUES(1,'owner@example.test',?)").run(now);db.prepare('INSERT INTO sessions(token,customer_id,expires_at,created_at) VALUES(?,1,?,?)').run('D'.repeat(43),now+86400000,now);
+  const db=getDb();db.prepare("INSERT INTO customers(id,email,created_at) VALUES(1,'owner@example.test',?)").run(now);db.prepare("INSERT INTO sessions(purpose,token,customer_id,expires_at,created_at) VALUES ('session',?,1,?,?)").run('D'.repeat(43),now+86400000,now);
  });
  afterEach(()=>{closeDb();vi.restoreAllMocks();vi.unstubAllEnvs();rmSync(root,{recursive:true,force:true})});
  const search=(body:unknown={},custom=headers)=>createApp().request('/api/admin/crm/customers/search',{method:'POST',headers:custom,body:JSON.stringify(body)});
@@ -82,7 +82,7 @@ describe('Recherche exhaustive des fiches clients privées',()=>{
   const overview=await(await createApp().request('/api/admin/crm/overview',{headers})).json();expect(overview.revenue.customers).toBe(0);
  });
  it('refuse client non administrateur, session expirée, mauvaise origine et format',async()=>{
-  const id=add('sans-role@example.test'),db=getDb();db.prepare('INSERT INTO sessions(token,customer_id,created_at,expires_at) VALUES(?,?,?,?)').run('E'.repeat(43),id,now,now+1000);
+  const id=add('sans-role@example.test'),db=getDb();db.prepare("INSERT INTO sessions(purpose,token,customer_id,created_at,expires_at) VALUES ('session',?,?,?,?)").run('E'.repeat(43),id,now,now+1000);
   let r=await search({}, {...headers,cookie:'osd_session='+'E'.repeat(43)});expect(r.status).toBe(403);expect(await r.json()).toEqual({error:'forbidden'});
   db.prepare('UPDATE sessions SET expires_at=? WHERE token=?').run(now-1,'E'.repeat(43));expect((await search({}, {...headers,cookie:'osd_session='+'E'.repeat(43)})).status).toBe(401);
   for(const custom of [{...headers,origin:''},{...headers,'content-type':'text/plain'},{...headers,'x-osd-csrf':''}]){r=await search({},custom);expect(r.status).toBe(403);expect(await r.json()).toEqual({error:'origin_forbidden'})}

@@ -14,7 +14,7 @@ describe('Agrégats privés des créations Checkout', () => {
     vi.spyOn(Date,'now').mockReturnValue(now);temp=mkdtempSync(join(tmpdir(),'osd-crm-checkouts-'));
     vi.stubEnv('DATABASE_PATH',join(temp,'fictif.sqlite'));vi.stubEnv('ADMIN_EMAILS','owner@example.test');
     const db=getDb();for(const [id,email] of [[1,'owner@example.test'],[2,'buyer@example.test']] as const)db.prepare('INSERT INTO customers(id,email,created_at) VALUES(?,?,?)').run(id,email,now-day);
-    for(const [id,token] of [[1,'D'.repeat(43)],[2,'E'.repeat(43)]] as const)db.prepare('INSERT INTO sessions(token,customer_id,created_at,expires_at) VALUES(?,?,?,?)').run(token,id,now,now+day);
+    for(const [id,token] of [[1,'D'.repeat(43)],[2,'E'.repeat(43)]] as const)db.prepare("INSERT INTO sessions(purpose,token,customer_id,created_at,expires_at) VALUES ('session',?,?,?,?)").run(token,id,now,now+day);
   });
   afterEach(async()=>{await new Promise(r=>setImmediate(r));closeDb();rmSync(temp,{recursive:true,force:true});vi.restoreAllMocks();vi.unstubAllEnvs()});
   function event(overrides:Partial<{basket:string;locale:string;entry:string;kind:string;origin:string;status:number;at:number|string;ua:string|null;hash:string|null;meta:string|null}>={}){

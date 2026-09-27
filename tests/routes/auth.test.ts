@@ -240,7 +240,7 @@ describe("auth routes", () => {
       const db = getDb();
       const cust = db.prepare("SELECT id FROM customers WHERE email = ?").get("alice@example.com") as any;
       const token = "X".repeat(43);
-      db.prepare("INSERT INTO sessions (token, customer_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
+      db.prepare("INSERT INTO sessions(purpose,token, customer_id, expires_at, created_at) VALUES ('session',?, ?, ?, ?)")
         .run(token, cust.id, Date.now() + 3600_000, Date.now());
       closeDb();
       const app = createApp();

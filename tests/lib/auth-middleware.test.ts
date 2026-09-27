@@ -48,7 +48,7 @@ describe("requireAuth middleware", () => {
     const db = getDb();
     const cust = db.prepare("SELECT id FROM customers WHERE email = ?").get("a@b.com") as any;
     const token = "B".repeat(43);
-    db.prepare("INSERT INTO sessions (token, customer_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
+    db.prepare("INSERT INTO sessions(purpose,token, customer_id, expires_at, created_at) VALUES ('session',?, ?, ?, ?)")
       .run(token, cust.id, Date.now() - 1000, Date.now() - 2000);
     closeDb();
     const res = await makeApp().request("/protected", { headers: { cookie: `osd_session=${token}` } });
@@ -59,7 +59,7 @@ describe("requireAuth middleware", () => {
     const db = getDb();
     const cust = db.prepare("SELECT id FROM customers WHERE email = ?").get("a@b.com") as any;
     const token = "C".repeat(43);
-    db.prepare("INSERT INTO sessions (token, customer_id, expires_at, created_at) VALUES (?, ?, ?, ?)")
+    db.prepare("INSERT INTO sessions(purpose,token, customer_id, expires_at, created_at) VALUES ('session',?, ?, ?, ?)")
       .run(token, cust.id, Date.now() + 3600_000, Date.now());
     closeDb();
     const res = await makeApp().request("/protected", { headers: { cookie: `osd_session=${token}` } });

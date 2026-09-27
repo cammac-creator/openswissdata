@@ -1,49 +1,22 @@
-import type { MiddlewareHandler } from "hono";
-import { getDb } from "./db.js";
+import type {MiddlewareHandler} from 'hono';
+import {readAccountSession} from './account-session.js';
 
-/**
- * Authenticates as an admin via:
- *   1. The same `osd_session` cookie used for /account, AND
- *   2. The session's customer.email is in the comma-separated ADMIN_EMAILS env.
- *
- * This piggybacks on the existing magic-link flow — no new credentials to
- * manage, no separate password store. To get admin access, an admin email
- * must be present in the customers table; if it's not, log in once via the
- * /account magic link to create the row.
- */
+/** Session ouverte du compte et adresse présente dans la liste administrative. */
 export const requireAdmin: MiddlewareHandler<{
-  Variables: { customer_id: number; customer_email: string };
+  Variables: {customer_id: number; customer_email: string};
 }> = async (c, next) => {
-  const adminEmails = (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-  if (adminEmails.length === 0) {
-    return c.json({ error: "admin_disabled" }, 503);
+  c.header('Cache-Control', 'private, no-store');
+  const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  if (!adminEmails.length) return c.json({error: 'admin_disabled'}, 503);
+  let session;
+  try { session = readAccountSession(c.req.header('cookie')); }
+  catch {
+    console.warn('[connexion] vérification de session administrative indisponible');
+    return c.json({error: 'temporarily_unavailable'}, 503);
   }
-
-  const cookie = c.req.header("cookie") ?? "";
-  const m = cookie.match(/(?:^|;\s*)osd_session=([A-Za-z0-9_-]{43})/);
-  if (!m) return c.json({ error: "unauthorized" }, 401);
-
-  const db = getDb();
-  const row = db.prepare(`
-    SELECT s.customer_id, s.expires_at, c.email
-    FROM sessions s
-    JOIN customers c ON c.id = s.customer_id
-    WHERE s.token = ?
-  `).get(m[1]) as
-    | { customer_id: number; expires_at: number; email: string }
-    | undefined;
-
-  if (!row || row.expires_at < Date.now()) {
-    return c.json({ error: "unauthorized" }, 401);
-  }
-  if (!adminEmails.includes(row.email.toLowerCase())) {
-    return c.json({ error: "forbidden" }, 403);
-  }
-
-  c.set("customer_id", row.customer_id);
-  c.set("customer_email", row.email);
+  if (!session) return c.json({error: 'unauthorized'}, 401);
+  if (!adminEmails.includes(session.email.toLowerCase())) return c.json({error: 'forbidden'}, 403);
+  c.set('customer_id', session.customer_id);
+  c.set('customer_email', session.email);
   await next();
 };
