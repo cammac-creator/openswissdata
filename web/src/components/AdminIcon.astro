@@ -1,0 +1,18 @@
+---
+type Props = {name:string; class?:string};
+const {name, class:className} = Astro.props;
+// Repères de navigation vectoriels, servis avec la page et sans dépendance externe.
+const paths:Record<string,string> = {
+ overview:'M3 3h7v7H3zM14 3h7v4h-7zM3 14h7v7H3zM14 11h7v10h-7z',
+ clients:'M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM5 21v-3a7 7 0 0 1 14 0v3M20 5a3 3 0 0 1 0 6M22 20v-2a5 5 0 0 0-2-4',
+ mail:'M3 5h18v14H3zM3 6l9 7 9-7',
+ audience:'M4 20h16M6 16v-5M12 16V5M18 16V8',
+ visibility:'M15 9a6 6 0 1 1-12 0 6 6 0 0 1 12 0ZM13 13l8 8',
+ data:'M12 3 2 8l10 5 10-5-10-5ZM2 12l10 5 10-5M2 16l10 5 10-5',
+ operations:'m13 2-9 12h7l-1 8 10-12h-7l1-8Z',
+ more:'M4 4h5v5H4zM15 4h5v5h-5zM4 15h5v5H4zM15 15h5v5h-5z',
+ refresh:'M20 8a8 8 0 1 0 0 8M20 3v5h-5',
+ arrow:'M5 12h14M14 7l5 5-5 5',
+};
+---
+<svg class={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d={paths[name] ?? paths.more}/></svg>
