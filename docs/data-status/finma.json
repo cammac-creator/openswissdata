@@ -1,21 +1,21 @@
 {
-  "version": "2026.09.26",
-  "collected_on": "2026-09-26",
+  "version": "2026.09.27",
+  "collected_on": "2026-09-27",
   "registry_rows": 2943,
   "unique_uids": 2748,
   "warning_rows": 2345,
   "populated_fields": {
     "uid": 2858,
-    "lei": 783,
+    "lei": 784,
     "licence_date": 0,
     "status": 0,
-    "canton": 674,
+    "canton": 675,
     "city": 2943,
-    "address": 783
+    "address": 784
   },
   "history": {
-    "available_from": "2026-06-27",
-    "available_until": "2026-09-26",
+    "available_from": "2026-06-28",
+    "available_until": "2026-09-27",
     "snapshots": 61,
     "gaps": [
       {
