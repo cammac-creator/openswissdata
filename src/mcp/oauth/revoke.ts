@@ -15,6 +15,7 @@ import { hashToken } from "./crypto.js";
 import { findClientById, revokeTokenByHash } from "./store.js";
 import { timingSafeEqual } from "node:crypto";
 import { readOAuthForm } from './input.js';
+import {parseClientCredentials, rejectClientAuth} from './client-auth.js';
 
 export const revokeRoute = new Hono();
 
@@ -30,41 +31,21 @@ revokeRoute.post("/revoke", async (c) => {
   const body = await readOAuthForm(c);
   if (!body) return c.json({error: 'invalid_request'}, 400);
 
-  // Client auth (Basic OR body fields)
-  let cid = "";
-  let secret = "";
-  const ah = c.req.header("authorization") ?? c.req.header("Authorization");
-  if (ah?.startsWith("Basic ")) {
-    try {
-      const decoded = Buffer.from(ah.slice(6), "base64").toString("utf8");
-      const sep = decoded.indexOf(":");
-      if (sep > 0) {
-        cid = decoded.slice(0, sep);
-        secret = decoded.slice(sep + 1);
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-  if (!cid && typeof body.client_id === "string") cid = body.client_id;
-  if (!secret && typeof body.client_secret === "string") secret = body.client_secret;
-
-  if (!cid || !secret) {
-    return c.json({ error: "invalid_client" }, 401);
-  }
+  const parsedAuth = parseClientCredentials(c.req.header('authorization'), body);
+  if (!parsedAuth.ok) return rejectClientAuth(c, parsedAuth.error);
+  const {client_id: cid, client_secret: secret} = parsedAuth.credentials;
 
   const client = findClientById(cid);
   if (!client || client.revoked_at !== null) {
-    return c.json({ error: "invalid_client" }, 401);
+    return rejectClientAuth(c);
   }
   if (!constantTimeStrEq(hashToken(secret), client.client_secret_hash)) {
-    return c.json({ error: "invalid_client" }, 401);
+    return rejectClientAuth(c);
   }
 
   const token = body.token;
-  if (typeof token === "string" && token.length > 0) {
-    revokeTokenByHash(hashToken(token), cid);
-  }
+  if (typeof token !== 'string' || !token.length) return c.json({error: 'invalid_request'}, 400);
+  revokeTokenByHash(hashToken(token), cid);
   // RFC 7009: always 200 (don't leak token validity).
   return c.body(null, 200);
 });

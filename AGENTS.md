@@ -202,3 +202,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 ## Entrées OAuth (27.09.2026)
 - Le routeur compte les octets réels des POST avant tout parseur, plafond 16 Kio et annulation du flux trop long. Ne pas revenir à la seule valeur Content-Length. En-têtes no-store/no-cache sur les deux montages OAuth, inscription et autorisation comprises.
 - Utiliser readOAuthForm pour refuser un formulaire illisible sans diagnostic brut. Les deux outils sémantiques rendent un message fixe si index/modèle indisponible ; aucun message fournisseur ou chemin interne. Voir docs/entrees-oauth.md ; les limites de fréquence, durée de réception et redirections restent distinctes.
+
+## Authentification des clients OAuth (27.09.2026)
+- Jeton et révocation utilisent parseClientCredentials : Basic ou formulaire, jamais un assemblage ni un repli après en-tête invalide. Défi Basic sur401 ; ambiguïté400. Respecter encodage de formulaire par composant, Base64 canonique et UTF-8 strict.
+- readOAuthForm refuse paramètres répétés, tableaux et fichiers avant effet. Garder les deux formats de formulaire valides. Aucun test ne doit utiliser un client réel ; vérifier code et jetons inchangés après refus. Voir docs/authentification-client-oauth.md et les réserves d’identité/redirection/abonnement encore ouvertes.

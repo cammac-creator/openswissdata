@@ -15,11 +15,12 @@
  * yet.
  */
 
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { timingSafeEqual } from "node:crypto";
 import { isValidScope, parseScopes, serializeScopes } from './scopes.js';
 import { getDb, SQLITE_BUSY_TIMEOUT_MS } from '../../lib/db.js';
 import { readOAuthForm } from './input.js';
+import {parseClientCredentials, rejectClientAuth} from './client-auth.js';
 import {
   generateRandomToken,
   hashToken,
@@ -37,38 +38,6 @@ import {
 } from "./store.js";
 
 export const tokenRoute = new Hono();
-
-interface ParsedClientAuth {
-  client_id: string;
-  client_secret: string;
-}
-
-function parseClientAuth(c: {
-  req: { header: (n: string) => string | undefined };
-}, body: Record<string, unknown>): ParsedClientAuth | null {
-  // Basic auth first.
-  const authHeader = c.req.header("authorization") ?? c.req.header("Authorization");
-  if (authHeader?.startsWith("Basic ")) {
-    try {
-      const decoded = Buffer.from(authHeader.slice(6), "base64").toString("utf8");
-      const sep = decoded.indexOf(":");
-      if (sep > 0) {
-        return {
-          client_id: decoded.slice(0, sep),
-          client_secret: decoded.slice(sep + 1),
-        };
-      }
-    } catch {
-      /* fall through */
-    }
-  }
-  const cid = body.client_id;
-  const sec = body.client_secret;
-  if (typeof cid === "string" && typeof sec === "string") {
-    return { client_id: cid, client_secret: sec };
-  }
-  return null;
-}
 
 function constantTimeStrEq(a: string, b: string): boolean {
   const ba = Buffer.from(a, "utf8");
@@ -102,7 +71,7 @@ tokenRoute.post("/token", async (c) => {
     }
   }
   return c.json(
-    { error: "unsupported_grant_type", error_description: `grant_type=${grant} not supported` },
+    { error: "unsupported_grant_type" },
     400,
   );
 });
@@ -117,13 +86,14 @@ function reportTokenFailure(error: unknown, reason?: 'restore'): void {
   } catch { /* Un diagnostic facultatif ne remplace pas le refus prudent. */ }
 }
 
-function handleCode(c: any, body: Record<string, unknown>): Response {
+function handleCode(c: Context, body: Record<string, unknown>): Response {
   const code = String(body.code ?? "");
   const verifier = String(body.code_verifier ?? "");
   const redirect_uri = String(body.redirect_uri ?? "");
 
-  const auth = parseClientAuth(c, body);
-  if (!auth) return c.json({ error: "invalid_client", error_description: "client credentials missing" }, 401);
+  const parsedAuth = parseClientCredentials(c.req.header('authorization'), body);
+  if (!parsedAuth.ok) return rejectClientAuth(c, parsedAuth.error);
+  const auth = parsedAuth.credentials;
 
   if (!code || !verifier) {
     return c.json({ error: "invalid_request", error_description: "code + code_verifier required" }, 400);
@@ -133,11 +103,11 @@ function handleCode(c: any, body: Record<string, unknown>): Response {
   }
 
   const client = findClientById(auth.client_id);
-  if (!client || client.revoked_at) {
-    return c.json({ error: "invalid_client" }, 401);
+  if (!client || client.revoked_at !== null) {
+    return rejectClientAuth(c);
   }
   if (!constantTimeStrEq(hashToken(auth.client_secret), client.client_secret_hash)) {
-    return c.json({ error: "invalid_client", error_description: "bad client_secret" }, 401);
+    return rejectClientAuth(c);
   }
 
   const stored = findAuthCode(code);
@@ -172,18 +142,19 @@ function handleCode(c: any, body: Record<string, unknown>): Response {
   });
 }
 
-function handleRefresh(c: any, body: Record<string, unknown>): Response {
+function handleRefresh(c: Context, body: Record<string, unknown>): Response {
   const refresh = String(body.refresh_token ?? "");
-  const auth = parseClientAuth(c, body);
-  if (!auth) return c.json({ error: "invalid_client", error_description: "client credentials missing" }, 401);
+  const parsedAuth = parseClientCredentials(c.req.header('authorization'), body);
+  if (!parsedAuth.ok) return rejectClientAuth(c, parsedAuth.error);
+  const auth = parsedAuth.credentials;
   if (!refresh) return c.json({ error: "invalid_request", error_description: "refresh_token required" }, 400);
 
   const client = findClientById(auth.client_id);
-  if (!client || client.revoked_at) {
-    return c.json({ error: "invalid_client" }, 401);
+  if (!client || client.revoked_at !== null) {
+    return rejectClientAuth(c);
   }
   if (!constantTimeStrEq(hashToken(auth.client_secret), client.client_secret_hash)) {
-    return c.json({ error: "invalid_client" }, 401);
+    return rejectClientAuth(c);
   }
 
   const refreshHash = hashToken(refresh);

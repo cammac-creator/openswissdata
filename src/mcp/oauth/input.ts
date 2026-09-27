@@ -42,5 +42,9 @@ export const oauthInput: MiddlewareHandler = async (c, next) => {
 
 /** Une erreur de format ne doit pas devenir un diagnostic technique public. */
 export async function readOAuthForm(c: Context): Promise<Record<string, unknown> | null> {
-  try { return await c.req.parseBody(); } catch { return null; }
+  try {
+    const body = await c.req.parseBody({all: true});
+    // Les paramètres répétés et fichiers ne sont pas des valeurs OAuth uniques.
+    return Object.values(body).every(value => typeof value === 'string') ? body : null;
+  } catch { return null; }
 }
