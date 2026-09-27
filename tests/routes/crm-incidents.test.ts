@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -5,7 +6,7 @@ import {join} from 'node:path';
 import {getDb,closeDb} from '../../src/lib/db.js';
 import {createApp} from '../../src/index.js';
 import {observeDeliveryIncident} from '../../src/lib/delivery-incidents.js';
-const now=Date.parse('2026-09-26T12:00:00Z'),cookie='osd_session='+'D'.repeat(43);
+const now=Date.parse('2026-09-26T12:00:00Z'),cookie='__Host-osd_session='+'D'.repeat(43);
 describe('Consultation privée du registre de livraison',()=>{
  let root:string;
  beforeEach(()=>{
@@ -35,7 +36,7 @@ describe('Consultation privée du registre de livraison',()=>{
  });
  it.each(['/incidents?state=all','/incidents?page=0','/incidents?page=1.5','/incidents?page=1000001','/incidents?extra=true','/incidents/1/events?before=0','/incidents/1/events?before=x','/incidents/1/events?unknown=1','/incidents/abc/events'])('refuse les paramètres invalides %s',async path=>expect((await read(path)).status).toBe(400));
  it('refuse la lecture anonyme et celle d’un client non administrateur',async()=>{
-  for(const path of ['/incidents','/incidents/1/events']){expect((await read(path,'')).status).toBe(401);expect((await read(path,'osd_session='+'E'.repeat(43))).status).toBe(403)}
+  for(const path of ['/incidents','/incidents/1/events']){expect((await read(path,'')).status).toBe(401);expect((await read(path,'__Host-osd_session='+'E'.repeat(43))).status).toBe(403)}
  });
  it('une panne du registre laisse les autres données du bureau accessibles',async()=>{
   getDb().exec('DROP TABLE delivery_incident_events; DROP TABLE delivery_incidents');vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response('{}',{status:503})));
@@ -52,7 +53,7 @@ describe('Consultation privée du registre de livraison',()=>{
  });
  it('protège la création par session, origine et CSRF avant toute écriture',async()=>{
   vi.stubEnv('BASE_URL','https://www.openswissdata.com');add(1);observeDeliveryIncident(getDb(),1,now);
-  for(const [headers,status] of [[{cookie:''},401],[{cookie:'osd_session='+'E'.repeat(43)},403],[{origin:'https://example.test'},403],[{'x-osd-csrf':''},403]] as const)expect((await write(1,{},headers)).status).toBe(status);
+  for(const [headers,status] of [[{cookie:''},401],[{cookie:'__Host-osd_session='+'E'.repeat(43)},403],[{origin:'https://example.test'},403],[{'x-osd-csrf':''},403]] as const)expect((await write(1,{},headers)).status).toBe(status);
   expect((await write(1,{due_on:'2026-02-31'})).status).toBe(400);expect((await write(1,{created_by:2})).status).toBe(400);expect((await write(999)).status).toBe(404);
   expect(getDb().prepare('SELECT COUNT(*) n FROM crm_tasks').get()).toEqual({n:0});
  });

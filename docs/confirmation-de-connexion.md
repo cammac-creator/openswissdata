@@ -40,7 +40,7 @@ Recette sur comptes fictifs uniquement : GET/HEAD répétables, aucune session t
 
 Ce parcours empêche la connexion silencieuse par GET et les POST tiers sans preuve du navigateur. Il ne prouve pas l’identité civile, ne fournit pas de MFA et ne protège pas d’une personne qui confirme volontairement un lien transmis par un fraudeur malgré l’adresse et l’avertissement. Un robot qui conserve les cookies, extrait la preuve et soumet réellement le formulaire peut imiter un clic ; la garantie de prévisualisation concerne GET/HEAD, pas toute automatisation possible.
 
-Le cookie de session historique osd_session ne porte pas encore le préfixe __Host : protection contre fixation par sous-domaine frère et migration des anciens cookies restent à traiter avant de fonder le consentement MCP sur ce cookie. La confirmation remplace le cookie courant, sans révocation globale des autres sessions.
+Depuis le lot51, le cookie de session est __Host-osd_session en HTTPS, sans repli vers l’ancien osd_session. La reconnexion ferme la session exacte remplacée, sans révoquer les autres appareils. Les anciens navigateurs doivent demander un nouveau lien. Voir [cookies et transition de session](cookies-et-transition-de-session.md) pour la migration et ses limites.
 
 Le lien demeure présent dans l’URL originale du mail et les jetons restent stockés comme auparavant dans sessions. Hachage en base, gestion des appareils, révocation globale, file durable des mails et récupération d’une réponse perdue restent distincts. Les protections de connexion ne remplacent pas le consentement MCP : application, titulaire et payeur restent à relier avec une demande OAuth immuable et authentifiée. Les abonnements restent fermés.
 

@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 const { retrieve } = vi.hoisted(() => ({ retrieve: vi.fn() }));
 vi.mock("../../src/lib/stripe.js", () => ({ stripe: () => ({ paymentIntents: { retrieve } }) }));
@@ -40,7 +41,7 @@ describe("account routes", () => {
     db.prepare("UPDATE orders SET stripe_payment_intent='pi_own' WHERE customer_id=?").run(custId);
     retrieve.mockResolvedValue({latest_charge:{receipt_url:"https://pay.stripe.com/receipts/test"}});
     const app=createApp();
-    const headers={cookie:`osd_session=${token}`};
+    const headers={cookie:`__Host-osd_session=${token}`};
     const ownId=(db.prepare("SELECT id FROM orders WHERE customer_id=?").get(custId) as {id:number}).id;
     const own=await app.request(`/api/account/orders/${ownId}/receipt`,{headers});
     expect(own.status).toBe(200); expect((await own.json()).url).toContain("pay.stripe.com");
@@ -60,7 +61,7 @@ describe("account routes", () => {
     db.prepare("INSERT INTO orders(customer_id,stripe_session_id,amount_chf,items_json,created_at) VALUES(?, 'cs_foreign', 10, '[]', ?)").run(foreign.lastInsertRowid,Date.now());
     const app=createApp();
     expect((await app.request('/api/account/orders')).status).toBe(401);
-    const body=await (await app.request('/api/account/orders',{headers:{cookie:`osd_session=${token}`}})).json();
+    const body=await (await app.request('/api/account/orders',{headers:{cookie:`__Host-osd_session=${token}`}})).json();
     expect(body.orders).toHaveLength(1);
     expect(body.orders[0].legal).toMatchObject({status:"accepted",locale:"en",url:"/en/legal/versions/2026-09-26/cgv"});
     expect(body.orders[0].legal.event_id).toBeUndefined();
@@ -68,7 +69,7 @@ describe("account routes", () => {
 
   it("GET /api/account returns customer info when authenticated", async () => {
     const app = createApp();
-    const res = await app.request("/api/account", { headers: { cookie: `osd_session=${token}` } });
+    const res = await app.request("/api/account", { headers: { cookie: `__Host-osd_session=${token}` } });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.customer.email).toBe("bob@example.com");
@@ -82,7 +83,7 @@ describe("account routes", () => {
 
   it("GET /api/account/datasets returns entitled datasets only", async () => {
     const app = createApp();
-    const res = await app.request("/api/account/datasets", { headers: { cookie: `osd_session=${token}` } });
+    const res = await app.request("/api/account/datasets", { headers: { cookie: `__Host-osd_session=${token}` } });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.datasets).toHaveLength(1);

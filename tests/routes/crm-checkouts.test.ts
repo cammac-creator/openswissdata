@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -9,7 +10,7 @@ import * as checkouts from '../../src/lib/checkout-measures.js';
 
 describe('Agrégats privés des créations Checkout', () => {
   const now=Date.parse('2026-10-26T00:30:00Z'),day=86400000,hash='v2:'+'a'.repeat(24),other='v2:'+'b'.repeat(24);
-  const headers={cookie:'osd_session='+'D'.repeat(43)};let temp:string;
+  const headers={cookie:'__Host-osd_session='+'D'.repeat(43)};let temp:string;
   beforeEach(()=>{
     vi.spyOn(Date,'now').mockReturnValue(now);temp=mkdtempSync(join(tmpdir(),'osd-crm-checkouts-'));
     vi.stubEnv('DATABASE_PATH',join(temp,'fictif.sqlite'));vi.stubEnv('ADMIN_EMAILS','owner@example.test');
@@ -24,7 +25,7 @@ describe('Agrégats privés des créations Checkout', () => {
   }
   const read=(days=30)=>checkouts.readCheckoutMeasures(getDb(),crmPeriod(days,now),now);
   it('reste réservé à l’administrateur, sans URL, client ni identifiant de session dans la sortie',async()=>{
-    event();const app=createApp(),path='/api/admin/crm/audience';expect((await app.request(path)).status).toBe(401);expect((await app.request(path,{headers:{cookie:'osd_session='+'E'.repeat(43)}})).status).toBe(403);
+    event();const app=createApp(),path='/api/admin/crm/audience';expect((await app.request(path)).status).toBe(401);expect((await app.request(path,{headers:{cookie:'__Host-osd_session='+'E'.repeat(43)}})).status).toBe(403);
     const r=await app.request(path,{headers});expect(r.status).toBe(200);expect(r.headers.get('cache-control')).toBe('private, no-store');const b=await r.json();expect(b.checkouts.total.sessions).toBe(1);expect(JSON.stringify(b.checkouts)).not.toMatch(/@|cs_live_|https:|visitor_hash|customer_id|v2:|token/);
   });
   it('réconcilie paniers, langues et points d’entrée sans compter les lignes comme des sessions',()=>{

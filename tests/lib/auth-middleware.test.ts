@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Hono } from "hono";
 import { requireAuth } from "../../src/lib/auth-middleware.js";
@@ -34,13 +35,13 @@ describe("requireAuth middleware", () => {
   });
 
   it("returns 401 when cookie is malformed", async () => {
-    const res = await makeApp().request("/protected", { headers: { cookie: "osd_session=short" } });
+    const res = await makeApp().request("/protected", { headers: { cookie: "__Host-osd_session=short" } });
     expect(res.status).toBe(401);
   });
 
   it("returns 401 when session not found", async () => {
     const fakeToken = "A".repeat(43);
-    const res = await makeApp().request("/protected", { headers: { cookie: `osd_session=${fakeToken}` } });
+    const res = await makeApp().request("/protected", { headers: { cookie: `__Host-osd_session=${fakeToken}` } });
     expect(res.status).toBe(401);
   });
 
@@ -51,7 +52,7 @@ describe("requireAuth middleware", () => {
     db.prepare("INSERT INTO sessions(purpose,token, customer_id, expires_at, created_at) VALUES ('session',?, ?, ?, ?)")
       .run(token, cust.id, Date.now() - 1000, Date.now() - 2000);
     closeDb();
-    const res = await makeApp().request("/protected", { headers: { cookie: `osd_session=${token}` } });
+    const res = await makeApp().request("/protected", { headers: { cookie: `__Host-osd_session=${token}` } });
     expect(res.status).toBe(401);
   });
 
@@ -62,7 +63,7 @@ describe("requireAuth middleware", () => {
     db.prepare("INSERT INTO sessions(purpose,token, customer_id, expires_at, created_at) VALUES ('session',?, ?, ?, ?)")
       .run(token, cust.id, Date.now() + 3600_000, Date.now());
     closeDb();
-    const res = await makeApp().request("/protected", { headers: { cookie: `osd_session=${token}` } });
+    const res = await makeApp().request("/protected", { headers: { cookie: `__Host-osd_session=${token}` } });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.cid).toBe(cust.id);

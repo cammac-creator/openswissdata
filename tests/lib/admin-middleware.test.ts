@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Hono } from "hono";
 import { requireAdmin } from "../../src/lib/admin-middleware.js";
@@ -57,7 +58,7 @@ describe("requireAdmin middleware", () => {
     const token = "A".repeat(43);
     seedSession("user@osd.com", token, 60_000);
     const res = await makeApp().request("/admin-only", {
-      headers: { cookie: `osd_session=${token}` },
+      headers: { cookie: `__Host-osd_session=${token}` },
     });
     expect(res.status).toBe(403);
   });
@@ -67,7 +68,7 @@ describe("requireAdmin middleware", () => {
     const token = "B".repeat(43);
     const cid = seedSession("admin@osd.com", token, 60_000);
     const res = await makeApp().request("/admin-only", {
-      headers: { cookie: `osd_session=${token}` },
+      headers: { cookie: `__Host-osd_session=${token}` },
     });
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -80,7 +81,7 @@ describe("requireAdmin middleware", () => {
     const token = "C".repeat(43);
     seedSession("admin@osd.com", token, 60_000);
     const res = await makeApp().request("/admin-only", {
-      headers: { cookie: `osd_session=${token}` },
+      headers: { cookie: `__Host-osd_session=${token}` },
     });
     expect(res.status).toBe(200);
   });

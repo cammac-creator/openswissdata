@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
@@ -52,7 +53,7 @@ describe("GET /api/admin/stats", () => {
   it("ignore les préfixes voisins des modes Stripe dans les deux totaux", async () => {
     const db=getDb(),insert=db.prepare("INSERT INTO orders(customer_id,stripe_session_id,amount_chf,items_json,status,created_at) VALUES(?,?,99999,'[]','paid',?)");
     for(const value of ['csXliveXfictif','csXtestXfictif','CS_LIVE_fictif','CS_TEST_fictif'])insert.run(cid,value,Date.now());
-    const r=await createApp().request('/api/admin/stats',{headers:{cookie:`osd_session=${token}`}});expect(r.status).toBe(200);const body=await r.json();
+    const r=await createApp().request('/api/admin/stats',{headers:{cookie:`__Host-osd_session=${token}`}});expect(r.status).toBe(200);const body=await r.json();
     for(const totals of [body.revenue,body.revenueAllTime])expect(totals).toMatchObject({orders_count:1,test_orders_count:1,revenue_chf:29900,test_revenue_chf:29900});
   });
 
@@ -65,7 +66,7 @@ describe("GET /api/admin/stats", () => {
   it("returns full payload for an authenticated admin", async () => {
     const app = createApp();
     const res = await app.request("/api/admin/stats?days=30", {
-      headers: { cookie: `osd_session=${token}` },
+      headers: { cookie: `__Host-osd_session=${token}` },
     });
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -90,20 +91,20 @@ describe("GET /api/admin/stats", () => {
   it('sépare aussi les déclarations de l’ancienne route statistique',async()=>{
     const db=getDb(),now=Date.now();db.prepare("INSERT INTO events(kind,name,origin,ua_class,meta_json,ts) VALUES('custom','mcp_tool_call','client','human_authenticated','{\"admin\":false,\"client_id\":\"fictif\"}',?)").run(now);
     db.prepare("INSERT INTO events(kind,name,origin,ts) VALUES('conversion','paiement_fictif','client',?)").run(now);
-    const r=await createApp().request('/api/admin/stats',{headers:{cookie:`osd_session=${token}`}});const body=await r.json();
+    const r=await createApp().request('/api/admin/stats',{headers:{cookie:`__Host-osd_session=${token}`}});const body=await r.json();
     expect(body.mcpHuman7d.human_calls).toBe(0);expect(body.customEvents.find((x:{name:string})=>x.name==='paiement_fictif')).toMatchObject({origin:'client',count:1});expect(body.customEvents.find((x:{name:string})=>x.name==='cta_pricing').origin).toBe('legacy');expect(body.measurement_notes.historical_origin).toContain('aucune conversion');
   });
 
   it('présente un pays historique invalide comme inconnu sans réécrire sa trace',async()=>{
     const raw='<img src=x onerror=alert(1)>';getDb().prepare('UPDATE events SET country=?').run(raw);
-    const r=await createApp().request('/api/admin/stats',{headers:{cookie:`osd_session=${token}`}});const body=await r.json();
+    const r=await createApp().request('/api/admin/stats',{headers:{cookie:`__Host-osd_session=${token}`}});const body=await r.json();
     expect(body.topCountries).toEqual([{country:'??',hits:1}]);expect(getDb().prepare("SELECT country FROM events WHERE kind='api_request'").get()).toEqual({country:raw});
   });
 
   it("clamps days param to allowed range", async () => {
     const app = createApp();
     const res = await app.request("/api/admin/stats?days=99999", {
-      headers: { cookie: `osd_session=${token}` },
+      headers: { cookie: `__Host-osd_session=${token}` },
     });
     const body = await res.json();
     expect(body.window.days).toBe(30); // fallback
@@ -142,7 +143,7 @@ describe("GET /api/admin/stats", () => {
 
     const app = createApp();
     const res = await app.request("/api/admin/stats?days=30", {
-      headers: { cookie: `osd_session=${token}` },
+      headers: { cookie: `__Host-osd_session=${token}` },
     });
     expect(res.status).toBe(200);
     const body = await res.json();

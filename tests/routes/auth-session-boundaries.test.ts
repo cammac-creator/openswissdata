@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import {mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -19,7 +20,7 @@ function seed(purpose='session', duration=SESSION_TTL_MS, token=TOKEN, expiry=NO
 }
 const verify=(token=TOKEN,extra='')=>confirmEmailLink(app,token,extra);
 const rows=()=>getDb().prepare('SELECT * FROM sessions ORDER BY token').all();
-const cookie=(value=TOKEN)=>({cookie:'osd_session='+value});
+const cookie=(value=TOKEN)=>({cookie:'__Host-osd_session='+value, origin:'https://www.openswissdata.com'});
 const protectedPaths=['/api/account','/api/admin/stats'];
 
 beforeEach(()=>{
@@ -61,17 +62,17 @@ describe('Frontières entre lien reçu et session ouverte',()=>{
  it.each([TOKEN+'x',TOKEN+'=',TOKEN.slice(0,-1),'"'+TOKEN+'"',TOKEN+'%00',TOKEN+',autre=x'])('refuse le cookie de forme ambiguë %s',async value=>{
   seed();for(const path of protectedPaths)expect((await app.request(path,{headers:cookie(value)})).status).toBe(401);
  });
- it.each(['osd_session='+TOKEN+'; osd_session='+TOKEN,'osd_session='+TOKEN+'; osd_session=bad',
-  'osd_session=bad; osd_session='+TOKEN,'osd_session='+TOKEN+'; osd_session',
-  'osd_session='+TOKEN+'; osd_session =bad'])('refuse les cookies répétés sans choisir un côté',async value=>{
+ it.each(['__Host-osd_session='+TOKEN+'; __Host-osd_session='+TOKEN,'__Host-osd_session='+TOKEN+'; __Host-osd_session=bad',
+  '__Host-osd_session=bad; __Host-osd_session='+TOKEN,'__Host-osd_session='+TOKEN+'; __Host-osd_session',
+  '__Host-osd_session='+TOKEN+'; __Host-osd_session =bad'])('refuse les cookies répétés sans choisir un côté',async value=>{
   seed();const before=rows();for(const path of protectedPaths)expect((await app.request(path,{headers:{cookie:value}})).status).toBe(401);
-  await app.request('/api/auth/logout',{method:'POST',headers:{cookie:value}});expect(rows()).toEqual(before);
+  await app.request('https://www.openswissdata.com/api/auth/logout',{method:'POST',headers:{cookie:value,origin:'https://www.openswissdata.com'}});expect(rows()).toEqual(before);
  });
  it('accepte le cookie complet au milieu des autres cookies',async()=>{
-  seed();expect((await app.request('/api/account',{headers:{cookie:'a=1; osd_session='+TOKEN+'; b=2'}})).status).toBe(200);
+  seed();expect((await app.request('/api/account',{headers:{cookie:'a=1; __Host-osd_session='+TOKEN+'; b=2'}})).status).toBe(200);
  });
  it('un cookie lien ne permet pas de supprimer le lien par logout',async()=>{
-  seed('magic_link',MAGIC_LINK_TTL_MS);const before=rows();await app.request('/api/auth/logout',{method:'POST',headers:cookie()});expect(rows()).toEqual(before);
+  seed('magic_link',MAGIC_LINK_TTL_MS);const before=rows();await app.request('https://www.openswissdata.com/api/auth/logout',{method:'POST',headers:cookie()});expect(rows()).toEqual(before);
  });
  it.each(['&token='+TOKEN,'&token=bad','&return_to=admin&return_to=account'])('refuse la query ambiguë sans consommer le lien',async extra=>{
   seed('magic_link',MAGIC_LINK_TTL_MS);const before=rows();const r=await verify(TOKEN,extra);expect(r.headers.get('location')).toBe('/account?auth=invalid');expect(r.headers.get('set-cookie')).toBeNull();expect(rows()).toEqual(before);
@@ -123,11 +124,11 @@ describe('Échange atomique et pannes de stockage',()=>{
  });
  it('une panne de déconnexion ne prétend pas révoquer le cookie',async()=>{
   seed();const before=rows();getDb().exec("CREATE TRIGGER panne_fictive BEFORE DELETE ON sessions BEGIN SELECT RAISE(ABORT,'detail-prive-fictif'); END");
-  const r=await app.request('/api/auth/logout',{method:'POST',headers:cookie()});expect(r.status).toBe(503);expect(r.headers.get('set-cookie')).toBeNull();expect(rows()).toEqual(before);
+  const r=await app.request('https://www.openswissdata.com/api/auth/logout',{method:'POST',headers:cookie()});expect(r.status).toBe(503);expect(r.headers.get('set-cookie')).toBeNull();expect(rows()).toEqual(before);
  });
  it('une suppression ignorée ne prétend pas réussir la déconnexion',async()=>{
   seed();const before=rows();getDb().exec("CREATE TRIGGER panne_fictive BEFORE DELETE ON sessions BEGIN SELECT RAISE(IGNORE); END");
-  const r=await app.request('/api/auth/logout',{method:'POST',headers:cookie()});expect(r.status).toBe(503);expect(r.headers.get('set-cookie')).toBeNull();expect(rows()).toEqual(before);
+  const r=await app.request('https://www.openswissdata.com/api/auth/logout',{method:'POST',headers:cookie()});expect(r.status).toBe(503);expect(r.headers.get('set-cookie')).toBeNull();expect(rows()).toEqual(before);
  });
  it.each(['session','magic_link'])('refuse un jeton %s créé dans le futur',async kind=>{
   seed(kind,kind==='session'?SESSION_TTL_MS:MAGIC_LINK_TTL_MS,TOKEN,NOW+(kind==='session'?SESSION_TTL_MS:MAGIC_LINK_TTL_MS)+1);

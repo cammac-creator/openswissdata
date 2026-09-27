@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 import { mkdtempSync,rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -5,7 +6,7 @@ import { join } from 'node:path';
 import { getDb,closeDb } from '../../src/lib/db.js';
 import { createApp } from '../../src/index.js';
 const now=Date.parse('2026-09-25T22:30:00Z');
-const headers={cookie:'osd_session='+'D'.repeat(43),origin:'https://www.openswissdata.com','content-type':'application/json','x-osd-csrf':'dashboard'};
+const headers={cookie:'__Host-osd_session='+'D'.repeat(43),origin:'https://www.openswissdata.com','content-type':'application/json','x-osd-csrf':'dashboard'};
 describe('Parcours complet des tâches ouvertes et clôturées',()=>{
  let root:string;
  beforeEach(()=>{root=mkdtempSync(join(tmpdir(),'osd-taches-pages-'));vi.stubEnv('DATABASE_PATH',join(root,'fictive.sqlite'));vi.stubEnv('ADMIN_EMAILS','owner@example.test');vi.stubEnv('BASE_URL','https://www.openswissdata.com');vi.spyOn(Date,'now').mockReturnValue(now);const db=getDb();db.prepare("INSERT INTO customers(id,email,created_at) VALUES(1,'owner@example.test',?),(2,'client@example.test',?)").run(now,now);db.prepare("INSERT INTO sessions(purpose,token,customer_id,expires_at,created_at) VALUES ('session',?,1,?,?)").run('D'.repeat(43),now+86400000,now)});
@@ -65,7 +66,7 @@ describe('Parcours complet des tâches ouvertes et clôturées',()=>{
  });
  it.each([{page:0},{page:1000001},{page:2.4},{page:'2'},{status:'all'},{q:'x'.repeat(181)},{q:'\u0301'},{q:'x\u0000y'},{unknown:true}])('refuse un filtre non prévu %j',async body=>expect((await search(body)).status).toBe(400));
  it('garde les contrôles administrateur, JSON, origine, CSRF, taille et annulation',async()=>{
-  expect((await search({}, {...headers,cookie:''})).status).toBe(401);getDb().prepare("INSERT INTO sessions(purpose,token,customer_id,created_at,expires_at) VALUES ('session',?,2,?,?)").run('E'.repeat(43),now,now+1000);let r=await search({}, {...headers,cookie:'osd_session='+'E'.repeat(43)});expect(r.status).toBe(403);expect(await r.json()).toEqual({error:'forbidden'});
+  expect((await search({}, {...headers,cookie:''})).status).toBe(401);getDb().prepare("INSERT INTO sessions(purpose,token,customer_id,created_at,expires_at) VALUES ('session',?,2,?,?)").run('E'.repeat(43),now,now+1000);let r=await search({}, {...headers,cookie:'__Host-osd_session='+'E'.repeat(43)});expect(r.status).toBe(403);expect(await r.json()).toEqual({error:'forbidden'});
   for(const custom of [{...headers,origin:''},{...headers,'x-osd-csrf':''},{...headers,'content-type':'text/plain'}]){r=await search({},custom);expect(r.status).toBe(403);expect(await r.json()).toEqual({error:'origin_forbidden'})}
   expect((await search({q:'x'.repeat(17000)})).status).toBe(413);r=await createApp().request('/api/admin/crm/tasks/search',{method:'POST',headers,body:'{invalide'});expect(r.status).toBe(400);
   const controller=new AbortController();controller.abort();expect((await createApp().fetch(new Request('https://www.openswissdata.com/api/admin/crm/tasks/search',{method:'POST',headers,body:'{}',signal:controller.signal}))).status).toBe(499);

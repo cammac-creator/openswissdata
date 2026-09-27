@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -41,11 +42,11 @@ describe('Résultat vérifiable du nettoyage planifié', () => {
     db.prepare("INSERT INTO sessions(purpose,token,customer_id,expires_at,created_at) VALUES ('session',?,1,?,?)").run(token, now + 60_000, now);
     db.prepare("INSERT INTO operation_checks(name,checked_at,details_json) VALUES('cleanup',?,'{')").run(now);
     vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 503 })));
-    const response = await createApp().request('/api/admin/crm/operations', { headers: { cookie: `osd_session=${token}` } });
+    const response = await createApp().request('/api/admin/crm/operations', { headers: { cookie: `__Host-osd_session=${token}` } });
     expect(response.status).toBe(200);
     expect((await response.json()).cleanup).toBeNull();
     db.exec('DROP TABLE operation_checks');
-    const missing = await createApp().request('/api/admin/crm/operations', { headers: { cookie: `osd_session=${token}` } });
+    const missing = await createApp().request('/api/admin/crm/operations', { headers: { cookie: `__Host-osd_session=${token}` } });
     expect(missing.status).toBe(200);
     expect((await missing.json()).cleanup).toBeNull();
   });

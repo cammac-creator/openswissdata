@@ -36,7 +36,7 @@ export const privacy: Record<LegalLocale, LegalDocument> = {
         "Les sauvegardes chiffrées servent à la reprise après incident. Une suppression peut n’y devenir effective qu’à l’expiration de leur cycle de conservation ; en cas de restauration, les demandes de suppression encore applicables doivent être réappliquées. Nous examinons les demandes d’effacement pour limiter les données conservées au nécessaire."
       ] },
       { id: "cookies", title: "7. Cookies et mesure d’audience", paragraphs: [
-        "Le cookie osd_session est nécessaire à la connexion et protégé par les attributs HttpOnly, Secure en production et SameSite. Les liens de paiement conduisent à Stripe, dont les cookies et la notice s’appliquent à sa page. Le site n’utilise pas de cookie publicitaire OpenSwissData ; Plausible fonctionne sans cookie. Cela ne signifie pas qu’aucune donnée technique ne soit traitée.",
+        "Les cookies __Host-osd_session (connexion, trente jours au maximum) et __Host-osd_login (confirmation, cinq minutes au maximum) sont nécessaires à la connexion. Ils sont protégés par les attributs HttpOnly, Secure et SameSite, et limités au site qui les émet. Les liens de paiement conduisent à Stripe, dont les cookies et la notice s’appliquent à sa page. Le site n’utilise pas de cookie publicitaire OpenSwissData ; Plausible fonctionne sans cookie. Cela ne signifie pas qu’aucune donnée technique ne soit traitée.",
         "Vous pouvez supprimer les cookies dans votre navigateur ; cela ferme la session. Les mesures internes côté serveur utilisent les données techniques décrites ci-dessus, sans identifiant stable d’un jour à l’autre. Vous pouvez contacter le responsable pour exercer votre opposition lorsque le droit applicable le permet."
       ] },
       { id: "droits", title: "8. Vos droits et signalements", paragraphs: [
@@ -80,7 +80,7 @@ export const privacy: Record<LegalLocale, LegalDocument> = {
         "Verschlüsselte Sicherungen dienen der Wiederherstellung nach Vorfällen. Eine Löschung kann darin erst mit Ablauf des Aufbewahrungszyklus wirksam werden; nach einer Wiederherstellung sind weiterhin gültige Löschbegehren erneut umzusetzen. Wir prüfen Löschbegehren, um die Aufbewahrung auf das Erforderliche zu beschränken."
       ] },
       { id: "cookies", title: "7. Cookies und Statistik", paragraphs: [
-        "Das notwendige Anmeldecookie osd_session ist durch HttpOnly, Secure in Produktion und SameSite geschützt. Zahlungslinks führen zu Stripe, dessen Cookies und Informationen auf seiner Seite gelten. Die Website verwendet kein OpenSwissData-Werbecookie; Plausible funktioniert ohne Cookies. Technische Daten können dennoch bearbeitet werden.",
+        "Die notwendigen Cookies __Host-osd_session (Anmeldung, höchstens dreissig Tage) und __Host-osd_login (Bestätigung, höchstens fünf Minuten) sind durch HttpOnly, Secure und SameSite geschützt und auf die ausstellende Website beschränkt. Zahlungslinks führen zu Stripe, dessen Cookies und Informationen auf seiner Seite gelten. Die Website verwendet kein OpenSwissData-Werbecookie; Plausible funktioniert ohne Cookies. Technische Daten können dennoch bearbeitet werden.",
         "Sie können Cookies im Browser löschen und damit die Sitzung beenden. Serverseitige Messungen verwenden die oben beschriebenen technischen Daten ohne über Tage stabile Kennung. Soweit gesetzlich vorgesehen, können Sie beim Verantwortlichen Widerspruch einlegen."
       ] },
       { id: "droits", title: "8. Rechte und Meldungen", paragraphs: [
@@ -124,7 +124,7 @@ export const privacy: Record<LegalLocale, LegalDocument> = {
         "Encrypted backups support incident recovery. Deletion may take effect there only when the retention cycle expires; applicable deletion requests must be reapplied after restoration. We review erasure requests to limit retained data to what is needed."
       ] },
       { id: "cookies", title: "7. Cookies and audience measurement", paragraphs: [
-        "The osd_session cookie is necessary for sign-in and protected by HttpOnly, Secure in production and SameSite. Payment links lead to Stripe, whose cookies and notice apply on its page. The site uses no OpenSwissData advertising cookie; Plausible works without cookies. This does not mean no technical data are processed.",
+        "The necessary cookies __Host-osd_session (sign-in, up to thirty days) and __Host-osd_login (confirmation, up to five minutes) are protected by HttpOnly, Secure and SameSite and restricted to the site that issues them. Payment links lead to Stripe, whose cookies and notice apply on its page. The site uses no OpenSwissData advertising cookie; Plausible works without cookies. This does not mean no technical data are processed.",
         "You can remove cookies in your browser, ending the session. Server-side measurement uses the technical data described above without an identifier stable across days. You may contact the controller to object where applicable law provides that right."
       ] },
       { id: "droits", title: "8. Your rights and reports", paragraphs: [

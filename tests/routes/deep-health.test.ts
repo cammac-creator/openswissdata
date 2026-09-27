@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -26,7 +27,7 @@ describe('Accès privé au diagnostic profond', () => {
   it('refuse anonyme, client et session expirée avant tout appel externe', async () => {
     const app = createApp();
     for (const [token, status] of [['', 401], [buyer, 403], [expired, 401]] as const) {
-      const response = await app.request('/api/health/deep', { headers: { cookie: `osd_session=${token}` } });
+      const response = await app.request('/api/health/deep', { headers: { cookie: `__Host-osd_session=${token}` } });
       expect(response.status).toBe(status);
       expect(response.headers.get('cache-control')).toBe('private, no-store');
       expect(await response.text()).not.toContain('checks');
@@ -35,7 +36,7 @@ describe('Accès privé au diagnostic profond', () => {
     expect(diagnostic).not.toHaveBeenCalled();
   });
   it('autorise le propriétaire puis refuse immédiatement sa session révoquée', async () => {
-    const app = createApp(), headers = { cookie: `osd_session=${admin}` };
+    const app = createApp(), headers = { cookie: `__Host-osd_session=${admin}` };
     const response = await app.request('/api/health/deep', { headers });
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
@@ -46,13 +47,13 @@ describe('Accès privé au diagnostic profond', () => {
   });
   it('rend la dégradation en 503 sans rendre le diagnostic public', async () => {
     diagnostic.mockResolvedValue({ status: 'degraded', checks: { stripe: { ok: false, reason: 'timeout' } } });
-    const response = await createApp().request('/api/health/deep', { headers: { cookie: `osd_session=${admin}` } });
+    const response = await createApp().request('/api/health/deep', { headers: { cookie: `__Host-osd_session=${admin}` } });
     expect(response.status).toBe(503);
     expect((await response.json()).status).toBe('degraded');
   });
   it('ne lance aucun diagnostic si l’administration est désactivée', async () => {
     vi.stubEnv('ADMIN_EMAILS', '');
-    expect((await createApp().request('/api/health/deep', { headers: { cookie: `osd_session=${admin}` } })).status).toBe(503);
+    expect((await createApp().request('/api/health/deep', { headers: { cookie: `__Host-osd_session=${admin}` } })).status).toBe(503);
     expect(diagnostic).not.toHaveBeenCalled();
   });
   it('garde les sondes publiques légères sans appeler les fournisseurs', async () => {

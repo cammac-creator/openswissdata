@@ -3,10 +3,11 @@ import {bodyLimit} from 'hono/body-limit';
 import {HTTPException} from 'hono/http-exception';
 import {generateToken, isValidTokenFormat} from '../lib/tokens.js';
 import {accountSessionSnapshot, inspectMagicLink, confirmMagicLink, LoginContextChanged, SESSION_TTL_MS} from '../lib/account-session.js';
-import {confirmationNonce, confirmationCookie, isLoginHost, isLoginPostOrigin, loginOrigin, nonceFingerprint,
+import {confirmationNonce, confirmationCookie, isLoginHost, isLoginPostOrigin, nonceFingerprint,
   sealLoginConfirmation, openLoginConfirmation, LOGIN_CONFIRMATION_TTL_MS} from '../lib/login-confirmation.js';
 import {loginConfirmationPage, loginNoticePage, loginAccountPath, type LoginLocale} from '../lib/login-confirmation-page.js';
 import {parseLocale} from '../lib/email.js';
+import {prepareSessionCookie, clearLegacySessionCookie} from '../lib/session-cookie.js';
 
 export const authConfirmationRoute = new Hono();
 const requestLocale = (header: string | undefined): LoginLocale => /^(de|en)(?:-|,|;|$)/i.exec(header ?? '')?.[1]?.toLowerCase() as 'de' | 'en' || 'fr';
@@ -67,11 +68,15 @@ authConfirmationRoute.post('/confirm', async c => {
     if (!nonce || nonceFingerprint(nonce) !== proof.nonce ||
       (proof.switchAccount && form.get('switch_account') !== 'yes') ||
       (!proof.switchAccount && form.has('switch_account'))) return c.html(loginNoticePage(locale, 'invalid'), 403);
+    // Préparer les attributs avant la transaction évite une erreur de configuration après commit.
+    const issueCookie = prepareSessionCookie(SESSION_TTL_MS / 1000);
+    const legacyCookie = clearLegacySessionCookie(), loginClear = confirmationCookie('', true);
     const session = confirmMagicLink(proof.token, proof.target, c.req.header('cookie'), proof);
     if (!session) return c.html(loginNoticePage(locale, 'invalid'), 410);
     // Cookie de session seulement après validation du contexte et commit ; l'enveloppe n'est jamais réutilisable comme session.
-    c.header('Set-Cookie', `osd_session=${session.token}; HttpOnly; ${loginOrigin().protocol === 'https:' ? 'Secure; ' : ''}SameSite=Lax; Max-Age=${SESSION_TTL_MS / 1000}; Path=/`);
-    c.header('Set-Cookie', confirmationCookie('', true), {append:true});
+    c.header('Set-Cookie', issueCookie(session.token));
+    c.header('Set-Cookie', legacyCookie, {append:true});
+    c.header('Set-Cookie', loginClear, {append:true});
     return c.redirect(session.target === 'admin' ? '/admin' : loginAccountPath(parseLocale(session.locale)) + '?auth=ok', 303);
   } catch (error) {
     if (error instanceof LoginContextChanged) return c.html(loginNoticePage(locale, 'changed'), 409);

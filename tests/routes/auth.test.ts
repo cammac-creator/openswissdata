@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const { sendMagicLinkMock } = vi.hoisted(() => ({
@@ -209,7 +210,7 @@ describe("auth routes", () => {
       expect(res.status).toBe(303);
       expect(res.headers.get("location")).toBe("/account?auth=ok");
       const setCookie = res.headers.get("set-cookie");
-      expect(setCookie).toMatch(/osd_session=[A-Za-z0-9_-]{43}/);
+      expect(setCookie).toMatch(/__Host-osd_session=[A-Za-z0-9_-]{43}/);
       expect(setCookie).toContain("HttpOnly");
       expect(setCookie).toContain("SameSite=Lax");
 
@@ -245,13 +246,13 @@ describe("auth routes", () => {
         .run(token, cust.id, Date.now() + 3600_000, Date.now());
       closeDb();
       const app = createApp();
-      const res = await app.request("/api/auth/logout", {
+      const res = await app.request("https://www.openswissdata.com/api/auth/logout", {
         method: "POST",
-        headers: { cookie: `osd_session=${token}` },
+        headers: { cookie: `__Host-osd_session=${token}`, origin: "https://www.openswissdata.com" },
       });
       expect(res.status).toBe(200);
       const setCookie = res.headers.get("set-cookie");
-      expect(setCookie).toContain("osd_session=;");
+      expect(setCookie).toContain("__Host-osd_session=;");
       expect(setCookie).toContain("Max-Age=0");
       const db2 = getDb();
       const s = db2.prepare("SELECT * FROM sessions WHERE token = ?").get(token);

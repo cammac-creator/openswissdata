@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import {beforeEach, afterEach, describe, it, expect, vi} from 'vitest';
 import {mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -15,7 +16,7 @@ type Preview = {confirmation:string; cookie:string; response:Response; html:stri
 const rows=()=>getDb().prepare('SELECT * FROM sessions ORDER BY token').all();
 function seedSession(customer=2, token=SESSION) {
   getDb().prepare("INSERT INTO sessions(token,customer_id,created_at,expires_at,purpose) VALUES(?,?,?,?,'session')").run(token,customer,NOW,NOW+SESSION_TTL_MS);
-  return 'osd_session='+token;
+  return '__Host-osd_session='+token;
 }
 async function preview(cookie='', extra=''): Promise<Preview> {
   const response=await app.request(ORIGIN+'/api/auth/verify?token='+TOKEN+extra,{headers:{cookie}});
@@ -47,7 +48,7 @@ describe('La consultation ne connecte jamais',()=>{
     const cookie=seedSession(),before=rows();
     for(let i=0;i<3;i++){
       const r=await app.request(ORIGIN+'/api/auth/verify?token='+TOKEN,{method,headers:{cookie}});
-      expect(r.status).toBe(200);expect(r.headers.get('set-cookie')).toMatch(/^__Host-osd_login=/);expect(r.headers.get('set-cookie')).not.toMatch(/(?:^|, )osd_session=/);
+      expect(r.status).toBe(200);expect(r.headers.get('set-cookie')).toMatch(/^__Host-osd_login=/);expect(r.headers.get('set-cookie')).not.toMatch(/(?:^|, )__Host-osd_session=/);
       expect(rows()).toEqual(before);if(method==='HEAD')expect(await r.text()).toBe('');
     }
   });
@@ -69,7 +70,7 @@ describe('La consultation ne connecte jamais',()=>{
     getDb().prepare('UPDATE customers SET locale=? WHERE id=1').run(locale);const p=await preview();
     expect(p.html).toContain(`<html lang="${locale}">`);expect(p.html).not.toContain('switch-account');
     const r=await post(p);expect(r.status).toBe(303);expect(r.headers.get('location')).toBe((locale==='fr'?'':'/'+locale)+'/account?auth=ok');
-    expect(r.headers.get('set-cookie')).toMatch(/^osd_session=[A-Za-z0-9_-]{43}/);expect(r.headers.get('set-cookie')).toContain('__Host-osd_login=;');
+    expect(r.headers.get('set-cookie')).toMatch(/^__Host-osd_session=[A-Za-z0-9_-]{43}/);expect(r.headers.get('set-cookie')).toContain('__Host-osd_login=;');
     expect(getDb().prepare('SELECT purpose FROM sessions').get()).toEqual({purpose:'session'});
   });
   it('échappe même une ancienne adresse mal formée',async()=>{

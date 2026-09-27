@@ -8,16 +8,14 @@ import {issueMagicLink, deleteAccountSession} from '../lib/account-session.js';
 import { sendMagicLinkEmail, parseLocale } from "../lib/email.js";
 
 import {authConfirmationRoute} from './auth-confirmation.js';
+import {isLoginPostOrigin} from '../lib/login-origin.js';
+import {sessionCookie, clearLegacySessionCookie} from '../lib/session-cookie.js';
 
 export const authRoute = new Hono();
 
 // Réponses de connexion privées, y compris les redirections et les refus.
 authRoute.use('*', async (c, next) => { c.header('Cache-Control', 'no-store'); await next(); });
 authRoute.use('/magic-link', bodyLimit({ maxSize: 4096, onError: c => c.json({ error: 'body_too_large' }, 413) }));
-
-function isProd(): boolean {
-  return process.env.NODE_ENV === "production";
-}
 
 authRoute.post("/magic-link", async (c) => {
   let db;
@@ -67,12 +65,18 @@ authRoute.post("/magic-link", async (c) => {
 authRoute.route('/', authConfirmationRoute);
 
 authRoute.post('/logout', (c) => {
-  try { deleteAccountSession(c.req.header('cookie')); }
+  let cleared: string, legacy: string;
+  try {
+    if (!isLoginPostOrigin(c)) return c.json({error: 'invalid_origin'}, 403);
+    cleared = sessionCookie('', 0); legacy = clearLegacySessionCookie();
+    deleteAccountSession(c.req.header('cookie'));
+  }
   catch {
     console.warn('[connexion] déconnexion non enregistrée');
     c.header('Retry-After', '1');
     return c.json({error: 'temporarily_unavailable'}, 503);
   }
-  c.header('Set-Cookie', `osd_session=; HttpOnly; ${isProd() ? 'Secure; ' : ''}SameSite=Lax; Max-Age=0; Path=/`);
+  c.header('Set-Cookie', cleared);
+  c.header('Set-Cookie', legacy, {append:true});
   return c.json({ok: true});
 });

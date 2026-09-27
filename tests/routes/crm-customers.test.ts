@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 import { mkdtempSync,rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -5,7 +6,7 @@ import { join } from 'node:path';
 import { getDb,closeDb } from '../../src/lib/db.js';
 import { createApp } from '../../src/index.js';
 const now=Date.parse('2026-09-26T10:00:00Z');
-const headers={cookie:'osd_session'+'='+ 'D'.repeat(43),origin:'https://www.openswissdata.com','content-type':'application/json','x-osd-csrf':'dashboard'};
+const headers={cookie:'__Host-osd_session'+'='+ 'D'.repeat(43),origin:'https://www.openswissdata.com','content-type':'application/json','x-osd-csrf':'dashboard'};
 describe('Recherche exhaustive des fiches clients privées',()=>{
  let root:string;
  beforeEach(()=>{
@@ -83,8 +84,8 @@ describe('Recherche exhaustive des fiches clients privées',()=>{
  });
  it('refuse client non administrateur, session expirée, mauvaise origine et format',async()=>{
   const id=add('sans-role@example.test'),db=getDb();db.prepare("INSERT INTO sessions(purpose,token,customer_id,created_at,expires_at) VALUES ('session',?,?,?,?)").run('E'.repeat(43),id,now,now+1000);
-  let r=await search({}, {...headers,cookie:'osd_session='+'E'.repeat(43)});expect(r.status).toBe(403);expect(await r.json()).toEqual({error:'forbidden'});
-  db.prepare('UPDATE sessions SET expires_at=? WHERE token=?').run(now-1,'E'.repeat(43));expect((await search({}, {...headers,cookie:'osd_session='+'E'.repeat(43)})).status).toBe(401);
+  let r=await search({}, {...headers,cookie:'__Host-osd_session='+'E'.repeat(43)});expect(r.status).toBe(403);expect(await r.json()).toEqual({error:'forbidden'});
+  db.prepare('UPDATE sessions SET expires_at=? WHERE token=?').run(now-1,'E'.repeat(43));expect((await search({}, {...headers,cookie:'__Host-osd_session='+'E'.repeat(43)})).status).toBe(401);
   for(const custom of [{...headers,origin:''},{...headers,'content-type':'text/plain'},{...headers,'x-osd-csrf':''}]){r=await search({},custom);expect(r.status).toBe(403);expect(await r.json()).toEqual({error:'origin_forbidden'})}
   r=await createApp().request('/api/admin/crm/customers/search',{method:'POST',headers,body:'{invalide'});expect(r.status).toBe(400);
   expect((await search({q:'x'.repeat(17000)})).status).toBe(413);

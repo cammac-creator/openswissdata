@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const { signedUrlMock } = vi.hoisted(() => ({
@@ -48,7 +49,7 @@ describe("download routes", () => {
     const app = createApp();
     const res = await app.request("/api/account/download-request", {
       method: "POST",
-      headers: { "content-type": "application/json", cookie: `osd_session=${token}` },
+      headers: { "content-type": "application/json", cookie: `__Host-osd_session=${token}` },
       body: JSON.stringify({ dataset_id: "tares" }),
     });
     expect(res.status).toBe(200);
@@ -66,7 +67,7 @@ describe("download routes", () => {
     const app = createApp();
     const res = await app.request("/api/account/download-request", {
       method: "POST",
-      headers: { "content-type": "application/json", cookie: `osd_session=${token}` },
+      headers: { "content-type": "application/json", cookie: `__Host-osd_session=${token}` },
       body: JSON.stringify({ dataset_id: "finma" }),
     });
     expect(res.status).toBe(403);
@@ -87,7 +88,7 @@ describe("download routes", () => {
     // Issue download token first
     const issue = await app.request("/api/account/download-request", {
       method: "POST",
-      headers: { "content-type": "application/json", cookie: `osd_session=${token}` },
+      headers: { "content-type": "application/json", cookie: `__Host-osd_session=${token}` },
       body: JSON.stringify({ dataset_id: "tares" }),
     });
     const { share_token } = await issue.json();
@@ -121,7 +122,7 @@ describe("download routes", () => {
 
   it("conserve le lien si la signature du fichier échoue", async () => {
     const app=createApp();
-    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`__Host-osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
     const {share_token}=await issue.json();
     signedUrlMock.mockRejectedValueOnce(new Error('Stockage indisponible'));
     expect((await app.request(`/api/download/${share_token}`)).status).toBe(500);
@@ -131,7 +132,7 @@ describe("download routes", () => {
 
   it("refuse un droit retiré pendant la signature et ne consomme pas le lien", async () => {
     const app=createApp();
-    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`__Host-osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
     const {share_token}=await issue.json();
     signedUrlMock.mockImplementationOnce(async()=>{getDb().prepare('DELETE FROM entitlements').run();return 'https://signed.example.test';});
     expect((await app.request(`/api/download/${share_token}`)).status).toBe(403);
@@ -140,7 +141,7 @@ describe("download routes", () => {
 
   it("ne permet qu'une utilisation même en concurrence",async()=>{
     const app=createApp();
-    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`__Host-osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
     const {share_token}=await issue.json();
     const responses=await Promise.all([app.request(`/api/download/${share_token}`),app.request(`/api/download/${share_token}`)]);
     expect(responses.map(r=>r.status).sort()).toEqual([302,410]);
@@ -148,7 +149,7 @@ describe("download routes", () => {
 
   it("la prévisualisation d'un mail ne consomme pas le lien, puis le bouton le télécharge",async()=>{
     const app=createApp();
-    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const issue=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`__Host-osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
     const {share_token}=await issue.json();
     const preview=await app.request(`/api/delivery/${share_token}?lang=de`);
     expect(preview.status).toBe(200);
@@ -172,7 +173,7 @@ describe("download routes", () => {
     db.prepare("UPDATE versions SET released_at=? WHERE version='2026.04.22'").run(end-1000);
     db.prepare("INSERT INTO versions(dataset_id,version,r2_key,sha256,size_bytes,released_at) VALUES('tares','2026.05.01','tares/future.zip',?,100,?)").run('a'.repeat(64),end+1000);
     db.prepare("UPDATE datasets SET current_version='2026.05.01'").run();
-    const app=createApp(); const headers={"content-type":"application/json",cookie:`osd_session=${token}`};
+    const app=createApp(); const headers={"content-type":"application/json",cookie:`__Host-osd_session=${token}`};
     const res=await app.request("/api/account/download-request",{method:"POST",headers,body:JSON.stringify({dataset_id:"tares"})});
     expect(res.status).toBe(200); expect(signedUrlMock).toHaveBeenLastCalledWith("tares/2026.04.22.zip",300);
     const body=await res.json(); expect((await app.request(`/api/download/${body.share_token}`)).status).toBe(302);
@@ -193,14 +194,14 @@ describe("download routes", () => {
     const app = createApp();
     const res = await app.request("/api/account/download-request", {
       method: "POST",
-      headers: { "content-type": "application/json", cookie: `osd_session=${token}` },
+      headers: { "content-type": "application/json", cookie: `__Host-osd_session=${token}` },
       body: JSON.stringify({ dataset_id: "tares" }),
     });
     expect(res.status).toBe(200);
   });
   it("sépare lien fourni, prévisualisation et autorisation, sans prolonger la première trace", async () => {
     const app=createApp(),db=getDb();
-    const result=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const result=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`__Host-osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
     const {share_token}=await result.json();
     const activity=()=>db.prepare('SELECT source,order_id,authorized_at FROM download_activity').get();
     expect(activity()).toEqual({source:'account',order_id:null,authorized_at:null});
@@ -216,7 +217,7 @@ describe("download routes", () => {
 
   it("ne produit aucune autorisation de téléchargement quand les droits sont retirés", async () => {
     const app=createApp(),db=getDb();
-    const result=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const result=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`__Host-osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
     const {share_token}=await result.json();
     db.prepare('DELETE FROM entitlements').run();
     expect((await app.request('/api/delivery/'+share_token,{method:'POST'})).status).toBe(403);
@@ -225,7 +226,7 @@ describe("download routes", () => {
 
   it("revérifie les droits après la signature distante avant création ou consommation",async()=>{
     const app=createApp(),db=getDb();
-    const result=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
+    const result=await app.request('/api/account/download-request',{method:'POST',headers:{'content-type':'application/json',cookie:`__Host-osd_session=${token}`},body:JSON.stringify({dataset_id:'tares'})});
     const {share_token}=await result.json();
     signedUrlMock.mockImplementationOnce(async()=>{db.prepare('DELETE FROM entitlements').run();return 'https://signed.example.test/secret'});
     expect((await app.request('/api/delivery/'+share_token,{method:'POST'})).status).toBe(403);

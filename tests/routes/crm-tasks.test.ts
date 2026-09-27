@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 import { mkdtempSync,rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -7,7 +8,7 @@ import { createApp } from '../../src/index.js';
 import { isCalendarDate } from '../../src/lib/calendar-date.js';
 import { readTaskOverview } from '../../src/lib/crm-tasks.js';
 
-const headers={cookie:'osd_session='+ 'D'.repeat(43),origin:'https://www.openswissdata.com','content-type':'application/json','x-osd-csrf':'dashboard'};
+const headers={cookie:'__Host-osd_session='+ 'D'.repeat(43),origin:'https://www.openswissdata.com','content-type':'application/json','x-osd-csrf':'dashboard'};
 const now=Date.parse('2026-09-25T22:30:00Z');
 const dates:Array<[string,boolean]>=[['2026-02-31',false],['2026-02-29',false],['2024-02-29',true],['2000-02-29',true],['1900-02-29',false],['2100-02-29',false],['2026-04-31',false],['2026-13-01',false],['2026-00-01',false],['2026-09-00',false],['2026-9-2',false],['0000-01-01',false],['0001-01-01',true],['9999-12-31',true],['10000-01-01',false],['<img src=x>',false],['',false],['2026-09-26T00:00:00Z',false]];
 

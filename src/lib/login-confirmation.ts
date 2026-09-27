@@ -1,6 +1,7 @@
 import {createCipheriv, createDecipheriv, createHmac, createHash, randomBytes} from 'node:crypto';
 import {z} from 'zod';
-import type {Context} from 'hono';
+import {loginOrigin} from './login-origin.js';
+export {loginOrigin, isLoginHost, isLoginPostOrigin} from './login-origin.js';
 import {uniqueTokenCookie} from './account-session.js';
 
 export const LOGIN_CONFIRMATION_TTL_MS = 5 * 60_000;
@@ -18,24 +19,6 @@ const payloadSchema = z.object({
 }).strict();
 export type LoginConfirmation = z.infer<typeof payloadSchema>;
 
-export function loginOrigin(): URL {
-  const origin = new URL(process.env.BASE_URL || 'http://localhost:3000');
-  const local = ['test','development'].includes(process.env.NODE_ENV ?? '') &&
-    ['localhost','127.0.0.1','[::1]'].includes(origin.hostname);
-  if ((!local && origin.protocol !== 'https:') || origin.username || origin.password ||
-    origin.pathname !== '/' || origin.search || origin.hash) throw new Error('login_origin_unavailable');
-  return origin;
-}
-
-/** Le nom d'hôte vient de la requête, l'origine attendue uniquement de la configuration. */
-export function isLoginHost(c: Context): boolean {
-  const expected = loginOrigin().host;
-  return new URL(c.req.url).host === expected && (!c.req.header('host') || c.req.header('host') === expected);
-}
-export function isLoginPostOrigin(c: Context): boolean {
-  const site = c.req.header('sec-fetch-site');
-  return isLoginHost(c) && c.req.header('origin') === loginOrigin().origin && (!site || site === 'same-origin');
-}
 function confirmationKey(): Buffer {
   const secret = process.env.SESSION_SECRET;
   if (!secret || secret.length < 32) throw new Error('login_key_unavailable');

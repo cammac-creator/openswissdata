@@ -1,3 +1,4 @@
+import '../helpers/session-origin.js';
 import {describe,it,expect,beforeEach,afterEach,vi} from 'vitest';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -10,7 +11,7 @@ import {readOrderJourney} from '../../src/lib/order-journey.js';
 
 describe('Preuves après achat, sans attribution inventée',()=>{
  let temp:string,serial:number;const now=Date.parse('2026-10-26T00:30:00Z'),day=86400000;
- const headers={cookie:'osd_session='+'D'.repeat(43)};
+ const headers={cookie:'__Host-osd_session='+'D'.repeat(43)};
  beforeEach(()=>{
   vi.spyOn(Date,'now').mockReturnValue(now);serial=0;temp=mkdtempSync(join(tmpdir(),'osd-journey-'));
   vi.stubEnv('DATABASE_PATH',join(temp,'fictif.sqlite'));vi.stubEnv('ADMIN_EMAILS','OWNER@example.test');vi.stubEnv('CRM_INTERNAL_EMAILS','interne@example.test');vi.stubEnv('BASE_URL','https://www.openswissdata.com');
@@ -28,7 +29,7 @@ describe('Preuves après achat, sans attribution inventée',()=>{
  function access(id:number|null,customer=2,created=now-1000,authorized:number|null=now,source='email',dataset='finma'){getDb().prepare('INSERT INTO download_activity(order_id,customer_id,dataset_id,version,source,created_at,authorized_at) VALUES(?,?,?,\'fictive\',?,?,?)').run(id,customer,dataset,source,created,authorized)}
  const read=(days=30)=>readOrderJourney(getDb(),crmPeriod(days,now),realCustomerSql(),now);
  it('reste privé, sans email, référence de paiement, identifiant individuel ni lien',async()=>{
-  const app=createApp(),path='/api/admin/crm/audience';expect((await app.request(path)).status).toBe(401);expect((await app.request(path,{headers:{cookie:'osd_session='+'E'.repeat(43)}})).status).toBe(403);
+  const app=createApp(),path='/api/admin/crm/audience';expect((await app.request(path)).status).toBe(401);expect((await app.request(path,{headers:{cookie:'__Host-osd_session='+'E'.repeat(43)}})).status).toBe(403);
   grant(order());const response=await app.request(path,{headers}),body=await response.json();expect(response.status).toBe(200);expect(response.headers.get('cache-control')).toBe('private, no-store');expect(body.journey.orders).toBe(1);expect(JSON.stringify(body.journey)).not.toMatch(/@|cs_live_|customer_id|order_id|token|https:/);
  });
  it('compte seulement les commandes payées réelles hors comptes internes et donne les clients distincts',()=>{

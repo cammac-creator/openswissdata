@@ -1,6 +1,7 @@
 import {getDb, SQLITE_BUSY_TIMEOUT_MS} from './db.js';
 import {generateToken, isValidTokenFormat} from './tokens.js';
 import {createHash} from 'node:crypto';
+import {sessionCookieName} from './session-cookie.js';
 
 export const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;
 export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -13,14 +14,16 @@ export function uniqueTokenCookie(cookie: string | undefined, name: string): str
   if (!cookie || cookie.length > 16384) return null;
   const values: string[] = [];
   for (const part of cookie.split(';')) {
-    const value = part.trim();
+    // Seuls espace et tabulation appartiennent aux blancs syntaxiques d'un cookie.
+    const value = part.replace(/^[ \t]+|[ \t]+$/g, '');
     const split = value.indexOf('=');
-    const cookieName = split < 0 ? value : value.slice(0, split).trim();
+    const cookieName = split < 0 ? value : value.slice(0, split).replace(/^[ \t]+|[ \t]+$/g, '');
+    if (cookieName !== name && cookieName.trim().toLowerCase() === name.toLowerCase()) return null;
     if (cookieName === name) values.push(split < 0 ? '' : value.slice(split + 1));
   }
   return values.length === 1 && isValidTokenFormat(values[0]) ? values[0] : null;
 }
-export const accountSessionToken = (cookie: string | undefined) => uniqueTokenCookie(cookie, 'osd_session');
+export const accountSessionToken = (cookie: string | undefined) => uniqueTokenCookie(cookie, sessionCookieName());
 
 /** Compatibilité limitée aux deux durées exactes émises par l'ancien code. */
 function purpose(row: SessionRow): string {
@@ -38,7 +41,10 @@ function find(token: string): SessionRow | undefined {
 }
 
 export function readAccountSession(cookie: string | undefined): {customer_id: number; email: string} | null {
-  const token = accountSessionToken(cookie);
+  return sessionForToken(accountSessionToken(cookie));
+}
+
+function sessionForToken(token: string | null): {customer_id: number; email: string} | null {
   if (!token) return null;
   const row = find(token);
   return row && current(row, Date.now()) && purpose(row) === 'session'
@@ -46,8 +52,8 @@ export function readAccountSession(cookie: string | undefined): {customer_id: nu
 }
 
 export function accountSessionSnapshot(cookie: string | undefined) {
-  const session = readAccountSession(cookie);
-  return {session, fingerprint: session ? createHash('sha256').update(accountSessionToken(cookie)!).digest('hex') : null};
+  const token = accountSessionToken(cookie), session = sessionForToken(token);
+  return {session, token, fingerprint: session && token ? createHash('sha256').update(token).digest('hex') : null};
 }
 
 /** Lecture seule : les prévisualisations de mails ne consomment aucun lien. */
@@ -91,12 +97,19 @@ export function confirmMagicLink(token: string, target: LoginReturn, cookie: str
   return sessionWrite(() => {
     const now = Date.now();
     if (expected.expiresAt <= now) return null;
-    if (accountSessionSnapshot(cookie).fingerprint !== expected.session) throw new LoginContextChanged();
+    const current = accountSessionSnapshot(cookie);
+    if (current.fingerprint !== expected.session) throw new LoginContextChanged();
     const row = inspectMagicLink(token, target);
     if (!row || row.customerId !== expected.customerId || row.target !== target) return null;
     const db = getDb();
     const removed = db.prepare('DELETE FROM sessions WHERE token=? AND expires_at>?').run(token, now);
     if (removed.changes !== 1) throw new Error('login_link_not_consumed');
+    // Seule la session authentifiée remplacée est fermée ; les autres appareils restent ouverts.
+    if (current.session) {
+      const closed = db.prepare('DELETE FROM sessions WHERE token=? AND customer_id=?')
+        .run(current.token, current.session.customer_id);
+      if (closed.changes !== 1) throw new Error('previous_session_not_revoked');
+    }
     const sessionToken = generateToken();
     const inserted = db.prepare(`INSERT INTO sessions(token,customer_id,expires_at,created_at,purpose,return_to)
       VALUES(?,?,?,?,'session','account')`).run(sessionToken, row.customerId, now + SESSION_TTL_MS, now);
