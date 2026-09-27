@@ -68,6 +68,5 @@ export function getClientIp(c: {
 }
 
 // Pre-defined buckets for common endpoints — shared across the codebase.
-export const checkoutBucket = makeRateLimit("checkout", 6_000); // 10 req/min/IP
 export const oauthRegisterBucket = makeRateLimit("oauth-register", 6_000);
 export const adminBucket = makeRateLimit("admin", 2_000); // 30 req/min/IP

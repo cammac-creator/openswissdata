@@ -393,3 +393,11 @@ CREATE TABLE IF NOT EXISTS auth_request_limits (
 );
 CREATE INDEX IF NOT EXISTS idx_auth_request_limits_expiry ON auth_request_limits(expires_at);
 CREATE INDEX IF NOT EXISTS idx_auth_request_limits_scope_expiry ON auth_request_limits(scope,expires_at);
+
+-- Compteurs temporaires de demandes Checkout, sans adresse en clair ni donnée de paiement.
+CREATE TABLE IF NOT EXISTS checkout_request_limits (
+  identity_key TEXT NOT NULL PRIMARY KEY CHECK(length(identity_key)=64 AND identity_key NOT GLOB '*[^a-f0-9]*'),
+  accepted_at INTEGER NOT NULL CHECK(typeof(accepted_at)='integer' AND accepted_at>=1000000000000),
+  expires_at INTEGER NOT NULL CHECK(typeof(expires_at)='integer' AND expires_at=accepted_at+6000)
+);
+CREATE INDEX IF NOT EXISTS idx_checkout_request_limits_expiry ON checkout_request_limits(expires_at);

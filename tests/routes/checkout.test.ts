@@ -1,3 +1,7 @@
+// Ces tests vérifient le métier ; checkout-limits.test.ts exerce la protection réelle sans désactivation globale.
+vi.mock('../../src/lib/checkout-limits.js', async importOriginal => ({
+  ...await importOriginal<typeof import('../../src/lib/checkout-limits.js')>(), consumeCheckoutLimit: () => ({ allowed: true }),
+}));
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const sessionCreateMock = vi.fn();

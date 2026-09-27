@@ -30,6 +30,7 @@ import { startFinancialWorker } from "./lib/stripe-financial.js";
 import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
+import { CHECKOUT_NOTICE_CSP, isCheckoutNotice } from './lib/checkout-notice.js';
 
 export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   const app = new Hono();
@@ -39,6 +40,7 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   // Ces en-têtes s'appliquent après les réglages généraux, y compris aux redirections.
   app.use("*", async (c, next) => {
     await next();
+    if (isCheckoutNotice(c)) c.header('Content-Security-Policy', CHECKOUT_NOTICE_CSP);
     if (/^\/api\/(delivery|download)\//.test(c.req.path)) c.header("Referrer-Policy", "no-referrer");
     if (c.req.path.startsWith("/api/delivery/")) {
       c.header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://*.r2.cloudflarestorage.com; frame-ancestors 'none'; base-uri 'none'");

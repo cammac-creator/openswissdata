@@ -4,26 +4,34 @@ import type Stripe from "stripe";
 import { z } from "zod";
 import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
-import { checkoutBucket, checkRateLimit, getClientIp } from "../lib/rate-limit.js";
+import { checkoutRefusal } from "../lib/checkout-notice.js";
+import { bodyLimit } from "hono/body-limit";
+import { HTTPException } from "hono/http-exception";
+import { consumeCheckoutLimit, checkoutRequestIp, reportCheckoutLimitFailure } from "../lib/checkout-limits.js";
 import { checkoutLegal } from "../lib/order-legal.js";
 import { checkoutObservation, recordCheckoutCreated, type CheckoutObservation } from "../lib/checkout-measures.js";
 
 export const checkoutRoute = new Hono();
 
-// Rate-limit guard applied to both POST /session and POST /start to prevent
-// flooding the Stripe API with junk session creations.
-checkoutRoute.use("/session", async (c, next) => {
-  if (!checkRateLimit(checkoutBucket, getClientIp(c))) {
-    return c.json({ error: "too_many_requests" }, 429);
-  }
-  return next();
-});
-checkoutRoute.use("/start", async (c, next) => {
-  if (!checkRateLimit(checkoutBucket, getClientIp(c))) {
-    return c.json({ error: "too_many_requests" }, 429);
-  }
-  return next();
-});
+// Les deux portes d’entrée partagent la même protection, y compris après redémarrage.
+checkoutRoute.use('*', async (c, next) => { c.header('Cache-Control', 'no-store'); await next(); });
+for (const path of ['/session', '/start']) {
+  checkoutRoute.use(path, bodyLimit({ maxSize: 4096, onError: c => checkoutRefusal(c, 'body_too_large', 413) }));
+  checkoutRoute.use(path, async (c, next) => {
+    if (c.req.method !== 'POST') return next();
+    try {
+      const limit = consumeCheckoutLimit(getDb(), checkoutRequestIp(c));
+      if (!limit.allowed) {
+        c.header('Retry-After', String(limit.retryAfter));
+        return checkoutRefusal(c, 'too_many_requests', 429);
+      }
+    } catch (error) {
+      reportCheckoutLimitFailure(error);
+      return checkoutRefusal(c, 'temporarily_unavailable', 503);
+    }
+    return next();
+  });
+}
 
 // `mcp_standalone` is a special "subscription" SKU (49 CHF/month, 5k req/mo).
 // It uses Stripe's `mode: "subscription"` and CANNOT be combined with the
@@ -161,7 +169,8 @@ checkoutRoute.post("/session", async (c) => {
   let parsed;
   try {
     parsed = CheckoutSchema.parse(await c.req.json());
-  } catch {
+  } catch (error) {
+    if (error instanceof HTTPException && error.status === 413) return checkoutRefusal(c, 'body_too_large', 413);
     // H4: don't expose Zod validation internals to clients
     return c.json({ error: "invalid_body" }, 400);
   }
@@ -200,7 +209,12 @@ checkoutRoute.post("/session", async (c) => {
 
 // Form-encoded redirect API — used by static HTML CTA buttons (no JS required)
 checkoutRoute.post("/start", async (c) => {
-  const body = await c.req.parseBody({ all: true });
+  let body;
+  try { body = await c.req.parseBody({ all: true }); }
+  catch (error) {
+    if (error instanceof HTTPException && error.status === 413) return checkoutRefusal(c, 'body_too_large', 413);
+    return checkoutRefusal(c, 'invalid_body', 400);
+  }
   const raw = body.dataset_ids ?? body["dataset_ids[]"];
   let parts: string[];
   if (Array.isArray(raw)) {
