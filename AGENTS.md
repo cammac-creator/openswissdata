@@ -193,3 +193,8 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 ## Émission OAuth indivisible (27.09.2026)
 - `/oauth/token` valide, consomme/révoque et émet dans une seule transaction immédiate, synchrone et sans réseau. Ne pas rendre les fonctions internes asynchrones. Un verrou ou une panne donne 503/no-store sans détail SQL, avec rollback et restauration du busy_timeout.
 - Lire le code avant validation ; `consumeAuthCode` est conditionnel et doit rester dans la transaction qui insère la paire. Date exacte expirée, portée bornée aux droits actuels, ancien refresh inutilisable après succès. Voir `docs/cycle-jetons-mcp.md` pour les limites : aucune famille de jetons ni récupération de réponse perdue, abonnements toujours fermés.
+
+## Frontières MCP (27.09.2026)
+- Toute révocation exige le client propriétaire dans le WHERE SQL ; aucun appel sans clientId. Une réponse 200 ne révèle pas si un jeton tiers existe.
+- Authorization présent mais invalide donne 401, jamais de repli anonyme. Bearer accepte la casse indifféremment. Les pannes de lecture/quota ne renvoient aucun détail brut.
+- Registre des outils par Map et portée obligatoire, y compris pour administrateur. Ne pas réintroduire la lecture des propriétés héritées. Voir docs/frontieres-mcp.md et les réserves OAuth restantes.

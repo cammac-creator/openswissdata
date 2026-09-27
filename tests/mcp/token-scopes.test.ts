@@ -79,7 +79,7 @@ describe('Restrictions du jeton MCP et droits actuels du compte',()=>{
  });
 
  it('chaque outil enregistré exige une portée connue',()=>{
-  for(const tool of listTools().tools)expect(TOOL_SCOPE[tool.name]).toBeDefined();
+  for(const tool of listTools().tools){expect(Object.hasOwn(TOOL_SCOPE,tool.name)).toBe(true);expect(SCOPES).toContain(TOOL_SCOPE[tool.name])}
  });
 
  it('garde les portées pour chaque appel d’un lot JSON-RPC',async()=>{

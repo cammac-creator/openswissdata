@@ -210,7 +210,7 @@ function handleRefresh(c: any, body: Record<string, unknown>): Response {
   const grantedScope = serializeScopes(nextScopes);
 
   // Rotation dans la transaction d’émission : un échec annule aussi la révocation.
-  if (!revokeTokenByHash(refreshHash)) return c.json({ error: 'invalid_grant' }, 400);
+  if (!revokeTokenByHash(refreshHash, auth.client_id)) return c.json({ error: 'invalid_grant' }, 400);
 
   const newAccess = generateRandomToken();
   const newRefresh = generateRandomToken();

@@ -60,7 +60,7 @@ const TOOLS: readonly Tool[] = [
   tariffChangelogTool,
   entityHistoryTool,
 ] as const;
-const TOOLS_BY_NAME: Record<string, Tool> = Object.fromEntries(TOOLS.map((t) => [t.name, t]));
+const TOOLS_BY_NAME = new Map<string, Tool>(TOOLS.map((t) => [t.name, t]));
 
 export interface JsonRpcRequest {
   jsonrpc: "2.0";
@@ -152,14 +152,14 @@ export async function dispatch(
         if (!params || typeof params.name !== "string") {
           return err(id, ERR.INVALID_PARAMS, "params.name (string) is required");
         }
-        const tool = TOOLS_BY_NAME[params.name];
+        const tool = TOOLS_BY_NAME.get(params.name);
         if (!tool) {
           return err(id, ERR.METHOD_NOT_FOUND, `Unknown tool: ${params.name}`);
         }
 
         // OAuth scope check — anonymous callers only get V1 tools, token
         // bearers must hold the scope the tool requires (see TOOL_SCOPE).
-        const required = TOOL_SCOPE[params.name] ?? null;
+        const required = Object.hasOwn(TOOL_SCOPE, params.name) ? TOOL_SCOPE[params.name] : null;
         if (!isToolAllowed(params.name, required, ctx)) {
           return err(
             id,
@@ -177,8 +177,18 @@ export async function dispatch(
       default:
         return err(id, ERR.METHOD_NOT_FOUND, `Unknown method: ${r.method}`);
     }
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return err(id, ERR.INTERNAL_ERROR, `Internal error: ${msg}`);
+  } catch {
+    reportToolFailure();
+    return err(id, ERR.INTERNAL_ERROR, 'Internal error');
   }
+}
+
+let lastToolFailureLog = 0;
+function reportToolFailure(): void {
+  try {
+    const now = Date.now();
+    if (lastToolFailureLog && now >= lastToolFailureLog && now - lastToolFailureLog < 60_000) return;
+    lastToolFailureLog = now;
+    console.warn('[mcp] exécution temporairement indisponible');
+  } catch { /* Aucun argument, secret ou détail technique dans la réponse. */ }
 }

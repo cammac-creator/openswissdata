@@ -25,6 +25,7 @@ function constantTimeStrEq(a: string, b: string): boolean {
 }
 
 revokeRoute.post("/revoke", async (c) => {
+  c.header('Cache-Control', 'no-store');
   const body = (await c.req.parseBody()) as Record<string, unknown>;
 
   // Client auth (Basic OR body fields)
@@ -51,7 +52,7 @@ revokeRoute.post("/revoke", async (c) => {
   }
 
   const client = findClientById(cid);
-  if (!client || client.revoked_at) {
+  if (!client || client.revoked_at !== null) {
     return c.json({ error: "invalid_client" }, 401);
   }
   if (!constantTimeStrEq(hashToken(secret), client.client_secret_hash)) {
@@ -60,7 +61,7 @@ revokeRoute.post("/revoke", async (c) => {
 
   const token = body.token;
   if (typeof token === "string" && token.length > 0) {
-    revokeTokenByHash(hashToken(token));
+    revokeTokenByHash(hashToken(token), cid);
   }
   // RFC 7009: always 200 (don't leak token validity).
   return c.body(null, 200);

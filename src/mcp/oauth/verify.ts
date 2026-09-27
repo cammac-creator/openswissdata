@@ -82,9 +82,17 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
   const requireToken = opts.requireToken === true;
 
   return async (c, next) => {
+    c.header('Cache-Control', 'no-store');
     const auth = c.req.header("authorization") ?? c.req.header("Authorization");
-    const m = auth?.match(/^Bearer\s+(.+)$/);
-    const token = m?.[1]?.trim();
+    const token = auth && auth.length <= 4096 ? auth.match(/^Bearer +([A-Za-z0-9._~+\/-]+=*)$/i)?.[1] : undefined;
+    const refuseToken = () => {
+      c.header('WWW-Authenticate', 'Bearer realm="openswissdata", error="invalid_token"');
+      return c.json({ error: 'invalid_token' }, 401);
+    };
+    // Un en-tête présent mais invalide n’est jamais une demande d’accès anonyme.
+    if (auth !== undefined && !token) {
+      return refuseToken();
+    }
 
     // 0. Legacy admin bypass — only when MCP_BEARER_TOKEN is configured.
     const legacy = process.env.MCP_BEARER_TOKEN;
@@ -104,29 +112,20 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
 
     // 1. OAuth bearer
     if (token) {
-      let stored;
+      let stored, client: MCPClient | null, tier: Tier, quota: QuotaResult;
       try {
         stored = findTokenByAccessHash(hashToken(token));
-      } catch (e) {
-        return c.json(
-          { error: "server_error", error_description: e instanceof Error ? e.message : String(e) },
-          500,
-        );
-      }
-      if (!stored) {
-        return c.json({ error: "invalid_token", error_description: "unknown token" }, 401);
-      }
-      if (!Number.isSafeInteger(stored.expires_at) || stored.expires_at <= Date.now()) {
-        return c.json({ error: "invalid_token", error_description: "token expired" }, 401);
-      }
+        if (!stored || !Number.isSafeInteger(stored.expires_at) || stored.expires_at <= Date.now()) return refuseToken();
 
-      const client: MCPClient | null = findClientById(stored.client_id);
-      if (!client || client.revoked_at) {
-        return c.json({ error: "invalid_token", error_description: "client revoked" }, 401);
-      }
-      const tier: Tier = isValidTier(client.tier) ? client.tier : "free";
+        client = findClientById(stored.client_id);
+        if (!client || client.revoked_at !== null || !isValidTier(client.tier)) return refuseToken();
+        tier = client.tier;
 
-      const quota = consumeQuota(client.client_id, tier);
+        quota = consumeQuota(client.client_id, tier);
+      } catch {
+        reportAuthFailure();
+        return c.json({ error: 'server_error' }, 500);
+      }
       c.header("X-RateLimit-Tier", tier);
       c.header("X-RateLimit-Day-Used", String(quota.day_used));
       if (quota.day_limit >= 0) c.header("X-RateLimit-Day-Limit", String(quota.day_limit));
@@ -162,6 +161,7 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
 
     // 2. No token. If the route requires one, 401.
     if (requireToken) {
+      c.header('WWW-Authenticate', 'Bearer realm="openswissdata"');
       return c.json({ error: "unauthorized" }, 401);
     }
 
@@ -202,6 +202,7 @@ export function isToolAllowed(
   requiredScope: Scope | null,
   auth: MCPAuthContext | null,
 ): boolean {
+  if (!requiredScope) return false;
   if (auth?.admin) return true;
   if (!auth) {
     // Anonymous fallback: only V1 read-only tools, gated by their scope being
@@ -209,6 +210,15 @@ export function isToolAllowed(
     const PUBLIC_TOOLS = new Set(["tariff_lookup", "kyc_check", "cross_walk"]);
     return PUBLIC_TOOLS.has(toolName);
   }
-  if (!requiredScope) return true;
   return auth.scopes.includes(requiredScope);
+}
+
+let lastAuthFailureLog = 0;
+function reportAuthFailure(): void {
+  try {
+    const now = Date.now();
+    if (lastAuthFailureLog && now >= lastAuthFailureLog && now - lastAuthFailureLog < 60_000) return;
+    lastAuthFailureLog = now;
+    console.warn('[oauth] vérification temporairement indisponible');
+  } catch { /* Aucun détail de stockage ni secret dans la réponse. */ }
 }

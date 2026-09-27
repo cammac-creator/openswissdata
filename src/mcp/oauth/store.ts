@@ -233,13 +233,13 @@ export function findTokenByRefreshHash(hash: string): MCPToken | null {
   return row ?? null;
 }
 
-export function revokeTokenByHash(hash: string): boolean {
+export function revokeTokenByHash(hash: string, clientId: string): boolean {
   const db = getDb();
   const result = db
     .prepare(
-      "UPDATE mcp_tokens SET revoked_at = ? WHERE (access_token_hash = ? OR refresh_token_hash = ?) AND revoked_at IS NULL",
+      "UPDATE mcp_tokens SET revoked_at = ? WHERE (access_token_hash = ? OR refresh_token_hash = ?) AND client_id = ? AND revoked_at IS NULL",
     )
-    .run(Date.now(), hash, hash);
+    .run(Date.now(), hash, hash, clientId);
   return result.changes > 0;
 }
 
