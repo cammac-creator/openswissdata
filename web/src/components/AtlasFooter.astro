@@ -1,0 +1,22 @@
+---
+import { getLangFromPath, localizePath, t } from '../i18n/utils';
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => localizePath(path, lang);
+const copy = {
+ fr: { title: 'Des sources aux usages.', subtitle: 'Les données suisses, avec leur mode d’emploi.', files: 'Les données', explore: 'Explorer', legal: 'Cadre & confiance', account: 'Espace client', contact: 'Une question sur les fichiers ?', allLegal: 'Tous les documents juridiques', status: 'État du service' },
+ de: { title: 'Von der Quelle zur Anwendung.', subtitle: 'Schweizer Daten, mit Anleitung.', files: 'Datensätze', explore: 'Entdecken', legal: 'Recht & Vertrauen', account: 'Kundenkonto', contact: 'Fragen zu den Dateien?', allLegal: 'Alle Rechtsinformationen', status: 'Dienststatus' },
+ en: { title: 'From source to application.', subtitle: 'Swiss data, with the instructions included.', files: 'The data', explore: 'Explore', legal: 'Terms & trust', account: 'Your account', contact: 'A question about the files?', allLegal: 'All legal information', status: 'Service status' },
+}[lang];
+---
+<footer class="atlas-footer">
+ <div class="atlas-shell">
+  <div class="atlas-footer-top"><div><p class="atlas-kicker">OPENSWISSDATA</p><h2>{copy.title}</h2><p>{copy.subtitle}</p></div><a class="atlas-contact" href="mailto:contact@openswissdata.com"><span>{copy.contact}</span>contact@openswissdata.com <span aria-hidden="true">↗</span></a></div>
+  <div class="atlas-footer-links">
+   <div><h3>{copy.files}</h3><a href={L('/datasets/finma')}>FINMA Registry</a><a href={L('/datasets/tares')}>TARES</a><a href={L('/datasets/classifications')}>NOGA · NACE · ISIC</a><a href={L('/bundle')}>{t('footer.link_bundle',lang)}</a></div>
+   <div><h3>{copy.explore}</h3><a href={L('/mcp')}>MCP</a><a href={L('/codes/')}>{lang === 'fr' ? 'Codes NOGA' : lang === 'de' ? 'NOGA-Codes' : 'NOGA codes'}</a><a href={L('/account')}>{copy.account}</a><a href="/api/health/ready">{copy.status}</a></div>
+   <div><h3>{copy.legal}</h3><a href={L('/legal/provenance')}>{t('footer.link_provenance',lang)}</a><a href={L('/legal/cgv')}>{t('footer.link_cgv',lang)}</a><a href={L('/legal/privacy')}>{t('footer.link_privacy',lang)}</a><a href={L('/legal/impressum')}>{t('footer.link_impressum',lang)}</a><a href={L('/legal/')}>{copy.allLegal} ↗</a></div>
+  </div>
+  <div class="atlas-footer-notes"><p>{t('footer.affiliation',lang)}</p><p><strong>{t('footer.disclaimer_title',lang)}</strong> {t('footer.disclaimer_body',lang)}</p></div>
+  <div class="atlas-footer-bottom"><span>© {new Date().getFullYear()} OpenSwissData</span><span>FR · DE · EN</span><a href="https://ibanforge.com" rel="noopener">{t('footer.studio',lang)}</a></div>
+ </div>
+</footer>

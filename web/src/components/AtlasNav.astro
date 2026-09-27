@@ -1,0 +1,36 @@
+---
+import LangSwitcher from './LangSwitcher.astro';
+import { getLangFromPath, localizePath } from '../i18n/utils';
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => localizePath(path, lang);
+const copy = {
+  fr: { nav: 'Navigation principale', files: 'Les données', method: 'La méthode', proof: 'Provenance', account: 'Espace client', menu: 'Menu' },
+  de: { nav: 'Hauptnavigation', files: 'Datensätze', method: 'So funktioniert es', proof: 'Herkunft', account: 'Kundenkonto', menu: 'Menü' },
+  en: { nav: 'Main navigation', files: 'The data', method: 'How it works', proof: 'Provenance', account: 'Your account', menu: 'Menu' },
+}[lang];
+---
+<header class="atlas-header">
+  <div class="atlas-shell atlas-nav-row">
+    <a class="atlas-brand" href={L('/')} aria-label="OpenSwissData">
+      <span class="atlas-mark" aria-hidden="true">+</span><span>open<span class="atlas-brand-light">swiss</span>data<span class="atlas-brand-point">.</span></span>
+    </a>
+    <nav class="atlas-desktop-nav" aria-label={copy.nav}>
+      <a href={`${L('/')}#datasets`}>{copy.files}</a>
+      <a href={`${L('/')}#how`}>{copy.method}</a>
+      <a href={L('/legal/provenance')}>{copy.proof}</a>
+    </nav>
+    <div class="atlas-nav-actions"><LangSwitcher /><a class="atlas-account-link" href={L('/account')}>{copy.account}<span aria-hidden="true">↗</span></a></div>
+    <details class="atlas-mobile-menu" data-atlas-menu>
+      <summary>{copy.menu}<span class="atlas-menu-lines" aria-hidden="true"></span></summary>
+      <nav aria-label={copy.nav}>
+        <a href={`${L('/')}#datasets`}>{copy.files}<span aria-hidden="true">↗</span></a>
+        <a href={`${L('/')}#how`}>{copy.method}<span aria-hidden="true">↗</span></a>
+        <a href={L('/legal/provenance')}>{copy.proof}<span aria-hidden="true">↗</span></a>
+        <a href={L('/account')}>{copy.account}<span aria-hidden="true">↗</span></a>
+      </nav>
+    </details>
+  </div>
+</header>
+<script>
+  import '../scripts/atlas';
+</script>

@@ -18,14 +18,12 @@ interface Props {
   datasetJsonLd?: Record<string, unknown>;
   /** When true, emits <meta name="robots" content="noindex,nofollow">. */
   noindex?: boolean;
-  /**
-   * When true, skips hreflang alternates — used for pages that exist
-   * only in French (codes, blog, account, admin, famille, 404).
-   */
+  /** Désactive les variantes de langue pour les pages réellement monolingues. */
   monolingual?: boolean;
+  appearance?: "atlas";
 }
 
-const { title, description, image = "/og-default.png", productJsonLd, datasetJsonLd, noindex = false, monolingual = false } = Astro.props;
+const { title, description, image = "/og-default.png", productJsonLd, datasetJsonLd, noindex = false, monolingual = false, appearance } = Astro.props;
 const lang = getLangFromPath(Astro.url.pathname);
 const htmlLang = lang === "de" ? "de-CH" : lang === "fr" ? "fr-CH" : "en";
 
@@ -45,7 +43,7 @@ const orgDescription = lang === "de"
     : "Datasets officiels suisses normalisés — TARES (douanes), NOGA/NACE/ISIC, registre FINMA. Format multi (CSV, Parquet, JSON, SQL), signature Ed25519, mises à jour automatiques.";
 ---
 <!DOCTYPE html>
-<html lang={htmlLang}>
+<html lang={htmlLang} class:list={{ 'atlas-document': appearance === 'atlas' }}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -82,7 +80,7 @@ const orgDescription = lang === "de"
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#FAFAF7" />
+    <meta name="theme-color" content={appearance === 'atlas' ? '#f4f3ed' : '#FAFAF7'} />
 
     {/* Organization-level Schema.org JSON-LD — applies sitewide.
         Dataset and FAQ pages can supplement this with their own JSON-LD
@@ -117,13 +115,13 @@ const orgDescription = lang === "de"
       <script is:inline defer data-domain="openswissdata.com" src="https://plausible.io/js/script.js"></script>
     )}
   </head>
-  <body>
+  <body class:list={{ 'atlas-site': appearance === 'atlas' }}>
     <a href="#main" class="skip-to-content">{t("footer.skip_link", lang)}</a>
-    <StatusBar monolingual={monolingual} />
+    <slot name="header"><StatusBar monolingual={monolingual} /></slot>
     <main id="main" tabindex="-1"><slot /></main>
-    <Footer monolingual={monolingual} />
+    <slot name="footer"><Footer monolingual={monolingual} /></slot>
 
-    <script is:inline>
+    {appearance !== 'atlas' && <script is:inline>
       // Nav scroll state
       const navEl = document.querySelector('nav.fixed-nav');
       if (navEl) {
@@ -162,6 +160,6 @@ const orgDescription = lang === "de"
           }
         });
       });
-    </script>
+    </script>}
   </body>
 </html>

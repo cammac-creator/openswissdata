@@ -1,9 +1,7 @@
 ---
 import { jsonForHtml } from "../lib/html";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import InstallBar from "./InstallBar.astro";
-import Fiche from "./Fiche.astro";
-import TrustStrip from "./TrustStrip.astro";
+import AtlasLayout from "../layouts/AtlasLayout.astro";
+import AtlasArtwork from "./AtlasArtwork.astro";
 import { getLangFromPath } from "../i18n/utils";
 const lang = getLangFromPath(Astro.url.pathname);
 const prefix = lang === "fr" ? "" : `/${lang}`;
@@ -98,53 +96,65 @@ const products = [
  {id:"classifications",label:"CLASSIFICATIONS",source:"OFS · Eurostat · ONU",title:"NOGA · NACE · ISIC",sub:copy.classSub,desc:copy.classDesc,price:"399"},
  {id:"finma",label:"FINMA",source:"FINMA · GLEIF",title:copy.finmaTitle,sub:copy.finmaSub,desc:copy.finmaDesc,price:"299"},
 ];
+const atlas = {
+ fr: { hero:'La Suisse,', accent:'en données.', intro:'Tarifs douaniers, classifications économiques et registre FINMA. Des fichiers structurés pour passer de la source à vos outils.', explore:'Découvrir FINMA', proof:'Sources documentées', access:'Achat unique · Accès aux fichiers', sources:'Sources publiques. Préparation indépendante.', catalogue:'01 / Les données', method:'02 / Votre parcours', quality:'03 / La méthode', questions:'04 / Questions fréquentes', featured:'FINMA REGISTRY', featuredTitle:'Le registre, dans vos outils.', files:'Un registre. Plusieurs formats.', workbook:'Classeur Excel', workbookSub:'Onglets et guide de lecture', structured:'Fichiers structurés', structuredSub:'CSV · JSON · Parquet · SQL', provenance:'Sources & contrôles', provenanceSub:'Manifeste signé · SHA-256', developers:'Pour vos outils & assistants', nojs:'Les versions et volumes nécessitent JavaScript. Consultez les fiches et leurs échantillons pour vérifier les fichiers disponibles.' },
+ de: { hero:'Die Schweiz.', accent:'In Daten.', intro:'Zolltarife, Wirtschaftsklassifikationen und FINMA-Register. Strukturierte Dateien, von der Quelle direkt zu Ihren Werkzeugen.', explore:'FINMA entdecken', proof:'Dokumentierte Quellen', access:'Einmaliger Kauf · Dateizugriff', sources:'Öffentliche Quellen. Unabhängige Aufbereitung.', catalogue:'01 / Die Datensätze', method:'02 / Ihr Weg', quality:'03 / Unsere Methode', questions:'04 / Häufige Fragen', featured:'FINMA REGISTRY', featuredTitle:'Das Register für Ihre Werkzeuge.', files:'Ein Register. Mehrere Formate.', workbook:'Excel-Arbeitsmappe', workbookSub:'Tabellenblätter und Leseanleitung', structured:'Strukturierte Dateien', structuredSub:'CSV · JSON · Parquet · SQL', provenance:'Quellen & Prüfungen', provenanceSub:'Signiertes Manifest · SHA-256', developers:'Für Ihre Werkzeuge & Assistenten', nojs:'Versionen und Umfänge benötigen JavaScript. Prüfen Sie die verfügbaren Dateien auf den Produktseiten und anhand der Muster.' },
+ en: { hero:'Switzerland,', accent:'in data.', intro:'Customs tariffs, economic classifications and the FINMA registry. Structured files that take you from the source to your tools.', explore:'Discover FINMA', proof:'Documented sources', access:'One-time purchase · File access', sources:'Public sources. Independently prepared.', catalogue:'01 / The data', method:'02 / Your workflow', quality:'03 / Our method', questions:'04 / Frequently asked', featured:'FINMA REGISTRY', featuredTitle:'The registry, in your tools.', files:'One registry. Multiple formats.', workbook:'Excel workbook', workbookSub:'Worksheets and reading guide', structured:'Structured files', structuredSub:'CSV · JSON · Parquet · SQL', provenance:'Sources & checks', provenanceSub:'Signed manifest · SHA-256', developers:'For your tools & assistants', nojs:'Versions and volumes require JavaScript. Review the product pages and samples to check the available files.' },
+}[lang];
+
 ---
-<BaseLayout title={`openswissdata — ${copy.title}`} description={copy.description}>
- <div class="bg-grid"></div>
- <section class="v4-hero"><div class="container-v4"><div class="v4-hero-grid">
-  <div><div class="v4-eyebrow reveal-v4">{copy.eyebrow}</div><h1 class="v4-h1 reveal-v4">{copy.hero}<br/><span class="accent">{copy.accent}</span></h1>
-   <p class="v4-lede reveal-v4">{copy.intro}</p>
-   <div class="v4-spec-row reveal-v4"><div class="v4-spec"><div class="v4-spec-label">{copy.datasets}</div><div class="v4-spec-value">3 + bundle</div></div><div class="v4-spec"><div class="v4-spec-label">{copy.formats}</div><div class="v4-spec-value">CSV · JSON · SQL</div></div><div class="v4-spec"><div class="v4-spec-label">{copy.provenance}</div><div class="v4-spec-value">Ed25519</div></div></div>
-   <div class="v4-cta-row reveal-v4"><a href={`${prefix}/mcp#install`} class="v4-btn v4-btn-primary">{copy.connect} →</a><a href="#datasets" class="v4-btn v4-btn-secondary">{copy.browse}</a></div>
-   <InstallBar command="claude mcp add --transport http openswissdata https://mcp.openswissdata.com/mcp/jsonrpc"/>
+
+<AtlasLayout title={`openswissdata — ${copy.title}`} description={copy.description}>
+ <div data-home-live data-lang={lang} data-copy={JSON.stringify({loading:copy.loading,unavailable:copy.unavailable,codes:copy.codes,rows:copy.rows,links:copy.links})}>
+ <section class="atlas-hero"><div class="atlas-shell atlas-hero-grid">
+  <div class="atlas-hero-copy" data-atlas-enter>
+   <p class="atlas-kicker">{copy.eyebrow}</p>
+   <h1>{atlas.hero}<br/><em>{atlas.accent}</em></h1>
+   <p class="atlas-lede">{atlas.intro}</p>
+   <div class="atlas-actions"><a href="#datasets" class="atlas-btn">{copy.browse}<span aria-hidden="true">↗</span></a><a href={`${prefix}/datasets/finma`} class="atlas-text-link">{atlas.explore}<span aria-hidden="true">→</span></a></div>
+   <div class="atlas-hero-footnote"><span>{atlas.proof}</span><span>{atlas.access}</span></div>
   </div>
-  <aside class="home-live reveal-v4" aria-label={copy.current} data-home-live data-lang={lang} data-copy={JSON.stringify({loading:copy.loading,unavailable:copy.unavailable,codes:copy.codes,rows:copy.rows,links:copy.links})}>
-   <p class="live-label">{copy.current}</p><h2>{copy.updated}</h2>
-   {products.map(p=><a class="live-row" href={`${prefix}/datasets/${p.id}`}><span class="live-name">{p.label}</span><strong data-live-version={p.id}>{copy.loading}</strong><span class="live-count" data-live-count={p.id}>{copy.details} →</span></a>)}
-   <p class="live-note">{copy.independent}</p>
-  </aside>
- </div></div></section>
- <TrustStrip sources={["BAZG", "OFS", "Eurostat", "ONU", "FINMA", "GLEIF"]} badges={["SHA-256 · Ed25519", "CSV · JSON · Parquet · SQL"]}/>
- <section class="v4-personas"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.valueTitle}</h2><p class="v4-section-intro reveal-v4">{copy.valueIntro}</p><div class="v4-persona-grid">{copy.benefits.map(([tag,title,text])=><article class="home-benefit reveal-v4"><span>{tag}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
- <section class="v4-datasets" id="datasets"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.catalogTitle}</h2><p class="v4-section-intro reveal-v4">{copy.catalogIntro}</p><div class="v4-dataset-grid">
-  {products.map((p,i)=><Fiche ribbonLabel={p.label} ribbonSource={p.source} datasetId={p.id} pillText={copy.loading} title={p.title} sub={p.sub} desc={p.desc} formats={p.id==='finma'?["EXCEL","CSV","JSON","PARQUET","SQL"]:["CSV","JSON","PARQUET","SQL"]} price={p.price} href={`${prefix}/datasets/${p.id}`} ctaLabel={copy.buy} delay={i+1}/>)}
-  <Fiche ribbonLabel={copy.bundleLabel} ribbonSource={copy.all} pillText="−20 %" title={copy.bundleTitle} sub="TARES + Classifications + FINMA" desc={copy.bundleDesc} formats={["CSV","JSON","PARQUET","SQL"]} price="797" href={`${prefix}/bundle`} ctaLabel={copy.bundleCta} theme="bundle" roiText={copy.saving} strikePrice="997" delay={4}/>
- </div></div></section>
- <section class="v4-how"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.howTitle}</h2><div class="home-steps">{copy.steps.map(([title,text],i)=><article class="reveal-v4"><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
- <section class="v4-faq"><div class="container-v4"><h2 class="v4-section-h2 reveal-v4">{copy.faqTitle}</h2><div class="v4-faq-list">{copy.faq.map(([q,a])=><details class="v4-faq-item reveal-v4"><summary>{q}</summary><p>{a}</p></details>)}</div><div class="v4-cta-row"><a href={`${lang==='de'?'/de':''}/legal/provenance`}>{copy.readProof} →</a><a href={`${lang==='de'?'/de':''}/legal/cgv`}>{copy.terms}</a><a href="mailto:contact@openswissdata.com">{copy.support}</a></div></div></section>
- <section class="v4-cta-final"><div class="container-v4"><h2 class="reveal-v4">{copy.finalTitle}</h2><p class="reveal-v4">{copy.finalText}</p><div class="v4-cta-final-row reveal-v4"><a href="#datasets" class="v4-btn v4-btn-primary">{copy.browse} →</a><a href="/api/catalog/tares?format=csv" class="v4-btn v4-btn-secondary" download>{copy.sample} ↓</a></div></div></section>
+  <AtlasArtwork />
+ </div></section>
+ <div class="atlas-source-band"><div class="atlas-shell atlas-source-row"><p class="atlas-source-caption">{atlas.sources}</p><div class="atlas-source-names"><span>BAZG</span><span>OFS</span><span>Eurostat</span><span>ONU</span><span>FINMA</span><span>GLEIF</span></div></div></div>
+ <section class="atlas-section" id="datasets"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{atlas.catalogue}</p><h2>{copy.catalogTitle}</h2></div><p class="atlas-section-intro">{copy.catalogIntro}</p></div>
+  <article class="atlas-feature" data-atlas-enter>
+   <div><p class="atlas-kicker">{atlas.featured}</p><h3>{atlas.featuredTitle}</h3><p>{copy.finmaDesc}</p><ul class="atlas-formats" aria-label={copy.formats}>{['EXCEL','CSV','JSON','PARQUET','SQL'].map(format=><li>{format}</li>)}</ul>
+    <div class="atlas-price-line"><strong>299</strong><span>CHF</span></div><div class="atlas-actions"><a href={`${prefix}/datasets/finma`} class="atlas-btn">{copy.buy}<span aria-hidden="true">↗</span></a><a href="/api/catalog/finma?format=csv" class="atlas-text-link">{copy.sample} ↓</a></div>
+   </div>
+   <div class="atlas-file-window"><div class="atlas-window-title"><span>FINMA / REGISTRY</span><span aria-hidden="true">↗</span></div><div class="atlas-window-body"><h4>{atlas.files}</h4>
+    {[["XLS",atlas.workbook,atlas.workbookSub],["{ }",atlas.structured,atlas.structuredSub],["#",atlas.provenance,atlas.provenanceSub]].map(([icon,title,sub])=><div class="atlas-file-row"><span aria-hidden="true">{icon}</span><div><strong>{title}</strong><small>{sub}</small></div><span aria-hidden="true">↳</span></div>)}
+   </div><div class="atlas-window-bottom"><strong class="atlas-live-value" data-live-version="finma">{copy.loading}</strong><span data-live-count="finma">{copy.details}</span></div></div>
+  </article>
+  <div class="atlas-product-grid">{products.filter(p=>p.id!=='finma').map(p=><article class="atlas-product-card" data-atlas-enter><div class="atlas-product-card-head"><p class="atlas-kicker">{p.label}</p><span>{p.source}</span></div><h3>{p.title}</h3><span class="atlas-product-sub">{p.sub}</span><p>{p.desc}</p><div class="atlas-live-value"><span data-live-version={p.id}>{copy.loading}</span><br/><span data-live-count={p.id}></span></div><div class="atlas-product-card-foot"><strong>{p.price} <small>CHF</small></strong><a href={`${prefix}/datasets/${p.id}`}>{copy.buy}<span aria-hidden="true">↗</span></a></div></article>)}</div>
+  <div class="atlas-bundle" data-atlas-enter><span class="atlas-bundle-mark" aria-hidden="true">3↳1</span><div><h3>{copy.bundleTitle}</h3><p>{copy.saving}</p></div><a href={`${prefix}/bundle`}><strong>797 CHF</strong><span>{copy.bundleCta} ↗</span></a></div>
+  <p class="atlas-live-note">{copy.updated}. {copy.independent}</p><noscript class="atlas-noscript">{atlas.nojs}</noscript>
+ </div></section>
+ <section class="atlas-section atlas-method" id="how"><div class="atlas-shell"><div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{atlas.method}</p><h2>{copy.howTitle}</h2></div><p class="atlas-section-intro">{copy.valueIntro}</p></div><div class="atlas-steps">{copy.steps.map(([title,text],i)=><article class="atlas-step" data-atlas-enter><span>0{i+1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+ <section class="atlas-section"><div class="atlas-shell"><div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{atlas.quality}</p><h2>{copy.valueTitle}</h2></div><a href={`${prefix}/legal/provenance`} class="atlas-text-link">{copy.readProof} ↗</a></div><div class="atlas-benefits">{copy.benefits.map(([tag,title,text])=><article class="atlas-benefit" data-atlas-enter><span>{tag}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+ <section class="atlas-section atlas-faq"><div class="atlas-shell atlas-faq-grid"><div data-atlas-enter><p class="atlas-kicker">{atlas.questions}</p><h2 class="atlas-section-title">{copy.faqTitle}</h2><a href={`${prefix}/legal/cgv`} class="atlas-text-link">{copy.terms} ↗</a><br/><a href="mailto:contact@openswissdata.com" class="atlas-text-link">{copy.support} ↗</a></div><div>{copy.faq.map(([q,a])=><details><summary>{q}</summary><p>{a}</p></details>)}</div></div></section>
+ <section class="atlas-shell atlas-integrate" data-atlas-enter><div><h2>{atlas.developers}</h2><p>{copy.finalText}</p><div class="atlas-actions"><a href={`${prefix}/mcp#install`} class="atlas-text-link">{copy.connect} ↗</a></div></div><div class="atlas-code-box"><span>MCP / HTTP</span><code>claude mcp add --transport http openswissdata https://mcp.openswissdata.com/mcp/jsonrpc</code></div></section>
+ </div>
  <script type="application/ld+json" set:html={jsonForHtml({"@context":"https://schema.org","@type":"FAQPage",mainEntity:copy.faq.map(([q,a])=>({"@type":"Question",name:q,acceptedAnswer:{"@type":"Answer",text:a}}))})}/>
  <script>
+  import { readPublicCatalogue } from "../lib/public-catalogue";
   const root=document.querySelector<HTMLElement>('[data-home-live]');
   if(root){
-   const copy=JSON.parse(root.dataset.copy!),number=new Intl.NumberFormat(root.dataset.lang);
-   for(const id of ['tares','classifications','finma']){
+   const copy=JSON.parse(root.dataset.copy!),lang=root.dataset.lang as 'fr'|'de'|'en',number=new Intl.NumberFormat({fr:'fr-CH',de:'de-CH',en:'en'}[lang]);
+   for(const id of ['tares','classifications','finma'] as const){
     const version=document.querySelector<HTMLElement>(`[data-live-version="${id}"]`)!,count=document.querySelector<HTMLElement>(`[data-live-count="${id}"]`)!;
     const pills=document.querySelectorAll<HTMLElement>(`[data-dataset-version="${id}"]`);
-    fetch(`/api/catalog/${id}`,{cache:'no-store',signal:AbortSignal.timeout(12000)}).then(async r=>{
-     if(!r.ok)throw new Error('Catalogue indisponible');const data=await r.json();
-     if(!/^\d{4}\.\d{2}\.\d{2}/.test(data.version))throw new Error('Version absente');
+    readPublicCatalogue(id).then(data=>{
+     if(typeof data.version!=='string'||!/^\d{4}\.\d{2}\.\d{2}/.test(data.version))throw new Error('Version absente');
+     const total=id==='finma'?data.registry_rows:data.rows;
+     if(typeof total!=='number'||!Number.isSafeInteger(total)||total<0||(id==='classifications'&&(typeof data.links!=='number'||!Number.isSafeInteger(data.links)||data.links<0)))throw new Error('Volumes absents');
      version.textContent='v'+data.version;pills.forEach(p=>p.textContent='v'+data.version);
-     count.textContent=id==='finma'?`${number.format(data.registry_rows)} ${copy.rows}`:`${number.format(data.rows)} ${copy.codes}`;
-     if(id==='classifications')count.textContent+=` · ${number.format(data.links)} ${copy.links}`;
+     count.textContent=`${number.format(total)} ${id==='finma'?copy.rows:copy.codes}`;
+     if(id==='classifications'&&typeof data.links==='number')count.textContent+=` · ${number.format(data.links)} ${copy.links}`;
     }).catch(()=>{version.textContent=copy.unavailable;pills.forEach(p=>p.textContent=copy.unavailable);});
    }
   }
+
  </script>
- <style>
-  .home-live{border:1px solid var(--line);background:var(--bg-card);border-radius:20px;padding:28px;box-shadow:0 16px 48px #00000008;min-width:0}
-  .live-label{text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--accent);margin-bottom:12px}.home-live h2{font-size:22px;line-height:1.35;letter-spacing:-.03em;margin-bottom:22px}.live-row{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:19px 0;border-top:1px solid var(--line);text-decoration:none;color:var(--ink);overflow-wrap:anywhere}.live-name{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--ink-soft)}.live-row strong{font-size:18px}.live-count,.live-note{font-size:13px;color:var(--ink-soft);line-height:1.65}.live-note{margin-top:18px}.home-benefit{padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--bg-card)}.home-benefit>span{color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.home-benefit h3,.home-steps h3{font-size:20px;margin:14px 0;line-height:1.3}.home-benefit p,.home-steps p{font-size:15px;line-height:1.8;color:var(--ink-soft)}.home-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px}.step-number{font-family:var(--font-mono);font-size:28px;color:var(--accent)}
-  @media(max-width:768px){.home-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.home-live{padding:22px}.v4-spec-value{font-size:14px}}
-  @media(max-width:480px){.home-steps{grid-template-columns:1fr;gap:24px}.home-steps article{border-top:1px solid var(--line);padding-top:18px}.v4-spec-row{gap:18px}.v4-spec-value{font-size:12px}}
- </style>
-</BaseLayout>
+</AtlasLayout>

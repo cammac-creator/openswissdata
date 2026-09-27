@@ -1,0 +1,17 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import AtlasNav from '../components/AtlasNav.astro';
+import AtlasFooter from '../components/AtlasFooter.astro';
+import '../styles/atlas.css';
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  datasetJsonLd?: Record<string, unknown>;
+}
+---
+<BaseLayout {...Astro.props} appearance="atlas">
+  <AtlasNav slot="header" />
+  <slot />
+  <AtlasFooter slot="footer" />
+</BaseLayout>

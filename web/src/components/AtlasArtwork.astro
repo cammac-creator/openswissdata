@@ -1,0 +1,19 @@
+---
+import { Image } from 'astro:assets';
+import atlas from '../assets/art/swiss-atlas-v1.png';
+import { getLangFromPath } from '../i18n/utils';
+const { compact = false } = Astro.props;
+const lang = getLangFromPath(Astro.url.pathname);
+const copy = {
+ fr: { layers: 'Des sources. Une structure.', archive: 'Fichiers documentés', format: 'Prêts à explorer', pause: 'Réduire les animations' },
+ de: { layers: 'Mehrere Quellen. Eine Struktur.', archive: 'Dokumentierte Dateien', format: 'Bereit zum Entdecken', pause: 'Animationen reduzieren' },
+ en: { layers: 'Many sources. One structure.', archive: 'Documented files', format: 'Ready to explore', pause: 'Reduce animations' },
+}[lang];
+---
+<div class:list={['atlas-artwork', { 'atlas-artwork-compact': compact }]} data-atlas-art>
+ <div class="atlas-art-meta" aria-hidden="true"><span>CH / DATA ATLAS</span><span>46°57′ N · 7°27′ E</span></div>
+ <div class="atlas-art-plane" aria-hidden="true"><Image src={atlas} alt="" widths={[400,700,1000,1254]} sizes="(max-width: 760px) 100vw, 55vw" format="webp" quality={82} loading="eager" fetchpriority="high" class="atlas-art-image" /></div>
+ <div class="atlas-art-label" aria-hidden="true"><span class="atlas-art-line"></span><span>{copy.layers}</span></div>
+ <div class="atlas-file-float"><span class="atlas-file-glyph" aria-hidden="true">↳</span><div><strong>{copy.archive}</strong><span>CSV / JSON / PARQUET / SQL</span></div><span class="atlas-file-plus" aria-hidden="true">+</span></div>
+ <div class="atlas-art-bottom"><span>{copy.format}<span aria-hidden="true"> ↗</span></span><button type="button" class="atlas-motion" data-atlas-motion aria-pressed="false" hidden><span class="atlas-pause-icon" aria-hidden="true">Ⅱ</span><span>{copy.pause}</span></button></div>
+</div>
