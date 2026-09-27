@@ -198,3 +198,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Toute révocation exige le client propriétaire dans le WHERE SQL ; aucun appel sans clientId. Une réponse 200 ne révèle pas si un jeton tiers existe.
 - Authorization présent mais invalide donne 401, jamais de repli anonyme. Bearer accepte la casse indifféremment. Les pannes de lecture/quota ne renvoient aucun détail brut.
 - Registre des outils par Map et portée obligatoire, y compris pour administrateur. Ne pas réintroduire la lecture des propriétés héritées. Voir docs/frontieres-mcp.md et les réserves OAuth restantes.
+
+## Entrées OAuth (27.09.2026)
+- Le routeur compte les octets réels des POST avant tout parseur, plafond 16 Kio et annulation du flux trop long. Ne pas revenir à la seule valeur Content-Length. En-têtes no-store/no-cache sur les deux montages OAuth, inscription et autorisation comprises.
+- Utiliser readOAuthForm pour refuser un formulaire illisible sans diagnostic brut. Les deux outils sémantiques rendent un message fixe si index/modèle indisponible ; aucun message fournisseur ou chemin interne. Voir docs/entrees-oauth.md ; les limites de fréquence, durée de réception et redirections restent distinctes.

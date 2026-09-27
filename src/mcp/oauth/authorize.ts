@@ -24,6 +24,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { generateAuthCode, hashToken } from "./crypto.js";
 import { findClientById, insertAuthCode } from "./store.js";
+import { readOAuthForm } from './input.js';
 import {
   parseScopes,
   serializeScopes,
@@ -124,7 +125,8 @@ authorizeRoute.get("/authorize", (c) => {
 });
 
 authorizeRoute.post("/authorize/decision", async (c) => {
-  const form = await c.req.parseBody();
+  const form = await readOAuthForm(c);
+  if (!form) return c.json({error: 'invalid_request'}, 400);
   const decision = String(form.decision ?? "");
   const client_id = String(form.client_id ?? "");
   const redirect_uri = String(form.redirect_uri ?? "");

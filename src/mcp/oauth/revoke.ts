@@ -14,6 +14,7 @@ import { Hono } from "hono";
 import { hashToken } from "./crypto.js";
 import { findClientById, revokeTokenByHash } from "./store.js";
 import { timingSafeEqual } from "node:crypto";
+import { readOAuthForm } from './input.js';
 
 export const revokeRoute = new Hono();
 
@@ -26,7 +27,8 @@ function constantTimeStrEq(a: string, b: string): boolean {
 
 revokeRoute.post("/revoke", async (c) => {
   c.header('Cache-Control', 'no-store');
-  const body = (await c.req.parseBody()) as Record<string, unknown>;
+  const body = await readOAuthForm(c);
+  if (!body) return c.json({error: 'invalid_request'}, 400);
 
   // Client auth (Basic OR body fields)
   let cid = "";

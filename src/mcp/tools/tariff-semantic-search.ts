@@ -25,6 +25,7 @@
 import { z } from "zod";
 import { getTaresEmbeddings } from "../data-loader.js";
 import { embedQuery, cosineSimilarity, EMBEDDING_MODEL } from "../embedder.js";
+import { reportSemanticFailure } from '../semantic-failure.js';
 
 export const tariffSemanticSearchSchema = {
   type: "object",
@@ -77,10 +78,10 @@ export async function tariffSemanticSearchHandler(args: unknown): Promise<{
   let queryVec: Float32Array;
   try {
     [embeddings, queryVec] = await Promise.all([getTaresEmbeddings(), embedQuery(query)]);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
+  } catch {
+    reportSemanticFailure('tariff_semantic_search');
     return {
-      content: [{ type: "text", text: `Embedding pipeline failed: ${msg}` }],
+      content: [{ type: "text", text: "Recherche sémantique temporairement indisponible." }],
       isError: true,
     };
   }

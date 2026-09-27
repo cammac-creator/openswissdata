@@ -14,8 +14,10 @@ import { registerRoute } from "./register.js";
 import { authorizeRoute } from "./authorize.js";
 import { tokenRoute } from "./token.js";
 import { revokeRoute } from "./revoke.js";
+import { oauthInput } from './input.js';
 
 export const oauthRouter = new Hono();
+oauthRouter.use('*', oauthInput);
 oauthRouter.route("/", registerRoute);
 oauthRouter.route("/", authorizeRoute);
 oauthRouter.route("/", tokenRoute);

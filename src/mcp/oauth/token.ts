@@ -19,6 +19,7 @@ import { Hono } from "hono";
 import { timingSafeEqual } from "node:crypto";
 import { isValidScope, parseScopes, serializeScopes } from './scopes.js';
 import { getDb, SQLITE_BUSY_TIMEOUT_MS } from '../../lib/db.js';
+import { readOAuthForm } from './input.js';
 import {
   generateRandomToken,
   hashToken,
@@ -79,8 +80,8 @@ function constantTimeStrEq(a: string, b: string): boolean {
 tokenRoute.post("/token", async (c) => {
   c.header('Cache-Control', 'no-store');
   c.header('Pragma', 'no-cache');
-  // Body can be url-encoded form OR JSON. parseBody handles both via Hono.
-  const body = (await c.req.parseBody()) as Record<string, unknown>;
+  const body = await readOAuthForm(c);
+  if (!body) return c.json({error: 'invalid_request'}, 400);
 
   const grant = String(body.grant_type ?? "");
   if (grant === "authorization_code" || grant === "refresh_token") {
