@@ -227,6 +227,13 @@ CREATE TABLE IF NOT EXISTS mcp_clients (
 );
 
 CREATE INDEX IF NOT EXISTS idx_mcp_clients_email ON mcp_clients(email);
+-- Liste explicite ; les clients historiques ne reçoivent aucune adresse supposée.
+CREATE TABLE IF NOT EXISTS mcp_client_redirect_uris (
+  client_id TEXT NOT NULL REFERENCES mcp_clients(client_id) ON DELETE CASCADE,
+  redirect_uri TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (client_id, redirect_uri)
+);
 -- NOTE: the index on stripe_subscription_id is created in src/lib/db.ts AFTER an
 -- idempotent ensureColumn(), because on a pre-existing DB the column is absent
 -- here (CREATE TABLE IF NOT EXISTS won't add it) and a CREATE INDEX referencing

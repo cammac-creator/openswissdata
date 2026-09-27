@@ -21,6 +21,7 @@ import { isValidScope, parseScopes, serializeScopes } from './scopes.js';
 import { getDb, SQLITE_BUSY_TIMEOUT_MS } from '../../lib/db.js';
 import { readOAuthForm } from './input.js';
 import {parseClientCredentials, rejectClientAuth} from './client-auth.js';
+import {isRegisteredRedirectUri} from './redirects.js';
 import {
   generateRandomToken,
   hashToken,
@@ -116,6 +117,7 @@ function handleCode(c: Context, body: Record<string, unknown>): Response {
   if (!Number.isSafeInteger(stored.expires_at) || stored.expires_at <= Date.now()) return c.json({ error: "invalid_grant", error_description: "code expired" }, 400);
   if (stored.client_id !== auth.client_id) return c.json({ error: "invalid_grant", error_description: "client_id mismatch" }, 400);
   if (stored.redirect_uri !== redirect_uri) return c.json({ error: "invalid_grant", error_description: "redirect_uri mismatch" }, 400);
+  if (stored.code_challenge_method !== 'S256' || !isRegisteredRedirectUri(client.client_id, redirect_uri)) return c.json({error: 'invalid_grant'}, 400);
   if (!pkceVerify(verifier, stored.code_challenge, stored.code_challenge_method)) {
     return c.json({ error: "invalid_grant", error_description: "PKCE verification failed" }, 400);
   }

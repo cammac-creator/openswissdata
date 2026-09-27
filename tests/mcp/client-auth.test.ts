@@ -12,7 +12,7 @@ const basic=(id=CLIENT,secret=SECRET)=>'Basic '+Buffer.from(id+':'+secret).toStr
 describe('Authentification OAuth sans mélange sur base fictive',()=>{
  let folder:string,app:ReturnType<typeof createApp>;
  beforeEach(()=>{closeDb();folder=mkdtempSync(join(tmpdir(),'osd-auth-client-'));vi.stubEnv('DATABASE_PATH',join(folder,'fictive.sqlite'));vi.stubEnv('OAUTH_SIGNING_SECRET','cle-fictive-auth-client');
-  insertClient({client_id:CLIENT,client_secret_hash:hashToken(SECRET),name:'Fictif',email:'fictif@example.test',tier:'free',scopes:['finma:read']});
+  insertClient({redirect_uris:[REDIRECT],client_id:CLIENT,client_secret_hash:hashToken(SECRET),name:'Fictif',email:'fictif@example.test',tier:'free',scopes:['finma:read']});
   insertToken({client_id:CLIENT,access_token_plain:ACCESS,refresh_token_plain:REFRESH,scope:'finma:read'});
   insertAuthCode({code:hashToken(CODE),client_id:CLIENT,redirect_uri:REDIRECT,code_challenge:pkceChallengeS256(VERIFIER),code_challenge_method:'S256',scope:'finma:read',state:null});app=createApp();
  });

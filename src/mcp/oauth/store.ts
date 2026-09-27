@@ -8,6 +8,8 @@
 
 import { getDb } from "../../lib/db.js";
 import { hashToken } from "./crypto.js";
+import {replaceClientRedirectUris} from './redirects.js';
+import {oauthWrite} from './transaction.js';
 import { parseScopes, serializeScopes, TIER_DEFAULT_SCOPES, type Scope, type Tier } from "./scopes.js";
 
 const ACCESS_TOKEN_TTL_MS = 60 * 60 * 1000; // 1h
@@ -64,9 +66,11 @@ export function insertClient(args: {
   scopes: readonly Scope[];
   customer_id?: number | null;
   stripe_subscription_id?: string | null;
+  redirect_uris?: readonly string[];
 }): MCPClient {
   const db = getDb();
   const now = Date.now();
+  return oauthWrite(() => {
   db.prepare(
     `INSERT INTO mcp_clients (client_id, client_secret_hash, name, email, tier, scopes, customer_id, stripe_subscription_id, created_at)
      VALUES (@client_id, @client_secret_hash, @name, @email, @tier, @scopes, @customer_id, @stripe_subscription_id, @created_at)`,
@@ -77,7 +81,9 @@ export function insertClient(args: {
     stripe_subscription_id: args.stripe_subscription_id ?? null,
     created_at: now,
   });
+  if (args.redirect_uris) replaceClientRedirectUris(args.client_id, args.redirect_uris);
   return findClientById(args.client_id) as MCPClient;
+  });
 }
 
 export function findClientById(client_id: string): MCPClient | null {

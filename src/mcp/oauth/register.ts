@@ -6,7 +6,7 @@
  *     "name": "My MCP integration",
  *     "email": "dev@example.com",
  *     "tier": "free" | "standard" | "pro" | "standalone",   // optional, default "free"
- *     "redirect_uris": ["http://localhost:8765/callback"]    // not stored — declared at /authorize
+ *     "redirect_uris": ["http://localhost:8765/callback"]    // liste explicite persistée
  *   }
  *
  * Response (201):
@@ -33,6 +33,7 @@ import {
   hashToken,
 } from "./crypto.js";
 import { insertClient } from "./store.js";
+import {RedirectUrisSchema} from './redirects.js';
 import { TIER_DEFAULT_SCOPES, serializeScopes, type Tier } from "./scopes.js";
 import {
   oauthRegisterBucket,
@@ -41,10 +42,10 @@ import {
 } from "../../lib/rate-limit.js";
 
 const RegisterSchema = z.object({
-  name: z.string().min(1).max(120),
+  name: z.string().trim().min(1).max(120).refine(value => !/[\p{Cc}\p{Cf}]/u.test(value)),
   email: z.string().email(),
   tier: z.string().optional(),
-  redirect_uris: z.array(z.string().url()).optional(),
+  redirect_uris: RedirectUrisSchema,
 });
 
 export const registerRoute = new Hono();
@@ -65,7 +66,7 @@ registerRoute.post("/register", async (c) => {
   const parsed = RegisterSchema.safeParse(body);
   if (!parsed.success) {
     return c.json(
-      { error: "invalid_request", error_description: parsed.error.message },
+      { error: parsed.error.issues.some(issue => issue.path[0] === 'redirect_uris') ? 'invalid_redirect_uri' : 'invalid_client_metadata' },
       400,
     );
   }
@@ -81,14 +82,18 @@ registerRoute.post("/register", async (c) => {
   const clientSecret = generateClientSecret();
   const scopes = TIER_DEFAULT_SCOPES[tier];
 
-  insertClient({
+  try { insertClient({
     client_id: clientId,
     client_secret_hash: hashToken(clientSecret),
     name: parsed.data.name,
     email: parsed.data.email,
     tier,
     scopes,
-  });
+    redirect_uris: parsed.data.redirect_uris,
+  }); } catch {
+    c.header('Retry-After', '1');
+    return c.json({error: 'temporarily_unavailable'}, 503);
+  }
 
   const baseUrl = process.env.MCP_BASE_URL ?? "https://mcp.openswissdata.com";
 
@@ -98,6 +103,7 @@ registerRoute.post("/register", async (c) => {
       client_secret: clientSecret,
       tier,
       scopes: serializeScopes(scopes),
+      redirect_uris: parsed.data.redirect_uris,
       token_endpoint: `${baseUrl}/oauth/token`,
       authorization_endpoint: `${baseUrl}/oauth/authorize`,
       revoke_endpoint: `${baseUrl}/oauth/revoke`,

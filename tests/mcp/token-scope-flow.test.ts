@@ -21,7 +21,7 @@ describe('Portées durant le cycle OAuth, uniquement sur comptes fictifs',()=>{
  };
  const refresh=(scope?:string)=>createApp().request('/mcp/oauth/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',client_id:CLIENT,client_secret:SECRET,refresh_token:REFRESH,...(scope===undefined?{}:{scope})})});
  it('le parcours inscription puis autorisation sans scope donne les droits gratuits explicites',async()=>{
-  const app=createApp();const registered=await app.request('/mcp/oauth/register',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:'Client de démonstration',email:'demo@example.test'})});expect(registered.status).toBe(201);const client=await registered.json();
+  const app=createApp();const registered=await app.request('/mcp/oauth/register',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:'Client de démonstration',email:'demo@example.test',redirect_uris:['https://client.example.test/callback']})});expect(registered.status).toBe(201);const client=await registered.json();
   const verifier='V'.repeat(43),redirect='https://client.example.test/callback',query=new URLSearchParams({response_type:'code',client_id:client.client_id,redirect_uri:redirect,code_challenge:pkceChallengeS256(verifier),code_challenge_method:'S256'});
   const authorize=await app.request('/mcp/oauth/authorize?'+query);expect(authorize.status).toBe(200);const form=new URLSearchParams();
   for(const match of (await authorize.text()).matchAll(/name="([^"]+)" value="([^"]*)"/g))form.set(match[1],match[2]);

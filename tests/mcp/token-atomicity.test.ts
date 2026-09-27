@@ -14,7 +14,7 @@ describe('Emission OAuth indivisible sur base fictive',()=>{
  let folder:string, app:ReturnType<typeof createApp>;
  beforeEach(()=>{
   closeDb();folder=mkdtempSync(join(tmpdir(),'osd-atomicite-'));vi.stubEnv('DATABASE_PATH',join(folder,'fictive.sqlite'));vi.stubEnv('OAUTH_SIGNING_SECRET','cle-fictive-pour-transactions-oauth');vi.stubEnv('MCP_BEARER_TOKEN','');
-  insertClient({client_id:CLIENT,client_secret_hash:hashToken(SECRET),name:'Exemple',email:'demo@example.test',tier:'pro',scopes:TIER_DEFAULT_SCOPES.pro});
+  insertClient({redirect_uris:[REDIRECT],client_id:CLIENT,client_secret_hash:hashToken(SECRET),name:'Exemple',email:'demo@example.test',tier:'pro',scopes:TIER_DEFAULT_SCOPES.pro});
   insertAuthCode({code:hashToken(CODE),client_id:CLIENT,redirect_uri:REDIRECT,code_challenge:pkceChallengeS256(VERIFIER),code_challenge_method:'S256',scope:'finma:read',state:null});
   insertToken({client_id:CLIENT,access_token_plain:ACCESS,refresh_token_plain:REFRESH,scope:'finma:read'});
   app=createApp();

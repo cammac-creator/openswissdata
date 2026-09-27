@@ -15,10 +15,12 @@ import { authorizeRoute } from "./authorize.js";
 import { tokenRoute } from "./token.js";
 import { revokeRoute } from "./revoke.js";
 import { oauthInput } from './input.js';
+import {redirectConfigurationRoute} from './redirect-configuration.js';
 
 export const oauthRouter = new Hono();
 oauthRouter.use('*', oauthInput);
 oauthRouter.route("/", registerRoute);
+oauthRouter.route('/', redirectConfigurationRoute);
 oauthRouter.route("/", authorizeRoute);
 oauthRouter.route("/", tokenRoute);
 oauthRouter.route("/", revokeRoute);

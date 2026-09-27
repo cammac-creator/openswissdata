@@ -31,6 +31,7 @@ import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
 import { CHECKOUT_NOTICE_CSP, isCheckoutNotice } from './lib/checkout-notice.js';
+import {authorizationCsp} from './mcp/oauth/redirects.js';
 
 export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   const app = new Hono();
@@ -40,6 +41,11 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   // Ces en-têtes s'appliquent après les réglages généraux, y compris aux redirections.
   app.use("*", async (c, next) => {
     await next();
+    if (/^\/(?:mcp\/)?oauth\//.test(c.req.path)) c.header('Referrer-Policy', 'no-referrer');
+    if (/^\/(?:mcp\/)?oauth\/authorize(?:\/decision)?$/.test(c.req.path)) {
+      const destination = c.req.method === 'GET' && c.res.status === 200 && c.res.headers.get('content-type')?.includes('text/html') ? c.req.query('redirect_uri') : undefined;
+      c.header('Content-Security-Policy', authorizationCsp(destination));
+    }
     if (isCheckoutNotice(c)) c.header('Content-Security-Policy', CHECKOUT_NOTICE_CSP);
     if (/^\/api\/(delivery|download)\//.test(c.req.path)) c.header("Referrer-Policy", "no-referrer");
     if (c.req.path.startsWith("/api/delivery/")) {
