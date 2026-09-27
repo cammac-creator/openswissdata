@@ -105,9 +105,12 @@ export function isValidTier(t: string): t is Tier {
 /**
  * Maps a paid subscription SKU (as carried in Stripe Checkout metadata
  * `dataset_ids`) to the MCP tier it grants. Single source of truth consumed by
- * the Stripe webhook to provision/upgrade a client after payment.
+ * the Stripe webhook to provision a distinct client after payment.
  * Keep in sync with SUBSCRIPTION_PRICE_ENV in src/routes/checkout.ts.
  */
+// Marqueur du parcours d'attribution distincte, pas une preuve d'identité humaine.
+export const MCP_PROVISIONING_VERSION = "2026-09-27";
+
 export const SKU_TO_TIER: Readonly<Record<string, Tier>> = {
   mcp_standalone: "standalone",
   mcp_business: "business",

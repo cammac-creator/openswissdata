@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { MCP_PROVISIONING_VERSION } from "../mcp/oauth/scopes.js";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type Stripe from "stripe";
 import { z } from "zod";
@@ -129,6 +130,8 @@ async function buildSession(
   const buyerLocale = locale ?? "fr";
   const legal = mode === "payment" ? checkoutLegal(buyerLocale, baseUrl) : undefined;
   const metadata: Record<string, string> = { dataset_ids: dataset_ids.join(","), locale: buyerLocale, ...legal?.metadata };
+
+  if (mode === "subscription") metadata.mcp_provisioning_version = MCP_PROVISIONING_VERSION;
 
   const params: Stripe.Checkout.SessionCreateParams = {
     mode,

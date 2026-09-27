@@ -411,11 +411,13 @@ describe("POST /api/checkout — subscription caisse fermée (MCP_SUBSCRIPTIONS_
     const res = await app.request("/api/checkout/session", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ dataset_ids: ["mcp_standalone"], email: "x@y.com" }),
+      body: JSON.stringify({ dataset_ids: ["mcp_standalone"], email: "x@y.com", client_id: "osd_tiers", metadata: {mcp_provisioning_version: "faux"} }),
     });
     expect(res.status).toBe(200);
     const call = sessionCreateMock.mock.calls[0][0];
     expect(call.mode).toBe("subscription");
+    expect(call.metadata).toEqual({dataset_ids: "mcp_standalone", locale: "fr", mcp_provisioning_version: "2026-09-27"});
+    expect(call.client_id).toBeUndefined();
     expect(call.line_items).toEqual([{ price: "price_sub_standalone", quantity: 1 }]);
   });
 });

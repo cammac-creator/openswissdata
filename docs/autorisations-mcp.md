@@ -34,7 +34,7 @@ L’échange du code recontrôle la destination toujours enregistrée, le client
 
 Ne pas restaurer une ancienne base pour revenir au code précédent. La table additive peut être conservée ; l’ancien code l’ignore, donc un retour arrière réintroduirait les défauts de validation. La sauvegarde complète conserve ses lignes ; l’intégrité SQLite et les clés étrangères sont vérifiées globalement. Le profil historique de restauration ne constitue pas à lui seul une recette de ce parcours : un essai fictif dédié vérifie la persistance des destinations.
 
-À terminer en priorité : identité humaine et session de consentement, séparation du payeur (le rapprochement historique par email déclaré ne vaut pas une identité prouvée), limitation durable de fréquence et de durée, protection contre les rejeux de familles de jetons, clients publics/natifs et compatibilité externe. Aucun achat de fichier ne vaut abonnement MCP. Les nouvelles offres restent fermées.
+À terminer en priorité : identité humaine et session de consentement, preuve de contrôle du payeur et livraison durable (le rapprochement automatique par email a été retiré ; voir [rattachement des abonnements](rattachement-abonnements-mcp.md)), limitation durable de fréquence et de durée, protection contre les rejeux de familles de jetons, clients publics/natifs et compatibilité externe. Aucun achat de fichier ne vaut abonnement MCP. Les nouvelles offres restent fermées.
 
 ## Références
 

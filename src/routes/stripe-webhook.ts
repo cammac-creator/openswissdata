@@ -1,4 +1,6 @@
 import { Hono, type Context } from "hono";
+import { z } from "zod";
+import { oauthWrite } from "../mcp/oauth/transaction.js";
 import type { Stripe } from "stripe";
 import { getDb } from "../lib/db.js";
 import { stripe } from "../lib/stripe.js";
@@ -11,11 +13,10 @@ import { UPDATE_PERIOD_MS, refreshOrderRights } from "../lib/order-rights.js";
 import { generateClientId, generateClientSecret, hashToken } from "../mcp/oauth/crypto.js";
 import {
   insertClient,
-  findClientByEmail,
   findClientBySubscriptionId,
   setClientTier,
 } from "../mcp/oauth/store.js";
-import { TIER_DEFAULT_SCOPES, SKU_TO_TIER, type Tier } from "../mcp/oauth/scopes.js";
+import { TIER_DEFAULT_SCOPES, SKU_TO_TIER, MCP_PROVISIONING_VERSION, type Tier } from "../mcp/oauth/scopes.js";
 
 export const stripeWebhookRoute = new Hono();
 
@@ -31,154 +32,119 @@ function priceIdToTier(priceId: string | undefined): Tier | undefined {
   return undefined;
 }
 
+/** Accepte aussi les références développées par Stripe, sans les enregistrer comme objets. */
+function stripeReference(value: unknown, prefix: string): string | null {
+  const id = typeof value === "string" ? value
+    : value && typeof value === "object" && "id" in value ? value.id : null;
+  return typeof id === "string" && id.length <= 255 &&
+    new RegExp(`^${prefix}_[A-Za-z0-9_]+$`).test(id) ? id : null;
+}
+
 /**
- * A paid MCP subscription checkout completed → provision (or upgrade) the
- * client and email its credentials. Matching payer → client is done by EMAIL
- * (checkout carries no client_id). Always returns 200: a 500 here would make
- * Stripe retry-storm, and we've already been paid — failures are logged loudly
- * for manual recovery instead.
+ * L'email déclaré à l'inscription d'une application n'est jamais une preuve
+ * de propriété. Chaque nouvel abonnement reçoit une application et un secret
+ * distincts. Le reçu durable dédoublonne aussi les rejeux après résiliation.
  */
 async function handleSubscriptionCheckout(
   session: Stripe.Checkout.Session,
   datasetIds: string[],
   c: Context,
 ) {
-  const email = session.customer_email ?? session.customer_details?.email ?? null;
-  const sku = datasetIds.find((id) => id in SKU_TO_TIER);
+  const sku = datasetIds.find(id => Object.hasOwn(SKU_TO_TIER, id));
   const tier = sku ? SKU_TO_TIER[sku] : undefined;
-
-  if (!tier) {
-    console.error(
-      `[webhook] subscription checkout ${session.id} has no recognised MCP SKU (dataset_ids="${datasetIds.join(",")}") — cannot provision`,
-    );
-    return c.json({ received: true, mcp: { provisioned: false, reason: "unknown_sku" } });
+  // Le compte Stripe peut aussi recevoir des achats d'autres projets.
+  if (!tier) return c.json({ received: true, mcp: { provisioned: false, reason: "unknown_sku" } });
+  const subId = stripeReference(session.subscription, "sub");
+  const stripeCustomerId = stripeReference(session.customer, "cus");
+  const sessionId = stripeReference(session.id, "cs");
+  if (session.mode !== "subscription" || datasetIds.length !== 1 || !subId || !stripeCustomerId || !sessionId) {
+    console.error("[webhook] références ou mode MCP invalides ; vérification nécessaire", {session: sessionId});
+    return c.json({ error: "invalid_subscription_checkout" }, 400);
   }
-  if (!email) {
-    console.error(
-      `[webhook] ALERT subscription checkout ${session.id} (tier ${tier}) had NO email — paid but cannot deliver an MCP key`,
-    );
-    return c.json({ received: true, mcp: { provisioned: false, reason: "no_email" } });
+  // Les coordonnées finales de Checkout priment sur un préremplissage.
+  const parsedEmail = z.string().max(320).email().safeParse(session.customer_details?.email ?? session.customer_email);
+  if (!parsedEmail.success) {
+    console.error("[webhook] coordonnées MCP inutilisables ; vérification nécessaire", {session: sessionId});
+    return c.json({ error: "invalid_subscription_email" }, 400);
   }
+  const email = parsedEmail.data;
+  const metaLocale = session.metadata?.locale;
 
+  let result;
   try {
-    const db = getDb();
-    const now = Date.now();
-    const subId = (session.subscription as string | null) ?? null;
-    // Buyer language carried from the localized checkout page → drives the
-    // language of the credentials email and is stored for future emails.
-    const metaLocale = session.metadata?.locale;
-    let locale = parseLocale(metaLocale);
+    result = oauthWrite(() => {
+      const db = getDb();
+      const now = Date.now();
+      const receipt = db.prepare(`SELECT c.client_id, c.tier FROM mcp_subscription_checkouts p
+        JOIN mcp_clients c ON c.client_id=p.client_id WHERE p.subscription_id=?`).get(subId) as
+        {client_id: string; tier: Tier} | undefined;
+      if (receipt) return { idempotent: true as const, clientId: receipt.client_id, tier: receipt.tier };
 
-    // Idempotency: Stripe replays events. If this subscription already
-    // provisioned a client, do nothing (no duplicate client / duplicate email).
-    if (subId) {
+      // Compatibilité des attributions antérieures : seul l'identifiant Stripe
+      // déjà associé fait foi. Aucun rapprochement avec l'email d'une application.
       const already = findClientBySubscriptionId(subId);
       if (already) {
-        console.log(
-          `[webhook] subscription ${subId} already provisioned (client ${already.client_id}) — idempotent`,
-        );
-        return c.json({
-          received: true,
-          mcp: { provisioned: true, idempotent: true, client_id: already.client_id, tier: already.tier },
-        });
+        db.prepare(`INSERT INTO mcp_subscription_checkouts(subscription_id,checkout_session_id,client_id,created_at)
+          VALUES(?,?,?,?)`).run(subId, sessionId, already.client_id, now);
+        return { idempotent: true as const, clientId: already.client_id, tier: already.tier };
       }
-    }
-
-    // Upsert the customer (mirrors the one-shot path) so the MCP client can link
-    // back to a /api/account customer and the billing portal can resolve it.
-    const customerRow = db.prepare("SELECT id FROM customers WHERE email = ?").get(email) as
-      | { id: number }
-      | undefined;
-    let customerId: number;
-    if (customerRow) {
-      customerId = customerRow.id;
-      if (session.customer) {
-        db.prepare(
-          "UPDATE customers SET stripe_customer_id = COALESCE(stripe_customer_id, ?) WHERE id = ?",
-        ).run(session.customer as string, customerId);
+      // Un ancien achat sans association conservée pourrait avoir déjà été
+      // résilié. Le nouveau parcours doit être attesté avant toute création.
+      if (session.metadata?.mcp_provisioning_version !== MCP_PROVISIONING_VERSION) {
+        return { requiresReview: true as const };
       }
-    } else {
-      const info = db
-        .prepare("INSERT INTO customers (email, stripe_customer_id, locale, created_at) VALUES (?, ?, ?, ?)")
-        .run(email, (session.customer as string | null) ?? null, locale, now);
-      customerId = Number(info.lastInsertRowid);
-    }
-
-    locale = checkoutLanguage(customerId, metaLocale);
-
-    const authorizationEndpoint = `${mcpBaseUrl()}/oauth/authorize`;
-    const tokenEndpoint = `${mcpBaseUrl()}/oauth/token`;
-
-    // Upgrade an existing client matched by email — BUT only if it isn't already
-    // tied to a DIFFERENT live subscription (hijacking it would orphan the other
-    // subscription, leaving it non-downgradable). Otherwise provision a fresh one.
-    const existing = findClientByEmail(email);
-    const canUpgrade =
-      existing && (!existing.stripe_subscription_id || existing.stripe_subscription_id === subId);
-    if (existing && canUpgrade) {
-      setClientTier(existing.client_id, tier, {
-        customer_id: customerId,
-        stripe_subscription_id: subId,
+      const customerRow = db.prepare("SELECT id FROM customers WHERE email=?").get(email) as {id: number} | undefined;
+      const customerId = customerRow?.id ?? Number(db.prepare(
+        "INSERT INTO customers(email,stripe_customer_id,locale,created_at) VALUES(?,?,?,?)"
+      ).run(email, stripeCustomerId, parseLocale(metaLocale), now).lastInsertRowid);
+      if (customerRow) db.prepare("UPDATE customers SET stripe_customer_id=COALESCE(stripe_customer_id,?) WHERE id=?")
+        .run(stripeCustomerId, customerId);
+      const locale = checkoutLanguage(customerId, metaLocale);
+      // Ce suivi facultatif absorbe ses erreurs. Un ROLLBACK SQLite global
+      // doit néanmoins interdire toute nouvelle écriture hors transaction.
+      if (!db.inTransaction) throw new Error("subscription_transaction_aborted");
+      const clientId = generateClientId();
+      const clientSecret = generateClientSecret();
+      insertClient({
+        client_id: clientId,
+        client_secret_hash: hashToken(clientSecret),
+        name: (session.customer_details?.name ?? "").replace(/[\p{Cc}\p{Cf}]/gu, "").trim().slice(0, 120) || "Application MCP",
+        email, tier, scopes: TIER_DEFAULT_SCOPES[tier],
+        customer_id: customerId, stripe_subscription_id: subId,
       });
-      const emailResult = await sendMcpCredentialsEmail({
-        to: email,
-        clientId: existing.client_id,
-        tier,
-        authorizationEndpoint,
-        tokenEndpoint,
-        locale,
-      });
-      if (!emailResult.sent) {
-        console.error(
-          `[webhook] ALERT activation email failed for upgraded client ${existing.client_id} (${email}): ${emailResult.reason}`,
-        );
-      }
-      console.log(`[webhook] upgraded client ${existing.client_id} → tier ${tier} (sub ${subId})`);
-      return c.json({
-        received: true,
-        mcp: { provisioned: true, action: "upgraded", client_id: existing.client_id, tier },
-      });
-    }
-
-    const clientId = generateClientId();
-    const clientSecret = generateClientSecret();
-    insertClient({
-      client_id: clientId,
-      client_secret_hash: hashToken(clientSecret),
-      name: session.customer_details?.name ?? email,
-      email,
-      tier,
-      scopes: TIER_DEFAULT_SCOPES[tier],
-      customer_id: customerId,
-      stripe_subscription_id: subId,
+      db.prepare(`INSERT INTO mcp_subscription_checkouts(subscription_id,checkout_session_id,client_id,created_at)
+        VALUES(?,?,?,?)`).run(subId, sessionId, clientId, now);
+      return { idempotent: false as const, clientId, clientSecret, tier, locale };
     });
-    const emailResult = await sendMcpCredentialsEmail({
-      to: email,
-      clientId,
-      clientSecret,
-      tier,
-      authorizationEndpoint,
-      tokenEndpoint,
-      locale,
-    });
-    if (!emailResult.sent) {
-      console.error(
-        `[webhook] ALERT credentials email failed for NEW client ${clientId} (${email}): ${emailResult.reason} — secret NOT delivered, manual re-issue needed`,
-      );
-    }
-    console.log(`[webhook] provisioned NEW client ${clientId} at tier ${tier} (sub ${subId})`);
-    return c.json({
-      received: true,
-      mcp: { provisioned: true, action: "created", client_id: clientId, tier },
-    });
-  } catch (err) {
-    // Never 500 on the subscription path: Stripe would retry-storm a customer
-    // who has ALREADY been charged. Log loudly for manual recovery instead.
-    // (This is also the guard that turns a pre-migration `tier='business'` CHECK
-    // violation into a recoverable alert rather than a retry loop.)
-    console.error(`[webhook] ALERT subscription provisioning db_error for session ${session.id}:`, err);
-    return c.json({ received: true, mcp: { provisioned: false, reason: "db_error" } });
+  } catch {
+    // Une écriture non enregistrée doit pouvoir être rejouée par Stripe.
+    console.error("[webhook] attribution MCP non enregistrée ; rejeu Stripe nécessaire", {session: sessionId});
+    c.header("Retry-After", "1");
+    return c.json({ error: "subscription_not_saved" }, 503);
   }
+  if ("requiresReview" in result) {
+    console.error("[webhook] achat MCP ancien ou inconnu sans attribution conservée ; vérification nécessaire", {session: sessionId});
+    return c.json({ error: "subscription_requires_review" }, 409);
+  }
+  if (result.idempotent) return c.json({ received: true,
+    mcp: { provisioned: true, idempotent: true, client_id: result.clientId, tier: result.tier } });
+
+  // La livraison durable reste un chantier distinct. Après enregistrement,
+  // ne jamais recréer un secret ni renvoyer à l'aveugle sur un rejeu Stripe.
+  let sent = false;
+  try {
+    sent = (await sendMcpCredentialsEmail({
+      to: email, clientId: result.clientId, clientSecret: result.clientSecret,
+      tier: result.tier, locale: result.locale,
+      authorizationEndpoint: `${mcpBaseUrl()}/oauth/authorize`,
+      tokenEndpoint: `${mcpBaseUrl()}/oauth/token`,
+    })).sent;
+  } catch { /* L'état enregistré reste acquis ; l'envoi demande une vérification. */ }
+  if (!sent) console.error("[webhook] remise du secret MCP non confirmée ; vérification nécessaire",
+    {session: sessionId, client: result.clientId});
+  return c.json({ received: true,
+    mcp: { provisioned: true, action: "created", client_id: result.clientId, tier: result.tier,
+      delivery: sent ? "sent" : "review" } });
 }
 
 /** Subscription cancelled / ended → downgrade the linked client to free. */
@@ -291,7 +257,7 @@ stripeWebhookRoute.post("/", async (c) => {
     .split(",")
     .filter(Boolean);
   const isSubscriptionCheckout =
-    session.mode === "subscription" || subscriptionDatasetIds.some((id) => id in SKU_TO_TIER);
+    session.mode === "subscription" || subscriptionDatasetIds.some((id) => Object.hasOwn(SKU_TO_TIER, id));
   if (isSubscriptionCheckout) {
     return handleSubscriptionCheckout(session, subscriptionDatasetIds, c);
   }

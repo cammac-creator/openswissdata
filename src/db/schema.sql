@@ -234,6 +234,14 @@ CREATE TABLE IF NOT EXISTS mcp_client_redirect_uris (
   created_at INTEGER NOT NULL,
   PRIMARY KEY (client_id, redirect_uri)
 );
+-- Reçu d'attribution conservé après résiliation ou révocation de l'application.
+-- Aucun secret : le reçu empêche une ancienne notification de recréer des droits.
+CREATE TABLE IF NOT EXISTS mcp_subscription_checkouts (
+  subscription_id TEXT PRIMARY KEY,
+  checkout_session_id TEXT UNIQUE NOT NULL,
+  client_id TEXT UNIQUE NOT NULL REFERENCES mcp_clients(client_id),
+  created_at INTEGER NOT NULL
+);
 -- NOTE: the index on stripe_subscription_id is created in src/lib/db.ts AFTER an
 -- idempotent ensureColumn(), because on a pre-existing DB the column is absent
 -- here (CREATE TABLE IF NOT EXISTS won't add it) and a CREATE INDEX referencing

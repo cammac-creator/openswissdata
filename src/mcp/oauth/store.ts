@@ -94,21 +94,6 @@ export function findClientById(client_id: string): MCPClient | null {
   return row ?? null;
 }
 
-/**
- * Find the most recent non-revoked client registered under an email. Used by
- * the Stripe webhook to upgrade an existing client after a paid subscription
- * (we match payer → client by email, since checkout carries no client_id).
- */
-export function findClientByEmail(email: string): MCPClient | null {
-  const db = getDb();
-  const row = db
-    .prepare(
-      "SELECT * FROM mcp_clients WHERE email = ? AND revoked_at IS NULL ORDER BY created_at DESC LIMIT 1",
-    )
-    .get(email) as MCPClient | undefined;
-  return row ?? null;
-}
-
 /** Find the client whose paid tier is backed by a given Stripe subscription. */
 export function findClientBySubscriptionId(subscriptionId: string): MCPClient | null {
   const db = getDb();

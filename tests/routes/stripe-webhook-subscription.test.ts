@@ -1,7 +1,7 @@
 /**
  * Subscription delivery path of the Stripe webhook (P0-1).
  *
- * Verifies that a PAID MCP subscription checkout provisions / upgrades an
+ * Verifies that a PAID MCP subscription checkout provisions a distinct
  * OAuth client at the right tier, emails its credentials, is idempotent on
  * replay, and is downgraded on cancellation — and that the one-shot ZIP path
  * is untouched (non-regression).
@@ -36,6 +36,7 @@ import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
 import { insertClient, insertToken } from "../../src/mcp/oauth/store.js";
 import {
+  MCP_PROVISIONING_VERSION,
   TIER_DEFAULT_SCOPES,
   TIER_QUOTA,
   SKU_TO_TIER,
@@ -44,6 +45,8 @@ import {
 } from "../../src/mcp/oauth/scopes.js";
 import { _resetRateLimit } from "../../src/mcp/rate-limit.js";
 import { randomBytes } from "node:crypto";
+import Database from "better-sqlite3";
+import { hashToken } from "../../src/mcp/oauth/crypto.js";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -61,7 +64,7 @@ function subscriptionCheckoutEvent(over: Record<string, unknown> = {}) {
         subscription: "sub_1",
         customer_email: "newdev@example.com",
         customer_details: { email: "newdev@example.com", name: "New Dev" },
-        metadata: { dataset_ids: "mcp_standalone" },
+        metadata: { dataset_ids: "mcp_standalone", mcp_provisioning_version: MCP_PROVISIONING_VERSION },
         ...over,
       },
     },
@@ -143,7 +146,7 @@ describe("Stripe webhook — MCP subscription delivery", () => {
         subscription: "sub_biz",
         customer_email: "biz@example.com",
         customer_details: { email: "biz@example.com" },
-        metadata: { dataset_ids: "mcp_business" },
+        metadata: { dataset_ids: "mcp_business", mcp_provisioning_version: MCP_PROVISIONING_VERSION },
       }),
     );
     const app = createApp();
@@ -157,34 +160,31 @@ describe("Stripe webhook — MCP subscription delivery", () => {
     expect(SKU_TO_TIER.mcp_business).toBe("business");
   });
 
-  it("upgrades an EXISTING free client (matched by email) without creating a new one", async () => {
+  it("ne transmet aucun droit à l'application préinscrite sous l'email de l'acheteur", async () => {
     const app = createApp();
-    // Pre-register a free client under the same email.
-    insertClient({
-      client_id: "osd_preexisting",
-      client_secret_hash: "hash",
-      name: "Existing Dev",
-      email: "newdev@example.com",
-      tier: "free",
-      scopes: TIER_DEFAULT_SCOPES.free,
+    const registration = await app.request("/mcp/oauth/register", {
+      method: "POST", headers: {"content-type": "application/json"},
+      body: JSON.stringify({name: "Application tierce fictive", email: "newdev@example.com",
+        redirect_uris: ["https://tierce.example.test/retour"]}),
     });
-
+    expect(registration.status).toBe(201);
+    const registered = await registration.json();
+    const db = getDb();
+    const before = db.prepare("SELECT * FROM mcp_clients WHERE client_id=?").get(registered.client_id);
     constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent());
     const res = await postWebhook(app);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.mcp).toMatchObject({ provisioned: true, action: "upgraded", client_id: "osd_preexisting", tier: "standalone" });
-
-    const db = getDb();
-    const rows = db.prepare("SELECT * FROM mcp_clients WHERE email = ?").all("newdev@example.com") as any[];
-    expect(rows).toHaveLength(1); // upgraded, not duplicated
-    expect(rows[0].tier).toBe("standalone");
-    expect(rows[0].scopes).toBe(serializeScopes(TIER_DEFAULT_SCOPES.standalone));
-    expect(rows[0].stripe_subscription_id).toBe("sub_1");
-
-    // Upgrade email carries NO secret (client keeps its original).
-    const arg = (credsEmailMock as ReturnType<typeof vi.fn>).mock.calls[0][0];
-    expect(arg.clientSecret).toBeUndefined();
+    expect(body.mcp).toMatchObject({provisioned: true, action: "created", tier: "standalone"});
+    expect(body.mcp.client_id).not.toBe(registered.client_id);
+    expect(db.prepare("SELECT * FROM mcp_clients WHERE client_id=?").get(registered.client_id)).toEqual(before);
+    expect(db.prepare("SELECT COUNT(*) n FROM mcp_clients").get()).toEqual({n: 2});
+    const arg = vi.mocked(credsEmailMock).mock.calls[0][0];
+    expect(arg.clientSecret).toBeTruthy();
+    expect(arg.clientSecret).not.toBe(registered.client_secret);
+    expect(db.prepare("SELECT client_secret_hash FROM mcp_clients WHERE client_id=?").get(body.mcp.client_id))
+      .toEqual({client_secret_hash: hashToken(arg.clientSecret!)});
+    expect(JSON.stringify(body)).not.toContain(arg.clientSecret);
   });
 
   it("is idempotent on event replay (same subscription id)", async () => {
@@ -226,7 +226,7 @@ describe("Stripe webhook — MCP subscription delivery", () => {
     expect(client.stripe_subscription_id).toBeNull();
   });
 
-  it("returns 200 (not 500) and provisions nothing when the subscription has no email", async () => {
+  it("refuse un abonnement sans email sans créer de droit", async () => {
     constructEventAsyncMock.mockResolvedValueOnce(
       subscriptionCheckoutEvent({
         id: "cs_sub_noemail",
@@ -237,9 +237,9 @@ describe("Stripe webhook — MCP subscription delivery", () => {
     );
     const app = createApp();
     const res = await postWebhook(app);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.mcp).toMatchObject({ provisioned: false, reason: "no_email" });
+    expect(body).toEqual({error: "invalid_subscription_email"});
 
     const db = getDb();
     const count = db.prepare("SELECT COUNT(*) AS n FROM mcp_clients").get() as { n: number };
@@ -354,6 +354,221 @@ describe("Stripe webhook — MCP subscription delivery", () => {
     const count = db.prepare("SELECT COUNT(*) AS n FROM mcp_clients WHERE stripe_subscription_id = ?").get("sub_1") as { n: number };
     expect(count.n).toBe(1);
   });
+  it.each([
+    {mode: "payment"}, {subscription: null}, {subscription: ""},
+    {subscription: {id: "cus_erreur"}}, {customer: null}, {customer: {id: 23}},
+    {id: ""}, {metadata: {dataset_ids: "mcp_standalone,mcp_business"}},
+    {metadata: {dataset_ids: "mcp_standalone,tares"}},
+    {metadata: {dataset_ids: "mcp_standalone,mcp_standalone"}},
+  ])("refuse une attribution ambiguë ou sans référence Stripe (%j)", async over => {
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent(over));
+    expect((await postWebhook(createApp())).status).toBe(400);
+    expect(getDb().prepare("SELECT COUNT(*) n FROM mcp_clients").get()).toEqual({n: 0});
+    expect(getDb().prepare("SELECT COUNT(*) n FROM customers").get()).toEqual({n: 0});
+    expect(credsEmailMock).not.toHaveBeenCalled();
+  });
+
+  it("ignore un abonnement d'un autre projet et les propriétés héritées", async () => {
+    const app = createApp();
+    for (const sku of ["autre_projet", "toString", "constructor", "__proto__"]) {
+      constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent({metadata: {dataset_ids: sku}}));
+      const res = await postWebhook(app);
+      expect(res.status).toBe(200);
+      expect((await res.json()).mcp).toEqual({provisioned: false, reason: "unknown_sku"});
+    }
+    expect(getDb().prepare("SELECT COUNT(*) n FROM customers").get()).toEqual({n: 0});
+    expect(credsEmailMock).not.toHaveBeenCalled();
+  });
+
+  it("accepte les références Stripe développées et les coordonnées finales", async () => {
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent({
+      subscription: {id: "sub_1"}, customer: {id: "cus_1"},
+      customer_email: "prefill@example.test", customer_details: {email: "final@example.test"},
+    }));
+    expect((await postWebhook(createApp())).status).toBe(200);
+    expect(vi.mocked(credsEmailMock).mock.calls[0][0].to).toBe("final@example.test");
+    expect(getDb().prepare("SELECT stripe_subscription_id FROM mcp_clients").get()).toEqual({stripe_subscription_id: "sub_1"});
+    expect(getDb().prepare("SELECT stripe_customer_id FROM customers").get()).toEqual({stripe_customer_id: "cus_1"});
+  });
+
+  it("ne réattribue pas un ancien achat après résiliation, même après redémarrage", async () => {
+    const app = createApp();
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent());
+    const original = await (await postWebhook(app)).json();
+    constructEventAsyncMock.mockResolvedValueOnce({type: "customer.subscription.deleted", data: {object: {id: "sub_1"}}});
+    expect((await postWebhook(app)).status).toBe(200);
+    closeDb();
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent());
+    const replay = await (await postWebhook(app)).json();
+    expect(replay.mcp).toMatchObject({idempotent: true, client_id: original.mcp.client_id, tier: "free"});
+    expect(getDb().prepare("SELECT COUNT(*) n FROM mcp_clients").get()).toEqual({n: 1});
+    expect(getDb().prepare("SELECT COUNT(*) n FROM mcp_subscription_checkouts").get()).toEqual({n: 1});
+    expect(credsEmailMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("préserve aussi une application révoquée lors du rejeu", async () => {
+    constructEventAsyncMock.mockResolvedValue(subscriptionCheckoutEvent());
+    const app = createApp(); await postWebhook(app);
+    getDb().exec("UPDATE mcp_clients SET revoked_at=1");
+    const before = getDb().prepare("SELECT * FROM mcp_clients").all();
+    expect((await (await postWebhook(app)).json()).mcp.idempotent).toBe(true);
+    expect(getDb().prepare("SELECT * FROM mcp_clients").all()).toEqual(before);
+    expect(credsEmailMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("revient intégralement en arrière si l'enregistrement du reçu échoue puis accepte le rejeu", async () => {
+    const db = getDb();
+    db.exec("CREATE TRIGGER panne_fictive BEFORE INSERT ON mcp_subscription_checkouts BEGIN SELECT RAISE(ABORT,'detail-prive-fictif'); END");
+    constructEventAsyncMock.mockResolvedValue(subscriptionCheckoutEvent());
+    const app = createApp(); const res = await postWebhook(app);
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({error: "subscription_not_saved"});
+    for (const table of ["customers", "mcp_clients", "crm_languages", "mcp_subscription_checkouts"]) {
+      expect(db.prepare(`SELECT COUNT(*) n FROM ${table}`).get()).toEqual({n: 0});
+    }
+    expect(credsEmailMock).not.toHaveBeenCalled();
+    db.exec("DROP TRIGGER panne_fictive");
+    expect((await postWebhook(app)).status).toBe(200);
+    expect(credsEmailMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuse rapidement un verrou puis restaure le délai SQLite et permet la reprise", async () => {
+    const db = getDb(); const other = new Database(join(tmp, "t.sqlite"));
+    other.exec("BEGIN IMMEDIATE");
+    try {
+      constructEventAsyncMock.mockResolvedValue(subscriptionCheckoutEvent());
+      const app = createApp(); const start = Date.now();
+      const res = await postWebhook(app);
+      expect(res.status).toBe(503); expect(Date.now() - start).toBeLessThan(1000);
+      expect(db.pragma("busy_timeout", {simple: true})).toBe(5000);
+      expect(db.prepare("SELECT COUNT(*) n FROM customers").get()).toEqual({n: 0});
+      expect(credsEmailMock).not.toHaveBeenCalled();
+    } finally { other.exec("ROLLBACK"); other.close(); }
+    expect((await postWebhook(createApp())).status).toBe(200);
+  });
+
+  it("deux notifications concurrentes créent une seule application et un seul envoi", async () => {
+    constructEventAsyncMock.mockResolvedValue(subscriptionCheckoutEvent());
+    const app = createApp();
+    const results = await Promise.all([postWebhook(app), postWebhook(app)]);
+    expect(results.map(r => r.status)).toEqual([200, 200]);
+    expect(getDb().prepare("SELECT COUNT(*) n FROM mcp_subscription_checkouts").get()).toEqual({n: 1});
+    expect(getDb().prepare("SELECT COUNT(*) n FROM mcp_clients").get()).toEqual({n: 1});
+    expect(credsEmailMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("une session déjà reçue ne peut pas créer un deuxième abonnement", async () => {
+    const app = createApp();
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent()); await postWebhook(app);
+    const before = getDb().prepare("SELECT * FROM mcp_clients").all();
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent({subscription: "sub_autre"}));
+    expect((await postWebhook(app)).status).toBe(503);
+    expect(getDb().prepare("SELECT * FROM mcp_clients").all()).toEqual(before);
+    expect(credsEmailMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("un échec de livraison n'invente pas une panne d'écriture ni un nouvel envoi au rejeu", async () => {
+    constructEventAsyncMock.mockResolvedValue(subscriptionCheckoutEvent());
+    vi.mocked(credsEmailMock).mockRejectedValueOnce(new Error("prestataire-fictif"));
+    const app = createApp(); const res = await postWebhook(app);
+    expect(res.status).toBe(200);
+    expect((await res.json()).mcp).toMatchObject({provisioned: true, delivery: "review"});
+    expect((await (await postWebhook(app)).json()).mcp.idempotent).toBe(true);
+    expect(credsEmailMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("conserve l'association Stripe historique sans se servir de l'email", async () => {
+    insertClient({client_id: "osd_ancien", client_secret_hash: "fictif", name: "Fictif",
+      email: "ancien@example.test", tier: "standalone", scopes: TIER_DEFAULT_SCOPES.standalone,
+      stripe_subscription_id: "sub_1"});
+    constructEventAsyncMock.mockResolvedValue(subscriptionCheckoutEvent({metadata: {dataset_ids: "mcp_standalone"}}));
+    const app = createApp();
+    const res = await postWebhook(app);
+    expect(res.status).toBe(200);
+    expect((await res.json()).mcp).toMatchObject({idempotent: true, client_id: "osd_ancien"});
+    expect(getDb().prepare("SELECT COUNT(*) n FROM customers").get()).toEqual({n: 0});
+    expect(getDb().prepare("SELECT COUNT(*) n FROM mcp_subscription_checkouts").get()).toEqual({n: 1});
+    expect(credsEmailMock).not.toHaveBeenCalled();
+  });
+
+  it("un nouvel abonnement après résiliation reste un achat distinct", async () => {
+    const app = createApp();
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent()); await postWebhook(app);
+    constructEventAsyncMock.mockResolvedValueOnce({type: "customer.subscription.deleted", data: {object: {id: "sub_1"}}});
+    await postWebhook(app);
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent({id: "cs_nouveau", subscription: "sub_nouveau"}));
+    expect((await (await postWebhook(app)).json()).mcp.action).toBe("created");
+    expect(getDb().prepare("SELECT tier,COUNT(*) n FROM mcp_clients GROUP BY tier ORDER BY tier").all())
+      .toEqual([{tier: "free", n: 1}, {tier: "standalone", n: 1}]);
+    expect(credsEmailMock).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(credsEmailMock).mock.calls[0][0].clientSecret)
+      .not.toBe(vi.mocked(credsEmailMock).mock.calls[1][0].clientSecret);
+  });
+
+  it("le rollback conserve aussi le compte et la préférence préexistants", async () => {
+    const db = getDb();
+    db.prepare("INSERT INTO customers(email,locale,created_at) VALUES(?,?,?)").run("newdev@example.com", "de", 1);
+    const before = db.prepare("SELECT * FROM customers").all();
+    db.exec("CREATE TRIGGER panne_fictive BEFORE INSERT ON mcp_subscription_checkouts BEGIN SELECT RAISE(ABORT,'fictif'); END");
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent({metadata: {dataset_ids: "mcp_standalone", locale: "fr", mcp_provisioning_version: MCP_PROVISIONING_VERSION}}));
+    expect((await postWebhook(createApp())).status).toBe(503);
+    expect(db.prepare("SELECT * FROM customers").all()).toEqual(before);
+    expect(db.prepare("SELECT COUNT(*) n FROM crm_languages").get()).toEqual({n: 0});
+    expect(credsEmailMock).not.toHaveBeenCalled();
+  });
+
+  it("ne repart pas hors transaction après une annulation SQLite globale avalée par le suivi de langue", async () => {
+    const db = getDb();
+    db.prepare("INSERT INTO customers(email,locale,created_at) VALUES(?,?,?)").run("newdev@example.com", "de", 1);
+    const before = db.prepare("SELECT * FROM customers").all();
+    db.exec("CREATE TRIGGER rollback_fictif BEFORE INSERT ON crm_languages BEGIN SELECT RAISE(ROLLBACK,'rollback-global-fictif'); END");
+    constructEventAsyncMock.mockResolvedValue(subscriptionCheckoutEvent({metadata: {dataset_ids: "mcp_standalone", locale: "fr", mcp_provisioning_version: MCP_PROVISIONING_VERSION}}));
+    const app = createApp(); const res = await postWebhook(app);
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({error: "subscription_not_saved"});
+    expect(db.prepare("SELECT * FROM customers").all()).toEqual(before);
+    expect(db.prepare("SELECT COUNT(*) n FROM mcp_clients").get()).toEqual({n: 0});
+    expect(db.prepare("SELECT COUNT(*) n FROM mcp_subscription_checkouts").get()).toEqual({n: 0});
+    expect(credsEmailMock).not.toHaveBeenCalled();
+    expect(db.inTransaction).toBe(false);
+    db.exec("DROP TRIGGER rollback_fictif");
+    expect((await postWebhook(app)).status).toBe(200);
+  });
+
+  it("le nom reçu du paiement ne conserve ni contrôles ni valeur excessive", async () => {
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent({
+      customer_details: {email: "newdev@example.com", name: "\u202e\u0000" + "x".repeat(180)},
+    }));
+    expect((await postWebhook(createApp())).status).toBe(200);
+    expect(getDb().prepare("SELECT name FROM mcp_clients").get()).toEqual({name: "x".repeat(120)});
+  });
+
+  it.each([undefined, "ancien", "2027-01-01"])("un ancien paiement sans association ne peut pas recréer des droits (%s)", async version => {
+    constructEventAsyncMock.mockResolvedValueOnce(subscriptionCheckoutEvent({metadata: {
+      dataset_ids: "mcp_standalone", mcp_provisioning_version: version,
+    }}));
+    const res = await postWebhook(createApp());
+    expect(res.status).toBe(409);
+    expect(await res.json()).toEqual({error: "subscription_requires_review"});
+    for (const table of ["customers", "mcp_clients", "mcp_subscription_checkouts"]) {
+      expect(getDb().prepare(`SELECT COUNT(*) n FROM ${table}`).get()).toEqual({n: 0});
+    }
+    expect(credsEmailMock).not.toHaveBeenCalled();
+  });
+
+  it("ajoute la table sur une base antérieure sans attribuer de propriétaire", async () => {
+    const db = getDb();
+    insertClient({client_id: "osd_historique", client_secret_hash: "fictif", name: "Fictif",
+      email: "fictif@example.test", tier: "free", scopes: TIER_DEFAULT_SCOPES.free});
+    const before = db.prepare("SELECT * FROM mcp_clients").all();
+    db.exec("DROP TABLE mcp_subscription_checkouts"); closeDb();
+    expect(getDb().prepare("SELECT COUNT(*) n FROM mcp_subscription_checkouts").get()).toEqual({n: 0});
+    expect(getDb().prepare("SELECT * FROM mcp_clients").all()).toEqual(before);
+    closeDb();
+    expect(getDb().prepare("SELECT * FROM mcp_clients").all()).toEqual(before);
+    expect(getDb().pragma("foreign_key_check")).toEqual([]);
+  });
+
 });
 
 describe("scopes — business tier wiring", () => {

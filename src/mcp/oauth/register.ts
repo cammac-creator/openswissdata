@@ -19,10 +19,8 @@
  *     "authorization_endpoint": "https://mcp.openswissdata.com/oauth/authorize"
  *   }
  *
- * In production, paid tiers (standard / pro / standalone) MUST be activated
- * by the Stripe webhook — registering with `tier=pro` here only gets you
- * `tier=free` until a paid order is fulfilled. We keep the field on the
- * registration request as a hint for the email confirmation copy.
+ * L'inscription ne crée que des droits gratuits. Une application payante est
+ * distincte : son attribution ne peut jamais reposer sur l'email déclaré ici.
  */
 
 import { Hono } from "hono";
@@ -71,11 +69,9 @@ registerRoute.post("/register", async (c) => {
     );
   }
 
-  // Public registration always lands on 'free'. Paid tiers are granted by the
-  // Stripe webhook after a subscription is paid: it matches the payer to this
-  // client by email and calls setClientTier (or provisions a fresh paid client
-  // if none exists) — see src/routes/stripe-webhook.ts → handleSubscriptionCheckout.
-  // The `tier` field in the request body is intentionally ignored.
+  // Une inscription publique reste gratuite. Son email n'est pas vérifié et
+  // ne permet jamais de récupérer les droits d'un acheteur. Les abonnements
+  // créent une application distincte ; le champ tier reçu est ignoré.
   const tier: Tier = "free";
 
   const clientId = generateClientId();
