@@ -17,6 +17,7 @@
 
 import { Hono } from "hono";
 import { timingSafeEqual } from "node:crypto";
+import { isValidScope, parseScopes, serializeScopes } from './scopes.js';
 import {
   generateRandomToken,
   hashToken,
@@ -161,6 +162,20 @@ async function handleRefresh(c: any, body: Record<string, unknown>) {
     return c.json({ error: "invalid_grant", error_description: "refresh_token expired" }, 400);
   }
 
+  // Le renouvellement peut réduire une portée, jamais ajouter des droits au jeton d’origine.
+  const originalScopes = parseScopes(existing.scope), allowedScopes = parseScopes(client.scopes);
+  let nextScopes = originalScopes.filter(scope => allowedScopes.includes(scope));
+  if (body.scope !== undefined) {
+    if (typeof body.scope !== 'string' || body.scope.length > 1024) return c.json({ error: 'invalid_scope' }, 400);
+    const requested = body.scope.trim().split(/\s+/);
+    if (requested.some(scope => !isValidScope(scope) || !originalScopes.includes(scope) || !allowedScopes.includes(scope))) {
+      return c.json({ error: 'invalid_scope' }, 400);
+    }
+    nextScopes = parseScopes(body.scope);
+  }
+  if (!nextScopes.length) return c.json({ error: 'invalid_scope' }, 400);
+  const grantedScope = serializeScopes(nextScopes);
+
   // Rotate refresh token (recommended in OAuth 2.1).
   revokeTokenByHash(refreshHash);
 
@@ -170,7 +185,7 @@ async function handleRefresh(c: any, body: Record<string, unknown>) {
     client_id: auth.client_id,
     access_token_plain: newAccess,
     refresh_token_plain: newRefresh,
-    scope: existing.scope,
+    scope: grantedScope,
   });
 
   return c.json({
@@ -178,6 +193,6 @@ async function handleRefresh(c: any, body: Record<string, unknown>) {
     token_type: "Bearer",
     expires_in: Math.floor(TTL.ACCESS_TOKEN_TTL_MS / 1000),
     refresh_token: newRefresh,
-    scope: existing.scope,
+    scope: grantedScope,
   });
 }

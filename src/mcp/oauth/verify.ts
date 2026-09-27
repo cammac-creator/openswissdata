@@ -145,11 +145,13 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
         );
       }
 
+      const allowedScopes = parseScopes(client.scopes);
       c.set("mcp_auth", {
         client_id: client.client_id,
         client_pk: client.id,
         tier,
-        scopes: parseScopes(client.scopes),
+        // Un jeton ne gagne jamais les autres droits du compte ; les retraits du compte s’appliquent immédiatement.
+        scopes: parseScopes(stored.scope).filter(scope => allowedScopes.includes(scope)),
         admin: false,
       });
       c.set("mcp_quota", quota);

@@ -184,3 +184,8 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - checkout_request_limits conserve uniquement une clé HMAC dédiée et deux dates ; plafond de 10 000 lignes sans éviction des limites actives. Refus 429 sans prolongation et Retry-After ; clé, stockage, horloge ou capacité indisponibles donnent 503 avant Stripe. Aucune attente de verrou SQLite pour cette protection.
 - Corps limité à 4 096 octets, réponses no-store. Tests de protection actifs même avec NODE_ENV=test ; les tests métier peuvent simuler explicitement le garde. Ne pas appeler Stripe réellement pour la recette.
 - Table additive, sauvegarde avant publication ; purge périodique porte le témoin complet à 14 catégories. Le profil de restauration service-crm-2026-09-26 conserve sa définition métier ; les compteurs temporaires ne sont pas des preuves d’achat. Détails et limites : docs/protection-checkout.md.
+
+## Portées MCP — 27.09.2026
+- Les droits d’un jeton OAuth sont l’intersection de mcp_tokens.scope et des droits actuels de mcp_clients. Ne jamais attribuer automatiquement tous les droits du compte à un jeton plus étroit, vide ou inconnu. Pas de repli anonyme pour un jeton authentifié sans droit commun.
+- Le renouvellement garde au plus la portée originale et les droits actuels ; une demande de scope peut réduire, pas élargir. Refuser une portée invalide avant révocation du jeton de renouvellement. La rotation transactionnelle reste un chantier séparé.
+- Les quotas du compte, révocations, accès anonyme et chemin administrateur historique restent distincts. Aucun droit stocké ne doit être réécrit pour corriger une lecture. Ce correctif ne valide pas tout OAuth et ne rouvre pas les souscriptions ; voir docs/portees-mcp.md.
