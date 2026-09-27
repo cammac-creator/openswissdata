@@ -11,6 +11,8 @@ let _db: Database.Database | null = null;
 
 export function currentDatabasePath(): string { return _db?.name ?? resolveDatabasePath(); }
 
+export const SQLITE_BUSY_TIMEOUT_MS = 5_000;
+
 export function getDb(path?: string, options: { fileMustExist?: boolean } = {}): Database.Database {
   const dbPath = resolveDatabasePath(path);
   if (_db) return _db;
@@ -19,6 +21,7 @@ export function getDb(path?: string, options: { fileMustExist?: boolean } = {}):
   if (!options.fileMustExist && !existsSync(dir)) mkdirSync(dir, { recursive: true });
 
   const db = new Database(dbPath, options);
+  db.pragma(`busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS}`);
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
 

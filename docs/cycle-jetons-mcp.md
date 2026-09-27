@@ -1,0 +1,15 @@
+# Émission et renouvellement des jetons MCP
+
+Le contrôle du client, la validation du code ou du jeton de renouvellement, sa consommation ou révocation et l’insertion de la nouvelle paire se déroulent dans une seule transaction SQLite immédiate. Elle ne contient ni attente ni appel réseau. Deux processus ne peuvent donc pas obtenir chacun une paire valide à partir du même artefact. Un verrou d’écriture concurrent rend une réponse `503 temporarily_unavailable`, avec `Retry-After: 1`, sans immobiliser le serveur pendant le délai SQLite habituel.
+
+Un code n’est consommé qu’après validation du client, de la redirection, du vérificateur PKCE et d’une portée encore autorisée. Une erreur de preuve ne brûle pas le code. Les codes déjà consommés, y compris un marqueur égal à zéro, sont refusés ; la date exacte d’expiration est déjà expirée. La primitive de consommation vérifie également l’absence d’utilisation et la date en base.
+
+Si l’insertion échoue, la transaction annule aussi la consommation ou la révocation : aucune réponse de succès ni paire partielle n’est émise. Une nouvelle tentative peut réussir lorsque la panne disparaît. Un renouvellement réussi révoque l’ancienne paire ; son ancien accès et son ancien refresh sont ensuite refusés. Une panne de réseau après validation de la transaction peut toutefois empêcher le client de recevoir la nouvelle paire : ce lot ne fournit pas de récupération idempotente de cette réponse.
+
+Toutes les réponses du point d’émission portent `Cache-Control: no-store` et `Pragma: no-cache`. Les erreurs internes ne contiennent ni détails SQLite ni secrets ; le journal se limite à une catégorie technique fermée, au plus une fois par minute dans le processus. Les droits restent bornés selon [les portées MCP](portees-mcp.md). Il n’y a aucune migration de table ni réécriture des jetons existants lors du déploiement.
+
+Les tests utilisent uniquement des bases et identités fictives : erreurs de preuve, révocation, expiration, panne d’insertion avec rollback, verrou concurrent et ancienne/nouvelle paire. Une recette supplémentaire confronte quatre processus à la même base en WAL, puis fait réessayer les perdants après validation de la première émission : ils reçoivent `invalid_grant`. Les protections dépendent du partage de cette même base : ne pas ajouter des répliques disposant de copies indépendantes.
+
+Cette étape n’instaure pas une famille de jetons avec révocation de tous ses descendants lors d’un rejeu. Les formulaires d’autorisation, redirections enregistrées, identité de l’utilisateur, protections publiques et rapprochement de droits payants restent à traiter avant réouverture des abonnements. Elle ne démontre pas une conformité OAuth globale.
+
+Références : [transactions SQLite](https://sqlite.org/lang_transaction.html), [transactions synchrones better-sqlite3](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/api.md#transactionfunction---function), [RFC 6749 : codes, réponses et renouvellement](https://www.rfc-editor.org/rfc/rfc6749).

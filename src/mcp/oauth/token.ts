@@ -18,6 +18,7 @@
 import { Hono } from "hono";
 import { timingSafeEqual } from "node:crypto";
 import { isValidScope, parseScopes, serializeScopes } from './scopes.js';
+import { getDb, SQLITE_BUSY_TIMEOUT_MS } from '../../lib/db.js';
 import {
   generateRandomToken,
   hashToken,
@@ -26,6 +27,7 @@ import {
 } from "./crypto.js";
 import {
   consumeAuthCode,
+  findAuthCode,
   findClientById,
   findTokenByRefreshHash,
   insertToken,
@@ -75,19 +77,46 @@ function constantTimeStrEq(a: string, b: string): boolean {
 }
 
 tokenRoute.post("/token", async (c) => {
+  c.header('Cache-Control', 'no-store');
+  c.header('Pragma', 'no-cache');
   // Body can be url-encoded form OR JSON. parseBody handles both via Hono.
   const body = (await c.req.parseBody()) as Record<string, unknown>;
 
   const grant = String(body.grant_type ?? "");
-  if (grant === "authorization_code") return handleCode(c, body);
-  if (grant === "refresh_token") return handleRefresh(c, body);
+  if (grant === "authorization_code" || grant === "refresh_token") {
+    try {
+      const db = getDb();
+      try {
+        // Aucun await ni appel réseau : validation, consommation et émission indivisibles.
+        db.pragma('busy_timeout = 0');
+        return db.transaction(() => grant === 'authorization_code' ? handleCode(c, body) : handleRefresh(c, body)).immediate();
+      } finally {
+        // Après COMMIT, un diagnostic ou un réglage ne doit pas masquer la paire émise.
+        try { if (db.open) db.pragma(`busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS}`); } catch (error) { reportTokenFailure(error, 'restore'); }
+      }
+    } catch (error) {
+      reportTokenFailure(error);
+      c.header('Retry-After', '1');
+      return c.json({ error: 'temporarily_unavailable' }, 503);
+    }
+  }
   return c.json(
     { error: "unsupported_grant_type", error_description: `grant_type=${grant} not supported` },
     400,
   );
 });
 
-async function handleCode(c: any, body: Record<string, unknown>) {
+let lastFailureLog = 0;
+function reportTokenFailure(error: unknown, reason?: 'restore'): void {
+  try {
+    const now = Date.now();
+    if (lastFailureLog && now >= lastFailureLog && now - lastFailureLog < 60_000) return;
+    lastFailureLog = now;
+    console.warn(`[oauth] incident technique : ${reason ?? (error instanceof Error && 'code' in error && error.code === 'SQLITE_BUSY' ? 'busy' : 'storage')}`);
+  } catch { /* Un diagnostic facultatif ne remplace pas le refus prudent. */ }
+}
+
+function handleCode(c: any, body: Record<string, unknown>): Response {
   const code = String(body.code ?? "");
   const verifier = String(body.code_verifier ?? "");
   const redirect_uri = String(body.redirect_uri ?? "");
@@ -110,15 +139,19 @@ async function handleCode(c: any, body: Record<string, unknown>) {
     return c.json({ error: "invalid_client", error_description: "bad client_secret" }, 401);
   }
 
-  const stored = consumeAuthCode(code);
+  const stored = findAuthCode(code);
   if (!stored) return c.json({ error: "invalid_grant", error_description: "code not found" }, 400);
-  if (stored.used_at) return c.json({ error: "invalid_grant", error_description: "code already used" }, 400);
-  if (stored.expires_at < Date.now()) return c.json({ error: "invalid_grant", error_description: "code expired" }, 400);
+  if (stored.used_at !== null) return c.json({ error: "invalid_grant", error_description: "code already used" }, 400);
+  if (!Number.isSafeInteger(stored.expires_at) || stored.expires_at <= Date.now()) return c.json({ error: "invalid_grant", error_description: "code expired" }, 400);
   if (stored.client_id !== auth.client_id) return c.json({ error: "invalid_grant", error_description: "client_id mismatch" }, 400);
   if (stored.redirect_uri !== redirect_uri) return c.json({ error: "invalid_grant", error_description: "redirect_uri mismatch" }, 400);
   if (!pkceVerify(verifier, stored.code_challenge, stored.code_challenge_method)) {
     return c.json({ error: "invalid_grant", error_description: "PKCE verification failed" }, 400);
   }
+
+  const allowedScopes = parseScopes(client.scopes);
+  const grantedScope = serializeScopes(parseScopes(stored.scope).filter(scope => allowedScopes.includes(scope)));
+  if (!grantedScope || !consumeAuthCode(code)) return c.json({ error: 'invalid_grant' }, 400);
 
   const access = generateRandomToken();
   const refresh = generateRandomToken();
@@ -126,7 +159,7 @@ async function handleCode(c: any, body: Record<string, unknown>) {
     client_id: auth.client_id,
     access_token_plain: access,
     refresh_token_plain: refresh,
-    scope: stored.scope,
+    scope: grantedScope,
   });
 
   return c.json({
@@ -134,11 +167,11 @@ async function handleCode(c: any, body: Record<string, unknown>) {
     token_type: "Bearer",
     expires_in: Math.floor(TTL.ACCESS_TOKEN_TTL_MS / 1000),
     refresh_token: refresh,
-    scope: stored.scope,
+    scope: grantedScope,
   });
 }
 
-async function handleRefresh(c: any, body: Record<string, unknown>) {
+function handleRefresh(c: any, body: Record<string, unknown>): Response {
   const refresh = String(body.refresh_token ?? "");
   const auth = parseClientAuth(c, body);
   if (!auth) return c.json({ error: "invalid_client", error_description: "client credentials missing" }, 401);
@@ -158,7 +191,7 @@ async function handleRefresh(c: any, body: Record<string, unknown>) {
   if (existing.client_id !== auth.client_id) {
     return c.json({ error: "invalid_grant", error_description: "client mismatch" }, 400);
   }
-  if (existing.refresh_expires_at && existing.refresh_expires_at < Date.now()) {
+  if (!Number.isSafeInteger(existing.refresh_expires_at) || existing.refresh_expires_at! <= Date.now()) {
     return c.json({ error: "invalid_grant", error_description: "refresh_token expired" }, 400);
   }
 
@@ -176,8 +209,8 @@ async function handleRefresh(c: any, body: Record<string, unknown>) {
   if (!nextScopes.length) return c.json({ error: 'invalid_scope' }, 400);
   const grantedScope = serializeScopes(nextScopes);
 
-  // Rotate refresh token (recommended in OAuth 2.1).
-  revokeTokenByHash(refreshHash);
+  // Rotation dans la transaction d’émission : un échec annule aussi la révocation.
+  if (!revokeTokenByHash(refreshHash)) return c.json({ error: 'invalid_grant' }, 400);
 
   const newAccess = generateRandomToken();
   const newRefresh = generateRandomToken();

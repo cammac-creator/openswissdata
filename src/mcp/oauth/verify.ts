@@ -116,7 +116,7 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
       if (!stored) {
         return c.json({ error: "invalid_token", error_description: "unknown token" }, 401);
       }
-      if (stored.expires_at < Date.now()) {
+      if (!Number.isSafeInteger(stored.expires_at) || stored.expires_at <= Date.now()) {
         return c.json({ error: "invalid_token", error_description: "token expired" }, 401);
       }
 

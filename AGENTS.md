@@ -187,5 +187,9 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 
 ## Portées MCP — 27.09.2026
 - Les droits d’un jeton OAuth sont l’intersection de mcp_tokens.scope et des droits actuels de mcp_clients. Ne jamais attribuer automatiquement tous les droits du compte à un jeton plus étroit, vide ou inconnu. Pas de repli anonyme pour un jeton authentifié sans droit commun.
-- Le renouvellement garde au plus la portée originale et les droits actuels ; une demande de scope peut réduire, pas élargir. Refuser une portée invalide avant révocation du jeton de renouvellement. La rotation transactionnelle reste un chantier séparé.
+- Le renouvellement garde au plus la portée originale et les droits actuels ; une demande de scope peut réduire, pas élargir. Refuser une portée invalide avant révocation du jeton de renouvellement. La rotation suit la transaction décrite ci-dessous.
 - Les quotas du compte, révocations, accès anonyme et chemin administrateur historique restent distincts. Aucun droit stocké ne doit être réécrit pour corriger une lecture. Ce correctif ne valide pas tout OAuth et ne rouvre pas les souscriptions ; voir docs/portees-mcp.md.
+
+## Émission OAuth indivisible (27.09.2026)
+- `/oauth/token` valide, consomme/révoque et émet dans une seule transaction immédiate, synchrone et sans réseau. Ne pas rendre les fonctions internes asynchrones. Un verrou ou une panne donne 503/no-store sans détail SQL, avec rollback et restauration du busy_timeout.
+- Lire le code avant validation ; `consumeAuthCode` est conditionnel et doit rester dans la transaction qui insère la paire. Date exacte expirée, portée bornée aux droits actuels, ancien refresh inutilisable après succès. Voir `docs/cycle-jetons-mcp.md` pour les limites : aucune famille de jetons ni récupération de réponse perdue, abonnements toujours fermés.

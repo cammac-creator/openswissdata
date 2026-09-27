@@ -166,19 +166,21 @@ export function insertAuthCode(args: {
   });
 }
 
-export function consumeAuthCode(plain: string): MCPAuthCode | null {
+export function findAuthCode(plain: string): MCPAuthCode | null {
   const db = getDb();
   const codeHash = hashToken(plain);
   const row = db
     .prepare("SELECT * FROM mcp_oauth_codes WHERE code = ?")
     .get(codeHash) as MCPAuthCode | undefined;
-  if (!row) return null;
-  // Mark as used (single-use).
-  db.prepare("UPDATE mcp_oauth_codes SET used_at = ? WHERE code = ?").run(
-    Date.now(),
-    codeHash,
-  );
-  return row;
+  return row ?? null;
+}
+
+/** À appeler après validation, dans la même transaction que l’émission du jeton. */
+export function consumeAuthCode(plain: string): MCPAuthCode | null {
+  const now = Date.now();
+  return getDb().prepare(`UPDATE mcp_oauth_codes SET used_at = ?
+    WHERE code = ? AND used_at IS NULL AND expires_at > ? RETURNING *`)
+    .get(now, hashToken(plain), now) as MCPAuthCode | undefined ?? null;
 }
 
 // ----- Access / refresh tokens ------------------------------------------
