@@ -10,6 +10,7 @@ vi.mock("../../src/lib/email.js", () => ({
   parseLocale: (v: unknown) => (v === "de" || v === "en" ? v : "fr"),
 }));
 
+import {confirmEmailLink} from "../helpers/login.js";
 import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -160,8 +161,8 @@ describe("auth routes", () => {
       const app=createApp();await request(app, 'alice@example.com', '192.0.2.6');
       const token=(getDb().prepare('SELECT token FROM sessions').get() as {token:string}).token;
       expect((await request(app, 'alice@example.com', '192.0.2.7')).status).toBe(429);
-      const verified=await app.request('/api/auth/verify?token='+token);
-      expect(verified.status).toBe(302);expect(verified.headers.get('location')).toBe('/account?auth=ok');
+      const verified=await confirmEmailLink(app,token);
+      expect(verified.status).toBe(303);expect(verified.headers.get('location')).toBe('/account?auth=ok');
       const cookie=verified.headers.get('set-cookie')!.split(';')[0];
       expect((await app.request('/api/account',{headers:{cookie}})).status).toBe(200);
     });
@@ -191,8 +192,8 @@ describe("auth routes", () => {
     });
   });
 
-  describe("GET /api/auth/verify", () => {
-    it("rotates magic-link → long session and sets cookie, redirects to /account", async () => {
+  describe("Lien reçu puis confirmation POST", () => {
+    it("ouvre une session après le clic de confirmation et revient au compte", async () => {
       const app = createApp();
       // First, request a magic link
       await app.request("/api/auth/magic-link", {
@@ -204,8 +205,8 @@ describe("auth routes", () => {
       const token = (db.prepare("SELECT token FROM sessions").get() as any).token;
       closeDb();
 
-      const res = await app.request(`/api/auth/verify?token=${token}`);
-      expect(res.status).toBe(302);
+      const res = await confirmEmailLink(app,token);
+      expect(res.status).toBe(303);
       expect(res.headers.get("location")).toBe("/account?auth=ok");
       const setCookie = res.headers.get("set-cookie");
       expect(setCookie).toMatch(/osd_session=[A-Za-z0-9_-]{43}/);
@@ -229,7 +230,7 @@ describe("auth routes", () => {
 
     it("redirects to /account?auth=expired when token not found", async () => {
       const app = createApp();
-      const res = await app.request(`/api/auth/verify?token=${"Z".repeat(43)}`);
+      const res = await confirmEmailLink(app,"Z".repeat(43));
       expect(res.status).toBe(302);
       expect(res.headers.get("location")).toBe("/account?auth=expired");
     });

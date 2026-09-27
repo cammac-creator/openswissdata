@@ -30,7 +30,7 @@ Tests sur bases temporaires fictives : échange et rejeu, deux appels simultané
 
 ## Limites et suite
 
-Ce lot ne termine pas le consentement MCP et ne rouvre aucune offre. L’accès à un lien ou à un cookie prouve sa possession, pas une identité civile. Le GET de vérification consomme encore directement le lien : protection contre prévisualisations de mails, fixation de connexion par lien fourni par un tiers et confirmation explicite restent à traiter avant de s’appuyer sur cette session pour un consentement. Une confirmation POST liée au navigateur et protégée contre les requêtes tierces est la prochaine étape.
+Ce lot ne termine pas le consentement MCP et ne rouvre aucune offre. L’accès à un lien ou à un cookie prouve sa possession, pas une identité civile. Au lot49, le GET de vérification consommait directement le lien. Le lot50 apporte désormais une confirmation POST liée au navigateur, décrite dans [confirmation-de-connexion.md](./confirmation-de-connexion.md). Les autres limites ci-dessous restent ouvertes.
 
 Les jetons de connexion restent stockés en clair comme auparavant ; un hachage et une migration dédiée restent à examiner. Aucun MFA, révocation globale ni gestion des appareils n’est ajouté. Un cookie historique détourné ne redevient pas sûr du seul fait de cette migration. La remise du mail de connexion n’est pas une file durable ; une réponse réseau perdue après commit ne permet pas de récupérer la nouvelle session avec le lien consommé. Le portail Stripe et l’identité du payeur restent un chantier distinct.
 

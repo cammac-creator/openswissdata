@@ -3,6 +3,7 @@ import {mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import Database from 'better-sqlite3';
+import {confirmEmailLink} from '../helpers/login.js';
 const {send} = vi.hoisted(() => ({send: vi.fn().mockResolvedValue({sent:true})}));
 vi.mock('../../src/lib/email.js', () => ({sendMagicLinkEmail:send, sendDownloadEmail:vi.fn(), parseLocale:(v:unknown)=>v==='de'||v==='en'?v:'fr'}));
 import {createApp} from '../../src/index.js';
@@ -16,7 +17,7 @@ let app:ReturnType<typeof createApp>;
 function seed(purpose='session', duration=SESSION_TTL_MS, token=TOKEN, expiry=NOW+duration) {
   getDb().prepare('INSERT INTO sessions(token,customer_id,created_at,expires_at,purpose) VALUES(?,1,?,?,?)').run(token,expiry-duration,expiry,purpose);
 }
-const verify=(token=TOKEN,extra='')=>app.request('/api/auth/verify?token='+token+extra);
+const verify=(token=TOKEN,extra='')=>confirmEmailLink(app,token,extra);
 const rows=()=>getDb().prepare('SELECT * FROM sessions ORDER BY token').all();
 const cookie=(value=TOKEN)=>({cookie:'osd_session='+value});
 const protectedPaths=['/api/account','/api/admin/stats'];
@@ -36,7 +37,7 @@ describe('Frontières entre lien reçu et session ouverte',()=>{
  it.each(['magic_link','legacy'])('le lien %s ne sert jamais de cookie, compte ou administration',async kind=>{
   seed(kind,MAGIC_LINK_TTL_MS);const before=rows();
   for(const path of protectedPaths){const r=await app.request(path,{headers:cookie()});expect(r.status).toBe(401);expect(r.headers.get('cache-control')).toContain('no-store');}
-  expect(rows()).toEqual(before);const r=await verify();expect(r.status).toBe(302);expect(r.headers.get('set-cookie')).toBeTruthy();
+  expect(rows()).toEqual(before);const r=await verify();expect(r.status).toBe(303);expect(r.headers.get('set-cookie')).toBeTruthy();
  });
  it.each(['session','legacy'])('une session %s ne redevient pas un lien de connexion',async kind=>{
   seed(kind);const before=rows();const r=await verify();expect(r.headers.get('location')).toBe('/account?auth=expired');expect(r.headers.get('set-cookie')).toBeNull();expect(rows()).toEqual(before);
@@ -101,7 +102,7 @@ describe('Échange atomique et pannes de stockage',()=>{
  it('échec à la dernière écriture : lien intact, aucun cookie, reprise possible',async()=>{
   seed('magic_link',MAGIC_LINK_TTL_MS);const before=rows();
   getDb().exec("CREATE TRIGGER panne_fictive BEFORE INSERT ON sessions WHEN NEW.purpose='session' BEGIN SELECT RAISE(ABORT,'detail-prive-fictif'); END");
-  const r=await verify();expect(r.status).toBe(503);expect(await r.json()).toEqual({error:'temporarily_unavailable'});expect(r.headers.get('set-cookie')).toBeNull();expect(rows()).toEqual(before);
+  const r=await verify();expect(r.status).toBe(503);expect(await r.text()).toContain('momentanément indisponible');expect(r.headers.get('set-cookie')).toBeNull();expect(rows()).toEqual(before);
   getDb().exec('DROP TRIGGER panne_fictive');expect((await verify()).headers.get('set-cookie')).toBeTruthy();
  });
  it('échec de consommation : aucune deuxième session émise',async()=>{

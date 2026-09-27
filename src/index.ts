@@ -31,6 +31,7 @@ import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
 import { CHECKOUT_NOTICE_CSP, isCheckoutNotice } from './lib/checkout-notice.js';
+import {LOGIN_CONFIRMATION_CSP} from './lib/login-confirmation-page.js';
 import {authorizationCsp} from './mcp/oauth/redirects.js';
 
 export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
@@ -46,8 +47,12 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
       const destination = c.req.method === 'GET' && c.res.status === 200 && c.res.headers.get('content-type')?.includes('text/html') ? c.req.query('redirect_uri') : undefined;
       c.header('Content-Security-Policy', authorizationCsp(destination));
     }
+    if (/^\/api\/auth\/(verify|confirm)$/.test(c.req.path)) c.header('Content-Security-Policy', LOGIN_CONFIRMATION_CSP);
     if (isCheckoutNotice(c)) c.header('Content-Security-Policy', CHECKOUT_NOTICE_CSP);
     if (/^\/api\/(delivery|download|auth)\//.test(c.req.path)) c.header("Referrer-Policy", "no-referrer");
+    // no-referrer transforme l'Origin d'un formulaire en null dans les navigateurs.
+    // strict-origin garde une origine vérifiable sans transmettre le chemin ni le jeton.
+    if (c.req.path === '/api/auth/verify' && ['GET','HEAD'].includes(c.req.method) && c.res.status === 200 && c.res.headers.get('content-type')?.includes('text/html')) c.header('Referrer-Policy', 'strict-origin');
     if (c.req.path.startsWith("/api/delivery/")) {
       c.header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://*.r2.cloudflarestorage.com; frame-ancestors 'none'; base-uri 'none'");
     }

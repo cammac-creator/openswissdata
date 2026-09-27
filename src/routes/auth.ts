@@ -4,9 +4,10 @@ import { bodyLimit } from "hono/body-limit";
 import { HTTPException } from "hono/http-exception";
 import { authRequestIp, consumeAuthLimit, reportAuthLimitFailure } from "../lib/auth-limits.js";
 import { getDb } from "../lib/db.js";
-import {isValidTokenFormat} from '../lib/tokens.js';
-import {issueMagicLink, exchangeMagicLink, deleteAccountSession, SESSION_TTL_MS} from '../lib/account-session.js';
+import {issueMagicLink, deleteAccountSession} from '../lib/account-session.js';
 import { sendMagicLinkEmail, parseLocale } from "../lib/email.js";
+
+import {authConfirmationRoute} from './auth-confirmation.js';
 
 export const authRoute = new Hono();
 
@@ -63,27 +64,7 @@ authRoute.post("/magic-link", async (c) => {
   return c.json({ ok: true });
 });
 
-authRoute.get("/verify", (c) => {
-  const query = new URL(c.req.url).searchParams;
-  const tokens = query.getAll('token');
-  const targets = query.getAll('return_to');
-  if (c.req.url.length > 4096 || tokens.length !== 1 || !isValidTokenFormat(tokens[0]) || targets.length > 1) {
-    return c.redirect('/account?auth=invalid', 302);
-  }
-  let session;
-  try { session = exchangeMagicLink(tokens[0], targets[0] === 'admin' ? 'admin' : 'account'); }
-  catch {
-    console.warn('[connexion] échange non enregistré ; lien conservé');
-    c.header('Retry-After', '1');
-    return c.json({error: 'temporarily_unavailable'}, 503);
-  }
-  if (!session) return c.redirect('/account?auth=expired', 302);
-  // Le cookie n'est émis qu'après la validation de toute la transaction.
-  c.header('Set-Cookie', `osd_session=${session.token}; HttpOnly; ${isProd() ? 'Secure; ' : ''}SameSite=Lax; Max-Age=${Math.floor(SESSION_TTL_MS / 1000)}; Path=/`);
-  if (session.target === 'admin') return c.redirect('/admin', 302);
-  const locale = parseLocale(session.locale);
-  return c.redirect(`${locale === 'fr' ? '' : '/' + locale}/account?auth=ok`, 302);
-});
+authRoute.route('/', authConfirmationRoute);
 
 authRoute.post('/logout', (c) => {
   try { deleteAccountSession(c.req.header('cookie')); }

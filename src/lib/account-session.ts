@@ -1,5 +1,6 @@
 import {getDb, SQLITE_BUSY_TIMEOUT_MS} from './db.js';
 import {generateToken, isValidTokenFormat} from './tokens.js';
+import {createHash} from 'node:crypto';
 
 export const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;
 export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -8,17 +9,18 @@ type SessionRow = {customer_id: number; email: string; locale: string; purpose: 
   return_to: string; created_at: number; expires_at: number};
 
 /** Un cookie complet, unique et de forme exacte ; aucun préfixe ni premier doublon privilégié. */
-export function accountSessionToken(cookie: string | undefined): string | null {
+export function uniqueTokenCookie(cookie: string | undefined, name: string): string | null {
   if (!cookie || cookie.length > 16384) return null;
   const values: string[] = [];
   for (const part of cookie.split(';')) {
     const value = part.trim();
     const split = value.indexOf('=');
-    const name = split < 0 ? value : value.slice(0, split).trim();
-    if (name === 'osd_session') values.push(split < 0 ? '' : value.slice(split + 1));
+    const cookieName = split < 0 ? value : value.slice(0, split).trim();
+    if (cookieName === name) values.push(split < 0 ? '' : value.slice(split + 1));
   }
   return values.length === 1 && isValidTokenFormat(values[0]) ? values[0] : null;
 }
+export const accountSessionToken = (cookie: string | undefined) => uniqueTokenCookie(cookie, 'osd_session');
 
 /** Compatibilité limitée aux deux durées exactes émises par l'ancien code. */
 function purpose(row: SessionRow): string {
@@ -43,6 +45,24 @@ export function readAccountSession(cookie: string | undefined): {customer_id: nu
     ? {customer_id: row.customer_id, email: row.email} : null;
 }
 
+export function accountSessionSnapshot(cookie: string | undefined) {
+  const session = readAccountSession(cookie);
+  return {session, fingerprint: session ? createHash('sha256').update(accountSessionToken(cookie)!).digest('hex') : null};
+}
+
+/** Lecture seule : les prévisualisations de mails ne consomment aucun lien. */
+export function inspectMagicLink(token: string, legacyReturn: LoginReturn) {
+  if (!isValidTokenFormat(token)) return null;
+  const row = find(token);
+  if (!row || !current(row, Date.now()) || purpose(row) !== 'magic_link') return null;
+  return {customerId: row.customer_id, email: row.email, locale: row.locale, expiresAt: row.expires_at,
+    target: row.purpose === 'legacy' ? legacyReturn : row.return_to === 'admin' ? 'admin' as const : 'account' as const};
+}
+
+export class LoginContextChanged extends Error {
+  constructor() { super('login_context_changed'); }
+}
+
 /** Aucune attente de verrou, aucun réseau, et délai restauré même sur exception. */
 export function sessionWrite<T>(work: () => T): T {
   const db = getDb();
@@ -59,25 +79,29 @@ export function issueMagicLink(customerId: number, target: LoginReturn): string 
   return sessionWrite(() => {
     const token = generateToken();
     const now = Date.now();
-    getDb().prepare(`INSERT INTO sessions(token,customer_id,expires_at,created_at,purpose,return_to)
+    const inserted = getDb().prepare(`INSERT INTO sessions(token,customer_id,expires_at,created_at,purpose,return_to)
       VALUES(?,?,?,?,'magic_link',?)`).run(token, customerId, now + MAGIC_LINK_TTL_MS, now, target);
+    if (inserted.changes !== 1) throw new Error('login_link_not_created');
     return token;
   });
 }
 
-export function exchangeMagicLink(token: string, legacyReturn: LoginReturn) {
+export function confirmMagicLink(token: string, target: LoginReturn, cookie: string | undefined,
+  expected: {session: string | null; customerId: number; expiresAt: number}) {
   return sessionWrite(() => {
-    const row = find(token);
     const now = Date.now();
-    if (!row || !current(row, now) || purpose(row) !== 'magic_link') return null;
+    if (expected.expiresAt <= now) return null;
+    if (accountSessionSnapshot(cookie).fingerprint !== expected.session) throw new LoginContextChanged();
+    const row = inspectMagicLink(token, target);
+    if (!row || row.customerId !== expected.customerId || row.target !== target) return null;
     const db = getDb();
     const removed = db.prepare('DELETE FROM sessions WHERE token=? AND expires_at>?').run(token, now);
     if (removed.changes !== 1) throw new Error('login_link_not_consumed');
     const sessionToken = generateToken();
-    db.prepare(`INSERT INTO sessions(token,customer_id,expires_at,created_at,purpose,return_to)
-      VALUES(?,?,?,?,'session','account')`).run(sessionToken, row.customer_id, now + SESSION_TTL_MS, now);
-    return {token: sessionToken, locale: row.locale,
-      target: row.purpose === 'legacy' ? legacyReturn : row.return_to === 'admin' ? 'admin' : 'account'};
+    const inserted = db.prepare(`INSERT INTO sessions(token,customer_id,expires_at,created_at,purpose,return_to)
+      VALUES(?,?,?,?,'session','account')`).run(sessionToken, row.customerId, now + SESSION_TTL_MS, now);
+    if (inserted.changes !== 1) throw new Error('account_session_not_created');
+    return {token: sessionToken, locale: row.locale, target: row.target};
   });
 }
 
