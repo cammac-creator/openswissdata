@@ -7,7 +7,8 @@ The data is an unofficial copy. Each result names its source; binding decisions 
 ## Use it from an AI agent (free, no key)
 
 - MCP endpoint (Streamable HTTP, JSON responses): `https://mcp.openswissdata.com/jsonrpc`
-- Limit without a key: 100 calls per hour per IP address.
+- Limit without a key: 100 calls per hour per IP address. Each message of a JSON-RPC batch counts as one call.
+- Browser calls are allowed (CORS, any origin, no cookies), so agents running in a web page can use the endpoint directly.
 - Claude Code: `claude mcp add --transport http openswissdata https://mcp.openswissdata.com/jsonrpc`
 - Clients configured with JSON (Cursor, Windsurf and similar): `{"mcpServers": {"openswissdata": {"url": "https://mcp.openswissdata.com/jsonrpc"}}}`
 - Clients that only launch local processes: `npx -y @openswissdata/mcp` (a small bridge to the same endpoint).

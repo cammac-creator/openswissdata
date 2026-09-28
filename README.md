@@ -6,6 +6,21 @@
 - **Full datasets as signed files:** [openswissdata.com](https://www.openswissdata.com/en/). Summary for AI agents: [llms.txt](https://www.openswissdata.com/llms.txt).
 - Unofficial copies: binding decisions belong to the official sources (xtares.admin.ch, finma.ch, the Swiss Federal Statistical Office).
 
+## Tools
+
+| Tool | Access | What it answers |
+| --- | --- | --- |
+| `tariff_lookup` | Free, no key | Swiss customs tariff line for an 8-digit tariff number (MFN duty, preferential regimes, restrictions, relief codes), or the Swiss lines under a 2- to 7-digit HS prefix |
+| `kyc_check` | Free, no key | FINMA register of supervised institutions and FINMA warning list, searched by name, closest matches first |
+| `cross_walk` | Free, no key | Correspondence of an activity code between NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4, with the relation type and its source |
+| `tariff_semantic_search` | Existing access grant | Semantic search over the French TARES descriptions |
+| `tariff_changelog` | Existing access grant | MFN duty history of a tariff number across archived releases |
+| `classify_text` | Existing access grant | NOGA 2025 codes suggested for a French activity description |
+| `finma_search` | Existing access grant | Fuzzy FINMA register search with LEI/UID where available |
+| `entity_history` | Existing access grant | Change history of a FINMA-supervised entity by Swiss UID |
+
+New Pro subscriptions are closed; the three free tools need no sign-up. The endpoint accepts browser calls (CORS, any origin, no cookies).
+
 ---
 
 Jeux de données publics suisses normalisés : FINMA, TARES et classifications. API Hono, site Astro et collectes TypeScript dans ce dépôt. Les données des clients et les preuves privées restent hors Git.
