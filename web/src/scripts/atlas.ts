@@ -6,7 +6,7 @@ if (site) {
   const buttons = site.querySelectorAll<HTMLButtonElement>('[data-atlas-motion]');
   let pausedByUser = false;
   const animations = new Set<Animation>();
-  const art = site.querySelector<HTMLElement>('[data-atlas-art]');
+  const art = site.querySelector<HTMLElement>('[data-atlas-art]:not(.atlas-relief)');
   let frame = 0;
   const resetArt = () => {
     if (frame) cancelAnimationFrame(frame);

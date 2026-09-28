@@ -243,6 +243,49 @@
 }
 @media (max-width:359px) { .atlas-shell { width:calc(100% - 32px); }.atlas-brand { font-size:17px; gap:6px; }.atlas-mark { width:22px; height:22px; }.atlas-nav-row { gap:8px; }.atlas-hero h1 { font-size:48px; }.atlas-actions { gap:10px; }.atlas-art-meta { font-size:7px; }.atlas-motion { font-size:8px!important; }.atlas-art-bottom>span { font-size:8px; }.atlas-product-nav-links { gap:10px; }.atlas-product-nav a { font-size:10px; }.atlas-nav-buy span { display:none; }.atlas-feature,.atlas-purchase { padding:22px; }.atlas-window-body { padding:16px; }.atlas-purchase-box { padding:20px; }.atlas-product-card-head>span { font-size:9px; } }
 @media (prefers-reduced-motion:reduce) { .atlas-site *, .atlas-site *::before, .atlas-site *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }.atlas-art-plane { transform:none!important; } }
+
+/* Le relief manipulable garde sa place avant, pendant et après son chargement. */
+.atlas-relief { overflow:visible; }
+.atlas-relief .atlas-art-plane { transition:opacity .35s ease; transform:none; }
+.atlas-relief[data-relief-state='ready'] .atlas-art-plane { opacity:0; pointer-events:none; }
+.atlas-relief[data-relief-state='ready'] .atlas-art-image { animation:none!important; }
+.atlas-relief-stage { position:absolute; inset:-2% -5% 10%; z-index:1; cursor:grab; outline-offset:-5px; touch-action:pan-y; }
+.atlas-relief-stage canvas { display:block; width:100%; height:100%; }
+.atlas-relief-stage.is-dragging { cursor:grabbing; }
+.atlas-relief[data-touch-active='true'] .atlas-relief-stage { touch-action:none; }
+.atlas-relief .atlas-art-meta { pointer-events:none; }
+.atlas-relief .atlas-file-float { z-index:2; pointer-events:none; transition:opacity .2s; bottom:24%; }
+.atlas-relief[data-relief-view='back'] .atlas-file-float,
+.atlas-relief[data-relief-view='custom'] .atlas-file-float { opacity:0; }
+.atlas-relief-hint { position:absolute; left:6%; top:10%; z-index:2; font-size:10px; color:var(--atlas-muted); pointer-events:none; }
+.atlas-relief-controls { position:absolute; bottom:9%; inset-inline:2%; z-index:3; display:flex; justify-content:center; }
+.atlas-relief-controls button { border:1px solid #16382f28; background:#f4f3ede8; color:var(--atlas-ink); border-radius:99px; padding:10px 15px; min-height:42px; font-size:11px; cursor:pointer; backdrop-filter:blur(8px); }
+.atlas-relief-controls button:hover,.atlas-relief-controls button[aria-pressed='true'] { background:var(--atlas-ink); color:var(--atlas-paper); }
+.atlas-relief-controls button:disabled { opacity:.6; cursor:progress; }
+.atlas-relief-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:7px; }
+.atlas-relief-actions[hidden],.atlas-relief-stage[hidden],.atlas-relief-hint[hidden],.atlas-relief-controls [hidden] { display:none; }
+.atlas-relief .atlas-art-bottom { z-index:4; bottom:1%; align-items:center; }
+.atlas-relief-source { position:relative; font-size:10px; line-height:1.5; }
+.atlas-relief-source summary { cursor:pointer; min-height:36px; display:flex; align-items:center; gap:5px; border-bottom:1px dotted #16382f55; list-style:none; }
+.atlas-relief-source summary::-webkit-details-marker { display:none; }
+.atlas-relief-source summary::after { content:'+'; color:var(--atlas-red); }
+.atlas-relief-source[open] summary::after { content:'−'; }
+.atlas-relief-source>div { position:absolute; bottom:calc(100% + 12px); left:0; width:min(290px,75vw); padding:18px; border:1px solid var(--atlas-line); border-radius:10px; background:var(--atlas-paper); box-shadow:0 10px 35px #16382f1c; font-size:12px; }
+.atlas-relief-source p { margin:0 0 12px; }
+.atlas-relief-source a { color:var(--atlas-ink); text-underline-offset:3px; }
+@media (hover:hover) and (pointer:fine) { .atlas-relief [data-relief-touch] { display:none; } }
+@media (max-width:760px) {
+ .atlas-relief { aspect-ratio:.93; margin-top:24px; }
+ .atlas-product-hero .atlas-relief { aspect-ratio:.93; }
+ .atlas-relief-stage { inset:0 -3% 17%; }
+ .atlas-relief .atlas-art-plane { margin:-2% -3% 0; }
+ .atlas-relief .atlas-file-float { bottom:29%; }
+ .atlas-relief-controls { bottom:11%; inset-inline:0; }
+ .atlas-relief-controls button { min-height:44px; padding:9px 12px; font-size:10px; }
+ .atlas-relief .atlas-art-bottom { inset:auto 0 0; }
+ .atlas-relief-hint { top:10%; left:4%; font-size:9px; }
+ .atlas-relief-source { font-size:9px; }
+}
 .atlas-site[data-motion='off'] *, .atlas-site[data-motion='off'] *::before, .atlas-site[data-motion='off'] *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
 @media (forced-colors:active) { .atlas-mark { border:1px solid ButtonText; }.atlas-meter span { background:Highlight; }.atlas-feature,.atlas-purchase,.atlas-btn { border:1px solid CanvasText; } }
 
