@@ -44,7 +44,7 @@
     },
     {
       "name": "tariff_semantic_search",
-      "description": "Semantic search over the French TARES descriptions, returns 8-digit candidates (existing access grant required)"
+      "description": "Find 8-digit TARES lines from a description in French, German, Italian or English, using each line's official hierarchy (existing access grant required)"
     },
     {
       "name": "tariff_changelog",
@@ -52,11 +52,11 @@
     },
     {
       "name": "classify_text",
-      "description": "Suggest NOGA 2025 codes for a French activity description (existing access grant required)"
+      "description": "Suggest NOGA 2025 subclasses for an activity description in French, German, Italian or English (existing access grant required)"
     },
     {
       "name": "finma_search",
-      "description": "Fuzzy FINMA register search with LEI/UID where available (existing access grant required)"
+      "description": "FINMA register search tolerant of accents, legal forms and typos, each match labelled with its type (existing access grant required)"
     },
     {
       "name": "entity_history",

@@ -3,6 +3,7 @@
  * recherche par mots officiels (vecteur de requête nul : aucun modèle chargé).
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { parse } from "csv-parse/sync";
 import { EMBEDDING_REVISION } from "../../src/lib/embedding-model.js";
@@ -46,6 +47,20 @@ describe("index TARES livré", () => {
       expect(r.hits.map((h) => h.hs_code.slice(0, 4)), query).toEqual(["0901", "0901", "0901"]);
       expect(r.hits[0].lexical_rank, query).toBe(1);
     }
+  });
+});
+
+describe("index et sources suivis ensemble", () => {
+  it("l'index TARES vient de la structure tarifaire surveillée par le contrôle des sources", async () => {
+    // Une nouvelle structure acceptée dans la référence du contrôle impose de reconstruire l'index :
+    // npx tsx scripts/build-search-indexes.ts --tares --tarifstruktur <bronze du jour>
+    const baseline = JSON.parse(readFileSync(new URL("../../etl/canary-baseline.json", import.meta.url), "utf8")) as Record<string, { hash: string }>;
+    expect((await data.getTaresEmbeddings()).meta.source.sha256).toBe(baseline["tares.tarifstruktur"].hash);
+  });
+
+  it("l'index NOGA 2025 vient du fichier NOGA 2025 du dépôt tel qu'il est aujourd'hui", async () => {
+    const csv = readFileSync(new URL("../../data/classifications/classifications-2026.04.29-test-work/noga_2025.csv", import.meta.url));
+    expect((await data.getNogaEmbeddings()).meta.source.sha256).toBe(createHash("sha256").update(csv).digest("hex"));
   });
 });
 
