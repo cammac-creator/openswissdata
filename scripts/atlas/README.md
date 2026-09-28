@@ -1,6 +1,6 @@
 # Relief suisse interactif — chaîne de fabrication
 
-Le modèle est une interprétation graphique mesurée, produite hors du serveur web. Aucun service cartographique ni téléchargement de données géographiques ne se déclenche chez le visiteur.
+Le modèle est une interprétation artistique à partir de données topographiques, produite hors du serveur web. Aucun service cartographique ni téléchargement de données géographiques ne se déclenche chez le visiteur.
 
 ## Sources originales, conservées séparément
 
@@ -10,7 +10,7 @@ Le modèle est une interprétation graphique mesurée, produite hors du serveur 
 
 Les archives sont téléchargées une fois, vérifiées par SHA-256 et gardées intactes dans `bronze/2026-09-28/`. Extraire le ZIP MNT dans `argent/mnt/`, avec `ASCII_GRID_1part/dhm25_grid_raster.asc`, et le GeoPackage dans `argent/frontieres/`. Les chemins se passent explicitement aux scripts ; aucun téléchargement implicite. Les gros originaux et le fichier Blender restent hors du dépôt public.
 
-## Transformation
+## Préparation topographique et ancien modèle v2
 
 Python : numpy/scipy, shapely 2.0.7, pyproj 3.6.1, rasterio 1.4.3, triangle 20250106. Blender 5.2.1 LTS ; glTF Transform 4.5.0.
 
@@ -23,7 +23,7 @@ Les rapports `geometrie.json` et `scene.json` documentent chaque exécution. Le 
 
 ## Dans la page
 
-Three.js est chargé à la demande, puis le modèle de moins de 3 Mo est lu sur la même origine, décompressé avec `DecompressionStream` et rendu localement. Aucun WASM, CDN ni service tiers ; CSP inchangée. La licence MIT de Three.js accompagne la distribution dans `/licenses/three-MIT.txt`. Chargement exclusivement explicite sur tous les appareils : le mode 3D ne remplace jamais automatiquement l’illustration. Une affiche demeure sans JavaScript, sans WebGL, en cas d’échec réseau ou de perte du contexte graphique ; le visiteur peut réessayer.
+Three.js est chargé à la demande, puis le modèle v4 (environ 3,5 Mo compressés) est lu sur la même origine, décompressé avec `DecompressionStream` et rendu localement. Aucun WASM, CDN ni service tiers ; CSP inchangée. La licence MIT de Three.js accompagne la distribution dans `/licenses/three-MIT.txt`. Chargement exclusivement explicite sur tous les appareils : le mode 3D ne remplace jamais automatiquement l’illustration. Une affiche demeure sans JavaScript, sans WebGL, en cas d’échec réseau ou de perte du contexte graphique ; le visiteur peut réessayer.
 
 Glisser à la souris tourne librement ; les flèches du clavier aussi. Les boutons montrent le dos et rétablissent le recto. Sur écran tactile, « Manipuler » active les gestes, « Terminer » libère le défilement. Le mouvement réduit, la pause, la visibilité de la page et la sortie de l’écran interrompent le mouvement automatique. Le bouton « Illustration » revient au visuel artistique, rend le focus au bouton d’exploration et libère les ressources GPU ; celles-ci sont aussi libérées au départ de la page. Prévoir une recette sur un vrai téléphone en complément des moteurs de navigateur automatisés.
 
@@ -33,4 +33,18 @@ L’accueil et FINMA FR/DE/EN présentent d’abord `swiss-atlas-editorial-v3.pn
 
 Direction : grande sculpture ivoire, socle et vallées vert forêt, fin liseré vermillon, lumière chaude latérale et ombres profondes. La demande de couleurs plus présentes est traduite dans l’image et par une saturation CSS de 1,2 ; ce n’est pas une mesure de surface ou une exactitude colorimétrique. Les fichiers servis par Astro portent leur empreinte de contenu. Les animations respectent le mouvement réduit et le bouton de pause. Sans JavaScript, l’illustration et sa provenance restent accessibles.
 
-Le prototype en terrasses Blender du même jour n’a pas été retenu : son rendu mécanique ne correspondait pas à la référence. Le volume v2 reste proposé volontairement, avec un cadrage plus grand et un éclairage latéral. Une sculpture 3D reproduisant réellement la matière et la composition de l’illustration demanderait une modélisation artistique spécifique ; ce résultat n’est pas revendiqué ici.
+Le prototype en terrasses Blender du même jour n’a pas été retenu : son rendu mécanique ne correspondait pas à la référence. Le volume v4 ci-dessous remplace le v2 dans le mode interactif. Il reprend les verts profonds, les stries et le contraste de cette direction artistique, avec une géométrie distincte guidée par le MNT. Il ne prétend pas reproduire exactement les sommets imaginés de l’illustration.
+
+
+## Sculpture interactive v4 — 28.09.2026
+
+Après la première étape topographique ci-dessus, utiliser les fichiers argent `terrain.npz` et `contour.npz`. Aucune archive n’est modifiée et aucun téléchargement supplémentaire n’est nécessaire.
+
+1. `prepare-artistic.py --geometry DOSSIER_GEOMETRIE --output DOSSIER_SCULPTURE` reconstruit un maillage d’environ 625 m. Deux lissages gaussiens regroupent les petits sommets en massifs ; une amplification de 16 est appliquée après soustraction d’un niveau de base de 330 m. Le contour est arrondi et simplifié ; les hauteurs s’abaissent progressivement près du bord. Ce traitement variable ne correspond donc pas à une échelle altimétrique uniforme ×16.
+2. `blender --background --python-exit-code 1 --python build-artistic.py -- --geometry DOSSIER_SCULPTURE --output DOSSIER_OR` fabrique le volume ivoire, les pigments des vallées, le socle vert profond, le liseré vermillon et la signature volumétrique. Blender calcule l’occlusion des creux dans les couleurs des sommets. Aucun éclairage directionnel n’est figé dans ces couleurs. Les chants reçoivent des normales pondérées pour rendre les reflets continus. Le `.blend` et les vues de comparaison restent privés.
+3. `gltf-transform quantize DOSSIER_OR/swiss-atlas.glb DOSSIER_OR/swiss-atlas-quantized.glb --quantize-position 14 --quantize-normal 10`.
+4. `package-model.py --input DOSSIER_OR --output CHEMIN_PROJET/web/src/assets/art --version v4 --without-poster` compresse le GLB avec une date gzip fixe. Seul le `.bin` est livré ; l’illustration éditoriale reste l’affiche initiale.
+
+`sculpture.json` et `scene.json` consignent les paramètres, effectifs et occlusion. Les stries et pigments ne représentent ni géologie ni occupation du sol. Le bord abaissé améliore la finition de l’objet au prix d’une déformation volontaire : ce n’est pas une carte de mesure.
+
+Dans le navigateur, `atlas-relief-material.ts` ajoute des stries fines qui suivent la hauteur du volume, avec un relief de surface procédural et un filtrage à distance. Les ombres portées entre massifs suivent la rotation. `RoomEnvironment` produit sur place des reflets doux ; aucun panorama externe n’est chargé. `atlas-relief-shadow.ts` calcule une empreinte floutée une seule fois pour le contact au sol et l’efface progressivement quand le visiteur retourne l’objet. Les textures de calcul, matériaux et géométries sont libérés au retour à l’illustration. Les filtres et la perturbation des normales s’appuient sur Three.js, distribué sous licence MIT.

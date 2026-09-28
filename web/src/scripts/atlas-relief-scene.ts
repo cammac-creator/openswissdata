@@ -1,9 +1,12 @@
 import {
-  AmbientLight, Box3, DirectionalLight, Group, HemisphereLight, Matrix4, Mesh,
+  Box3, DirectionalLight, Group, HemisphereLight, Matrix4, Mesh,
   OrthographicCamera, PCFSoftShadowMap, Quaternion, Scene, SRGBColorSpace,
-  Vector3, WebGLRenderer, ACESFilmicToneMapping, type Material,
+  Vector3, WebGLRenderer, ACESFilmicToneMapping, PMREMGenerator, type WebGLRenderTarget, type Material,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { sculptedMaterial } from './atlas-relief-material';
+import { createContactShadow } from './atlas-relief-shadow';
 
 /** Vrai volume fermé, rendu local et rotations sans limites ni service tiers. */
 export async function mountRelief(art: HTMLElement): Promise<() => void> {
@@ -19,6 +22,8 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
   let renderer: WebGLRenderer | undefined;
   let model: Group | undefined;
   let shadow: DirectionalLight['shadow'] | undefined;
+  let studio: WebGLRenderTarget | undefined;
+  let contact: ReturnType<typeof createContactShadow> | undefined;
   let disposed = false;
   let frame = 0;
   let resizeObserver: ResizeObserver | undefined;
@@ -40,6 +45,8 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
       materials.forEach(material => material.dispose());
     });
     shadow?.dispose();
+    studio?.dispose();
+    contact?.dispose();
     renderer?.dispose();
     renderer?.forceContextLoss();
     renderer?.domElement.remove();
@@ -83,18 +90,30 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
     }
     const box = new Box3().setFromObject(model);
     if (!Number.isFinite(box.max.x) || box.getSize(new Vector3()).length() > 20) throw new Error('Géométrie invalide');
-    // Le relief est éclairé par ses normales ; les ombres portées soulignent la frappe du socle.
+    // Le grain suit la géométrie ; les ombres portées réagissent à sa rotation.
+    model.updateMatrixWorld(true);
     model.traverse(node => {
-      if (node instanceof Mesh) { node.castShadow = true; node.receiveShadow = typeof node.userData.inscription === 'string'; }
+      if (node instanceof Mesh) {
+        node.castShadow = true; node.receiveShadow = true;
+        if (node.userData.strates === true) sculptedMaterial(node);
+      }
     });
     const scene = new Scene();
+    // Un studio calculé sur place apporte des reflets doux, sans image HDR distante.
+    const environment = new RoomEnvironment();
+    const generator = new PMREMGenerator(renderer);
+    try { studio = generator.fromScene(environment, .04); }
+    finally { environment.dispose(); generator.dispose(); }
+    scene.environment = studio.texture;
+    scene.environmentIntensity = .24;
     const pivot = new Group();
     pivot.add(model);
     scene.add(pivot);
-    scene.add(new HemisphereLight(0xfffaef, 0x314c3b, .55));
-    scene.add(new AmbientLight(0xfff7eb, .12));
-    const key = new DirectionalLight(0xffefcf, 2.3);
-    key.position.set(-7, 3, 5);
+    contact = createContactShadow(renderer, scene);
+    scene.add(contact.ground);
+    scene.add(new HemisphereLight(0xfffaef, 0x203e30, .25));
+    const key = new DirectionalLight(0xffecd0, 2.8);
+    key.position.set(-5, 6, 7);
     key.castShadow = true;
     shadow = key.shadow;
     key.shadow.mapSize.set(2048, 2048);
@@ -102,18 +121,18 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
     key.shadow.camera.right = key.shadow.camera.top = 7;
     key.shadow.camera.near = .1;
     key.shadow.camera.far = 40;
-    key.shadow.normalBias = .014;
-    key.shadow.bias = -.0001;
+    key.shadow.normalBias = .038;
+    key.shadow.bias = -.00003;
     scene.add(key);
-    const fill = new DirectionalLight(0xfff7da, .65);
-    fill.position.set(6, 4, -4);
+    const fill = new DirectionalLight(0xeaf1ff, 1.2);
+    fill.position.set(5, 5, -7);
     scene.add(fill);
-    const front = new DirectionalLight(0xfffaf2, .3);
+    const front = new DirectionalLight(0xfffaf2, .18);
     front.position.set(1, 2, 8);
     scene.add(front);
     const camera = new OrthographicCamera(-6.25, 6.25, 6.25, -6.25, .1, 100);
-    camera.position.set(-1.4, 10, 9);
-    camera.lookAt(0, .45, 0);
+    camera.position.set(-2.6, 11, 8.7);
+    camera.lookAt(0, .65, 0);
     const screenRight = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     const screenUp = new Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
     const rotation = new Quaternion();
@@ -145,6 +164,11 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
         pivot.quaternion.multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.sin(now / 4000) * .022));
         pivot.position.y = Math.sin(now / 1900) * .035;
       } else pivot.position.y = 0;
+      // L'ombre de contact accompagne le recto et s'efface quand le volume se retourne.
+      const ground = contact!.ground;
+      ground.material.opacity = .42 * Math.max(0, 1 - orientation.angleTo(new Quaternion()) / .45);
+      ground.visible = ground.material.opacity > .001;
+      ground.position.y = -.55 + pivot.position.y;
       renderer!.render(scene, camera);
       if (tween || automatic()) requestFrame();
     }

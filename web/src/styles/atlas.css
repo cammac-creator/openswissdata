@@ -328,8 +328,5 @@
  .atlas-relief-controls button { padding-inline:10px; }
 }
 
-.atlas-relief-stage::before { content:''; position:absolute; z-index:-1; width:85%; height:20%; left:9%; bottom:19%; border-radius:50%; background:radial-gradient(ellipse,#17372d35,transparent 68%); filter:blur(13px); transform:rotate(-5deg); pointer-events:none; }
-.atlas-relief[data-relief-view='back'] .atlas-relief-stage::before,
-.atlas-relief[data-relief-view='custom'] .atlas-relief-stage::before { display:none; }
 /* Sur les plus petits écrans tactiles, les commandes occupent deux lignes. */
 @media (max-width:359px) { .atlas-relief-stage { bottom:27%; } }
