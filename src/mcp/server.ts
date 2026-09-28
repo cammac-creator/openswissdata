@@ -105,7 +105,7 @@ const TOOL_TITLES = new Map<string, string>([
   ["tariff_lookup", "Swiss customs tariff line (TARES)"],
   ["kyc_check", "FINMA register and warnings list check"],
   ["cross_walk", "NOGA / NACE / ISIC code correspondence"],
-  ["tariff_semantic_search", "TARES semantic search (French descriptions)"],
+  ["tariff_semantic_search", "TARES search by goods description (FR/DE/IT/EN)"],
   ["classify_text", "NOGA 2025 classification of a business description"],
   ["finma_search", "FINMA register fuzzy name search"],
   ["tariff_changelog", "TARES duty rate history"],
