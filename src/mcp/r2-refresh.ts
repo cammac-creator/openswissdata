@@ -13,6 +13,7 @@ import { getObjectBuffer } from "../lib/r2.js";
 import {
   setFinmaRegistry,
   setFinmaWarnings,
+  setFinmaVersion,
   setTares,
   setClassificationLinks,
   type TaresRow,
@@ -254,9 +255,10 @@ async function doRefreshFinma(): Promise<void> {
     validateRows(registry, FINMA_REGISTRY_MIN_ROWS, REGISTRY_REQUIRED_COLS, "finma_registry");
     validateRows(warnings, FINMA_WARNINGS_MIN_ROWS, WARNINGS_REQUIRED_COLS, "finma_warnings");
 
-    // Atomic swap (two reference reassignments, no await between them).
+    // Atomic swap (three reference reassignments, no await between them).
     setFinmaRegistry(registry);
     setFinmaWarnings(warnings);
+    setFinmaVersion(version);
     state.loadedVersion = version;
     state.lastRefreshAt = Date.now();
     state.lastError = null;

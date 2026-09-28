@@ -11,6 +11,7 @@
 
 import { z } from "zod";
 import { getFinmaRegistry, getFinmaWarnings } from "../data-loader.js";
+import { foldName, rankedMatches } from "../name-match.js";
 
 export const kycCheckSchema = {
   type: "object",
@@ -59,46 +60,6 @@ export interface KycCheckResult {
   warning_total: number;
 }
 
-function normalize(s: string): string {
-  return s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "");
-}
-
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
- * Rang d'un nom pour la requête (plus petit = meilleur) : égalité, début sur un mot entier,
- * mot entier ailleurs, début de nom, simple sous-chaîne. `null` si aucune correspondance.
- * Sans cela, « UBS » plaçait « Clos du Doubs » avant UBS Switzerland AG, et une requête large
- * gardait les premières lignes du registre au lieu des meilleures.
- */
-function matcher(needle: string): (candidate: string) => number | null {
-  const word = new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegExp(needle)}($|[^\\p{L}\\p{N}])`, "u");
-  // Mots distincts, huit au plus : le repli reste borné quelle que soit la requête.
-  const tokens = [...new Set(needle.split(/\s+/).filter((t) => t.length >= 2))].slice(0, 8);
-  return (candidate) => {
-    if (candidate === needle) return 0;
-    if (candidate.includes(needle)) {
-      if (candidate.startsWith(needle) && word.test(candidate)) return 1;
-      if (word.test(candidate)) return 2;
-      return candidate.startsWith(needle) ? 3 : 4;
-    }
-    // Mots dans un autre ordre (« Morges Raiffeisen ») : tous les mots présents.
-    if (tokens.length > 1 && tokens.every((t) => candidate.includes(t))) return 5;
-    return null;
-  };
-}
-
-function rankedMatches<T extends { name: string }>(rows: readonly T[], needle: string): T[] {
-  const rank = matcher(needle);
-  return rows
-    .map((row, index) => ({ row, index, score: rank(normalize(row.name)) }))
-    .filter((m): m is { row: T; index: number; score: number } => m.score !== null)
-    .sort((a, b) => a.score - b.score || a.index - b.index)
-    .map((m) => m.row);
-}
-
 export function kycCheckHandler(args: unknown): {
   content: { type: "text"; text: string }[];
   isError?: boolean;
@@ -112,7 +73,7 @@ export function kycCheckHandler(args: unknown): {
     };
   }
   const { name, top_k } = parsed.data;
-  const needle = normalize(name);
+  const needle = foldName(name);
 
   const registry = getFinmaRegistry();
   const warnings = getFinmaWarnings();

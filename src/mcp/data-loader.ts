@@ -102,6 +102,7 @@ let _tares: TaresRow[] | null = null;
 let _taresByHs8: Map<string, TaresRow> | null = null;
 let _finmaRegistry: FinmaRegistryRow[] | null = null;
 let _finmaWarnings: FinmaWarningRow[] | null = null;
+let _finmaVersion: string | null = null;
 let _crosswalks: CrosswalkRow[] | null = null;
 let _classificationLinks: ClassificationLink[] | null = null;
 let _classificationSources: ClassificationSource[] | null = null;
@@ -169,6 +170,16 @@ export function setFinmaRegistry(rows: FinmaRegistryRow[]): void {
 
 export function setFinmaWarnings(rows: FinmaWarningRow[]): void {
   _finmaWarnings = rows;
+}
+
+/** Version FINMA actuellement servie ; null tant que la copie embarquée au déploiement est utilisée. */
+export function getFinmaVersion(): string | null {
+  return _finmaVersion;
+}
+
+/** Enregistrée dans le même bloc synchrone que le registre et les mises en garde qu'elle décrit. */
+export function setFinmaVersion(version: string): void {
+  _finmaVersion = version;
 }
 
 export function getCrosswalks(): readonly CrosswalkRow[] {
@@ -268,6 +279,7 @@ export function _resetDataLoaderCache(): void {
   _taresByHs8 = null;
   _finmaRegistry = null;
   _finmaWarnings = null;
+  _finmaVersion = null;
   _crosswalks = null;
   _classificationLinks = null;
   _classificationSources = null;
