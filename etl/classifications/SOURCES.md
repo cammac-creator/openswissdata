@@ -11,7 +11,7 @@ Toutes les sources ci-dessous sont récupérées dynamiquement par
 | Schème | Source | URL exacte | Format | Volume |
 |---|---|---|---|---|
 | **NACE Rev 2** | npm `nace-codes` (mirror Eurostat) | (intégré au package) | JS dist | 1047 codes |
-| **NACE Rev 2.1** | EU Vocabularies (publications.europa.eu) | https://op.europa.eu/o/opportal-service/euvoc-download-handler?cellarURI=http%3A%2F%2Fpublications.europa.eu%2Fresource%2Fcellar%2Fbeb2efec-da9a-11ed-a05c-01aa75ed71a1.0001.02%2FDOC_1&fileName=ESTAT-NACE2.1.rdf | RDF/SKOS-XKOS | 1047 codes (24 langues, 4 retenues) |
+| **NACE Rev 2.1** | EU Vocabularies (publications.europa.eu) | https://publications.europa.eu/resource/cellar/beb2efec-da9a-11ed-a05c-01aa75ed71a1.0001.02/DOC_1 (adresse directe depuis le 28.09.2026, le gestionnaire op.europa.eu répond 403) | RDF/SKOS-XKOS | 1047 codes (24 langues, 4 retenues) |
 | **NOGA 2008** | i14y.admin.ch (BFS — plateforme suisse interopérabilité) | https://api.i14y.admin.ch/api/public/v1/concepts/08dc481b-2add-1232-b5fe-b1fae7a1ac02?includeCodeListEntries=true | JSON | 1790 codes EN/DE/FR/IT |
 | **NOGA 2025** | i14y.admin.ch | https://api.i14y.admin.ch/api/public/v1/concepts/001bfaa8-fa57-4d66-acfd-c795d67fcf80?includeCodeListEntries=true | JSON | 1845 codes EN/DE/FR/IT (incl. 6 chiffres CH) |
 | **ISIC Rev 4** | UN Statistics Division | https://unstats.un.org/unsd/classifications/Econ/Download/In%20Text/ISIC_Rev_4_{english,French,Spanish}_structure.Txt | CSV (Windows-1252 pour FR/ES) | 766 codes EN/FR/ES |

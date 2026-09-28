@@ -19,8 +19,11 @@ const ISIC_CSV_BY_LANG: Record<"en" | "fr" | "es", string> = {
 
 // EU Vocabularies — official SKOS/XKOS RDF distribution of NACE Rev 2.1
 // Listed at https://data.europa.eu/data/datasets/nace2-1
+// Adresse directe du document cellar : le gestionnaire de téléchargement op.europa.eu
+// répond 403 (pare-feu Azure) aux scripts depuis le 28.09.2026. Même document, mêmes
+// octets (SHA-256 d98047ce…ef20, 10 315 081 octets, le 25.09 et le 28.09.2026).
 const NACE_2_1_RDF_URL =
-  "https://op.europa.eu/o/opportal-service/euvoc-download-handler?cellarURI=http%3A%2F%2Fpublications.europa.eu%2Fresource%2Fcellar%2Fbeb2efec-da9a-11ed-a05c-01aa75ed71a1.0001.02%2FDOC_1&fileName=ESTAT-NACE2.1.rdf";
+  "https://publications.europa.eu/resource/cellar/beb2efec-da9a-11ed-a05c-01aa75ed71a1.0001.02/DOC_1";
 
 // i14y.admin.ch — Swiss interoperability platform; concept IDs are stable.
 // Catalog: https://www.i14y.admin.ch/de/catalog/datasets/HCL_NOGA

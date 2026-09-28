@@ -68,6 +68,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Relations directes sourcées et typées, aucune égalité de code présumée ; seule l'identité OFS aux niveaux 1 à 4 est exacte. Ne pas chaîner deux relations non exactes. Les genres suisses à six chiffres nécessitent une table dédiée pour migrer entre révisions.
 - Le format historique crosswalks contient désormais des paires ; README et fiche produit préviennent de cette évolution. Sources, qualité, provenance signée et empreintes sont dans chaque archive. Catalogue et MCP rechargent la version distribuée.
 - Publication manuelle par `release-classifications.yml`, simulation par défaut, Standard uniquement. Fixtures et Pro refusés avant publication. Lien Stripe Pro désactivé le 25.09.2026 : ne rouvrir qu'après validation complète des compléments et de leur livraison.
+- NACE 2.1 se télécharge par l'adresse directe du document cellar (`publications.europa.eu/resource/cellar/…`) : depuis le 28.09.2026, le gestionnaire `op.europa.eu` répond 403 (pare-feu Azure) aux scripts. Mêmes octets vérifiés. Une notice de licence modifiée n'atteint les acheteurs qu'avec une nouvelle version publiée : `tests/etl/dataset-license.test.ts` vérifie la notice jointe à chaque archive.
 
 ## Disponibilité au démarrage
 - Railway attend `/api/health/ready` (180 s) : trois versions enregistrées, schéma financier disponible, pages essentielles et leurs ressources présentes. Aucun appel externe dans ce contrôle ; `/api/health/deep` et `/freshness` restent distincts.
