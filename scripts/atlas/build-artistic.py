@@ -17,7 +17,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--geometry', type=Path, required=True)
 parser.add_argument('--output', type=Path, required=True)
 parser.add_argument('--samples', type=int, default=32)
+parser.add_argument('--height-scale', type=float, default=1.0)
 args = parser.parse_args(sys.argv[sys.argv.index('--')+1:])
+if not 0 < args.height_scale <= 1:
+    parser.error('--height-scale doit être compris entre 0 exclu et 1 inclus')
 args.output.mkdir(parents=True, exist_ok=True)
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete(use_global=False)
@@ -63,7 +66,9 @@ forest = material('Laque vert forêt', [.065, .255, .195], .34, .05)
 red = material('Filet vermillon satiné', [.80, .17, .105], .3, .04)
 stamp_mat = material('Frappe patinée', [.43, .58, .48], .34, .3)
 data = np.load(args.geometry/'sculpture.npz')
-xyz, faces, edges = data['vertices'], data['faces'], data['edges']
+xyz, faces, edges = data['vertices'].copy(), data['faces'], data['edges']
+# Réduire uniquement les hauteurs au-dessus du bord ; socle et frappe restent intacts.
+xyz[:, 2] = .23 + (xyz[:, 2] - .23) * args.height_scale
 terrain_mat = material('Pigments ivoire et émeraude', [1, 1, 1], .72)
 terrain = mesh_object('Massifs sculptés et vallées émeraude', xyz.tolist(), faces.tolist(), terrain_mat)
 terrain['strates'] = True
@@ -171,6 +176,6 @@ scene.render.resolution_x = 1500; scene.render.resolution_y = 1250; scene.render
 scene.render.image_settings.file_format = 'PNG'; scene.view_settings.view_transform = 'AgX'
 bpy.ops.wm.save_as_mainfile(filepath=str(args.output/'swiss-atlas.blend'))
 scene.render.filepath = str(args.output/'swiss-atlas-front.png'); bpy.ops.render.render(write_still=True)
-report = {'objets': [{'nom':o.name, 'sommets':len(o.data.vertices), 'faces':len(o.data.polygons)} for o in objects], 'occlusionMoyenne':float(ao.mean()), 'blender':bpy.app.version_string, 'inscription':'Made in Switzerland'}
+report = {'facteurHauteur':args.height_scale, 'niveauBord':.23, 'objets': [{'nom':o.name, 'sommets':len(o.data.vertices), 'faces':len(o.data.polygons)} for o in objects], 'occlusionMoyenne':float(ao.mean()), 'blender':bpy.app.version_string, 'inscription':'Made in Switzerland'}
 (args.output/'scene.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
 print(json.dumps(report, ensure_ascii=False), flush=True)

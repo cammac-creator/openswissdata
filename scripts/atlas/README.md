@@ -23,7 +23,7 @@ Les rapports `geometrie.json` et `scene.json` documentent chaque exécution. Le 
 
 ## Dans la page
 
-Three.js est chargé à la demande, puis le modèle v4 (environ 3,5 Mo compressés) est lu sur la même origine, décompressé avec `DecompressionStream` et rendu localement. Aucun WASM, CDN ni service tiers ; CSP inchangée. La licence MIT de Three.js accompagne la distribution dans `/licenses/three-MIT.txt`. Chargement exclusivement explicite sur tous les appareils : le mode 3D ne remplace jamais automatiquement l’illustration. Une affiche demeure sans JavaScript, sans WebGL, en cas d’échec réseau ou de perte du contexte graphique ; le visiteur peut réessayer.
+Three.js est chargé à la demande, puis le modèle v5 (environ 3,4 Mo compressés) est lu sur la même origine, décompressé avec `DecompressionStream` et rendu localement. Aucun WASM, CDN ni service tiers ; CSP inchangée. La licence MIT de Three.js accompagne la distribution dans `/licenses/three-MIT.txt`. Chargement exclusivement explicite sur tous les appareils : le mode 3D ne remplace jamais automatiquement l’illustration. Une affiche demeure sans JavaScript, sans WebGL, en cas d’échec réseau ou de perte du contexte graphique ; le visiteur peut réessayer.
 
 Glisser à la souris tourne librement ; les flèches du clavier aussi. Les boutons montrent le dos et rétablissent le recto. Sur écran tactile, « Manipuler » active les gestes, « Terminer » libère le défilement. Le mouvement réduit, la pause, la visibilité de la page et la sortie de l’écran interrompent le mouvement automatique. Le bouton « Illustration » revient au visuel artistique, rend le focus au bouton d’exploration et libère les ressources GPU ; celles-ci sont aussi libérées au départ de la page. Prévoir une recette sur un vrai téléphone en complément des moteurs de navigateur automatisés.
 
@@ -48,3 +48,12 @@ Après la première étape topographique ci-dessus, utiliser les fichiers argent
 `sculpture.json` et `scene.json` consignent les paramètres, effectifs et occlusion. Les stries et pigments ne représentent ni géologie ni occupation du sol. Le bord abaissé améliore la finition de l’objet au prix d’une déformation volontaire : ce n’est pas une carte de mesure.
 
 Dans le navigateur, `atlas-relief-material.ts` ajoute des stries fines qui suivent la hauteur du volume, avec un relief de surface procédural et un filtrage à distance. Les ombres portées entre massifs suivent la rotation. `RoomEnvironment` produit sur place des reflets doux ; aucun panorama externe n’est chargé. `atlas-relief-shadow.ts` calcule une empreinte floutée une seule fois pour le contact au sol et l’efface progressivement quand le visiteur retourne l’objet. Les textures de calcul, matériaux et géométries sont libérés au retour à l’illustration. Les filtres et la perturbation des normales s’appuient sur Three.js, distribué sous licence MIT.
+
+
+## Hauteur choisie et lumière v5 — 28.09.2026
+
+Après comparaison de quatre études, Claude-Alain retient une hauteur réduite de **45 % par rapport au v4**. Reprendre la même géométrie argent et exécuter `build-artistic.py` avec `--height-scale 0.55` : chaque hauteur devient `0.23 + (z - 0.23) × 0.55`. Ce facteur concerne le terrain et son chant, pas le socle, le filet rouge ni l’inscription. Le paramètre vaut 1 par défaut pour conserver la fabrication historique. L’occlusion est recalculée sur la nouvelle géométrie ; les pigments d’origine restent identiques. Quantifier comme ci-dessus, puis empaqueter avec `--version v5 --without-poster`.
+
+La scène web utilise une lumière principale chaude plus haute, un remplissage neutre et un éclairage d’ambiance pour lire le socle vert. L’ombre de contact est plus légère et diffuse ; les stries s’atténuent sur les faibles pentes pour éviter les anneaux du plateau. Le cadrage est légèrement plus plongeant, centré sur le nouveau volume. Un halo doux sur le papier, un fondu à l’ouverture et les commandes réunies sous la carte assurent la continuité avec la page ; le mouvement réduit neutralise le fondu.
+
+L’illustration initiale, l’activation explicite, les gestes, le revers et les informations de provenance sont conservés. Ce réglage ne remodélise pas les crêtes ni les couches géométriques ; il ne prétend donc pas reproduire exactement l’illustration.

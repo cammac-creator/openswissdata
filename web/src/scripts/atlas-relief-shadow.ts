@@ -9,7 +9,7 @@ import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
 export function createContactShadow(renderer: WebGLRenderer, scene: Scene) {
   const target = new WebGLRenderTarget(512, 512);
   const buffer = new WebGLRenderTarget(512, 512);
-  const silhouette = new MeshBasicMaterial({ color: 0x30291d, toneMapped: false });
+  const silhouette = new MeshBasicMaterial({ color: 0x434436, toneMapped: false });
   const horizontal = new ShaderMaterial(HorizontalBlurShader);
   const vertical = new ShaderMaterial(VerticalBlurShader);
   const screenGeometry = new PlaneGeometry(2, 2);
@@ -30,7 +30,7 @@ export function createContactShadow(renderer: WebGLRenderer, scene: Scene) {
     renderer.render(scene, camera);
     scene.overrideMaterial = previousOverride;
     // Deux rayons donnent une pénombre continue, sans contour dur de projecteur.
-    for (const radius of [6, 2.5]) {
+    for (const radius of [7, 3]) {
       screen.material = horizontal;
       horizontal.uniforms.tDiffuse.value = target.texture;
       horizontal.uniforms.h.value = radius / 512;
@@ -52,7 +52,7 @@ export function createContactShadow(renderer: WebGLRenderer, scene: Scene) {
     buffer.dispose(); silhouette.dispose(); horizontal.dispose(); vertical.dispose(); screenGeometry.dispose();
   }
   const ground = new Mesh(new PlaneGeometry(14, 14), new MeshBasicMaterial({
-    map: target.texture, transparent: true, opacity: .42, depthWrite: false, toneMapped: false,
+    map: target.texture, transparent: true, opacity: .28, depthWrite: false, toneMapped: false,
   }));
   ground.rotation.x = -Math.PI / 2;
   ground.position.set(.14, -.55, .16);

@@ -1,35 +1,41 @@
-import { BufferAttribute, Mesh, MeshStandardMaterial, Vector3 } from 'three';
+import { BufferAttribute, Matrix3, Mesh, MeshStandardMaterial, Vector3 } from 'three';
 
 /** Fines strates de matière attachées à l'objet, stables pendant sa rotation. */
 export function sculptedMaterial(mesh: Mesh): void {
   const positions = mesh.geometry.getAttribute('position');
   const heights = new Float32Array(positions.count);
+  const slopes = new Float32Array(positions.count);
+  const normals = mesh.geometry.getAttribute('normal');
+  const normalMatrix = new Matrix3().getNormalMatrix(mesh.matrixWorld);
   const point = new Vector3();
   for (let i = 0; i < positions.count; i++) {
     point.fromBufferAttribute(positions, i).applyMatrix4(mesh.matrixWorld);
     heights[i] = point.y;
+    point.fromBufferAttribute(normals, i).applyMatrix3(normalMatrix).normalize();
+    slopes[i] = 1 - Math.abs(point.y);
   }
   mesh.geometry.setAttribute('sculptureHeight', new BufferAttribute(heights, 1));
+  mesh.geometry.setAttribute('sculptureSlope', new BufferAttribute(slopes, 1));
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
   for (const material of materials) {
     if (!(material instanceof MeshStandardMaterial)) continue;
     material.dithering = true;
     material.onBeforeCompile = shader => {
-      shader.vertexShader = `attribute float sculptureHeight;\nvarying float vSculptureHeight;\n${shader.vertexShader}`;
-      shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvSculptureHeight = sculptureHeight;');
-      shader.fragmentShader = `varying float vSculptureHeight;\n${shader.fragmentShader}`;
+      shader.vertexShader = `attribute float sculptureHeight;\nattribute float sculptureSlope;\nvarying float vSculptureHeight;\nvarying float vSculptureSlope;\n${shader.vertexShader}`;
+      shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvSculptureHeight = sculptureHeight;\nvSculptureSlope = sculptureSlope;');
+      shader.fragmentShader = `varying float vSculptureHeight;\nvarying float vSculptureSlope;\n${shader.fragmentShader}`;
       shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `
         #include <color_fragment>
         float layerPhase = vSculptureHeight / 0.058;
         float layerWidth = max(fwidth(layerPhase), 0.025);
-        float layerVisibility = 1.0 - smoothstep(0.35, 0.85, layerWidth);
+        float layerVisibility = (1.0 - smoothstep(0.35, 0.85, layerWidth)) * smoothstep(0.08, 0.48, vSculptureSlope);
         float layerLine = 1.0 - smoothstep(0.10, 0.10 + layerWidth, abs(fract(layerPhase) - 0.18));
-        diffuseColor.rgb *= 1.0 - 0.16 * layerLine * layerVisibility;
+        diffuseColor.rgb *= 1.0 - 0.08 * layerLine * layerVisibility;
       `);
       // Perturbation par gradient de surface, comme le bump mapping de Three.js (licence MIT fournie).
       shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', `
         #include <normal_fragment_maps>
-        float layerSlope = -0.0022 * 108.33078 * sin(vSculptureHeight * 108.33078) * layerVisibility;
+        float layerSlope = -0.0008 * 108.33078 * sin(vSculptureHeight * 108.33078) * layerVisibility;
         vec3 surfaceX = dFdx(-vViewPosition);
         vec3 surfaceY = dFdy(-vViewPosition);
         vec3 axisX = cross(surfaceY, normal);
@@ -39,6 +45,6 @@ export function sculptedMaterial(mesh: Mesh): void {
         normal = normalize(max(abs(determinant), 0.00000001) * normal - layerGradient);
       `);
     };
-    material.customProgramCacheKey = () => 'atlas-strates-v1';
+    material.customProgramCacheKey = () => 'atlas-strates-v2';
   }
 }

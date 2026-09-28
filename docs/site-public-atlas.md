@@ -27,3 +27,8 @@ Poursuivre A20 sur TARES, classifications et bundle, puis sur le compte et la co
 ## Relief interactif — 28 septembre 2026
 
 La version A choisie devient un modèle 3D issu de MNT25 et swissBOUNDARIES3D, avec altitudes ×8, liseré rouge et couleurs renforcées. Le dos porte « Made in Switzerland », orthographe confirmée par Claude-Alain. Souris, clavier, commandes tactiles et affichage de repli sont gérés par `atlas-relief.ts` et son module différé. Voir [la chaîne de fabrication et ses limites](../scripts/atlas/README.md). Ce remplacement concerne les six pages qui utilisent `AtlasArtwork` ; A20 reste partiel.
+
+
+## Relief et intégration v5 — 28 septembre 2026
+
+Le volume courant reprend le choix explicite de hauteur −45 % par rapport à la sculpture v4, avec socle et inscription conservés et occlusion recalculée. Éclairage chaud adouci, socle mieux rempli, stries discrètes sur les pentes, cadrage et commandes regroupées. L’illustration demeure l’entrée initiale ; le modèle n’est téléchargé qu’à la demande. La fabrication reproductible et les limites sont décrites dans `scripts/atlas/README.md`.

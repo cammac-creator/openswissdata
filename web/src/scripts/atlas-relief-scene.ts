@@ -68,7 +68,7 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = SRGBColorSpace;
     renderer.toneMapping = ACESFilmicToneMapping;
-    renderer.toneMappingExposure = .95;
+    renderer.toneMappingExposure = 1.05;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.domElement.setAttribute('aria-hidden', 'true');
@@ -105,15 +105,16 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
     try { studio = generator.fromScene(environment, .04); }
     finally { environment.dispose(); generator.dispose(); }
     scene.environment = studio.texture;
-    scene.environmentIntensity = .24;
+    scene.environmentIntensity = .34;
     const pivot = new Group();
     pivot.add(model);
     scene.add(pivot);
     contact = createContactShadow(renderer, scene);
     scene.add(contact.ground);
-    scene.add(new HemisphereLight(0xfffaef, 0x203e30, .25));
-    const key = new DirectionalLight(0xffecd0, 2.8);
-    key.position.set(-5, 6, 7);
+    // Lumière ivoire et remplissage du socle : les creux restent lisibles sans devenir noirs.
+    scene.add(new HemisphereLight(0xfffcf3, 0x768577, .55));
+    const key = new DirectionalLight(0xfff2dc, 2.75);
+    key.position.set(-5, 9, 6);
     key.castShadow = true;
     shadow = key.shadow;
     key.shadow.mapSize.set(2048, 2048);
@@ -124,15 +125,15 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
     key.shadow.normalBias = .038;
     key.shadow.bias = -.00003;
     scene.add(key);
-    const fill = new DirectionalLight(0xeaf1ff, 1.2);
+    const fill = new DirectionalLight(0xecf3f4, 1.05);
     fill.position.set(5, 5, -7);
     scene.add(fill);
-    const front = new DirectionalLight(0xfffaf2, .18);
+    const front = new DirectionalLight(0xfffaf2, .35);
     front.position.set(1, 2, 8);
     scene.add(front);
     const camera = new OrthographicCamera(-6.25, 6.25, 6.25, -6.25, .1, 100);
-    camera.position.set(-2.6, 11, 8.7);
-    camera.lookAt(0, .65, 0);
+    camera.position.set(-2.6, 12, 8.7);
+    camera.lookAt(0, .38, 0);
     const screenRight = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     const screenUp = new Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
     const rotation = new Quaternion();
@@ -166,7 +167,7 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
       } else pivot.position.y = 0;
       // L'ombre de contact accompagne le recto et s'efface quand le volume se retourne.
       const ground = contact!.ground;
-      ground.material.opacity = .42 * Math.max(0, 1 - orientation.angleTo(new Quaternion()) / .45);
+      ground.material.opacity = .28 * Math.max(0, 1 - orientation.angleTo(new Quaternion()) / .45);
       ground.visible = ground.material.opacity > .001;
       ground.position.y = -.55 + pivot.position.y;
       renderer!.render(scene, camera);
@@ -176,7 +177,7 @@ export async function mountRelief(art: HTMLElement): Promise<() => void> {
       const width = stage.clientWidth, height = stage.clientHeight;
       if (!width || !height || disposed) return;
       const aspect = width / height;
-      const halfHeight = Math.max(4.8, 5.25 / aspect);
+      const halfHeight = Math.max(4.65, 5.25 / aspect);
       camera.left = -halfHeight * aspect;
       camera.right = halfHeight * aspect;
       camera.top = halfHeight;

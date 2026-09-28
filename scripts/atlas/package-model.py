@@ -9,7 +9,7 @@ from pathlib import Path
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', type=Path, required=True)
 parser.add_argument('--output', type=Path, required=True)
-parser.add_argument('--version', choices=['v2', 'v4'], default='v2')
+parser.add_argument('--version', choices=['v2', 'v4', 'v5'], default='v2')
 parser.add_argument('--without-poster', action='store_true')
 args = parser.parse_args()
 args.output.mkdir(parents=True, exist_ok=True)
