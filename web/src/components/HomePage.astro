@@ -3,6 +3,7 @@ import { jsonForHtml } from "../lib/html";
 import AtlasLayout from "../layouts/AtlasLayout.astro";
 import AtlasArtwork from "./AtlasArtwork.astro";
 import { getLangFromPath } from "../i18n/utils";
+import { BUNDLE_OFFER, BUNDLE_SAVING, FILE_OFFERS } from "../lib/offers";
 const lang = getLangFromPath(Astro.url.pathname);
 const prefix = lang === "fr" ? "" : `/${lang}`;
 const copy = {
@@ -18,7 +19,7 @@ const copy = {
   taresTitle: "Tarif douanier", taresSub: "HS8 · Descriptions DE/FR/IT", taresDesc: "Codes suisses et lignes de taux avec unités, dates et conditions. Un résumé absent ne signifie pas un droit nul.",
   classSub: "5 nomenclatures · Langues selon la source", classDesc: "NOGA 2008/2025, NACE 2/2.1 et ISIC 4. Relations sourcées, avec indication de leur précision et des limites de migration.",
   finmaTitle: "Registre FINMA + avertissements", finmaSub: "Autorisations · UID · LEI disponibles", finmaDesc: "Registre UID public et liste d’avertissement séparée. Enrichissement GLEIF par UID exact, sans assimilation sur une ressemblance de nom.",
-  bundleTitle: "Les trois fichiers ensemble", bundleDesc: "TARES, Classifications Standard et FINMA au même achat. Les fiches qualité de chaque produit précisent le périmètre effectivement livré.", all: "Tous les fichiers", bundleLabel: "BUNDLE 3-EN-1", bundleCta: "Voir le bundle", saving: "200 CHF de moins que les achats séparés", buy: "Voir les détails",
+  bundleTitle: "Les trois fichiers ensemble", bundleDesc: "TARES, Classifications Standard et FINMA au même achat. Les fiches qualité de chaque produit précisent le périmètre effectivement livré.", all: "Tous les fichiers", bundleLabel: "BUNDLE 3-EN-1", bundleCta: "Voir le bundle", saving: `${BUNDLE_SAVING} CHF de moins que les achats séparés`, buy: "Voir les détails",
   howTitle: "De l’échantillon à votre intégration.", steps: [
    ["Vérifier le contenu", "Téléchargez l’échantillon et lisez la fiche qualité : champs disponibles, langues, formats et limites."],
    ["Confirmer l’achat", "Le paiement est traité par Stripe en CHF. L’accès est accordé après confirmation du paiement."],
@@ -46,7 +47,7 @@ const copy = {
   taresTitle: "Zolltarif", taresSub: "HS8 · Bezeichnungen DE/FR/IT", taresDesc: "Schweizer Codes und Tarifzeilen mit Einheiten, Zeiträumen und Bedingungen. Ein fehlender Kurzansatz bedeutet keine Zollfreiheit.",
   classSub: "5 Nomenklaturen · Sprachen je Quelle", classDesc: "NOGA 2008/2025, NACE 2/2.1 und ISIC 4. Quellenbelegte Beziehungen mit Angaben zu Genauigkeit und Migrationsgrenzen.",
   finmaTitle: "FINMA-Register + Warnliste", finmaSub: "Bewilligungen · UID · verfügbare LEIs", finmaDesc: "Öffentliches UID-Register und separate Warnliste. GLEIF-Ergänzung über exakte UID, ohne Gleichsetzung aufgrund ähnlicher Namen.",
-  bundleTitle: "Alle drei Dateien gemeinsam", bundleDesc: "TARES, Classifications Standard und FINMA mit einem Kauf. Die Qualitätsseiten beschreiben den tatsächlich gelieferten Umfang jedes Produkts.", all: "Alle Dateien", bundleLabel: "3-IN-1 BUNDLE", bundleCta: "Bundle ansehen", saving: "200 CHF weniger als Einzelkäufe", buy: "Details ansehen",
+  bundleTitle: "Alle drei Dateien gemeinsam", bundleDesc: "TARES, Classifications Standard und FINMA mit einem Kauf. Die Qualitätsseiten beschreiben den tatsächlich gelieferten Umfang jedes Produkts.", all: "Alle Dateien", bundleLabel: "3-IN-1 BUNDLE", bundleCta: "Bundle ansehen", saving: `${BUNDLE_SAVING} CHF weniger als Einzelkäufe`, buy: "Details ansehen",
   howTitle: "Vom Muster zur Integration.", steps: [
    ["Inhalt prüfen", "Muster herunterladen und Qualitätsseite lesen: verfügbare Felder, Sprachen, Formate und Grenzen."],
    ["Kauf bestätigen", "Stripe verarbeitet die Zahlung in CHF. Der Zugriff wird nach Zahlungsbestätigung gewährt."],
@@ -74,7 +75,7 @@ const copy = {
   taresTitle: "Customs tariff", taresSub: "HS8 · Descriptions DE/FR/IT", taresDesc: "Swiss codes and tariff rows with units, dates and conditions. A missing summary does not mean zero duty.",
   classSub: "5 classifications · Languages vary by source", classDesc: "NOGA 2008/2025, NACE 2/2.1 and ISIC 4. Sourced relations with explicit precision and migration limits.",
   finmaTitle: "FINMA registry + warnings", finmaSub: "Authorisations · UIDs · available LEIs", finmaDesc: "Public UID registry and separate warning list. GLEIF enrichment uses exact UID matches, with no identity inferred from similar names.",
-  bundleTitle: "All three files together", bundleDesc: "TARES, Classifications Standard and FINMA in one purchase. Each product’s quality page explains the content actually delivered.", all: "All files", bundleLabel: "3-IN-1 BUNDLE", bundleCta: "View the bundle", saving: "CHF 200 less than separate purchases", buy: "View details",
+  bundleTitle: "All three files together", bundleDesc: "TARES, Classifications Standard and FINMA in one purchase. Each product’s quality page explains the content actually delivered.", all: "All files", bundleLabel: "3-IN-1 BUNDLE", bundleCta: "View the bundle", saving: `CHF ${BUNDLE_SAVING} less than separate purchases`, buy: "View details",
   howTitle: "From sample to integration.", steps: [
    ["Check the content", "Download a sample and review the quality page: available fields, languages, formats and limitations."],
    ["Confirm your purchase", "Stripe processes the payment in CHF. Access is granted after payment confirmation."],
@@ -92,9 +93,9 @@ const copy = {
  },
 }[lang];
 const products = [
- {id:"tares",label:"TARES",source:"BAZG",title:copy.taresTitle,sub:copy.taresSub,desc:copy.taresDesc,price:"299"},
- {id:"classifications",label:"CLASSIFICATIONS",source:"OFS · Eurostat · ONU",title:"NOGA · NACE · ISIC",sub:copy.classSub,desc:copy.classDesc,price:"399"},
- {id:"finma",label:"FINMA",source:"FINMA · GLEIF",title:copy.finmaTitle,sub:copy.finmaSub,desc:copy.finmaDesc,price:"299"},
+ {id:"tares",label:"TARES",source:"BAZG",title:copy.taresTitle,sub:copy.taresSub,desc:copy.taresDesc,price:FILE_OFFERS.tares.price},
+ {id:"classifications",label:"CLASSIFICATIONS",source:"OFS · Eurostat · ONU",title:"NOGA · NACE · ISIC",sub:copy.classSub,desc:copy.classDesc,price:FILE_OFFERS.classifications.price},
+ {id:"finma",label:"FINMA",source:"FINMA · GLEIF",title:copy.finmaTitle,sub:copy.finmaSub,desc:copy.finmaDesc,price:FILE_OFFERS.finma.price},
 ];
 const atlas = {
  fr: { hero:'La Suisse,', accent:'en données.', intro:'Tarifs douaniers, classifications économiques et registre FINMA. Des fichiers structurés pour passer de la source à vos outils.', explore:'Découvrir FINMA', proof:'Sources documentées', access:'Achat unique · Accès aux fichiers', sources:'Sources publiques. Préparation indépendante.', catalogue:'01 / Les données', method:'02 / Votre parcours', quality:'03 / La méthode', questions:'04 / Questions fréquentes', featured:'FINMA REGISTRY', featuredTitle:'Le registre, dans vos outils.', files:'Un registre. Plusieurs formats.', workbook:'Classeur Excel', workbookSub:'Onglets et guide de lecture', structured:'Fichiers structurés', structuredSub:'CSV · JSON · Parquet · SQL', provenance:'Sources & contrôles', provenanceSub:'Manifeste signé · SHA-256', developers:'Pour vos outils & assistants', nojs:'Les versions et volumes nécessitent JavaScript. Consultez les fiches et leurs échantillons pour vérifier les fichiers disponibles.' },
@@ -121,14 +122,14 @@ const atlas = {
   <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{atlas.catalogue}</p><h2>{copy.catalogTitle}</h2></div><p class="atlas-section-intro">{copy.catalogIntro}</p></div>
   <article class="atlas-feature" data-atlas-enter>
    <div><p class="atlas-kicker">{atlas.featured}</p><h3>{atlas.featuredTitle}</h3><p>{copy.finmaDesc}</p><ul class="atlas-formats" aria-label={copy.formats}>{['EXCEL','CSV','JSON','PARQUET','SQL'].map(format=><li>{format}</li>)}</ul>
-    <div class="atlas-price-line"><strong>299</strong><span>CHF</span></div><div class="atlas-actions"><a href={`${prefix}/datasets/finma`} class="atlas-btn">{copy.buy}<span aria-hidden="true">↗</span></a><a href="/api/catalog/finma?format=csv" class="atlas-text-link">{copy.sample} ↓</a></div>
+    <div class="atlas-price-line"><strong>{FILE_OFFERS.finma.price}</strong><span>CHF</span></div><div class="atlas-actions"><a href={`${prefix}/datasets/finma`} class="atlas-btn">{copy.buy}<span aria-hidden="true">↗</span></a><a href="/api/catalog/finma?format=csv" class="atlas-text-link">{copy.sample} ↓</a></div>
    </div>
    <div class="atlas-file-window"><div class="atlas-window-title"><span>FINMA / REGISTRY</span><span aria-hidden="true">↗</span></div><div class="atlas-window-body"><h4>{atlas.files}</h4>
     {[["XLS",atlas.workbook,atlas.workbookSub],["{ }",atlas.structured,atlas.structuredSub],["#",atlas.provenance,atlas.provenanceSub]].map(([icon,title,sub])=><div class="atlas-file-row"><span aria-hidden="true">{icon}</span><div><strong>{title}</strong><small>{sub}</small></div><span aria-hidden="true">↳</span></div>)}
    </div><div class="atlas-window-bottom"><strong class="atlas-live-value" data-live-version="finma">{copy.loading}</strong><span data-live-count="finma">{copy.details}</span></div></div>
   </article>
   <div class="atlas-product-grid">{products.filter(p=>p.id!=='finma').map(p=><article class="atlas-product-card" data-atlas-enter><div class="atlas-product-card-head"><p class="atlas-kicker">{p.label}</p><span>{p.source}</span></div><h3>{p.title}</h3><span class="atlas-product-sub">{p.sub}</span><p>{p.desc}</p><div class="atlas-live-value"><span data-live-version={p.id}>{copy.loading}</span><br/><span data-live-count={p.id}></span></div><div class="atlas-product-card-foot"><strong>{p.price} <small>CHF</small></strong><a href={`${prefix}/datasets/${p.id}`}>{copy.buy}<span aria-hidden="true">↗</span></a></div></article>)}</div>
-  <div class="atlas-bundle" data-atlas-enter><span class="atlas-bundle-mark" aria-hidden="true">3↳1</span><div><h3>{copy.bundleTitle}</h3><p>{copy.saving}</p></div><a href={`${prefix}/bundle`}><strong>797 CHF</strong><span>{copy.bundleCta} ↗</span></a></div>
+  <div class="atlas-bundle" data-atlas-enter><span class="atlas-bundle-mark" aria-hidden="true">3↳1</span><div><h3>{copy.bundleTitle}</h3><p>{copy.saving}</p></div><a href={`${prefix}/bundle`}><strong>{BUNDLE_OFFER.price} CHF</strong><span>{copy.bundleCta} ↗</span></a></div>
   <p class="atlas-live-note">{copy.updated}. {copy.independent}</p><noscript class="atlas-noscript">{atlas.nojs}</noscript>
  </div></section>
  <section class="atlas-section atlas-method" id="how"><div class="atlas-shell"><div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{atlas.method}</p><h2>{copy.howTitle}</h2></div><p class="atlas-section-intro">{copy.valueIntro}</p></div><div class="atlas-steps">{copy.steps.map(([title,text],i)=><article class="atlas-step" data-atlas-enter><span>0{i+1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
