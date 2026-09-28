@@ -48,5 +48,40 @@
     "hash": "a159ba13a640a2c4e06c12f7f3acea677755702f9653f86c96684c8c117bbd82",
     "checked_at": "2026-09-25T16:18:33.863Z",
     "size": 3601007
+  },
+  "eurostat.nace21_rdf": {
+    "hash": "d98047ce74d345c12a8a0970fa14df232a1245891c8581b036994776505fef20",
+    "checked_at": "2026-09-28T18:52:10.950Z",
+    "size": 10315081
+  },
+  "eurostat.nace2_sparql": {
+    "hash": "b9358b65fb974d80a278deaafe580091a27662217fa38176d367810e8416596e",
+    "checked_at": "2026-09-28T18:52:10.950Z",
+    "size": 609628
+  },
+  "eurostat.nace2_isic4_sparql": {
+    "hash": "b9358b65fb974d80a278deaafe580091a27662217fa38176d367810e8416596e",
+    "checked_at": "2026-09-28T18:52:10.950Z",
+    "size": 364555
+  },
+  "unsd.isic4_en": {
+    "hash": "18b645efc5a0b001fda5852cfd0690eb579011651e405631e50cb2d271ee2cc6",
+    "checked_at": "2026-09-28T18:52:10.950Z",
+    "size": 40195
+  },
+  "unsd.isic4_fr": {
+    "hash": "3b5421f0fd83255b7d5b99ba5ee5c9ab0b211072e43cd8718bb748807e214172",
+    "checked_at": "2026-09-28T18:52:10.950Z",
+    "size": 45736
+  },
+  "unsd.isic4_es": {
+    "hash": "adc40d8869368165dbaa63181e1d2d6815ac46a390cea49a912e2a8e139e551e",
+    "checked_at": "2026-09-28T18:52:10.950Z",
+    "size": 46935
+  },
+  "bfs.noga_methodologie": {
+    "hash": "7c176cc9b35d1b42fc987213c51a55c6c5e3bf9e7ecb0de7988286e97195aaf7",
+    "checked_at": "2026-09-28T18:52:10.950Z",
+    "size": 880523
   }
 }

@@ -51,7 +51,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Sur mobile, les colonnes du héros doivent pouvoir rétrécir (`minmax(0,…)`, enfants `min-width:0`). Vérifier la géométrie réelle des textes et boutons : un `scrollWidth` correct peut masquer du contenu tronqué par `overflow:hidden`.
 
 ## Surveillance des sources
-- Le contrôle compare dix sources publiques à `etl/canary-baseline.json`. Octets d’abord dans un bronze daté immuable, puis empreinte. Dans GitHub, ce bronze est temporaire ; seuls le rapport et la référence sont conservés 14 jours comme artefacts.
+- Le contrôle compare dix-sept sources publiques à `etl/canary-baseline.json` : sept TARES, FINMA, NOGA (I14Y), et depuis le 28.09.2026 les adresses mêmes de la publication des classifications (NACE 2.1 cellar, deux requêtes SPARQL Eurostat, ISIC en/fr/es, méthodologie OFS ; mode `document` pour un fichier non XLSX). Octets d’abord dans un bronze daté immuable, puis empreinte. Dans GitHub, ce bronze est temporaire ; seuls le rapport et la référence sont conservés 14 jours comme artefacts.
 - Une source modifiée, absente ou illisible fait échouer la tâche. Aucun nouveau ticket GitHub ni message client automatique. La référence n’est jamais réinitialisée automatiquement : contrôler les sources avant de l’intégrer. La réussite du contrôle ne prouve pas la justesse métier de toutes les données.
 - Nettoyage réactivé le 25.09.2026, passage réel 36159500858 réussi (HTTP 200). Les tables historiques `magic_links` et `request_log` n’existent pas dans cette base et sont ignorées ; les commandes, clients, droits et versions ne sont pas concernés.
 

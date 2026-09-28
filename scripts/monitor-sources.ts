@@ -9,6 +9,9 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
+import { ISIC_CSV_BY_LANG, NACE_2_1_RDF_URL } from "../etl/classifications/ingest-real.js";
+import { NACE2_URL } from "../etl/classifications/nace-official.js";
+import { NACE_ISIC_URL, OFS_METHODOLOGY_URL } from "../etl/classifications/links.js";
 
 export interface SourceCanary {
   id: string;
@@ -17,7 +20,9 @@ export interface SourceCanary {
   // releases). `json-shape` hashes only structural keys/types — use for JSON APIs.
   // `csv-shape` hashes only the header row + separator — use for CSVs that update
   // continuously (rows added/removed daily) where only schema changes matter.
-  mode: "raw" | "json-shape" | "csv-shape";
+  // `document` hashes the bytes of a non-XLSX document (RDF, TXT, PDF) published
+  // in discrete versions : même adresse que la publication, pour voir un blocage avant elle.
+  mode: "raw" | "json-shape" | "csv-shape" | "document";
   description: string;
 }
 
@@ -85,6 +90,38 @@ export const CANARIES: SourceCanary[] = [
     url: "https://api.i14y.admin.ch/api/public/v1/concepts/08dc481b-2add-1232-b5fe-b1fae7a1ac02?includeCodeListEntries=true",
     mode: "json-shape",
     description: "BFS — NOGA 2008 (concept i14y)",
+  },
+  // Classifications — mêmes adresses que la publication (etl/classifications).
+  // Le 28.09.2026, op.europa.eu bloquait NACE 2.1 : seule la publication l'avait vu.
+  {
+    id: "eurostat.nace21_rdf",
+    url: NACE_2_1_RDF_URL,
+    mode: "document",
+    description: "Eurostat — NACE Rév. 2.1, RDF officiel (document cellar)",
+  },
+  {
+    id: "eurostat.nace2_sparql",
+    url: NACE2_URL,
+    mode: "json-shape",
+    description: "Eurostat — NACE Rév. 2 par le point SPARQL de l'Office des publications",
+  },
+  {
+    id: "eurostat.nace2_isic4_sparql",
+    url: NACE_ISIC_URL,
+    mode: "json-shape",
+    description: "Eurostat — correspondances NACE Rév. 2 → ISIC Rév. 4 (SPARQL)",
+  },
+  ...(["en", "fr", "es"] as const).map((lang): SourceCanary => ({
+    id: `unsd.isic4_${lang}`,
+    url: ISIC_CSV_BY_LANG[lang],
+    mode: "document",
+    description: `ONU (UNSD) — structure ISIC Rév. 4 (${lang})`,
+  })),
+  {
+    id: "bfs.noga_methodologie",
+    url: OFS_METHODOLOGY_URL,
+    mode: "document",
+    description: "OFS — méthodologie des correspondances NOGA",
   },
 ];
 
@@ -191,6 +228,9 @@ export async function fetchAndHash(canary: SourceCanary): Promise<{ hash: string
   if(/^\s*(?:<!doctype\s+html|<html)/i.test(buf.subarray(0,300).toString()))throw new Error("La source a renvoyé une page HTML");
   if (canary.mode === "raw") {
     if(buf.subarray(0,4).toString("hex")!=="504b0304")throw new Error("La source attendue n'est pas une archive XLSX");
+    return { hash: createHash("sha256").update(buf).digest("hex"), size: buf.length };
+  }
+  if (canary.mode === "document") {
     return { hash: createHash("sha256").update(buf).digest("hex"), size: buf.length };
   }
   if (canary.mode === "csv-shape") {

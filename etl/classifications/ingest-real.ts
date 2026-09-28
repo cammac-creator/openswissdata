@@ -11,7 +11,7 @@ import type { NomenclatureRow, NomenclatureLevel, NomenclatureScheme, CrossWalkR
 
 /** Sources officielles archivées avant lecture ; liens explicites sans identité présumée. */
 
-const ISIC_CSV_BY_LANG: Record<"en" | "fr" | "es", string> = {
+export const ISIC_CSV_BY_LANG: Record<"en" | "fr" | "es", string> = {
   en: "https://unstats.un.org/unsd/classifications/Econ/Download/In%20Text/ISIC_Rev_4_english_structure.Txt",
   fr: "https://unstats.un.org/unsd/classifications/Econ/Download/In%20Text/ISIC_Rev_4_French_structure.Txt",
   es: "https://unstats.un.org/unsd/classifications/Econ/Download/In%20Text/ISIC_Rev_4_Spanish_structure.Txt",
@@ -22,7 +22,7 @@ const ISIC_CSV_BY_LANG: Record<"en" | "fr" | "es", string> = {
 // Adresse directe du document cellar : le gestionnaire de téléchargement op.europa.eu
 // répond 403 (pare-feu Azure) aux scripts depuis le 28.09.2026. Même document, mêmes
 // octets (SHA-256 d98047ce…ef20, 10 315 081 octets, le 25.09 et le 28.09.2026).
-const NACE_2_1_RDF_URL =
+export const NACE_2_1_RDF_URL =
   "https://publications.europa.eu/resource/cellar/beb2efec-da9a-11ed-a05c-01aa75ed71a1.0001.02/DOC_1";
 
 // i14y.admin.ch — Swiss interoperability platform; concept IDs are stable.
