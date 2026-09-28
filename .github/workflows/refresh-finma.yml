@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  actions: read
 concurrency:
   group: finma-production
   cancel-in-progress: false
@@ -55,3 +56,15 @@ jobs:
             git pull --rebase origin main
             git push origin HEAD:main
           fi
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Collecte FINMA
+          ALERT_WORKFLOW: refresh-finma.yml
+          ALERT_DETAIL: La collecte, le contrôle ou la publication FINMA n'a pas abouti ; la version distribuée reste la précédente.
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

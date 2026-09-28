@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: surveillance-publique
   cancel-in-progress: false
@@ -28,10 +29,26 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1, version figée
         with:
           persist-credentials: false
-          sparse-checkout: scripts/monitor-public.mjs
+          sparse-checkout: |
+            scripts/monitor-public.mjs
+            scripts/alert-email.mjs
           sparse-checkout-cone-mode: false
       - name: Contrôler le service public sans secret métier
         env:
           MONITOR_BRONZE_DIR: ${{ runner.temp }}/bronze/monitor-${{ github.run_id }}-${{ github.run_attempt }}
           MONITOR_SIMULATE: ${{ github.event_name == 'workflow_dispatch' && inputs.simuler_panne && 'panne' || '' }}
+          MONITOR_REPORT_FILE: ${{ runner.temp }}/rapport-surveillance.json
         run: node scripts/monitor-public.mjs
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Surveillance publique
+          ALERT_WORKFLOW: monitor-public.yml
+          ALERT_REPORT_FILE: ${{ runner.temp }}/rapport-surveillance.json
+          ALERT_SIMULATED: ${{ github.event_name == 'workflow_dispatch' && inputs.simuler_panne }}
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

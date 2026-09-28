@@ -78,6 +78,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     const simulate = process.env.MONITOR_SIMULATE === 'panne';
     const report = await runPublicMonitor({ bronzeDir: process.env.MONITOR_BRONZE_DIR, simulate });
     console.log(JSON.stringify(report));
+    // Rapport minimal relu par l'alerte par mail, dans l'espace temporaire du runner.
+    if (process.env.MONITOR_REPORT_FILE) await writeFile(process.env.MONITOR_REPORT_FILE, JSON.stringify(report), { mode: 0o600 });
     if (process.env.GITHUB_STEP_SUMMARY) {
       await writeFile(process.env.GITHUB_STEP_SUMMARY, `## Contrôle public extérieur\n\n${simulate ? '**Panne simulée à la demande : le service réel n’a pas été lu.**\n\n' : ''}Lecture : ${report.checked_at}\n\n${report.checks.map(c => `- ${c.name} : ${c.ok ? 'vérifié' : 'à vérifier'} · HTTP ${c.http ?? 'absent'} · ${c.reason}${c.revision ? ' · révision ' + c.revision : ''}${c.version ? ' · édition ' + c.version : ''}`).join('\n')}\n\nContrôle ponctuel de disponibilité et fraîcheur FINMA. Ne prouve ni achat, ni réception de mail, ni cadence future.\n`, { flag: 'a' });
     }

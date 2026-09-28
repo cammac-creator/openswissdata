@@ -8,7 +8,9 @@ on:
     - cron: "15 3 * * *"
   workflow_dispatch:
 
-permissions: {}
+permissions:
+  actions: read
+  contents: read
 concurrency:
   group: sauvegarde-sqlite
   cancel-in-progress: false
@@ -18,6 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1, version figée
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/alert-email.mjs
+          sparse-checkout-cone-mode: false
       - name: Déclencher et vérifier la restauration isolée de la base
         env:
           ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
@@ -52,3 +59,15 @@ jobs:
               sys.exit(1)
           print('::notice::Copie chiffrée restaurée ; octets, intégrité, liens, schéma et versions vérifiés. Détail conservé dans le bureau privé.')
           PYTHON
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Sauvegarde de la base
+          ALERT_WORKFLOW: backup-db.yml
+          ALERT_DETAIL: Sauvegarde ou restauration non vérifiée ; le détail reste dans le bureau privé.
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

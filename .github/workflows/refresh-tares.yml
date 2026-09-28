@@ -13,6 +13,7 @@ on:
         default: true
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: tares-production
   cancel-in-progress: false
@@ -71,3 +72,15 @@ jobs:
           path: data/tares/resultat.json
           retention-days: 14
           if-no-files-found: error
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() && steps.garde.outputs.publier == '1' }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Publication TARES
+          ALERT_WORKFLOW: refresh-tares.yml
+          ALERT_DETAIL: La collecte, le contrôle ou la publication TARES n'a pas abouti ; la version vendue reste la précédente.
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs
