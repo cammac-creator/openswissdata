@@ -183,3 +183,7 @@ Listé par priorité :
 ---
 
 _Audit autonome généré sans toucher au code source TypeScript, aux pages Astro, aux fichiers de config, ni aux fichiers de données. 0 commande destructive. Toutes les modifications sont des correctifs typographiques dans des fichiers `.md`._
+
+## Suite du 28.09.2026 — révocation prouvée côté production
+
+Sonde envoyée à `https://www.openswissdata.com/api/webhook/stripe` : un événement de type inconnu, hors mode live, signé avec l'ancien secret publié, puis avec deux secrets tirés au hasard. Les trois reçoivent la même réponse, HTTP 400 `invalid_signature`. Un événement bien signé aurait reçu `stripe_mode_mismatch` ou `ignored`, sans traitement : `tests/routes/stripe-webhook-signature.test.ts` vérifie cette distinction avec la vraie bibliothèque Stripe. L'ancien secret ne permet donc plus de faire accepter une notification par OpenSwissData. Les autres projets du compte Stripe partagé sont hors de cette preuve. L'historique Git public reste inchangé : sa réécriture est une décision distincte.
