@@ -79,6 +79,17 @@ describe("Accès des agents au serveur MCP", () => {
     });
   });
 
+  it("les réponses d'initialisation et de liste ne contiennent jamais « data: » (clients qui devinent un flux SSE)", async () => {
+    const app = createApp();
+    for (const body of [
+      { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "sonde", version: "1" } } },
+      { jsonrpc: "2.0", id: 2, method: "tools/list" },
+    ]) {
+      const text = await (await post(app, "/mcp/jsonrpc", body)).text();
+      expect(text).not.toContain("data:");
+    }
+  });
+
   describe("notifications et adresses d'entrée", () => {
     it("une notification reçoit 202 sans corps et n'est pas exécutée", async () => {
       const res = await post(createApp(), "/mcp/jsonrpc", { jsonrpc: "2.0", method: "notifications/initialized" });

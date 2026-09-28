@@ -54,9 +54,13 @@ const SERVER_INFO = {
 const PUBLIC_SITE = (process.env.BASE_URL ?? "https://www.openswissdata.com").replace(/\/$/, "");
 const ANONYMOUS_LIMIT_TEXT = `${ANONYMOUS_RATE_LIMIT.calls} calls per ${ANONYMOUS_RATE_LIMIT.window} per IP address`;
 
-/** Consignes lues par l'agent à la connexion : ce qui est gratuit, comment appeler, ce qu'il faut citer. */
+/**
+ * Consignes lues par l'agent à la connexion : ce qui est gratuit, comment appeler, ce qu'il faut citer.
+ * Jamais la suite de caractères « data » + deux-points : certains clients la cherchent pour deviner une
+ * réponse en flux SSE et ne lisent alors plus le JSON (sonde d'awesome-remote-mcp-servers, 28.09.2026).
+ */
 export const SERVER_INSTRUCTIONS = [
-  "OpenSwissData serves normalised copies of Swiss federal reference data: the Swiss customs tariff (TARES: 8-digit Swiss tariff numbers with MFN duty, preferential regimes, restrictions), the FINMA register of supervised institutions plus the FINMA warnings list, and correspondences between the NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4 activity classifications.",
+  "OpenSwissData serves normalised copies of Swiss federal reference data. It covers the Swiss customs tariff (TARES, 8-digit Swiss tariff numbers with MFN duty, preferential regimes and restrictions), the FINMA register of supervised institutions plus the FINMA warnings list, and correspondences between the NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4 activity classifications.",
   `Free without any key or sign-up (${ANONYMOUS_LIMIT_TEXT}):`,
   "- tariff_lookup: an 8-digit Swiss tariff number (dots allowed, e.g. 8471.3000) returns the full TARES line; a 2- to 7-digit HS prefix (e.g. the international HS6 code 847130) lists the Swiss 8-digit lines under it. Set lang to en, de, it or fr (default fr).",
   "- kyc_check: search the FINMA register and the FINMA warnings list by entity name.",
