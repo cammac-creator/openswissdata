@@ -1,0 +1,171 @@
+---
+import CheckoutNotice from "./CheckoutNotice.astro";
+import AtlasLayout from "../layouts/AtlasLayout.astro";
+import AtlasArtwork from "./AtlasArtwork.astro";
+import "../styles/atlas-fiches.css";
+import "../styles/atlas-fiche-bundle.css";
+import { getLangFromPath, localizePath } from "../i18n/utils";
+import { BUNDLE_OFFER, BUNDLE_SAVING, BUNDLE_SAVING_PERCENT, FILE_OFFERS, SEPARATE_TOTAL } from "../lib/offers";
+import { productJsonLd } from "../lib/structured-data";
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => localizePath(path, lang);
+const chf = (value: number) => (lang === "fr" ? `${value} CHF` : `CHF ${value}`);
+const copy = {
+ fr: {
+  title: "Bundle TARES, Classifications et FINMA", description: `Les trois fichiers OpenSwissData en un seul achat : TARES, Classifications Standard et registre FINMA, pour ${BUNDLE_OFFER.price} CHF, soit ${BUNDLE_SAVING} CHF de moins que les achats séparés.`,
+  eyebrow: "Bundle · Trois fichiers", hero: "Les trois fichiers.", accent: "Un seul achat.", intro: `TARES, Classifications Standard et le registre FINMA, avec leurs sources, leurs contrôles et leurs signatures. Le même contenu que les trois achats séparés, pour ${BUNDLE_SAVING} CHF de moins.`,
+  read: "Voir la composition", buy: "Acheter", buyBundle: "Acheter le bundle", catalogue: "Les données", crumb: "Bundle", navLabel: "Sections de la page bundle", navComposition: "Composition", navSaving: "Économie", navUpdates: "Mises à jour",
+  footnote: ["Trois archives signées", "360 jours de mises à jour"], cancelled: "Paiement interrompu. Si vous avez quitté la page de paiement avant de confirmer, aucun achat n’a été enregistré. Vous pouvez reprendre depuis la fiche du fichier choisi ou ci-dessous.", error: "Le paiement n’a pas pu démarrer. Réessayez dans un instant ; si le problème persiste, écrivez à contact@openswissdata.com.",
+  compositionKicker: "01 / Composition", compositionTitle: "Trois archives signées, chacune avec sa fiche qualité.", compositionIntro: "Le bundle livre les mêmes fichiers que les trois achats séparés : TARES, Classifications Standard et le registre FINMA. Chaque fiche décrit le contenu réellement distribué et ses limites.",
+  products: [
+   ["tares", "TARES", "OFDF · BAZG", "Tarif douanier", ["Numéros de tarif à huit chiffres, désignations en quatre langues", "Toutes les lignes de taux en vigueur, avec unités, dates et conditions", "Résumé du droit de base, jamais le taux le plus bas choisi"], "CSV · JSON · Parquet · SQL"],
+   ["classifications", "CLASSIFICATIONS STANDARD", "OFS · Eurostat · ONU", "NOGA · NACE · ISIC", ["NOGA 2008 et 2025, NACE Rév. 2 et 2.1, ISIC Rév. 4", "Correspondances par paire, avec source et précision", "Niveaux, parents et libellés selon les langues de chaque source"], "CSV · JSON · Parquet · SQL"],
+   ["finma", "FINMA REGISTRY", "FINMA · GLEIF", "Registre FINMA", ["Registre UID public de la FINMA, une ligne par autorisation", "Liste d’avertissement séparée du registre", "LEI et adresses GLEIF par correspondance exacte de l’UID"], "Excel · CSV · JSON · Parquet · SQL"]],
+  alone: "seul", readSheet: "Lire la fiche", loading: "Vérification…", unavailable: "Version non vérifiable pour le moment", codes: "numéros", classCodes: "codes", rows: "lignes du registre",
+  socle: `Bundle · trois archives · ${BUNDLE_OFFER.price} CHF`, socleNote: "360 jours de mises à jour pour chaque fichier",
+  savingKicker: "02 / L’économie", savingTitle: `${BUNDLE_SAVING} CHF de moins que les achats séparés.`, savingIntro: "Même contenu, mêmes mises à jour et mêmes conditions de livraison : seul le prix change.",
+  separate: "Achats séparés", bundleRow: "Bundle", allThree: "Les trois fichiers", saved: `Économie : ${BUNDLE_SAVING} CHF (${BUNDLE_SAVING_PERCENT} %)`, classShort: "Classifications Standard",
+  updatesKicker: "03 / Mises à jour", updatesTitle: "360 jours pour chaque fichier. Sans engagement.", updatesIntro: "Chaque fichier suit son propre rythme de publication. Une collecte peut être bloquée si ses contrôles échouent : la version réellement disponible est affichée sur chaque fiche.",
+  cadences: [["finma", "FINMA", "Collecte planifiée chaque jour"], ["tares", "TARES", "Collecte planifiée chaque semaine"], ["classifications", "Classifications", "Publication après contrôle des sources officielles"]],
+  renewal: "Prolongation facultative", perYear: "/an", afterTitle: "Après 360 jours", after: "Vous gardez les versions reçues, ou vous prolongez un fichier à la fois. Aucun renouvellement automatique.",
+  excludedTitle: "Ce que le bundle n’inclut pas", excluded: [
+   ["Aucun accès MCP payant", "Les outils MCP gratuits restent accessibles séparément ; aucune clé MCP payante n’est livrée avec cet achat."],
+   ["Pas Classifications Pro", "Le bundle comprend Classifications Standard. Classifications Pro est temporairement indisponible."],
+   ["Pas de connecteur ERP", "Les formats sont destinés à l’intégration par votre équipe. Aucun connecteur SAP, Odoo ou Sage prêt à installer n’est inclus."],
+   ["Les conditions des sources", "Les conditions propres à chaque source restent applicables. TARES n’est pas une publication officielle : seules celles de la Chancellerie fédérale et de l’OFDF font foi."]],
+  faqKicker: "04 / Questions fréquentes", faqTitle: "Avant d’acheter le bundle.", faq: [
+   ["Le contenu est-il le même qu’avec trois achats séparés ?", "Oui. Le bundle donne accès aux trois archives, avec leurs fiches qualité, leurs sources et leurs signatures, comme les achats séparés."],
+   ["Comment reçoit-on les fichiers ?", "Après confirmation du paiement par Stripe, un email vous donne accès à vos téléchargements. Les trois archives restent disponibles dans votre espace client."],
+   ["Que se passe-t-il après 360 jours ?", `Vous gardez les versions reçues. Chaque fichier se prolonge séparément : TARES ${FILE_OFFERS.tares.renewal} CHF, Classifications ${FILE_OFFERS.classifications.renewal} CHF et FINMA ${FILE_OFFERS.finma.renewal} CHF par an. Aucun renouvellement automatique.`],
+   ["Et si le bundle ne convient pas ?", "Vous pouvez demander un remboursement intégral dans les 14 jours suivant l’achat, sans justification, sauf redistribution des fichiers à un tiers en violation de la licence. Les conditions de vente font foi."]],
+  terms: "Conditions de vente",
+  purchaseKicker: "Votre prochaine base de travail", delivery: "Vos fichiers. Votre rythme.", serviceText: "Après paiement, vos archives sont accessibles par email et depuis votre espace client. Le reçu Stripe y est également disponible. Pour une facture au nom de votre entreprise, envoyez-nous sa raison sociale et son adresse de facturation.",
+  contact: "Écrire au support", account: "Espace client", price: "Bundle · Paiement unique", updates: "360 jours de mises à jour inclus pour chaque fichier.", instead: "au lieu de", independent: "Service privé indépendant, sans affiliation aux institutions sources.",
+ },
+ de: {
+  title: "Bundle TARES, Klassifikationen und FINMA", description: `Die drei OpenSwissData-Dateien in einem Kauf: TARES, Classifications Standard und FINMA-Register für CHF ${BUNDLE_OFFER.price}, also CHF ${BUNDLE_SAVING} weniger als Einzelkäufe.`,
+  eyebrow: "Bundle · Drei Dateien", hero: "Alle drei Dateien.", accent: "Ein Kauf.", intro: `TARES, Classifications Standard und das FINMA-Register, mit Quellen, Prüfungen und Signaturen. Derselbe Inhalt wie bei drei Einzelkäufen, für CHF ${BUNDLE_SAVING} weniger.`,
+  read: "Zusammensetzung ansehen", buy: "Kaufen", buyBundle: "Bundle kaufen", catalogue: "Datensätze", crumb: "Bundle", navLabel: "Abschnitte der Bundle-Seite", navComposition: "Inhalt", navSaving: "Ersparnis", navUpdates: "Aktualisierungen",
+  footnote: ["Drei signierte Archive", "360 Tage Aktualisierungen"], cancelled: "Zahlung abgebrochen. Wenn Sie die Zahlungsseite vor der Bestätigung verlassen haben, wurde kein Kauf erfasst. Sie können auf der Seite der gewählten Datei oder unten fortfahren.", error: "Die Zahlung konnte nicht gestartet werden. Bitte versuchen Sie es gleich noch einmal; besteht das Problem weiter, schreiben Sie an contact@openswissdata.com.",
+  compositionKicker: "01 / Zusammensetzung", compositionTitle: "Drei signierte Archive, jedes mit Qualitätsbericht.", compositionIntro: "Das Bundle liefert dieselben Dateien wie die drei Einzelkäufe: TARES, Classifications Standard und das FINMA-Register. Jede Produktseite beschreibt den tatsächlich gelieferten Inhalt und seine Grenzen.",
+  products: [
+   ["tares", "TARES", "BAZG", "Zolltarif", ["Achtstellige Tarifnummern, Bezeichnungen in vier Sprachen", "Alle geltenden Tarifzeilen mit Einheiten, Daten und Bedingungen", "Zusammenfassung des Normalansatzes, nie der tiefste Ansatz ausgewählt"], "CSV · JSON · Parquet · SQL"],
+   ["classifications", "CLASSIFICATIONS STANDARD", "BFS · Eurostat · UNO", "NOGA · NACE · ISIC", ["NOGA 2008 und 2025, NACE Rev. 2 und 2.1, ISIC Rev. 4", "Paarweise Zuordnungen mit Quelle und Genauigkeit", "Ebenen, übergeordnete Codes und Bezeichnungen je nach Sprachen der Quelle"], "CSV · JSON · Parquet · SQL"],
+   ["finma", "FINMA REGISTRY", "FINMA · GLEIF", "FINMA-Register", ["Öffentliches UID-Register der FINMA, eine Zeile pro Bewilligung", "Vom Register getrennte Warnliste", "LEI und GLEIF-Adressen über exakte UID-Zuordnung"], "Excel · CSV · JSON · Parquet · SQL"]],
+  alone: "einzeln", readSheet: "Produktseite lesen", loading: "Wird geprüft…", unavailable: "Version derzeit nicht überprüfbar", codes: "Nummern", classCodes: "Codes", rows: "Registerzeilen",
+  socle: `Bundle · drei Archive · CHF ${BUNDLE_OFFER.price}`, socleNote: "360 Tage Aktualisierungen für jede Datei",
+  savingKicker: "02 / Die Ersparnis", savingTitle: `CHF ${BUNDLE_SAVING} weniger als Einzelkäufe.`, savingIntro: "Derselbe Inhalt, dieselben Aktualisierungen und dieselben Lieferbedingungen: Nur der Preis ändert sich.",
+  separate: "Einzelkäufe", bundleRow: "Bundle", allThree: "Alle drei Dateien", saved: `Ersparnis: CHF ${BUNDLE_SAVING} (${BUNDLE_SAVING_PERCENT} %)`, classShort: "Classifications Standard",
+  updatesKicker: "03 / Aktualisierungen", updatesTitle: "360 Tage für jede Datei. Ohne Bindung.", updatesIntro: "Jede Datei folgt ihrem eigenen Veröffentlichungsrhythmus. Eine Erhebung kann bei fehlgeschlagenen Kontrollen ausgesetzt werden: Jede Produktseite zeigt die tatsächlich verfügbare Version.",
+  cadences: [["finma", "FINMA", "Täglich geplante Erhebung"], ["tares", "TARES", "Wöchentlich geplante Erhebung"], ["classifications", "Klassifikationen", "Veröffentlichung nach Prüfung der offiziellen Quellen"]],
+  renewal: "Freiwillige Verlängerung", perYear: "/Jahr", afterTitle: "Nach 360 Tagen", after: "Sie behalten die erhaltenen Versionen oder verlängern jeweils eine Datei. Keine automatische Erneuerung.",
+  excludedTitle: "Was das Bundle nicht enthält", excluded: [
+   ["Kein kostenpflichtiger MCP-Zugang", "Kostenlose MCP-Werkzeuge sind separat verfügbar; dieser Kauf liefert keinen kostenpflichtigen MCP-Schlüssel."],
+   ["Kein Classifications Pro", "Das Bundle enthält Classifications Standard. Classifications Pro ist vorübergehend nicht verfügbar."],
+   ["Kein ERP-Konnektor", "Die Formate dienen der Integration durch Ihr Team. Ein installierbarer SAP-, Odoo- oder Sage-Konnektor ist nicht enthalten."],
+   ["Die Bedingungen der Quellen", "Die Bedingungen jeder Quelle bleiben anwendbar. TARES ist keine offizielle Veröffentlichung: Massgebend sind allein jene der Bundeskanzlei und des BAZG."]],
+  faqKicker: "04 / Häufige Fragen", faqTitle: "Vor dem Kauf des Bundles.", faq: [
+   ["Ist der Inhalt derselbe wie bei drei Einzelkäufen?", "Ja. Das Bundle gibt Zugang zu den drei Archiven mit ihren Qualitätsberichten, Quellen und Signaturen, wie die Einzelkäufe."],
+   ["Wie erhalte ich die Dateien?", "Nach der Zahlungsbestätigung durch Stripe erhalten Sie per E-Mail Zugang zu Ihren Downloads. Die drei Archive bleiben in Ihrem Kundenkonto verfügbar."],
+   ["Was geschieht nach 360 Tagen?", `Sie behalten die erhaltenen Versionen. Jede Datei wird separat verlängert: TARES CHF ${FILE_OFFERS.tares.renewal}, Klassifikationen CHF ${FILE_OFFERS.classifications.renewal} und FINMA CHF ${FILE_OFFERS.finma.renewal} pro Jahr. Keine automatische Erneuerung.`],
+   ["Und wenn das Bundle nicht passt?", "Sie können innerhalb von 14 Tagen nach dem Kauf ohne Begründung die vollständige Erstattung verlangen, ausser bei einer lizenzwidrigen Weitergabe der Dateien an Dritte. Massgebend sind die Verkaufsbedingungen."]],
+  terms: "Verkaufsbedingungen",
+  purchaseKicker: "Ihre nächste Datengrundlage", delivery: "Ihre Dateien. Ihr Tempo.", serviceText: "Nach der Zahlung erhalten Sie die Archive per E-Mail und in Ihrem Kundenkonto. Dort finden Sie auch den Stripe-Zahlungsbeleg. Für eine Rechnung an Ihr Unternehmen senden Sie uns bitte den Firmennamen und die Rechnungsadresse.",
+  contact: "Support kontaktieren", account: "Kundenkonto", price: "Bundle · Einmalige Zahlung", updates: "360 Tage Aktualisierungen für jede Datei inklusive.", instead: "statt", independent: "Unabhängiger privater Dienst ohne Verbindung zu den Quellinstitutionen.",
+ },
+ en: {
+  title: "TARES, Classifications and FINMA bundle", description: `The three OpenSwissData files in one purchase: TARES, Classifications Standard and the FINMA registry for CHF ${BUNDLE_OFFER.price}, CHF ${BUNDLE_SAVING} less than separate purchases.`,
+  eyebrow: "Bundle · Three files", hero: "All three files.", accent: "One purchase.", intro: `TARES, Classifications Standard and the FINMA registry, with their sources, checks and signatures. The same content as three separate purchases, for CHF ${BUNDLE_SAVING} less.`,
+  read: "See what is inside", buy: "Buy", buyBundle: "Buy the bundle", catalogue: "The data", crumb: "Bundle", navLabel: "Bundle page sections", navComposition: "Contents", navSaving: "Savings", navUpdates: "Updates",
+  footnote: ["Three signed archives", "360 days of updates"], cancelled: "Payment interrupted. If you left the payment page before confirming, no purchase was recorded. You can resume from the page of the file you chose or below.", error: "The payment could not start. Please try again in a moment; if the problem persists, email contact@openswissdata.com.",
+  compositionKicker: "01 / Contents", compositionTitle: "Three signed archives, each with its quality report.", compositionIntro: "The bundle delivers the same files as the three separate purchases: TARES, Classifications Standard and the FINMA registry. Each product page describes the content actually distributed and its limitations.",
+  products: [
+   ["tares", "TARES", "FOCBS · BAZG", "Customs tariff", ["Eight-digit tariff numbers, descriptions in four languages", "Every rate row in force, with units, dates and conditions", "Base-duty summary, never the lowest rate picked"], "CSV · JSON · Parquet · SQL"],
+   ["classifications", "CLASSIFICATIONS STANDARD", "FSO · Eurostat · UN", "NOGA · NACE · ISIC", ["NOGA 2008 and 2025, NACE Rev. 2 and 2.1, ISIC Rev. 4", "Pairwise mappings with source and precision", "Levels, parents and labels in each source’s languages"], "CSV · JSON · Parquet · SQL"],
+   ["finma", "FINMA REGISTRY", "FINMA · GLEIF", "FINMA registry", ["FINMA public UID registry, one row per authorisation", "Warning list kept separate from the registry", "GLEIF LEIs and addresses through exact UID matches"], "Excel · CSV · JSON · Parquet · SQL"]],
+  alone: "on its own", readSheet: "Read the product page", loading: "Checking…", unavailable: "Version cannot currently be verified", codes: "numbers", classCodes: "codes", rows: "registry rows",
+  socle: `Bundle · three archives · CHF ${BUNDLE_OFFER.price}`, socleNote: "360 days of updates for each file",
+  savingKicker: "02 / Savings", savingTitle: `CHF ${BUNDLE_SAVING} less than separate purchases.`, savingIntro: "Same content, same updates and same delivery terms: only the price changes.",
+  separate: "Separate purchases", bundleRow: "Bundle", allThree: "All three files", saved: `Saving: CHF ${BUNDLE_SAVING} (${BUNDLE_SAVING_PERCENT}%)`, classShort: "Classifications Standard",
+  updatesKicker: "03 / Updates", updatesTitle: "360 days for each file. No commitment.", updatesIntro: "Each file follows its own publication rhythm. Failed checks can block a collection: each product page shows the version actually available.",
+  cadences: [["finma", "FINMA", "Collection scheduled daily"], ["tares", "TARES", "Collection scheduled weekly"], ["classifications", "Classifications", "Published after the official sources are checked"]],
+  renewal: "Optional extension", perYear: "/year", afterTitle: "After 360 days", after: "You keep the versions you received, or extend one file at a time. No automatic renewal.",
+  excludedTitle: "What the bundle does not include", excluded: [
+   ["No paid MCP access", "Free MCP tools remain available separately; this purchase does not deliver a paid MCP key."],
+   ["No Classifications Pro", "The bundle includes Classifications Standard. Classifications Pro is temporarily unavailable."],
+   ["No ERP connector", "The formats are intended for integration by your team. A ready-to-install SAP, Odoo or Sage connector is not included."],
+   ["Source conditions", "Each source’s own conditions remain applicable. TARES is not an official publication: only those of the Federal Chancellery and the FOCBS are authoritative."]],
+  faqKicker: "04 / Frequently asked", faqTitle: "Before buying the bundle.", faq: [
+   ["Is the content the same as three separate purchases?", "Yes. The bundle gives access to the three archives, with their quality reports, sources and signatures, just like separate purchases."],
+   ["How are the files delivered?", "Once Stripe confirms the payment, an email gives you access to your downloads. The three archives remain available in your account."],
+   ["What happens after 360 days?", `You keep the versions you received. Each file is extended separately: TARES CHF ${FILE_OFFERS.tares.renewal}, Classifications CHF ${FILE_OFFERS.classifications.renewal} and FINMA CHF ${FILE_OFFERS.finma.renewal} per year. No automatic renewal.`],
+   ["What if the bundle does not suit me?", "You may request a full refund within 14 days of purchase without giving a reason, unless the files have been redistributed to a third party in breach of the licence. The sales terms prevail."]],
+  terms: "Sales terms",
+  purchaseKicker: "Your next data foundation", delivery: "Your files. Your workflow.", serviceText: "After payment, download your archives from the delivery email or your account. Your Stripe receipt is also available there. For an invoice addressed to your company, send us its legal name and billing address.",
+  contact: "Contact support", account: "Your account", price: "Bundle · One-time payment", updates: "360 days of updates included for each file.", instead: "instead of", independent: "Independent private service, not affiliated with the source institutions.",
+ },
+}[lang];
+// Géométrie des barres calculée depuis le module des prix : aucun montant écrit à la main.
+const segments = BUNDLE_OFFER.products.reduce<Array<{ id: string; x: number; width: number }>>((list, id) => {
+ const x = list.length ? list[list.length - 1].x + list[list.length - 1].width : 0;
+ return [...list, { id, x, width: FILE_OFFERS[id].price }];
+}, []);
+const names: Record<string, string> = { tares: "TARES", classifications: copy.classShort, finma: "FINMA" };
+const live = { lang, loading: copy.loading, unavailable: copy.unavailable, codes: copy.codes, classCodes: copy.classCodes, rows: copy.rows, cancelled: copy.cancelled, error: copy.error };
+---
+<AtlasLayout title={`${copy.title} | openswissdata`} description={copy.description} productJsonLd={productJsonLd("bundle", lang, { name: copy.title, description: copy.description, image: "/og-default.png" })}>
+<div class="atlas-product-site fiche" data-bundle-product data-copy={JSON.stringify(live)}>
+ <div class="atlas-shell atlas-breadcrumb"><a href={`${L("/")}#datasets`}>{copy.catalogue}</a><span aria-hidden="true">/</span><span>{copy.crumb}</span></div>
+ <div class="atlas-shell"><p class="fiche-banner" data-checkout-banner role="status" hidden></p></div>
+ <section class="atlas-hero atlas-product-hero"><div class="atlas-shell atlas-hero-grid"><div class="atlas-hero-copy" data-atlas-enter><p class="atlas-kicker">{copy.eyebrow}</p><h1>{copy.hero}<br/><em>{copy.accent}</em></h1><p class="atlas-lede">{copy.intro}</p><div class="atlas-actions"><a href="#composition" class="atlas-btn">{copy.read}<span aria-hidden="true">↓</span></a><a href="#acheter" class="atlas-text-link">{copy.buy} · {BUNDLE_OFFER.price} CHF ↗</a></div><div class="atlas-hero-footnote">{copy.footnote.map(item => <span>{item}</span>)}</div></div><AtlasArtwork /></div></section>
+ <div class="atlas-product-nav"><nav class="atlas-shell atlas-product-nav-inner" aria-label={copy.navLabel}><div class="atlas-product-nav-links"><a href="#composition">{copy.navComposition}</a><a href="#economie">{copy.navSaving}</a><a href="#mises-a-jour">{copy.navUpdates}</a></div><a class="atlas-nav-buy" href="#acheter">{copy.buy}<span>{BUNDLE_OFFER.price} CHF ↗</span></a></nav></div>
+
+ <section class="atlas-section" id="composition"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.compositionKicker}</p><h2>{copy.compositionTitle}</h2></div><p class="atlas-section-intro">{copy.compositionIntro}</p></div>
+  <div class="fiche-stack" data-atlas-enter>
+   <div class="fiche-sheets">{copy.products.map(([id, label, source, title, items, formats]) => <article class={`fiche-sheet fiche-sheet-${id}`}>
+    <div class="fiche-sheet-head"><p class="atlas-kicker">{label}</p><span>{source as string}</span></div>
+    <h3>{title as string}</h3>
+    <ul>{(items as string[]).map(item => <li>{item}</li>)}</ul>
+    <p class="fiche-sheet-formats">{formats as string}</p>
+    <p class="fiche-sheet-live"><span data-live-version={id as string}>{copy.loading}</span><span data-live-count={id as string}></span></p>
+    <div class="fiche-sheet-foot"><strong>{chf(FILE_OFFERS[id as "tares" | "classifications" | "finma"].price)} <small>{copy.alone}</small></strong><a href={L(`/datasets/${id}`)}>{copy.readSheet}<span aria-hidden="true">↗</span></a></div>
+   </article>)}</div>
+   <div class="fiche-socle"><strong>{copy.socle}</strong><span>{copy.socleNote}</span></div>
+  </div>
+ </div></section>
+
+ <section class="atlas-section atlas-method" id="economie"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.savingKicker}</p><h2>{copy.savingTitle}</h2></div><p class="atlas-section-intro">{copy.savingIntro}</p></div>
+  <div class="fiche-bars" data-atlas-enter data-bundle-bars>
+   <div class="fiche-bar-row">
+    <div class="fiche-bar-head"><span>{copy.separate}</span><strong>{chf(SEPARATE_TOTAL)}</strong></div>
+    <svg class="fiche-bar" viewBox={`0 0 ${SEPARATE_TOTAL} 40`} preserveAspectRatio="none" aria-hidden="true" focusable="false">{segments.map((segment, index) => <rect class={`fiche-seg fiche-seg-${index + 1}`} x={segment.x} y="0" width={segment.width - (index < segments.length - 1 ? 4 : 0)} height="40" />)}</svg>
+    <ul class="fiche-bar-legend">{segments.map((segment, index) => <li><span class={`fiche-swatch fiche-seg-${index + 1}`} aria-hidden="true"></span>{names[segment.id]} · {chf(segment.width)}</li>)}</ul>
+   </div>
+   <div class="fiche-bar-row">
+    <div class="fiche-bar-head"><span>{copy.bundleRow}</span><strong>{chf(BUNDLE_OFFER.price)}</strong></div>
+    <svg class="fiche-bar" viewBox={`0 0 ${SEPARATE_TOTAL} 40`} preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="fiche-seg fiche-seg-bundle" x="0" y="0" width={BUNDLE_OFFER.price} height="40" /><rect class="fiche-seg-saving" x={BUNDLE_OFFER.price + 3} y="1.5" width={BUNDLE_SAVING - 4.5} height="37" /></svg>
+    <ul class="fiche-bar-legend"><li><span class="fiche-swatch fiche-seg-bundle" aria-hidden="true"></span>{copy.allThree} · {chf(BUNDLE_OFFER.price)}</li><li class="is-saving"><span class="fiche-swatch fiche-swatch-saving" aria-hidden="true"></span>{copy.saved}</li></ul>
+   </div>
+  </div>
+ </div></section>
+
+ <section class="atlas-section" id="mises-a-jour"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.updatesKicker}</p><h2>{copy.updatesTitle}</h2></div><p class="atlas-section-intro">{copy.updatesIntro}</p></div>
+  <div class="fiche-cadence" data-atlas-enter>
+   {copy.cadences.map(([id, name, rhythm]) => <div class={`fiche-cadence-row fiche-cadence-${id}`}><div class="fiche-cadence-name"><strong>{name}</strong><span>{rhythm}</span></div><div class="fiche-cadence-track" aria-hidden="true"><span></span></div><div class="fiche-cadence-renewal"><span>{copy.renewal}</span><strong>{chf(FILE_OFFERS[id as "tares" | "classifications" | "finma"].renewal)}{copy.perYear}</strong></div></div>)}
+   <div class="fiche-cadence-scale" aria-hidden="true"><span></span><span class="fiche-cadence-axis"><b>0</b><b>90</b><b>180</b><b>270</b><b>360 {lang === "de" ? "Tage" : lang === "en" ? "days" : "jours"}</b></span><span></span></div>
+   <p class="fiche-cadence-after"><strong>{copy.afterTitle}.</strong> {copy.after}</p>
+  </div>
+  <div class="fiche-excluded" data-atlas-enter><h3>{copy.excludedTitle}</h3><div>{copy.excluded.map(([title, text]) => <article><span aria-hidden="true">×</span><h4>{title}</h4><p>{text}</p></article>)}</div></div>
+ </div></section>
+
+ <section class="atlas-section atlas-faq"><div class="atlas-shell atlas-faq-grid"><div data-atlas-enter><p class="atlas-kicker">{copy.faqKicker}</p><h2 class="atlas-section-title">{copy.faqTitle}</h2><a href={L("/legal/cgv")} class="atlas-text-link">{copy.terms} ↗</a></div><div>{copy.faq.map(([question, answer]) => <details><summary>{question}</summary><p>{answer}</p></details>)}</div></div></section>
+
+ <section class="atlas-shell" id="acheter"><div class="atlas-purchase" data-atlas-enter><div><p class="atlas-kicker">{copy.purchaseKicker}</p><h2>{copy.delivery}</h2><p>{copy.serviceText}</p><div class="atlas-actions"><a href="mailto:contact@openswissdata.com" class="atlas-text-link">{copy.contact} ↗</a><a href={L("/account")} class="atlas-text-link">{copy.account} ↗</a></div></div><div class="atlas-purchase-box"><p>{copy.price}</p><p class="fiche-was"><s>{chf(SEPARATE_TOTAL)}</s> <span>{copy.saved}</span></p><div class="atlas-purchase-price"><strong>{BUNDLE_OFFER.price}</strong><span>CHF</span></div><p>{copy.updates}</p><form method="POST" action="/api/checkout/start"><input type="hidden" name="locale" value={lang}/><input type="hidden" name="dataset_ids" value="bundle"/><button class="atlas-btn" type="submit">{copy.buyBundle}<span aria-hidden="true">↗</span></button></form><CheckoutNotice /></div></div><p class="atlas-live-note">{copy.independent}</p></section>
+</div>
+<script>
+ import '../scripts/bundle-product';
+</script>
+</AtlasLayout>
