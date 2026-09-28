@@ -1,6 +1,5 @@
 # openswissdata
 
-[![PyPI](https://img.shields.io/pypi/v/openswissdata.svg)](https://pypi.org/project/openswissdata/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 
@@ -10,10 +9,12 @@ Ships sync (`Client`) and async (`AsyncClient`) flavours on top of [httpx](https
 
 ## Install
 
+Not published on PyPI yet. Install from GitHub (Python 3.10+):
+
 ```bash
-pip install openswissdata
+pip install "git+https://github.com/cammac-creator/openswissdata#subdirectory=sdks/sdk-py"
 # or with pandas helpers:
-pip install "openswissdata[pandas]"
+pip install "openswissdata[pandas] @ git+https://github.com/cammac-creator/openswissdata#subdirectory=sdks/sdk-py"
 ```
 
 ## Quickstart
@@ -21,8 +22,10 @@ pip install "openswissdata[pandas]"
 ```python
 from openswissdata import Client
 
-with Client(api_key="sk_live_...") as client:
-    row = client.tares.lookup(hs8="84620010", lang="fr")
+# No key needed for tariff lookups, FINMA checks and code correspondences
+# (100 calls per hour per IP address).
+with Client() as client:
+    row = client.tares.lookup(hs8="84713000", lang="en")
     print(row["designation"], row["duty_mfn"]["value"])
     print(row["disclaimer"])  # always surface to end users
 ```
