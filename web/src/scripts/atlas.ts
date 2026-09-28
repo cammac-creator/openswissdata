@@ -6,7 +6,7 @@ if (site) {
   const buttons = site.querySelectorAll<HTMLButtonElement>('[data-atlas-motion]');
   let pausedByUser = false;
   const animations = new Set<Animation>();
-  const art = site.querySelector<HTMLElement>('[data-atlas-art]:not(.atlas-relief)');
+  const art = site.querySelector<HTMLElement>('[data-atlas-art]');
   let frame = 0;
   const resetArt = () => {
     if (frame) cancelAnimationFrame(frame);
@@ -38,7 +38,7 @@ if (site) {
 
   // L'image réagit très légèrement au pointeur, uniquement sur grand écran.
   art?.addEventListener('pointermove', event => {
-    if (paused() || !pointer.matches || window.innerWidth < 900) return;
+    if (paused() || !pointer.matches || window.innerWidth < 900 || art.dataset.reliefState === 'ready') return;
     const box = art.getBoundingClientRect();
     const rx = ((event.clientY - box.top) / box.height - .5) * -4;
     const ry = ((event.clientX - box.left) / box.width - .5) * 4;

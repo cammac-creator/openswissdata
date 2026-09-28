@@ -6,7 +6,7 @@ import {
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 /** Vrai volume fermé, rendu local et rotations sans limites ni service tiers. */
-export async function mountRelief(art: HTMLElement): Promise<void> {
+export async function mountRelief(art: HTMLElement): Promise<() => void> {
   const stage = art.querySelector<HTMLElement>('[data-relief-stage]');
   const status = art.querySelector<HTMLElement>('[data-relief-status]');
   const actions = art.querySelector<HTMLElement>('[data-relief-actions]');
@@ -91,10 +91,10 @@ export async function mountRelief(art: HTMLElement): Promise<void> {
     const pivot = new Group();
     pivot.add(model);
     scene.add(pivot);
-    scene.add(new HemisphereLight(0xfffaef, 0x536958, 1.05));
+    scene.add(new HemisphereLight(0xfffaef, 0x314c3b, .55));
     scene.add(new AmbientLight(0xfff7eb, .12));
-    const key = new DirectionalLight(0xffefcf, 2.8);
-    key.position.set(-5, 5, 6);
+    const key = new DirectionalLight(0xffefcf, 2.3);
+    key.position.set(-7, 3, 5);
     key.castShadow = true;
     shadow = key.shadow;
     key.shadow.mapSize.set(2048, 2048);
@@ -105,15 +105,15 @@ export async function mountRelief(art: HTMLElement): Promise<void> {
     key.shadow.normalBias = .014;
     key.shadow.bias = -.0001;
     scene.add(key);
-    const fill = new DirectionalLight(0xeaf4ff, .7);
+    const fill = new DirectionalLight(0xfff7da, .65);
     fill.position.set(6, 4, -4);
     scene.add(fill);
     const front = new DirectionalLight(0xfffaf2, .3);
     front.position.set(1, 2, 8);
     scene.add(front);
     const camera = new OrthographicCamera(-6.25, 6.25, 6.25, -6.25, .1, 100);
-    camera.position.set(-3.8, 11, 7);
-    camera.lookAt(0, .25, 0);
+    camera.position.set(-1.4, 10, 9);
+    camera.lookAt(0, .45, 0);
     const screenRight = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     const screenUp = new Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
     const rotation = new Quaternion();
@@ -152,7 +152,7 @@ export async function mountRelief(art: HTMLElement): Promise<void> {
       const width = stage.clientWidth, height = stage.clientHeight;
       if (!width || !height || disposed) return;
       const aspect = width / height;
-      const halfHeight = Math.max(6.05, 6.05 / aspect);
+      const halfHeight = Math.max(4.8, 5.25 / aspect);
       camera.left = -halfHeight * aspect;
       camera.right = halfHeight * aspect;
       camera.top = halfHeight;
@@ -260,6 +260,7 @@ export async function mountRelief(art: HTMLElement): Promise<void> {
     resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(stage);
     resize();
+    return dispose;
   } catch (error) {
     dispose();
     throw error;

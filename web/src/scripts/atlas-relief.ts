@@ -7,6 +7,7 @@ document.querySelectorAll<HTMLElement>('[data-model-url]').forEach(art => {
   const startLabel = start.textContent;
   let loading = false;
   let ready = false;
+  let unmount: (() => void) | undefined;
   art.addEventListener('atlas-relief-failed', () => {
     ready = false;
     start.hidden = false;
@@ -21,7 +22,7 @@ document.querySelectorAll<HTMLElement>('[data-model-url]').forEach(art => {
     art.dataset.reliefState = 'loading';
     try {
       const { mountRelief } = await import('./atlas-relief-scene');
-      await mountRelief(art);
+      unmount = await mountRelief(art);
       ready = true;
       start.hidden = true;
       if (interactive) art.querySelector<HTMLElement>('[data-relief-stage]')?.focus({ preventScroll: true });
@@ -32,14 +33,22 @@ document.querySelectorAll<HTMLElement>('[data-model-url]').forEach(art => {
     } finally { loading = false; start.textContent = startLabel; }
   };
   start.addEventListener('click', () => { void load(true); });
-  // Les téléphones et les connexions économes gardent un chargement explicite.
-  const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
-  if (matchMedia('(hover: hover) and (pointer: fine)').matches && !connection?.saveData && !['slow-2g', '2g'].includes(connection?.effectiveType || '') && 'IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      observer.disconnect();
-      void load();
-    }, { rootMargin: '100px' });
-    observer.observe(art);
-  }
+  art.querySelector('[data-relief-poster]')?.addEventListener('click', () => {
+    unmount?.();
+    unmount = undefined;
+    ready = false;
+    art.dataset.reliefState = 'poster';
+    art.dataset.reliefView = 'front';
+    art.dataset.touchActive = 'false';
+    for (const selector of ['[data-relief-stage]', '[data-relief-actions]', '[data-relief-hint]']) {
+      const element = art.querySelector<HTMLElement>(selector);
+      if (element) element.hidden = true;
+    }
+    const touch = art.querySelector<HTMLButtonElement>('[data-relief-touch]');
+    if (touch) { touch.setAttribute('aria-pressed', 'false'); touch.textContent = touch.dataset.labelOff || ''; }
+    start.hidden = false;
+    start.disabled = false;
+    status.textContent = art.dataset.artState || '';
+    start.focus({ preventScroll: true });
+  });
 });

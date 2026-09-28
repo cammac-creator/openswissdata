@@ -246,7 +246,7 @@
 
 /* Le relief manipulable garde sa place avant, pendant et après son chargement. */
 .atlas-relief { overflow:visible; }
-.atlas-relief .atlas-art-plane { transition:opacity .35s ease; transform:none; }
+.atlas-relief .atlas-art-plane { transition:opacity .35s ease,transform .5s ease-out; }
 .atlas-relief[data-relief-state='ready'] .atlas-art-plane { opacity:0; pointer-events:none; }
 .atlas-relief[data-relief-state='ready'] .atlas-art-image { animation:none!important; }
 .atlas-relief-stage { position:absolute; inset:-2% -5% 10%; z-index:1; cursor:grab; outline-offset:-5px; touch-action:pan-y; }
@@ -301,3 +301,33 @@
 @media(max-width:980px) { .atlas-mobile-menu nav { max-height:calc(100vh - 77px); max-height:calc(100dvh - 77px); overflow-y:auto; overscroll-behavior:contain; } }
 @media(max-width:760px) { .atlas-mobile-menu nav { max-height:calc(100vh - 69px); max-height:calc(100dvh - 69px); } }
 @media(max-width:760px) { .atlas-preview-formats { padding:14px 20px; gap:10px; }.atlas-preview-code { max-height:410px; padding:20px; font-size:11px; } }
+
+/* L'illustration éditoriale garde la première place ; le volume se découvre à la demande. */
+.atlas-relief .atlas-art-plane { position:absolute; top:-11%; left:-8%; width:116%; margin:0; mix-blend-mode:multiply; }
+.atlas-relief .atlas-art-image { filter:saturate(1.2) contrast(1.025); mask-image:linear-gradient(to right,transparent,#000 5%,#000 95%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 90%,transparent); mask-composite:intersect; }
+.atlas-relief .atlas-art-meta { inset-inline:2%; top:1%; }
+.atlas-relief .atlas-file-float { bottom:22%; left:-3%; }
+.atlas-relief-controls { bottom:6%; }
+.atlas-relief .atlas-art-bottom { bottom:-3%; }
+.atlas-relief-stage { inset:-5% -8% 6%; }
+.atlas-relief [data-source-model] { display:none; }
+.atlas-relief[data-relief-state='ready'] [data-source-model] { display:inline; }
+.atlas-relief[data-relief-state='ready'] [data-source-art] { display:none; }
+.atlas-relief[data-relief-state='ready'] .atlas-file-float { opacity:0; }
+.atlas-relief-source>div { z-index:5; }
+@media (min-width:1101px) { .atlas-hero-grid { grid-template-columns:minmax(0,.93fr) minmax(0,1.13fr); gap:24px; } }
+@media (max-width:760px) {
+ .atlas-relief,.atlas-product-hero .atlas-relief { aspect-ratio:.91; margin-top:32px; max-width:510px; }
+ .atlas-relief .atlas-art-plane { top:-1%; left:-5%; width:110%; margin:0; }
+ .atlas-relief .atlas-art-meta { top:0; inset-inline:0; }
+ .atlas-relief .atlas-file-float { left:0; bottom:21%; }
+ .atlas-relief-controls { bottom:8%; }
+ .atlas-relief .atlas-art-bottom { bottom:-2%; }
+ .atlas-relief-stage { inset:-2% -5% 16%; }
+ .atlas-relief-actions { gap:5px; }
+ .atlas-relief-controls button { padding-inline:10px; }
+}
+
+.atlas-relief-stage::before { content:''; position:absolute; z-index:-1; width:85%; height:20%; left:9%; bottom:19%; border-radius:50%; background:radial-gradient(ellipse,#17372d35,transparent 68%); filter:blur(13px); transform:rotate(-5deg); pointer-events:none; }
+.atlas-relief[data-relief-view='back'] .atlas-relief-stage::before,
+.atlas-relief[data-relief-view='custom'] .atlas-relief-stage::before { display:none; }
