@@ -91,3 +91,22 @@ describe('Sonde extérieure publique', () => {
     expect(result.checks.map(c => c.reason)).toEqual(['http_error', 'stale']); expect(result.ok).toBe(false);
   });
 });
+
+describe('Panne simulée de la sonde extérieure', () => {
+  let bronzeDir: string;
+  beforeEach(() => { bronzeDir = mkdtempSync(join(tmpdir(), 'osd-monitor-panne-')); });
+  afterEach(() => { rmSync(bronzeDir, { recursive: true, force: true }); });
+  it('échoue par le vrai chemin de détection sans lire le service réel', async () => {
+    const fetchImpl = vi.fn(async () => Response.json({ status: 'ready' }));
+    const result = await runPublicMonitor({ bronzeDir, fetchImpl, now: () => instant, simulate: true });
+    expect(fetchImpl).not.toHaveBeenCalled();
+    expect(result.ok).toBe(false); expect(result.simulated).toBe(true);
+    expect(result.checks.map(c => [c.name, c.http, c.reason])).toEqual([['ready', 503, 'http_error'], ['freshness', 503, 'http_error']]);
+    for (const name of ['ready', 'freshness']) expect(JSON.parse(readFileSync(join(bronzeDir, `${name}.json`), 'utf8')).http).toBe(503);
+  });
+  it('reste un contrôle ordinaire sans demande explicite', async () => {
+    const fetchImpl = vi.fn(async (url: string) => Response.json(url.endsWith('ready') ? ready : fresh));
+    const result = await runPublicMonitor({ bronzeDir, fetchImpl, now: () => instant });
+    expect(fetchImpl).toHaveBeenCalledTimes(2); expect(result.ok).toBe(true); expect(result).not.toHaveProperty('simulated');
+  });
+});

@@ -62,18 +62,24 @@ async function check(name, { fetchImpl, bronzeDir, now, timeoutMs }) {
   catch { return { ...witness, ok: false, reason: http === 200 ? 'invalid_json' : 'http_error' }; }
 }
 
-export async function runPublicMonitor({ bronzeDir, fetchImpl = fetch, now = Date.now, timeoutMs = 15_000 }) {
+// Panne simulée à la demande : le vrai chemin de détection reçoit un HTTP 503,
+// sans aucune lecture du service réel. Sert à éprouver l'alerte et le retour à la normale.
+export const simulatedOutage = async () => Response.json({ status: 'simulated_outage' }, { status: 503 });
+
+export async function runPublicMonitor({ bronzeDir, fetchImpl = fetch, now = Date.now, timeoutMs = 15_000, simulate = false }) {
   if (!bronzeDir) throw new Error('Dossier bronze requis');
-  const checks = await Promise.all(CHECKS.map(name => check(name, { fetchImpl, bronzeDir, now, timeoutMs })));
-  return { checked_at: new Date(now()).toISOString(), ok: checks.every(c => c.ok), checks };
+  const read = simulate ? simulatedOutage : fetchImpl;
+  const checks = await Promise.all(CHECKS.map(name => check(name, { fetchImpl: read, bronzeDir, now, timeoutMs })));
+  return { checked_at: new Date(now()).toISOString(), ok: checks.every(c => c.ok), ...(simulate ? { simulated: true } : {}), checks };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
-    const report = await runPublicMonitor({ bronzeDir: process.env.MONITOR_BRONZE_DIR });
+    const simulate = process.env.MONITOR_SIMULATE === 'panne';
+    const report = await runPublicMonitor({ bronzeDir: process.env.MONITOR_BRONZE_DIR, simulate });
     console.log(JSON.stringify(report));
     if (process.env.GITHUB_STEP_SUMMARY) {
-      await writeFile(process.env.GITHUB_STEP_SUMMARY, `## Contrôle public extérieur\n\nLecture : ${report.checked_at}\n\n${report.checks.map(c => `- ${c.name} : ${c.ok ? 'vérifié' : 'à vérifier'} · HTTP ${c.http ?? 'absent'} · ${c.reason}${c.revision ? ' · révision ' + c.revision : ''}${c.version ? ' · édition ' + c.version : ''}`).join('\n')}\n\nContrôle ponctuel de disponibilité et fraîcheur FINMA. Ne prouve ni achat, ni réception de mail, ni cadence future.\n`, { flag: 'a' });
+      await writeFile(process.env.GITHUB_STEP_SUMMARY, `## Contrôle public extérieur\n\n${simulate ? '**Panne simulée à la demande : le service réel n’a pas été lu.**\n\n' : ''}Lecture : ${report.checked_at}\n\n${report.checks.map(c => `- ${c.name} : ${c.ok ? 'vérifié' : 'à vérifier'} · HTTP ${c.http ?? 'absent'} · ${c.reason}${c.revision ? ' · révision ' + c.revision : ''}${c.version ? ' · édition ' + c.version : ''}`).join('\n')}\n\nContrôle ponctuel de disponibilité et fraîcheur FINMA. Ne prouve ni achat, ni réception de mail, ni cadence future.\n`, { flag: 'a' });
     }
     process.exitCode = report.ok ? 0 : 1;
   } catch { console.error('Contrôle extérieur non vérifié.'); process.exitCode = 1; }

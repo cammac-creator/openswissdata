@@ -1,9 +1,18 @@
 name: Surveillance publique extérieure
+run-name: ${{ github.event_name == 'workflow_dispatch' && inputs.simuler_panne && 'Surveillance publique — panne simulée' || 'Surveillance publique extérieure' }}
 
 on:
   schedule:
+    # Deux créneaux par heure : GitHub omet ou retarde beaucoup de passages
+    # (9 passages horaires sur 42 heures observés du 26 au 28.09.2026).
     - cron: '23 * * * *'
+    - cron: '53 * * * *'
   workflow_dispatch:
+    inputs:
+      simuler_panne:
+        description: "Simuler une panne : le contrôle échoue sans lire le service réel"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -24,4 +33,5 @@ jobs:
       - name: Contrôler le service public sans secret métier
         env:
           MONITOR_BRONZE_DIR: ${{ runner.temp }}/bronze/monitor-${{ github.run_id }}-${{ github.run_attempt }}
+          MONITOR_SIMULATE: ${{ github.event_name == 'workflow_dispatch' && inputs.simuler_panne && 'panne' || '' }}
         run: node scripts/monitor-public.mjs
