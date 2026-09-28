@@ -15,14 +15,14 @@ import { getFinmaRegistry, getFinmaWarnings } from "../data-loader.js";
 export const kycCheckSchema = {
   type: "object",
   properties: {
-    name: { type: "string", minLength: 2, description: "Entity name (or substring)" },
+    name: { type: "string", minLength: 2, maxLength: 200, description: "Entity name (or a distinctive part of it)" },
     top_k: { type: "integer", minimum: 1, maximum: 50, default: 10 },
   },
   required: ["name"],
 } as const;
 
 const InputZ = z.object({
-  name: z.string().min(2),
+  name: z.string().min(2).max(200),
   top_k: z.number().int().min(1).max(50).default(10),
 });
 
@@ -75,7 +75,8 @@ function escapeRegExp(s: string): string {
  */
 function matcher(needle: string): (candidate: string) => number | null {
   const word = new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegExp(needle)}($|[^\\p{L}\\p{N}])`, "u");
-  const tokens = needle.split(/\s+/).filter((t) => t.length >= 2);
+  // Mots distincts, huit au plus : le repli reste borné quelle que soit la requête.
+  const tokens = [...new Set(needle.split(/\s+/).filter((t) => t.length >= 2))].slice(0, 8);
   return (candidate) => {
     if (candidate === needle) return 0;
     if (candidate.includes(needle)) {

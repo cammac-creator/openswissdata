@@ -118,6 +118,7 @@ function listByPrefix(rows: readonly TaresRow[], prefix: string, lang: Lang, ver
   const shown = matches.slice(0, PREFIX_LIST_LIMIT);
   const text = [
     DISCLAIMERS[lang],
+    SUMMARY_NOTES[lang],
     `Version: ${version ?? "unknown (bundled data)"}`,
     "",
     `${matches.length} Swiss tariff line(s) start with ${prefix}${matches.length > shown.length ? ` (first ${shown.length} shown; add digits to narrow)` : ""}:`,
@@ -165,6 +166,10 @@ export function tariffLookupHandler(args: unknown): {
       if (near.length === 0) continue;
       const shown = near.slice(0, SUGGESTION_LIMIT);
       const text = [
+        DISCLAIMERS[lang],
+        SUMMARY_NOTES[lang],
+        `Version: ${version ?? "unknown (bundled data)"}`,
+        "",
         `No TARES row found for HS8 code "${hs8}". Swiss lines under ${hs8.slice(0, size)} (${near.length}${near.length > shown.length ? `, first ${shown.length} shown` : ""}):`,
         ...shown.map((r) => formatLine(r, lang)),
         "Call tariff_lookup again with one of these 8-digit numbers.",
@@ -232,7 +237,7 @@ export function tariffLookupHandler(args: unknown): {
 export const tariffLookupTool = {
   name: "tariff_lookup",
   description:
-    "Look up the Swiss customs tariff (TARES). An 8-digit Swiss tariff number (dots allowed) returns the full line: designations in FR/DE/IT/EN, MFN duty, preferential regimes, restrictions and customs relief codes. A 2- to 7-digit HS prefix (for example the international HS6 code) lists the Swiss 8-digit lines under it. Every answer carries an unofficial-copy notice that the agent must show to the end user.",
+    "Look up the Swiss customs tariff (TARES). An 8-digit Swiss tariff number (dots allowed) returns the full line: designations in FR/DE/IT/EN, MFN duty, preferential regimes, restrictions and customs relief codes. A 2- to 7-digit HS prefix (for example the international HS6 code) lists the Swiss 8-digit lines under it. Every result carries an unofficial-copy notice that the agent must show to the end user.",
   inputSchema: tariffLookupSchema,
   handler: tariffLookupHandler,
 } as const;

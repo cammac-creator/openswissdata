@@ -62,7 +62,7 @@ export const SERVER_INSTRUCTIONS = [
   "- kyc_check: search the FINMA register and the FINMA warnings list by entity name.",
   "- cross_walk: map a code between NOGA 2008, NOGA 2025, NACE 2.0, NACE 2.1 and ISIC 4, with the relation type and its source.",
   "The other tools (semantic search, change history) belong to the Pro plan, which is closed to new subscribers at the moment.",
-  "The data is an unofficial copy. Show the notice included in each answer to the user, and point to the official source (xtares.admin.ch, finma.ch, the Swiss Federal Statistical Office) for binding decisions.",
+  "The data is an unofficial copy: tell the user so, show the notice when a result carries one, and point to the official source (xtares.admin.ch, finma.ch, the Swiss Federal Statistical Office) for binding decisions.",
   `Documentation for agents: ${PUBLIC_SITE}/llms.txt. Full datasets are sold as signed files: ${PUBLIC_SITE}/en/`,
 ].join("\n");
 

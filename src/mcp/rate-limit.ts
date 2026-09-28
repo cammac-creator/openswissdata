@@ -35,24 +35,34 @@ export interface RateLimitResult {
   firstRefusal: boolean;
 }
 
+// Chaque fenêtre ouverte est réinsérée en fin de table : l'ordre d'insertion suit l'ordre
+// d'expiration, et la purge s'arrête à la première fenêtre encore active.
 function prune(now: number): void {
-  for (const [key, bucket] of buckets) if (bucket.resetAt <= now) buckets.delete(key);
-  // Toutes les fenêtres encore actives : la plus ancienne insérée cède sa place.
+  for (const [key, bucket] of buckets) {
+    if (bucket.resetAt > now) break;
+    buckets.delete(key);
+  }
+  // Toutes les fenêtres encore actives : celle qui expire la première cède sa place.
   if (buckets.size >= MAX_BUCKETS) {
     const oldest = buckets.keys().next().value;
     if (oldest !== undefined) buckets.delete(oldest);
   }
 }
 
-export function checkRateLimit(ip: string, limit: number = DEFAULT_MAX_REQ): RateLimitResult {
+/**
+ * Consomme `cost` unités (un lot JSON-RPC coûte un appel par message) pour cette clé et dit si la
+ * requête reste dans la limite.
+ */
+export function checkRateLimit(ip: string, limit: number = DEFAULT_MAX_REQ, cost = 1): RateLimitResult {
   const now = Date.now();
   let bucket = buckets.get(ip);
   if (!bucket || bucket.resetAt <= now) {
-    if (!bucket && buckets.size >= MAX_BUCKETS) prune(now);
+    if (bucket) buckets.delete(ip);
+    else if (buckets.size >= MAX_BUCKETS) prune(now);
     bucket = { count: 0, resetAt: now + WINDOW_MS, refusalSeen: false };
     buckets.set(ip, bucket);
   }
-  bucket.count += 1;
+  bucket.count += Math.max(1, Math.floor(cost));
   const allowed = bucket.count <= limit;
   const firstRefusal = !allowed && !bucket.refusalSeen;
   if (!allowed) bucket.refusalSeen = true;

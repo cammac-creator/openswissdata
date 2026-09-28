@@ -31,10 +31,11 @@ export function trackMcpToolCall(
   } catch { reportEventFailure(); }
 }
 
-// Nom et version déclarés par le client MCP : lettres, chiffres et ponctuation courante seulement,
-// jamais d'arobase (aucune adresse ne doit entrer dans le journal).
+// Nom et version déclarés par le client MCP : lettres, chiffres et ponctuation courante seulement.
+// Une valeur qui contient une arobase ou cinq chiffres de suite (adresse, téléphone) n'est pas
+// enregistrée du tout : retirer le caractère laisserait l'adresse ou le numéro lisible.
 function cleanClientField(value: unknown, max: number): string | null {
-  if (typeof value !== 'string') return null;
+  if (typeof value !== 'string' || value.includes('@') || /\d{5,}/.test(value)) return null;
   const cleaned = value.replace(/[^A-Za-z0-9 ._/+:()-]/g, '').trim().slice(0, max);
   return cleaned || null;
 }

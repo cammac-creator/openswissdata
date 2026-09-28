@@ -12,7 +12,13 @@ import { getDb, closeDb } from "../../src/lib/db.js";
 import { _resetRateLimit, _bucketCount, checkRateLimit } from "../../src/mcp/rate-limit.js";
 import { negotiateProtocolVersion, SUPPORTED_PROTOCOL_VERSIONS } from "../../src/mcp/server.js";
 import { tariffLookupHandler } from "../../src/mcp/tools/tariff-lookup.js";
+import { kycCheckTool } from "../../src/mcp/tools/kyc-check.js";
 import { getTares, _resetDataLoaderCache } from "../../src/mcp/data-loader.js";
+import { MCP_BODY_BYTES } from "../../src/mcp/body-limit.js";
+import { generateClientId, generateClientSecret, hashToken } from "../../src/mcp/oauth/crypto.js";
+import { insertClient, insertToken } from "../../src/mcp/oauth/store.js";
+import { TIER_DEFAULT_SCOPES, serializeScopes } from "../../src/mcp/oauth/scopes.js";
+import { randomBytes } from "node:crypto";
 
 const flush = async () => {
   for (let i = 0; i < 5; i++) await new Promise((r) => setImmediate(r));
@@ -96,12 +102,15 @@ describe("Accès des agents au serveur MCP", () => {
     });
 
     it("un appel d'outil sans id n'est ni exécuté ni mesuré", async () => {
+      const handler = vi.spyOn(kycCheckTool, "handler");
       const res = await post(createApp(), "/mcp/jsonrpc", {
         jsonrpc: "2.0", method: "tools/call", params: { name: "kyc_check", arguments: { name: "Institution fictive" } },
       });
       expect(res.status).toBe(202);
+      expect(handler).not.toHaveBeenCalled();
       await flush();
       expect(events("mcp_tool_call")).toHaveLength(0);
+      handler.mockRestore();
     });
 
     it("un lot vide est une requête invalide", async () => {
@@ -119,7 +128,7 @@ describe("Accès des agents au serveur MCP", () => {
     it("l'ouverture d'un flux SSE sur une adresse d'entrée répond 405, sur les deux hôtes", async () => {
       const app = createApp();
       const sse = { accept: "text/event-stream" };
-      for (const [path, host] of [["/", "mcp.openswissdata.com"], ["/mcp", "mcp.openswissdata.com"], ["/jsonrpc", "mcp.openswissdata.com"], ["/mcp", "www.openswissdata.com"], ["/mcp/jsonrpc", "www.openswissdata.com"]]) {
+      for (const [path, host] of [["/", "mcp.openswissdata.com"], ["/mcp", "mcp.openswissdata.com"], ["/jsonrpc", "mcp.openswissdata.com"], ["/mcp", "www.openswissdata.com"], ["/mcp/", "www.openswissdata.com"], ["/mcp/jsonrpc", "www.openswissdata.com"]]) {
         const res = await app.request(`http://${host}${path}`, { headers: { ...sse, host } });
         expect(res.status, `${host}${path}`).toBe(405);
       }
@@ -227,20 +236,115 @@ describe("Accès des agents au serveur MCP", () => {
     });
   });
 
+  describe("taille, lots et appelants authentifiés", () => {
+    it("un corps trop grand est refusé en 413 avant tout quota", async () => {
+      const app = createApp();
+      const big = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "kyc_check", arguments: { name: "x".repeat(MCP_BODY_BYTES) } } });
+      const refused = await post(app, "/mcp/jsonrpc", big);
+      expect(refused.status).toBe(413);
+      expect((await refused.json()).error.code).toBe(-32600);
+      const next = await post(app, "/mcp/jsonrpc", { jsonrpc: "2.0", id: 2, method: "ping" });
+      expect(next.headers.get("x-ratelimit-remaining")).toBe("99");
+    });
+
+    it("un nom FINMA trop long est refusé, un nom répétitif reste rapide", async () => {
+      expect(kycCheckTool.handler({ name: "a".repeat(201) }).isError).toBe(true);
+      const started = performance.now();
+      const out = kycCheckTool.handler({ name: "ag ".repeat(66).trim() });
+      expect(out.isError).not.toBe(true);
+      expect(performance.now() - started).toBeLessThan(1000);
+    });
+
+    it("chaque message d'un lot anonyme coûte un appel, et un lot trop coûteux n'est pas exécuté", async () => {
+      const app = createApp();
+      const batch = (n: number, from = 0) => Array.from({ length: n }, (_, i) => ({ jsonrpc: "2.0", id: from + i, method: "ping" }));
+      const first = await post(app, "/mcp/jsonrpc", batch(50));
+      expect(first.status).toBe(200);
+      expect(first.headers.get("x-ratelimit-remaining")).toBe("50");
+      for (let i = 0; i < 10; i++) await post(app, "/mcp/jsonrpc", { jsonrpc: "2.0", id: 100 + i, method: "ping" });
+      // 60 unités consommées : le contrôle d'entrée accepte le lot suivant (61), sa facturation le refuse (110).
+      const handler = vi.spyOn(kycCheckTool, "handler");
+      const tooMany = await post(app, "/mcp/jsonrpc", Array.from({ length: 50 }, (_, i) => ({ jsonrpc: "2.0", id: i, method: "tools/call", params: { name: "kyc_check", arguments: { name: "Institution fictive" } } })));
+      expect(tooMany.status).toBe(429);
+      expect(tooMany.headers.get("retry-after")).not.toBeNull();
+      expect(handler).not.toHaveBeenCalled();
+      handler.mockRestore();
+      await flush();
+      expect(events("mcp_rate_limited")).toHaveLength(1);
+      expect(events("mcp_tool_call")).toHaveLength(0);
+    });
+
+    it("sur Railway, les chemins réécrits partagent la même fenêtre", async () => {
+      vi.stubEnv("RAILWAY_ENVIRONMENT_ID", "environnement-fictif");
+      const app = createApp();
+      const ping = { jsonrpc: "2.0", id: 1, method: "ping" };
+      const ip = { "x-real-ip": "198.51.100.20" };
+      const a = await post(app, "http://www.openswissdata.com/mcp/jsonrpc", ping, { ...ip, host: "www.openswissdata.com" });
+      const b = await post(app, "http://www.openswissdata.com/mcp/", ping, { ...ip, host: "www.openswissdata.com" });
+      const d = await post(app, "http://mcp.openswissdata.com/", ping, { ...ip, host: "mcp.openswissdata.com" });
+      expect([a, b, d].map((r) => r.headers.get("x-ratelimit-remaining"))).toEqual(["99", "98", "97"]);
+    });
+
+    it("un jeton authentifié voit les outils de sa portée, pas davantage", async () => {
+      const clientId = generateClientId();
+      insertClient({ client_id: clientId, client_secret_hash: hashToken(generateClientSecret()), name: "fictif", email: "fictif@example.test", tier: "free", scopes: TIER_DEFAULT_SCOPES.free });
+      const token = randomBytes(32).toString("base64url");
+      insertToken({ client_id: clientId, access_token_plain: token, refresh_token_plain: null, scope: serializeScopes(TIER_DEFAULT_SCOPES.free) });
+      const res = await post(createApp(), "/mcp/jsonrpc", { jsonrpc: "2.0", id: 1, method: "tools/list" }, { authorization: `Bearer ${token}` });
+      const names = ((await res.json()).result.tools as { name: string }[]).map((t) => t.name).sort();
+      expect(names).toEqual(["cross_walk", "finma_search", "kyc_check", "tariff_lookup"]);
+    });
+  });
+
+  describe("appels depuis un navigateur (CORS)", () => {
+    it("la requête préalable est acceptée sur toutes les adresses d'entrée, sans cookies", async () => {
+      const app = createApp();
+      const preflight = { origin: "https://client-web.example", "access-control-request-method": "POST", "access-control-request-headers": "content-type, mcp-protocol-version" };
+      for (const [url, host] of [["http://www.openswissdata.com/mcp/jsonrpc", "www.openswissdata.com"], ["http://www.openswissdata.com/mcp", "www.openswissdata.com"], ["http://www.openswissdata.com/mcp/", "www.openswissdata.com"], ["http://mcp.openswissdata.com/", "mcp.openswissdata.com"], ["http://mcp.openswissdata.com/jsonrpc", "mcp.openswissdata.com"]]) {
+        const res = await app.request(url, { method: "OPTIONS", headers: { ...preflight, host } });
+        expect(res.status, url).toBe(204);
+        expect(res.headers.get("access-control-allow-origin"), url).toBe("*");
+        expect(res.headers.get("access-control-allow-headers") ?? "", url).toContain("mcp-protocol-version");
+        expect(res.headers.get("access-control-allow-credentials"), url).toBeNull();
+      }
+    });
+
+    it("les réponses exposent l'origine libre et les compteurs, les routes OAuth restent fermées", async () => {
+      const app = createApp();
+      const res = await post(app, "/mcp/jsonrpc", { jsonrpc: "2.0", id: 1, method: "ping" }, { origin: "https://client-web.example" });
+      expect(res.headers.get("access-control-allow-origin")).toBe("*");
+      expect(res.headers.get("access-control-expose-headers") ?? "").toContain("x-ratelimit-remaining");
+      const oauth = await app.request("/mcp/oauth/token", { method: "OPTIONS", headers: { origin: "https://client-web.example", "access-control-request-method": "POST" } });
+      expect(oauth.headers.get("access-control-allow-origin")).toBeNull();
+    });
+  });
+
   describe("mesure des connexions", () => {
-    it("enregistre le nom déclaré du client et les versions, sans arobase", async () => {
+    it("enregistre le nom déclaré du client et les versions", async () => {
       await post(createApp(), "/mcp/jsonrpc", {
         jsonrpc: "2.0", id: 1, method: "initialize",
-        params: { protocolVersion: "2025-03-26", capabilities: {}, clientInfo: { name: "claude-code <moi@exemple.test>", version: "2.1.283" } },
+        params: { protocolVersion: "2025-03-26", capabilities: {}, clientInfo: { name: "claude-code", version: "2.1.283" } },
       }, { "user-agent": "claude-code/2.1.283" });
       await flush();
       const rows = events("mcp_initialize");
       expect(rows).toHaveLength(1);
       const meta = JSON.parse(rows[0].meta_json);
-      expect(meta).toMatchObject({ client_version: "2.1.283", requested_version: "2025-03-26", negotiated_version: "2025-03-26", authenticated: false, tier: "anonymous" });
-      expect(meta.client_name).not.toContain("@");
-      expect(meta.client_name.startsWith("claude-code")).toBe(true);
+      expect(meta).toMatchObject({ client_name: "claude-code", client_version: "2.1.283", requested_version: "2025-03-26", negotiated_version: "2025-03-26", authenticated: false, tier: "anonymous" });
       expect(rows[0].ua_class).toBe("mcp_client");
+    });
+
+    it("n'enregistre ni adresse ni numéro déguisés en nom de client", async () => {
+      const app = createApp();
+      for (const name of ["claude-code <moi@exemple.test>", "Jean Dupont +41 79 123 45 67 0791234567"]) {
+        await post(app, "/mcp/jsonrpc", {
+          jsonrpc: "2.0", id: 1, method: "initialize",
+          params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name, version: "1.0" } },
+        });
+      }
+      await flush();
+      const names = events("mcp_initialize").map((r) => JSON.parse(r.meta_json).client_name);
+      expect(names).toEqual([null, null]);
+      expect(JSON.stringify(events("mcp_initialize"))).not.toMatch(/exemple|0791234567|Dupont/);
     });
   });
 });
@@ -265,6 +369,7 @@ describe("tariff_lookup pour les agents", () => {
     expect(structured.total).toBe(expected);
     expect(structured.lines.every((l) => l.hs8.startsWith(hs6))).toBe(true);
     expect(out.content[0].text).toContain("UNOFFICIAL NOTICE");
+    expect(out.content[0].text).toContain("missing values do not mean duty-free");
   });
 
   it("un préfixe trop large est tronqué à 40 lignes et le dit", () => {
@@ -284,10 +389,12 @@ describe("tariff_lookup pour les agents", () => {
     let unknown = `${hs6}99`;
     for (let n = 99; byHs8.has(unknown) && n > 0; n--) unknown = `${hs6}${String(n).padStart(2, "0")}`;
     if (byHs8.has(unknown)) return;
-    const out = tariffLookupHandler({ hs8: unknown });
+    const out = tariffLookupHandler({ hs8: unknown, lang: "en" });
     expect(out.isError).toBe(true);
     expect(out.content[0].text).toContain("No TARES row");
     expect(out.content[0].text).toContain(rows[0].hs8);
+    expect(out.content[0].text).toContain("UNOFFICIAL NOTICE");
+    expect(out.content[0].text).toContain("missing values do not mean duty-free");
   });
 
   it("refuse toujours une entrée qui n'est pas un numéro", () => {

@@ -29,11 +29,30 @@
  */
 
 import { Hono, type Context } from "hono";
+import { cors } from "hono/cors";
 import { callableBy, dispatch, getServerInfo } from "../../mcp/server.js";
 import { oauthRouter, oauthVerify, type MCPAuthVar } from "../../mcp/oauth/index.js";
+import { anonymousLimitResponse } from "../../mcp/oauth/verify.js";
+import { checkRateLimit } from "../../mcp/rate-limit.js";
+import { mcpBodyLimit } from "../../mcp/body-limit.js";
 import { trackMcpInitialize, trackMcpToolCall } from "../../mcp/track-mcp.js";
 
 export const mcpRoute = new Hono<MCPAuthVar>();
+
+// Données publiques en lecture seule : tout site peut appeler le point d'entrée depuis un
+// navigateur (client MCP web, démonstrateur tiers). Aucun cookie n'est admis (pas de
+// credentials) ; un jeton éventuel reste dans l'en-tête posé par la page qui le détient.
+// Les routes OAuth gardent leurs propres règles et ne reçoivent pas ces en-têtes.
+const mcpCors = cors({
+  origin: "*",
+  allowMethods: ["POST", "GET", "OPTIONS"],
+  allowHeaders: ["content-type", "accept", "authorization", "mcp-protocol-version", "mcp-session-id", "last-event-id"],
+  exposeHeaders: ["mcp-session-id", "retry-after", "x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset"],
+  maxAge: 86_400,
+});
+mcpRoute.use("/jsonrpc", mcpCors);
+mcpRoute.use("/discovery", mcpCors);
+mcpRoute.use("/", mcpCors);
 
 // Health is intentionally unauthenticated — used by Railway's healthcheck.
 mcpRoute.get("/health", (c) => c.json({ status: "ok" }));
@@ -74,6 +93,14 @@ async function handleJsonRpc(c: Context<MCPAuthVar>) {
     if (body.length === 0) {
       return c.json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Empty batch" } }, 400);
     }
+    // Anonyme : chaque message du lot coûte un appel. Le contrôle d'entrée en a déjà compté un ;
+    // sans ce complément, un lot de 50 valait 50 appels pour le prix d'un.
+    const rateKey = c.get("mcp_rate_key");
+    if (rateKey && body.length > 1) {
+      const rl = checkRateLimit(rateKey, undefined, body.length - 1);
+      if (!rl.allowed) return anonymousLimitResponse(c, rl);
+      c.header("X-RateLimit-Remaining", String(rl.remaining));
+    }
     const started = Date.now();
     const out = await Promise.all(body.map((r) => dispatch(r, auth)));
     const dur = Date.now() - started;
@@ -98,8 +125,9 @@ async function handleJsonRpc(c: Context<MCPAuthVar>) {
   return c.json(response);
 }
 
-mcpRoute.post("/jsonrpc", oauthVerify(), handleJsonRpc);
-mcpRoute.post("/", oauthVerify(), handleJsonRpc);
+// Taille bornée avant tout quota ou décodage, puis contrôle d'accès, puis exécution.
+mcpRoute.post("/jsonrpc", mcpBodyLimit, oauthVerify(), handleJsonRpc);
+mcpRoute.post("/", mcpBodyLimit, oauthVerify(), handleJsonRpc);
 
 // Aucun flux SSE n'est proposé : la spécification demande 405 pour qu'un client n'insiste pas.
 mcpRoute.get("/jsonrpc", (c) => {

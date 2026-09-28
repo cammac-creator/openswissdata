@@ -20,7 +20,7 @@
  *      ALL scopes and unlimited quota.
  */
 
-import type { MiddlewareHandler } from "hono";
+import type { Context, MiddlewareHandler } from "hono";
 import { hashToken } from "./crypto.js";
 import { findClientById, findTokenByAccessHash, type MCPClient } from "./store.js";
 import { consumeQuota, type QuotaResult } from "./quota.js";
@@ -54,6 +54,8 @@ export type MCPAuthVar = {
     mcp_auth: MCPAuthContext | null;
     mcp_quota: QuotaResult | null;
     mcp_rate_limit: RateLimitResult | null;
+    /** Clé du limiteur anonyme (réseau fiable), pour facturer chaque message d'un lot. */
+    mcp_rate_key: string | null;
   };
 };
 
@@ -79,6 +81,33 @@ function datasetsUrl(): string {
 
 function retryAfterSeconds(resetAt: number): number {
   return Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
+}
+
+/**
+ * Refus de la limite anonyme, partagé par le contrôle d'entrée et par la facturation des lots.
+ * Journalisé avant la réponse, une fois par fenêtre et par réseau : un refus non mesuré rend
+ * l'API innocente à tort, un refus mesuré à chaque appel inonderait le journal.
+ */
+export function anonymousLimitResponse(c: Context, rl: RateLimitResult): Response {
+  if (rl.firstRefusal) trackMcpRateLimited(c, "anonymous");
+  const retryAfter = retryAfterSeconds(rl.resetAt);
+  const files = datasetsUrl();
+  c.header("Retry-After", String(retryAfter));
+  c.header("X-RateLimit-Limit", String(rl.limit));
+  c.header("X-RateLimit-Remaining", String(rl.remaining));
+  c.header("X-RateLimit-Reset", String(Math.floor(rl.resetAt / 1000)));
+  c.header("Cache-Control", "no-store");
+  return c.json(
+    {
+      error: "rate_limit_exceeded",
+      error_description: `Anonymous limit reached: ${ANONYMOUS_RATE_LIMIT.calls} calls per ${ANONYMOUS_RATE_LIMIT.window} per IP address (each message of a batch counts). Retry after ${retryAfter} seconds. No paid API plan is open at the moment; the full datasets are sold as signed files at ${files}`,
+      retry_after_seconds: retryAfter,
+      limit: rl.limit,
+      window: ANONYMOUS_RATE_LIMIT.window,
+      datasets_url: files,
+    },
+    429,
+  );
 }
 
 /**
@@ -113,6 +142,7 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
       });
       c.set("mcp_quota", null);
       c.set("mcp_rate_limit", null);
+      c.set("mcp_rate_key", null);
       await next();
       return;
     }
@@ -141,8 +171,9 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
 
       if (!quota.allowed) {
         const upgrade = pricingUpgradeUrl();
-        const dayExceeded = quota.day_limit >= 0 && quota.day_used > quota.day_limit;
-        c.header("Retry-After", String(secondsUntilUtcBoundary(dayExceeded ? "day" : "month")));
+        // Mois épuisé : le blocage dure jusqu'au mois suivant, même si le jour l'est aussi.
+        const monthExceeded = quota.month_limit >= 0 && quota.month_used > quota.month_limit;
+        c.header("Retry-After", String(secondsUntilUtcBoundary(monthExceeded ? "month" : "day")));
         return c.json(
           {
             error: "rate_limit_exceeded",
@@ -164,6 +195,7 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
       });
       c.set("mcp_quota", quota);
       c.set("mcp_rate_limit", null);
+      c.set("mcp_rate_key", null);
       await next();
       return;
     }
@@ -181,28 +213,11 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
     c.header("X-RateLimit-Limit", String(rl.limit));
     c.header("X-RateLimit-Remaining", String(rl.remaining));
     c.header("X-RateLimit-Reset", String(Math.floor(rl.resetAt / 1000)));
-    if (!rl.allowed) {
-      // Journaliser avant de refuser, une fois par fenêtre et par réseau : un refus non mesuré
-      // rend l'API innocente à tort, un refus mesuré à chaque appel inonderait le journal.
-      if (rl.firstRefusal) trackMcpRateLimited(c, "anonymous");
-      const retryAfter = retryAfterSeconds(rl.resetAt);
-      const files = datasetsUrl();
-      c.header("Retry-After", String(retryAfter));
-      return c.json(
-        {
-          error: "rate_limit_exceeded",
-          error_description: `Anonymous limit reached: ${ANONYMOUS_RATE_LIMIT.calls} calls per ${ANONYMOUS_RATE_LIMIT.window} per IP address. Retry after ${retryAfter} seconds. No paid API plan is open at the moment; the full datasets are sold as signed files at ${files}`,
-          retry_after_seconds: retryAfter,
-          limit: rl.limit,
-          window: ANONYMOUS_RATE_LIMIT.window,
-          datasets_url: files,
-        },
-        429,
-      );
-    }
+    if (!rl.allowed) return anonymousLimitResponse(c, rl);
     c.set("mcp_auth", null);
     c.set("mcp_quota", null);
     c.set("mcp_rate_limit", rl);
+    c.set("mcp_rate_key", ip);
     await next();
   };
 }

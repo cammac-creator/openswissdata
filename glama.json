@@ -1,4 +1,66 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "maintainers": ["cammac-creator"]
+  "maintainers": [
+    "cammac-creator"
+  ],
+  "name": "OpenSwissData",
+  "description": "Swiss federal reference data for AI agents: Swiss customs tariff lines (TARES, 8-digit tariff numbers) with MFN duty and preferential regimes, the FINMA register of supervised institutions and the FINMA warnings list, and NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4 correspondences. Three tools work without a key or sign-up (100 calls per hour per IP address); five more need an existing access grant, and new subscriptions are closed. Unofficial copy of public sources; full datasets are sold as signed files.",
+  "homepage": "https://www.openswissdata.com/en/mcp",
+  "repository": "https://github.com/cammac-creator/openswissdata",
+  "documentation": "https://www.openswissdata.com/llms.txt",
+  "categories": [
+    "finance",
+    "compliance",
+    "government-data",
+    "open-data"
+  ],
+  "keywords": [
+    "switzerland",
+    "swiss",
+    "customs",
+    "tariff",
+    "hs-code",
+    "tares",
+    "finma",
+    "kyc",
+    "noga",
+    "nace",
+    "isic",
+    "crosswalk",
+    "mcp"
+  ],
+  "tools": [
+    {
+      "name": "tariff_lookup",
+      "description": "Swiss customs tariff line for an 8-digit tariff number (MFN duty, preferential regimes, restrictions, relief codes), or the Swiss lines under a 2- to 7-digit HS prefix (no key)"
+    },
+    {
+      "name": "kyc_check",
+      "description": "Search the FINMA register and the FINMA warnings list by name, closest matches first, with total counts (no key)"
+    },
+    {
+      "name": "cross_walk",
+      "description": "Map an activity code between NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4, with the relation type and its source (no key)"
+    },
+    {
+      "name": "tariff_semantic_search",
+      "description": "Semantic search over the French TARES descriptions, returns 8-digit candidates (existing access grant required)"
+    },
+    {
+      "name": "tariff_changelog",
+      "description": "MFN duty history of an 8-digit tariff number across archived releases (existing access grant required)"
+    },
+    {
+      "name": "classify_text",
+      "description": "Suggest NOGA 2025 codes for a French activity description (existing access grant required)"
+    },
+    {
+      "name": "finma_search",
+      "description": "Fuzzy FINMA register search with LEI/UID where available (existing access grant required)"
+    },
+    {
+      "name": "entity_history",
+      "description": "Change history of a FINMA-supervised entity by Swiss UID (existing access grant required)"
+    }
+  ]
 }

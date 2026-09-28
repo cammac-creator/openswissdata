@@ -2,7 +2,7 @@
 
 > Normalised copies of Swiss federal reference data: the Swiss customs tariff (TARES, 8-digit Swiss tariff numbers with MFN duty, preferential regimes and restrictions), the FINMA register of supervised financial institutions plus the FINMA warnings list, and correspondences between the NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4 activity classifications. Free to query from AI agents over MCP, without a key or sign-up. Full datasets are sold as signed files.
 
-The data is an unofficial copy. Every answer names its source; binding decisions belong to the official sources (xtares.admin.ch for customs, finma.ch for supervision, the Swiss Federal Statistical Office for NOGA).
+The data is an unofficial copy. Each result names its source; binding decisions belong to the official sources (xtares.admin.ch for customs, finma.ch for supervision, the Swiss Federal Statistical Office for NOGA).
 
 ## Use it from an AI agent (free, no key)
 

@@ -194,10 +194,12 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
       c.header("Cache-Control", "no-store");
       return c.json({ error: "method_not_allowed", error_description: MCP_NO_SSE_MESSAGE }, 405);
     }
-    // Adresse avec barre finale collée telle quelle : même point d'entrée JSON-RPC.
-    if (c.req.method === "POST" && url.pathname === "/mcp/") {
+    // Adresse avec barre finale collée telle quelle : même point d'entrée JSON-RPC (et même
+    // requête préalable CORS pour un client qui tourne dans un navigateur).
+    if ((c.req.method === "POST" || c.req.method === "OPTIONS") && url.pathname === "/mcp/") {
       url.pathname = "/mcp/jsonrpc";
-      return app.fetch(new Request(url, c.req.raw));
+      // L'environnement Node suit la requête réécrite : l'adresse de connexion reste lisible.
+      return app.fetch(new Request(url, c.req.raw), c.env);
     }
     if (!isMcpHost) return next();
 
@@ -222,7 +224,7 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
     // La racine du sous-domaine est l'adresse la plus souvent collée dans un client : POST / = JSON-RPC.
     url.pathname = url.pathname === "/" ? "/mcp/jsonrpc" : "/mcp" + url.pathname;
     const rewritten = new Request(url, c.req.raw);
-    return app.fetch(rewritten);
+    return app.fetch(rewritten, c.env);
   });
 
   // --- Event tracking middleware ---
