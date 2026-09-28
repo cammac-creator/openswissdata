@@ -1,0 +1,282 @@
+---
+import CheckoutNotice from "./CheckoutNotice.astro";
+import AtlasLayout from "../layouts/AtlasLayout.astro";
+import AtlasArtwork from "./AtlasArtwork.astro";
+import "../styles/atlas-fiches.css";
+import "../styles/atlas-fiche-classifications.css";
+import { getLangFromPath, localizePath } from "../i18n/utils";
+import { BUNDLE_OFFER, BUNDLE_SAVING, FILE_OFFERS } from "../lib/offers";
+import { datasetJsonLd, productJsonLd } from "../lib/structured-data";
+import { dottedCode, getClassificationReferenceVersion, getCrosswalksFor, getNogaByCode } from "../lib/noga-helpers";
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => localizePath(path, lang);
+const offer = FILE_OFFERS.classifications;
+const label = (row: { label_fr: string; label_de: string; label_en: string }) => (lang === "de" ? row.label_de : lang === "en" ? row.label_en : row.label_fr);
+// Exemple et hiérarchie calculés au build depuis la même référence sourcée que le service MCP.
+const referenceVersion = getClassificationReferenceVersion();
+const exampleRow = getNogaByCode("1811");
+const ladderRows = ["C", "18", "181", "1811", "181100"].map(code => getNogaByCode(code));
+if (!exampleRow || ladderRows.some(row => !row)) throw new Error("Exemple NOGA 18.11 absent du référentiel : fiche non publiée.");
+const exampleLinks = getCrosswalksFor("1811");
+const copy = {
+ fr: {
+  title: "Classifications NOGA, NACE et ISIC avec correspondances sourcées",
+  description: "NOGA 2008 et 2025, NACE Rév. 2 et 2.1, ISIC Rév. 4 dans un format commun, avec niveaux, parents et libellés. Correspondances sourcées : identité documentée ou rapprochement à vérifier. CSV, JSON, Parquet et SQL.",
+  eyebrow: "Classifications · NOGA · NACE · ISIC", hero: "Cinq nomenclatures.", accent: "Des liens qualifiés.",
+  intro: "NOGA 2008 et 2025, NACE Rév. 2 et 2.1, ISIC Rév. 4, dans un même format avec leurs niveaux, leurs parents et leurs libellés. Chaque correspondance indique sa source et sa précision.",
+  read: "Voir les correspondances", buy: "Acheter", buyClass: "Acheter Classifications Standard", catalogue: "Les données", navLabel: "Sections de la fiche Classifications", navMap: "Correspondances", navLevels: "Niveaux", navPreview: "Aperçu",
+  status: "Dernière version publiée", waiting: "Vérification de la version disponible…", unavailable: "La version ne peut pas être vérifiée pour le moment. Contactez-nous avant votre achat.",
+  statRows: "Codes, tous niveaux", statLinks: "Liens directs sourcés", statExact: "Identités documentées", statApprox: "Rapprochements et regroupements",
+  nojs: "Activez JavaScript pour lire la version et les volumes publiés, ou téléchargez l’échantillon CSV pour examiner les données.", checked: "contrôlée le", codes: "codes", classes: "classes",
+  mapKicker: "01 / Comment les nomenclatures se relient", mapTitle: "Un lien exact ne se devine pas.", mapIntro: "Seule l’identité documentée par l’OFS entre NOGA et NACE, aux niveaux 1 à 4, est exacte. Les tables d’Eurostat entre révisions et vers ISIC restent des rapprochements à vérifier, et deux rapprochements ne sont jamais enchaînés.",
+  switzerland: "Suisse", europe: "Union européenne", world: "Nations unies", exactLink: "Identité OFS · niveaux 1 à 4", approxLink: "Rapprochement Eurostat", noChain: "Pas de chaînage",
+  ghostTitle: "ISIC Rév. 4", ghostText: "Aucun lien déduit depuis NOGA 2025 ou NACE Rév. 2.1 : il faudrait enchaîner deux rapprochements.",
+  legend: [["exact", "Identité documentée : NOGA et NACE partagent les codes des niveaux 1 à 4."], ["approx", "Rapprochement à vérifier : table de correspondance d’Eurostat."], ["none", "Aucun lien n’est déduit de deux rapprochements successifs."]],
+  relationsTitle: "Les relations en toutes lettres", relations: [
+   "NOGA 2008 ↔ NACE Rév. 2 : identité documentée par l’OFS aux niveaux 1 à 4. Chaque genre suisse à six chiffres est rattaché à sa classe NACE, une relation plus large.",
+   "NOGA 2025 ↔ NACE Rév. 2.1 : même règle entre ces deux révisions.",
+   "NACE Rév. 2.1 ↔ NACE Rév. 2 : correspondance d’Eurostat, conservée comme rapprochement.",
+   "NACE Rév. 2 ↔ ISIC Rév. 4 : correspondance d’Eurostat, conservée comme rapprochement.",
+   "Aucun lien n’est déduit de la seule ressemblance des codes ni de deux rapprochements successifs. Une absence de lien ne prouve pas l’absence d’équivalent."],
+  exampleTitle: "Exemple sourcé", exampleFrom: "NOGA 2025", exampleRef: `Référence sourcée ${referenceVersion}, la même que celle du serveur MCP.`, noIsic: "aucun résultat déduit : il faudrait enchaîner deux rapprochements.",
+  relationNames: { exactMatch: "identité documentée", closeMatch: "rapprochement à vérifier", broadMatch: "cible plus large, à vérifier", narrowMatch: "cible plus étroite, à vérifier", relatedMatch: "relation indicative, à vérifier" },
+  levelsKicker: "02 / Du secteur au genre suisse", levelsTitle: "Cinq niveaux, dont un propre à la Suisse.", levelsIntro: "Les quatre premiers niveaux de la NOGA reprennent ceux de la NACE. Le cinquième, le genre à six chiffres, n’existe qu’en Suisse : il est rattaché à sa classe européenne, avec perte de précision.",
+  levelNames: ["Section", "Division", "Groupe", "Classe", "Genre suisse"], sameAsNace: "= NACE", broaderNace: "→ classe NACE, plus large", ladderCaption: "NOGA 2025, libellés de l’archive signée",
+  tableTitle: "Les cinq nomenclatures", tableColumns: ["Nomenclature", "Langues", "Codes · classes"],
+  previewKicker: "03 / Explorez avant d’acheter", previewTitle: "Vérifiez une correspondance. Lisez de vraies lignes.", previewIntro: "Le vérificateur interroge la même référence sourcée que le serveur MCP. L’échantillon montre dix lignes de chaque nomenclature, extraites de la version distribuée.",
+  viewerTitle: "Dix lignes par nomenclature", viewerLabel: "Choisir une nomenclature", columns: ["Code", "Libellé", "Niveau", "Parent"], viewerRegion: "Échantillon des classifications. Faites défiler le tableau pour voir toutes les colonnes.", viewerNote: "Conservez les zéros initiaux des codes.", sample: "Télécharger l’échantillon CSV (50 lignes)", viewerEmpty: "Aucune ligne pour cette nomenclature dans l’échantillon.", viewerNojs: "L’aperçu interactif nécessite JavaScript. L’échantillon CSV contient les mêmes cinquante lignes.", isicLabel: "",
+  levelLabels: { section: "Section", division: "Division", group: "Groupe", class: "Classe", subclass: "Genre" },
+  archiveKicker: "04 / Dans votre archive, et ses limites", archiveTitle: "Des tables, leurs liens, leurs sources.", archiveWindow: "CLASSIFICATIONS / ARCHIVE", groups: [
+   ["Nomenclatures", "Une table par nomenclature, aussi en JSON et SQL, et toutes réunies en Parquet", ["noga_2008.csv", "noga_2025.csv", "nace_2_0.csv", "nace_2_1.csv", "isic_4.csv", "nomenclatures.parquet"]],
+   ["Correspondances", "Une paire par ligne, avec sens, relation et source", ["classification_links.csv", "classification_links.json", "classification_links.sql", "classification_links.parquet"]],
+   ["Format historique", "Conservé, désormais une paire par ligne", ["crosswalks.csv", "crosswalks.json", "crosswalks.sql", "crosswalks.parquet"]],
+   ["Sources et contrôles", "URL, empreintes SHA-256, dates de collecte et volumes", ["sources.json", "classification_sources.csv", "quality.json"]],
+   ["Preuves et mode d’emploi", "Signature Ed25519, horodatage RFC-3161 et empreintes", ["provenance.json", "checksums.sha256", "README.md", "schema.json", "LICENSE.txt"]]],
+  limits: [
+   "Un rapprochement n’est pas une équivalence : vérifiez l’activité avant de migrer un code.",
+   "Deux rapprochements ne sont pas enchaînés. Une absence de lien ne prouve pas l’absence d’équivalent.",
+   "Migrer un genre suisse à six chiffres entre NOGA 2008 et NOGA 2025 exige une table dédiée.",
+   "Langues : NOGA et NACE en français, allemand, italien et anglais ; ISIC en français, anglais et espagnol, sans libellés officiels allemands ou italiens dans ce fichier.",
+   "Schéma 2 : les correspondances sont décrites par paire, avec leur source et leur sens. Les anciennes jointures à cinq colonnes doivent être adaptées.",
+   "Les conditions des sources OFS, Eurostat et ONU restent applicables : l’achat ne donne pas une autorisation générale de redistribuer ces sources."],
+  provenance: "Provenance et droits des sources",
+  pro: "Classifications Pro est temporairement indisponible pendant la vérification de ses compléments. L’archive Standard ne comprend ni vecteurs multilingues ni correspondances NAICS.",
+  mcpTitle: "Plutôt une question ponctuelle ?", mcpText: "L’outil cross_walk du serveur MCP répond sans compte, dans la limite de 100 appels par heure ; les autres outils de classification demandent des droits. L’achat du fichier n’ouvre aucun accès MCP payant.", mcpLink: "Tester le serveur MCP",
+  faqKicker: "05 / Questions fréquentes", faqTitle: "Avant d’acheter les classifications.", faq: [
+   ["Puis-je convertir automatiquement NOGA 2008 en NOGA 2025 ?", "Seulement lorsque la relation le permet. Aux niveaux 1 à 4, le passage se fait par la NACE et comporte un rapprochement d’Eurostat à vérifier. Pour les genres à six chiffres, une table dédiée est nécessaire."],
+   ["Les libellés sont-ils officiels ?", "Ils sont repris des publications de l’OFS, d’Eurostat et de l’ONU, puis préparés de manière indépendante. OpenSwissData n’est affilié à aucune de ces institutions ; leurs publications font foi."],
+   ["Comment reçoit-on les fichiers ?", "Après confirmation du paiement par Stripe, un email ouvre votre page de téléchargement. Les fichiers restent disponibles dans votre espace client."],
+   ["Que se passe-t-il après 360 jours ?", `Vous gardez les versions reçues. Une prolongation facultative coûte ${offer.renewal} CHF par an ; il n’y a aucun renouvellement automatique.`],
+   ["Et si le fichier ne convient pas ?", "Vous pouvez demander un remboursement intégral dans les 14 jours suivant l’achat, sans justification, sauf redistribution des fichiers à un tiers en violation de la licence. Les conditions de vente font foi."]],
+  terms: "Conditions de vente",
+  purchaseKicker: "Votre prochaine base de travail", delivery: "Vos fichiers. Votre rythme.", serviceText: "Après paiement, votre archive est accessible par email et depuis votre espace client. Le reçu Stripe y est également disponible. Pour une facture au nom de votre entreprise, envoyez-nous sa raison sociale et son adresse de facturation.",
+  contact: "Écrire au support", account: "Espace client", price: "Classifications Standard · Paiement unique", updates: `360 jours de mises à jour inclus, publiées après contrôle des sources officielles. Prolongation facultative : ${offer.renewal} CHF/an.`,
+  bundle: `Les trois fichiers ensemble : ${BUNDLE_OFFER.price} CHF, soit ${BUNDLE_SAVING} CHF de moins que les achats séparés.`, bundleLink: "Voir le bundle", independent: "Service privé indépendant, sans affiliation à l’OFS, à Eurostat ou aux Nations unies.",
+ },
+ de: {
+  title: "Klassifikationen NOGA, NACE und ISIC mit belegten Zuordnungen",
+  description: "NOGA 2008 und 2025, NACE Rev. 2 und 2.1, ISIC Rev. 4 in einem gemeinsamen Format, mit Ebenen, übergeordneten Codes und Bezeichnungen. Belegte Zuordnungen: dokumentierte Identität oder zu prüfende Annäherung. CSV, JSON, Parquet und SQL.",
+  eyebrow: "Klassifikationen · NOGA · NACE · ISIC", hero: "Fünf Nomenklaturen.", accent: "Belegte Beziehungen.",
+  intro: "NOGA 2008 und 2025, NACE Rev. 2 und 2.1, ISIC Rev. 4 in einem Format, mit Ebenen, übergeordneten Codes und Bezeichnungen. Jede Zuordnung nennt Quelle und Genauigkeit.",
+  read: "Zuordnungen ansehen", buy: "Kaufen", buyClass: "Classifications Standard kaufen", catalogue: "Datensätze", navLabel: "Abschnitte der Klassifikationsseite", navMap: "Zuordnungen", navLevels: "Ebenen", navPreview: "Vorschau",
+  status: "Zuletzt veröffentlichte Version", waiting: "Verfügbare Version wird geprüft…", unavailable: "Die aktuelle Version kann derzeit nicht geprüft werden. Bitte kontaktieren Sie uns vor dem Kauf.",
+  statRows: "Codes aller Ebenen", statLinks: "Belegte direkte Zuordnungen", statExact: "Dokumentierte Identitäten", statApprox: "Annäherungen und Zusammenfassungen",
+  nojs: "Aktivieren Sie JavaScript für Version und Umfang oder laden Sie das CSV-Muster herunter, um die Daten zu prüfen.", checked: "geprüft am", codes: "Codes", classes: "Klassen",
+  mapKicker: "01 / Wie die Nomenklaturen zusammenhängen", mapTitle: "Eine exakte Zuordnung wird nicht erraten.", mapIntro: "Exakt ist allein die vom BFS dokumentierte Identität zwischen NOGA und NACE auf den Ebenen 1 bis 4. Die Eurostat-Tabellen zwischen Revisionen und zu ISIC bleiben zu prüfende Annäherungen, und zwei Annäherungen werden nie verkettet.",
+  switzerland: "Schweiz", europe: "Europäische Union", world: "Vereinte Nationen", exactLink: "BFS-Identität · Ebenen 1 bis 4", approxLink: "Eurostat-Annäherung", noChain: "Keine Verkettung",
+  ghostTitle: "ISIC Rev. 4", ghostText: "Keine Zuordnung aus NOGA 2025 oder NACE Rev. 2.1 abgeleitet: Dafür wären zwei Annäherungen zu verketten.",
+  legend: [["exact", "Dokumentierte Identität: NOGA und NACE teilen die Codes der Ebenen 1 bis 4."], ["approx", "Zu prüfende Annäherung: Korrespondenztabelle von Eurostat."], ["none", "Aus zwei aufeinanderfolgenden Annäherungen wird keine Zuordnung abgeleitet."]],
+  relationsTitle: "Die Beziehungen im Klartext", relations: [
+   "NOGA 2008 ↔ NACE Rev. 2: vom BFS dokumentierte Identität auf den Ebenen 1 bis 4. Jede sechsstellige Schweizer Wirtschaftsart ist ihrer NACE-Klasse zugeordnet, einer breiteren Beziehung.",
+   "NOGA 2025 ↔ NACE Rev. 2.1: dieselbe Regel zwischen diesen beiden Revisionen.",
+   "NACE Rev. 2.1 ↔ NACE Rev. 2: Korrespondenz von Eurostat, als Annäherung erhalten.",
+   "NACE Rev. 2 ↔ ISIC Rev. 4: Korrespondenz von Eurostat, als Annäherung erhalten.",
+   "Keine Zuordnung wird aus der blossen Ähnlichkeit von Codes oder aus zwei aufeinanderfolgenden Annäherungen abgeleitet. Eine fehlende Zuordnung beweist nicht, dass keine Entsprechung existiert."],
+  exampleTitle: "Belegtes Beispiel", exampleFrom: "NOGA 2025", exampleRef: `Belegter Datenstand ${referenceVersion}, derselbe wie beim MCP-Server.`, noIsic: "kein abgeleitetes Ergebnis: Dafür wären zwei Annäherungen zu verketten.",
+  relationNames: { exactMatch: "dokumentierte Identität", closeMatch: "zu prüfende Annäherung", broadMatch: "breiteres Ziel, zu prüfen", narrowMatch: "engeres Ziel, zu prüfen", relatedMatch: "Hinweis auf Beziehung, zu prüfen" },
+  levelsKicker: "02 / Vom Abschnitt zur Schweizer Wirtschaftsart", levelsTitle: "Fünf Ebenen, eine davon nur in der Schweiz.", levelsIntro: "Die ersten vier Ebenen der NOGA übernehmen jene der NACE. Die fünfte, die sechsstellige Wirtschaftsart, gibt es nur in der Schweiz: Sie ist ihrer europäischen Klasse zugeordnet, mit Detailverlust.",
+  levelNames: ["Abschnitt", "Abteilung", "Gruppe", "Klasse", "Schweizer Wirtschaftsart"], sameAsNace: "= NACE", broaderNace: "→ NACE-Klasse, breiter", ladderCaption: "NOGA 2025, Bezeichnungen des signierten Archivs",
+  tableTitle: "Die fünf Nomenklaturen", tableColumns: ["Nomenklatur", "Sprachen", "Codes · Klassen"],
+  previewKicker: "03 / Vor dem Kauf entdecken", previewTitle: "Eine Zuordnung prüfen. Reale Zeilen lesen.", previewIntro: "Die Prüfung nutzt denselben belegten Datenstand wie der MCP-Server. Das Muster zeigt zehn Zeilen je Nomenklatur aus der ausgelieferten Version.",
+  viewerTitle: "Zehn Zeilen je Nomenklatur", viewerLabel: "Nomenklatur wählen", columns: ["Code", "Bezeichnung", "Ebene", "Übergeordnet"], viewerRegion: "Muster der Klassifikationen. Scrollen Sie die Tabelle, um alle Spalten zu sehen.", viewerNote: "Führende Nullen der Codes müssen erhalten bleiben.", sample: "CSV-Muster herunterladen (50 Zeilen)", viewerEmpty: "Keine Zeile dieser Nomenklatur im Muster.", viewerNojs: "Die interaktive Vorschau benötigt JavaScript. Das CSV-Muster enthält dieselben fünfzig Zeilen.", isicLabel: "ISIC hat in dieser Datei keine offizielle deutsche Bezeichnung: Die englische wird angezeigt.",
+  levelLabels: { section: "Abschnitt", division: "Abteilung", group: "Gruppe", class: "Klasse", subclass: "Art" },
+  archiveKicker: "04 / In Ihrem Archiv, und seine Grenzen", archiveTitle: "Tabellen, ihre Zuordnungen, ihre Quellen.", archiveWindow: "KLASSIFIKATIONEN / ARCHIV", groups: [
+   ["Nomenklaturen", "Eine Tabelle je Nomenklatur, auch als JSON und SQL, und alle zusammen in Parquet", ["noga_2008.csv", "noga_2025.csv", "nace_2_0.csv", "nace_2_1.csv", "isic_4.csv", "nomenclatures.parquet"]],
+   ["Zuordnungen", "Ein Paar pro Zeile, mit Richtung, Beziehung und Quelle", ["classification_links.csv", "classification_links.json", "classification_links.sql", "classification_links.parquet"]],
+   ["Historisches Format", "Erhalten, nun ein Paar pro Zeile", ["crosswalks.csv", "crosswalks.json", "crosswalks.sql", "crosswalks.parquet"]],
+   ["Quellen und Prüfungen", "URL, SHA-256-Prüfsummen, Erhebungsdaten und Umfang", ["sources.json", "classification_sources.csv", "quality.json"]],
+   ["Nachweise und Anleitung", "Ed25519-Signatur, RFC-3161-Zeitstempel und Prüfsummen", ["provenance.json", "checksums.sha256", "README.md", "schema.json", "LICENSE.txt"]]],
+  limits: [
+   "Eine Annäherung ist keine Gleichwertigkeit: Prüfen Sie die Tätigkeit, bevor Sie einen Code migrieren.",
+   "Zwei Annäherungen werden nicht verkettet. Eine fehlende Zuordnung beweist nicht, dass keine Entsprechung existiert.",
+   "Die Migration einer sechsstelligen Schweizer Wirtschaftsart zwischen NOGA 2008 und NOGA 2025 erfordert eine eigene Tabelle.",
+   "Sprachen: NOGA und NACE auf Französisch, Deutsch, Italienisch und Englisch; ISIC auf Französisch, Englisch und Spanisch, ohne offizielle deutsche oder italienische Bezeichnungen in dieser Datei.",
+   "Schema 2: Zuordnungen werden paarweise mit Quelle und Richtung beschrieben. Bestehende Verknüpfungen über fünf Spalten müssen angepasst werden.",
+   "Die Bedingungen der Quellen BFS, Eurostat und UNO bleiben anwendbar: Der Kauf erteilt keine allgemeine Erlaubnis zur Weiterverbreitung dieser Quellen."],
+  provenance: "Herkunft und Rechte der Quellen",
+  pro: "Classifications Pro ist während der Prüfung seiner Ergänzungen vorübergehend nicht verfügbar. Das Standard-Archiv enthält weder mehrsprachige Vektoren noch NAICS-Zuordnungen.",
+  mcpTitle: "Lieber eine einzelne Abfrage?", mcpText: "Das Werkzeug cross_walk des MCP-Servers antwortet ohne Konto, mit bis zu 100 Aufrufen pro Stunde; die übrigen Klassifikationswerkzeuge erfordern Rechte. Der Dateikauf eröffnet keinen kostenpflichtigen MCP-Zugang.", mcpLink: "MCP-Server testen",
+  faqKicker: "05 / Häufige Fragen", faqTitle: "Vor dem Kauf der Klassifikationen.", faq: [
+   ["Kann ich NOGA 2008 automatisch in NOGA 2025 umwandeln?", "Nur wenn die Beziehung es erlaubt. Auf den Ebenen 1 bis 4 führt der Weg über die NACE und enthält eine zu prüfende Eurostat-Annäherung. Für sechsstellige Wirtschaftsarten ist eine eigene Tabelle nötig."],
+   ["Sind die Bezeichnungen offiziell?", "Sie stammen aus den Veröffentlichungen des BFS, von Eurostat und der UNO und werden unabhängig aufbereitet. OpenSwissData ist mit keiner dieser Institutionen verbunden; massgebend sind deren Veröffentlichungen."],
+   ["Wie erhalte ich die Dateien?", "Nach der Zahlungsbestätigung durch Stripe öffnet eine E-Mail Ihre Download-Seite. Die Dateien bleiben in Ihrem Kundenkonto verfügbar."],
+   ["Was geschieht nach 360 Tagen?", `Sie behalten die erhaltenen Versionen. Eine freiwillige Verlängerung kostet CHF ${offer.renewal} pro Jahr; es gibt keine automatische Erneuerung.`],
+   ["Und wenn die Datei nicht passt?", "Sie können innerhalb von 14 Tagen nach dem Kauf ohne Begründung die vollständige Erstattung verlangen, ausser bei einer lizenzwidrigen Weitergabe der Dateien an Dritte. Massgebend sind die Verkaufsbedingungen."]],
+  terms: "Verkaufsbedingungen",
+  purchaseKicker: "Ihre nächste Datengrundlage", delivery: "Ihre Dateien. Ihr Tempo.", serviceText: "Nach der Zahlung erhalten Sie das Archiv per E-Mail und in Ihrem Kundenkonto. Dort finden Sie auch den Stripe-Zahlungsbeleg. Für eine Rechnung an Ihr Unternehmen senden Sie uns bitte den Firmennamen und die Rechnungsadresse.",
+  contact: "Support kontaktieren", account: "Kundenkonto", price: "Classifications Standard · Einmalige Zahlung", updates: `360 Tage Aktualisierungen inklusive, veröffentlicht nach Prüfung der offiziellen Quellen. Freiwillige Verlängerung: CHF ${offer.renewal}/Jahr.`,
+  bundle: `Alle drei Dateien zusammen: CHF ${BUNDLE_OFFER.price}, also CHF ${BUNDLE_SAVING} weniger als Einzelkäufe.`, bundleLink: "Bundle ansehen", independent: "Unabhängiger privater Dienst ohne Verbindung zum BFS, zu Eurostat oder zu den Vereinten Nationen.",
+ },
+ en: {
+  title: "NOGA, NACE and ISIC classifications with sourced mappings",
+  description: "NOGA 2008 and 2025, NACE Rev. 2 and 2.1, ISIC Rev. 4 in one common format, with levels, parents and labels. Sourced mappings: documented identity or approximation to review. CSV, JSON, Parquet and SQL.",
+  eyebrow: "Classifications · NOGA · NACE · ISIC", hero: "Five classifications.", accent: "Qualified links.",
+  intro: "NOGA 2008 and 2025, NACE Rev. 2 and 2.1, ISIC Rev. 4, in one format with their levels, parents and labels. Each mapping states its source and precision.",
+  read: "See the mappings", buy: "Buy", buyClass: "Buy Classifications Standard", catalogue: "The data", navLabel: "Classifications page sections", navMap: "Mappings", navLevels: "Levels", navPreview: "Preview",
+  status: "Latest published version", waiting: "Checking the available version…", unavailable: "The current version cannot be verified. Please contact us before purchasing.",
+  statRows: "Codes across all levels", statLinks: "Sourced direct links", statExact: "Documented identities", statApprox: "Approximations and aggregations",
+  nojs: "Enable JavaScript to see the published version and volumes, or download the CSV sample to examine the data.", checked: "checked on", codes: "codes", classes: "classes",
+  mapKicker: "01 / How the classifications connect", mapTitle: "An exact link is never guessed.", mapIntro: "Only the identity documented by the FSO between NOGA and NACE, at levels 1 to 4, is exact. Eurostat tables between revisions and towards ISIC remain approximations to review, and two approximations are never chained.",
+  switzerland: "Switzerland", europe: "European Union", world: "United Nations", exactLink: "FSO identity · levels 1 to 4", approxLink: "Eurostat approximation", noChain: "No chaining",
+  ghostTitle: "ISIC Rev. 4", ghostText: "No link derived from NOGA 2025 or NACE Rev. 2.1: it would require chaining two approximations.",
+  legend: [["exact", "Documented identity: NOGA and NACE share the codes of levels 1 to 4."], ["approx", "Approximation to review: Eurostat correspondence table."], ["none", "No link is derived from two successive approximations."]],
+  relationsTitle: "The relations in plain words", relations: [
+   "NOGA 2008 ↔ NACE Rev. 2: identity documented by the FSO at levels 1 to 4. Each six-digit Swiss subclass is attached to its NACE class, a broader relation.",
+   "NOGA 2025 ↔ NACE Rev. 2.1: the same rule between these two revisions.",
+   "NACE Rev. 2.1 ↔ NACE Rev. 2: Eurostat correspondence, kept as an approximation.",
+   "NACE Rev. 2 ↔ ISIC Rev. 4: Eurostat correspondence, kept as an approximation.",
+   "No link is derived from similar-looking codes or from two successive approximations. A missing link does not prove that no equivalent exists."],
+  exampleTitle: "Sourced example", exampleFrom: "NOGA 2025", exampleRef: `Sourced reference ${referenceVersion}, the same as the MCP server.`, noIsic: "no derived result: it would require chaining two approximations.",
+  relationNames: { exactMatch: "documented identity", closeMatch: "approximation to review", broadMatch: "broader target, to review", narrowMatch: "narrower target, to review", relatedMatch: "indicative relation, to review" },
+  levelsKicker: "02 / From section to Swiss subclass", levelsTitle: "Five levels, one of them Swiss only.", levelsIntro: "The first four NOGA levels follow those of NACE. The fifth, the six-digit subclass, only exists in Switzerland: it is attached to its European class, with a loss of detail.",
+  levelNames: ["Section", "Division", "Group", "Class", "Swiss subclass"], sameAsNace: "= NACE", broaderNace: "→ NACE class, broader", ladderCaption: "NOGA 2025, labels from the signed archive",
+  tableTitle: "The five classifications", tableColumns: ["Classification", "Languages", "Codes · classes"],
+  previewKicker: "03 / Explore before you buy", previewTitle: "Check a mapping. Read real rows.", previewIntro: "The checker queries the same sourced reference as the MCP server. The sample shows ten rows from each classification, taken from the distributed version.",
+  viewerTitle: "Ten rows per classification", viewerLabel: "Choose a classification", columns: ["Code", "Label", "Level", "Parent"], viewerRegion: "Classifications sample. Scroll the table to see all columns.", viewerNote: "Keep leading zeros in codes.", sample: "Download the CSV sample (50 rows)", viewerEmpty: "No row from this classification in the sample.", viewerNojs: "The interactive preview requires JavaScript. The CSV sample contains the same fifty rows.", isicLabel: "",
+  levelLabels: { section: "Section", division: "Division", group: "Group", class: "Class", subclass: "Subclass" },
+  archiveKicker: "04 / Inside your archive, and its limits", archiveTitle: "Tables, their links, their sources.", archiveWindow: "CLASSIFICATIONS / ARCHIVE", groups: [
+   ["Classifications", "One table per classification, also in JSON and SQL, and all together in Parquet", ["noga_2008.csv", "noga_2025.csv", "nace_2_0.csv", "nace_2_1.csv", "isic_4.csv", "nomenclatures.parquet"]],
+   ["Mappings", "One pair per row, with direction, relation and source", ["classification_links.csv", "classification_links.json", "classification_links.sql", "classification_links.parquet"]],
+   ["Legacy format", "Kept, now one pair per row", ["crosswalks.csv", "crosswalks.json", "crosswalks.sql", "crosswalks.parquet"]],
+   ["Sources and checks", "URLs, SHA-256 checksums, collection dates and volumes", ["sources.json", "classification_sources.csv", "quality.json"]],
+   ["Proofs and guide", "Ed25519 signature, RFC-3161 timestamp and checksums", ["provenance.json", "checksums.sha256", "README.md", "schema.json", "LICENSE.txt"]]],
+  limits: [
+   "An approximation is not an equivalence: review the activity before migrating a code.",
+   "Two approximations are not chained. A missing link does not prove that no equivalent exists.",
+   "Migrating a six-digit Swiss subclass between NOGA 2008 and NOGA 2025 requires a dedicated table.",
+   "Languages: NOGA and NACE in French, German, Italian and English; ISIC in French, English and Spanish, with no official German or Italian labels in this file.",
+   "Schema 2: mappings are described by pair, with source and direction. Existing five-column joins need to be updated.",
+   "Conditions of the FSO, Eurostat and UN sources remain applicable: purchasing does not grant blanket permission to redistribute those sources."],
+  provenance: "Provenance and source rights",
+  pro: "Classifications Pro is temporarily unavailable while its add-ons are being verified. The Standard archive includes neither multilingual vectors nor NAICS mappings.",
+  mcpTitle: "Just a quick lookup?", mcpText: "The MCP server’s cross_walk tool answers without an account, within 100 calls per hour; the other classification tools require access rights. Buying the file does not open any paid MCP access.", mcpLink: "Try the MCP server",
+  faqKicker: "05 / Frequently asked", faqTitle: "Before buying the classifications.", faq: [
+   ["Can I convert NOGA 2008 to NOGA 2025 automatically?", "Only where the relation allows it. At levels 1 to 4 the path goes through NACE and includes a Eurostat approximation to review. Six-digit subclasses require a dedicated table."],
+   ["Are the labels official?", "They come from FSO, Eurostat and UN publications and are prepared independently. OpenSwissData is not affiliated with any of these institutions; their publications prevail."],
+   ["How are the files delivered?", "Once Stripe confirms the payment, an email opens your download page. The files remain available in your account."],
+   ["What happens after 360 days?", `You keep the versions you received. An optional extension costs CHF ${offer.renewal} per year; there is no automatic renewal.`],
+   ["What if the file does not suit me?", "You may request a full refund within 14 days of purchase without giving a reason, unless the files have been redistributed to a third party in breach of the licence. The sales terms prevail."]],
+  terms: "Sales terms",
+  purchaseKicker: "Your next data foundation", delivery: "Your files. Your workflow.", serviceText: "After payment, download your archive from the delivery email or your account. Your Stripe receipt is also available there. For an invoice addressed to your company, send us its legal name and billing address.",
+  contact: "Contact support", account: "Your account", price: "Classifications Standard · One-time payment", updates: `360 days of updates included, published after the official sources have been checked. Optional extension: CHF ${offer.renewal}/year.`,
+  bundle: `All three files together: CHF ${BUNDLE_OFFER.price}, or CHF ${BUNDLE_SAVING} less than separate purchases.`, bundleLink: "View the bundle", independent: "Independent private service, not affiliated with the FSO, Eurostat or the United Nations.",
+ },
+}[lang];
+const rev = lang === "fr" ? "Rév." : "Rev.";
+const schemes = [
+ { id: "NOGA_2008", name: "NOGA 2008", issuer: lang === "fr" ? "OFS" : lang === "de" ? "BFS" : "FSO", region: copy.switzerland, languages: "FR · DE · IT · EN", area: "n08", tone: "ch" },
+ { id: "NOGA_2025", name: "NOGA 2025", issuer: lang === "fr" ? "OFS" : lang === "de" ? "BFS" : "FSO", region: copy.switzerland, languages: "FR · DE · IT · EN", area: "n25", tone: "ch" },
+ { id: "NACE_2.0", name: `NACE ${rev} 2`, issuer: "Eurostat", region: copy.europe, languages: "FR · DE · IT · EN", area: "n2", tone: "eu" },
+ { id: "NACE_2.1", name: `NACE ${rev} 2.1`, issuer: "Eurostat", region: copy.europe, languages: "FR · DE · IT · EN", area: "n21", tone: "eu" },
+ { id: "ISIC_4", name: `ISIC ${rev} 4`, issuer: lang === "fr" ? "ONU" : lang === "de" ? "UNO" : "UN", region: copy.world, languages: "FR · EN · ES", area: "isic", tone: "un" },
+];
+const standardNames: Record<string, string> = { "NACE 2.1": `NACE ${rev} 2.1`, "NACE 2.0": `NACE ${rev} 2`, "ISIC 4": `ISIC ${rev} 4`, "NOGA 2008": "NOGA 2008" };
+const exampleLines = ["NACE 2.1", "NACE 2.0", "NOGA 2008"].flatMap(standard => exampleLinks.filter(link => link.standard === standard).map(link => ({ name: standardNames[standard], code: dottedCode(link.code), relation: copy.relationNames[link.relation], exact: link.relation === "exactMatch" })));
+const hasIsic = exampleLinks.some(link => link.standard === "ISIC 4");
+const ladder = ladderRows.map((row, index) => ({ code: dottedCode(row!.code), kind: copy.levelNames[index], text: label(row!), swiss: index === 4 }));
+const live = { lang, rowsWord: { fr: "lignes", de: "Zeilen", en: "rows" }[lang], waiting: copy.waiting, unavailable: copy.unavailable, checked: copy.checked, codes: copy.codes, classes: copy.classes, columns: copy.columns, viewerEmpty: copy.viewerEmpty, isicLabel: copy.isicLabel, levelLabels: copy.levelLabels };
+---
+<AtlasLayout title={`${copy.title} | openswissdata`} description={copy.description} image="/og-classifications.png" datasetJsonLd={datasetJsonLd("classifications", lang, copy.description)} productJsonLd={productJsonLd("classifications", lang, { name: copy.title, description: copy.description, image: "/og-classifications.png" })}>
+<div class="atlas-product-site fiche" data-class-product data-copy={JSON.stringify(live)}>
+ <div class="atlas-shell atlas-breadcrumb"><a href={`${L("/")}#datasets`}>{copy.catalogue}</a><span aria-hidden="true">/</span><span>NOGA · NACE · ISIC</span></div>
+ <section class="atlas-hero atlas-product-hero"><div class="atlas-shell atlas-hero-grid"><div class="atlas-hero-copy" data-atlas-enter><p class="atlas-kicker">{copy.eyebrow}</p><h1>{copy.hero}<br/><em>{copy.accent}</em></h1><p class="atlas-lede">{copy.intro}</p><div class="atlas-actions"><a href="#correspondances" class="atlas-btn">{copy.read}<span aria-hidden="true">↓</span></a><a href="#acheter" class="atlas-text-link">{copy.buy} · {offer.price} CHF ↗</a></div><div class="atlas-hero-footnote"><span>CSV · JSON · Parquet · SQL</span><span>Ed25519 · SHA-256</span></div></div><AtlasArtwork /></div></section>
+ <div class="atlas-product-nav"><nav class="atlas-shell atlas-product-nav-inner" aria-label={copy.navLabel}><div class="atlas-product-nav-links"><a href="#correspondances">{copy.navMap}</a><a href="#niveaux">{copy.navLevels}</a><a href="#apercu">{copy.navPreview}</a></div><a class="atlas-nav-buy" href="#acheter">{copy.buy}<span>{offer.price} CHF ↗</span></a></nav></div>
+ <div class="atlas-shell"><div class="atlas-quality"><div class="atlas-quality-heading"><p class="atlas-kicker">{copy.status}</p><p class="fiche-version" data-class-version role="status">{copy.waiting}</p></div><div class="atlas-quality-grid">{[["rows", copy.statRows], ["links", copy.statLinks], ["exact", copy.statExact], ["approximate", copy.statApprox]].map(([key, text]) => <div><strong data-class-count={key}>—</strong><span>{text}</span></div>)}</div><noscript class="atlas-noscript">{copy.nojs}</noscript></div></div>
+
+ <section class="atlas-section" id="correspondances"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.mapKicker}</p><h2>{copy.mapTitle}</h2></div><p class="atlas-section-intro">{copy.mapIntro}</p></div>
+  <div class="fiche-map-plate" data-atlas-enter>
+   <div class="fiche-map" aria-hidden="true">
+    {schemes.map(scheme => <div class={`fiche-node fiche-node-${scheme.tone} fiche-area-${scheme.area}`}><span class="fiche-node-issuer">{scheme.issuer} · {scheme.region}</span><strong>{scheme.name}</strong><span class="fiche-node-langs">{scheme.languages}</span><span class="fiche-node-count" data-scheme-count={scheme.id}>—</span></div>)}
+    <div class="fiche-link fiche-link-exact fiche-area-e1"><span>{copy.exactLink}</span></div>
+    <div class="fiche-link fiche-link-exact fiche-area-e2"><span>{copy.exactLink}</span></div>
+    <div class="fiche-link fiche-link-approx fiche-area-a1"><span>{copy.approxLink}</span></div>
+    <div class="fiche-link fiche-link-approx fiche-link-vertical fiche-area-v1"><span>{copy.approxLink}</span></div>
+    <div class="fiche-link fiche-link-none fiche-area-x"><span>{copy.noChain}</span><b>×</b></div>
+    <div class="fiche-node fiche-node-ghost fiche-area-ghost"><span class="fiche-node-issuer">× {copy.world}</span><strong>{copy.ghostTitle}</strong><span class="fiche-node-langs">{copy.ghostText}</span></div>
+   </div>
+   <ul class="fiche-legend">{copy.legend.map(([kind, text]) => <li><span class={`fiche-legend-mark fiche-legend-${kind}`} aria-hidden="true"></span>{text}</li>)}</ul>
+  </div>
+  <div class="fiche-map-text">
+   <div class="fiche-relations" data-atlas-enter><h3>{copy.relationsTitle}</h3><ul class="atlas-limits">{copy.relations.map(item => <li>{item}</li>)}</ul></div>
+   <article class="fiche-example" data-atlas-enter>
+    <p class="atlas-kicker">{copy.exampleTitle}</p>
+    <p class="fiche-example-from"><span>{copy.exampleFrom}</span><strong>{dottedCode(exampleRow.code)}</strong></p>
+    <p class="fiche-example-label">{label(exampleRow)}</p>
+    <ul class="fiche-example-links">{exampleLines.map(line => <li class:list={{ "is-exact": line.exact }}><span>{line.name}</span><strong>{line.code}</strong><em>{line.relation}</em></li>)}{!hasIsic && <li class="is-none"><span>{`ISIC ${rev} 4`}</span><strong>—</strong><em>{copy.noIsic}</em></li>}</ul>
+    <p class="fiche-note">{copy.exampleRef}</p>
+   </article>
+  </div>
+ </div></section>
+
+ <section class="atlas-section atlas-method" id="niveaux"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.levelsKicker}</p><h2>{copy.levelsTitle}</h2></div><p class="atlas-section-intro">{copy.levelsIntro}</p></div>
+  <div class="fiche-levels-grid">
+   <figure class="fiche-ladder-card" data-atlas-enter>
+    <ol class="fiche-ladder">{ladder.map((step, index) => <li class:list={[`fiche-step-${index + 1}`, { "is-swiss": step.swiss }]}><span class="fiche-step-code">{step.code}</span><span class="fiche-step-kind">{step.kind}</span><span class="fiche-step-text">{step.text}</span><span class="fiche-step-chip">{step.swiss ? copy.broaderNace : copy.sameAsNace}</span></li>)}</ol>
+    <figcaption class="fiche-note">{copy.ladderCaption} · {referenceVersion}</figcaption>
+   </figure>
+   <div class="fiche-schemes" data-atlas-enter>
+    <h3>{copy.tableTitle}</h3>
+    <table class="fiche-scheme-table"><thead><tr>{copy.tableColumns.map(column => <th scope="col">{column}</th>)}</tr></thead><tbody>{schemes.map(scheme => <tr><th scope="row"><strong>{scheme.name}</strong><span>{scheme.issuer} · {scheme.region}</span></th><td class="fiche-langs">{scheme.languages}</td><td data-scheme-table={scheme.id}>—</td></tr>)}</tbody></table>
+   </div>
+  </div>
+ </div></section>
+
+ <section class="atlas-section" id="apercu"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.previewKicker}</p><h2>{copy.previewTitle}</h2></div><p class="atlas-section-intro">{copy.previewIntro}</p></div>
+  <div class="fiche-preview-grid">
+   <slot />
+   <div class="atlas-preview fiche-scheme-viewer" data-class-viewer>
+    <div class="atlas-preview-tools"><h3>{copy.viewerTitle}</h3><a href="/api/catalog/classifications?format=csv" class="atlas-text-link">{copy.sample} ↓</a></div>
+    <div class="atlas-preview-formats" data-class-tabs hidden><div role="group" aria-label={copy.viewerLabel}>{schemes.map((scheme, index) => <button type="button" data-scheme={scheme.id} aria-pressed={index === 1 ? "true" : "false"} aria-controls="class-sample-table">{scheme.name.replace(`${rev} `, "")}</button>)}</div><span>{copy.viewerNote}</span></div>
+    <div class="atlas-table-scroll" id="class-sample-table" tabindex="0" role="region" aria-label={copy.viewerRegion}><table class="atlas-table fiche-class-table"><thead><tr>{copy.columns.map(column => <th scope="col">{column}</th>)}</tr></thead><tbody data-class-rows></tbody></table></div>
+    <p class="atlas-preview-status" data-class-status role="status">{copy.waiting}</p>
+    <noscript class="atlas-noscript">{copy.viewerNojs}</noscript>
+   </div>
+  </div>
+ </div></section>
+
+ <section class="atlas-section atlas-method" id="archive"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.archiveKicker}</p><h2>{copy.archiveTitle}</h2></div><a class="atlas-text-link" href={L("/legal/provenance")}>{copy.provenance} ↗</a></div>
+  <div class="fiche-archive">
+   <div class="fiche-window" data-atlas-enter>
+    <div class="atlas-window-title"><span>{copy.archiveWindow}</span><span aria-hidden="true">ZIP</span></div>
+    <div class="fiche-window-body">{copy.groups.map(([title, text, files]) => <div class="fiche-file-group"><div><strong>{title}</strong><small>{text}</small></div><ul>{(files as string[]).map(file => <li><code>{file}</code></li>)}</ul></div>)}</div>
+   </div>
+   <div class="fiche-archive-side" data-atlas-enter>
+    <ul class="atlas-limits">{copy.limits.map(item => <li>{item}</li>)}</ul>
+    <p class="fiche-pro">{copy.pro}</p>
+    <div class="fiche-mcp"><p class="atlas-kicker">MCP · cross_walk</p><h3>{copy.mcpTitle}</h3><p>{copy.mcpText}</p><a class="atlas-text-link" href={`${L("/mcp")}#install`}>{copy.mcpLink} ↗</a></div>
+   </div>
+  </div>
+ </div></section>
+
+ <section class="atlas-section atlas-faq"><div class="atlas-shell atlas-faq-grid"><div data-atlas-enter><p class="atlas-kicker">{copy.faqKicker}</p><h2 class="atlas-section-title">{copy.faqTitle}</h2><a href={L("/legal/cgv")} class="atlas-text-link">{copy.terms} ↗</a></div><div>{copy.faq.map(([question, answer]) => <details><summary>{question}</summary><p>{answer}</p></details>)}</div></div></section>
+
+ <section class="atlas-shell" id="acheter"><div class="atlas-purchase" data-atlas-enter><div><p class="atlas-kicker">{copy.purchaseKicker}</p><h2>{copy.delivery}</h2><p>{copy.serviceText}</p><div class="atlas-actions"><a href="mailto:contact@openswissdata.com" class="atlas-text-link">{copy.contact} ↗</a><a href={L("/account")} class="atlas-text-link">{copy.account} ↗</a></div></div><div class="atlas-purchase-box"><p>{copy.price}</p><div class="atlas-purchase-price"><strong>{offer.price}</strong><span>CHF</span></div><p>{copy.updates}</p><form method="POST" action="/api/checkout/start"><input type="hidden" name="locale" value={lang}/><input type="hidden" name="dataset_ids" value="classifications"/><button class="atlas-btn" type="submit">{copy.buyClass}<span aria-hidden="true">↗</span></button></form><CheckoutNotice /></div></div><p class="fiche-bundle-line">{copy.bundle} <a href={L("/bundle")}>{copy.bundleLink} ↗</a></p><p class="atlas-live-note">{copy.independent}</p></section>
+</div>
+<script>
+ import '../scripts/classifications-product';
+</script>
+</AtlasLayout>
