@@ -20,7 +20,7 @@ const exists = path => {
 const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w-]+)\s*=\s*["']([^"']*)["']/g)].map(m => [m[1], m[2]]));
 const errors = new Set();
 const pages = new Map();
-let linkCount = 0, alternateCount = 0, sitemapCount = 0;
+let linkCount = 0, alternateCount = 0, sitemapCount = 0, datasetPages = 0;
 for (const file of files.filter(f => f.endsWith('.html'))) {
   const html = await readFile(file, 'utf8');
   // Les fichiers de validation Google portent .html mais ne sont pas des pages.
@@ -39,6 +39,18 @@ for (const file of files.filter(f => f.endsWith('.html'))) {
     if (url.origin !== origin || !exists(url.pathname)) errors.add(`Traduction absente : ${path} → ${a.href}`);
   }
   pages.set(normalize(path), { canonical, noindex, alternates });
+  // Les neuf fiches produit (trois jeux, trois langues) portent un Dataset schema.org dont l'adresse est la canonique.
+  if (/^\/(?:(?:de|en)\/)?datasets\/(?:tares|classifications|finma)\/$/.test(path)) {
+    datasetPages++;
+    const datasets = [...head.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+      .map(m => { try { return JSON.parse(m[1]); } catch { errors.add(`JSON-LD illisible : ${path}`); return {}; } })
+      .filter(data => data['@type'] === 'Dataset');
+    const dataset = datasets[0];
+    if (datasets.length !== 1) errors.add(`Dataset absent ou multiple : ${path}`);
+    else if (dataset.url !== canonical || typeof dataset.name !== 'string' || typeof dataset.description !== 'string' || dataset.description.length < 50 || dataset.isAccessibleForFree !== false || 'distribution' in dataset) {
+      errors.add(`Dataset incomplet : ${path}`);
+    }
+  }
   const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '');
   for (const m of markup.matchAll(/<a\b[^>]*>/g)) {
     const href = attrs(m[0]).href;
@@ -71,8 +83,9 @@ for (const file of files.filter(f => /sitemap-\d+\.xml$/.test(f))) {
   }
 }
 if (!sitemapCount || pages.size < 40) errors.add('Construction ou sitemap incomplet.');
+if (datasetPages !== 9) errors.add(`Fiches produit attendues : 9, trouvées : ${datasetPages}.`);
 if (errors.size) {
   console.error([...errors].slice(0, 30).join('\n'));
   throw new Error(`${errors.size} anomalie(s) de référencement.`);
 }
-console.log(`Référencement vérifié : ${pages.size} pages, ${linkCount} liens internes, ${alternateCount} références de langue, ${sitemapCount} URLs sitemap ; zéro anomalie.`);
+console.log(`Référencement vérifié : ${pages.size} pages, ${linkCount} liens internes, ${alternateCount} références de langue, ${sitemapCount} URLs sitemap, ${datasetPages} fiches avec Dataset ; zéro anomalie.`);
