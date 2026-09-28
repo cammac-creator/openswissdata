@@ -1,43 +1,34 @@
 /**
  * Tool: classify_text
  *
- * Free-text → top-K NOGA 2025 codes with confidence scores.
+ * Description libre d'une activité → genres NOGA 2025 (6 chiffres) les plus proches.
  *
- * The killer feature for the Classifications Pro pack: a buyer types
- *   "vente de café en grain et torréfaction"
- * and gets back the most likely NOGA 2025 codes (e.g. 47.29 retail food,
- * 10.83 coffee processing) ranked by cosine similarity.
+ * Index (`data/embeddings/noga_2025_index.*`, voir `search-index.ts`) : une entrée par genre, son
+ * libellé officiel dans les quatre langues. Les niveaux supérieurs (section, division, groupe,
+ * classe) accompagnent chaque résultat sans être ajoutés au texte vectorisé : mesuré sur le jeu
+ * d'évaluation, les ajouter dégradait le classement (voir docs/recherche-semantique.md). Une classe
+ * n'apparaît plus à côté de son genre identique : l'ancien index occupait deux places sur cinq
+ * avec le même libellé.
  *
- * Implementation:
- *   - Mirrors `etl/classifications/classify.ts` but reads embeddings from
- *     the bundled Parquet (via `data-loader.getNogaEmbeddings()`) instead of
- *     the ETL-time JSON cache.
- *   - Same model as `tariff_semantic_search` (mpnet 768d FR), reused
- *     through `embedder.embedQuery()` so the model loads once per process.
- *   - Cosine over ~1 845 vectors → sub-millisecond after the embed call.
+ * Score = cosinus maximal entre la description et les quatre libellés du genre (modèle figé partagé
+ * avec tariff_semantic_search). Un code saisi (« 62.10 », « NOGA 1071 ») liste ses genres.
  *
- * NACE 2.1 mode (`scheme: "NACE_2.1"`) is accepted in the schema but not yet
- * implemented in the underlying embeddings: NACE codes are derived through
- * the crosswalks table at ETL time, not embedded directly. v1 keeps it
- * "best-effort" — we mark the response with `degraded: true` if the user
- * requests NACE so they know we returned NOGA codes.
- *
- * Disclaimer note: NOGA codes are administrative — there is no "official"
- * answer for free-text classification. We surface a similarity score so the
- * user can judge confidence.
+ * Il n'existe pas de réponse officielle à une classification libre : le score aide à juger, il ne
+ * remplace pas l'attribution par l'OFS (registre REE/BUR).
  */
 
 import { z } from "zod";
-import { getNogaEmbeddings } from "../data-loader.js";
-import { embedQuery, cosineSimilarity, EMBEDDING_MODEL } from "../embedder.js";
-import { reportSemanticFailure } from '../semantic-failure.js';
+import { getClassificationLinks, getNogaEmbeddings } from "../data-loader.js";
+import { embedQuery, EMBEDDING_MODEL } from "../embedder.js";
+import { reportSemanticFailure } from "../semantic-failure.js";
+import { indexProvenance, nodeText, SEARCH_LANGS, semanticScores, type SearchIndex, type SearchLang } from "../search-index.js";
 
 export const classifyTextSchema = {
   type: "object",
   properties: {
-    text: { type: "string", minLength: 5, maxLength: 500, description: "Free-text business description (FR)" },
+    text: { type: "string", minLength: 5, maxLength: 500, description: "Business activity description in French, German, Italian or English, or a NOGA 2025 code (e.g. 62.10)" },
     top_k: { type: "integer", minimum: 1, maximum: 10, default: 3 },
-    lang: { type: "string", enum: ["fr"], default: "fr" },
+    lang: { type: "string", enum: ["fr", "de", "it", "en"], default: "fr", description: "Language of the returned labels; the search itself covers all four languages" },
     scheme: { type: "string", enum: ["NOGA_2025", "NACE_2.1"], default: "NOGA_2025" },
   },
   required: ["text"],
@@ -46,13 +37,19 @@ export const classifyTextSchema = {
 const InputZ = z.object({
   text: z.string().min(5).max(500),
   top_k: z.number().int().min(1).max(10).default(3),
-  lang: z.enum(["fr"]).default("fr"),
+  lang: z.enum(SEARCH_LANGS).default("fr"),
   scheme: z.enum(["NOGA_2025", "NACE_2.1"]).default("NOGA_2025"),
 });
 
 export interface ClassifyHit {
+  /** Genre NOGA 2025 (6 chiffres). */
   code: string;
   label: string;
+  /** Classe à 4 chiffres, identique à la classe NACE 2.1. */
+  class_code: string;
+  /** Libellés de la section, de la division, du groupe et de la classe. */
+  path: string[];
+  /** Cosinus maximal entre la description et les libellés du genre ; 1 pour un code saisi. */
   score: number;
   scheme: "NOGA_2025";
 }
@@ -61,11 +58,42 @@ export interface ClassifyTextResult {
   query: string;
   scheme_requested: "NOGA_2025" | "NACE_2.1";
   scheme_returned: "NOGA_2025";
+  method: "semantic" | "code";
   hits: ClassifyHit[];
   count: number;
   model: string;
+  /** Version du référentiel de classifications servi par cross_walk ; null s'il est illisible. */
+  reference_version: string | null;
+  index: ReturnType<typeof indexProvenance>;
   /** True if the user requested a scheme other than NOGA_2025 (we still returned NOGA). */
   degraded?: boolean;
+}
+
+/** Code NOGA saisi comme texte : 2 à 6 chiffres, points et préfixe « NOGA » tolérés. */
+export function nogaCodeQuery(text: string): string | null {
+  const digits = text.trim().replace(/^noga(\s*2025)?\s*/i, "").replace(/[\s.]/g, "");
+  return /^\d{2,6}$/.test(digits) ? digits : null;
+}
+
+function referenceVersion(): string | null {
+  try {
+    return getClassificationLinks().version;
+  } catch {
+    return null;
+  }
+}
+
+function hit(index: SearchIndex, entry: number, lang: SearchLang, score: number): ClassifyHit {
+  const path = index.paths[entry];
+  const code = index.codes[entry];
+  return {
+    code,
+    label: nodeText(index, path[path.length - 1], lang),
+    class_code: code.slice(0, 4),
+    path: path.slice(0, -1).map((n) => nodeText(index, n, lang)),
+    score,
+    scheme: "NOGA_2025",
+  };
 }
 
 export async function classifyTextHandler(args: unknown): Promise<{
@@ -81,61 +109,68 @@ export async function classifyTextHandler(args: unknown): Promise<{
     };
   }
   const { text, top_k, lang, scheme } = parsed.data;
+  const code = nogaCodeQuery(text);
 
-  let embeddings: Awaited<ReturnType<typeof getNogaEmbeddings>>;
-  let queryVec: Float32Array;
+  let index: SearchIndex;
+  let queryVec: Float32Array | null = null;
   try {
-    [embeddings, queryVec] = await Promise.all([getNogaEmbeddings(), embedQuery(text)]);
+    if (code) index = await getNogaEmbeddings();
+    else [index, queryVec] = await Promise.all([getNogaEmbeddings(), embedQuery(text)]);
   } catch {
-    reportSemanticFailure('classify_text');
+    reportSemanticFailure("classify_text");
     return {
       content: [{ type: "text", text: "Recherche sémantique temporairement indisponible." }],
       isError: true,
     };
   }
 
-  const candidates = embeddings.filter((e) => e.lang === lang);
-  if (candidates.length === 0) {
-    return {
-      content: [{ type: "text", text: `No embeddings available for lang="${lang}".` }],
-      isError: true,
-    };
+  let hits: ClassifyHit[];
+  if (code) {
+    hits = index.codes
+      .map((c, entry) => ({ c, entry }))
+      .filter((e) => e.c.startsWith(code))
+      .slice(0, top_k)
+      .map((e) => hit(index, e.entry, lang, 1));
+  } else {
+    const scores = semanticScores(index, queryVec!);
+    hits = [...scores.keys()]
+      .sort((a, b) => scores[b] - scores[a] || a - b)
+      .slice(0, top_k)
+      .map((entry) => hit(index, entry, lang, Number(scores[entry].toFixed(4))));
   }
 
-  const scored: ClassifyHit[] = candidates.map((e) => ({
-    code: e.code,
-    label: e.description,
-    score: Number(cosineSimilarity(queryVec, e.vector).toFixed(4)),
-    scheme: "NOGA_2025" as const,
-  }));
-  scored.sort((a, b) => b.score - a.score);
-  const hits = scored.slice(0, top_k);
-
   const degraded = scheme !== "NOGA_2025";
+  const provenance = indexProvenance(index);
+  const reference = referenceVersion();
   const result: ClassifyTextResult = {
     query: text,
     scheme_requested: scheme,
     scheme_returned: "NOGA_2025",
+    method: code ? "code" : "semantic",
     hits,
     count: hits.length,
     model: EMBEDDING_MODEL,
+    reference_version: reference,
+    index: provenance,
     ...(degraded ? { degraded: true } : {}),
   };
 
   const lines: string[] = [];
   if (degraded) {
     lines.push(
-      `NOTE: scheme="${scheme}" requested but only NOGA_2025 embeddings are bundled in v1. Returned NOGA_2025 codes — use cross_walk to translate them to NACE_2.1 if needed.`,
+      `NOTE: scheme="${scheme}" requested but only NOGA 2025 is indexed. The 4-digit class_code is the NACE 2.1 class; use cross_walk for other correspondences.`,
     );
     lines.push("");
   }
-  lines.push(`NOGA 2025 classification of "${text}" — top ${hits.length}:`);
+  lines.push(code ? `NOGA 2025 subclasses under ${code} — ${hits.length} shown:` : `NOGA 2025 classification of "${text}" — top ${hits.length}:`);
   for (const h of hits) {
-    lines.push(`  ${h.score.toFixed(3)}  ${h.code} — ${h.label}`);
+    const parent = h.path[h.path.length - 1];
+    lines.push(`  ${h.score.toFixed(3)}  ${h.code} — ${h.label}${parent && parent !== h.label ? ` (class ${h.class_code}: ${parent})` : ` (class ${h.class_code})`}`);
   }
+  if (!hits.length) lines.push("  (no NOGA 2025 code)");
   lines.push("");
-  lines.push(`Model: ${EMBEDDING_MODEL} (768d, mean-pooled + L2-normalised)`);
-  lines.push("Source: OpenSwissData Classifications bundle — based on OFS NOGA 2025 nomenclature.");
+  lines.push(`Index built ${provenance.built_at.slice(0, 10)} from ${provenance.source} (${provenance.source_version}), ${provenance.entries} subclasses in ${provenance.languages.join("/")}; model ${EMBEDDING_MODEL}.`);
+  lines.push(`Classification reference version: ${reference ?? "unavailable"}. A similarity score is not an official classification by the Federal Statistical Office.`);
 
   return {
     content: [{ type: "text", text: lines.join("\n") }],
@@ -146,7 +181,7 @@ export async function classifyTextHandler(args: unknown): Promise<{
 export const classifyTextTool = {
   name: "classify_text",
   description:
-    "Classify a free-text business description into top-K NOGA 2025 codes with confidence scores. Uses pre-computed Xenova/paraphrase-multilingual-mpnet-base-v2 embeddings (768d, FR). NACE 2.1 mode falls back to NOGA 2025 in v1 — combine with cross_walk for translation.",
+    "Classify a business activity description (French, German, Italian or English) into the closest NOGA 2025 subclasses (6 digits) with their class (the NACE 2.1 class), official hierarchy and a similarity score, using a pinned multilingual mpnet model. A NOGA code as text lists its subclasses. Each answer states the index provenance and the classification reference version; combine with cross_walk for NACE, ISIC or NOGA 2008.",
   inputSchema: classifyTextSchema,
   handler: classifyTextHandler,
 } as const;
