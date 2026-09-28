@@ -49,6 +49,8 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   app.use("*", async (c, next) => {
     await next();
     if (/^\/(?:mcp\/)?oauth\//.test(c.req.path)) c.header('Referrer-Policy', 'no-referrer');
+    // Consentement payant (authorize.ts) : strict-origin garde l'origine du formulaire vérifiable, sans chemin ni demande.
+    if (c.get('holderConsent') === true) c.header('Referrer-Policy', 'strict-origin');
     if (/^\/(?:mcp\/)?oauth\/authorize(?:\/decision)?$/.test(c.req.path)) {
       const destination = c.req.method === 'GET' && c.res.status === 200 && c.res.headers.get('content-type')?.includes('text/html') ? c.req.query('redirect_uri') : undefined;
       c.header('Content-Security-Policy', authorizationCsp(destination));

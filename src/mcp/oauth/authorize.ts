@@ -6,7 +6,9 @@ import {generateAuthCode, hashToken} from './crypto.js';
 import {findClientById, insertAuthCode} from './store.js';
 import {readOAuthForm} from './input.js';
 import {isRegisteredRedirectUri, authorizationCsp} from './redirects.js';
-import {isValidScope, parseScopes, serializeScopes} from './scopes.js';
+import {isValidScope, parseScopes, serializeScopes, TIER_DEFAULT_SCOPES} from './scopes.js';
+import {readAccountSession} from '../../lib/account-session.js';
+import {isLoginHost, isLoginPostOrigin, loginOrigin} from '../../lib/login-origin.js';
 
 const QuerySchema = z.object({
   response_type: z.literal('code'),
@@ -37,6 +39,33 @@ function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, c => c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : '&#39;');
 }
 
+// Portées gratuites : consentement inchangé. Une portée payante exige la session du
+// titulaire de l'application, sur l'hôte du compte où vit le cookie __Host (sans Domain).
+const FREE_SCOPES = new Set<string>(TIER_DEFAULT_SCOPES.free);
+declare module 'hono' {
+  interface ContextVariableMap { holderConsent: boolean }
+}
+const needsHolder = (granted: readonly string[]) => granted.some(scope => !FREE_SCOPES.has(scope));
+
+function holderOf(cookie: string | undefined, customerId: number | null) {
+  const session = readAccountSession(cookie);
+  if (!session) return {ok: false, reason: 'login'} as const;
+  if (customerId === null || session.customer_id !== customerId) return {ok: false, reason: 'owner'} as const;
+  return {ok: true, email: session.email} as const;
+}
+
+function holderRequiredPage(reason: 'login' | 'owner'): string {
+  const text = reason === 'login'
+    ? 'Cette application demande des accès payants. Connectez-vous d’abord à votre compte OpenSwissData, puis relancez la connexion depuis l’application.'
+    : 'Le compte connecté n’est pas titulaire de cette application. Connectez-vous avec le compte qui l’a souscrite, puis relancez la connexion depuis l’application.';
+  return `<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Connexion au compte requise · openswissdata MCP</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:480px;margin:60px auto;padding:0 20px;color:#111}p{line-height:1.5}a{color:#4f46e5}</style></head>
+<body><main><h1>Connexion au compte requise</h1><p>${text}</p><p><a href="/account">Ouvrir mon compte</a></p></main></body>
+</html>`;
+}
+
 authorizeRoute.get('/authorize', c => {
   if (c.req.url.length > 8192) return c.json({error: 'invalid_request'}, 400);
   const params = new URL(c.req.url).searchParams;
@@ -45,6 +74,19 @@ authorizeRoute.get('/authorize', c => {
     const valid = validate(Object.fromEntries(params));
     if ('error' in valid) return c.json({error: valid.error}, 400);
     const {client, granted} = valid;
+    let accountLine = '';
+    if (needsHolder(granted)) {
+      // Le cookie du compte n'existe que sur l'hôte principal : y reprendre la même demande, octets compris.
+      if (!isLoginHost(c)) return c.redirect(loginOrigin().origin + '/mcp/oauth/authorize' + new URL(c.req.url).search, 302);
+      const holder = holderOf(c.req.header('cookie'), client.customer_id);
+      if (!holder.ok) {
+        c.header('Referrer-Policy', 'no-referrer');
+        c.header('Content-Security-Policy', authorizationCsp());
+        return c.html(holderRequiredPage(holder.reason), 403);
+      }
+      accountLine = `<p class="muted">Compte titulaire : <strong class="destination">${escapeHtml(holder.email)}</strong></p>`;
+      c.set('holderConsent', true);
+    }
     const displayName = client.name.replace(/[\p{Cc}\p{Cf}]/gu, '');
     const parsed = {data: valid.request};
     // Le sous-domaine réécrit le chemin en interne ; le navigateur garde le montage d’origine.
@@ -71,7 +113,7 @@ authorizeRoute.get('/authorize', c => {
   <p class="muted">Nom déclaré par l’application</p><h1>Connecter <em>${escapeHtml(displayName)}</em></h1>
   <p class="muted">Accès demandés par cette application :</p>
   <p>${granted.map((s) => `<span class="scope">${escapeHtml(s)}</span>`).join(" ")}</p>
-  <p class="muted">Retour vers : <strong class="destination">${escapeHtml(parsed.data.redirect_uri)}</strong></p><p class="muted">L’application devra présenter son secret et sa preuve de connexion pour obtenir un accès. Cette étape ne modifie pas votre abonnement.</p>
+  <p class="muted">Retour vers : <strong class="destination">${escapeHtml(parsed.data.redirect_uri)}</strong></p><p class="muted">L’application devra présenter son secret et sa preuve de connexion pour obtenir un accès. Cette étape ne modifie pas votre abonnement.</p>${accountLine}
   <form method="POST" action="${escapeHtml(action)}">
     <input type="hidden" name="response_type" value="code">
     <input type="hidden" name="client_id" value="${escapeHtml(parsed.data.client_id)}">
@@ -86,7 +128,8 @@ ${parsed.data.state === undefined ? "" : `<input type="hidden" name="state" valu
 </main></body>
 </html>`;
 
-  c.header('Referrer-Policy', 'no-referrer');
+  // Une décision payante doit porter son origine : strict-origin ne transmet ni chemin ni demande.
+  c.header('Referrer-Policy', accountLine ? 'strict-origin' : 'no-referrer');
   c.header('Content-Security-Policy', authorizationCsp(parsed.data.redirect_uri));
   return c.html(html);
   } catch {
@@ -102,11 +145,16 @@ authorizeRoute.post('/authorize/decision', async c => {
   try {
     const before = validate(form);
     if ('error' in before) return c.json({error: before.error}, 400);
+    // Accord payant : même origine que le compte, jamais sur le sous-domaine ni depuis un autre site.
+    if (form.decision === 'allow' && needsHolder(before.granted) && !isLoginPostOrigin(c)) return c.json({error: 'holder_required'}, 403);
     // Aucun await entre la relecture du client, de ses destinations et l’émission du code.
     return oauthWrite(() => {
       const valid = validate(form);
       if ('error' in valid) return c.json({error: valid.error}, 400);
       const {request, granted} = valid;
+      if (form.decision === 'allow' && needsHolder(granted) && !holderOf(c.req.header('cookie'), valid.client.customer_id).ok) {
+        return c.json({error: 'holder_required'}, 403);
+      }
       const responseParams = new URLSearchParams();
       if (form.decision === 'deny') responseParams.set('error', 'access_denied');
       else {
