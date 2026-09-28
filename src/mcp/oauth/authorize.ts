@@ -45,7 +45,9 @@ const FREE_SCOPES = new Set<string>(TIER_DEFAULT_SCOPES.free);
 declare module 'hono' {
   interface ContextVariableMap { holderConsent: boolean }
 }
-const needsHolder = (granted: readonly string[]) => granted.some(scope => !FREE_SCOPES.has(scope));
+// Une application payante aussi : sinon son secret seul ouvrirait le quota payé du titulaire (revue du 28.09).
+const needsHolder = (client: {tier: string}, granted: readonly string[]) =>
+  client.tier !== 'free' || granted.some(scope => !FREE_SCOPES.has(scope));
 
 function holderOf(cookie: string | undefined, customerId: number | null) {
   const session = readAccountSession(cookie);
@@ -75,7 +77,7 @@ authorizeRoute.get('/authorize', c => {
     if ('error' in valid) return c.json({error: valid.error}, 400);
     const {client, granted} = valid;
     let accountLine = '';
-    if (needsHolder(granted)) {
+    if (needsHolder(client, granted)) {
       // Le cookie du compte n'existe que sur l'hôte principal : y reprendre la même demande, octets compris.
       if (!isLoginHost(c)) return c.redirect(loginOrigin().origin + '/mcp/oauth/authorize' + new URL(c.req.url).search, 302);
       const holder = holderOf(c.req.header('cookie'), client.customer_id);
@@ -146,13 +148,14 @@ authorizeRoute.post('/authorize/decision', async c => {
     const before = validate(form);
     if ('error' in before) return c.json({error: before.error}, 400);
     // Accord payant : même origine que le compte, jamais sur le sous-domaine ni depuis un autre site.
-    if (form.decision === 'allow' && needsHolder(before.granted) && !isLoginPostOrigin(c)) return c.json({error: 'holder_required'}, 403);
+    if (form.decision === 'allow' && needsHolder(before.client, before.granted) && !isLoginPostOrigin(c)) return c.json({error: 'holder_required'}, 403);
     // Aucun await entre la relecture du client, de ses destinations et l’émission du code.
     return oauthWrite(() => {
       const valid = validate(form);
       if ('error' in valid) return c.json({error: valid.error}, 400);
       const {request, granted} = valid;
-      if (form.decision === 'allow' && needsHolder(granted) && !holderOf(c.req.header('cookie'), valid.client.customer_id).ok) {
+      if (form.decision === 'allow' && needsHolder(valid.client, granted) &&
+        (!isLoginPostOrigin(c) || !holderOf(c.req.header('cookie'), valid.client.customer_id).ok)) {
         return c.json({error: 'holder_required'}, 403);
       }
       const responseParams = new URLSearchParams();

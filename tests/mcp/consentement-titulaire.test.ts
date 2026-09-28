@@ -99,13 +99,18 @@ describe('Consentement lié au titulaire, uniquement fictif', () => {
     expect(r.status).toBe(403); expect(codes()).toBe(0);
   });
 
-  it('laisse une demande limitée aux portées gratuites suivre le consentement habituel', async () => {
+  it('exige aussi le titulaire pour une application payante qui ne demande que des portées gratuites', async () => {
     const q = query({scope: 'finma:read'});
     const page = await get(MCP, q);
-    expect(page.status).toBe(200); expect(await page.text()).not.toContain('Compte titulaire');
-    expect(page.headers.get('referrer-policy')).toBe('no-referrer');
-    const r = await decide(MCP, q);
-    expect(r.status).toBe(302); expect(new URL(r.headers.get('location')!).searchParams.get('code')).toMatch(/.+/);
+    expect(page.status).toBe(302); expect(page.headers.get('location')).toBe(`${WWW}/mcp/oauth/authorize?${q}`);
+    expect((await get(WWW, q)).status).toBe(403);
+    for (const r of [await decide(MCP, q), await decide(WWW, q)]) { expect(r.status).toBe(403); expect(r.headers.get('location')).toBeNull(); }
+    expect(codes()).toBe(0);
+  });
+
+  it('refuse un accord posté depuis le sous-domaine, même avec le cookie du titulaire', async () => {
+    const r = await decide(WWW, query(), {...same(), origin: MCP, 'sec-fetch-site': 'same-site'});
+    expect(r.status).toBe(403); expect(await r.json()).toEqual({error: 'holder_required'}); expect(codes()).toBe(0);
   });
 
   it('accepte un refus sans session : il n’accorde rien', async () => {
