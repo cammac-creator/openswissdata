@@ -37,6 +37,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Poids publics figés : la construction revérifie taille et empreinte de chaque fichier du cache.
+      - name: Réutiliser les modèles publics déjà vérifiés
+        uses: actions/cache@v4
+        with:
+          path: dist/models
+          key: modeles-${{ hashFiles('src/lib/embedding-model.ts', 'src/lib/translation-model.ts') }}
       - run: npm run build
         env:
           # La compilation utilise les valeurs de développement, sans secret de production.

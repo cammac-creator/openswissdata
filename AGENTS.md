@@ -95,6 +95,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Après chaque build du site, `npm run seo:check` contrôle les liens internes, canonical, hreflang réciproques et sitemap. Ne pas remettre une date `lastmod` fabriquée à la construction.
 - Les fiches FINMA publiques sont une copie historique distincte du produit quotidien. Les correspondances des fiches NOGA viennent des mêmes références sourcées que le MCP. Voir `docs/fiches-publiques.md`.
 - Recherche et traduction vérifient leurs fichiers de modèle par taille et SHA-256 au build. Les modèles figés et les index vectoriels historiques restent deux sujets distincts ; aucun téléchargement ni envoi de texte à un fournisseur pendant la traduction.
+- Téléchargement des poids au build : reprise bornée (4 essais, 2/4/8 s ou `Retry-After` plafonné à 60 s) seulement pour un refus passager (408, 425, 429, 5xx) ou une panne réseau avant réponse ; une adresse absente ou un contenu non conforme échoue aussitôt. La CI garde `dist/models` en cache par empreinte des références ; chaque fichier du cache est revérifié.
 
 ## Conditions de vente et preuve contractuelle — 26.09.2026
 - Les achats de fichiers demandent l’acceptation des CGV chez Stripe, dans la langue du parcours (français par défaut). Le compte Stripe est partagé : ne pas modifier ses réglages juridiques globaux sans vérifier les autres projets. Les liens de CGV et confidentialité OpenSwissData sont fournis dans le texte spécifique de chaque session.

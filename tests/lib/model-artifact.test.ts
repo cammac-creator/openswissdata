@@ -30,9 +30,28 @@ describe('Intégrité des fichiers de modèles',()=>{
   });
  }
  it('conserve le cache précédent sans le déclarer valable si le réseau échoue',async()=>{
-  const path=join(dir,'model');await writeFile(path,'ancien');request.mockResolvedValue(new Response('indisponible',{status:503}));
-  await expect(prepareModelArtifact(path,'https://example.test/model',expected)).rejects.toThrow('HTTP 503');
+  const path=join(dir,'model');await writeFile(path,'ancien');request.mockImplementation(async()=>new Response('indisponible',{status:503}));
+  const wait=vi.fn(async()=>{});
+  await expect(prepareModelArtifact(path,'https://example.test/model',expected,{wait})).rejects.toThrow('HTTP 503');
+  expect(request).toHaveBeenCalledTimes(4);expect(wait.mock.calls.map(c=>c[0])).toEqual([2000,4000,8000]);
   expect(await readFile(path,'utf8')).toBe('ancien');expect(await readdir(dir)).toEqual(['model']);
+ });
+ it('reprend un refus passager en respectant le délai demandé, puis vérifie le fichier',async()=>{
+  const path=join(dir,'model');const wait=vi.fn(async()=>{});
+  request.mockResolvedValueOnce(new Response('trop de demandes',{status:429,headers:{'retry-after':'3'}}))
+   .mockRejectedValueOnce(new TypeError('fetch failed')).mockResolvedValueOnce(new Response(bytes));
+  await prepareModelArtifact(path,'https://example.test/model',expected,{wait});
+  expect(request).toHaveBeenCalledTimes(3);expect(wait.mock.calls.map(c=>c[0])).toEqual([3000,4000]);
+  expect(await readFile(path)).toEqual(bytes);expect(await readdir(dir)).toEqual(['model']);
+ });
+ it('ne reprend ni une adresse absente ni un contenu non conforme',async()=>{
+  const wait=vi.fn(async()=>{});
+  request.mockImplementation(async()=>new Response('absent',{status:404}));
+  await expect(prepareModelArtifact(join(dir,'a'),'https://example.test/model',expected,{wait})).rejects.toThrow('HTTP 404');
+  expect(request).toHaveBeenCalledTimes(1);
+  request.mockReset();request.mockImplementation(async()=>new Response(Buffer.alloc(bytes.length,1)));
+  await expect(prepareModelArtifact(join(dir,'b'),'https://example.test/model',expected,{wait})).rejects.toThrow('Empreinte');
+  expect(request).toHaveBeenCalledTimes(1);expect(wait).not.toHaveBeenCalled();expect(await readdir(dir)).toEqual([]);
  });
  it('nettoie un flux interrompu avant sa fin',async()=>{
   const path=join(dir,'model');let n=0;
