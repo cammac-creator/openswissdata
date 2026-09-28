@@ -34,10 +34,19 @@ La version A choisie devient un modèle 3D issu de MNT25 et swissBOUNDARIES3D, a
 Le volume courant reprend le choix explicite de hauteur −45 % par rapport à la sculpture v4, avec socle et inscription conservés et occlusion recalculée. Éclairage chaud adouci, socle mieux rempli, stries discrètes sur les pentes, cadrage et commandes regroupées. L’illustration demeure l’entrée initiale ; le modèle n’est téléchargé qu’à la demande. La fabrication reproductible et les limites sont décrites dans `scripts/atlas/README.md`.
 
 
-## Illustration fixe — 28 septembre 2026 (lot58)
+## Historique — illustration fixe — 28 septembre 2026 (lot58)
 
 Claude-Alain retire la manipulation et donne la priorité à la ressemblance avec l’illustration. Les six pages utilisent désormais directement `swiss-atlas-editorial-v3.png` comme visuel définitif : crêtes ivoire, strates fines, verts profonds, filet rouge et lumière de l’image conservés. La saturation CSS de 1,2 reste celle de la direction approuvée ; le contraste supplémentaire est retiré. Le cadrage responsive et les fondus périphériques intègrent l’image au papier sans recouvrir le relief d’une carte de formats.
 
 `AtlasArtwork` n’importe plus de modèle ni de script 3D. Les commandes de rotation, de manipulation et de revers disparaissent ; aucune scène WebGL ou ressource 3D n’est livrée par le build de ces pages. Les anciens scripts et modèles restent des sources historiques non importées. La description accessible de provenance concerne uniquement l’illustration ChatGPT : ni altitudes mesurables, ni géologie réelle. Elle fonctionne sans JavaScript, en FR/DE/EN. Le bouton de réduction des animations concerne les autres animations de la page.
 
 Astro produit quatre tailles WebP (qualité 90) avec adresses par empreinte et sélection adaptée à la largeur d’affichage. Les dimensions de l’image réservent sa place avant son chargement. Cette décision remplace les gestes et l’inscription au revers des lots précédents ; elle ne transforme pas l’illustration imaginée en carte topographique.
+
+
+## Illustration pixels sur fond clair — 28 septembre 2026
+
+Après comparaison de six pistes, Claude-Alain choisit la maquette pixels et demande de conserver le fond clair actuel, puis autorise son intégration. `swiss-atlas-pixels-v1.png` remplace le visuel importé par `AtlasArtwork` sur l’accueil et FINMA FR/DE/EN. Cette illustration issue de ChatGPT conserve relief ivoire, pixels émeraude, socle vert et filet rouge. Empreinte SHA-256 du PNG : `c7034c475f7e5dfec360721577e4802673e40d7d406846a639e469c73067b081`.
+
+Le papier du site reste `#f4f3ed`. La sursaturation de l’ancien visuel est retirée ; une luminosité CSS de 1,045 et le mélange par multiplication raccordent son fond au papier, avec fondu limité aux bords. Aucun nouveau panneau sombre, mouvement ou modèle 3D. Le fichier source reste inchangé ; Astro produit les formats WebP adaptés avec empreinte dans l’adresse.
+
+La notice FR/DE/EN précise que les pixels évoquent les données suisses : ils ne décrivent pas une couverture réseau mesurée. Le relief n’est ni une mesure d’altitude exacte ni une carte géologique. Aucune source de couverture OFCOM n’a été intégrée à l’image. Cette illustration artistique ne remplace aucune donnée vendue.

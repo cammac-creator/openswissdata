@@ -1,12 +1,12 @@
 ---
 import { Image } from 'astro:assets';
-import atlas from '../assets/art/swiss-atlas-editorial-v3.png';
+import atlas from '../assets/art/swiss-atlas-pixels-v1.png';
 import { getLangFromPath } from '../i18n/utils';
 const lang = getLangFromPath(Astro.url.pathname);
 const copy = {
- fr: { source: 'Illustration artistique', note: 'Illustration créée avec ChatGPT, inspirée d’une sculpture de la Suisse. Le relief et les couleurs sont imaginés : ils ne représentent ni les altitudes ni la géologie réelles.', pause: 'Réduire les animations', title: 'La Suisse en relief' },
- de: { source: 'Künstlerische Illustration', note: 'Mit ChatGPT erstellte Illustration, inspiriert von einer Skulptur der Schweiz. Relief und Farben sind frei gestaltet: Sie zeigen weder die tatsächlichen Höhen noch die Geologie.', pause: 'Animationen reduzieren', title: 'Die Schweiz als Relief' },
- en: { source: 'Artistic illustration', note: 'Illustration created with ChatGPT, inspired by a sculpture of Switzerland. Terrain and colours are imagined: they do not represent actual elevations or geology.', pause: 'Reduce animations', title: 'Switzerland in relief' },
+ fr: { source: 'Illustration artistique', note: 'Illustration créée avec ChatGPT. Le relief et les pixels verts évoquent la Suisse et ses données : ils ne représentent ni des altitudes exactes, ni la géologie, ni une couverture réseau mesurée.', pause: 'Réduire les animations', title: 'La Suisse en relief' },
+ de: { source: 'Künstlerische Illustration', note: 'Mit ChatGPT erstellte Illustration. Relief und grüne Pixel stehen sinnbildlich für die Schweiz und ihre Daten. Sie zeigen weder exakte Höhen noch die Geologie oder eine gemessene Netzabdeckung.', pause: 'Animationen reduzieren', title: 'Die Schweiz als Relief' },
+ en: { source: 'Artistic illustration', note: 'Illustration created with ChatGPT. The relief and green pixels evoke Switzerland and its data. They do not represent exact elevations, geology or measured network coverage.', pause: 'Reduce animations', title: 'Switzerland in relief' },
 }[lang];
 ---
 <div class="atlas-artwork" data-atlas-art>

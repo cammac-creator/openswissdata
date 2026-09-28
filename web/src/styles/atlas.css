@@ -244,10 +244,12 @@
 
 
 /* L'illustration est fixe : ni parallaxe, ni flottement, ni téléchargement 3D. */
-.atlas-artwork { position:relative; isolation:isolate; min-width:0; width:100%; }
+/* Le groupe reste non isolé pour que l’image se mélange au papier de la page. */
+.atlas-artwork { position:relative; min-width:0; width:100%; }
 .atlas-art-meta { position:relative; z-index:1; display:flex; justify-content:space-between; gap:12px; font-family:var(--font-mono); font-size:9px; letter-spacing:.06em; color:var(--atlas-muted); }
 .atlas-art-plane { position:relative; width:112%; margin:-10% -6% -17%; mix-blend-mode:multiply; pointer-events:none; user-select:none; }
-.atlas-art-image { display:block; width:100%; height:auto; filter:saturate(1.2); mask-image:linear-gradient(to right,transparent,#000 2%,#000 98%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 90%,transparent); mask-composite:intersect; }
+/* Le fond ivoire de l’image rejoint le papier par multiplication, sans sursaturation. */
+.atlas-art-image { display:block; width:100%; height:auto; filter:brightness(1.045); mask-image:linear-gradient(to right,transparent,#000 2%,#000 98%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 90%,transparent); mask-composite:intersect; }
 .atlas-art-bottom { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:10px; color:var(--atlas-muted); }
 .atlas-art-source { position:relative; font-size:10px; line-height:1.5; }
 .atlas-art-source summary { cursor:pointer; min-height:44px; display:flex; align-items:center; gap:6px; list-style:none; text-decoration:underline dotted #16382f55; text-underline-offset:5px; }
