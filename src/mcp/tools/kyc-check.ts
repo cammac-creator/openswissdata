@@ -1,8 +1,9 @@
 /**
  * Tool: kyc_check
  *
- * Search the FINMA registry by name (case-insensitive substring match) and
- * return matching authorised entities + any FINMA warnings whose name matches.
+ * Search the FINMA registry by name (case-insensitive, accent-insensitive) and
+ * return matching authorised entities + any FINMA warnings whose name matches,
+ * closest first (exact, whole word, then substring; all words in any order as a fallback).
  *
  * MVP: simple substring match — V2 will add fuzzy + cross-source (SECO sanctions,
  * Zefix corporate status, GLEIF LEI) and proper trigram scoring.
@@ -50,12 +51,51 @@ export interface KycCheckResult {
   query: string;
   registry_matches: KycMatch[];
   warning_matches: KycWarning[];
+  /** Entrées renvoyées (au plus top_k), classées de la plus proche à la plus lointaine. */
   match_count: number;
   warning_count: number;
+  /** Toutes les correspondances trouvées, avant la limite top_k. */
+  match_total: number;
+  warning_total: number;
 }
 
 function normalize(s: string): string {
   return s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "");
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Rang d'un nom pour la requête (plus petit = meilleur) : égalité, début sur un mot entier,
+ * mot entier ailleurs, début de nom, simple sous-chaîne. `null` si aucune correspondance.
+ * Sans cela, « UBS » plaçait « Clos du Doubs » avant UBS Switzerland AG, et une requête large
+ * gardait les premières lignes du registre au lieu des meilleures.
+ */
+function matcher(needle: string): (candidate: string) => number | null {
+  const word = new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegExp(needle)}($|[^\\p{L}\\p{N}])`, "u");
+  const tokens = needle.split(/\s+/).filter((t) => t.length >= 2);
+  return (candidate) => {
+    if (candidate === needle) return 0;
+    if (candidate.includes(needle)) {
+      if (candidate.startsWith(needle) && word.test(candidate)) return 1;
+      if (word.test(candidate)) return 2;
+      return candidate.startsWith(needle) ? 3 : 4;
+    }
+    // Mots dans un autre ordre (« Morges Raiffeisen ») : tous les mots présents.
+    if (tokens.length > 1 && tokens.every((t) => candidate.includes(t))) return 5;
+    return null;
+  };
+}
+
+function rankedMatches<T extends { name: string }>(rows: readonly T[], needle: string): T[] {
+  const rank = matcher(needle);
+  return rows
+    .map((row, index) => ({ row, index, score: rank(normalize(row.name)) }))
+    .filter((m): m is { row: T; index: number; score: number } => m.score !== null)
+    .sort((a, b) => a.score - b.score || a.index - b.index)
+    .map((m) => m.row);
 }
 
 export function kycCheckHandler(args: unknown): {
@@ -76,8 +116,10 @@ export function kycCheckHandler(args: unknown): {
   const registry = getFinmaRegistry();
   const warnings = getFinmaWarnings();
 
-  const registryMatches: KycMatch[] = registry
-    .filter((r) => normalize(r.name).includes(needle))
+  const registryAll = rankedMatches(registry, needle);
+  const warningAll = rankedMatches(warnings, needle);
+
+  const registryMatches: KycMatch[] = registryAll
     .slice(0, top_k)
     .map((r) => ({
       entity_type: r.entity_type,
@@ -92,8 +134,7 @@ export function kycCheckHandler(args: unknown): {
       source_url: r.source_url,
     }));
 
-  const warningMatches: KycWarning[] = warnings
-    .filter((w) => normalize(w.name).includes(needle))
+  const warningMatches: KycWarning[] = warningAll
     .slice(0, top_k)
     .map((w) => ({
       name: w.name,
@@ -109,21 +150,24 @@ export function kycCheckHandler(args: unknown): {
     warning_matches: warningMatches,
     match_count: registryMatches.length,
     warning_count: warningMatches.length,
+    match_total: registryAll.length,
+    warning_total: warningAll.length,
   };
 
   const lines: string[] = [];
+  const shown = (count: number, total: number) => (total > count ? ` (closest ${count} shown)` : "");
   if (warningMatches.length > 0) {
-    lines.push(`WARNING: ${warningMatches.length} FINMA warning entry/entries match "${name}".`);
-    for (const w of warningMatches.slice(0, 5)) {
+    lines.push(`WARNING: ${warningAll.length} FINMA warning entry/entries match "${name}"${shown(warningMatches.length, warningAll.length)}.`);
+    for (const w of warningMatches) {
       lines.push(`  - ${w.name} (${w.warning_type}, added ${w.date_added})`);
     }
     lines.push("");
   }
-  lines.push(`FINMA registry: ${registryMatches.length} authorised entity/entities matching "${name}":`);
+  lines.push(`FINMA registry: ${registryAll.length} authorised entity/entities matching "${name}"${shown(registryMatches.length, registryAll.length)}:`);
   if (registryMatches.length === 0) {
     lines.push("  (none)");
   } else {
-    for (const m of registryMatches.slice(0, 5)) {
+    for (const m of registryMatches) {
       const flag = "";
       lines.push(`  - ${m.name} (${m.entity_type}, ${m.licence_type})${flag} — ${m.city || "?"} — ${m.uid || "no UID"}`);
     }
@@ -140,7 +184,7 @@ export function kycCheckHandler(args: unknown): {
 export const kycCheckTool = {
   name: "kyc_check",
   description:
-    "Search the FINMA registry of supervised entities and the FINMA warnings list by name. Returns up to top_k authorised entities + any matching warning entries. Use this for basic counterparty KYC screening.",
+    "Search the FINMA register of supervised institutions and the FINMA warnings list by name (case- and accent-insensitive). Returns the closest top_k authorised entities and warning entries (exact name, then whole word, then substring; all words in any order as a fallback) with the total number of matches. Use it for basic counterparty screening; no result is not a compliance certificate.",
   inputSchema: kycCheckSchema,
   handler: kycCheckHandler,
 } as const;

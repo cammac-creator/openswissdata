@@ -1,0 +1,59 @@
+name: Publication de la fiche du registre MCP
+# Publie server.json dans le registre MCP officiel (registry.modelcontextprotocol.io) avec
+# l'identité OIDC de GitHub Actions : aucun jeton stocké, aucune connexion faite à la main.
+# Déclenchement manuel uniquement, après la mise en ligne du serveur décrit par la fiche.
+# Une version déjà publiée est refusée par le registre : c'est une fin normale, pas un échec.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: mcp-registry
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Contrôler la fiche avant publication
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const server = JSON.parse(readFileSync('server.json', 'utf8'));
+          const problems = [];
+          if (server.name !== 'io.github.cammac-creator/openswissdata') problems.push('nom inattendu');
+          if (!/^\d+\.\d+\.\d+$/.test(server.version ?? '')) problems.push('version invalide');
+          if (!server.description || server.description.length > 100) problems.push('description absente ou trop longue (100 caractères au plus)');
+          if (!server.remotes?.some(r => r.url === 'https://mcp.openswissdata.com/jsonrpc')) problems.push('adresse distante absente');
+          if (problems.length) { console.error(problems.join(' ; ')); process.exit(1); }
+          console.log(`${server.name} ${server.version}`);
+          NODE
+      - name: Publier dans le registre MCP
+        env:
+          # Binaire épinglé et contrôlé par empreinte (même version que la publication d'IBANforge).
+          MCP_PUBLISHER_VERSION: v1.8.1
+          MCP_PUBLISHER_SHA256: a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc
+        run: |
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz" -o /tmp/mcp-publisher.tgz
+          echo "${MCP_PUBLISHER_SHA256}  /tmp/mcp-publisher.tgz" | sha256sum -c -
+          tar -xzf /tmp/mcp-publisher.tgz -C /tmp mcp-publisher
+          chmod +x /tmp/mcp-publisher
+          /tmp/mcp-publisher login github-oidc
+          STATUS=0
+          OUT=$(/tmp/mcp-publisher publish 2>&1) || STATUS=$?
+          echo "$OUT"
+          if echo "$OUT" | grep -qi "duplicate version"; then
+            echo "::notice::Cette version est déjà publiée dans le registre MCP."
+            exit 0
+          fi
+          exit "$STATUS"
+      - name: Relire la fiche publiée
+        run: |
+          sleep 10
+          curl -fsS "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.cammac-creator/openswissdata" \
+            | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const d=JSON.parse(s);for(const e of d.servers??[]){const x=e.server??e;console.log(x.name,x.version)}})"

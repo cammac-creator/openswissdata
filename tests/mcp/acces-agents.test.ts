@@ -296,3 +296,41 @@ describe("tariff_lookup pour les agents", () => {
     expect(tariffLookupHandler({ hs8: "123456789" }).isError).toBe(true);
   });
 });
+
+describe("kyc_check classe du plus proche au plus lointain", () => {
+  it("un nom entier passe avant une simple sous-chaîne (UBS avant « Clos du Doubs »)", async () => {
+    const { kycCheckHandler } = await import("../../src/mcp/tools/kyc-check.js");
+    const out = kycCheckHandler({ name: "UBS" });
+    const names = (out.structured as { registry_matches: { name: string }[] }).registry_matches.map((m) => m.name);
+    const doubs = names.findIndex((n) => /doubs/i.test(n));
+    const ubsWord = names.findIndex((n) => /(^|\W)UBS(\W|$)/.test(n));
+    expect(ubsWord).toBeGreaterThanOrEqual(0);
+    if (doubs >= 0) expect(ubsWord).toBeLessThan(doubs);
+    expect(names[0]).toMatch(/^UBS\b/);
+  });
+
+  it("annonce le vrai total et précise quand la liste est tronquée", async () => {
+    const { kycCheckHandler } = await import("../../src/mcp/tools/kyc-check.js");
+    const out = kycCheckHandler({ name: "Raiffeisen", top_k: 3 });
+    const s = out.structured as { match_count: number; match_total: number };
+    expect(s.match_count).toBe(3);
+    expect(s.match_total).toBeGreaterThan(3);
+    expect(out.content[0].text).toContain(`${s.match_total} authorised entity/entities`);
+    expect(out.content[0].text).toContain("closest 3 shown");
+  });
+
+  it("trouve les mots dans un autre ordre en dernier recours", async () => {
+    const { kycCheckHandler } = await import("../../src/mcp/tools/kyc-check.js");
+    const direct = kycCheckHandler({ name: "Raiffeisen Morges" }).structured as { match_total: number };
+    const reversed = kycCheckHandler({ name: "Morges Raiffeisen" }).structured as { match_total: number; registry_matches: { name: string }[] };
+    if (direct.match_total === 0) return;
+    expect(reversed.match_total).toBeGreaterThan(0);
+    expect(reversed.registry_matches[0].name).toMatch(/Raiffeisen/i);
+  });
+
+  it("ne confond pas un caractère spécial de la requête avec une expression", async () => {
+    const { kycCheckHandler } = await import("../../src/mcp/tools/kyc-check.js");
+    expect(kycCheckHandler({ name: "(.*)" }).isError).not.toBe(true);
+    expect(kycCheckHandler({ name: "a+b[" }).isError).not.toBe(true);
+  });
+});
