@@ -3,7 +3,8 @@
  *
  * These are build-time source tests (no browser needed):
  * - Each dataset page imports and renders its Lookup component.
- * - Each Lookup component contains the embedded data sample it is supposed to ship.
+ * - Depuis le 28.09.2026, les démonstrateurs lisent l'échantillon publié par le catalogue
+ *   au lieu d'embarquer des valeurs figées.
  *
  * We check the Astro source files directly because building the site in CI would
  * require Node 20+ with Astro installed, which may time out.
@@ -32,6 +33,21 @@ describe("HSLookup live demos — source-level presence (commit c1d1e22)", () =>
   });
 
   // Le démonstrateur classifications est vérifié par ses réponses réelles dans routes/catalog.test.ts.
+
+  it("TARES lit son échantillon publié et n'embarque plus de taux figés", () => {
+    const lookup = readFileSync(join(ROOT, "components/HSLookup.astro"), "utf8");
+    const explorer = readFileSync(join(ROOT, "scripts/tares-explorer.ts"), "utf8");
+    const catalogue = readFileSync(join(ROOT, "lib/tares-catalogue.ts"), "utf8");
+    expect(lookup).not.toContain("TARES_SAMPLE");
+    expect(lookup).not.toMatch(/is:inline|innerHTML/);
+    expect(explorer).toContain("loadTaresCatalogue");
+    expect(explorer).not.toContain("innerHTML");
+    expect(catalogue).toContain("readPublicCatalogue('tares')");
+    for (const lang of ["de", "en"]) {
+      const page = readFileSync(join(ROOT, `pages/${lang}/datasets/tares.astro`), "utf8");
+      expect(page).toMatch(/<TaresProduct><HSLookup \/><\/TaresProduct>/);
+    }
+  });
 
   it("FINMA charge son échantillon publié et n'embarque plus des identifiants non vérifiés", () => {
     const old=readFileSync(join(ROOT,"components/FinmaLookup.astro"),"utf8");

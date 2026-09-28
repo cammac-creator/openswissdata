@@ -1,0 +1,254 @@
+---
+import CheckoutNotice from "./CheckoutNotice.astro";
+import AtlasLayout from "../layouts/AtlasLayout.astro";
+import AtlasArtwork from "./AtlasArtwork.astro";
+import "../styles/atlas-fiches.css";
+import "../styles/atlas-fiche-tares.css";
+import { getLangFromPath, localizePath } from "../i18n/utils";
+import { BUNDLE_OFFER, BUNDLE_SAVING, FILE_OFFERS } from "../lib/offers";
+import { datasetJsonLd, productJsonLd } from "../lib/structured-data";
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => localizePath(path, lang);
+const offer = FILE_OFFERS.tares;
+// Exemples tirés de la version publiée le 28.09.2026 (échantillon du catalogue) : textes officiels de la ligne, sans taux figé.
+const example = { hs8: "85011000", designations: { fr: "moteurs d’une puissance n’excédant pas 37,5 W", de: "Motoren mit einer Leistung von nicht mehr als 37,5 W", it: "motori di potenza non eccedente 37,5 W", en: "motors of an output not exceeding 37.5 W" } };
+const quota = { fr: ["importés dans les limites du contingent tarifaire (c. n° 1)", "autres"], de: ["innerhalb des Zollkontingents (K-Nr. 1) eingeführt", "andere"], en: ["within the limits of the tariff quota (Q. No. 1)", "other"] }[lang];
+const copy = {
+ fr: {
+  title: "TARES : le tarif douanier suisse en fichiers structurés",
+  description: "Numéros de tarif suisses à huit chiffres, désignations en quatre langues et toutes les lignes de taux en vigueur, avec unités, dates et conditions. CSV, JSON, Parquet et SQL.",
+  eyebrow: "TARES · Tarif douanier suisse", hero: "Le tarif douanier suisse.", accent: "Ligne par ligne.",
+  intro: "Chaque numéro de tarif à huit chiffres, ses désignations en quatre langues et toutes ses lignes de taux en vigueur, avec unités, dates et conditions. Collecte hebdomadaire planifiée dans les fichiers de l’OFDF, contrôlée avant publication.",
+  read: "Lire une ligne", buy: "Acheter", buyTares: "Acheter TARES", catalogue: "Les données", navLabel: "Sections de la fiche TARES", navRead: "Lecture", navPreview: "Aperçu", navConditions: "Conditions",
+  status: "Dernière version publiée", waiting: "Vérification de la version disponible…", unavailable: "La version ne peut pas être vérifiée pour le moment. Contactez-nous avant votre achat.",
+  statRows: "Numéros de tarif", statRates: "Lignes de taux détaillées", statMissing: "Numéros sans résumé du droit de base", statChanges: "Ajouts · retraits depuis la version précédente",
+  nojs: "Activez JavaScript pour lire la version et les volumes publiés, ou téléchargez l’échantillon CSV pour examiner les données.",
+  checked: "contrôlée le", compared: "comparée à",
+  readKicker: "01 / Du chapitre à la ligne", readTitle: "Lire un numéro de tarif.", readIntro: "Les six premiers chiffres suivent le Système harmonisé international. Les deux derniers sont suisses : ils séparent par exemple une importation dans un contingent tarifaire du reste.",
+  plate: "TARES / NUMÉRO DE TARIF", plateDigits: "8 chiffres",
+  levels: [["Chapitre", "85", "chapter"], ["Position", "85.01", "heading"], ["Sous-position SH", "8501.10", "hs6"], ["Numéro de tarif suisse", "8501.1000", "hs8"]],
+  designation: "Désignation de la ligne", source: "Exemple réel de la version publiée le 28.09.2026. Les désignations sont reprises telles quelles, dans les quatre langues.",
+  quotaTitle: "Quand les deux derniers chiffres comptent", quotaIntro: "Deux lignes suisses sous la même sous-position internationale 0101.21 :", quotaNote: "Une désignation se lit sous sa position : le fichier livre le libellé de chaque numéro à huit chiffres, pas ceux des chapitres et positions. « autres » n’a de sens que dans cette hiérarchie.",
+  readerTitle: "Une ligne, puis son détail", readerIntro: "Le résumé tient en une ligne par numéro. Le détail garde chaque ligne de taux publiée, avec son accord, son unité et ses conditions.",
+  summary: "Résumé", summaryFile: "tares.csv · une ligne par numéro", detail: "Détail", detailFile: "tares_rates.csv · une ligne par taux",
+  fields: [["hs8", "Numéro de tarif"], ["designation", "Désignation"], ["duty_mfn", "Droit de base, s’il est unique et sans condition"], ["preferential_regimes", "Préférences sans variante, dans la même unité"], ["duty_rates_count", "Lignes dans le détail"], ["valid_from", "Valable depuis"]],
+  detailColumns: ["Accord (code LDG)", "Code ZCO et séquence", "Taux et unité publiée : Fr. ou %", "Base : 100 kg brut, pièce…", "Validité", "Conditions"],
+  percent: "Un taux en % reste en % : il n’est jamais converti en francs.", detailCount: "lignes de taux pour ce numéro", another: "Autre ligne", liveLine: "Ligne réelle de la version", verify: "Vérifier dans Tares",
+  noMfn: "Aucun résumé unique : lire les lignes du détail.", prefCount: "accords", prefNote: "sous réserve d’origine et de conditions", free: "franchise",
+  previewKicker: "02 / Explorez avant d’acheter", previewTitle: "Cent lignes réelles de la version publiée.", previewIntro: "Une ligne par chapitre, puis des compléments dans l’ordre des numéros. Filtrez par numéro ou par désignation. L’absence d’un numéro dans cet échantillon ne dit rien du fichier complet.",
+  conditionsKicker: "03 / Conditions douanières et réserves", conditionsTitle: "Ce que le fichier dit. Et ce qu’il ne dit pas.", conditions: [
+   ["%", "Un pourcentage reste un pourcentage.", "Dans le détail, l’unité publiée (Fr. ou %) est conservée. Un taux en pour cent n’est jamais converti ni présenté comme un montant en CHF ; sa base de calcul se vérifie dans la source. Le résumé ne retient que des droits exprimés en francs."],
+   ["∅", "Une case vide n’est pas une franchise.", "Le résumé omet les cas ambigus et ne choisit jamais le taux le plus bas. Un numéro sans résumé renvoie à ses lignes détaillées, qui conservent les conditions de la source."],
+   ["⇄", "Les préférences dépendent de l’origine.", "Le résumé préférentiel ne reprend que les accords sans variante conditionnelle, dans la même unité que le droit de base. Origine, contingents et conditions restent à vérifier : le fichier n’est pas un calculateur de dédouanement."],
+   ["↻", "Une collecte hebdomadaire, contrôlée.", "Les sept fichiers officiels sont collectés selon un calendrier hebdomadaire et comparés à la version précédente. Une colonne imprévue, un taux vide, des doublons, une perte de lignes ou un volume inhabituel bloquent la publication. La version réellement disponible est affichée plus haut."]],
+  officialTitle: "Pas une publication officielle.", official: "Seules les publications de la Chancellerie fédérale et de l’Office fédéral de la douane et de la sécurité des frontières (OFDF) font foi. Les notes explicatives et les décisions de classement ne sont pas incluses. For juridique pour les litiges TARES : Berne, Suisse.", permission: "Préparé de manière indépendante dans le cadre de l’autorisation écrite de l’OFDF du 21.04.2026, qui impose notamment l’intégrité du contenu, l’attribution et l’absence de présentation comme produit officiel.", officialLink: "Consulter Tares, la source officielle",
+  archiveKicker: "04 / Dans votre archive", archiveTitle: "Un résumé, un détail, leurs preuves.", archiveIntro: "Chaque version est une archive ZIP signée. Le README et la fiche qualité expliquent toute évolution du schéma avant que vous remplaciez une version dans vos outils.",
+  archiveWindow: "TARES / ARCHIVE", groups: [
+   ["Résumé", "Une ligne par numéro de tarif", ["tares.csv", "tares.json", "tares.parquet", "tares.sql"]],
+   ["Détail des taux", "Toutes les lignes en vigueur et leurs cellules source", ["tares_rates.csv", "tares_rates.json"]],
+   ["Contrôles", "Changements observés et provenance des sept sources", ["quality.json", "sources.json"]],
+   ["Preuves et mode d’emploi", "Signature Ed25519, horodatage RFC-3161 et empreintes", ["provenance.json", "checksums.sha256", "README.md", "schema.json", "LICENSE.txt"]]],
+  archiveNotes: ["Le champ historique unit_stat reste un ancien alias de l’unité du droit, pas une unité statistique indépendante.", "Les vecteurs de recherche ne sont pas inclus dans cette actualisation.", "Les empreintes de provenance.json portent sur les fichiers de l’archive, pas sur le ZIP qui les contient."],
+  mcpTitle: "Plutôt une question ponctuelle ?", mcpText: "L’outil tariff_lookup du serveur MCP répond sans compte, dans la limite de 100 appels par heure. L’achat du fichier n’ouvre aucun accès MCP payant.", mcpLink: "Tester le serveur MCP",
+  faqKicker: "05 / Questions fréquentes", faqTitle: "Avant d’acheter TARES.", faq: [
+   ["Puis-je calculer un montant de droits de douane ?", "Pas directement. Le fichier reprend les taux publiés avec leurs unités et leurs conditions ; il ne remplace ni la déclaration en douane ni la vérification de l’origine. Un taux en pour cent n’est jamais converti en francs."],
+   ["Les données sont-elles officielles ?", "Non. Elles sont préparées de manière indépendante à partir des fichiers publiés par l’OFDF. Seules les publications de la Chancellerie fédérale et de l’OFDF font foi."],
+   ["Comment reçoit-on les fichiers ?", "Après confirmation du paiement par Stripe, un email ouvre votre page de téléchargement. Les fichiers restent disponibles dans votre espace client."],
+   ["Que se passe-t-il après 360 jours ?", `Vous gardez les versions reçues. Une prolongation facultative coûte ${offer.renewal} CHF par an ; il n’y a aucun renouvellement automatique.`],
+   ["Et si le fichier ne convient pas ?", "Vous pouvez demander un remboursement intégral dans les 14 jours suivant l’achat, sans justification, sauf redistribution des fichiers à un tiers en violation de la licence. Les conditions de vente font foi."]],
+  terms: "Conditions de vente",
+  purchaseKicker: "Votre prochaine base de travail", delivery: "Vos fichiers. Votre rythme.", serviceText: "Après paiement, votre archive est accessible par email et depuis votre espace client. Le reçu Stripe y est également disponible. Pour une facture au nom de votre entreprise, envoyez-nous sa raison sociale et son adresse de facturation.",
+  contact: "Écrire au support", account: "Espace client", price: "Paiement unique", updates: `360 jours de mises à jour inclus. Prolongation facultative : ${offer.renewal} CHF/an.`,
+  bundle: `Les trois fichiers ensemble : ${BUNDLE_OFFER.price} CHF, soit ${BUNDLE_SAVING} CHF de moins que les achats séparés.`, bundleLink: "Voir le bundle", independent: "Service privé indépendant, sans affiliation à l’OFDF.",
+ },
+ de: {
+  title: "TARES: der Schweizer Zolltarif als strukturierte Dateien",
+  description: "Achtstellige Schweizer Tarifnummern, Bezeichnungen in vier Sprachen und alle geltenden Tarifzeilen mit Einheiten, Daten und Bedingungen. CSV, JSON, Parquet und SQL.",
+  eyebrow: "TARES · Schweizer Zolltarif", hero: "Der Schweizer Zolltarif.", accent: "Zeile für Zeile.",
+  intro: "Jede achtstellige Tarifnummer, ihre Bezeichnungen in vier Sprachen und alle geltenden Tarifzeilen mit Einheiten, Daten und Bedingungen. Wöchentlich geplante Erhebung aus den Dateien des BAZG, vor der Veröffentlichung geprüft.",
+  read: "Eine Zeile lesen", buy: "Kaufen", buyTares: "TARES kaufen", catalogue: "Datensätze", navLabel: "Abschnitte der TARES-Seite", navRead: "Lesen", navPreview: "Vorschau", navConditions: "Bedingungen",
+  status: "Zuletzt veröffentlichte Version", waiting: "Verfügbare Version wird geprüft…", unavailable: "Die aktuelle Version kann derzeit nicht geprüft werden. Bitte kontaktieren Sie uns vor dem Kauf.",
+  statRows: "Tarifnummern", statRates: "Detaillierte Tarifzeilen", statMissing: "Nummern ohne Zusammenfassung des Normalansatzes", statChanges: "Neu · entfernt seit der Vorversion",
+  nojs: "Aktivieren Sie JavaScript für Version und Umfang oder laden Sie das CSV-Muster herunter, um die Daten zu prüfen.",
+  checked: "geprüft am", compared: "verglichen mit",
+  readKicker: "01 / Vom Kapitel zur Zeile", readTitle: "Eine Tarifnummer lesen.", readIntro: "Die ersten sechs Stellen folgen dem internationalen Harmonisierten System. Die letzten zwei sind schweizerisch: Sie trennen zum Beispiel die Einfuhr innerhalb eines Zollkontingents vom Rest.",
+  plate: "TARES / TARIFNUMMER", plateDigits: "8 Stellen",
+  levels: [["Kapitel", "85", "chapter"], ["Position", "85.01", "heading"], ["HS-Unterposition", "8501.10", "hs6"], ["Schweizer Tarifnummer", "8501.1000", "hs8"]],
+  designation: "Bezeichnung der Zeile", source: "Reales Beispiel aus der am 28.09.2026 veröffentlichten Version. Die Bezeichnungen werden unverändert in allen vier Sprachen übernommen.",
+  quotaTitle: "Wenn die letzten zwei Stellen zählen", quotaIntro: "Zwei Schweizer Zeilen unter derselben internationalen Unterposition 0101.21:", quotaNote: "Eine Bezeichnung wird unter ihrer Position gelesen: Die Datei liefert die Bezeichnung jeder achtstelligen Nummer, nicht jene der Kapitel und Positionen. «andere» ergibt nur in dieser Hierarchie einen Sinn.",
+  readerTitle: "Eine Zeile, dann ihr Detail", readerIntro: "Die Zusammenfassung umfasst eine Zeile pro Nummer. Das Detail bewahrt jede veröffentlichte Tarifzeile mit Abkommen, Einheit und Bedingungen.",
+  summary: "Zusammenfassung", summaryFile: "tares.csv · eine Zeile pro Nummer", detail: "Detail", detailFile: "tares_rates.csv · eine Zeile pro Ansatz",
+  fields: [["hs8", "Tarifnummer"], ["designation", "Bezeichnung"], ["duty_mfn", "Normalansatz, falls eindeutig und ohne Bedingung"], ["preferential_regimes", "Präferenzen ohne Variante, in derselben Einheit"], ["duty_rates_count", "Zeilen im Detail"], ["valid_from", "Gültig ab"]],
+  detailColumns: ["Abkommen (LDG-Code)", "ZCO-Code und Sequenz", "Ansatz und Einheit: Fr. oder %", "Basis: 100 kg brutto, Stück…", "Gültigkeit", "Bedingungen"],
+  percent: "Ein Ansatz in % bleibt in %: Er wird nie in Franken umgerechnet.", detailCount: "Tarifzeilen für diese Nummer", another: "Andere Zeile", liveLine: "Reale Zeile der Version", verify: "In Tares prüfen",
+  noMfn: "Keine eindeutige Zusammenfassung: Detailzeilen lesen.", prefCount: "Abkommen", prefNote: "vorbehaltlich Ursprung und Bedingungen", free: "zollfrei",
+  previewKicker: "02 / Vor dem Kauf entdecken", previewTitle: "Hundert reale Zeilen der veröffentlichten Version.", previewIntro: "Eine Zeile pro Kapitel, dann Ergänzungen in der Reihenfolge der Nummern. Filtern Sie nach Nummer oder Bezeichnung. Fehlt eine Nummer in diesem Muster, sagt das nichts über die vollständige Datei.",
+  conditionsKicker: "03 / Zollbedingungen und Vorbehalte", conditionsTitle: "Was die Datei sagt. Und was nicht.", conditions: [
+   ["%", "Ein Prozentsatz bleibt ein Prozentsatz.", "Im Detail bleibt die veröffentlichte Einheit (Fr. oder %) erhalten. Ein Ansatz in Prozent wird nie umgerechnet oder als CHF-Betrag dargestellt; seine Berechnungsbasis ist in der Quelle zu prüfen. Die Zusammenfassung enthält nur Ansätze in Franken."],
+   ["∅", "Ein leeres Feld bedeutet keine Zollfreiheit.", "Die Zusammenfassung lässt mehrdeutige Fälle weg und wählt nie den tiefsten Ansatz. Eine Nummer ohne Zusammenfassung verweist auf ihre Detailzeilen, die die Bedingungen der Quelle bewahren."],
+   ["⇄", "Präferenzen hängen vom Ursprung ab.", "Die Präferenz-Zusammenfassung übernimmt nur Abkommen ohne bedingte Variante und in derselben Einheit wie der Normalansatz. Ursprung, Kontingente und Bedingungen sind zu prüfen: Die Datei ist kein Verzollungsrechner."],
+   ["↻", "Eine wöchentliche, geprüfte Erhebung.", "Die sieben offiziellen Dateien werden nach einem wöchentlichen Plan erhoben und mit der Vorversion verglichen. Eine unerwartete Spalte, ein leerer Ansatz, Duplikate, verlorene Zeilen oder ein ungewöhnlicher Umfang stoppen die Veröffentlichung. Die tatsächlich verfügbare Version steht oben."]],
+  officialTitle: "Keine offizielle Veröffentlichung.", official: "Massgebend sind allein die Veröffentlichungen der Bundeskanzlei und des Bundesamts für Zoll und Grenzsicherheit (BAZG). Erläuterungen und Entscheide sind nicht enthalten. Gerichtsstand für TARES-Streitigkeiten: Bern, Schweiz.", permission: "Unabhängig aufbereitet im Rahmen der schriftlichen Erlaubnis des BAZG vom 21.04.2026, die insbesondere unveränderte Inhalte, Quellenangaben und keine Darstellung als amtliches Produkt verlangt.", officialLink: "Tares, die offizielle Quelle, öffnen",
+  archiveKicker: "04 / In Ihrem Archiv", archiveTitle: "Eine Zusammenfassung, ein Detail, ihre Nachweise.", archiveIntro: "Jede Version ist ein signiertes ZIP-Archiv. README und Qualitätsbericht erklären jede Schemaänderung, bevor Sie eine Version in Ihren Werkzeugen ersetzen.",
+  archiveWindow: "TARES / ARCHIV", groups: [
+   ["Zusammenfassung", "Eine Zeile pro Tarifnummer", ["tares.csv", "tares.json", "tares.parquet", "tares.sql"]],
+   ["Tarifdetail", "Alle geltenden Zeilen und ihre Quellzellen", ["tares_rates.csv", "tares_rates.json"]],
+   ["Prüfungen", "Beobachtete Änderungen und Herkunft der sieben Quellen", ["quality.json", "sources.json"]],
+   ["Nachweise und Anleitung", "Ed25519-Signatur, RFC-3161-Zeitstempel und Prüfsummen", ["provenance.json", "checksums.sha256", "README.md", "schema.json", "LICENSE.txt"]]],
+  archiveNotes: ["Das historische Feld unit_stat bleibt ein alter Alias der Zolleinheit, keine eigenständige statistische Einheit.", "Suchvektoren sind in dieser Aktualisierung nicht enthalten.", "Die Prüfsummen in provenance.json beziehen sich auf die Dateien im Archiv, nicht auf das umschliessende ZIP."],
+  mcpTitle: "Lieber eine einzelne Abfrage?", mcpText: "Das Werkzeug tariff_lookup des MCP-Servers antwortet ohne Konto, mit bis zu 100 Aufrufen pro Stunde. Der Dateikauf eröffnet keinen kostenpflichtigen MCP-Zugang.", mcpLink: "MCP-Server testen",
+  faqKicker: "05 / Häufige Fragen", faqTitle: "Vor dem Kauf von TARES.", faq: [
+   ["Kann ich einen Zollbetrag berechnen?", "Nicht direkt. Die Datei übernimmt die veröffentlichten Ansätze mit Einheiten und Bedingungen; sie ersetzt weder die Zollanmeldung noch die Prüfung des Ursprungs. Ein Ansatz in Prozent wird nie in Franken umgerechnet."],
+   ["Sind die Daten offiziell?", "Nein. Sie werden unabhängig aus den vom BAZG veröffentlichten Dateien aufbereitet. Massgebend sind allein die Veröffentlichungen der Bundeskanzlei und des BAZG."],
+   ["Wie erhalte ich die Dateien?", "Nach der Zahlungsbestätigung durch Stripe öffnet eine E-Mail Ihre Download-Seite. Die Dateien bleiben in Ihrem Kundenkonto verfügbar."],
+   ["Was geschieht nach 360 Tagen?", `Sie behalten die erhaltenen Versionen. Eine freiwillige Verlängerung kostet CHF ${offer.renewal} pro Jahr; es gibt keine automatische Erneuerung.`],
+   ["Und wenn die Datei nicht passt?", "Sie können innerhalb von 14 Tagen nach dem Kauf ohne Begründung die vollständige Erstattung verlangen, ausser bei einer lizenzwidrigen Weitergabe der Dateien an Dritte. Massgebend sind die Verkaufsbedingungen."]],
+  terms: "Verkaufsbedingungen",
+  purchaseKicker: "Ihre nächste Datengrundlage", delivery: "Ihre Dateien. Ihr Tempo.", serviceText: "Nach der Zahlung erhalten Sie das Archiv per E-Mail und in Ihrem Kundenkonto. Dort finden Sie auch den Stripe-Zahlungsbeleg. Für eine Rechnung an Ihr Unternehmen senden Sie uns bitte den Firmennamen und die Rechnungsadresse.",
+  contact: "Support kontaktieren", account: "Kundenkonto", price: "Einmalige Zahlung", updates: `360 Tage Aktualisierungen inklusive. Freiwillige Verlängerung: CHF ${offer.renewal}/Jahr.`,
+  bundle: `Alle drei Dateien zusammen: CHF ${BUNDLE_OFFER.price}, also CHF ${BUNDLE_SAVING} weniger als Einzelkäufe.`, bundleLink: "Bundle ansehen", independent: "Unabhängiger privater Dienst ohne Verbindung zum BAZG.",
+ },
+ en: {
+  title: "TARES: the Swiss customs tariff as structured files",
+  description: "Eight-digit Swiss tariff numbers, descriptions in four languages and every rate row in force, with units, dates and conditions. CSV, JSON, Parquet and SQL.",
+  eyebrow: "TARES · Swiss customs tariff", hero: "The Swiss customs tariff.", accent: "Line by line.",
+  intro: "Every eight-digit tariff number, its descriptions in four languages and every rate row in force, with units, dates and conditions. Weekly scheduled collection from FOCBS (BAZG) files, checked before publication.",
+  read: "Read a line", buy: "Buy", buyTares: "Buy TARES", catalogue: "The data", navLabel: "TARES page sections", navRead: "Reading", navPreview: "Preview", navConditions: "Conditions",
+  status: "Latest published version", waiting: "Checking the available version…", unavailable: "The current version cannot be verified. Please contact us before purchasing.",
+  statRows: "Tariff numbers", statRates: "Detailed rate rows", statMissing: "Numbers without a base-duty summary", statChanges: "Added · removed since the previous version",
+  nojs: "Enable JavaScript to see the published version and volumes, or download the CSV sample to examine the data.",
+  checked: "checked on", compared: "compared with",
+  readKicker: "01 / From chapter to line", readTitle: "Reading a tariff number.", readIntro: "The first six digits follow the international Harmonized System. The last two are Swiss: they separate, for example, imports within a tariff quota from the rest.",
+  plate: "TARES / TARIFF NUMBER", plateDigits: "8 digits",
+  levels: [["Chapter", "85", "chapter"], ["Heading", "85.01", "heading"], ["HS subheading", "8501.10", "hs6"], ["Swiss tariff number", "8501.1000", "hs8"]],
+  designation: "Line description", source: "Real example from the version published on 28 September 2026. Descriptions are reproduced unchanged, in all four languages.",
+  quotaTitle: "When the last two digits matter", quotaIntro: "Two Swiss lines under the same international subheading 0101.21:", quotaNote: "A description is read under its heading: the file delivers the description of each eight-digit number, not those of chapters and headings. “other” only makes sense within that hierarchy.",
+  readerTitle: "One line, then its detail", readerIntro: "The summary holds one line per number. The detail keeps every published rate row, with its agreement, unit and conditions.",
+  summary: "Summary", summaryFile: "tares.csv · one line per number", detail: "Detail", detailFile: "tares_rates.csv · one line per rate",
+  fields: [["hs8", "Tariff number"], ["designation", "Description"], ["duty_mfn", "Base duty, if unique and unconditional"], ["preferential_regimes", "Preferences without variants, in the same unit"], ["duty_rates_count", "Rows in the detail"], ["valid_from", "Valid from"]],
+  detailColumns: ["Agreement (LDG code)", "ZCO code and sequence", "Rate and published unit: Fr. or %", "Basis: 100 kg gross, piece…", "Validity", "Conditions"],
+  percent: "A rate in % stays in %: it is never converted into francs.", detailCount: "rate rows for this number", another: "Another line", liveLine: "Real line from version", verify: "Check in Tares",
+  noMfn: "No unique summary: read the detailed rows.", prefCount: "agreements", prefNote: "subject to origin and conditions", free: "duty-free",
+  previewKicker: "02 / Explore before you buy", previewTitle: "One hundred real lines from the published version.", previewIntro: "One line per chapter, then additions in number order. Filter by number or description. A number missing from this sample says nothing about the complete file.",
+  conditionsKicker: "03 / Customs conditions and caveats", conditionsTitle: "What the file says. And what it does not.", conditions: [
+   ["%", "A percentage stays a percentage.", "In the detail, the published unit (Fr. or %) is kept. A percentage rate is never converted or presented as a CHF amount; its calculation basis must be checked in the source. The summary only keeps duties expressed in francs."],
+   ["∅", "A blank is not duty-free.", "The summary omits ambiguous cases and never picks the lowest rate. A number without a summary points to its detailed rows, which keep the source conditions."],
+   ["⇄", "Preferences depend on origin.", "The preferential summary only keeps agreements without conditional variants, in the same unit as the base duty. Origin, quotas and conditions still need checking: the file is not a customs clearance calculator."],
+   ["↻", "A weekly, checked collection.", "The seven official files are collected on a weekly schedule and compared with the previous version. An unexpected column, an empty rate, duplicates, lost rows or an unusual volume block publication. The version actually available is shown above."]],
+  officialTitle: "Not an official publication.", official: "Only the publications of the Federal Chancellery and the Federal Office for Customs and Border Security (FOCBS/BAZG) are authoritative. Explanatory notes and classification decisions are not included. Legal venue for TARES disputes: Berne, Switzerland.", permission: "Independently prepared under the FOCBS written permission of 21 April 2026, which requires, among other things, content integrity, attribution and no presentation as an official product.", officialLink: "Open Tares, the official source",
+  archiveKicker: "04 / Inside your archive", archiveTitle: "A summary, a detail, their proofs.", archiveIntro: "Each version is a signed ZIP archive. The README and quality report explain any schema change before you replace a version in your tools.",
+  archiveWindow: "TARES / ARCHIVE", groups: [
+   ["Summary", "One line per tariff number", ["tares.csv", "tares.json", "tares.parquet", "tares.sql"]],
+   ["Rate detail", "Every row in force and its source cells", ["tares_rates.csv", "tares_rates.json"]],
+   ["Checks", "Observed changes and provenance of the seven sources", ["quality.json", "sources.json"]],
+   ["Proofs and guide", "Ed25519 signature, RFC-3161 timestamp and checksums", ["provenance.json", "checksums.sha256", "README.md", "schema.json", "LICENSE.txt"]]],
+  archiveNotes: ["The legacy unit_stat field remains an old alias of the duty unit, not a separate statistical unit.", "Search vectors are not included in this update.", "Checksums in provenance.json refer to the files in the archive, not to the ZIP that contains them."],
+  mcpTitle: "Just a quick lookup?", mcpText: "The MCP server’s tariff_lookup tool answers without an account, within 100 calls per hour. Buying the file does not open any paid MCP access.", mcpLink: "Try the MCP server",
+  faqKicker: "05 / Frequently asked", faqTitle: "Before buying TARES.", faq: [
+   ["Can I calculate a customs duty amount?", "Not directly. The file reproduces published rates with their units and conditions; it replaces neither the customs declaration nor the origin check. A percentage rate is never converted into francs."],
+   ["Is the data official?", "No. It is independently prepared from the files published by the FOCBS. Only the publications of the Federal Chancellery and the FOCBS are authoritative."],
+   ["How are the files delivered?", "Once Stripe confirms the payment, an email opens your download page. The files remain available in your account."],
+   ["What happens after 360 days?", `You keep the versions you received. An optional extension costs CHF ${offer.renewal} per year; there is no automatic renewal.`],
+   ["What if the file does not suit me?", "You may request a full refund within 14 days of purchase without giving a reason, unless the files have been redistributed to a third party in breach of the licence. The sales terms prevail."]],
+  terms: "Sales terms",
+  purchaseKicker: "Your next data foundation", delivery: "Your files. Your workflow.", serviceText: "After payment, download your archive from the delivery email or your account. Your Stripe receipt is also available there. For an invoice addressed to your company, send us its legal name and billing address.",
+  contact: "Contact support", account: "Your account", price: "One-time payment", updates: `360 days of updates included. Optional extension: CHF ${offer.renewal}/year.`,
+  bundle: `All three files together: CHF ${BUNDLE_OFFER.price}, or CHF ${BUNDLE_SAVING} less than separate purchases.`, bundleLink: "View the bundle", independent: "Independent private service, not affiliated with the FOCBS.",
+ },
+}[lang];
+const digits = example.hs8.split("");
+const otherLangs = (["fr", "de", "it", "en"] as const).filter(code => code !== lang);
+const live = { lang, waiting: copy.waiting, unavailable: copy.unavailable, checked: copy.checked, compared: copy.compared, noMfn: copy.noMfn, prefCount: copy.prefCount, prefNote: copy.prefNote, free: copy.free, liveLine: copy.liveLine, detailCount: copy.detailCount };
+---
+<AtlasLayout title={`${copy.title} | openswissdata`} description={copy.description} image="/og-tares.png" datasetJsonLd={datasetJsonLd("tares", lang, copy.description)} productJsonLd={productJsonLd("tares", lang, { name: copy.title, description: copy.description, image: "/og-tares.png" })}>
+<div class="atlas-product-site fiche" data-tares-product data-copy={JSON.stringify(live)}>
+ <div class="atlas-shell atlas-breadcrumb"><a href={`${L("/")}#datasets`}>{copy.catalogue}</a><span aria-hidden="true">/</span><span>TARES</span></div>
+ <section class="atlas-hero atlas-product-hero"><div class="atlas-shell atlas-hero-grid"><div class="atlas-hero-copy" data-atlas-enter><p class="atlas-kicker">{copy.eyebrow}</p><h1>{copy.hero}<br/><em>{copy.accent}</em></h1><p class="atlas-lede">{copy.intro}</p><div class="atlas-actions"><a href="#lecture" class="atlas-btn">{copy.read}<span aria-hidden="true">↓</span></a><a href="#acheter" class="atlas-text-link">{copy.buy} · {offer.price} CHF ↗</a></div><div class="atlas-hero-footnote"><span>CSV · JSON · Parquet · SQL</span><span>Ed25519 · SHA-256</span></div></div><AtlasArtwork /></div></section>
+ <div class="atlas-product-nav"><nav class="atlas-shell atlas-product-nav-inner" aria-label={copy.navLabel}><div class="atlas-product-nav-links"><a href="#lecture">{copy.navRead}</a><a href="#apercu">{copy.navPreview}</a><a href="#conditions">{copy.navConditions}</a></div><a class="atlas-nav-buy" href="#acheter">{copy.buy}<span>{offer.price} CHF ↗</span></a></nav></div>
+ <div class="atlas-shell"><div class="atlas-quality"><div class="atlas-quality-heading"><p class="atlas-kicker">{copy.status}</p><p class="fiche-version" data-tares-version role="status">{copy.waiting}</p></div><div class="atlas-quality-grid">{[["rows", copy.statRows], ["rates", copy.statRates], ["missing", copy.statMissing], ["changes", copy.statChanges]].map(([key, label]) => <div><strong data-tares-count={key}>—</strong><span>{label}</span></div>)}</div><noscript class="atlas-noscript">{copy.nojs}</noscript></div></div>
+
+ <section class="atlas-section" id="lecture"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.readKicker}</p><h2>{copy.readTitle}</h2></div><p class="atlas-section-intro">{copy.readIntro}</p></div>
+  <div class="fiche-anatomy-grid">
+   <figure class="fiche-plate" data-atlas-enter>
+    <div class="fiche-plate-meta" aria-hidden="true"><span>{copy.plate}</span><span>{copy.plateDigits}</span></div>
+    <div class="fiche-code" data-tares-anatomy>
+     <div class="fiche-code-digits" role="img" aria-label={`${copy.levels[3][0]} ${copy.levels[3][1]}`}>{digits.map((digit, index) => <><span class:list={["fiche-tile", { "is-swiss": index > 5 }]} aria-hidden="true">{digit}</span>{index === 3 && <span class="fiche-code-dot" aria-hidden="true">.</span>}</>)}</div>
+     <ol class="fiche-code-levels">{copy.levels.map(([label, code, field], index) => <li class={`fiche-level fiche-level-${index + 1}`}><span class="fiche-level-line" aria-hidden="true"></span><span class="fiche-level-text"><strong>{label}</strong> <span class="fiche-level-code">{code}</span> <code>{field}</code></span></li>)}</ol>
+    </div>
+    <div class="fiche-designation">
+     <p class="fiche-mini">{copy.designation} · <code>designation_{lang}</code></p>
+     <p class="fiche-designation-main" lang={lang}>{example.designations[lang]}</p>
+     <ul class="fiche-designation-others">{otherLangs.map(code => <li lang={code}><span>{code.toUpperCase()}</span>{example.designations[code]}</li>)}</ul>
+    </div>
+    <figcaption class="fiche-plate-caption">{copy.source}</figcaption>
+   </figure>
+   <aside class="fiche-quota" data-atlas-enter>
+    <h3>{copy.quotaTitle}</h3>
+    <p>{copy.quotaIntro}</p>
+    <ol class="fiche-tree">
+     <li class="fiche-tree-1"><span class="fiche-quota-code">01</span><span class="fiche-tree-label">{copy.levels[0][0]}</span></li>
+     <li class="fiche-tree-2"><span class="fiche-quota-code">01.01</span><span class="fiche-tree-label">{copy.levels[1][0]}</span></li>
+     <li class="fiche-tree-3"><span class="fiche-quota-code">0101.21</span><span class="fiche-tree-label">{copy.levels[2][0]}</span></li>
+     <li class="fiche-tree-4"><span class="fiche-quota-code">0101.21<b>10</b></span><span lang={lang}>{quota[0]}</span></li>
+     <li class="fiche-tree-4"><span class="fiche-quota-code">0101.21<b>90</b></span><span lang={lang}>{quota[1]}</span></li>
+    </ol>
+    <p class="fiche-note">{copy.quotaNote}</p>
+   </aside>
+  </div>
+  <div class="fiche-reader" data-atlas-enter>
+   <div class="fiche-reader-head"><div><h3>{copy.readerTitle}</h3><p>{copy.readerIntro}</p></div><button type="button" class="atlas-btn atlas-btn-secondary fiche-reader-next" data-tares-next hidden>{copy.another}<span aria-hidden="true">↻</span></button></div>
+   <div class="fiche-reader-grid">
+    <div class="fiche-card fiche-summary">
+     <div class="fiche-card-title"><strong>{copy.summary}</strong><span>{copy.summaryFile}</span></div>
+     <dl class="fiche-fields">{copy.fields.map(([field, label]) => <div><dt><code>{field}</code><span>{label}</span></dt><dd data-tares-field={field}>—</dd></div>)}</dl>
+     <p class="fiche-live-line" data-tares-live role="status"></p>
+     <a class="atlas-text-link fiche-verify" data-tares-source href="https://xtares.admin.ch/" rel="noopener">{copy.verify} ↗</a>
+    </div>
+    <div class="fiche-card fiche-detail">
+     <div class="fiche-card-title"><strong>{copy.detail}</strong><span>{copy.detailFile}</span></div>
+     <div class="fiche-rate-stack" data-tares-stack aria-hidden="true">{Array.from({ length: 8 }, (_, index) => <span class:list={{ "is-percent": index === 5 }}></span>)}</div>
+     <p class="fiche-rate-count"><strong data-tares-rate-count>—</strong> <span>{copy.detailCount}</span></p>
+     <ul class="fiche-detail-columns">{copy.detailColumns.map(column => <li>{column}</li>)}</ul>
+     <p class="fiche-percent"><span aria-hidden="true">%</span>{copy.percent}</p>
+    </div>
+   </div>
+  </div>
+ </div></section>
+
+ <section class="atlas-section atlas-method" id="apercu"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.previewKicker}</p><h2>{copy.previewTitle}</h2></div><p class="atlas-section-intro">{copy.previewIntro}</p></div>
+  <slot />
+ </div></section>
+
+ <section class="atlas-section" id="conditions"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.conditionsKicker}</p><h2>{copy.conditionsTitle}</h2></div></div>
+  <div class="fiche-conditions">{copy.conditions.map(([glyph, title, text]) => <article class="fiche-condition" data-atlas-enter><span class="fiche-glyph" aria-hidden="true">{glyph}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
+  <div class="fiche-official" data-atlas-enter>
+   <p class="fiche-official-langs"><span lang="fr">Non officiel</span><span lang="de">Nicht offiziell</span><span lang="it">Non ufficiale</span><span lang="en">Not official</span></p>
+   <div><h3>{copy.officialTitle}</h3><p>{copy.official}</p><p lang="de" class="fiche-official-quote">«&nbsp;Dies ist keine offizielle Veröffentlichung.&nbsp;»</p><p class="fiche-note">{copy.permission}</p><a class="atlas-text-link" href="https://xtares.admin.ch/" rel="noopener">{copy.officialLink} ↗</a></div>
+  </div>
+ </div></section>
+
+ <section class="atlas-section atlas-method" id="archive"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.archiveKicker}</p><h2>{copy.archiveTitle}</h2></div><p class="atlas-section-intro">{copy.archiveIntro}</p></div>
+  <div class="fiche-archive">
+   <div class="fiche-window" data-atlas-enter>
+    <div class="atlas-window-title"><span>{copy.archiveWindow}</span><span aria-hidden="true">ZIP</span></div>
+    <div class="fiche-window-body">{copy.groups.map(([title, text, files]) => <div class="fiche-file-group"><div><strong>{title}</strong><small>{text}</small></div><ul>{(files as string[]).map(file => <li><code>{file}</code></li>)}</ul></div>)}</div>
+   </div>
+   <div class="fiche-archive-side" data-atlas-enter>
+    <ul class="atlas-limits">{copy.archiveNotes.map(note => <li>{note}</li>)}</ul>
+    <div class="fiche-mcp"><p class="atlas-kicker">MCP · tariff_lookup</p><h3>{copy.mcpTitle}</h3><p>{copy.mcpText}</p><a class="atlas-text-link" href={`${L("/mcp")}#install`}>{copy.mcpLink} ↗</a></div>
+   </div>
+  </div>
+ </div></section>
+
+ <section class="atlas-section atlas-faq"><div class="atlas-shell atlas-faq-grid"><div data-atlas-enter><p class="atlas-kicker">{copy.faqKicker}</p><h2 class="atlas-section-title">{copy.faqTitle}</h2><a href={L("/legal/cgv")} class="atlas-text-link">{copy.terms} ↗</a></div><div>{copy.faq.map(([question, answer]) => <details><summary>{question}</summary><p>{answer}</p></details>)}</div></div></section>
+
+ <section class="atlas-shell" id="acheter"><div class="atlas-purchase" data-atlas-enter><div><p class="atlas-kicker">{copy.purchaseKicker}</p><h2>{copy.delivery}</h2><p>{copy.serviceText}</p><div class="atlas-actions"><a href="mailto:contact@openswissdata.com" class="atlas-text-link">{copy.contact} ↗</a><a href={L("/account")} class="atlas-text-link">{copy.account} ↗</a></div></div><div class="atlas-purchase-box"><p>TARES · {copy.price}</p><div class="atlas-purchase-price"><strong>{offer.price}</strong><span>CHF</span></div><p>{copy.updates}</p><form method="POST" action="/api/checkout/start"><input type="hidden" name="locale" value={lang}/><input type="hidden" name="dataset_ids" value="tares"/><button class="atlas-btn" type="submit">{copy.buyTares}<span aria-hidden="true">↗</span></button></form><CheckoutNotice /></div></div><p class="fiche-bundle-line">{copy.bundle} <a href={L("/bundle")}>{copy.bundleLink} ↗</a></p><p class="atlas-live-note">{copy.independent}</p></section>
+</div>
+<script>
+ import '../scripts/tares-product';
+</script>
+</AtlasLayout>

@@ -1,0 +1,128 @@
+/* Fiche TARES : anatomie du numéro, lecture d’une ligne, conditions et réserves. */
+/* Anatomie d’un numéro de tarif : plaque sombre, tuiles ivoire, chiffres suisses soulignés de rouge. */
+.fiche-anatomy-grid { display:grid; grid-template-columns:minmax(0,1.38fr) minmax(0,1fr); gap:22px; align-items:stretch; }
+.fiche-plate { --atlas-focus:#f4f3ed; --tile:58px; --gap:6px; --dot:18px; margin:0; padding:40px; border-radius:12px; background:var(--atlas-ink); color:#f4f3ed; position:relative; overflow:hidden; min-width:0; }
+.fiche-plate::after { content:''; position:absolute; inset:auto 0 0; height:4px; background:linear-gradient(90deg,#2f6b53 0 62%,var(--atlas-red) 62% 100%); }
+.fiche-plate-meta { display:flex; justify-content:space-between; gap:12px; font-family:var(--font-mono); font-size:10px; letter-spacing:.07em; color:#aebfaf; }
+.fiche-code { margin:34px 0 30px; }
+.fiche-code-digits { display:flex; align-items:flex-end; gap:var(--gap); }
+.fiche-tile { flex:none; display:grid; place-items:center; width:var(--tile); height:calc(var(--tile) * 1.2); border-radius:6px; background:#f4f3ed; color:var(--atlas-ink); font-size:calc(var(--tile) * .66); font-weight:500; letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; box-shadow:inset 0 -4px 0 #d2dccd, 0 14px 26px #04130d59; }
+.fiche-tile.is-swiss { background:#fbf2ec; box-shadow:inset 0 5px 0 var(--atlas-red), inset 0 -4px 0 #ecd6cc, 0 14px 26px #04130d59; }
+.fiche-code-dot { flex:none; width:var(--dot); text-align:center; font-size:calc(var(--tile) * .66); line-height:1; color:#8fb09b; }
+.fiche-code-levels { list-style:none; margin:20px 0 0; padding:0; display:grid; gap:11px; }
+.fiche-level { display:grid; gap:7px; }
+.fiche-level-line { display:block; height:10px; border:1.5px solid #7fa38e; border-top:0; border-radius:0 0 3px 3px; transform-origin:left center; }
+.fiche-level-1 .fiche-level-line { width:calc(2 * var(--tile) + var(--gap)); }
+.fiche-level-2 .fiche-level-line { width:calc(4 * var(--tile) + 3 * var(--gap)); border-color:#9dbba8; }
+.fiche-level-3 .fiche-level-line { width:calc(6 * var(--tile) + var(--dot) + 6 * var(--gap)); border-color:#c2d4c6; }
+.fiche-level-4 .fiche-level-line { width:calc(8 * var(--tile) + var(--dot) + 8 * var(--gap)); border-color:#e98b78; border-width:2px; }
+.fiche-level-text { font-size:12px; line-height:1.5; color:#dfe8dc; }
+.fiche-level-text strong { font-weight:560; }
+.fiche-level-code { font-family:var(--font-mono); font-size:11px; color:#f4f3ed; }
+.fiche-level-text code { font-size:10px; color:#a9bdb0; background:#ffffff12; padding:2px 6px; border-radius:3px; white-space:nowrap; }
+.fiche-level-4 .fiche-level-text strong,.fiche-level-4 .fiche-level-code { color:#ffb8a8; }
+.fiche-designation { border-top:1px solid #ffffff21; padding-top:22px; }
+.fiche-designation .fiche-mini { color:#aebfaf; }
+.fiche-designation .fiche-mini code { color:#dfe8dc; }
+.fiche-designation-main { font-size:25px; font-weight:470; letter-spacing:-.035em; line-height:1.3; margin:10px 0 16px!important; color:#f8f7f1; text-wrap:balance; }
+.fiche-designation-others { list-style:none; margin:0; padding:0; display:grid; gap:7px; font-size:12px; line-height:1.55; color:#c5d4c9; }
+.fiche-designation-others li { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:baseline; gap:0 10px; }
+.fiche-designation-others span { min-width:26px; padding:1px 5px; border:1px solid #ffffff30; border-radius:3px; font-family:var(--font-mono); font-size:9px; text-align:center; color:#dfe8dc; }
+.fiche-plate-caption { margin-top:24px; font-size:11px; line-height:1.7; color:#9fb5a5; }
+
+.fiche-quota { padding:34px; border:1px solid var(--atlas-line); border-radius:12px; background:#fbfbf5; min-width:0; display:flex; flex-direction:column; gap:16px; }
+.fiche-quota h3 { font-size:22px; font-weight:530; letter-spacing:-.035em; line-height:1.25; }
+.fiche-quota>p:not(.fiche-note) { font-size:14px; line-height:1.75; color:var(--atlas-muted); }
+.fiche-quota-code { font-family:var(--font-mono); font-size:15px; color:var(--atlas-ink); letter-spacing:.01em; white-space:nowrap; }
+.fiche-quota-code b { color:var(--atlas-red); font-weight:600; }
+/* Arbre vertical : chaque niveau décale d’un cran et se raccroche au précédent. */
+.fiche-tree { list-style:none; margin:0; padding:20px 20px 22px; border-radius:10px; background:#eef1e8; border:1px solid #dfe5da; display:grid; }
+.fiche-tree li { --step:22px; position:relative; display:grid; gap:3px; padding:9px 0 9px calc(var(--level) * var(--step)); font-size:13px; line-height:1.5; }
+.fiche-tree li::before { content:''; position:absolute; left:calc((var(--level) - 1) * var(--step) + 6px); top:0; height:calc(50% + 1px); width:calc(var(--step) - 10px); border-left:1.5px solid #9dbba8; border-bottom:1.5px solid #9dbba8; border-bottom-left-radius:3px; }
+.fiche-tree .fiche-tree-1 { --level:0; }.fiche-tree .fiche-tree-1::before { display:none; }
+.fiche-tree .fiche-tree-2 { --level:1; }.fiche-tree .fiche-tree-3 { --level:2; }.fiche-tree .fiche-tree-4 { --level:3; }
+.fiche-tree .fiche-tree-4+.fiche-tree-4::before { top:-50%; height:calc(100% + 1px); }
+.fiche-tree-label { font-size:11px; color:var(--atlas-muted); font-family:var(--font-mono); letter-spacing:.02em; }
+.fiche-tree .fiche-tree-4 { font-size:13px; color:var(--atlas-ink); }
+.fiche-quota .fiche-note { margin-top:auto; padding-top:14px; border-top:1px solid var(--atlas-line); }
+
+/* Une ligne réelle, puis la pile de ses lignes détaillées. */
+.fiche-reader { margin-top:22px; padding:34px; border:1px solid var(--atlas-line); border-radius:12px; background:#fbfbf5; }
+.fiche-reader-head { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:18px 30px; }
+.fiche-reader-head h3 { font-size:23px; font-weight:530; letter-spacing:-.035em; }
+.fiche-reader-head p { font-size:14px; line-height:1.75; color:var(--atlas-muted); max-width:62ch; margin-top:8px; }
+.fiche-reader-next { min-height:46px; padding:10px 18px; gap:16px; }
+.fiche-reader-grid { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:18px; margin-top:26px; align-items:start; }
+.fiche-card { padding:24px; border:1px solid var(--atlas-line); border-radius:10px; background:#f4f3ed; min-width:0; }
+.fiche-card-title { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 14px; padding-bottom:14px; border-bottom:1px solid #16382f33; }
+.fiche-card-title strong { font-size:15px; font-weight:600; }
+.fiche-card-title span { font-family:var(--font-mono); font-size:10px; color:var(--atlas-muted); }
+.fiche-fields { margin:0; }
+.fiche-fields>div { display:grid; grid-template-columns:minmax(150px,.85fr) minmax(0,1.15fr); gap:6px 18px; padding:13px 0; border-bottom:1px solid var(--atlas-line); }
+.fiche-fields dt code { display:block; font-size:10.5px; color:var(--atlas-ink); }
+.fiche-fields dt span { display:block; margin-top:3px; font-size:11px; line-height:1.5; color:var(--atlas-muted); }
+.fiche-fields dd { margin:0; font-size:14px; line-height:1.5; overflow-wrap:anywhere; align-self:center; }
+.fiche-fields [data-tares-field='hs8'] { font-family:var(--font-mono); font-size:15px; }
+.fiche-live-line { min-height:18px; margin-top:18px; font-family:var(--font-mono); font-size:10px; color:var(--atlas-muted); }
+.fiche-verify { font-size:13px; padding-bottom:0; }
+.fiche-rate-stack { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:5px; margin:22px 0 16px; }
+.fiche-rate-stack span { height:15px; border-radius:2px; background:#b9ccbd; }
+.fiche-rate-stack span:first-child { background:var(--atlas-ink); }
+.fiche-rate-stack span:nth-child(3n+2) { background:#8fb09b; }
+.fiche-rate-stack span:nth-child(5n+4) { background:#d7e2d6; }
+.fiche-rate-stack span.is-percent { background:#f4f3ed; box-shadow:inset 0 0 0 1.5px var(--atlas-red); }
+.fiche-rate-count { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; font-size:12px; color:var(--atlas-muted); }
+.fiche-rate-count strong { font-size:34px; font-weight:500; letter-spacing:-.05em; color:var(--atlas-ink); font-variant-numeric:tabular-nums; }
+.fiche-detail-columns { list-style:none; margin:18px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:6px; }
+.fiche-detail-columns li { padding:5px 10px; border:1px solid var(--atlas-line); border-radius:99px; background:#fbfbf5; font-size:11px; line-height:1.4; }
+.fiche-percent { display:flex; align-items:center; gap:13px; margin-top:20px; font-size:13px; line-height:1.6; }
+.fiche-percent span { flex:none; display:grid; place-items:center; width:36px; height:36px; border-radius:7px; background:var(--atlas-red); color:#fff; font-weight:600; font-size:15px; }
+
+/* Aperçu TARES : numéro en chasse fixe, désignation lisible. */
+.fiche .fiche-tares-table td:first-child { min-width:0; font-family:var(--font-mono); font-size:11px; font-weight:500; white-space:nowrap; }
+.fiche .fiche-tares-table td:nth-child(2) { min-width:240px; }
+
+/* Conditions et réserves. */
+.fiche-conditions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.fiche-condition { display:grid; grid-template-columns:54px minmax(0,1fr); grid-template-areas:'glyph title' 'glyph text'; gap:6px 22px; padding:30px; border:1px solid var(--atlas-line); border-radius:10px; background:#fbfbf5; }
+.fiche-glyph { grid-area:glyph; display:grid; place-items:center; width:54px; height:54px; border-radius:9px; background:var(--atlas-ink); color:#f4f3ed; font-size:23px; box-shadow:inset 0 -4px 0 #0b241c; }
+.fiche-condition:first-child .fiche-glyph { background:var(--atlas-red); box-shadow:inset 0 -4px 0 #8c2a1f; }
+.fiche-condition h3 { grid-area:title; font-size:19px; font-weight:540; letter-spacing:-.03em; line-height:1.3; align-self:end; }
+.fiche-condition p { grid-area:text; font-size:13.5px; line-height:1.8; color:var(--atlas-muted); }
+.fiche-official { display:grid; grid-template-columns:minmax(0,.55fr) minmax(0,1.45fr); gap:34px; margin-top:18px; padding:34px; border:1px solid var(--atlas-line); border-top:3px solid var(--atlas-red); border-radius:10px; background:#f0efe7; }
+.fiche-official-langs { display:grid; align-content:start; gap:9px; font-family:var(--font-mono); font-size:11px; letter-spacing:.07em; text-transform:uppercase; }
+.fiche-official-langs span { display:flex; align-items:center; gap:10px; }
+.fiche-official-langs span::before { content:''; width:7px; height:7px; border-radius:1px; background:var(--atlas-red); }
+.fiche-official h3 { font-size:22px; font-weight:530; letter-spacing:-.035em; margin-bottom:10px; }
+.fiche-official p:not(.fiche-note) { font-size:14px; line-height:1.8; color:var(--atlas-muted); }
+.fiche-official .fiche-official-quote { margin:10px 0 14px; color:var(--atlas-ink); font-size:13px; }
+
+@media (max-width:1100px) { .fiche-plate { --tile:50px; --gap:5px; --dot:15px; padding:34px; } }
+@media (max-width:980px) {
+ .fiche-anatomy-grid,.fiche-reader-grid { grid-template-columns:minmax(0,1fr); }
+ .fiche-plate { --tile:54px; }
+ .fiche-official { grid-template-columns:minmax(0,1fr); gap:18px; }
+ .fiche-official-langs { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:760px) {
+ .fiche-plate { --tile:31px; --gap:3px; --dot:10px; padding:24px 22px 26px; border-radius:10px; }
+ .fiche-code { margin:26px 0 24px; }
+ .fiche-tile { border-radius:4px; box-shadow:inset 0 -3px 0 #d2dccd, 0 8px 16px #04130d59; }
+ .fiche-tile.is-swiss { box-shadow:inset 0 4px 0 var(--atlas-red), inset 0 -3px 0 #ecd6cc, 0 8px 16px #04130d59; }
+ .fiche-level-text { font-size:11px; }
+ .fiche-designation-main { font-size:20px; }
+ .fiche-quota,.fiche-reader { padding:22px; }
+ .fiche-quota h3,.fiche-reader-head h3 { font-size:21px; }
+ .fiche-card { padding:18px; }
+ .fiche-fields>div { grid-template-columns:minmax(0,1fr); gap:4px; }
+ .fiche-rate-count strong { font-size:30px; }
+ .fiche-conditions { grid-template-columns:minmax(0,1fr); gap:14px; }
+ .fiche-condition { grid-template-columns:44px minmax(0,1fr); grid-template-areas:'glyph title' 'text text'; gap:14px 16px; padding:22px; }
+ .fiche-condition h3 { align-self:center; }
+ .fiche-glyph { width:44px; height:44px; font-size:19px; border-radius:8px; }
+ .fiche-condition h3 { font-size:17px; }
+ .fiche-official { padding:24px 22px; }
+ .fiche-official-langs { font-size:10px; letter-spacing:.04em; gap:9px 12px; }
+}
+@media (max-width:359px) { .fiche-plate { --tile:27px; --dot:8px; padding:20px 18px 24px; } .fiche-official-langs { grid-template-columns:minmax(0,1fr); } }
+@media (forced-colors:active) { .fiche-tile,.fiche-glyph,.fiche-percent span { border:1px solid CanvasText; } .fiche-level-line { border-color:CanvasText; } }
