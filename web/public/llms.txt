@@ -1,0 +1,45 @@
+# OpenSwissData
+
+> Normalised copies of Swiss federal reference data: the Swiss customs tariff (TARES, 8-digit Swiss tariff numbers with MFN duty, preferential regimes and restrictions), the FINMA register of supervised financial institutions plus the FINMA warnings list, and correspondences between the NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4 activity classifications. Free to query from AI agents over MCP, without a key or sign-up. Full datasets are sold as signed files.
+
+The data is an unofficial copy. Every answer names its source; binding decisions belong to the official sources (xtares.admin.ch for customs, finma.ch for supervision, the Swiss Federal Statistical Office for NOGA).
+
+## Use it from an AI agent (free, no key)
+
+- MCP endpoint (Streamable HTTP, JSON responses): `https://mcp.openswissdata.com/jsonrpc`
+- Limit without a key: 100 calls per hour per IP address.
+- Claude Code: `claude mcp add --transport http openswissdata https://mcp.openswissdata.com/jsonrpc`
+- Clients configured with JSON (Cursor, Windsurf and similar): `{"mcpServers": {"openswissdata": {"url": "https://mcp.openswissdata.com/jsonrpc"}}}`
+- Clients that only launch local processes: `npx -y @openswissdata/mcp` (a small bridge to the same endpoint).
+- Without MCP support, send JSON-RPC directly: `curl -s https://mcp.openswissdata.com/jsonrpc -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"cross_walk","arguments":{"code":"62.01","source":"NOGA_2008","target":"NACE_2.0"}}}'`
+
+## Free tools
+
+- `tariff_lookup` — Swiss customs tariff (TARES). Arguments: `hs8` = an 8-digit Swiss tariff number (dots allowed, e.g. `8471.3000`) for the full line: designations in French, German, Italian and English, MFN duty, preferential regimes, restrictions, customs relief codes; or a 2- to 7-digit HS prefix (e.g. the international HS6 code `847130`) to list the Swiss 8-digit lines under it. Optional `lang`: `fr`, `de`, `it` or `en`.
+- `kyc_check` — search the FINMA register of supervised institutions and the FINMA warnings list by name. Argument: `name` (full name or a distinctive part).
+- `cross_walk` — map an activity code between `NOGA_2008`, `NOGA_2025`, `NACE_2.0`, `NACE_2.1` and `ISIC_4`, with the relation type (exact or approximate) and its source. Arguments: `code`, `source`, `target`.
+
+Other tools (semantic search over tariff descriptions, text-to-NOGA classification, change history) belong to the Pro plan, which is closed to new subscribers at the moment.
+
+## Datasets sold as files
+
+One-off payments in CHF, no automatic renewal, 360 days of updates included. Each archive carries an Ed25519-signed manifest and SHA-256 checksums.
+
+- [TARES Swiss customs tariff](https://www.openswissdata.com/en/datasets/tares): about 7,500 tariff lines, 299 CHF.
+- [FINMA register and warnings list](https://www.openswissdata.com/en/datasets/finma): 299 CHF.
+- [NOGA / NACE / ISIC classifications](https://www.openswissdata.com/en/datasets/classifications): five classifications with sourced correspondences, 399 CHF.
+- [Bundle of the three datasets](https://www.openswissdata.com/en/bundle): 797 CHF.
+
+## Samples and current versions
+
+- [TARES: current version, counts and sample (JSON)](https://www.openswissdata.com/api/catalog/tares) · [CSV sample](https://www.openswissdata.com/api/catalog/tares?format=csv)
+- [FINMA: current version, counts and sample (JSON)](https://www.openswissdata.com/api/catalog/finma) · [CSV sample](https://www.openswissdata.com/api/catalog/finma?format=csv)
+- [Classifications: current version, counts and sample (JSON)](https://www.openswissdata.com/api/catalog/classifications) · [CSV sample](https://www.openswissdata.com/api/catalog/classifications?format=csv)
+
+## Documentation
+
+- [MCP server page](https://www.openswissdata.com/en/mcp)
+- [Server discovery (JSON)](https://mcp.openswissdata.com/discovery)
+- [Source code](https://github.com/cammac-creator/openswissdata)
+- [npm bridge @openswissdata/mcp](https://www.npmjs.com/package/@openswissdata/mcp)
+- [Public key for archive signatures](https://www.openswissdata.com/.well-known/openswissdata-pubkey.pem)

@@ -65,7 +65,7 @@ const tools = [
 ---
 <BaseLayout
   title="MCP Server openswissdata — Schweizer Bundes-Datasets für Claude Code & Cursor"
-  description="TARES, NOGA und FINMA über JSON-RPC. Drei Tools ohne Konto, 100 Anfragen pro Tag und IP. Weitere Tools benötigen bestehende Rechte."
+  description="TARES, NOGA und FINMA über JSON-RPC. Drei Tools ohne Konto, 100 Anfragen pro Stunde und IP. Weitere Tools benötigen bestehende Rechte."
 >
 
 <div class="bg-grid"></div>
@@ -77,7 +77,7 @@ const tools = [
       <div class="v4-eyebrow">
         <span>Model Context Protocol</span>
         <span style="opacity:.4">·</span>
-        <span class="check">3 Tools ohne Konto · 100 Anfragen/Tag/IP</span>
+        <span class="check">3 Tools ohne Konto · 100 Anfragen/Stunde/IP</span>
       </div>
 
       <h1 class="v4-h1" style="max-width:24ch;">
@@ -85,7 +85,7 @@ const tools = [
       </h1>
 
       <p class="v4-lede" style="max-width:62ch;">
-        Verbinden Sie die Schweizer Bundes-Datasets (TARES, NOGA, FINMA) direkt mit Ihrem KI-Agenten. JSON-RPC 2.0, vorberechnete mehrsprachige Embeddings, kryptografisch signiertes Manifest. <strong>Free Tier 100 Req/Tag.</strong>
+        Verbinden Sie die Schweizer Bundes-Datasets (TARES, NOGA, FINMA) direkt mit Ihrem KI-Agenten. JSON-RPC 2.0, vorberechnete mehrsprachige Embeddings, kryptografisch signiertes Manifest. <strong>Free Tier 100 Req/Stunde.</strong>
       </p>
 
       <div class="v4-spec-row">
@@ -192,7 +192,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
 </section>
 
 <!-- ========== PLAYGROUND ========== -->
-<div class="container-v4"><p class="mcp-availability" style="padding:20px;border:1px solid var(--line);border-radius:12px;line-height:1.8;margin:24px 0;">Ohne Konto verfügbar: tariff_lookup, kyc_check und cross_walk (100 Anfragen/Tag je IP). Andere Werkzeuge benötigen entsprechende Rechte; neue kostenpflichtige Abonnements sind geschlossen. STATENT ist bis zum Nachweis der Weiterverbreitungsrechte ausgesetzt. Vektorindizes werden nicht durch Dateierhebungen aktualisiert.</p></div>
+<div class="container-v4"><p class="mcp-availability" style="padding:20px;border:1px solid var(--line);border-radius:12px;line-height:1.8;margin:24px 0;">Ohne Konto verfügbar: tariff_lookup, kyc_check und cross_walk (100 Anfragen/Stunde je IP). Andere Werkzeuge benötigen entsprechende Rechte; neue kostenpflichtige Abonnements sind geschlossen. STATENT ist bis zum Nachweis der Weiterverbreitungsrechte ausgesetzt. Vektorindizes werden nicht durch Dateierhebungen aktualisiert.</p></div>
 <section class="v4-personas" id="playground">
   <div class="container-v4">
     <div class="v4-section-eyebrow">
@@ -216,7 +216,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
         </div>
       </div>
       <button id="pg-run" class="v4-btn v4-btn-primary" style="width:auto;">Try it <span class="arrow">→</span></button>
-      <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin-top:10px;">→ Free Tier: 100 Req/Tag pro IP. Kein Account zum Testen nötig.</p>
+      <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin-top:10px;">→ Free Tier: 100 Req/Stunde pro IP. Kein Account zum Testen nötig.</p>
 
       <pre id="pg-output" style="background:#0A0A0C;color:#fafafa;padding:18px 22px;border-radius:8px;font-family:var(--font-mono);font-size:13px;line-height:1.6;overflow-x:auto;margin-top:18px;min-height:200px;">→ Tool auswählen, Argumente anpassen, „Try it" klicken…</pre>
     </div>
@@ -239,7 +239,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
       <div class="mcp-pc">
         <div class="mcp-pc-tier">Free</div>
         <div class="mcp-pc-price">0 CHF</div>
-        <p class="mcp-pc-sub">100 Req/Tag pro IP. Kein Account zum Testen nötig.</p>
+        <p class="mcp-pc-sub">100 Req/Stunde pro IP. Kein Account zum Testen nötig.</p>
         <a href="#install" class="v4-btn v4-btn-secondary mcp-pc-cta">Jetzt testen <span class="arrow">→</span></a>
       </div>
       <div class="mcp-pc pop">
@@ -272,7 +272,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
 <section class="v4-cta-final">
   <div class="container-v4">
     <h2>Schweizer Daten für Ihre Agenten.</h2>
-    <p>Free Tier 100 Req/Tag. Kein Account zum Testen nötig. Open Spec MCP 2025-11-25.</p>
+    <p>Free Tier 100 Req/Stunde. Kein Account zum Testen nötig. Open Spec MCP 2025-11-25.</p>
     <div class="v4-cta-final-row">
       <a href="#install" class="v4-btn v4-btn-primary">Jetzt verbinden <span class="arrow">→</span></a>
       <a href="/de/datasets/classifications" class="v4-btn v4-btn-secondary">Klassifikationen ansehen</a>

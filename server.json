@@ -1,8 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.cammac-creator/openswissdata",
-  "description": "Données suisses TARES, FINMA et NOGA/NACE/ISIC. Huit outils MCP, dont trois anonymes.",
-  "version": "0.2.1",
+  "title": "OpenSwissData",
+  "description": "Swiss customs tariff (TARES), FINMA register and warnings, NOGA/NACE/ISIC codes. 3 free tools.",
+  "version": "0.3.0",
   "websiteUrl": "https://www.openswissdata.com",
   "repository": {
     "url": "https://github.com/cammac-creator/openswissdata",
@@ -20,7 +21,7 @@
       "environmentVariables": [
         {
           "name": "OPENSWISSDATA_API_KEY",
-          "description": "Optional Bearer token for higher quotas / Pro tools. Anonymous tier works without it (~100 req/day/IP).",
+          "description": "Optional existing OAuth token for Pro tools (closed to new subscribers). Without it: 3 free tools, 100 calls/hour/IP.",
           "isRequired": false,
           "isSecret": true,
           "format": "string"
@@ -52,13 +53,17 @@
     "io.modelcontextprotocol.registry/publisher-provided": {
       "tags": [
         "swiss",
-        "federal",
+        "switzerland",
+        "customs",
+        "tariff",
+        "hs-code",
         "tares",
         "finma",
+        "kyc",
         "noga",
-        "compliance",
-        "tariff",
-        "kyc"
+        "nace",
+        "isic",
+        "compliance"
       ],
       "categories": [
         "government",

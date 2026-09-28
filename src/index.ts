@@ -34,6 +34,12 @@ import { CHECKOUT_NOTICE_CSP, isCheckoutNotice } from './lib/checkout-notice.js'
 import {LOGIN_CONFIRMATION_CSP} from './lib/login-confirmation-page.js';
 import {authorizationCsp} from './mcp/oauth/redirects.js';
 
+// Adresses d'entrée MCP qu'un client peut recevoir : sur le sous-domaine (après réécriture ou non)
+// et sur le site principal. Seules ces adresses répondent 405 à une ouverture de flux SSE.
+const MCP_HOST_ENTRY_PATHS: ReadonlySet<string> = new Set(["/", "/jsonrpc", "/mcp", "/mcp/", "/mcp/jsonrpc"]);
+const MCP_WWW_ENTRY_PATHS: ReadonlySet<string> = new Set(["/mcp", "/mcp/", "/mcp/jsonrpc"]);
+const MCP_NO_SSE_MESSAGE = "This MCP endpoint speaks Streamable HTTP with JSON responses: send JSON-RPC messages with POST. No SSE stream is offered.";
+
 export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   const app = new Hono();
   const adminPolicy=adminPagePolicy(webRoot);
@@ -172,9 +178,29 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   app.use("*", async (c, next) => {
     const host = (c.req.header("host") ?? "").split(":")[0].toLowerCase();
     const isMcpHost = host === "mcp.openswissdata.com" || host === "mcp.localhost";
+    const url = new URL(c.req.url);
+
+    // Un client MCP ouvre le flux SSE par GET text/event-stream sur l'adresse qu'on lui a donnée.
+    // Aucun flux n'est proposé : 405, plutôt qu'une page HTML qu'il lirait comme un flux vide
+    // avant de se reconnecter sans fin. Les navigateurs (text/html) gardent la page de documentation.
+    const accept = c.req.header("accept") ?? "";
+    const entries = isMcpHost ? MCP_HOST_ENTRY_PATHS : MCP_WWW_ENTRY_PATHS;
+    if (
+      (c.req.method === "GET" || c.req.method === "HEAD") &&
+      accept.includes("text/event-stream") && !accept.includes("text/html") &&
+      entries.has(url.pathname)
+    ) {
+      c.header("Allow", "POST");
+      c.header("Cache-Control", "no-store");
+      return c.json({ error: "method_not_allowed", error_description: MCP_NO_SSE_MESSAGE }, 405);
+    }
+    // Adresse avec barre finale collée telle quelle : même point d'entrée JSON-RPC.
+    if (c.req.method === "POST" && url.pathname === "/mcp/") {
+      url.pathname = "/mcp/jsonrpc";
+      return app.fetch(new Request(url, c.req.raw));
+    }
     if (!isMcpHost) return next();
 
-    const url = new URL(c.req.url);
     // API/protocol paths stay on the sub-domain (mapped to /mcp/* below):
     // JSON-RPC, discovery, health, the OAuth flow, and OAuth metadata.
     const isMcpApi =
@@ -193,7 +219,8 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
       return c.redirect(dest, 302);
     }
     if (url.pathname.startsWith("/mcp")) return next();
-    url.pathname = "/mcp" + url.pathname;
+    // La racine du sous-domaine est l'adresse la plus souvent collée dans un client : POST / = JSON-RPC.
+    url.pathname = url.pathname === "/" ? "/mcp/jsonrpc" : "/mcp" + url.pathname;
     const rewritten = new Request(url, c.req.raw);
     return app.fetch(rewritten);
   });

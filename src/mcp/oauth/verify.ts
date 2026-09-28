@@ -31,8 +31,14 @@ import {
   type Tier,
   isValidTier,
 } from "./scopes.js";
-import { checkRateLimit, type RateLimitResult } from "../rate-limit.js";
+import { checkRateLimit, ANONYMOUS_RATE_LIMIT, type RateLimitResult } from "../rate-limit.js";
 import { timingSafeEqual } from "node:crypto";
+import { abuseIp, trustedRequestIp } from "../../lib/request-ip.js";
+import { trackMcpRateLimited } from "../track-mcp.js";
+
+/** Outils appelables sans jeton, dans l'ordre présenté aux agents. */
+export const ANONYMOUS_TOOL_NAMES = ["tariff_lookup", "kyc_check", "cross_walk"] as const;
+const ANONYMOUS_TOOLS: ReadonlySet<string> = new Set(ANONYMOUS_TOOL_NAMES);
 
 export interface MCPAuthContext {
   client_id: string;
@@ -58,20 +64,21 @@ function constantTimeStrEq(a: string, b: string): boolean {
   return timingSafeEqual(ba, bb);
 }
 
-function clientIp(req: { header: (n: string) => string | undefined }): string {
-  return (
-    req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.header("x-real-ip") ||
-    "unknown"
-  );
-}
-
 /**
  * Public /pricing URL surfaced on 429s so a rate-limited caller (human or LLM)
  * sees the upgrade path. Uses BASE_URL (the public site), not MCP_BASE_URL.
  */
 function pricingUpgradeUrl(): string {
   return (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "") + "/pricing";
+}
+
+/** Page anglaise des fichiers vendus : seule offre ouverte tant que les abonnements sont fermés. */
+function datasetsUrl(): string {
+  return (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "") + "/en/";
+}
+
+function retryAfterSeconds(resetAt: number): number {
+  return Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
 }
 
 /**
@@ -134,6 +141,8 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
 
       if (!quota.allowed) {
         const upgrade = pricingUpgradeUrl();
+        const dayExceeded = quota.day_limit >= 0 && quota.day_used > quota.day_limit;
+        c.header("Retry-After", String(secondsUntilUtcBoundary(dayExceeded ? "day" : "month")));
         return c.json(
           {
             error: "rate_limit_exceeded",
@@ -165,19 +174,28 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
       return c.json({ error: "unauthorized" }, 401);
     }
 
-    // Fallback: IP rate limit (free anonymous tier).
-    const ip = clientIp(c.req);
+    // Fallback: IP rate limit (free anonymous tier). Adresse du proxy Railway validé
+    // (IPv6 réduite en /64), jamais le premier X-Forwarded-For fourni par le client.
+    const ip = abuseIp(trustedRequestIp(c) ?? "");
     const rl = checkRateLimit(ip);
     c.header("X-RateLimit-Limit", String(rl.limit));
     c.header("X-RateLimit-Remaining", String(rl.remaining));
     c.header("X-RateLimit-Reset", String(Math.floor(rl.resetAt / 1000)));
     if (!rl.allowed) {
-      const upgrade = pricingUpgradeUrl();
+      // Journaliser avant de refuser, une fois par fenêtre et par réseau : un refus non mesuré
+      // rend l'API innocente à tort, un refus mesuré à chaque appel inonderait le journal.
+      if (rl.firstRefusal) trackMcpRateLimited(c, "anonymous");
+      const retryAfter = retryAfterSeconds(rl.resetAt);
+      const files = datasetsUrl();
+      c.header("Retry-After", String(retryAfter));
       return c.json(
         {
           error: "rate_limit_exceeded",
-          error_description: `anonymous tier exceeded — upgrade at ${upgrade}`,
-          upgrade_url: upgrade,
+          error_description: `Anonymous limit reached: ${ANONYMOUS_RATE_LIMIT.calls} calls per ${ANONYMOUS_RATE_LIMIT.window} per IP address. Retry after ${retryAfter} seconds. No paid API plan is open at the moment; the full datasets are sold as signed files at ${files}`,
+          retry_after_seconds: retryAfter,
+          limit: rl.limit,
+          window: ANONYMOUS_RATE_LIMIT.window,
+          datasets_url: files,
         },
         429,
       );
@@ -207,10 +225,18 @@ export function isToolAllowed(
   if (!auth) {
     // Anonymous fallback: only V1 read-only tools, gated by their scope being
     // among the "default-on" public scopes.
-    const PUBLIC_TOOLS = new Set(["tariff_lookup", "kyc_check", "cross_walk"]);
-    return PUBLIC_TOOLS.has(toolName);
+    return ANONYMOUS_TOOLS.has(toolName);
   }
   return auth.scopes.includes(requiredScope);
+}
+
+/** Secondes jusqu'au prochain jour ou mois UTC, bornes des compteurs de `consumeQuota`. */
+function secondsUntilUtcBoundary(unit: "day" | "month"): number {
+  const now = new Date();
+  const next = unit === "day"
+    ? Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
+    : Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1);
+  return Math.max(1, Math.ceil((next - now.getTime()) / 1000));
 }
 
 let lastAuthFailureLog = 0;

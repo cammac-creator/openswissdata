@@ -30,3 +30,58 @@ export function trackMcpToolCall(
     }, recordedAt);
   } catch { reportEventFailure(); }
 }
+
+// Nom et version déclarés par le client MCP : lettres, chiffres et ponctuation courante seulement,
+// jamais d'arobase (aucune adresse ne doit entrer dans le journal).
+function cleanClientField(value: unknown, max: number): string | null {
+  if (typeof value !== 'string') return null;
+  const cleaned = value.replace(/[^A-Za-z0-9 ._/+:()-]/g, '').trim().slice(0, max);
+  return cleaned || null;
+}
+
+/**
+ * Mesure facultative des connexions (`initialize`) : quel client déclare quel nom et quelle version
+ * de protocole. Le nom est déclaratif et falsifiable : diagnostic seulement, jamais une preuve humaine.
+ */
+export function trackMcpInitialize(
+  c: Context,
+  req: { method?: unknown; params?: unknown },
+  res: JsonRpcResponse | undefined,
+  auth: MCPAuthContext | null,
+): void {
+  if (req?.method !== 'initialize' || !res || res.error) return;
+  try {
+    const params = (req.params ?? {}) as { protocolVersion?: unknown; clientInfo?: { name?: unknown; version?: unknown } };
+    const negotiated = (res.result as { protocolVersion?: unknown } | undefined)?.protocolVersion;
+    const ua = (c.req.header('user-agent') ?? '').slice(0, 1024), recordedAt = Date.now();
+    const authenticated = auth !== null;
+    track({
+      kind: 'custom', origin: 'server', name: 'mcp_initialize',
+      status: 200, duration_ms: null, customer_id: null,
+      visitor_hash: visitorHashFromRequest(c, recordedAt), country: countryFromRequest(c),
+      referer: refererOrigin(c), ua_class: mcpCallerClass(ua, authenticated),
+      meta_json: JSON.stringify({
+        mcp: true,
+        client_name: cleanClientField(params.clientInfo?.name, 64),
+        client_version: cleanClientField(params.clientInfo?.version, 32),
+        requested_version: cleanClientField(params.protocolVersion, 16),
+        negotiated_version: cleanClientField(negotiated, 16),
+        authenticated, admin: auth?.admin === true, tier: auth?.tier ?? 'anonymous',
+      }),
+    }, recordedAt);
+  } catch { reportEventFailure(); }
+}
+
+/** Premier refus 429 d'une fenêtre pour un réseau : combien de réseaux touchent la limite, sans inonder le journal. */
+export function trackMcpRateLimited(c: Context, tier: string): void {
+  try {
+    const ua = (c.req.header('user-agent') ?? '').slice(0, 1024), recordedAt = Date.now();
+    track({
+      kind: 'custom', origin: 'server', name: 'mcp_rate_limited',
+      status: 429, duration_ms: null, customer_id: null,
+      visitor_hash: visitorHashFromRequest(c, recordedAt), country: countryFromRequest(c),
+      referer: refererOrigin(c), ua_class: mcpCallerClass(ua, false),
+      meta_json: JSON.stringify({ mcp: true, tier }),
+    }, recordedAt);
+  } catch { reportEventFailure(); }
+}

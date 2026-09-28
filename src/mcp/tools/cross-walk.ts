@@ -6,7 +6,7 @@ import { CLASSIFICATION_SCHEMES, resolveClassificationLinks, type Classification
 export const crossWalkSchema = {
   type: "object",
   properties: {
-    code: { type: "string", description: "Code source, avec ou sans point (01, 6201, 47.91)." },
+    code: { type: "string", description: "Source code, with or without dot (01, 6201, 47.91)." },
     source: { type: "string", enum: [...CLASSIFICATION_SCHEMES] },
     target: { type: "string", enum: [...CLASSIFICATION_SCHEMES] },
   },
@@ -59,6 +59,6 @@ export function crossWalkHandler(args: unknown): {
 }
 export const crossWalkTool = {
   name: "cross_walk",
-  description: "Recherche des correspondances NOGA 2008/2025, NACE 2.0/2.1 et ISIC 4. Retourne la relation exacte ou approchée, les sources et le chemin documenté. Refuse de chaîner deux relations non exactes. Une correspondance non exacte exige une validation métier.",
+  description: "Find correspondences between NOGA 2008, NOGA 2025, NACE 2.0, NACE 2.1 and ISIC 4 activity codes (Swiss, EU and UN classifications). Returns the exact or approximate relation, its sources and the documented path. Never chains two non-exact relations; a non-exact correspondence needs expert validation.",
   inputSchema: crossWalkSchema, handler: crossWalkHandler,
 } as const;

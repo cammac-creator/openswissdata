@@ -2,8 +2,11 @@ User-agent: *
 Allow: /
 
 Disallow: /account
+# Public dataset samples and versions stay readable by search engines and AI readers.
+Allow: /api/catalog/
 Disallow: /api/
 Disallow: /pour-toi/
 Disallow: /pour-electricien/
 
+# Summary for AI agents: https://www.openswissdata.com/llms.txt
 Sitemap: https://www.openswissdata.com/sitemap-index.xml

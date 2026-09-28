@@ -81,7 +81,7 @@ $ openswissdata finma-search "Cred Suisse" --top-k 5 --warnings
 
 | Tier        | How                                              | Limits                          |
 | ----------- | ------------------------------------------------ | ------------------------------- |
-| Anonymous   | `Client()` (no key)                              | ~100 req/day per IP, V1 tools   |
+| Anonymous   | `Client()` (no key)                              | 100 req/hour per IP, V1 tools  |
 | Bearer      | `Client(api_key="sk_live_...")` or env var       | Plan-dependent                  |
 | OAuth 2.1   | Token issued via `/oauth/*` endpoints            | All tools, scope-checked        |
 

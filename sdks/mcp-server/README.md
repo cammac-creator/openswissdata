@@ -1,18 +1,30 @@
 # @openswissdata/mcp
 
-Passerelle MCP STDIO vers le service HTTPS OpenSwissData, pour les clients qui lancent un processus local. Elle transmet les descriptions et les résultats du serveur, y compris les avertissements de source non officielle.
+MCP server for Swiss federal reference data: the Swiss customs tariff (TARES), the FINMA register of supervised institutions and the FINMA warnings list, and NOGA / NACE / ISIC activity-code correspondences. Three tools work without any key or sign-up.
 
-## Accès disponible
+This package is a small STDIO bridge to the remote OpenSwissData MCP endpoint, for clients that only launch local processes. Clients that speak MCP over HTTP can connect directly to `https://mcp.openswissdata.com/jsonrpc` without it.
 
-Le serveur expose huit outils. Trois sont accessibles anonymement, avec une limite de 100 appels par jour et par IP : `tariff_lookup`, `cross_walk`, `kyc_check`.
+## Free tools (no key)
 
-`tariff_semantic_search`, `tariff_changelog`, `classify_text`, `finma_search` et `entity_history` exigent des droits existants. Les nouvelles souscriptions payantes sont fermées. L’achat d’un fichier ne crée pas de clé API. `statent_lookup` a été retiré du service.
+Limit: 100 calls per hour per IP address.
 
-## Configuration
+| Tool | What it answers |
+| --- | --- |
+| `tariff_lookup` | An 8-digit Swiss tariff number (dots allowed, e.g. `8471.3000`) returns the full TARES line: designations in FR/DE/IT/EN, MFN duty, preferential regimes, restrictions, customs relief codes. A 2- to 7-digit HS prefix (e.g. the international HS6 code `847130`) lists the Swiss 8-digit lines under it. |
+| `kyc_check` | Searches the FINMA register and the FINMA warnings list by entity name. |
+| `cross_walk` | Maps an activity code between NOGA 2008, NOGA 2025, NACE 2.0, NACE 2.1 and ISIC 4, with the relation type and its source. |
 
-Version 0.1.2 relue dans le registre public le 25.09.2026, avec une intégrité identique à l’archive vérifiée.
+The other tools (`tariff_semantic_search`, `classify_text`, `finma_search`, `tariff_changelog`, `entity_history`) need existing access rights; new paid subscriptions are closed at the moment. Buying a dataset file does not create an API key. `statent_lookup` has been withdrawn.
 
-Exemple pour un client compatible avec `mcpServers` :
+## Setup
+
+Claude Code, remote endpoint (no bridge needed):
+
+```bash
+claude mcp add --transport http openswissdata https://mcp.openswissdata.com/jsonrpc
+```
+
+Clients configured with `mcpServers` and a local process (Claude Desktop, Cline and others):
 
 ```json
 {
@@ -25,19 +37,19 @@ Exemple pour un client compatible avec `mcpServers` :
 }
 ```
 
-Les clients qui acceptent directement MCP HTTP peuvent utiliser `https://mcp.openswissdata.com/jsonrpc`, sans cette passerelle. Les outils et leurs schémas proviennent du serveur à chaque consultation.
+Tools and their schemas come from the server at each listing.
 
-| Variable | Valeur par défaut | Usage |
+| Variable | Default | Use |
 | --- | --- | --- |
-| `OPENSWISSDATA_API_KEY` | Aucune | Jeton déjà accordé, pour les droits associés |
-| `OPENSWISSDATA_BASE_URL` | `https://mcp.openswissdata.com` | Serveur de substitution |
-| `OPENSWISSDATA_TIMEOUT_MS` | `30000` | Délai incluant la lecture complète de la réponse |
+| `OPENSWISSDATA_API_KEY` | none | Existing OAuth token, for the rights it carries |
+| `OPENSWISSDATA_BASE_URL` | `https://mcp.openswissdata.com` | Alternative server |
+| `OPENSWISSDATA_TIMEOUT_MS` | `30000` | Timeout, including reading the whole response |
 
-Une clé reste dans la configuration privée du client. Les diagnostics vont vers stderr ; stdout est réservé au protocole. `openswissdata-mcp --version` et `--help` affichent la version et l’aide.
+Keep a key in the client's private configuration. Diagnostics go to stderr; stdout is reserved for the protocol. `openswissdata-mcp --version` and `--help` print the version and help.
 
-## Développement et vérification
+## Development
 
-Node 22 est utilisé pour les contrôles. Le runtime conserve sa déclaration Node 18+ ; utiliser une version encore maintenue.
+Node 22 is used for the checks. The runtime keeps its Node 18+ declaration; use a maintained version.
 
 ```bash
 npm ci
@@ -47,12 +59,14 @@ npm run build
 npm pack --dry-run
 ```
 
-Les tests vérifient un échange MCP complet avec le SDK officiel et l’interruption d’une réponse dont le corps reste bloqué. Une modification du dépôt ne publie pas automatiquement une nouvelle version npm : vérifier séparément le registre avant distribution.
+The tests run a full MCP exchange with the official SDK and interrupt a response whose body stalls. A change in the repository does not publish a new npm version: check the registry separately before distribution.
 
-Le Dockerfile fournit une alternative locale : `docker build -t openswissdata-mcp .`, puis `docker run --rm -i openswissdata-mcp`.
+The Dockerfile offers a local alternative: `docker build -t openswissdata-mcp .`, then `docker run --rm -i openswissdata-mcp`.
 
-## Limites métier
+## Limits
 
-OpenSwissData est une copie non officielle. Conserver les avertissements remis à l’utilisateur. Une correspondance approchée exige une validation métier ; un tarif absent ne signifie pas gratuité ; l’absence de résultat FINMA n’est pas une certification de conformité. Consulter les sources originales avant une décision.
+OpenSwissData is an unofficial copy. Keep the notices shown to the user. An approximate correspondence needs expert validation; a missing tariff value does not mean duty-free; no FINMA result is not a compliance certificate. Check the original sources (xtares.admin.ch, finma.ch, the Swiss Federal Statistical Office) before any decision.
 
-Licence Apache-2.0. [Documentation du SDK MCP utilisé](https://github.com/modelcontextprotocol/typescript-sdk/tree/v1.x).
+Full datasets are sold as signed files at [openswissdata.com](https://www.openswissdata.com/en/). A summary for AI agents lives at [openswissdata.com/llms.txt](https://www.openswissdata.com/llms.txt).
+
+Apache-2.0 licence. [Documentation of the MCP SDK used](https://github.com/modelcontextprotocol/typescript-sdk/tree/v1.x).

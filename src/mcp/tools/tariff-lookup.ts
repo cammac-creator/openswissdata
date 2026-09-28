@@ -7,21 +7,30 @@
  */
 
 import { z } from "zod";
-import { getTares } from "../data-loader.js";
+import { getTares, type TaresRow } from "../data-loader.js";
 
 export const tariffLookupSchema = {
   type: "object",
   properties: {
-    hs8: { type: "string", pattern: "^\\d{8}$", description: "8-digit Swiss tariff number" },
+    hs8: {
+      type: "string",
+      pattern: "^[0-9][0-9. ]{1,11}$",
+      description: "Swiss tariff number: 8 digits for one line (dots allowed, e.g. 8471.3000), or a 2- to 7-digit HS prefix (e.g. the international HS6 code 847130) to list the Swiss 8-digit lines under it",
+    },
     lang: { type: "string", enum: ["fr", "de", "it", "en"], default: "fr" },
   },
   required: ["hs8"],
 } as const;
 
+// Points et espaces tolérés (8471.3000, 8471 30 00) : seuls les chiffres comptent.
 const InputZ = z.object({
-  hs8: z.string().regex(/^\d{8}$/),
+  hs8: z.string().max(20).transform((v) => v.replace(/[\s.]/g, "")).pipe(z.string().regex(/^\d{2,8}$/)),
   lang: z.enum(["fr", "de", "it", "en"]).default("fr"),
 });
+
+// Nombre maximal de lignes listées pour un préfixe : au-delà, l'agent affine avec plus de chiffres.
+const PREFIX_LIST_LIMIT = 40;
+const SUGGESTION_LIMIT = 10;
 
 const DISCLAIMERS = {
   fr: "AVIS NON-OFFICIEL : ces données sont une copie OpenSwissData de la TARES (BAZG/OFDF) et ne remplacent pas la consultation officielle sur xtares.admin.ch. OpenSwissData ne garantit ni l'exactitude ni l'actualité, et n'est pas responsable des décisions douanières prises sur cette base.",
@@ -66,10 +75,76 @@ function safeParseJson<T>(s: string, fallback: T): T {
   }
 }
 
+type Lang = "fr" | "de" | "it" | "en";
+
+function linesUnder(rows: readonly TaresRow[], prefix: string): TaresRow[] {
+  return rows.filter((r) => r.hs8.startsWith(prefix)).sort((a, b) => a.hs8.localeCompare(b.hs8));
+}
+
+function designationOf(row: TaresRow, lang: Lang): string {
+  return (row[`designation_${lang}` as const] as string) || row.designation_fr;
+}
+
+function formatLine(row: TaresRow, lang: Lang): string {
+  const label = designationOf(row, lang).replace(/\s+/g, " ").trim();
+  const short = label.length > 140 ? `${label.slice(0, 137)}...` : label;
+  const duty = row.duty_mfn_value !== "" && row.duty_mfn_value != null
+    ? `MFN ${row.duty_mfn_value} ${row.duty_mfn_unit ?? ""} ${row.duty_mfn_currency ?? ""}`.replace(/\s+/g, " ").trim()
+    : "MFN n/a";
+  return `- ${row.hs8} ${short} (${duty})`;
+}
+
+export interface TariffPrefixResult {
+  version: string | null;
+  prefix: string;
+  total: number;
+  lines: { hs8: string; designation: string; duty_mfn: { value: string | null; unit: string | null; currency: string | null } }[];
+  disclaimer: string;
+}
+
+/** Préfixe de 2 à 7 chiffres : liste des lignes suisses à 8 chiffres qui le prolongent. */
+function listByPrefix(rows: readonly TaresRow[], prefix: string, lang: Lang, version: string | null): {
+  content: { type: "text"; text: string }[];
+  isError?: boolean;
+  structured?: TariffPrefixResult;
+} {
+  const matches = linesUnder(rows, prefix);
+  if (matches.length === 0) {
+    return {
+      content: [{ type: "text", text: `No Swiss tariff line starts with "${prefix}". Swiss tariff numbers have 8 digits; the first 6 follow the international HS code.` }],
+      isError: true,
+    };
+  }
+  const shown = matches.slice(0, PREFIX_LIST_LIMIT);
+  const text = [
+    DISCLAIMERS[lang],
+    `Version: ${version ?? "unknown (bundled data)"}`,
+    "",
+    `${matches.length} Swiss tariff line(s) start with ${prefix}${matches.length > shown.length ? ` (first ${shown.length} shown; add digits to narrow)` : ""}:`,
+    ...shown.map((r) => formatLine(r, lang)),
+    "",
+    "Call tariff_lookup with one 8-digit number for its full line: preferential regimes, restrictions and customs relief codes.",
+  ].join("\n");
+  return {
+    content: [{ type: "text", text }],
+    structured: {
+      version,
+      prefix,
+      total: matches.length,
+      lines: shown.map((r) => ({
+        hs8: r.hs8,
+        designation: designationOf(r, lang),
+        duty_mfn: { value: r.duty_mfn_value || null, unit: r.duty_mfn_unit || null, currency: r.duty_mfn_currency || null },
+      })),
+      disclaimer: DISCLAIMERS[lang],
+    },
+  };
+}
+
 export function tariffLookupHandler(args: unknown): {
   content: { type: "text"; text: string }[];
   isError?: boolean;
-  structured?: TariffLookupResult;
+  structured?: TariffLookupResult | TariffPrefixResult;
 } {
   const parsed = InputZ.safeParse(args);
   if (!parsed.success) {
@@ -79,11 +154,25 @@ export function tariffLookupHandler(args: unknown): {
     };
   }
   const { hs8, lang } = parsed.data;
-  const { byHs8, version } = getTares();
+  const { rows, byHs8, version } = getTares();
+  if (hs8.length < 8) return listByPrefix(rows, hs8, lang, version);
   const row = byHs8.get(hs8);
   if (!row) {
+    // Proposer les lignes voisines : un agent connaît souvent le code international à 6 chiffres,
+    // pas l'extension suisse à 8 chiffres.
+    for (const size of [6, 4]) {
+      const near = linesUnder(rows, hs8.slice(0, size));
+      if (near.length === 0) continue;
+      const shown = near.slice(0, SUGGESTION_LIMIT);
+      const text = [
+        `No TARES row found for HS8 code "${hs8}". Swiss lines under ${hs8.slice(0, size)} (${near.length}${near.length > shown.length ? `, first ${shown.length} shown` : ""}):`,
+        ...shown.map((r) => formatLine(r, lang)),
+        "Call tariff_lookup again with one of these 8-digit numbers.",
+      ].join("\n");
+      return { content: [{ type: "text", text }], isError: true };
+    }
     return {
-      content: [{ type: "text", text: `No TARES row found for HS8 code "${hs8}".` }],
+      content: [{ type: "text", text: `No TARES row found for HS8 code "${hs8}", and no Swiss line shares its first 4 digits.` }],
       isError: true,
     };
   }
@@ -143,7 +232,7 @@ export function tariffLookupHandler(args: unknown): {
 export const tariffLookupTool = {
   name: "tariff_lookup",
   description:
-    "Lookup a Swiss customs tariff (HS8) and return the full TARES row including MFN duty, preferential regimes, restrictions and customs relief codes. Always returns a non-official disclaimer that the agent must surface to the end user.",
+    "Look up the Swiss customs tariff (TARES). An 8-digit Swiss tariff number (dots allowed) returns the full line: designations in FR/DE/IT/EN, MFN duty, preferential regimes, restrictions and customs relief codes. A 2- to 7-digit HS prefix (for example the international HS6 code) lists the Swiss 8-digit lines under it. Every answer carries an unofficial-copy notice that the agent must show to the end user.",
   inputSchema: tariffLookupSchema,
   handler: tariffLookupHandler,
 } as const;

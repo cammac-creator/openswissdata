@@ -26,7 +26,7 @@ const registre = await client.finma.kycCheck({ name: "UBS", top_k: 3 });
 console.log(registre);
 ```
 
-Ces trois opérations sont accessibles anonymement, dans la limite de 100 appels par jour et par IP. Les recherches sémantiques, historiques et recherches FINMA avancées exigent des droits existants. Les nouvelles souscriptions payantes sont fermées ; acheter un fichier ne donne pas de clé API.
+Ces trois opérations sont accessibles anonymement, dans la limite de 100 appels par heure et par IP. Les recherches sémantiques, historiques et recherches FINMA avancées exigent des droits existants. Les nouvelles souscriptions payantes sont fermées ; acheter un fichier ne donne pas de clé API.
 
 Une mise à jour du dépôt ne publie pas automatiquement le paquet npm. Les champs de version et de qualité documentés ici décrivent le code de cette branche ; contrôler la distribution choisie avant de l’intégrer.
 
