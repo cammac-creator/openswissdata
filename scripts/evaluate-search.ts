@@ -6,12 +6,16 @@
  * calcule top-1, top-5 et rang réciproque moyen (MRR, borné à la liste renvoyée).
  *
  *   npx tsx scripts/evaluate-search.ts [--tool tares|noga|finma|all] [--out resultats.json]
- *                                      [--structure Tarifstruktur.xlsx]
+ *                                      [--structure Tarifstruktur.xlsx] [--holdout]
  *
  * Préalable : `npm run models:prepare:embedding` (poids figés dans dist/models). Pendant la mesure,
  * `fetch` est remplacé par une fonction qui échoue : un téléchargement caché ferait échouer le script.
  * `--structure` vérifie en plus que chaque désignation citée en justification figure mot pour mot
  * dans le chemin officiel d'une ligne attendue (fichier Tarifstruktur de l'OFDF, lu localement).
+ *
+ * Groupes : langues du jeu principal (et leur ensemble), requêtes en forme de code, puis « contrôle »
+ * (jeu écrit après le choix de la méthode, rapporté séparément, mesuré seulement avec --holdout ;
+ * ses attentes et désignations sont vérifiées à chaque exécution).
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -23,6 +27,8 @@ interface AbsentCase { id: string; query: string }
 interface Cases {
   tares: CodeCase[]; tares_codes: CodeCase[]; noga: CodeCase[]; noga_codes: CodeCase[];
   finma: NameCase[]; finma_absent: AbsentCase[];
+  /** Jeu de contrôle, écrit après le choix de la méthode : mesuré à part, jamais mêlé à l'ensemble principal. */
+  tares_holdout: CodeCase[]; noga_holdout: CodeCase[];
 }
 interface CaseResult { id: string; group: string; query: string; expected: string[]; rank: number | null; top: string[]; ms: number }
 interface Summary { cases: number; top1: number; top5: number; mrr: number }
@@ -34,9 +40,13 @@ const option = (name: string): string | undefined => {
   return index >= 0 ? args[index + 1] : undefined;
 };
 const tool = option("--tool") ?? "all";
+// Le jeu de contrôle n'est mesuré qu'à la demande explicite, une fois la méthode figée.
+const withHoldout = args.includes("--holdout");
 if (!["tares", "noga", "finma", "all"].includes(tool)) throw new Error("--tool attend tares, noga, finma ou all");
 
 const cases = JSON.parse(readFileSync(`${root}scripts/search-eval/cases.json`, "utf8")) as Cases;
+const holdoutCases = { tares: cases.tares_holdout, noga: cases.noga_holdout };
+if (!withHoldout) { cases.tares_holdout = []; cases.noga_holdout = []; }
 
 function csv<T>(path: string): T[] {
   return parse(readFileSync(`${root}${path}`, "utf8"), { columns: true, skip_empty_lines: true }) as T[];
@@ -46,11 +56,11 @@ function csv<T>(path: string): T[] {
 function checkExpectations(): string[] {
   const problems: string[] = [];
   const hs8 = csv<{ hs8: string }>("src/mcp/data/tares.csv").map((r) => r.hs8);
-  for (const c of [...cases.tares, ...cases.tares_codes]) {
+  for (const c of [...cases.tares, ...cases.tares_codes, ...holdoutCases.tares]) {
     for (const prefix of c.expected) if (!hs8.some((code) => code.startsWith(prefix))) problems.push(`${c.id} : ${prefix} absent du TARES embarqué`);
   }
   const noga = csv<{ code: string; label_fr: string }>("data/classifications/classifications-2026.04.29-test-work/noga_2025.csv");
-  for (const c of [...cases.noga, ...cases.noga_codes]) {
+  for (const c of [...cases.noga, ...cases.noga_codes, ...holdoutCases.noga]) {
     for (const prefix of c.expected) if (!noga.some((r) => r.code === prefix)) problems.push(`${c.id} : ${prefix} absent de NOGA 2025`);
     if (c.designation && !c.expected.some((prefix) => noga.find((r) => r.code === prefix)?.label_fr === c.designation)) {
       problems.push(`${c.id} : désignation différente du libellé officiel`);
@@ -71,7 +81,7 @@ async function checkDesignations(structurePath: string): Promise<string[]> {
   const { readStructureLines, buildTaresPaths, pathDesignations } = await import("../etl/tares/hierarchy.js");
   const paths = [...buildTaresPaths(readStructureLines(structurePath)).values()];
   const problems: string[] = [];
-  for (const c of cases.tares) {
+  for (const c of [...cases.tares, ...holdoutCases.tares]) {
     const under = paths.filter((p) => c.expected.some((prefix) => p.hs8.startsWith(prefix)));
     const found = under.some((p) => pathDesignations(p, "fr", { chapter: true }).join(" › ").includes(c.designation ?? "\u0000"));
     if (!found) problems.push(`${c.id} : « ${c.designation} » absent des chemins officiels de ${c.expected.join(", ")}`);
@@ -104,11 +114,15 @@ function table(title: string, groups: Record<string, CaseResult[]>): string {
   return lines.join("\n");
 }
 
+const SIDE_GROUPS = new Set(["code", "contrôle"]);
 function groupBy(results: CaseResult[], all: string): Record<string, CaseResult[]> {
   const groups: Record<string, CaseResult[]> = {};
-  for (const r of results) (groups[r.group] ??= []).push(r);
-  return { ...groups, [all]: results.filter((r) => !r.group.startsWith("code")) };
+  for (const r of results) if (!SIDE_GROUPS.has(r.group)) (groups[r.group] ??= []).push(r);
+  const side = Object.fromEntries([...SIDE_GROUPS].map((g) => [g, results.filter((r) => r.group === g)]).filter(([, rows]) => rows.length));
+  return { ...groups, [all]: results.filter((r) => !SIDE_GROUPS.has(r.group)), ...side };
 }
+const main = (results: CaseResult[]) => results.filter((r) => !SIDE_GROUPS.has(r.group));
+const only = (results: CaseResult[], group: string) => results.filter((r) => r.group === group);
 
 const problems = checkExpectations();
 const structurePath = option("--structure");
@@ -134,29 +148,31 @@ async function timed<T>(fn: () => Promise<T> | T): Promise<[T, number]> {
 if (tool === "tares" || tool === "all") {
   const { tariffSemanticSearchHandler } = await import("../src/mcp/tools/tariff-semantic-search.js");
   const results: CaseResult[] = [];
-  for (const c of [...cases.tares, ...cases.tares_codes]) {
+  const tagged = [...cases.tares.map((c) => ({ c, group: c.lang! })), ...cases.tares_codes.map((c) => ({ c, group: "code" })), ...cases.tares_holdout.map((c) => ({ c, group: "contrôle" }))];
+  for (const { c, group } of tagged) {
     const [out, ms] = await timed(() => tariffSemanticSearchHandler({ query: c.query, top_k: 20 }));
     if (out.isError) throw new Error(`${c.id} : ${out.content[0]?.text}`);
     const top = ((out.structured as { hits: { hs_code: string }[] }).hits).map((h) => h.hs_code);
-    results.push({ id: c.id, group: c.lang ?? "code", query: c.query, expected: c.expected, rank: rankOf(top, c.expected, (v, w) => v.startsWith(w)), top: top.slice(0, 5), ms });
+    results.push({ id: c.id, group, query: c.query, expected: c.expected, rank: rankOf(top, c.expected, (v, w) => v.startsWith(w)), top: top.slice(0, 5), ms });
   }
-  output.tares = { summary: summarize(results.filter((r) => r.group !== "code")), codes: summarize(results.filter((r) => r.group === "code")), results };
-  report.push(table("tariff_semantic_search (TARES)", groupBy(results, "ensemble FR/DE/EN/IT")));
+  output.tares = { summary: summarize(main(results)), codes: summarize(only(results, "code")), holdout: summarize(only(results, "contrôle")), results };
+  report.push(table("tariff_semantic_search (TARES)", groupBy(results, "ensemble principal FR/DE/EN/IT")));
 }
 
 if (tool === "noga" || tool === "all") {
   const { classifyTextHandler } = await import("../src/mcp/tools/classify-text.js");
   const results: CaseResult[] = [];
-  for (const c of [...cases.noga, ...cases.noga_codes]) {
+  const tagged = [...cases.noga.map((c) => ({ c, group: c.lang! })), ...cases.noga_codes.map((c) => ({ c, group: "code" })), ...cases.noga_holdout.map((c) => ({ c, group: "contrôle" }))];
+  for (const { c, group } of tagged) {
     // classify_text accepte cinq caractères au moins ; les requêtes en forme de code sont complétées sans changer le code.
     const text = c.query.length >= 5 ? c.query : `NOGA ${c.query}`;
     const [out, ms] = await timed(() => classifyTextHandler({ text, top_k: 10 }));
     if (out.isError) throw new Error(`${c.id} : ${out.content[0]?.text}`);
     const top = ((out.structured as { hits: { code: string }[] }).hits).map((h) => h.code);
-    results.push({ id: c.id, group: c.lang ?? "code", query: text, expected: c.expected, rank: rankOf(top, c.expected, (v, w) => v.startsWith(w)), top: top.slice(0, 5), ms });
+    results.push({ id: c.id, group, query: text, expected: c.expected, rank: rankOf(top, c.expected, (v, w) => v.startsWith(w)), top: top.slice(0, 5), ms });
   }
-  output.noga = { summary: summarize(results.filter((r) => r.group !== "code")), codes: summarize(results.filter((r) => r.group === "code")), results };
-  report.push(table("classify_text (NOGA 2025, liste de 10 au plus)", groupBy(results, "ensemble")));
+  output.noga = { summary: summarize(main(results)), codes: summarize(only(results, "code")), holdout: summarize(only(results, "contrôle")), results };
+  report.push(table("classify_text (NOGA 2025, liste de 10 au plus)", groupBy(results, "ensemble principal")));
 }
 
 if (tool === "finma" || tool === "all") {

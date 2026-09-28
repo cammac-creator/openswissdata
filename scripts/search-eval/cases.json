@@ -118,5 +118,40 @@
     { "id": "X01", "query": "Credit Suisse" },
     { "id": "X02", "query": "Neon Switzerland" },
     { "id": "X03", "query": "Banque Imaginaire du Léman" }
+  ],
+  "holdout_note": "Jeu de contrôle écrit le 28.09.2026 après le choix de la méthode et avant toute mesure du système retenu ; mesuré une seule fois pour vérifier que le gain ne vient pas d'un réglage sur le jeu principal.",
+  "tares_holdout": [
+    { "id": "H01", "lang": "fr", "query": "machine à laver le linge", "expected": ["8450"], "designation": "Machines à laver le linge, même avec dispositif de séchage" },
+    { "id": "H02", "lang": "fr", "query": "écran d'ordinateur", "expected": ["852852"], "designation": "aptes à être connectés directement à une machine automatique de traitement de l'information du n° 8471" },
+    { "id": "H03", "lang": "fr", "query": "fourchettes et cuillères en inox", "expected": ["8215"], "designation": "Cuillers, fourchettes, louches" },
+    { "id": "H04", "lang": "fr", "query": "sucre de canne brut", "expected": ["170113", "170114"], "designation": "sucres bruts sans addition d'aromatisants ou de colorants" },
+    { "id": "H05", "lang": "fr", "query": "riz basmati", "expected": ["1006"], "designation": "Riz" },
+    { "id": "H06", "lang": "de", "query": "Gummihandschuhe", "expected": ["4015"], "designation": "gants, mitaines et moufles" },
+    { "id": "H07", "lang": "de", "query": "Mineralwasser ohne Kohlensäure", "expected": ["220110"], "designation": "eaux minérales et eaux gazéifiées" },
+    { "id": "H08", "lang": "de", "query": "Kinderwagen", "expected": ["8715"], "designation": "Landaus, poussettes et voitures similaires pour le transport des enfants" },
+    { "id": "H09", "lang": "de", "query": "Nähmaschine für den Haushalt", "expected": ["845210"], "designation": "machines à coudre de type ménager" },
+    { "id": "H10", "lang": "de", "query": "Olivenöl", "expected": ["1509"], "designation": "Huile d'olive et ses fractions" },
+    { "id": "H11", "lang": "de", "query": "Zement", "expected": ["2523"], "designation": "Ciments hydrauliques" },
+    { "id": "H12", "lang": "en", "query": "tennis rackets", "expected": ["950651"], "designation": "raquettes de tennis, même non cordées" },
+    { "id": "H13", "lang": "en", "query": "wooden chairs", "expected": ["940161", "940169"], "designation": "autres sièges, avec bâti en bois" },
+    { "id": "H14", "lang": "en", "query": "umbrellas", "expected": ["6601"], "designation": "Parapluies, ombrelles et parasols" },
+    { "id": "H15", "lang": "en", "query": "canned tuna", "expected": ["160414"], "designation": "thons, listaos et bonites (Sarda spp.)" },
+    { "id": "H16", "lang": "en", "query": "copper wire", "expected": ["7408"], "designation": "Fils de cuivre" },
+    { "id": "H17", "lang": "en", "query": "motorcycle helmets", "expected": ["650610"], "designation": "coiffures de sécurité" },
+    { "id": "H18", "lang": "it", "query": "formaggio grattugiato", "expected": ["040620"], "designation": "fromages râpés ou en poudre, de tous types" },
+    { "id": "H19", "lang": "it", "query": "vino spumante", "expected": ["220410"], "designation": "vins mousseux" },
+    { "id": "H20", "lang": "fr", "query": "piles alcalines", "expected": ["850610"], "designation": "au bioxyde de manganèse" }
+  ],
+  "noga_holdout": [
+    { "id": "NH01", "lang": "fr", "query": "cabinet d'expertise comptable", "expected": ["6920"], "designation": "Activités de comptabilité, de tenue de comptes et d’audit; conseil fiscal" },
+    { "id": "NH02", "lang": "de", "query": "Physiotherapiepraxis", "expected": ["8695"], "designation": "Activités de physiothérapie" },
+    { "id": "NH03", "lang": "fr", "query": "entreprise de nettoyage de bureaux", "expected": ["8121"], "designation": "Nettoyage courant des bâtiments" },
+    { "id": "NH04", "lang": "en", "query": "hair salon", "expected": ["9621"], "designation": "Coiffure et activités de barbier" },
+    { "id": "NH05", "lang": "de", "query": "Gartenbau und Landschaftspflege", "expected": ["8130"], "designation": "Activités de service d’aménagement paysager" },
+    { "id": "NH06", "lang": "fr", "query": "auto-école", "expected": ["8553"], "designation": "Enseignement de la conduit" },
+    { "id": "NH07", "lang": "en", "query": "car rental", "expected": ["7711"], "designation": "Location et location-bail de voitures et véhicules automobiles légers" },
+    { "id": "NH08", "lang": "fr", "query": "fromagerie qui fabrique du fromage", "expected": ["105102"], "designation": "Fabrication de fromage" },
+    { "id": "NH09", "lang": "de", "query": "Reisebüro", "expected": ["7911"], "designation": "Activités d’agence de voyage" },
+    { "id": "NH10", "lang": "en", "query": "property management for landlords", "expected": ["6832"], "designation": "Autres activités immobilières pour compte de tiers" }
   ]
 }
