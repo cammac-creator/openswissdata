@@ -12,7 +12,7 @@ Le lot53 refond l’accueil et la fiche FINMA, chacun en français, allemand et 
 
 ## Mouvement et accessibilité
 
-Le relief flotte légèrement ; le volume réagit au glissement du pointeur sur ordinateur ; une carte de formats bouge en contrepoint et le parcours est animé. Les sections entrent par un déplacement court, sans masquage initial. Aucun contenu essentiel ne dépend d’une animation ou du JavaScript.
+Depuis le lot58, l’illustration est fixe : aucun flottement, aucune parallaxe et aucun mode 3D. Le parcours et les autres sections gardent leurs animations. Les sections entrent par un déplacement court, sans masquage initial. Aucun contenu essentiel ne dépend d’une animation ou du JavaScript.
 
 La préférence `prefers-reduced-motion` désactive les mouvements. Un bouton permet aussi de les arrêter dans la page ; aucun stockage navigateur n’est ajouté. Le menu mobile natif `details` fonctionne sans script, et le script complète Échap, clic/focus extérieur, changement de largeur et retour du focus. Les ancres conservent l’URL et rendent le focus au contenu visé.
 
@@ -24,11 +24,20 @@ La recette couvre les six routes à 320, 390, 768 et 1440 pixels dans Chromium, 
 
 Poursuivre A20 sur TARES, classifications et bundle, puis sur le compte et la continuité achat/livraison/support. Ne pas assimiler cette livraison à une refonte de toutes les pages ni à un gain de conversion mesuré. Vérifier les performances terrain avant d’annoncer un bénéfice commercial.
 
-## Relief interactif — 28 septembre 2026
+## Historique — relief interactif — 28 septembre 2026
 
 La version A choisie devient un modèle 3D issu de MNT25 et swissBOUNDARIES3D, avec altitudes ×8, liseré rouge et couleurs renforcées. Le dos porte « Made in Switzerland », orthographe confirmée par Claude-Alain. Souris, clavier, commandes tactiles et affichage de repli sont gérés par `atlas-relief.ts` et son module différé. Voir [la chaîne de fabrication et ses limites](../scripts/atlas/README.md). Ce remplacement concerne les six pages qui utilisent `AtlasArtwork` ; A20 reste partiel.
 
 
-## Relief et intégration v5 — 28 septembre 2026
+## Historique — relief et intégration v5 — 28 septembre 2026
 
 Le volume courant reprend le choix explicite de hauteur −45 % par rapport à la sculpture v4, avec socle et inscription conservés et occlusion recalculée. Éclairage chaud adouci, socle mieux rempli, stries discrètes sur les pentes, cadrage et commandes regroupées. L’illustration demeure l’entrée initiale ; le modèle n’est téléchargé qu’à la demande. La fabrication reproductible et les limites sont décrites dans `scripts/atlas/README.md`.
+
+
+## Illustration fixe — 28 septembre 2026 (lot58)
+
+Claude-Alain retire la manipulation et donne la priorité à la ressemblance avec l’illustration. Les six pages utilisent désormais directement `swiss-atlas-editorial-v3.png` comme visuel définitif : crêtes ivoire, strates fines, verts profonds, filet rouge et lumière de l’image conservés. La saturation CSS de 1,2 reste celle de la direction approuvée ; le contraste supplémentaire est retiré. Le cadrage responsive et les fondus périphériques intègrent l’image au papier sans recouvrir le relief d’une carte de formats.
+
+`AtlasArtwork` n’importe plus de modèle ni de script 3D. Les commandes de rotation, de manipulation et de revers disparaissent ; aucune scène WebGL ou ressource 3D n’est livrée par le build de ces pages. Les anciens scripts et modèles restent des sources historiques non importées. La description accessible de provenance concerne uniquement l’illustration ChatGPT : ni altitudes mesurables, ni géologie réelle. Elle fonctionne sans JavaScript, en FR/DE/EN. Le bouton de réduction des animations concerne les autres animations de la page.
+
+Astro produit quatre tailles WebP (qualité 90) avec adresses par empreinte et sélection adaptée à la largeur d’affichage. Les dimensions de l’image réservent sa place avant son chargement. Cette décision remplace les gestes et l’inscription au revers des lots précédents ; elle ne transforme pas l’illustration imaginée en carte topographique.

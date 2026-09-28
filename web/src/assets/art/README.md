@@ -8,4 +8,9 @@ Ce premier visuel est une illustration décorative, pas une carte géographique 
 
 ## Version 2 — 28 septembre 2026
 
-`swiss-atlas-v2.png` est un rendu Blender du véritable volume présent dans `swiss-atlas-v2.bin` (GLB quantifié, compressé en gzip). Le contour provient de swissBOUNDARIES3D 2026-01 et les altitudes de MNT25 : **©swisstopo**. Les hauteurs sont amplifiées ×8 et le relief simplifié ; les couleurs sont artistiques. La version 2 remplace la version 1 dans `AtlasArtwork`. La [documentation de fabrication](../../../../scripts/atlas/README.md) donne les sources, empreintes, règles d’attribution et étapes de reconstruction.
+`swiss-atlas-v2.png` est un rendu Blender du véritable volume présent dans `swiss-atlas-v2.bin` (GLB quantifié, compressé en gzip). Le contour provient de swissBOUNDARIES3D 2026-01 et les altitudes de MNT25 : **©swisstopo**. Les hauteurs sont amplifiées ×8 et le relief simplifié ; les couleurs sont artistiques. La version 2 remplaçait la version 1 dans `AtlasArtwork` ; elle n’est plus utilisée. La [documentation de fabrication](../../../../scripts/atlas/README.md) donne les sources, empreintes, règles d’attribution et étapes de reconstruction.
+
+
+## Illustration éditoriale fixe — 28 septembre 2026 (lot58)
+
+`swiss-atlas-editorial-v3.png`, création ChatGPT dérivée de la maquette A et du premier atlas, est le visuel courant. Aucun modèle 3D n’est importé. Crêtes et couleurs sont imaginées ; l’image n’est pas issue du MNT et ne porte pas l’attribution swisstopo réservée aux modèles historiques. `AtlasArtwork` présente l’image sans mouvement, avec alternative décorative vide et provenance consultable en français, allemand et anglais. Les variantes WebP sont produites par Astro, avec empreinte dans leur adresse.

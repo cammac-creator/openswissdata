@@ -1,4 +1,6 @@
-# Relief suisse interactif — chaîne de fabrication
+# Relief suisse — historique de fabrication
+
+**Depuis le 28.09.2026 (lot58), la présentation publique utilise une illustration fixe.** Le mode manipulable et ses commandes ont été retirés à la demande de Claude-Alain. Aucun des modèles ou scripts 3D ci-dessous n’est importé par les pages : cette documentation conserve leur fabrication historique, sans décrire le comportement actuel du site. Voir `docs/site-public-atlas.md`.
 
 Le modèle est une interprétation artistique à partir de données topographiques, produite hors du serveur web. Aucun service cartographique ni téléchargement de données géographiques ne se déclenche chez le visiteur.
 

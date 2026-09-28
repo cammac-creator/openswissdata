@@ -1,37 +1,21 @@
 ---
 import { Image } from 'astro:assets';
 import atlas from '../assets/art/swiss-atlas-editorial-v3.png';
-import modelUrl from '../assets/art/swiss-atlas-v5.bin?url';
 import { getLangFromPath } from '../i18n/utils';
-const { compact = false } = Astro.props;
 const lang = getLangFromPath(Astro.url.pathname);
 const copy = {
- fr: { illustration: 'Illustration', artSource: 'Illustration artistique', artNote: 'Illustration créée avec ChatGPT, inspirée d’une sculpture de la Suisse. Relief et couleurs sont imaginés : ils ne représentent pas la géologie réelle. Le mode 3D séparé s’appuie sur des données topographiques.', archive: 'Fichiers documentés', pause: 'Réduire les animations', title: 'La Suisse en relief', hint: 'Faites glisser pour tourner', touch: 'Manipuler', release: 'Terminer', back: 'Voir le dos', reset: 'Vue initiale', start: 'Explorer en 3D', loading: 'Préparation du relief…', ready: 'Relief prêt. Faites glisser ou utilisez les flèches du clavier.', error: 'La vue 3D est indisponible. L’illustration reste visible.', label: 'Relief suisse en 3D. Flèches pour tourner, touche Origine pour revenir à la vue initiale.', about: 'Relief artistique · ©swisstopo', source: 'Sculpture issue du MNT25 et du contour swissBOUNDARIES3D 2026. Relief lissé et accentué, bords arrondis et abaissés. Couleurs et stries décoratives, sans signification géologique. Cette représentation ne permet pas de mesurer les altitudes.', link: 'Les données du relief', backState: 'Dos de la carte : Made in Switzerland.', frontState: 'Vue initiale du relief.' },
- de: { illustration: 'Illustration', artSource: 'Künstlerische Illustration', artNote: 'Mit ChatGPT erstellte Illustration, inspiriert von einer Skulptur der Schweiz. Relief und Farben sind frei gestaltet und zeigen keine tatsächliche Geologie. Die separate 3D-Ansicht basiert auf topografischen Daten.', archive: 'Dokumentierte Dateien', pause: 'Animationen reduzieren', title: 'Die Schweiz als Relief', hint: 'Zum Drehen ziehen', touch: 'Bewegen', release: 'Fertig', back: 'Rückseite', reset: 'Ausgangsansicht', start: 'In 3D erkunden', loading: 'Relief wird vorbereitet…', ready: 'Relief bereit. Ziehen oder die Pfeiltasten verwenden.', error: 'Die 3D-Ansicht ist nicht verfügbar. Die Illustration bleibt sichtbar.', label: 'Schweizer Relief in 3D. Pfeiltasten zum Drehen, Pos1 für die Ausgangsansicht.', about: 'Kunstrelief · ©swisstopo', source: 'Skulptur auf Basis des DHM25 und von swissBOUNDARIES3D 2026. Relief geglättet und überhöht, Ränder abgerundet und abgesenkt. Farben und Schichtlinien sind dekorativ, ohne geologische Bedeutung. Nicht zur Höhenmessung geeignet.', link: 'Die Daten des Reliefs', backState: 'Rückseite der Karte: Made in Switzerland.', frontState: 'Ausgangsansicht des Reliefs.' },
- en: { illustration: 'Illustration', artSource: 'Artistic illustration', artNote: 'Illustration created with ChatGPT, inspired by a sculpture of Switzerland. Terrain and colours are imagined and do not represent real geology. The separate 3D view uses topographic data.', archive: 'Documented files', pause: 'Reduce animations', title: 'Switzerland in relief', hint: 'Drag to rotate', touch: 'Interact', release: 'Done', back: 'See the reverse', reset: 'Reset view', start: 'Explore in 3D', loading: 'Preparing the relief…', ready: 'Relief ready. Drag or use the arrow keys.', error: 'The 3D view is unavailable. The illustration remains visible.', label: 'Swiss relief in 3D. Arrow keys to rotate, Home to reset the view.', about: 'Artistic relief · ©swisstopo', source: 'Sculpture based on DHM25 and the swissBOUNDARIES3D 2026 outline. Smoothed and exaggerated terrain, rounded and lowered edges. Colours and layered lines are decorative, with no geological meaning. This representation cannot be used to measure elevations.', link: 'Terrain data', backState: 'Reverse of the map: Made in Switzerland.', frontState: 'Initial relief view.' },
+ fr: { source: 'Illustration artistique', note: 'Illustration créée avec ChatGPT, inspirée d’une sculpture de la Suisse. Le relief et les couleurs sont imaginés : ils ne représentent ni les altitudes ni la géologie réelles.', pause: 'Réduire les animations', title: 'La Suisse en relief' },
+ de: { source: 'Künstlerische Illustration', note: 'Mit ChatGPT erstellte Illustration, inspiriert von einer Skulptur der Schweiz. Relief und Farben sind frei gestaltet: Sie zeigen weder die tatsächlichen Höhen noch die Geologie.', pause: 'Animationen reduzieren', title: 'Die Schweiz als Relief' },
+ en: { source: 'Artistic illustration', note: 'Illustration created with ChatGPT, inspired by a sculpture of Switzerland. Terrain and colours are imagined: they do not represent actual elevations or geology.', pause: 'Reduce animations', title: 'Switzerland in relief' },
 }[lang];
 ---
-<div class:list={['atlas-artwork', 'atlas-relief', { 'atlas-artwork-compact': compact }]} data-atlas-art data-model-url={modelUrl} data-relief-state="poster" data-loading={copy.loading} data-ready={copy.ready} data-error={copy.error} data-back-state={copy.backState} data-front-state={copy.frontState} data-art-state={copy.artSource}>
+<div class="atlas-artwork" data-atlas-art>
  <div class="atlas-art-meta" aria-hidden="true"><span>CH / DATA ATLAS</span><span>{copy.title}</span></div>
- <div class="atlas-art-plane" aria-hidden="true"><Image src={atlas} alt="" widths={[400,700,1000,1400]} sizes="(max-width: 760px) 100vw, 55vw" format="webp" quality={85} loading="eager" fetchpriority="high" class="atlas-art-image" /></div>
- <div class="atlas-relief-stage" data-relief-stage role="group" aria-label={copy.label} tabindex="0" hidden></div>
- <span class="atlas-relief-hint" data-relief-hint hidden aria-hidden="true">↔ {copy.hint}</span>
- <div class="atlas-file-float"><span class="atlas-file-glyph" aria-hidden="true">↳</span><div><strong>{copy.archive}</strong><span>CSV / JSON / PARQUET / SQL</span></div><span class="atlas-file-plus" aria-hidden="true">+</span></div>
- <div class="atlas-relief-controls">
-  <button type="button" class="atlas-relief-start" data-relief-start hidden>{copy.start}<span aria-hidden="true"> ↗</span></button>
-  <div class="atlas-relief-actions" data-relief-actions hidden>
-   <button type="button" data-relief-poster>{copy.illustration}<span aria-hidden="true"> ↖</span></button>
-   <button type="button" data-relief-touch aria-pressed="false" data-label-on={copy.release} data-label-off={copy.touch}>{copy.touch}</button>
-   <button type="button" data-relief-back>{copy.back}<span aria-hidden="true"> ↶</span></button>
-   <button type="button" data-relief-reset>{copy.reset}</button>
-  </div>
+ <div class="atlas-art-plane" aria-hidden="true">
+  <Image src={atlas} alt="" widths={[400,700,1000,1400]} sizes="(max-width: 600px) 100vw, (max-width: 980px) 620px, (max-width: 1376px) 62vw, 800px" format="webp" quality={90} loading="eager" fetchpriority="high" draggable="false" class="atlas-art-image" />
  </div>
  <div class="atlas-art-bottom">
-  <details class="atlas-relief-source"><summary><span data-source-art>{copy.artSource}</span><span data-source-model>{copy.about}</span></summary><div><p data-source-art>{copy.artNote}</p><p>{copy.source}</p><a href="https://www.swisstopo.admin.ch/fr/modele-altimetrique-mnt25" target="_blank" rel="noopener noreferrer">{copy.link} ↗</a></div></details>
+  <details class="atlas-art-source"><summary>{copy.source}</summary><div><p>{copy.note}</p></div></details>
   <button type="button" class="atlas-motion" data-atlas-motion aria-pressed="false" hidden><span class="atlas-pause-icon" aria-hidden="true">Ⅱ</span><span>{copy.pause}</span></button>
  </div>
- <p class="sr-only" role="status" aria-live="polite" data-relief-status></p>
 </div>
-<script>
- import '../scripts/atlas-relief';
-</script>

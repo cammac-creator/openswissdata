@@ -2,18 +2,9 @@
 const site = document.querySelector<HTMLElement>('.atlas-site');
 if (site) {
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const pointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const buttons = site.querySelectorAll<HTMLButtonElement>('[data-atlas-motion]');
   let pausedByUser = false;
   const animations = new Set<Animation>();
-  const art = site.querySelector<HTMLElement>('[data-atlas-art]');
-  let frame = 0;
-  const resetArt = () => {
-    if (frame) cancelAnimationFrame(frame);
-    frame = 0;
-    art?.style.removeProperty('--atlas-rx');
-    art?.style.removeProperty('--atlas-ry');
-  };
   const paused = () => preference.matches || pausedByUser;
   const syncMotion = () => {
     site.dataset.motion = paused() ? 'off' : 'on';
@@ -23,7 +14,6 @@ if (site) {
       button.disabled = preference.matches;
     });
     if (paused()) {
-      resetArt();
       animations.forEach(animation => animation.cancel());
       animations.clear();
     }
@@ -33,23 +23,7 @@ if (site) {
     syncMotion();
   }));
   preference.addEventListener('change', syncMotion);
-  pointer.addEventListener('change', resetArt);
   syncMotion();
-
-  // L'image réagit très légèrement au pointeur, uniquement sur grand écran.
-  art?.addEventListener('pointermove', event => {
-    if (paused() || !pointer.matches || window.innerWidth < 900 || art.dataset.reliefState === 'ready') return;
-    const box = art.getBoundingClientRect();
-    const rx = ((event.clientY - box.top) / box.height - .5) * -4;
-    const ry = ((event.clientX - box.left) / box.width - .5) * 4;
-    if (frame) cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(() => {
-      art.style.setProperty('--atlas-rx', `${rx}deg`);
-      art.style.setProperty('--atlas-ry', `${ry}deg`);
-      frame = 0;
-    });
-  });
-  art?.addEventListener('pointerleave', resetArt);
 
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => {
