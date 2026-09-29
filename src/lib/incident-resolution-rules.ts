@@ -15,7 +15,7 @@ export function normalizeResolutionNote(value: string): string {
 }
 
 // Contrôles, caractères invisibles de direction et marques bidirectionnelles : l'affichage ne doit pas tromper.
-const CONTROL = /[\u0000-\u0009\u000b-\u001f\u007f-\u009f؜‎‏‪-‮⁦-⁩]/;
+const CONTROL = /[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/;
 const EMAIL = /[^\s@<>()"',;:]+@[^\s@<>()"',;:]+\.[a-z]{2,}/i;
 // Schéma d'URL, « www. » ou domaine suivi d'un chemin : un domaine seul (« resend.com ») reste permis.
 const LINK = /[a-z][a-z0-9+.-]*:\/\/|\bwww\.|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}\/\S/i;

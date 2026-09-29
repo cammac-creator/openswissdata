@@ -88,7 +88,7 @@ describe('Clôture manuelle depuis le bureau privé', () => {
 
   it.each([
     ['   ', 'note_empty'], ['x'.repeat(281), 'note_too_long'], ['Écrit à client@example.test', 'note_email'], ['Voir https://resend.com/emails/abc', 'note_link'],
-    ['Message 4ef9a417-02e9-4d39-ad75-9611e0fcc33c', 'note_identifier'], ['Session cs_live_a1B2c3D4e5F6g7H8', 'note_identifier'], ['Inversion ‮du sens', 'note_control'],
+    ['Message 4ef9a417-02e9-4d39-ad75-9611e0fcc33c', 'note_identifier'], ['Session cs_live_fictifA1B2c3D4', 'note_identifier'], ['Inversion \u202edu sens', 'note_control'],
   ])('refuse la note %j avec le code %s sans la renvoyer', async (text, code) => {
     const response = await post(1, { kind: 'no_action', note: text, expected: await shown() });
     expect(response.status).toBe(400);

@@ -19,11 +19,11 @@ describe('Note de preuve d’une clôture manuelle', () => {
   it.each([
     ['', 'empty'], ['   \n\t ', 'empty'],
     ['x'.repeat(RESOLUTION_NOTE_MAX + 1), 'too_long'],
-    ['Texte avec contrôle \u0007', 'control'], ['Inversion ‮du sens', 'control'], ['Isolat ⁦bidi', 'control'],
+    ['Texte avec contrôle \u0007', 'control'], ['Inversion \u202edu sens', 'control'], ['Isolat \u2066bidi', 'control'],
     ['Écrit à client@example.test', 'email'], ['Adresse: prenom.nom@exemple.ch.', 'email'],
     ['Voir https://resend.com/emails/abc', 'link'], ['lien www.exemple.test', 'link'], ['resend.com/emails/abc', 'link'], ['ftp://serveur', 'link'],
     ['Message 4ef9a417-02e9-4d39-ad75-9611e0fcc33c', 'identifier'],
-    ['Session cs_live_a1B2c3D4e5F6g7H8', 'identifier'], ['Paiement pi_3NfX1234abcd', 'identifier'], ['Clé re_123456789', 'identifier'], ['whsec_abcdef1234', 'identifier'],
+    ['Session cs_live_fictifA1B2c3D4', 'identifier'], ['Paiement pi_fictif3NfX12', 'identifier'], ['Clé re_fictif123456', 'identifier'], ['whsec_fictif1234', 'identifier'],
     ['Jeton Zk3Qm9Xv2Lp8Rt5Wn1Yb7Hc4', 'identifier'], ['Empreinte 3f46cde9a0b1c2d3e4f5a6b7c8d9', 'identifier'], ['Carte 4242424242424242', 'identifier'],
   ])('refuse %j (%s)', (text, problem) => expect(check(text)).toBe(problem));
 
