@@ -22,8 +22,10 @@ export class RetentionError extends Error {
   constructor(readonly code: 'timestamp_format' | 'account_has_records') { super(code); }
 }
 
-const MS_FLOOR = 1_000_000_000_000;
-const isMs = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= MS_FLOOR;
+// Aucune écriture de l'application n'est antérieure à 2025 : une date plus ancienne (secondes, texte, valeur de
+// remplacement) demande un examen humain et n'est jamais prise pour une donnée ancienne à effacer.
+export const RETENTION_DATE_FLOOR = Date.UTC(2025, 0, 1);
+const isMs = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= RETENTION_DATE_FLOOR;
 
 /** Même instant, n années civiles plus tôt (UTC) ; un 29 février devient le 28. */
 export function yearsBefore(now: number, years: number): number {
@@ -37,9 +39,9 @@ export function purchaseBoundary(now: number): number {
   return swissMidnight(`${Number(swissDay(now).slice(0, 4)) - PURCHASE_RETENTION_YEARS}-01-01`);
 }
 
-/** Précontrôle : toutes les dates non vides sont des entiers en millisecondes (secondes ou texte → examen humain). */
+/** Précontrôle : toute date non vide est un entier en millisecondes postérieur au plancher (sinon examen humain). */
 function datesAreMilliseconds(db: Database.Database, clocks: ReadonlyArray<readonly [string, string]>): boolean {
-  return !clocks.some(([table, column]) => db.prepare(`SELECT 1 FROM ${table} WHERE ${column} IS NOT NULL AND (typeof(${column})<>'integer' OR ${column}<${MS_FLOOR}) LIMIT 1`).get());
+  return !clocks.some(([table, column]) => db.prepare(`SELECT 1 FROM ${table} WHERE ${column} IS NOT NULL AND (typeof(${column})<>'integer' OR ${column}<${RETENTION_DATE_FLOOR}) LIMIT 1`).get());
 }
 
 function recordErasure(db: Database.Database, category: ErasureCategory, subjectId: number, erasedAt: number): void {
@@ -139,14 +141,17 @@ export function eraseCustomerAccount(db: Database.Database, customerId: number, 
 
 const isInternal = (email: string, internal: string[]) => internal.includes(emailKey(email));
 
+const PURCHASE_CLOCKS = [['orders', 'created_at']] as const;
+function purchaseCandidates(db: Database.Database, now: number): number[] {
+  return (db.prepare(`SELECT o.id FROM orders o WHERE o.created_at<? AND ${ORDER_SETTLED_SQL} ORDER BY o.id`).all(purchaseBoundary(now)) as Array<{ id: number }>).map(row => row.id);
+}
+
 /** Règle 1 : commandes réglées dont l'année civile suisse est close depuis dix ans. */
 export function applyPurchaseRetention(db: Database.Database, now: number): RuleOutcome {
-  if (!datesAreMilliseconds(db, [['orders', 'created_at']])) return { deleted: 0, error: 'timestamp_format' };
-  const boundary = purchaseBoundary(now);
+  if (!datesAreMilliseconds(db, PURCHASE_CLOCKS)) return { deleted: 0, error: 'timestamp_format' };
   return db.transaction(() => {
-    const ids = db.prepare(`SELECT o.id FROM orders o WHERE o.created_at<? AND ${ORDER_SETTLED_SQL} ORDER BY o.id`).all(boundary) as Array<{ id: number }>;
     let deleted = 0;
-    for (const { id } of ids) {
+    for (const id of purchaseCandidates(db, now)) {
       if (eraseOrder(db, id, now) !== 'erased') continue;
       recordErasure(db, 'purchase_order', id, now);
       deleted++;
@@ -182,18 +187,22 @@ const CRM_CLOCKS = [['customers', 'created_at'], ['orders', 'created_at'], ['ord
   ['crm_notes', 'created_at'], ['crm_tasks', 'created_at'], ['crm_tasks', 'done_at'], ['crm_profiles', 'updated_at'], ['crm_languages', 'updated_at'],
   ['sessions', 'created_at']] as const;
 
+function crmCandidates(db: Database.Database, now: number): number[] {
+  const internal = internalEmails();
+  return (db.prepare(`SELECT c.id,c.email FROM customers c WHERE
+      (EXISTS(SELECT 1 FROM crm_notes WHERE customer_id=c.id) OR EXISTS(SELECT 1 FROM crm_tasks WHERE customer_id=c.id)
+        OR EXISTS(SELECT 1 FROM crm_profiles WHERE customer_id=c.id) OR EXISTS(SELECT 1 FROM crm_languages WHERE customer_id=c.id))
+      AND ${LAST_CONTACT_SQL}<? AND NOT (${CRM_PROTECTED_SQL}) ORDER BY c.id`).all(yearsBefore(now, CRM_RETENTION_YEARS)) as Array<{ id: number; email: string }>)
+    .filter(row => !isInternal(row.email, internal)).map(row => row.id);
+}
+
 /** Règle 2 : notes, fiche, actions et langue effacées trois ans après le dernier achat ou échange connu. */
 export function applyCrmRetention(db: Database.Database, now: number): RuleOutcome {
   if (!datesAreMilliseconds(db, CRM_CLOCKS)) return { deleted: 0, error: 'timestamp_format' };
-  const cutoff = yearsBefore(now, CRM_RETENTION_YEARS), internal = internalEmails();
   return db.transaction(() => {
-    const candidates = db.prepare(`SELECT c.id,c.email FROM customers c WHERE
-      (EXISTS(SELECT 1 FROM crm_notes WHERE customer_id=c.id) OR EXISTS(SELECT 1 FROM crm_tasks WHERE customer_id=c.id)
-        OR EXISTS(SELECT 1 FROM crm_profiles WHERE customer_id=c.id) OR EXISTS(SELECT 1 FROM crm_languages WHERE customer_id=c.id))
-      AND ${LAST_CONTACT_SQL}<? AND NOT (${CRM_PROTECTED_SQL}) ORDER BY c.id`).all(cutoff) as Array<{ id: number; email: string }>;
     let deleted = 0;
-    for (const { id, email } of candidates) {
-      if (isInternal(email, internal) || eraseCrmRecords(db, id, now) !== 'erased') continue;
+    for (const id of crmCandidates(db, now)) {
+      if (eraseCrmRecords(db, id, now) !== 'erased') continue;
       recordErasure(db, 'crm_records', id, now);
       deleted++;
     }
@@ -201,20 +210,37 @@ export function applyCrmRetention(db: Database.Database, now: number): RuleOutco
   }).immediate();
 }
 
+const ACCOUNT_CLOCKS = [['customers', 'created_at'], ['sessions', 'expires_at']] as const;
+function accountCandidates(db: Database.Database, now: number): number[] {
+  const internal = internalEmails();
+  return (db.prepare(`SELECT c.id,c.email FROM customers c WHERE c.created_at<@cutoff
+      AND NOT EXISTS(SELECT 1 FROM sessions s WHERE s.customer_id=c.id AND s.expires_at>=@now)
+      AND NOT (${ACCOUNT_RECORDS_SQL.replaceAll('@id', 'c.id')}) ORDER BY c.id`).all({ cutoff: yearsBefore(now, ACCOUNT_RETENTION_YEARS), now }) as Array<{ id: number; email: string }>)
+    .filter(row => !isInternal(row.email, internal)).map(row => row.id);
+}
+
 /** Règle 3 : compte créé il y a plus de dix ans, sans achat ni suivi restants, ni session en cours. */
 export function applyAccountRetention(db: Database.Database, now: number): RuleOutcome {
-  if (!datesAreMilliseconds(db, [['customers', 'created_at'], ['sessions', 'expires_at']])) return { deleted: 0, error: 'timestamp_format' };
-  const cutoff = yearsBefore(now, ACCOUNT_RETENTION_YEARS), internal = internalEmails();
+  if (!datesAreMilliseconds(db, ACCOUNT_CLOCKS)) return { deleted: 0, error: 'timestamp_format' };
   return db.transaction(() => {
-    const candidates = db.prepare(`SELECT c.id,c.email FROM customers c WHERE c.created_at<@cutoff
-      AND NOT EXISTS(SELECT 1 FROM sessions s WHERE s.customer_id=c.id AND s.expires_at>=@now)
-      AND NOT (${ACCOUNT_RECORDS_SQL.replaceAll('@id', 'c.id')}) ORDER BY c.id`).all({ cutoff, now }) as Array<{ id: number; email: string }>;
     let deleted = 0;
-    for (const { id, email } of candidates) {
-      if (isInternal(email, internal) || eraseCustomerAccount(db, id, now) !== 'erased') continue;
+    for (const id of accountCandidates(db, now)) {
+      if (eraseCustomerAccount(db, id, now) !== 'erased') continue;
       recordErasure(db, 'customer_account', id, now);
       deleted++;
     }
     return { deleted };
   }).immediate();
+}
+
+export type RetentionPreview = Record<'purchase_records' | 'crm_records' | 'customer_accounts', number | 'timestamp_format'>;
+/**
+ * Inventaire en lecture seule avant publication ou après restauration : mêmes requêtes que les règles, aucune écriture,
+ * aucun identifiant ni adresse rendus. Les comptes comptés sont ceux éligibles dans l'état présent, avant les effacements
+ * des règles 1 et 2 d'un même passage.
+ */
+export function previewRetention(db: Database.Database, now: number): RetentionPreview {
+  const count = (clocks: ReadonlyArray<readonly [string, string]>, candidates: (db: Database.Database, now: number) => number[]) =>
+    datesAreMilliseconds(db, clocks) ? candidates(db, now).length : 'timestamp_format' as const;
+  return { purchase_records: count(PURCHASE_CLOCKS, purchaseCandidates), crm_records: count(CRM_CLOCKS, crmCandidates), customer_accounts: count(ACCOUNT_CLOCKS, accountCandidates) };
 }

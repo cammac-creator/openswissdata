@@ -2,10 +2,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import type Database from 'better-sqlite3';
 import { closeDb, getDb } from '../../src/lib/db.js';
 import { readCleanupProof, runCleanup, runFullCleanup } from '../../src/lib/cleanup.js';
-import { applyAccountRetention, applyCrmRetention, applyPurchaseRetention, purchaseBoundary, yearsBefore } from '../../src/lib/retention-rules.js';
+import { applyAccountRetention, applyCrmRetention, applyPurchaseRetention, previewRetention, purchaseBoundary, RETENTION_DATE_FLOOR, yearsBefore } from '../../src/lib/retention-rules.js';
 import { ErasureRegistryError, readErasureMirror, replayErasureRegistry } from '../../src/lib/erasure-registry.js';
 import { swissMidnight } from '../../src/lib/crm-period.js';
 import { refreshOrderRights } from '../../src/lib/order-rights.js';
@@ -73,12 +75,38 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
     expect(registry()).toEqual([]);
   });
 
+  it('refuse toute date antérieure à 2025 : rien ne peut être dû avant le 1er janvier 2028', () => {
+    expect(RETENTION_DATE_FLOOR).toBe(Date.UTC(2025, 0, 1));
+    const admin = customer('bureau@example.test', RETENTION_DATE_FLOOR), c = customer('client@example.test', RETENTION_DATE_FLOOR);
+    order(c, RETENTION_DATE_FLOOR); note(c, RETENTION_DATE_FLOOR, admin); profile(c, RETENTION_DATE_FLOOR);
+    expect(previewRetention(db, Date.now())).toEqual({ purchase_records: 0, crm_records: 0, customer_accounts: 0 });
+    // Première échéance possible : le suivi, trois ans après la plus ancienne date acceptée.
+    expect(previewRetention(db, Date.UTC(2028, 0, 1)).crm_records).toBe(0);
+    expect(previewRetention(db, Date.UTC(2028, 0, 1) + 1).crm_records).toBe(1);
+    // Une date de remplacement (1 000 000 000 000 ms, soit 2001) n'est jamais prise pour un achat ancien.
+    db.prepare('UPDATE orders SET created_at=?').run(1_000_000_000_000);
+    expect(previewRetention(db, Date.UTC(2040, 0, 1)).purchase_records).toBe('timestamp_format');
+    const result = runCleanup(db, Date.UTC(2040, 0, 1));
+    expect(result.entries.find(e => e.name === 'purchase_records')).toMatchObject({ status: 'error', error: 'timestamp_format', deleted: 0 });
+    expect([count('orders'), count('retention_erasures')]).toEqual([1, 0]);
+  });
+  it('fournit un inventaire en ligne de commande, en lecture seule et sans adresse', () => {
+    const admin = customer('bureau@example.test', Date.UTC(2026, 0, 1)), c = customer('client@example.test', Date.UTC(2026, 0, 1));
+    order(c, Date.UTC(2026, 0, 2)); note(c, Date.UTC(2026, 0, 3), admin);
+    const root = fileURLToPath(new URL('../../', import.meta.url));
+    const run = spawnSync(process.execPath, ['--import', 'tsx', join(root, 'src', 'scripts', 'retention-preview.ts'), dbPath], { cwd: root, env: { NODE_ENV: 'test' }, encoding: 'utf8' });
+    expect(run.status).toBe(0);
+    expect(JSON.parse(run.stdout)).toMatchObject({ purchase_records: 0, crm_records: 0, customer_accounts: 0 });
+    expect(run.stdout).not.toContain('example.test');
+    expect([count('customers'), count('crm_notes'), count('retention_erasures')]).toEqual([2, 1, 0]);
+  });
+
   describe('Règle 1 : commandes et preuves, dix ans après la fin de l’année civile suisse', () => {
     const firstKept = swissMidnight('2026-01-01'), at2036 = swissMidnight('2036-01-01');
     it('efface l’achat de 2025 à la première milliseconde de 2036 (heure suisse), garde celui de 2026', () => {
       expect(purchaseBoundary(at2036)).toBe(firstKept);
       expect(purchaseBoundary(at2036 - 1)).toBe(swissMidnight('2025-01-01'));
-      const admin = customer('bureau@example.test', firstKept - 500 * DAY), c = customer('acheteur@example.test', firstKept - 400 * DAY);
+      const admin = customer('bureau@example.test', firstKept - 300 * DAY), c = customer('acheteur@example.test', firstKept - 200 * DAY);
       const old = order(c, firstKept - 1, { intent: 'pi_fictif_ancien' }), kept = order(c, firstKept, { intent: 'pi_fictif_garde' });
       const closed = incident(old.delivery, 'accepted', firstKept - 1), followUp = task(c, firstKept - 1, firstKept);
       resolution(closed, old.delivery, admin, firstKept - 1); link(closed, followUp, admin, firstKept - 1); note(c, firstKept - 1, admin);
@@ -88,10 +116,15 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
         db.prepare("INSERT INTO stripe_financial_jobs(charge_id,payment_intent,livemode,revision,checked_revision,state,next_attempt_at,checked_at) VALUES(?,?,1,1,1,'synced',?,?)").run(charge, intent, firstKept, firstKept);
         db.prepare('INSERT INTO stripe_financial_events(id,charge_id,created_at) VALUES(?,?,?)').run(`evt_${charge}`, charge, firstKept);
       }
-      const alone = customer('seul@example.test', firstKept - 400 * DAY), lonely = order(alone, firstKept - DAY);
+      const alone = customer('seul@example.test', firstKept - 200 * DAY), lonely = order(alone, firstKept - DAY);
 
+      // L'inventaire en lecture seule annonce exactement ce que la règle efface, sans rien écrire.
+      expect(previewRetention(db, at2036 - 1).purchase_records).toBe(0);
+      expect(previewRetention(db, at2036).purchase_records).toBe(2);
+      expect([count('orders'), count('retention_erasures')]).toEqual([3, 0]);
       expect(applyPurchaseRetention(db, at2036 - 1)).toEqual({ deleted: 0 });
       expect(applyPurchaseRetention(db, at2036)).toEqual({ deleted: 2 });
+      expect(previewRetention(db, at2036).purchase_records).toBe(0);
       for (const table of ['order_legal', 'order_grants', 'order_deliveries', 'download_activity']) expect(count(table, 'order_id IN (?,?)', old.order, lonely.order)).toBe(0);
       expect(count('orders', 'id IN (?,?)', old.order, lonely.order)).toBe(0);
       expect([count('delivery_incidents'), count('delivery_incident_events'), count('delivery_incident_resolutions'), count('delivery_incident_tasks')]).toEqual([0, 0, 0, 0]);
@@ -128,7 +161,9 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
       const gone = customer('ancien@example.test', cutoff - 800 * DAY), purchase = order(gone, cutoff - 700 * DAY);
       note(gone, cutoff - 1, admin); task(gone, cutoff - 500 * DAY, cutoff - 400 * DAY); profile(gone, cutoff - 300 * DAY); language(gone, cutoff - 300 * DAY);
       const kept = customer('recent@example.test', cutoff - 800 * DAY); order(kept, cutoff - 700 * DAY); note(kept, cutoff, admin); profile(kept, cutoff - 300 * DAY);
+      expect(previewRetention(db, NOW).crm_records).toBe(1);
       expect(applyCrmRetention(db, NOW)).toEqual({ deleted: 1 });
+      expect(previewRetention(db, NOW).crm_records).toBe(0);
       for (const table of ['crm_notes', 'crm_tasks', 'crm_profiles', 'crm_languages']) expect(count(table, 'customer_id=?', gone)).toBe(0);
       expect([count('crm_notes', 'customer_id=?', kept), count('crm_profiles', 'customer_id=?', kept)]).toEqual([1, 1]);
       for (const table of ['order_legal', 'order_grants', 'order_deliveries']) expect(count(table, 'order_id=?', purchase.order)).toBe(1);
@@ -187,7 +222,9 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
       db.prepare("INSERT INTO download_activity(customer_id,dataset_id,version,source,created_at) VALUES(?,'finma','2030.01.01','account',?)").run(gone, cutoff - 1);
       db.prepare("INSERT INTO download_tokens(token,customer_id,dataset_id,version,expires_at,created_at) VALUES('lien-fictif',?,'finma','2030.01.01',?,?)").run(gone, cutoff, cutoff - 1);
       db.prepare("INSERT INTO events(kind,name,customer_id,ts) VALUES('custom','fictif',?,?)").run(gone, NOW - DAY);
+      expect(previewRetention(db, NOW)).toEqual({ purchase_records: 0, crm_records: 0, customer_accounts: 1 });
       expect(applyAccountRetention(db, NOW)).toEqual({ deleted: 1 });
+      expect(previewRetention(db, NOW).customer_accounts).toBe(0);
       expect(db.prepare('SELECT id FROM customers').all()).toEqual([{ id: kept }]);
       expect([count('sessions', 'customer_id=?', gone), count('download_activity'), count('download_tokens')]).toEqual([0, 0, 0]);
       expect(db.prepare('SELECT customer_id FROM events').all()).toEqual([{ customer_id: null }]);

@@ -31,14 +31,15 @@ const erasers: Record<ErasureCategory, (db: Database.Database, id: number, bound
   purchase_order: eraseOrder, crm_records: eraseCrmRecords, customer_account: eraseCustomerAccount,
 };
 
-/** Dossier de la copie : répertoire réel, jamais un lien symbolique ; créé privé s'il manque. */
+/**
+ * Dossier retention/ : répertoire réel, jamais un lien symbolique ; créé privé s'il manque. Comme pour le bronze,
+ * seul ce niveau est contrôlé : le dossier de la base lui-même n'est pas examiné (un refus arrêterait le démarrage).
+ */
 function mirrorPath(db: Database.Database): string {
   let path: string;
   try { path = erasureRegistryPath(db.name); } catch { throw new ErasureRegistryError('registry_path_invalid'); }
   const folder = dirname(path);
   try {
-    const parent = lstatSync(dirname(folder));
-    if (!parent.isDirectory() || parent.isSymbolicLink()) throw new Error('parent');
     const info = lstatSync(folder, { throwIfNoEntry: false });
     if (!info) mkdirSync(folder, { mode: 0o700 });
     else if (!info.isDirectory() || info.isSymbolicLink()) throw new Error('folder');

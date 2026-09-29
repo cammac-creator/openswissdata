@@ -16,7 +16,7 @@ Décision de Claude-Alain du 29.09.2026. Les trois règles sont appliquées par 
 - Durée : trois ans, au même instant de l’horloge UTC (un 29 février devient le 28), après le dernier contact connu de la base. Un contact exactement à la limite garde les données ; une milliseconde plus tôt, elles sont effacées.
 - « Dernier achat ou dernier échange » : la date la plus récente parmi la création du compte, ses commandes, ses mails de livraison acceptés par le prestataire (`order_deliveries.sent_at`), les clôtures manuelles d’incidents de ses livraisons, ses notes, la création ou la fin de ses actions, la dernière modification de sa fiche ou de sa langue, et ses demandes de lien de connexion encore enregistrées (30 jours au plus).
 - La base ne garde pas les courriels : la boîte est lue en direct et ses copies techniques expirent après 30 jours. Un mail qui n’a pas été consigné dans une note ne prolonge pas le délai. Les téléchargements ne sont pas des échanges.
-- Jamais pendant : une action ouverte du client ; un incident de livraison `open`, y compris un dossier clos à la main que la machine garde ouvert ; une action ouverte reliée à ses incidents ; une commande `disputed` ou `financial_pending` ou une contestation ouverte ; une fiche interne (`internal=1`) ; une adresse de `ADMIN_EMAILS` ou `CRM_INTERNAL_EMAILS` ; un compte relié à une application MCP, même révoquée.
+- Jamais pendant : une action ouverte du client ; un incident de livraison `open`, y compris un dossier clos à la main que la machine garde ouvert ; une action ouverte reliée à ses incidents ; une commande `disputed` ou `financial_pending` ou une contestation ouverte ; une fiche interne (`internal=1`) ; une adresse de `ADMIN_EMAILS` ou `CRM_INTERNAL_EMAILS` ; un compte relié à une application MCP, même révoquée (seul le parcours d’abonnement relie une application à un compte ; l’inscription publique ne le fait pas).
 - Effacement : liaisons d’actions aux incidents, actions, notes, fiche et langue du client (`crm_languages` suit la fiche). Jamais ses achats, preuves, livraisons ni incidents.
 
 ## Règle 3 : compte client (`customer_accounts`)
@@ -33,10 +33,15 @@ Décision de Claude-Alain du 29.09.2026. Les trois règles sont appliquées par 
 ## Témoin et erreurs
 
 - Quatre catégories rejoignent le témoin `operation_checks/cleanup` : `purchase_records` (unité commandes), `crm_records` et `customer_accounts` (unité clients), `erasure_registry`. Un ancien témoin à 14 catégories n’est plus reconnu : la minuterie refait un passage 30 secondes après le démarrage.
-- Précontrôle des dates avant chaque règle : toute date non vide doit être un entier en millisecondes. Sinon `timestamp_format`, rien n’est effacé dans la catégorie. Une erreur SQL annule toute la règle (`database_error`), sans message brut ; les autres catégories continuent. Une copie du registre impossible à écrire donne `storage_error`.
+- Précontrôle des dates avant chaque règle : toute date non vide doit être un entier en millisecondes postérieur au 1er janvier 2025 (`RETENTION_DATE_FLOOR`), aucune écriture de l’application n’étant plus ancienne. Une date en secondes, en texte ou de remplacement (par exemple 1 000 000 000 000 ms, soit 2001) donne `timestamp_format` : rien n’est effacé dans la catégorie. Conséquence : aucune règle ne peut rien effacer avant le 1er janvier 2028 pour le suivi client (vérifié par un test), 2035 pour les comptes et 2036 pour les achats. Une erreur SQL annule toute la règle (`database_error`), sans message brut ; les autres catégories continuent. Une copie du registre impossible à écrire donne `storage_error`.
+
+## Inventaire en lecture seule
+
+`node dist/scripts/retention-preview.js [base]` (ou `DATABASE_PATH`) ouvre la base en lecture seule et affiche seulement le nombre de commandes, de clients et de comptes que chaque règle effacerait à cet instant, avec les mêmes requêtes que les règles (`previewRetention`). Les comptes sont comptés dans l’état présent, avant les effacements des deux premières règles d’un même passage. Résultat attendu jusqu’en 2028 : zéro partout.
 
 ## Publication, sauvegarde et retour arrière
 
 - Avant la première publication : sauvegarde vérifiée. La table est additive ; aucune ligne existante n’est modifiée par la publication elle-même.
 - Deux workflows figent encore l’ancien état : `cleanup-expired.yml` (14 catégories exactes) et `backup-db.yml` (profil `service-crm-2026-09-29`). Les faire accepter l’ancien et le nouvel état avant de publier le serveur, puis seulement le nouveau une fois le SHA servi vérifié.
 - Retour arrière : l’ancien code ignore la table et la copie, sans erreur, mais n’applique plus les durées ; ne supprimer ni la table ni `retention/erasures.json`. Une donnée effacée ne revient pas par un retour de code ; elle ne revient que par une restauration, que le rejeu corrige au démarrage suivant d’une version compatible.
+- Annuler un effacement erroné : service arrêté, restauration, retrait des seules entrées concernées de la copie (et de la table si la sauvegarde les contient), puis démarrage. Procédure détaillée : `docs/sauvegarde-et-reprise.md`.
