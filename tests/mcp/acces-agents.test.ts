@@ -171,10 +171,11 @@ describe("Accès des agents au serveur MCP", () => {
   });
 
   describe("outils présentés et refus", () => {
-    it("un appelant anonyme ne voit que les trois outils gratuits, annotés en lecture seule", async () => {
+    it("un appelant anonyme ne voit que les trois outils gratuits et les trois de l'essai, annotés en lecture seule", async () => {
       const res = await post(createApp(), "/mcp/jsonrpc", { jsonrpc: "2.0", id: 1, method: "tools/list" });
       const tools = (await res.json()).result.tools as Array<{ name: string; title: string; annotations: Record<string, unknown> }>;
-      expect(tools.map((t) => t.name)).toEqual(["tariff_lookup", "kyc_check", "cross_walk"]);
+      // Essai des outils de recherche (29.09.2026) ; l'historique reste réservé aux jetons.
+      expect(tools.map((t) => t.name)).toEqual(["tariff_lookup", "kyc_check", "cross_walk", "tariff_semantic_search", "classify_text", "finma_search"]);
       for (const t of tools) {
         expect(t.title.length).toBeGreaterThan(5);
         expect(t.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false, openWorldHint: false });
@@ -183,7 +184,8 @@ describe("Accès des agents au serveur MCP", () => {
 
     it("la découverte anonyme annonce l'accès gratuit et la documentation", async () => {
       const body = await (await createApp().request("/mcp/discovery")).json();
-      expect(body.tools).toEqual(["tariff_lookup", "kyc_check", "cross_walk"]);
+      expect(body.tools).toEqual(["tariff_lookup", "kyc_check", "cross_walk", "tariff_semantic_search", "classify_text", "finma_search"]);
+      expect(body.anonymous_access.tools).toEqual(["tariff_lookup", "kyc_check", "cross_walk"]);
       expect(body.anonymous_access.limit).toBe("100 calls per hour per IP address");
       expect(body.supported_protocol_versions).toContain("2025-06-18");
       expect(body.documentation).toMatch(/\/llms\.txt$/);
@@ -191,7 +193,7 @@ describe("Accès des agents au serveur MCP", () => {
 
     it("un outil Pro appelé sans jeton donne un résultat lisible, pas une erreur de protocole", async () => {
       const res = await post(createApp(), "/mcp/jsonrpc", {
-        jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "classify_text", arguments: { text: "fabrication de chocolat" } },
+        jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "entity_history", arguments: { uid: "CHE-000.000.000" } },
       });
       const body = await res.json();
       expect(body.error).toBeUndefined();

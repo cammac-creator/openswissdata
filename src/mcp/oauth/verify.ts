@@ -40,6 +40,18 @@ import { trackMcpRateLimited } from "../track-mcp.js";
 export const ANONYMOUS_TOOL_NAMES = ["tariff_lookup", "kyc_check", "cross_walk"] as const;
 const ANONYMOUS_TOOLS: ReadonlySet<string> = new Set(ANONYMOUS_TOOL_NAMES);
 
+/**
+ * Outils de recherche ouverts sans jeton dans la limite de l'essai (décision de Claude-Alain du
+ * 29.09.2026) : leur appel anonyme consomme le compteur d'essai du réseau, décompté dans le
+ * dispatcher. Les jetons authentifiés gardent leurs portées, sans essai.
+ */
+export const ANONYMOUS_TRIAL_TOOL_NAMES = ["tariff_semantic_search", "classify_text", "finma_search"] as const;
+const ANONYMOUS_TRIAL_TOOLS: ReadonlySet<string> = new Set(ANONYMOUS_TRIAL_TOOL_NAMES);
+
+export function isTrialTool(name: string): boolean {
+  return ANONYMOUS_TRIAL_TOOLS.has(name);
+}
+
 export interface MCPAuthContext {
   client_id: string;
   client_pk: number; // mcp_clients.id (autoincrement) — useful for joins
@@ -227,7 +239,8 @@ export function oauthVerify(opts: { requireToken?: boolean } = {}): MiddlewareHa
  * the JSON-RPC dispatcher.
  *
  * - Anonymous (no token) → only V1 read-only tools (`tariff_lookup`, `kyc_check`,
- *   `cross_walk`).
+ *   `cross_walk`), plus the three trial tools, each call of which the dispatcher
+ *   charges to the network's trial counter before running it.
  * - Token-authenticated → tools whose required scope is present in the token.
  */
 export function isToolAllowed(
@@ -239,8 +252,8 @@ export function isToolAllowed(
   if (auth?.admin) return true;
   if (!auth) {
     // Anonymous fallback: only V1 read-only tools, gated by their scope being
-    // among the "default-on" public scopes.
-    return ANONYMOUS_TOOLS.has(toolName);
+    // among the "default-on" public scopes, and the trial tools (counted apart).
+    return ANONYMOUS_TOOLS.has(toolName) || ANONYMOUS_TRIAL_TOOLS.has(toolName);
   }
   return auth.scopes.includes(requiredScope);
 }

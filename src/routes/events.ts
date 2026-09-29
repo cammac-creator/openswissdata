@@ -30,7 +30,7 @@ const RATE_MAX_PER_WINDOW = 60;
 const RATE_MAX_ENTRIES = 10_000;
 type Bucket = { count: number; windowStart: number };
 const rateMap = new Map<string, Bucket>();
-const reserved = new Set(['page_view', 'mcp_tool_call', 'mcp_initialize', 'mcp_rate_limited', 'checkout_started', 'payment_paid', 'delivery_sent', 'download_authorized', 'sample_served']);
+const reserved = new Set(['page_view', 'mcp_tool_call', 'mcp_initialize', 'mcp_rate_limited', 'mcp_trial', 'checkout_started', 'payment_paid', 'delivery_sent', 'download_authorized', 'sample_served']);
 eventsRoute.use('*', async (c, next) => { c.header('Cache-Control', 'no-store'); await next(); });
 eventsRoute.use('*', bodyLimit({ maxSize: 4096, onError: c => c.json({ error: 'body_too_large' }, 413) }));
 

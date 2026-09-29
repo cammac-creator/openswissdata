@@ -73,6 +73,25 @@ export function trackMcpInitialize(
   } catch { reportEventFailure(); }
 }
 
+/**
+ * Essai sans clé des outils de recherche (29.09.2026) : chaque appel servi, puis le premier refus
+ * de la fenêtre du réseau. Sert à lire l'intérêt réel avant toute décision sur l'offre Pro :
+ * `used` = 1 compte les réseaux qui commencent un essai, `outcome` = refused ceux qui l'épuisent.
+ * Ni argument (un nom cherché dans le registre FINMA peut désigner une personne), ni adresse.
+ */
+export function trackMcpTrial(c: Context, tool: string, outcome: { allowed: boolean; used: number; limit: number }): void {
+  try {
+    const ua = (c.req.header('user-agent') ?? '').slice(0, 1024), recordedAt = Date.now();
+    track({
+      kind: 'custom', origin: 'server', name: 'mcp_trial',
+      status: outcome.allowed ? 200 : 429, duration_ms: null, customer_id: null,
+      visitor_hash: visitorHashFromRequest(c, recordedAt), country: countryFromRequest(c),
+      referer: refererOrigin(c), ua_class: mcpCallerClass(ua, false),
+      meta_json: JSON.stringify({ mcp: true, tool: tool.slice(0, 64), outcome: outcome.allowed ? 'call' : 'refused', used: outcome.used, limit: outcome.limit }),
+    }, recordedAt);
+  } catch { reportEventFailure(); }
+}
+
 /** Premier refus 429 d'une fenêtre pour un réseau : combien de réseaux touchent la limite, sans inonder le journal. */
 export function trackMcpRateLimited(c: Context, tier: string): void {
   try {

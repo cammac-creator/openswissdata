@@ -26,8 +26,8 @@ import { finmaSearchTool } from "./tools/finma-search.js";
 import { tariffChangelogTool } from "./tools/tariff-changelog.js";
 import { entityHistoryTool } from "./tools/entity-history.js";
 import { TOOL_SCOPE, isToolAllowed, type MCPAuthContext } from "./oauth/index.js";
-import { ANONYMOUS_TOOL_NAMES } from "./oauth/verify.js";
-import { ANONYMOUS_RATE_LIMIT } from "./rate-limit.js";
+import { ANONYMOUS_TOOL_NAMES, ANONYMOUS_TRIAL_TOOL_NAMES, isTrialTool } from "./oauth/verify.js";
+import { ANONYMOUS_RATE_LIMIT, ANONYMOUS_TRIAL_LIMIT, type TrialResult } from "./rate-limit.js";
 
 // Versions servies, de la plus récente à la plus ancienne. Le serveur n'utilise que initialize,
 // ping, tools/list et tools/call, dont la forme est identique dans ces quatre versions.
@@ -53,6 +53,31 @@ const SERVER_INFO = {
 
 const PUBLIC_SITE = (process.env.BASE_URL ?? "https://www.openswissdata.com").replace(/\/$/, "");
 const ANONYMOUS_LIMIT_TEXT = `${ANONYMOUS_RATE_LIMIT.calls} calls per ${ANONYMOUS_RATE_LIMIT.window} per IP address`;
+const TRIAL_LIMIT_TEXT = `${ANONYMOUS_TRIAL_LIMIT.calls} calls per ${ANONYMOUS_TRIAL_LIMIT.window} per IP address`;
+const TRIAL_TOOLS_TEXT = `${ANONYMOUS_TRIAL_TOOL_NAMES.slice(0, -1).join(", ")} and ${ANONYMOUS_TRIAL_TOOL_NAMES[ANONYMOUS_TRIAL_TOOL_NAMES.length - 1]}`;
+const TRIAL_WINDOW_HOURS = ANONYMOUS_TRIAL_LIMIT.windowMs / 3_600_000;
+
+/**
+ * Vérification officielle rappelée dans chaque réponse d'essai : l'essai sert à juger l'outil,
+ * jamais à fonder une décision sur une copie non officielle.
+ */
+const OFFICIAL_CHECK = new Map<string, { short: string; url: string; text: string }>([
+  ["tariff_semantic_search", {
+    short: "the official tariff at xtares.admin.ch",
+    url: "https://xtares.admin.ch",
+    text: "Check the tariff number, its duties and conditions in the official Swiss customs tariff (Tares) at https://xtares.admin.ch before any customs declaration.",
+  }],
+  ["classify_text", {
+    short: "the NOGA publications of the Federal Statistical Office",
+    url: "https://www.bfs.admin.ch/bfs/en/home/statistics/industry-services/nomenclatures/noga.html",
+    text: "Check the NOGA code in the publications of the Swiss Federal Statistical Office: https://www.bfs.admin.ch/bfs/en/home/statistics/industry-services/nomenclatures/noga.html. A similarity score is not an official classification.",
+  }],
+  ["finma_search", {
+    short: "the official FINMA register",
+    url: "https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/",
+    text: "Check the institution in the official FINMA register: https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/ (FINMA warning list: https://www.finma.ch/en/finma-public/warnungen/warning-list/).",
+  }],
+]);
 
 /**
  * Consignes lues par l'agent à la connexion : ce qui est gratuit, comment appeler, ce qu'il faut citer.
@@ -65,7 +90,8 @@ export const SERVER_INSTRUCTIONS = [
   "- tariff_lookup: an 8-digit Swiss tariff number (dots allowed, e.g. 8471.3000) returns the full TARES line; a 2- to 7-digit HS prefix (e.g. the international HS6 code 847130) lists the Swiss 8-digit lines under it. Set lang to en, de, it or fr (default fr).",
   "- kyc_check: search the FINMA register and the FINMA warnings list by entity name.",
   "- cross_walk: map a code between NOGA 2008, NOGA 2025, NACE 2.0, NACE 2.1 and ISIC 4, with the relation type and its source.",
-  "The other tools (semantic search, change history) belong to the Pro plan, which is closed to new subscribers at the moment.",
+  `Free trial without a key, limited to ${TRIAL_LIMIT_TEXT} in total: ${TRIAL_TOOLS_TEXT} (search TARES lines by goods description, NOGA 2025 codes by activity description, the FINMA register with typo tolerance); each trial answer states the calls left and the official source on which to check the result before use.`,
+  "The change history tools (tariff_changelog, entity_history) belong to the Pro plan, which is closed to new subscribers at the moment.",
   "The data is an unofficial copy: tell the user so, show the notice when a result carries one, and point to the official source (xtares.admin.ch, finma.ch, the Swiss Federal Statistical Office) for binding decisions.",
   `Documentation for agents: ${PUBLIC_SITE}/llms.txt. Full datasets are sold as signed files: ${PUBLIC_SITE}/en/`,
 ].join("\n");
@@ -74,6 +100,29 @@ export interface ToolResult {
   content: { type: "text"; text: string }[];
   isError?: boolean;
   structured?: unknown;
+  /** Compteur d'essai d'un appel anonyme à un outil de recherche (absent pour tous les autres appels). */
+  trial?: TrialInfo;
+}
+
+/** État de l'essai renvoyé à l'agent : aucune donnée sur le réseau lui-même. */
+export interface TrialInfo {
+  tools: readonly string[];
+  limit: number;
+  used: number;
+  remaining: number;
+  window_hours: number;
+  resets_at: string;
+  official_check: string;
+  retry_after_seconds?: number;
+}
+
+/**
+ * Compteur d'essai d'une requête anonyme, fourni par la route (qui connaît le réseau et mesure).
+ * `consume` est appelé de façon synchrone avant l'exécution : dans un lot, l'ordre des messages
+ * décide lesquels sont servis.
+ */
+export interface TrialGate {
+  consume(tool: string): TrialResult;
 }
 
 interface Tool {
@@ -113,7 +162,8 @@ const TOOL_TITLES = new Map<string, string>([
 ]);
 const READ_ONLY_ANNOTATIONS = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
 
-// Piste gratuite proposée quand un appel anonyme vise un outil qui exige des droits.
+// Piste gratuite proposée quand un appel anonyme vise un outil qui exige des droits, ou quand
+// l'essai des outils de recherche est épuisé pour ce réseau.
 const FREE_ALTERNATIVE = new Map<string, string>([
   ["tariff_semantic_search", "If you know the international HS code (4 or 6 digits), call tariff_lookup with it: it lists the Swiss 8-digit lines under that prefix."],
   ["classify_text", "If you have a candidate NOGA, NACE or ISIC code, call cross_walk to get its correspondences."],
@@ -161,16 +211,26 @@ function ok(id: string | number | null, result: unknown): JsonRpcResponse {
   return { jsonrpc: "2.0", id, result };
 }
 
-export function listTools(canCall: (name: string) => boolean = () => true): {
+/**
+ * Outils présentés. `trial` (appelant anonyme) signale l'essai dans le titre et en tête de la
+ * description des outils de recherche ; un jeton voit les textes d'origine. Jamais la suite
+ * « data » + deux-points dans ces textes (voir SERVER_INSTRUCTIONS).
+ */
+export function listTools(canCall: (name: string) => boolean = () => true, opts: { trial?: boolean } = {}): {
   tools: { name: string; title: string; description: string; inputSchema: unknown; annotations: Record<string, unknown> }[];
 } {
   return {
     tools: TOOLS.filter((t) => canCall(t.name)).map((t) => {
-      const title = TOOL_TITLES.get(t.name) ?? t.name;
+      const trial = opts.trial === true && isTrialTool(t.name);
+      const base = TOOL_TITLES.get(t.name) ?? t.name;
+      const title = trial ? `${base} (free trial, ${ANONYMOUS_TRIAL_LIMIT.calls} calls per ${ANONYMOUS_TRIAL_LIMIT.window})` : base;
+      const description = trial
+        ? `FREE TRIAL without a key: ${TRIAL_LIMIT_TEXT} in total for ${TRIAL_TOOLS_TEXT}. Each answer states the trial calls left; check every result on ${OFFICIAL_CHECK.get(t.name)?.short ?? "the official source"} before use. ${t.description}`
+        : t.description;
       return {
         name: t.name,
         title,
-        description: t.description,
+        description,
         inputSchema: t.inputSchema,
         annotations: { title, ...READ_ONLY_ANNOTATIONS },
       };
@@ -184,7 +244,7 @@ export function getServerInfo(canCall: (name: string) => boolean = () => true): 
   server_info: { name: string; title: string; version: string };
   capabilities: { tools: { list_changed: false } };
   tools: string[];
-  anonymous_access: { tools: readonly string[]; limit: string };
+  anonymous_access: { tools: readonly string[]; limit: string; trial: { tools: readonly string[]; limit: string; window_hours: number } };
   documentation: string;
 } {
   return {
@@ -193,7 +253,11 @@ export function getServerInfo(canCall: (name: string) => boolean = () => true): 
     server_info: { ...SERVER_INFO },
     capabilities: { tools: { list_changed: false } },
     tools: TOOLS.filter((t) => canCall(t.name)).map((t) => t.name),
-    anonymous_access: { tools: ANONYMOUS_TOOL_NAMES, limit: ANONYMOUS_LIMIT_TEXT },
+    anonymous_access: {
+      tools: ANONYMOUS_TOOL_NAMES,
+      limit: ANONYMOUS_LIMIT_TEXT,
+      trial: { tools: ANONYMOUS_TRIAL_TOOL_NAMES, limit: TRIAL_LIMIT_TEXT, window_hours: TRIAL_WINDOW_HOURS },
+    },
     documentation: `${PUBLIC_SITE}/llms.txt`,
   };
 }
@@ -205,7 +269,64 @@ function anonymousRefusal(name: string): ToolResult {
     `'${name}' cannot be called without an access token. It belongs to the OpenSwissData Pro plan, which is closed to new subscribers at the moment, so no token can be obtained today.`,
     alternative,
     `Free tools without a key: ${ANONYMOUS_TOOL_NAMES.join(", ")} (${ANONYMOUS_LIMIT_TEXT}).`,
+    `Free trial without a key (${TRIAL_LIMIT_TEXT} in total): ${TRIAL_TOOLS_TEXT}.`,
     `Full datasets are sold as signed files: ${PUBLIC_SITE}/en/`,
+  ].filter(Boolean).join("\n");
+  return { content: [{ type: "text", text }], isError: true };
+}
+
+const isoSeconds = (ms: number) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
+
+function trialInfo(name: string, outcome: TrialResult): TrialInfo {
+  return {
+    tools: ANONYMOUS_TRIAL_TOOL_NAMES,
+    limit: outcome.limit,
+    used: outcome.used,
+    remaining: outcome.remaining,
+    window_hours: TRIAL_WINDOW_HOURS,
+    resets_at: isoSeconds(outcome.resetAt),
+    official_check: OFFICIAL_CHECK.get(name)?.url ?? PUBLIC_SITE,
+  };
+}
+
+/**
+ * Réponse d'essai : compteur et rappel de vérification ajoutés au premier texte (un agent qui ne
+ * transmet que content[0].text les garde), y compris pour une entrée invalide, qui a coûté un appel.
+ */
+function withTrialNotice(name: string, result: ToolResult, outcome: TrialResult): ToolResult {
+  const notice = [
+    `FREE TRIAL (no key): ${outcome.remaining} of ${outcome.limit} trial calls left for this network until ${isoSeconds(outcome.resetAt)}, shared by ${TRIAL_TOOLS_TEXT}.`,
+    OFFICIAL_CHECK.get(name)?.text ?? "Check the result on the official source before use.",
+  ].join("\n");
+  const [first, ...rest] = Array.isArray(result.content) ? result.content : [];
+  const content = first && typeof first.text === "string"
+    ? [{ ...first, text: `${first.text}\n\n${notice}` }, ...rest]
+    : [{ type: "text" as const, text: notice }, ...rest];
+  return { ...result, content, trial: trialInfo(name, outcome) };
+}
+
+/** Essai épuisé : résultat lisible, délai de reprise, piste gratuite ; aucun lien d'achat (offre Pro fermée). */
+function trialExhausted(name: string, outcome: TrialResult): ToolResult {
+  const retryAfter = Math.max(1, Math.ceil((outcome.resetAt - Date.now()) / 1000));
+  const text = [
+    `The free trial is used up for this network: ${TRIAL_LIMIT_TEXT} in total for ${TRIAL_TOOLS_TEXT}. It opens again at ${isoSeconds(outcome.resetAt)}; retry after ${retryAfter} seconds.`,
+    FREE_ALTERNATIVE.get(name) ?? "",
+    `Free tools without a key remain available: ${ANONYMOUS_TOOL_NAMES.join(", ")} (${ANONYMOUS_LIMIT_TEXT}).`,
+    "The Pro plan is closed to new subscribers at the moment, so no access token can be obtained today.",
+  ].filter(Boolean).join("\n");
+  return {
+    content: [{ type: "text", text }],
+    isError: true,
+    trial: { ...trialInfo(name, outcome), retry_after_seconds: retryAfter },
+  };
+}
+
+/** Appel direct sans compteur (hors de la route HTTP) : l'essai n'est jamais servi sans décompte. */
+function trialUnavailable(name: string): ToolResult {
+  const text = [
+    `'${name}' is offered without a key only within the free trial, which could not be counted for this request.`,
+    FREE_ALTERNATIVE.get(name) ?? "",
+    `Free tools without a key: ${ANONYMOUS_TOOL_NAMES.join(", ")} (${ANONYMOUS_LIMIT_TEXT}).`,
   ].filter(Boolean).join("\n");
   return { content: [{ type: "text", text }], isError: true };
 }
@@ -214,6 +335,7 @@ function anonymousRefusal(name: string): ToolResult {
 export async function dispatch(
   req: unknown,
   ctx: MCPAuthContext | null = null,
+  trial: TrialGate | null = null,
 ): Promise<JsonRpcResponse | null> {
   if (!req || typeof req !== "object") {
     return err(null, ERR.INVALID_REQUEST, "Request must be a JSON object");
@@ -245,7 +367,7 @@ export async function dispatch(
         return ok(id, {});
 
       case "tools/list":
-        return ok(id, listTools(callableBy(ctx)));
+        return ok(id, listTools(callableBy(ctx), { trial: ctx === null }));
 
       case "tools/call": {
         const params = r.params as { name?: string; arguments?: unknown } | undefined;
@@ -268,6 +390,15 @@ export async function dispatch(
             -32001,
             `Insufficient scope for tool '${params.name}' (requires '${required ?? "?"}')`,
           );
+        }
+
+        // Essai anonyme : décompte synchrone, avant toute attente, puis exécution et rappel.
+        if (ctx === null && isTrialTool(params.name)) {
+          const outcome = trial ? trial.consume(params.name) : null;
+          if (!outcome) return ok(id, trialUnavailable(params.name));
+          if (!outcome.allowed) return ok(id, trialExhausted(params.name, outcome));
+          const served = await tool.handler(params.arguments ?? {});
+          return ok(id, withTrialNotice(params.name, served, outcome));
         }
 
         // Always await — some handlers are sync (CSV lookup) and some are
