@@ -7,7 +7,7 @@
  * Bases fictives uniquement ; les deux outils sémantiques sont simulés (aucun modèle chargé).
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
@@ -21,6 +21,7 @@ import { classifyTextTool } from "../../src/mcp/tools/classify-text.js";
 import { generateClientId, generateClientSecret, hashToken } from "../../src/mcp/oauth/crypto.js";
 import { insertClient, insertToken } from "../../src/mcp/oauth/store.js";
 import { TIER_DEFAULT_SCOPES, serializeScopes } from "../../src/mcp/oauth/scopes.js";
+import { ANONYMOUS_TRIAL_TOOL_NAMES } from "../../src/mcp/oauth/verify.js";
 
 const flush = async () => {
   for (let i = 0; i < 5; i++) await new Promise((r) => setImmediate(r));
@@ -318,6 +319,22 @@ describe("Essai sans clé des outils de recherche", () => {
       const res = await post(createApp(), FINMA(), { origin: "https://client-web.example" });
       expect(res.headers.get("access-control-expose-headers") ?? "").toContain("x-trial-remaining");
     });
+  });
+
+  it("pages MCP, tarifs et llms.txt décrivent le même essai que le serveur, offres Pro toujours fermées", () => {
+    const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
+    for (const lang of ["", "de/", "en/"]) {
+      const page = read(`web/src/pages/${lang}mcp.astro`);
+      expect(page, lang).toContain(`const trialTools = ${JSON.stringify(ANONYMOUS_TRIAL_TOOL_NAMES).replace(/,/g, ", ")};`);
+      expect(page, lang).toMatch(/20 (appels|Aufrufe|calls)/);
+      expect(page, lang).not.toMatch(/<form\b/);
+    }
+    const pricing = read("web/src/components/PricingPage.astro");
+    expect(pricing.match(/20 (appels par jour|Aufrufe pro Tag|calls per day)/g)).toHaveLength(3);
+    const llms = read("web/public/llms.txt");
+    for (const name of ANONYMOUS_TRIAL_TOOL_NAMES) expect(llms).toContain(`\`${name}\``);
+    expect(llms).toContain("20 times per day per IP address in total");
+    expect(llms).toContain("closed to new subscribers");
   });
 
   it("la mémoire de l'essai reste bornée", () => {

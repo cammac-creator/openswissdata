@@ -3,6 +3,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 const mcpConfigJson = "claude mcp add --transport http openswissdata https://mcp.openswissdata.com/mcp/jsonrpc";
 const freeTools = ["tariff_lookup", "kyc_check", "cross_walk"];
+// Essai sans clé des outils de recherche (29.09.2026) : 20 appels par jour et par réseau au total.
+const trialTools = ["tariff_semantic_search", "classify_text", "finma_search"];
 
 const tools = [
   {
@@ -65,7 +67,7 @@ const tools = [
 ---
 <BaseLayout
   title="MCP server openswissdata — datasets fédéraux suisses pour Claude Code & Cursor"
-  description="TARES, NOGA et FINMA via JSON-RPC. Trois outils sans compte, 100 requêtes par heure et par IP. Autres outils soumis aux droits existants."
+  description="TARES, NOGA et FINMA via JSON-RPC. Trois outils sans compte, 100 requêtes par heure et par IP, et trois outils de recherche à l’essai. Autres outils soumis aux droits existants."
 >
 
 <div class="bg-grid"></div>
@@ -137,7 +139,7 @@ const tools = [
       <pre style="background:#0A0A0C;color:#fafafa;padding:18px 22px;border-radius:8px;font-family:var(--font-mono);font-size:13px;line-height:1.6;overflow-x:auto;margin-bottom:24px;">{mcpConfigJson}</pre>
 
       <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Étape 2 · Redémarrer Claude Code</p>
-      <p style="margin-bottom:14px;">Vérifiez la connexion avec <code>/mcp</code>. Trois outils sont accessibles sans compte ; les autres nécessitent des droits existants.</p>
+      <p style="margin-bottom:14px;">Vérifiez la connexion avec <code>/mcp</code>. Trois outils sont accessibles sans compte, et les trois outils de recherche à l’essai (20 appels par jour) ; les autres nécessitent des droits existants.</p>
 
       <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Étape 3 · Tester</p>
       <p>Demandez par exemple : <em>« Consulte le tarif TARES 09011100 avec tariff_lookup »</em>. Vérifiez ensuite l’unité et les conditions retournées.</p>
@@ -164,7 +166,7 @@ const tools = [
         <h3 style="font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;font-weight:600;">{`// pack ${packName}`}</h3>
         <div style="display:grid;grid-template-columns:1fr;gap:14px;">
           {tools.filter(t => t.pack === packName).map(tool => {
-            const authHeader = freeTools.includes(tool.name) ? "" : '  -H "Authorization: Bearer <access_token>" \\\n';
+            const authHeader = freeTools.includes(tool.name) || trialTools.includes(tool.name) ? "" : '  -H "Authorization: Bearer <access_token>" \\\n';
             const curlExample = `curl -X POST https://mcp.openswissdata.com/mcp/jsonrpc \\
   -H "Content-Type: application/json" \\
 ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: tool.name, arguments: tool.args } }, null, 2)}'`;
@@ -172,7 +174,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
               <div style="background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:22px;">
                 <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;">
                   <code style="font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--ink);">{tool.name}</code>
-                  <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:var(--green-soft);color:var(--green);border:1px solid rgba(21,128,61,.2);padding:3px 8px;border-radius:4px;font-weight:600;white-space:nowrap;">{freeTools.includes(tool.name) ? 'Sans compte' : 'Droits requis'}</span>
+                  <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:var(--green-soft);color:var(--green);border:1px solid rgba(21,128,61,.2);padding:3px 8px;border-radius:4px;font-weight:600;white-space:nowrap;">{freeTools.includes(tool.name) ? 'Sans compte' : trialTools.includes(tool.name) ? 'Essai sans compte' : 'Droits requis'}</span>
                 </div>
                 <p style="font-size:14px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">{tool.desc}</p>
                 <details style="font-family:var(--font-mono);font-size:12px;">
@@ -192,7 +194,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
 </section>
 
 <!-- ========== PLAYGROUND ========== -->
-<div class="container-v4"><p class="mcp-availability" style="padding:20px;border:1px solid var(--line);border-radius:12px;line-height:1.8;margin:24px 0;">Accès sans compte : tariff_lookup, kyc_check et cross_walk (100 requêtes/heure par IP). Les autres outils exigent les droits correspondants ; les nouvelles souscriptions payantes sont fermées. STATENT est suspendu en attente de preuve de droit de redistribution. Les index vectoriels ne sont pas actualisés par les collectes de fichiers.</p></div>
+<div class="container-v4"><p class="mcp-availability" style="padding:20px;border:1px solid var(--line);border-radius:12px;line-height:1.8;margin:24px 0;">Accès sans compte : tariff_lookup, kyc_check et cross_walk (100 requêtes/heure par IP). Essai sans compte de tariff_semantic_search, classify_text et finma_search : 20 appels par jour et par IP pour les trois, chaque réponse indiquant les appels restants et la source officielle où vérifier le résultat (xtares.admin.ch, registre FINMA, publications NOGA de l’OFS). Les autres outils exigent les droits correspondants ; les nouvelles souscriptions payantes sont fermées. STATENT est suspendu en attente de preuve de droit de redistribution. Les index vectoriels ne sont pas actualisés par les collectes de fichiers.</p></div>
 <section class="v4-personas" id="playground">
   <div class="container-v4">
     <div class="v4-section-eyebrow">

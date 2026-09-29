@@ -20,7 +20,9 @@ The data is an unofficial copy. Each result names its source; binding decisions 
 - `kyc_check` — search the FINMA register of supervised institutions and the FINMA warnings list by name. Argument: `name` (full name or a distinctive part).
 - `cross_walk` — map an activity code between `NOGA_2008`, `NOGA_2025`, `NACE_2.0`, `NACE_2.1` and `ISIC_4`, with the relation type (exact or approximate) and its source. Arguments: `code`, `source`, `target`.
 
-Other tools (semantic search over tariff descriptions, text-to-NOGA classification, change history) belong to the Pro plan, which is closed to new subscribers at the moment.
+Free trial without a key: `tariff_semantic_search` (TARES lines from a description of the goods in French, German, Italian or English), `classify_text` (NOGA 2025 codes from a business activity description) and `finma_search` (FINMA register search tolerant of typos and legal forms) can be called 20 times per day per IP address in total, in a 24-hour window opened by the first trial call, and each trial answer states the calls left and the official source on which to check the result (xtares.admin.ch, the official FINMA register, the NOGA publications of the Swiss Federal Statistical Office).
+
+The change history tools (`tariff_changelog`, `entity_history`) belong to the Pro plan, which is closed to new subscribers at the moment.
 
 ## Datasets sold as files
 
