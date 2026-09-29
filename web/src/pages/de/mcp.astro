@@ -139,7 +139,7 @@ const tools = [
       <pre style="background:#0A0A0C;color:#fafafa;padding:18px 22px;border-radius:8px;font-family:var(--font-mono);font-size:13px;line-height:1.6;overflow-x:auto;margin-bottom:24px;">{mcpConfigJson}</pre>
 
       <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Schritt 2 · Claude Code neu starten</p>
-      <p style="margin-bottom:14px;">Prüfen Sie die Verbindung mit <code>/mcp</code>. Drei Tools sind ohne Konto zugänglich, die drei Suchwerkzeuge zum Testen (20 Aufrufe pro Tag); die übrigen benötigen bestehende Zugriffsrechte.</p>
+      <p style="margin-bottom:14px;">Prüfen Sie die Verbindung mit <code>/mcp</code>. Drei Tools sind ohne Konto zugänglich, dazu drei Suchwerkzeuge im Testzugang (20 Aufrufe pro Tag); die übrigen benötigen bestehende Zugriffsrechte.</p>
 
       <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Schritt 3 · Testen</p>
       <p>Fragen Sie zum Beispiel: <em>„Rufe den TARES-Tarif 09011100 mit tariff_lookup ab“</em>. Prüfen Sie danach die Einheit und Bedingungen.</p>
@@ -194,7 +194,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
 </section>
 
 <!-- ========== PLAYGROUND ========== -->
-<div class="container-v4"><p class="mcp-availability" style="padding:20px;border:1px solid var(--line);border-radius:12px;line-height:1.8;margin:24px 0;">Ohne Konto verfügbar: tariff_lookup, kyc_check und cross_walk (100 Anfragen/Stunde je IP). Test ohne Konto von tariff_semantic_search, classify_text und finma_search: 20 Aufrufe pro Tag und IP für alle drei zusammen; jede Antwort nennt die verbleibenden Aufrufe und die amtliche Quelle, an der das Ergebnis zu prüfen ist (xtares.admin.ch, FINMA-Register, NOGA-Publikationen des BFS). Andere Werkzeuge benötigen entsprechende Rechte; neue kostenpflichtige Abonnements sind geschlossen. STATENT ist bis zum Nachweis der Weiterverbreitungsrechte ausgesetzt. Vektorindizes werden nicht durch Dateierhebungen aktualisiert.</p></div>
+<div class="container-v4"><p class="mcp-availability" style="padding:20px;border:1px solid var(--line);border-radius:12px;line-height:1.8;margin:24px 0;">Ohne Konto verfügbar: tariff_lookup, kyc_check und cross_walk (100 Anfragen/Stunde je IP). Testzugang ohne Konto für tariff_semantic_search, classify_text und finma_search: zusammen 20 Aufrufe pro Tag und IP; jede Antwort nennt die verbleibenden Aufrufe und die amtliche Quelle, an der das Ergebnis zu prüfen ist (xtares.admin.ch, FINMA-Register, NOGA-Publikationen des BFS). Andere Werkzeuge benötigen entsprechende Rechte; neue kostenpflichtige Abonnements sind geschlossen. STATENT ist bis zum Nachweis der Weiterverbreitungsrechte ausgesetzt. Vektorindizes werden nicht durch Dateierhebungen aktualisiert.</p></div>
 <section class="v4-personas" id="playground">
   <div class="container-v4">
     <div class="v4-section-eyebrow">
