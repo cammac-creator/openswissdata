@@ -45,23 +45,53 @@ export interface TariffLookupResult {
   disclaimer: string;
 }
 
+/** Languages of the search indexes rebuilt on 28.09.2026. */
+export type SearchLang = "fr" | "de" | "it" | "en";
+
+/** Provenance of a server-side search index (official source, model, build date). */
+export interface SearchIndexProvenance {
+  built_at: string;
+  source: string;
+  source_version: string;
+  source_sha256: string;
+  entries: number;
+  languages: SearchLang[];
+  model: string;
+  model_revision: string;
+}
+
 export interface TariffSemanticSearchInput {
+  /** Description in FR/DE/IT/EN, or a Swiss tariff number (2 to 8 digits, dots allowed). */
   query: string;
   top_k?: number;
-  lang?: "fr";
+  lang?: SearchLang;
 }
 
 export interface TariffSemanticHit {
   hs_code: string;
+  /** Official designation of the line in the requested language. */
   description: string;
+  /** Official ancestors, from the heading to the text closest to the line. */
+  path?: string[];
+  /** Relative relevance 0-1 (official words first, meaning as a tie-breaker). Not a probability, no longer a cosine. */
   score: number;
+  /** Cosine between query and line vector; null for a tariff-number lookup. */
+  similarity?: number | null;
+  lexical_rank?: number | null;
+  /** False when the line is missing from the TARES version currently served. */
+  in_current_tares?: boolean;
 }
 
 export interface TariffSemanticSearchResult {
   query: string;
+  lang?: SearchLang;
+  method?: "hybrid" | "tariff_number";
   hits: TariffSemanticHit[];
   count: number;
   model: string;
+  /** TARES version served; null = copy embedded at deployment. */
+  data_version?: string | null;
+  index?: SearchIndexProvenance;
   /** Mandatory non-official disclaimer. */
   disclaimer: string;
 }
@@ -131,13 +161,18 @@ export interface CrossWalkResult {
 export interface ClassifyTextInput {
   text: string;
   top_k?: number;
-  lang?: "fr";
+  lang?: SearchLang;
   scheme?: "NOGA_2025" | "NACE_2.1";
 }
 
 export interface ClassifyTextHit {
+  /** NOGA 2025 subclass (6 digits) since 28.09.2026; earlier responses mixed levels. */
   code: string;
   label: string;
+  /** Corresponding NACE Rev. 2.1 class (4 digits). */
+  class_code?: string;
+  /** Higher NOGA levels, from section to class. */
+  path?: string[];
   score: number;
   scheme: "NOGA_2025";
 }
@@ -151,6 +186,9 @@ export interface ClassifyTextResult {
   model: string;
   /** True when scheme_requested ≠ scheme_returned (NACE fallback). */
   degraded?: boolean;
+  /** Classifications version served; null = copy embedded at deployment. */
+  reference_version?: string | null;
+  index?: SearchIndexProvenance;
 }
 
 // -- FINMA ------------------------------------------------------------------
@@ -195,6 +233,8 @@ export interface FinmaSearchInput {
   include_warnings?: boolean;
 }
 
+export type FinmaMatchType = "exact" | "word_start" | "whole_word" | "prefix" | "substring" | "all_words" | "fuzzy";
+
 export interface FinmaSearchMatch {
   name: string;
   uid: string | null;
@@ -207,6 +247,7 @@ export interface FinmaSearchMatch {
   is_warning_listed: boolean | null;
   source_url: string;
   score: number;
+  match_type?: FinmaMatchType;
 }
 
 export interface FinmaSearchWarning {
@@ -216,13 +257,21 @@ export interface FinmaSearchWarning {
   date_added: string;
   source_url: string;
   score: number;
+  match_type?: FinmaMatchType;
 }
 
 export interface FinmaSearchResult {
   query: string;
+  /** Words actually compared (eight at most), without legal forms or accents. */
+  normalised_query?: string;
+  /** May be empty: no unrelated name is returned. */
   matches: FinmaSearchMatch[];
   warnings?: FinmaSearchWarning[];
   match_count: number;
+  match_total?: number;
+  /** FINMA version in memory; null = copy embedded at deployment. */
+  data_version?: string | null;
+  source?: string;
 }
 
 export interface EntityHistoryInput {
