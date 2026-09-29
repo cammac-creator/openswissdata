@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3';
 import { isCalendarDate } from './calendar-date.js';
-import { observeDeliveryIncident, type IncidentTask } from './delivery-incidents.js';
+import { observeDeliveryIncident, INCIDENT_STATUS_SQL, LATEST_RESOLUTION_JOIN, type IncidentTask } from './delivery-incidents.js';
 
 const taskQuery = `SELECT t.id,t.customer_id,t.title,t.due_on,t.done_at,t.created_at
   FROM delivery_incident_tasks link JOIN crm_tasks t ON t.id=link.task_id WHERE link.incident_id=?`;
@@ -20,8 +20,10 @@ export function createIncidentTask(db: Database.Database, incidentId: number, cr
     if(now<incident.last_checked_at)return {status:'clock'} as const;
     // Une première création relit le résultat actuel, même entre deux passages de la relève.
     observeDeliveryIncident(db, incident.delivery_id, now);
-    const current = db.prepare('SELECT state FROM delivery_incidents WHERE id=?').get(incidentId) as { state: string };
-    if (current.state !== 'open') return { status: 'closed' } as const;
+    const current = db.prepare(`SELECT ${INCIDENT_STATUS_SQL} status FROM delivery_incidents i ${LATEST_RESOLUTION_JOIN} WHERE i.id=?`).get(incidentId) as { status: string };
+    // Un dossier clos manuellement n'appelle plus d'action ; une nouvelle observation le rouvrira.
+    if (current.status === 'resolved') return { status: 'resolved' } as const;
+    if (current.status !== 'open') return { status: 'closed' } as const;
     const title = `Incident ${incidentId} : vérifier la livraison de la commande ${incident.order_id}`;
     const result = db.prepare('INSERT INTO crm_tasks(customer_id,title,due_on,created_at) VALUES(?,?,?,?)').run(incident.customer_id, title, dueOn, now);
     db.prepare('INSERT INTO delivery_incident_tasks(incident_id,task_id,created_by,created_at) VALUES(?,?,?,?)').run(incidentId, result.lastInsertRowid, creatorId, now);

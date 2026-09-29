@@ -28,7 +28,7 @@ describe('Consultation privée du registre de livraison',()=>{
  it('sépare blocage, acceptation et annulation',async()=>{
   for(let id=1;id<=3;id++){add(id);observeDeliveryIncident(getDb(),id,now)}
   getDb().prepare("UPDATE order_deliveries SET state='sent',sent_at=? WHERE id=2").run(now);observeDeliveryIncident(getDb(),2,now);getDb().prepare("UPDATE orders SET status='refunded' WHERE id=3").run();getDb().prepare("UPDATE order_deliveries SET state='cancelled' WHERE id=3").run();observeDeliveryIncident(getDb(),3,now);
-  for(const [state,id] of [['open',1],['accepted',2],['cancelled',3]]){const d=await(await read('/incidents?state='+state)).json();expect(d.summary).toEqual({open:1,accepted:1,cancelled:1});expect(d.incidents.map((i:{delivery_id:number})=>i.delivery_id)).toEqual([id])}
+  for(const [state,id] of [['open',1],['accepted',2],['cancelled',3]]){const d=await(await read('/incidents?state='+state)).json();expect(d.summary).toEqual({open:1,resolved:0,accepted:1,cancelled:1});expect(d.incidents.map((i:{delivery_id:number})=>i.delivery_id)).toEqual([id])}
  });
  it('parcourt les observations par curseur sans doublon',async()=>{
   add(1);for(let n=1;n<=63;n++){getDb().prepare('UPDATE order_deliveries SET attempts=? WHERE id=1').run(n);observeDeliveryIncident(getDb(),1,now+n)}

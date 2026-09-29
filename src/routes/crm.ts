@@ -1,6 +1,8 @@
 import { readCrmWorkflows } from '../lib/crm-workflows.js';
 import { createIncidentTask } from '../lib/incident-tasks.js';
-import {readDeliveryIncidentPage,readDeliveryIncidentEvents} from '../lib/delivery-incidents.js';
+import {readDeliveryIncidentPage,readDeliveryIncidentEvents,DELIVERY_INCIDENT_STATUSES} from '../lib/delivery-incidents.js';
+import { resolveDeliveryIncident, isRegistryLocked } from '../lib/incident-resolutions.js';
+import { RESOLUTION_KINDS, normalizeResolutionNote, resolutionNoteProblem } from '../lib/incident-resolution-rules.js';
 import { customerPage, customerProfiles, internalEmails, prepareCustomerFunctions, searchText } from '../lib/crm-customers.js';
 import { isCalendarDate } from '../lib/calendar-date.js';
 import { readTaskOverview, taskOrderSql, readTaskPage, TASK_FILTERS } from '../lib/crm-tasks.js';
@@ -75,19 +77,47 @@ crmRoute.post('/incidents/:id/task',async c=>{
  const result=createIncidentTask(getDb(),Number(c.req.param('id')),c.get('customer_id'),body.data.due_on);
  if(result.status==='not_found')return c.json({error:'not_found'},404);
  if(result.status==='closed')return c.json({error:'incident_closed'},409);
+ if(result.status==='resolved')return c.json({error:'incident_resolved'},409);
  if(result.status==='clock')return c.json({error:'incident_clock_pending'},409);
  return c.json({ok:true,created:result.created,task:result.task},result.created?201:200);
 });
+// Clôture humaine avec preuve : l'état attendu est celui affiché, l'auteur vient de la session, la date du serveur.
+const resolutionBody=z.object({
+ kind:z.enum(RESOLUTION_KINDS),
+ note:z.string().max(2_000),
+ expected:z.object({observations:z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),reason:z.string().min(1).max(64),delivery_state:z.string().min(1).max(64),order_state:z.string().min(1).max(64)}).strict(),
+}).strict();
+crmRoute.post('/incidents/:id/resolution',async c=>{
+ if(!validId(c.req.param('id')))return c.json({error:'invalid_id'},400);
+ const body=resolutionBody.safeParse(await c.req.json().catch(error=>{if(error instanceof SyntaxError)return null;throw error}));
+ if(!body.success)return c.json({error:'invalid_body'},400);
+ // Aucune coordonnée, aucun lien ni identifiant du prestataire dans la preuve ; le texte refusé n'est pas renvoyé.
+ const note=normalizeResolutionNote(body.data.note),problem=resolutionNoteProblem(note);
+ if(problem)return c.json({error:`note_${problem}`},400);
+ let result;
+ try{result=resolveDeliveryIncident(getDb(),Number(c.req.param('id')),c.get('customer_id'),{kind:body.data.kind,note,expected:body.data.expected})}
+ catch(error){
+  if(!isRegistryLocked(error))throw error;
+  // Refus propre sans attente ni détail SQL : rien n'a été écrit, la même demande peut être rejouée.
+  c.header('Retry-After','5');
+  return c.json({error:'incident_busy'},503);
+ }
+ if(result.status==='not_found')return c.json({error:'not_found'},404);
+ if(result.status==='closed')return c.json({error:'incident_closed'},409);
+ if(result.status==='changed')return c.json({error:'incident_changed'},409);
+ if(result.status==='clock')return c.json({error:'incident_clock_pending'},409);
+ return c.json({ok:true,created:result.created,resolution:result.resolution},result.created?201:200);
+});
 crmRoute.get('/incidents',c=>{
- const input=z.object({state:z.enum(['open','accepted','cancelled']).default('open'),page:z.coerce.number().int().min(1).max(1_000_000).default(1)}).strict().safeParse(c.req.query());
+ const input=z.object({state:z.enum(DELIVERY_INCIDENT_STATUSES).default('open'),page:z.coerce.number().int().min(1).max(1_000_000).default(1)}).strict().safeParse(c.req.query());
  if(!input.success)return c.json({error:'invalid_filter'},400);
- return c.json(readDeliveryIncidentPage(getDb(),input.data.state,input.data.page));
+ return c.json(readDeliveryIncidentPage(getDb(),input.data.state,input.data.page,Date.now(),c.get('customer_id')));
 });
 crmRoute.get('/incidents/:id/events',c=>{
  if(!validId(c.req.param('id')))return c.json({error:'invalid_id'},400);
  const input=z.object({before:z.coerce.number().int().min(1).max(Number.MAX_SAFE_INTEGER).optional()}).strict().safeParse(c.req.query());
  if(!input.success)return c.json({error:'invalid_filter'},400);
- const result=readDeliveryIncidentEvents(getDb(),Number(c.req.param('id')),input.data.before);
+ const result=readDeliveryIncidentEvents(getDb(),Number(c.req.param('id')),input.data.before,c.get('customer_id'));
  return result?c.json(result):c.json({error:'not_found'},404);
 });
 crmRoute.get("/customers/:id", c => {
@@ -206,6 +236,6 @@ crmRoute.get("/operations", async c => {
   try {
     workflows = await cached("workflows", 600_000, readCrmWorkflows);
   } catch { /* L'indisponibilité reste visible, aucun succès n'est inventé. */ }
-  return c.json({ checked_at: Date.now(), datasets, checks, cleanup: readCleanupProof(db), incidents:(()=>{try{return readDeliveryIncidentPage(db,'open',1)}catch{return null}})(), workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
+  return c.json({ checked_at: Date.now(), datasets, checks, cleanup: readCleanupProof(db), incidents:(()=>{try{return readDeliveryIncidentPage(db,'open',1,Date.now(),c.get('customer_id'))}catch{return null}})(), workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
 });
 crmRoute.route("/mail", crmMailRoute);

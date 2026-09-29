@@ -162,6 +162,23 @@ CREATE TABLE IF NOT EXISTS delivery_incident_events (
   accepted_at INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_delivery_incident_events ON delivery_incident_events(incident_id,id DESC);
+-- Clôtures humaines, en ajout seul : la preuve reste distincte du registre machine et ne change pas son état.
+-- La purge d'un dossier clos par la machine détache la preuve (incident_id NULL) sans la supprimer.
+CREATE TABLE IF NOT EXISTS delivery_incident_resolutions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  incident_id INTEGER REFERENCES delivery_incidents(id) ON DELETE SET NULL,
+  delivery_id INTEGER NOT NULL REFERENCES order_deliveries(id),
+  kind TEXT NOT NULL CHECK(length(kind) BETWEEN 1 AND 40 AND kind NOT GLOB '*[^a-z_]*'),
+  note TEXT NOT NULL CHECK(length(note) BETWEEN 1 AND 280),
+  resolved_at INTEGER NOT NULL CHECK(typeof(resolved_at)='integer' AND resolved_at>=1000000000000),
+  resolved_by INTEGER NOT NULL REFERENCES customers(id),
+  reason TEXT NOT NULL,
+  observations INTEGER NOT NULL CHECK(typeof(observations)='integer' AND observations>=1),
+  attempts INTEGER NOT NULL CHECK(typeof(attempts)='integer' AND attempts>=0),
+  delivery_state TEXT NOT NULL,
+  order_state TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_incident_resolutions ON delivery_incident_resolutions(incident_id,id DESC);
 
 CREATE TABLE IF NOT EXISTS app_migrations (name TEXT PRIMARY KEY, applied_at INTEGER NOT NULL);
 -- Historique des droits : rembourser un achat ne retire pas les autres achats.
