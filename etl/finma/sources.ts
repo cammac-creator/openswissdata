@@ -167,6 +167,9 @@ export const AUTH_TYPE_TO_ENTITY_TYPE: Record<string, import("./types.js").Finma
 
   // FinTech
   "persons under Article 1b of the Banking Act": "fintech",
+  // Libellés du CSV officiel relevés le 28.09.2026 (majuscule et représentations étrangères).
+  "Persons under Article 1b of the Banking Act": "fintech",
+  "Representation of foreign persons under Article 1b of the Banking Act": "fintech",
   "Vertretungen ausländischer Personen nach Art. 1b Bankengesetz": "fintech",
 
   // Supervisory & SRO

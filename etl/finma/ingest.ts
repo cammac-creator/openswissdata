@@ -51,10 +51,16 @@ export function parseUidCsv(path: string): FinmaEntity[] {
     // Override entity_type using AuthorisationTypeEN mapping (the source's
     // placeholder "bank" gets replaced by the real type).
     const authEn = String(raw["AuthorisationTypeEN"] ?? "").trim();
-    unified.entity_type = AUTH_TYPE_TO_ENTITY_TYPE[authEn] ?? "other";
+    unified.entity_type = entityTypeForAuthorisation(authEn);
     out.push(unified);
   }
   return out;
+}
+
+// La FINMA change parfois la casse d'un libellé : même type, jamais « other » par erreur.
+const AUTH_TYPE_LOWER = new Map(Object.entries(AUTH_TYPE_TO_ENTITY_TYPE).map(([k, v]) => [k.toLowerCase(), v]));
+export function entityTypeForAuthorisation(authEn: string): FinmaEntity["entity_type"] {
+  return AUTH_TYPE_TO_ENTITY_TYPE[authEn] ?? AUTH_TYPE_LOWER.get(authEn.toLowerCase()) ?? "other";
 }
 
 // Certaines raisons sociales du CSV officiel contiennent des guillemets non doublés.

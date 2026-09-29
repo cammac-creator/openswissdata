@@ -1,5 +1,7 @@
 # FINMA data sources
 
+> **État au 29.09.2026.** Certains passages ci-dessous sont historiques (collecte hebdomadaire, listes XLSX par catégorie, rapprochement par ressemblance). Fonctionnement actuel : registre lu chaque jour dans `uid.csv` (`refresh-finma.yml`, créneau 04:17 UTC, souvent lancé plus tard par GitHub), type d'établissement tiré de `AuthorisationTypeEN` (`entityTypeForAuthorisation`, insensible à la casse), liste d'alerte par l'API de recherche de la FINMA (`ingest-warnings.ts`), LEI par l'API GLEIF (`ingest-gleif.ts`). En cas de doute, le code fait foi.
+
 ## Authorised institutions registry (`finma_registry.*`)
 
 ### Upstream
@@ -16,7 +18,7 @@ date, status, branch addresses) — see `FINMA_PER_CATEGORY_XLSX` in `sources.ts
 ### Update cadence
 
 Continuous — FINMA updates the source file whenever licences are granted,
-withdrawn, or modified. We re-ingest weekly.
+withdrawn, or modified. We re-ingest daily (since September 2026).
 
 ### Licence
 

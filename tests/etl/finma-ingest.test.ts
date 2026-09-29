@@ -114,3 +114,14 @@ describe("CSV officiel FINMA", () => {
     } finally { rmSync(dir,{recursive:true,force:true}); }
   });
 });
+
+describe("Type d'établissement selon le libellé FINMA", () => {
+  it("classe les personnes de l'article 1b comme fintech, quelle que soit la casse", async () => {
+    const { entityTypeForAuthorisation } = await import("../../etl/finma/ingest.js");
+    expect(entityTypeForAuthorisation("Persons under Article 1b of the Banking Act")).toBe("fintech");
+    expect(entityTypeForAuthorisation("persons under Article 1b of the Banking Act")).toBe("fintech");
+    expect(entityTypeForAuthorisation("Representation of foreign persons under Article 1b of the Banking Act")).toBe("fintech");
+    expect(entityTypeForAuthorisation("BANK")).toBe("bank");
+    expect(entityTypeForAuthorisation("Libellé inconnu")).toBe("other");
+  });
+});
