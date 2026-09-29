@@ -1,0 +1,52 @@
+---
+/**
+ * Trajet d’un achat de fichier : paiement, email, téléchargement confirmé, archive vérifiée,
+ * et retour par l’espace client. Schéma HTML et SVG lisible sans JavaScript ; le petit carré
+ * qui parcourt la ligne ne bouge que si la page autorise le mouvement (data-motion='on').
+ * La variante « help » ajoute, sous chaque étape, quoi faire si elle bloque.
+ */
+import { getLangFromPath, localizePath } from "../i18n/utils";
+import { JOURNEY } from "../lib/customer-care";
+interface Props { id?: string; variant?: "default" | "help"; number?: string; returnLink?: boolean }
+const { id = "trajet", variant = "default", number, returnLink = true } = Astro.props;
+const lang = getLangFromPath(Astro.url.pathname);
+const copy = JOURNEY[lang];
+const titleId = `${id}-titre`;
+const pause = { fr: "Réduire les animations", de: "Animationen reduzieren", en: "Reduce animations" }[lang];
+---
+<section class="atlas-section atlas-method journey" id={id} aria-labelledby={titleId}>
+ <div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter>
+   <div><p class="atlas-kicker">{number ? `${number} / ${copy.kicker}` : copy.kicker}</p><h2 id={titleId}>{copy.title}</h2></div>
+   <p class="atlas-section-intro">{copy.intro}</p>
+  </div>
+  <figure class="journey-map" data-atlas-enter>
+   <figcaption class="journey-caption">{copy.figure}</figcaption>
+   <ol class="journey-track">
+    {copy.steps.map((step, index) => (
+     <li class={`journey-stop journey-stop-${step.id}`}>
+      <span class="journey-node" aria-hidden="true">
+       {step.id === "paiement" && <svg viewBox="0 0 48 48" focusable="false"><rect x="5" y="11" width="34" height="23" rx="3"/><path d="M5 18h34M11 28h9"/><circle class="journey-accent-fill" cx="36" cy="33" r="8"/><path class="journey-check" d="m32.5 33 2.4 2.4 4.6-4.8"/></svg>}
+       {step.id === "email" && <svg viewBox="0 0 48 48" focusable="false"><rect x="6" y="11" width="36" height="26" rx="3"/><path d="m7.5 13.5 16.5 12.5 16.5-12.5"/><path class="journey-accent" d="M31 31h7M31 34h4"/></svg>}
+       {step.id === "lien" && <svg viewBox="0 0 48 48" focusable="false"><rect x="5" y="9" width="38" height="29" rx="3"/><path d="M5 16h38"/><rect class="journey-accent" x="13" y="23" width="22" height="8" rx="2"/><path d="m29 29 5 11 1.8-4.2 4.2-1.8z"/></svg>}
+       {step.id === "archive" && <svg viewBox="0 0 48 48" focusable="false"><path d="M11 5h17l9 9v29H11z"/><path d="M28 5v9h9M19 8h3M19 12h3M19 16h3M19 20h3"/><circle class="journey-accent-fill" cx="33" cy="34" r="8"/><path class="journey-check" d="m29.5 34 2.4 2.4 4.6-4.8"/></svg>}
+      </span>
+      <div class="journey-body">
+       <span class="journey-num">0{index + 1}</span>
+       <h3>{step.title}</h3>
+       <p>{step.text}</p>
+       <p class="journey-meta">{step.meta}</p>
+       {variant === "help" && <p class="journey-hint"><strong>{copy.hintLabel}</strong> {step.hint}</p>}
+      </div>
+     </li>
+    ))}
+   </ol>
+   <div class="journey-return">
+    <span class="journey-return-mark" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="M8 22 24 9l16 13v17H8z"/><path d="M19 39V28h10v11"/><path class="journey-accent" d="M24 17v4"/></svg></span>
+    <div><h3>{copy.returnTitle}</h3><p>{copy.returnText}</p></div>
+    {returnLink && <a class="atlas-text-link" href={localizePath("/account", lang)}>{copy.returnLink}<span aria-hidden="true">↗</span></a>}
+   </div>
+  </figure>
+  <div class="journey-motion"><button type="button" class="atlas-motion" data-atlas-motion aria-pressed="false" hidden><span class="atlas-pause-icon" aria-hidden="true">Ⅱ</span><span>{pause}</span></button></div>
+ </div>
+</section>
