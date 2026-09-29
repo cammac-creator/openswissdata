@@ -270,3 +270,11 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Chaque réponse porte la version des données servies (`data_version` TARES/FINMA, `reference_version` classifications ; `null` = copie embarquée) et la provenance de l'index.
 - Mesure sans réseau : `npx tsx scripts/evaluate-search.ts [--structure <Tarifstruktur>] [--holdout]`, jeu `scripts/search-eval/cases.json`. Ne mesurer le jeu de contrôle qu'une fois la méthode figée. Chiffres et limites : `docs/recherche-semantique.md`.
 - L'archive TARES vendue garde ses vecteurs historiques (français, ligne seule) : sujet distinct de l'index du serveur.
+
+## Fiches produit Atlas — 28.09.2026
+- Les prix des fichiers et des prolongations vivent dans `web/src/lib/offers.ts`, seule source des pages Atlas (accueil, FINMA, TARES, classifications, bundle) ; `tests/web/fiches-atlas.test.ts` les compare à `src/db/seed.ts`. `/pricing` garde encore ses montants propres. Changer un prix reste une décision de Claude-Alain.
+- TARES, classifications et bundle réutilisent AtlasLayout, AtlasArtwork et le bloc d’achat FINMA. Les valeurs vivantes viennent du catalogue servi, contrôlé avant affichage ; les exemples statiques (8501.1000, 0101.21, 18.11) sont des textes officiels relus, jamais des taux. Unités TARES affichées telles que livrées ; une absence de résumé n’est pas une franchise ; un pourcentage n’est jamais présenté en CHF.
+- Ne pas réintroduire : intégrations ERP nommées, volumes figés, « remboursement sans condition », continuité entre révisions par chaînage de deux rapprochements, échantillon embarqué au build. Le test des fiches les refuse.
+- Dataset schema.org localisé sur les neuf fiches produit via `web/src/lib/structured-data.ts`, sans distribution ni volume ; `seo:check` échoue sinon. Offre sans date de validité, livraison ni retour ; la fiche FINMA n’a plus d’offre depuis le 25.09.
+- `/bundle` reçoit tous les retours Stripe `?checkout=cancelled|error` des achats de fichiers : son bandeau ne suppose pas le produit acheté.
+- Recette : outils privés `docs/internal/audit-global-20260925/fiches-atlas-20260928/outils/` (serveur fictif 8911, trois moteurs, écrans téléphone, axe).
