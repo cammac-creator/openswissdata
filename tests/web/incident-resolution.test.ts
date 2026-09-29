@@ -31,6 +31,7 @@ describe('Clôture manuelle dans le panneau des incidents', () => {
   it('affiche un dossier clos avec sa preuve échappée, son auteur et sans formulaire de clôture ou d’action', () => {
     const html = renderDeliveryIncidents(page({ status: 'resolved', resolution: resolution({ note: hostile }), resolutions: 1 }, 'resolved'));
     expect(html).toContain('pill blue">Clos manuellement');
+    expect(html).toContain('Situation signalée par le registre : Résultat de l’envoi à vérifier avant toute reprise');
     expect(html).toContain('par vous · Remise vérifiée chez le prestataire');
     expect(html).not.toContain('<img');
     expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');

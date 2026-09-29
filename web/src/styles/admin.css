@@ -1648,7 +1648,8 @@ dialog::backdrop {
   display: grid;
   gap: 12px;
   margin-top: 12px;
-  min-width: 0
+  min-width: 0;
+  max-width: 680px
 }
 .resolve-kinds {
   border: 0;
