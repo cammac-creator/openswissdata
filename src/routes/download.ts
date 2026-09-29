@@ -4,7 +4,7 @@ import { getDb } from "../lib/db.js";
 import { requireAuth } from "../lib/auth-middleware.js";
 import { generateToken, isValidTokenFormat } from "../lib/tokens.js";
 import { signedDownloadUrl } from "../lib/r2.js";
-import { deliveryConfirmationPage, deliveryLocaleFromHeader, deliveryLocaleFromQuery, deliveryNoticePage, deliveryStateFor } from "../lib/delivery-page.js";
+import { deliveryConfirmationPage, deliveryLocaleFor, deliveryLocaleFromHeader, deliveryNoticePage, deliveryStateFor } from "../lib/delivery-page.js";
 
 export const downloadRoute = new Hono<{ Variables: { customer_id: number } }>();
 
@@ -138,11 +138,8 @@ publicDownload.post("/delivery/:token", async c => {
 // Une prévisualisation automatique de mail ne doit jamais consommer le téléchargement.
 publicDownload.get("/delivery/:token", c => {
   const token = c.req.param("token");
-  if (!isValidTokenFormat(token)) {
-    const lang = c.req.query("lang") === undefined ? deliveryLocaleFromHeader(c.req.header("accept-language")) : deliveryLocaleFromQuery(c.req.query("lang"));
-    return c.html(deliveryNoticePage(lang, "invalid"), 400);
-  }
-  const lang = deliveryLocaleFromQuery(c.req.query("lang"));
+  const lang = deliveryLocaleFor(c.req.query("lang"), c.req.header("accept-language"));
+  if (!isValidTokenFormat(token)) return c.html(deliveryNoticePage(lang, "invalid"), 400);
   c.header("Cache-Control","private, no-store");
   c.header("Referrer-Policy","no-referrer");
   c.header("X-Robots-Tag","noindex, nofollow");

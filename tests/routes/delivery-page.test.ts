@@ -12,7 +12,7 @@ import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
 import {
   DELIVERY_DOUBLE_CLICK_SECONDS, DELIVERY_LINK_HOURS, DELIVERY_RESPONSE_TEXTS,
-  deliveryConfirmationPage, deliveryLocaleFromHeader, deliveryNoticePage, deliveryStateFor,
+  deliveryConfirmationPage, deliveryLocaleFor, deliveryLocaleFromHeader, deliveryNoticePage, deliveryStateFor,
   type DeliveryLocale, type DeliveryState,
 } from "../../src/lib/delivery-page.js";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -157,6 +157,20 @@ describe("page de livraison servie par la route", () => {
     expect(html).toContain("Le téléchargement n’a pas pu démarrer");
     expect(html).toContain('href="?lang=fr"');
     expect(html).not.toMatch(/Stockage fictif|sk_live|KKKK/);
+  });
+
+  it("GET : ?lang= du mail prime, sinon la langue du navigateur (lien de partage de l'espace client)", async () => {
+    expect(deliveryLocaleFor("de", "en-GB")).toBe("de");
+    expect(deliveryLocaleFor("xx", "en-GB,en;q=0.9")).toBe("en");
+    expect(deliveryLocaleFor(undefined, "de-CH")).toBe("de");
+    expect(deliveryLocaleFor(undefined, undefined)).toBe("fr");
+    const token = issue("L".repeat(43));
+    const shared = await createApp().request(`/api/delivery/${token}`, { headers: { "accept-language": "de-CH,de;q=0.9" } });
+    expect(shared.status).toBe(200);
+    expect(await shared.text()).toContain('<html lang="de">');
+    const fromMail = await createApp().request(`/api/delivery/${token}?lang=fr`, { headers: { "accept-language": "de-CH,de;q=0.9" } });
+    expect(await fromMail.text()).toContain('<html lang="fr">');
+    expect(getDb().prepare("SELECT used_at FROM download_tokens WHERE token=?").get(token)).toEqual({ used_at: null });
   });
 
   it("GET d'un lien coupé : page « lien incomplet » dans la langue demandée", async () => {

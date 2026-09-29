@@ -34,9 +34,12 @@ export function deliveryStateFor(status: number, text: string): DeliveryState {
   return STATE_BY_RESPONSE[`${status} ${text}`] ?? "error";
 }
 
-/** Langue de la page GET : paramètre du lien du mail, français par défaut (comme avant). */
-export function deliveryLocaleFromQuery(value: string | undefined): DeliveryLocale {
-  return value === "de" ? "de" : value === "en" ? "en" : "fr";
+/**
+ * Langue d'une page GET : le paramètre ?lang= du lien du mail prime ; sans paramètre reconnu
+ * (lien de partage de l'espace client, lien coupé), la langue du navigateur, puis le français.
+ */
+export function deliveryLocaleFor(query: string | undefined, acceptLanguage: string | undefined): DeliveryLocale {
+  return query === "fr" || query === "de" || query === "en" ? query : deliveryLocaleFromHeader(acceptLanguage);
 }
 
 /**
