@@ -255,6 +255,10 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
 
   // Les liens historiques pointent désormais vers un échantillon de la version publiée.
   app.get("/samples/finma-sample.csv", (c) => c.redirect("/api/catalog/finma?format=csv", 302));
+  // Ancien article FINMA (mai 2026) en contradiction avec le produit : remplacé par le guide (décision du 29.09.2026).
+  for (const path of ["/blog/finma-registry-compliance", "/blog/finma-registry-compliance/"]) {
+    app.get(path, (c) => c.redirect("/en/guides/finma-screening-automation/", 301));
+  }
 
   // --- Static Astro frontend ---
   // web/dist is relative to repo root (Railway runs node dist/index.js from root)

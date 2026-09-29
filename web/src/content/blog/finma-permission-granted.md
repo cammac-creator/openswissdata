@@ -55,6 +55,6 @@ Les datasets dérivés de l'OFS (NOGA, NACE, ISIC) restent publiés sous le seul
 - [Datasets FINMA Registry](/datasets/finma) — 299 CHF one-shot, 360 jours de mises à jour incluses
 - [Page Provenance](/legal/provenance) — texte intégral de l'autorisation + chaîne de droits
 - [Page Compliance](/compliance) — tableau des sources, fondements juridiques, takedown 24h
-- [Article : cross-checking counterparties against FINMA](/blog/finma-registry-compliance) — playbook 30 minutes pour les compliance officers
+- [Guide : automatiser le contrôle FINMA de vos contreparties](/guides/finma-screening-automation/) — méthode sourcée, avec exemples CSV, JSON et SQL
 
 L'archivage de la correspondance est disponible sur demande à [contact@openswissdata.com](mailto:contact@openswissdata.com).

@@ -13,7 +13,7 @@ const prefix = lang === "fr" ? "" : `/${lang}`;
 const copy = {
  fr: {
   title: "Registre FINMA : des données prêtes à travailler",
-  description: "Registre public FINMA normalisé, liste d'avertissement séparée et enrichissement LEI par UID exact. Excel, CSV, JSON, Parquet et SQL.",
+  description: "Registre public FINMA normalisé, liste d'alerte séparée et enrichissement LEI par UID exact. Excel, CSV, JSON, Parquet et SQL.",
   eyebrow: "FINMA · Données de référence suisses", hero: "Les données FINMA,", accent: "prêtes à travailler.",
   intro: "Retrouvez le registre public UID de la FINMA dans des fichiers structurés, avec les autorisations en quatre langues. Les LEI et adresses disponibles sont ajoutés depuis GLEIF par correspondance exacte de l'UID.",
   buy: "Acheter FINMA Registry", sample: "Télécharger l’échantillon CSV", price: "Paiement unique", updates: `360 jours de mises à jour inclus. Prolongation facultative : ${FILE_OFFERS.finma.renewal} CHF/an.`,
@@ -26,7 +26,7 @@ const copy = {
   limitsTitle: "Comprendre la couverture", limits: [
    "Une même entreprise peut apparaître plusieurs fois si elle possède plusieurs autorisations. Le nombre de lignes n’est donc pas un nombre d’entreprises.",
    "Le LEI, l’adresse et le canton ne sont renseignés que lorsqu’un rapprochement non ambigu est disponible. Les dates de licence et le statut ne sont pas fournis par le CSV source et restent vides.",
-   "La liste d’avertissement reste séparée du registre. Un nom ressemblant n’établit pas une identité : aucun signalement automatique n’est attribué à une institution sur cette seule base.",
+   "La liste d’alerte reste séparée du registre. Un nom ressemblant n’établit pas une identité : aucun signalement automatique n’est attribué à une institution sur cette seule base.",
    "Un LEI non renouvelé (LAPSED) n’est pas une sanction ni un retrait d’autorisation FINMA. L’absence d’une institution dans un instantané ne permet pas non plus de conclure à une sanction.",
    "Le périmètre suit le registre UID public de la FINMA. Il ne constitue pas une copie exhaustive de tous les registres spécialisés, notamment des intermédiaires d’assurance. Consultez la source officielle pour une décision de conformité."],
   preview: "Un aperçu des fichiers réels", previewNote: "Jusqu’à 20 lignes par catégorie présente, issues de la version publiée. Une absence dans cet échantillon ne signifie pas une absence du registre.", search: "Filtrer par nom, UID, LEI ou catégorie", empty: "Aucun résultat dans cet échantillon.",

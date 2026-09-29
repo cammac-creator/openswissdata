@@ -1,7 +1,7 @@
 /**
  * FINMA registry helpers — entités SOUS SURVEILLANCE et AUTORISÉES uniquement.
  * Données : web/src/data/finma.json (généré depuis le registre FINMA public,
- * entités sur liste d'avertissement EXCLUES). Lecture au build (SSG).
+ * entités sur liste d'alerte EXCLUES). Lecture au build (SSG).
  */
 import data from "../data/finma.json";
 

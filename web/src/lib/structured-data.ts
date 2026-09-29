@@ -36,8 +36,8 @@ const DATASETS: Record<FileProductId, Record<Lang, DatasetCopy>> = {
       variables: ['Code, level and parent in each classification', 'NOGA and NACE labels in French, German, Italian and English', 'ISIC labels in French, English and Spanish', 'Pairwise mappings with relation and source'] },
   },
   finma: {
-    fr: { name: 'Registre FINMA — autorisations et liste d’avertissement', keywords: ['FINMA', 'registre FINMA', 'établissements autorisés', 'liste d’avertissement', 'UID', 'LEI', 'conformité'],
-      variables: ['Institution et catégorie d’autorisation', 'UID', 'LEI par correspondance exacte de l’UID', 'Adresse, localité et canton lorsque disponibles', 'Liste d’avertissement séparée'] },
+    fr: { name: 'Registre FINMA — autorisations et liste d’alerte', keywords: ['FINMA', 'registre FINMA', 'établissements autorisés', 'liste d’alerte', 'liste d’avertissement', 'UID', 'LEI', 'conformité'],
+      variables: ['Institution et catégorie d’autorisation', 'UID', 'LEI par correspondance exacte de l’UID', 'Adresse, localité et canton lorsque disponibles', 'Liste d’alerte séparée'] },
     de: { name: 'FINMA-Register — Bewilligungen und Warnliste', keywords: ['FINMA', 'FINMA-Register', 'bewilligte Institute', 'Warnliste', 'UID', 'LEI', 'Compliance'],
       variables: ['Institut und Bewilligungskategorie', 'UID', 'LEI über exakte UID-Zuordnung', 'Adresse, Ort und Kanton, sofern verfügbar', 'Separate Warnliste'] },
     en: { name: 'FINMA Registry — authorisations and warning list', keywords: ['FINMA', 'FINMA registry', 'authorised institutions', 'warning list', 'UID', 'LEI', 'compliance'],
