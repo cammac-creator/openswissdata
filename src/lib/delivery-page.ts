@@ -198,9 +198,10 @@ h1{margin:0 0 16px;font-size:clamp(30px,7.2vw,40px);line-height:1.08;letter-spac
 p{margin:0 0 14px;font-size:15.5px;line-height:1.7;color:var(--muted)}
 .lede{color:#2f4a41}
 dl{display:grid;grid-template-columns:auto 1fr;column-gap:18px;margin:24px 0 26px;border-top:1px solid var(--line)}
-dt,dd{margin:0;padding:13px 0;border-bottom:1px solid var(--line)}
+dl>div{display:grid;grid-column:1 / -1;grid-template-columns:subgrid;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--line)}
+dt,dd{margin:0}
 dt{font-family:var(--mono);font-size:18px;font-weight:600;letter-spacing:-.02em;line-height:1.35;color:var(--ink);white-space:nowrap}
-dd{font-size:14px;line-height:1.55;color:var(--muted);align-self:center}
+dd{font-size:14px;line-height:1.55;color:var(--muted)}
 form{margin:0}
 button,.action{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:56px;padding:15px 20px;border:1px solid var(--ink);border-radius:6px;background:var(--ink);color:#fff;font:inherit;font-size:16px;font-weight:600;line-height:1.35;text-align:left;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 button:hover,.action:hover{background:#245143}
@@ -244,7 +245,7 @@ function shell(locale: DeliveryLocale, title: string, content: string, after = "
  */
 export function deliveryConfirmationPage(locale: DeliveryLocale, token: string): string {
   const c = COPY[locale];
-  const rules = c.rules.map(([value, text]) => `<dt>${value}</dt><dd>${text}</dd>`).join("");
+  const rules = c.rules.map(([value, text]) => `<div><dt>${value}</dt><dd>${text}</dd></div>`).join("");
   const help = `<section class="help" aria-labelledby="aide"><h2 id="aide">${c.helpTitle}</h2><ul>`
     + `<li><a href="${deliveryAccountPath(locale)}"><strong>${c.actions.account}</strong><em>${c.helpAccount}</em>${icon("arrow")}</a></li>`
     + `<li><a href="${supportPath(locale, "lien-expire")}"><strong>${c.actions.support}</strong><em>${c.helpSupport}</em>${icon("arrow")}</a></li></ul></section>`;
