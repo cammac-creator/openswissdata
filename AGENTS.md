@@ -278,3 +278,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Dataset schema.org localisé sur les neuf fiches produit via `web/src/lib/structured-data.ts`, sans distribution ni volume ; `seo:check` échoue sinon. Offre sans date de validité, livraison ni retour ; la fiche FINMA n’a plus d’offre depuis le 25.09.
 - `/bundle` reçoit tous les retours Stripe `?checkout=cancelled|error` des achats de fichiers : son bandeau ne suppose pas le produit acheté.
 - Recette : outils privés `docs/internal/audit-global-20260925/fiches-atlas-20260928/outils/` (serveur fictif 8911, trois moteurs, écrans téléphone, axe).
+
+## Notice de confidentialité — 29.09.2026
+- Section « Destinataires et lieux » réécrite FR/DE/EN d'après la matrice privée des prestataires (Stripe Payments Europe, Resend envoi AWS Irlande mais compte aux États-Unis et sans certification suisse, Infomaniak domaine/DNS/redirection, Cloudflare seulement pour R2 avec l'IP de l'acheteur au téléchargement, Swiss-U.S. DPF cité, Sentry en région UE, lettre Substack). La page de confidentialité affiche `legalDate`, plus la version des CGV.
+- Suivi des ouvertures et des clics désactivé chez Resend pour openswissdata.com le 29.09 (relu par l'API depuis le conteneur de production) : la notice l'annonce. Ne pas le réactiver sans modifier la notice ; il faisait aussi transiter les liens de connexion et de téléchargement par une adresse de Resend. Le compte Resend sert aussi un autre projet : ne régler que le domaine d'OpenSwissData.

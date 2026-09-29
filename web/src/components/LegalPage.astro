@@ -1,14 +1,14 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getLangFromPath, localizePath } from "../i18n/utils";
-import { privacy, providerLinks } from "../content/legal";
+import { privacy, providerLinks, legalDate } from "../content/legal";
 import { serviceDocuments } from "../content/legal-service";
 import { contractDocument, termsPath, CURRENT_TERMS_VERSION } from "../../../src/legal/catalog";
 interface Props { document?: string; immutable?: boolean; version?: string; }
 const { document: key = "index", immutable = false, version = CURRENT_TERMS_VERSION } = Astro.props;
 const lang = getLangFromPath(Astro.url.pathname);
 const L = (p: string) => localizePath(p, lang);
-const displayedDate = new Intl.DateTimeFormat(lang === "fr" ? "fr-CH" : lang === "de" ? "de-CH" : "en-GB", {day:"numeric",month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(version+"T00:00:00Z"));
+const displayedDate = new Intl.DateTimeFormat(lang === "fr" ? "fr-CH" : lang === "de" ? "de-CH" : "en-GB", {day:"numeric",month:"long",year:"numeric",timeZone:"UTC"}).format(new Date((key === "privacy" ? legalDate : version)+"T00:00:00Z"));
 const ui = {
  fr: { hub:"Vos droits, clairement", intro:"Les règles de nos ventes, l’usage des données et les contacts utiles, réunis au même endroit.", tag:"Informations juridiques", date:`Version du ${displayedDate}`, toc:"Dans ce document", save:"Conserver les CGV (.txt)", print:"Imprimer / PDF", archived:`Version contractuelle conservée : ${version}`, old:"Anciennes CGV 1.1 (avant le 26.09.2026)", contact:"Une question ?", back:"Tous les documents", providers:"Notices et documents des prestataires", proof:"Outil de vérification", key:"Clé publique" },
  de: { hub:"Ihre Rechte, verständlich", intro:"Verkaufsbedingungen, Datennutzung und wichtige Kontakte an einem Ort.", tag:"Rechtliche Informationen", date:`Stand: ${displayedDate}`, toc:"In diesem Dokument", save:"AGB speichern (.txt)", print:"Drucken / PDF", archived:`Aufbewahrte Vertragsversion: ${version}`, old:"Frühere AGB 1.1 (vor dem 26.09.2026)", contact:"Eine Frage?", back:"Alle Dokumente", providers:"Anbieterinformationen und Dokumente", proof:"Prüfwerkzeug", key:"Öffentlicher Schlüssel" },
