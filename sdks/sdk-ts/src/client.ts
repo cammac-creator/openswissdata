@@ -34,7 +34,7 @@ import type {
 } from "./types.js";
 
 export const DEFAULT_BASE_URL = "https://mcp.openswissdata.com";
-const SDK_VERSION = "0.1.0";
+const SDK_VERSION = "0.2.0";
 const DEFAULT_USER_AGENT = `openswissdata-sdk-ts/${SDK_VERSION}`;
 
 export interface ClientOptions {
