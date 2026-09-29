@@ -30,6 +30,16 @@ La décision accepte uniquement `allow` ou `deny`. Dans les deux cas, le client 
 
 L’échange du code recontrôle la destination toujours enregistrée, le client, la méthode S256, le secret et le vérificateur, puis consomme le code dans la transaction d’émission existante. Un refus ne le consomme pas. Les formulaires pointent vers leur montage réel ; la page présente l’adresse de retour. Réponses sans cache, politique de référent `no-referrer`, scripts interdits sur l’autorisation, formulaires de même origine avec la seule origine de retour validée permise pour la redirection, et intégration en cadre interdite. Les en-têtes spécifiques sont réappliqués après ceux du serveur général.
 
+## Consentement lié au titulaire — 29.09.2026
+
+Une application payante (tier autre que `free`) ou une portée payante ne s'accorde qu'avec la session du titulaire de l'application (`mcp_clients.customer_id`), sur l'hôte du compte `www.openswissdata.com`, où vit le cookie `__Host-osd_session` sans attribut Domain. Sur `mcp.openswissdata.com`, une telle demande est renvoyée (302) vers `https://www.openswissdata.com/mcp/oauth/authorize` avec la même demande, octets compris. Sans session : page 403 « Connexion au compte requise » ; autre compte : 403 « n'est pas titulaire ». La décision POST exige la même origine que le compte (`Origin` www, `sec-fetch-site` same-origin), puis l'origine et la session sont revérifiées ensemble dans la transaction qui émet le code. Un POST venu du sous-domaine porte le cookie (même site, SameSite=Lax) : seule l'origine l'arrête, un test le garde.
+
+La page du titulaire garde `Referrer-Policy: strict-origin` : avec `no-referrer`, le navigateur enverrait `Origin: null` et l'accord échouerait. Le parcours d'une application gratuite reste identique à l'octet près sur les deux hôtes (corps et en-têtes comparés avant publication).
+
+Sans cette porte, le seul secret d'une application payante suffisait, même en demandant une portée gratuite, pour obtenir un jeton qui consommait le quota payé du titulaire (constat de la revue du 28.09).
+
+Inventaire agrégé du 29.09, en lecture seule : quatre applications, toutes gratuites, une seule rattachée à un compte ; aucun jeton ni code actif. Réserves encore ouvertes avant toute réouverture des offres : pas de retour automatique après la connexion (relancer depuis l'application), destinations modifiables avec le seul secret, clic double détourné (une case obligatoire est envisagée), page d'erreur brute si la session expire entre l'affichage et l'accord, livraison durable des secrets, cycle financier et portail Stripe par abonnement.
+
 ## Retour arrière et réserves
 
 Ne pas restaurer une ancienne base pour revenir au code précédent. La table additive peut être conservée ; l’ancien code l’ignore, donc un retour arrière réintroduirait les défauts de validation. La sauvegarde complète conserve ses lignes ; l’intégrité SQLite et les clés étrangères sont vérifiées globalement. Le profil historique de restauration ne constitue pas à lui seul une recette de ce parcours : un essai fictif dédié vérifie la persistance des destinations.
