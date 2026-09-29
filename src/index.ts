@@ -32,6 +32,7 @@ import { startCleanupWorker } from "./lib/cleanup-worker.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
 import { CHECKOUT_NOTICE_CSP, isCheckoutNotice } from './lib/checkout-notice.js';
 import {LOGIN_CONFIRMATION_CSP} from './lib/login-confirmation-page.js';
+import { deliveryLocaleFromHeader, deliveryNoticePage } from './lib/delivery-page.js';
 import {authorizationCsp} from './mcp/oauth/redirects.js';
 
 // Adresses d'entrée MCP qu'un client peut recevoir : sur le sous-domaine (après réécriture ou non)
@@ -74,6 +75,8 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
       method: c.req.method,
     });
     console.error("[unhandled]", err);
+    // Page de livraison : même statut et mêmes en-têtes, corps lisible sans message technique.
+    if (c.req.path.startsWith("/api/delivery/")) return c.html(deliveryNoticePage(deliveryLocaleFromHeader(c.req.header("accept-language")), "error"), 500);
     return c.json({ error: "internal_server_error" }, 500);
   });
 

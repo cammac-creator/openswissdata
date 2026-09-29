@@ -4,6 +4,7 @@ import { getDb } from "../lib/db.js";
 import { requireAuth } from "../lib/auth-middleware.js";
 import { generateToken, isValidTokenFormat } from "../lib/tokens.js";
 import { signedDownloadUrl } from "../lib/r2.js";
+import { deliveryConfirmationPage, deliveryLocaleFromHeader, deliveryLocaleFromQuery, deliveryNoticePage, deliveryStateFor } from "../lib/delivery-page.js";
 
 export const downloadRoute = new Hono<{ Variables: { customer_id: number } }>();
 
@@ -120,23 +121,31 @@ async function redeemDownload(c: Context) {
   return c.redirect(signedUrl, 302);
 }
 publicDownload.get("/download/:token", redeemDownload);
-publicDownload.post("/delivery/:token", redeemDownload);
+
+// Le POST du formulaire garde redeemDownload tel quel : mêmes contrôles, codes, en-têtes et
+// redirection signée. Seul le corps d'un refus devient une page lisible (présentation Atlas) ;
+// statut et en-têtes sont recopiés, content-type excepté. Le lien historique /download reste en texte.
+publicDownload.post("/delivery/:token", async c => {
+  const res = await redeemDownload(c);
+  if (res.status === 302) return res;
+  const state = deliveryStateFor(res.status, await res.text());
+  const headers = new Headers(res.headers);
+  headers.set("Content-Type", "text/html; charset=UTF-8");
+  headers.delete("Content-Length");
+  return new Response(deliveryNoticePage(deliveryLocaleFromHeader(c.req.header("accept-language")), state), { status: res.status, headers });
+});
 
 // Une prévisualisation automatique de mail ne doit jamais consommer le téléchargement.
 publicDownload.get("/delivery/:token", c => {
   const token = c.req.param("token");
-  if (!isValidTokenFormat(token)) return c.text("invalid token",400);
-  const lang = c.req.query("lang") === "de" ? "de" : c.req.query("lang") === "en" ? "en" : "fr";
-  const copy = {
-    fr: {title:"Votre fichier est prêt",intro:"Confirmez le téléchargement pour ouvrir votre archive. Ce lien est personnel et utilisable une fois pendant 48 heures.",button:"Télécharger mon fichier",account:"Retrouver mes fichiers dans mon compte"},
-    de: {title:"Ihre Datei ist bereit",intro:"Bestätigen Sie den Download, um Ihr Archiv zu öffnen. Dieser persönliche Link ist 48 Stunden lang einmalig nutzbar.",button:"Datei herunterladen",account:"Meine Dateien im Kundenkonto finden"},
-    en: {title:"Your file is ready",intro:"Confirm the download to open your archive. This personal link can be used once within 48 hours.",button:"Download my file",account:"Find my files in my account"},
-  }[lang];
+  if (!isValidTokenFormat(token)) {
+    const lang = c.req.query("lang") === undefined ? deliveryLocaleFromHeader(c.req.header("accept-language")) : deliveryLocaleFromQuery(c.req.query("lang"));
+    return c.html(deliveryNoticePage(lang, "invalid"), 400);
+  }
+  const lang = deliveryLocaleFromQuery(c.req.query("lang"));
   c.header("Cache-Control","private, no-store");
   c.header("Referrer-Policy","no-referrer");
   c.header("X-Robots-Tag","noindex, nofollow");
   c.header("Content-Security-Policy","default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://*.r2.cloudflarestorage.com; frame-ancestors 'none'; base-uri 'none'");
-  return c.html(`<!doctype html><html lang="${lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${copy.title} · OpenSwissData</title>
-    <style>body{margin:0;padding:24px;background:#f5f3eb;color:#18342d;font:17px/1.65 system-ui,sans-serif}main{max-width:540px;margin:10vh auto;padding:32px;background:#fff;border:1px solid #ddd9cd;border-radius:20px}h1{font-size:clamp(28px,6vw,40px);line-height:1.2}button{font:inherit;font-weight:650;background:#183f33;color:white;border:0;border-radius:10px;padding:15px 22px;cursor:pointer;width:100%}a{color:#214f3e}p:last-child{font-size:14px;margin-top:24px}button:focus-visible,a:focus-visible{outline:3px solid #c27531;outline-offset:4px}</style>
-    <main><small>OPENSWISSDATA</small><h1>${copy.title}</h1><p>${copy.intro}</p><form method="post" action="/api/delivery/${token}"><button type="submit">${copy.button}</button></form><p><a href="${lang === "fr" ? "" : `/${lang}`}/account">${copy.account}</a></p></main></html>`);
+  return c.html(deliveryConfirmationPage(lang, token));
 });
