@@ -20,7 +20,7 @@ const exists = path => {
 const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w-]+)\s*=\s*["']([^"']*)["']/g)].map(m => [m[1], m[2]]));
 const errors = new Set();
 const pages = new Map();
-let linkCount = 0, alternateCount = 0, sitemapCount = 0, datasetPages = 0;
+let linkCount = 0, alternateCount = 0, sitemapCount = 0, datasetPages = 0, guidePages = 0;
 for (const file of files.filter(f => f.endsWith('.html'))) {
   const html = await readFile(file, 'utf8');
   // Les fichiers de validation Google portent .html mais ne sont pas des pages.
@@ -49,6 +49,21 @@ for (const file of files.filter(f => f.endsWith('.html'))) {
     if (datasets.length !== 1) errors.add(`Dataset absent ou multiple : ${path}`);
     else if (dataset.url !== canonical || typeof dataset.name !== 'string' || typeof dataset.description !== 'string' || dataset.description.length < 50 || dataset.isAccessibleForFree !== false || 'distribution' in dataset) {
       errors.add(`Dataset incomplet : ${path}`);
+    }
+  }
+  // Les neuf guides FINMA (trois guides, trois langues) : Article ou TechArticle sans date inventée, fil d'Ariane, sources citées.
+  if (/^\/(?:(?:de|en)\/)?guides\/[a-z0-9-]+\/$/.test(path)) {
+    guidePages++;
+    const graphs = [...head.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+      .map(m => { try { return JSON.parse(m[1]); } catch { errors.add(`JSON-LD illisible : ${path}`); return {}; } })
+      .flatMap(data => Array.isArray(data['@graph']) ? data['@graph'] : [data]);
+    const articles = graphs.filter(item => item['@type'] === 'Article' || item['@type'] === 'TechArticle');
+    const article = articles[0];
+    if (articles.length !== 1 || !graphs.some(item => item['@type'] === 'BreadcrumbList')) errors.add(`Guide sans Article unique ou sans fil d'Ariane : ${path}`);
+    else if (article.url !== canonical || article.author?.name !== 'OpenSwissData' || 'datePublished' in article || 'dateModified' in article
+      || typeof article.headline !== 'string' || article.headline.length > 110 || !Array.isArray(article.citation) || !article.citation.length
+      || article.citation.some(c => !/^https:\/\//.test(c.url))) {
+      errors.add(`Guide au balisage incomplet ou daté : ${path}`);
     }
   }
   const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '');
@@ -84,8 +99,9 @@ for (const file of files.filter(f => /sitemap-\d+\.xml$/.test(f))) {
 }
 if (!sitemapCount || pages.size < 40) errors.add('Construction ou sitemap incomplet.');
 if (datasetPages !== 9) errors.add(`Fiches produit attendues : 9, trouvées : ${datasetPages}.`);
+if (guidePages !== 9) errors.add(`Guides attendus : 9, trouvés : ${guidePages}.`);
 if (errors.size) {
   console.error([...errors].slice(0, 30).join('\n'));
   throw new Error(`${errors.size} anomalie(s) de référencement.`);
 }
-console.log(`Référencement vérifié : ${pages.size} pages, ${linkCount} liens internes, ${alternateCount} références de langue, ${sitemapCount} URLs sitemap, ${datasetPages} fiches avec Dataset ; zéro anomalie.`);
+console.log(`Référencement vérifié : ${pages.size} pages, ${linkCount} liens internes, ${alternateCount} références de langue, ${sitemapCount} URLs sitemap, ${datasetPages} fiches avec Dataset, ${guidePages} guides avec Article ; zéro anomalie.`);
