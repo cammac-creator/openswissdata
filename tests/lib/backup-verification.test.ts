@@ -23,7 +23,7 @@ describe('Restauration isolée et preuve explicite', () => {
   it('vérifie les deux fichiers en processus séparé sans modifier la copie restaurée', async () => {
     const before = readFileSync(restored);
     const proof = await verifyRestoredBackup(source, restored);
-    expect(proof).toMatchObject({ version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok', schema_profile: 'service-crm-2026-09-26' });
+    expect(proof).toMatchObject({ version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok', schema_profile: 'service-crm-2026-09-29' });
     expect(readFileSync(restored)).toEqual(before);
     expect(JSON.stringify(proof)).not.toContain('personne'); expect(JSON.stringify(proof)).not.toContain(dir);
   });
@@ -94,6 +94,7 @@ describe('Restauration isolée et preuve explicite', () => {
     const old={...proof};delete old.schema_profile;
     const base={name:'backup' as const,checked_at:now,encrypted:true,restore_check:'ok'};
     expect(renderBackupStatus([{...base,restore_verification:old}],now)).toContain('Contrôle de schéma historique : socle achats');
-    expect(renderBackupStatus([{...base,restore_verification:proof}],now)).toContain('inclut les actions, notes, connexions et incidents');
+    expect(renderBackupStatus([{...base,restore_verification:proof}],now)).toContain('inclut les actions, notes, connexions, incidents et preuves de clôture');
+    expect(renderBackupStatus([{...base,restore_verification:{...proof,schema_profile:'service-crm-2026-09-26'}}],now)).toContain('pas encore les preuves de clôture');
   });
 });
