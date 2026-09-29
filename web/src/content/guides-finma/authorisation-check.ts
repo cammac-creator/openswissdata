@@ -173,7 +173,7 @@ export const authorisationCheck: GuideDefinition = {
             "**Eine Tätigkeit ohne FINMA-Bewilligungspflicht.** Seit dem 1. August 2017 dürfen Unternehmen zum Beispiel unter bestimmten Voraussetzungen Gelder bis CHF 1 Mio. bewilligungsfrei entgegennehmen («Sandbox»); sie werden dann nicht von der FINMA beaufsichtigt, und es besteht keine Einlagensicherung.[^finma-sans-droit]",
             "**Eine zeitliche Abweichung der Liste**, in die eine oder andere Richtung, wie oben von der FINMA beschrieben.",
           ] },
-          { type: "callout", tone: "warn", title: "Kein Eintrag ist keine Sanktion", text: "Wer auf keiner Bewilligungsliste steht, ist weder Gegenstand einer FINMA-Verfügung, noch ist damit ein Verstoss belegt. Die Endverfügungen, welche die FINMA bei schweren Verletzungen veröffentlicht, bilden eine eigene Liste, ebenso die Warnliste.[^finma-alertes] Siehe den [Leitfaden zur Warnliste](@/guides/finma-warning-list/)." },
+          { type: "callout", tone: "warn", title: "Ein fehlender Eintrag ist keine Sanktion", text: "Wer auf keiner Bewilligungsliste steht, ist weder Gegenstand einer FINMA-Verfügung, noch ist damit ein Verstoss belegt. Die Endverfügungen, welche die FINMA bei schweren Verletzungen veröffentlicht, bilden eine eigene Liste, ebenso die Warnliste.[^finma-alertes] Siehe den [Leitfaden zur Warnliste](@/guides/finma-warning-list/)." },
           { type: "p", text: "Im Zweifelsfall nennt die FINMA auf derselben Seite eine Adresse und eine Hotline, über die Sie erfragen können, ob ein Anbieter die notwendige Bewilligung besitzt.[^finma-autorises]" },
         ],
       },
