@@ -47,7 +47,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Les chiffres du CRM déduisent les remboursements confirmés à la date de l'achat et excluent les contestations ouvertes/perdues ; ce n'est pas un relevé bancaire. Les abonnements MCP ne sont pas couverts par ce rapprochement des commandes de fichiers.
 
 ## Présentation des offres
-- Les nouvelles souscriptions Pro/Business sont explicitement fermées sur `/pricing` et les pages MCP FR/DE/EN ; prix conservés, formulaires retirés. Une réouverture nécessite de valider la livraison des abonnements, le contrôle `MCP_SUBSCRIPTIONS_OPEN` et ces quatre pages dans le même chantier.
+- Les nouvelles souscriptions Pro/Business sont explicitement fermées sur `/pricing` et les pages MCP FR/DE/EN ; prix conservés, formulaires retirés. Une réouverture nécessite de valider la livraison des abonnements, le contrôle `MCP_SUBSCRIPTIONS_OPEN`, `/pricing` FR/DE/EN (`PricingPage.astro`, constante `MCP_CLOSED`) et les trois pages MCP dans le même chantier.
 - Sur mobile, les colonnes du héros doivent pouvoir rétrécir (`minmax(0,…)`, enfants `min-width:0`). Vérifier la géométrie réelle des textes et boutons : un `scrollWidth` correct peut masquer du contenu tronqué par `overflow:hidden`.
 
 ## Surveillance des sources
@@ -280,7 +280,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - L'archive TARES vendue garde ses vecteurs historiques (français, ligne seule) : sujet distinct de l'index du serveur.
 
 ## Fiches produit Atlas — 28.09.2026
-- Les prix des fichiers et des prolongations vivent dans `web/src/lib/offers.ts`, seule source des pages Atlas (accueil, FINMA, TARES, classifications, bundle) ; `tests/web/fiches-atlas.test.ts` les compare à `src/db/seed.ts`. `/pricing` garde encore ses montants propres. Changer un prix reste une décision de Claude-Alain.
+- Les prix des fichiers et des prolongations vivent dans `web/src/lib/offers.ts`, seule source des pages Atlas (accueil, FINMA, TARES, classifications, bundle) ; `tests/web/fiches-atlas.test.ts` les compare à `src/db/seed.ts`. `/pricing` lit aussi `offers.ts` depuis le 29.09. Changer un prix reste une décision de Claude-Alain.
 - TARES, classifications et bundle réutilisent AtlasLayout, AtlasArtwork et le bloc d’achat FINMA. Les valeurs vivantes viennent du catalogue servi, contrôlé avant affichage ; les exemples statiques (8501.1000, 0101.21, 18.11) sont des textes officiels relus, jamais des taux. Unités TARES affichées telles que livrées ; une absence de résumé n’est pas une franchise ; un pourcentage n’est jamais présenté en CHF.
 - Ne pas réintroduire : intégrations ERP nommées, volumes figés, « remboursement sans condition », continuité entre révisions par chaînage de deux rapprochements, échantillon embarqué au build. Le test des fiches les refuse.
 - Dataset schema.org localisé sur les neuf fiches produit via `web/src/lib/structured-data.ts`, sans distribution ni volume ; `seo:check` échoue sinon. Offre sans date de validité, livraison ni retour ; la fiche FINMA n’a plus d’offre depuis le 25.09.
@@ -298,3 +298,10 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - `tests/web/guides-finma.test.ts` exécute le SQL des trois langues contre une archive de `etl/finma/bundle.ts` : toute évolution du format `.sql` ou du registre doit garder ce test vert. `seo:check` exige neuf guides avec Article ou TechArticle et fil d’Ariane.
 - Aucun gain SEO ne se déduit de la publication : comparer la Search Console sur quatre semaines, mêmes pages et requêtes.
 - L’ancien article `blog/finma-registry-compliance` (mai 2026), en contradiction avec le produit, est retiré et redirigé en 301 vers `/en/guides/finma-screening-automation/` (décision de Claude-Alain du 29.09). Terme officiel « liste d’alerte » sur les pages françaises ; « liste d’avertissement » reste un mot-clé de recherche.
+
+## Compte, support et tarifs Atlas — 29.09.2026
+- /account, /support et /pricing (FR/DE/EN) utilisent AtlasLayout. Textes d'aide et trajet d'achat dans `web/src/lib/customer-care.ts`, repris des CGV (art. 2, 4, 8, 9) ; aucun délai de réponse promis, seules les durées réelles (14 j, 15 min, 48 h, 360 j) citées. Relire ce module à chaque changement des CGV ou du parcours de livraison.
+- Le compte n'est qu'affichage : `web/src/scripts/account.ts` garde à l'identique les neuf appels de l'ancien script (adresse, méthode, en-têtes, corps, credentials) ; `tests/web/service-atlas.test.ts` les verrouille. Modifier un appel est un changement de session ou de téléchargement, pas de présentation. Vues basculées par l'attribut hidden ; texte serveur toujours par textContent.
+- /pricing lit fichiers, bundle et prolongations dans `offers.ts`. Pro 49 CHF et Business 199 CHF restent affichés fermés, sans formulaire (constante MCP_CLOSED comparée aux pages MCP et à `scopes.ts`). Ne pas y réintroduire LDA art. 5 pour l'OFS, RFC 3161, volumes figés ni « mises à jour automatiques ».
+- La confirmation de connexion n'a changé que de feuille de style ; sa CSP la reprend par empreinte. La page /api/delivery/:token garde son ancien style tant que la route de téléchargement n'est pas rouverte à la présentation.
+- Recette : banc privé `docs/internal/audit-global-20260925/compte-atlas-20260929/outils/` (port 8912, connexion par le vrai formulaire, R2 et Stripe simulés). La demande de lien n'accepte qu'un envoi par IP toutes les dix secondes : attendre entre deux essais.
