@@ -86,7 +86,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Référence de contrôle : `docs/securite-dependances.md`. Application et site ont des lockfiles distincts ; les SDK également. Ne pas confondre audit npm sans avis et audit de sécurité complet.
 - SheetJS vient de sa distribution officielle 0.20.3, intégrité verrouillée ; imports par `etl/shared/xlsx.ts` (CommonJS Node avec fichiers/encodages).
 - Recherche et collectes vectorielles utilisent le même moteur Transformers.js 3.8.1. Modèle mpnet à révision figée, tailles/SHA dans `embedding-model.ts`, préchargé au build ; aucun téléchargement pendant une requête. Pour une collecte vectorielle seule : `npm run models:prepare:embedding`.
-- Les caches de reprise exigent modèle, révision/moteur et dimension courants. Les index livrés restent ceux des collectes historiques tant qu’une régénération distincte n’a pas été validée.
+- Les caches de reprise exigent modèle, révision/moteur et dimension courants. Index de recherche régénérés le 28.09.2026, même modèle, même révision et même moteur : voir « Recherche TARES, NOGA et FINMA ».
 - Le démonstrateur navigateur appelle `/mcp/jsonrpc` sur la même origine, compatible avec la CSP ; une URL de sous-domaine nécessite CORS et CSP et ne doit pas être utilisée ici.
 
 ## Contrôles de publication et pages publiques
@@ -249,7 +249,7 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Mesures `mcp_initialize` (nom déclaré, vide s'il contient une arobase ou cinq chiffres) et `mcp_rate_limited` (premier refus de chaque fenêtre). La classe « scanner » regroupe les bibliothèques HTTP génériques : un agent Python y tombe aussi.
 - `robots.txt` ouvre `/api/catalog/` et `llms.txt` cite les échantillons : les lecteurs des IA gonflent les « demandes » de `sample_served` ; lire les « navigateurs présumés ».
 - Registre MCP : incrémenter `version` de `server.json`, puis lancer `publish-mcp-registry.yml` (OIDC, aucune connexion manuelle). IndexNow : `indexnow.yml` chaque lundi ; juste après la mise en ligne d'une nouvelle clé, un premier envoi peut répondre 403, relancer une minute plus tard.
-- Outils Pro sémantiques : réponses souvent fausses (index TARES sans contexte des positions, recherche FINMA floue). Pas d'essai gratuit avant reconstruction. Rapport : https://claude.ai/artifact/CrtG42ucqho8qpabJ5xAFf.
+- Outils Pro de recherche reconstruits et mesurés le 28.09.2026 (`docs/recherche-semantique.md`). Essai gratuit : décision de Claude-Alain.
 
 ## Surveillance et tâches planifiées — 28.09.2026
 - GitHub retarde ou omet beaucoup de passages planifiés : 9 passages horaires sur 42 heures pour le moniteur, tâches quotidiennes lancées de 2 à 11 heures après leur créneau. Le moniteur a deux créneaux par heure. Un passage manuel ne prouve jamais la cadence. Chiffres et limites : `docs/surveillance-exterieure.md`.
@@ -261,3 +261,12 @@ Le gel du 26.06.2026 est levé pour ce périmètre. Toute activité distincte pa
 - Application payante (tier ≠ `free`) ou portée payante : session `__Host-osd_session` du titulaire (`mcp_clients.customer_id`) exigée sur www ; renvoi 302 depuis le sous-domaine avec la même demande ; décision POST de même origine, origine et session revérifiées dans la transaction. Ne jamais déclencher la porte sur la seule portée demandée : le secret seul ouvrait sinon le quota payé.
 - Parcours gratuit identique à l'octet près (vérifier corps et en-têtes sur les deux hôtes à chaque modification). La page du titulaire pose `holderConsent` pour garder `Referrer-Policy: strict-origin` ; sans cela `Origin: null` fait échouer l'accord.
 - Inventaire agrégé en lecture seule avant publication (29.09 : quatre applications gratuites, aucun jeton actif). Réserves ouvertes et détails : `docs/autorisations-mcp.md`. Souscriptions toujours fermées.
+
+## Recherche TARES, NOGA et FINMA — 28.09.2026
+- Index livrés : `src/mcp/data/embeddings/{tares,noga_2025}_index.{json,bin}` (format `src/mcp/search-index.ts`) : source officielle, version, modèle et révision, date de construction, empreinte des vecteurs. Chargement refusé (message fixe) si taille, SHA-256, modèle ou nombre d'entrées diffèrent. Un vecteur int8 par entrée, moyenne renormalisée des textes FR/DE/IT/EN. Construction : `scripts/build-search-indexes.ts` (bronze de `Tarifstruktur.xlsx`, `noga_2025.csv`).
+- TARES : chemin officiel de chaque ligne (position › textes intermédiaires VT6/TN6/VT8 › ligne), lu par `etl/tares/hierarchy.ts`. `parseTarifstruktur` écarte les textes sans numéro : ne pas l'utiliser pour la hiérarchie. Classement par mots officiels d'abord (BM25 trigrammes, `lexical-index.ts`), sens en appoint (0,3), numéro tarifaire reconnu. L'index ne suit pas la publication hebdomadaire : `in_current_tares` signale une ligne absente des données servies. Reconstruire quand le contrôle des sources adopte une nouvelle `tares.tarifstruktur` ; un test compare les empreintes.
+- NOGA : une entrée par genre (798), libellé seul vectorisé (les parents dans le texte faisaient perdre environ 20 points de top-1), niveaux supérieurs rendus dans `path`, `class_code` = classe NACE 2.1. Reconstruire si `noga_2025.csv` change (test).
+- FINMA : `finma_search` réutilise le classement de `kyc_check` (`src/mcp/name-match.ts`), puis les suppositions de frappe. Formes juridiques et ae/oe/ue normalisées ; entrée de 200 caractères et 8 mots au plus ; `match_type` sur chaque résultat ; réponse vide plutôt qu'un nom sans rapport. `kyc_check` est figé par `tests/mcp/kyc-check-classement.test.ts` : ne pas modifier `nameMatcher` sans ce test.
+- Chaque réponse porte la version des données servies (`data_version` TARES/FINMA, `reference_version` classifications ; `null` = copie embarquée) et la provenance de l'index.
+- Mesure sans réseau : `npx tsx scripts/evaluate-search.ts [--structure <Tarifstruktur>] [--holdout]`, jeu `scripts/search-eval/cases.json`. Ne mesurer le jeu de contrôle qu'une fois la méthode figée. Chiffres et limites : `docs/recherche-semantique.md`.
+- L'archive TARES vendue garde ses vecteurs historiques (français, ligne seule) : sujet distinct de l'index du serveur.
