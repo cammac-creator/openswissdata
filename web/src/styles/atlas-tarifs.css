@@ -1,0 +1,128 @@
+/* Tarifs Atlas : relevé des prix, cartes des fichiers, bundle, accès MCP (offres payantes fermées). */
+.tarifs-hero { padding:30px 0 72px; }
+.tarifs-hero-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,470px); gap:80px; align-items:center; }
+.tarifs-hero-grid>div { min-width:0; }
+.tarifs-hero h1 { margin:25px 0 26px; font-size:clamp(52px,5.8vw,84px); font-weight:520; letter-spacing:-.07em; line-height:1.05; max-width:11ch; overflow-wrap:break-word; }
+.tarifs-hero h1 em { font-style:normal; color:var(--atlas-red); }
+
+/* Relevé : une fiche de prix imprimée, filet rouge et chiffres tabulaires. */
+.tarifs-ledger { position:relative; margin:0; min-width:0; padding:28px 30px 24px; background:#fbfbf5; border:1px solid var(--atlas-line); border-radius:10px; box-shadow:0 30px 64px #16382f17; transform:rotate(-1.2deg); }
+.tarifs-ledger::before { content:''; position:absolute; top:-1px; left:30px; width:56px; height:3px; background:var(--atlas-red); }
+.tarifs-ledger figcaption { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 16px; padding-bottom:16px; border-bottom:1px solid var(--atlas-ink); }
+.tarifs-ledger figcaption strong { font-size:19px; font-weight:560; letter-spacing:-.03em; }
+.tarifs-ledger figcaption span { font-family:var(--font-mono); font-size:10px; color:var(--atlas-muted); }
+.tarifs-ledger table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+.tarifs-ledger thead th { padding:12px 0 6px; font-family:var(--font-mono); font-size:10px; font-weight:400; letter-spacing:.06em; text-transform:uppercase; color:var(--atlas-muted); text-align:left; }
+.tarifs-ledger thead th:last-child,.tarifs-ledger td { text-align:right; }
+.tarifs-ledger tbody th { padding:11px 0; font-size:14px; font-weight:450; text-align:left; vertical-align:baseline; }
+.tarifs-ledger td { padding:11px 0; font-family:var(--font-mono); font-size:13px; white-space:nowrap; vertical-align:baseline; }
+.tarifs-ledger tbody tr { border-bottom:1px dotted #16382f40; }
+.tarifs-ledger .tarifs-ledger-sum th,.tarifs-ledger .tarifs-ledger-sum td { color:var(--atlas-muted); }
+.tarifs-ledger .tarifs-ledger-sum td { text-decoration:line-through; text-decoration-color:#b83a2c99; }
+.tarifs-ledger .tarifs-ledger-bundle { border-bottom:0; }
+.tarifs-ledger .tarifs-ledger-bundle :is(th,td) { background:var(--atlas-ink); color:#f4f3ed; }
+.tarifs-ledger .tarifs-ledger-bundle th { padding-left:14px; font-weight:560; }
+.tarifs-ledger .tarifs-ledger-bundle td { padding-right:14px; font-size:16px; font-weight:600; }
+.tarifs-ledger .tarifs-ledger-saving { border-bottom:0; }
+.tarifs-ledger .tarifs-ledger-saving th,.tarifs-ledger .tarifs-ledger-saving td { color:var(--atlas-red); font-weight:560; }
+.tarifs-ledger-foot { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px!important; padding-top:14px; border-top:1px solid var(--atlas-line); font-size:11px; color:var(--atlas-muted); }
+.tarifs-ledger-foot span { flex-basis:100%; font-family:var(--font-mono); font-size:10px; letter-spacing:.04em; text-transform:uppercase; }
+.tarifs-ledger-foot b { font-weight:560; color:var(--atlas-ink); font-variant-numeric:tabular-nums; }
+
+/* Fichiers. */
+.tarifs-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; }
+.tarifs-card { position:relative; display:flex; flex-direction:column; min-width:0; padding:30px 28px 22px; background:#fbfbf5; border:1px solid var(--atlas-line); border-radius:10px; transition:box-shadow .25s, transform .25s; }
+.tarifs-card:hover { box-shadow:0 16px 40px #16382f10; transform:translateY(-3px); }
+.tarifs-card-head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 14px; }
+.tarifs-card-head>span { font-family:var(--font-mono); font-size:10px; color:var(--atlas-muted); }
+.tarifs-card h3 { margin:22px 0 14px; font-size:28px; font-weight:500; letter-spacing:-.045em; line-height:1.15; }
+.tarifs-card ul { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+.tarifs-card li { position:relative; padding-left:18px; font-size:13px; line-height:1.7; color:var(--atlas-muted); }
+.tarifs-card li::before { content:''; position:absolute; left:0; top:.72em; width:6px; height:6px; border-radius:1px; background:var(--atlas-red); }
+.tarifs-card-meta { display:flex; flex-direction:column; gap:4px; margin:18px 0 22px!important; font-family:var(--font-mono); font-size:10.5px; color:var(--atlas-muted); }
+.tarifs-card-price { display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 12px; margin-top:auto; padding-top:24px; border-top:1px solid var(--atlas-line); }
+.tarifs-card-price strong { font-size:40px; font-weight:480; letter-spacing:-.06em; line-height:1.1; font-variant-numeric:tabular-nums; }
+.tarifs-card-price span { font-size:12px; color:var(--atlas-muted); }
+.tarifs-card-renewal { margin-top:6px!important; font-size:12px; color:var(--atlas-muted); }
+.tarifs-card form { margin-top:18px; }
+.tarifs-card .atlas-btn { width:100%; }
+.tarifs-card .checkout-legal { margin-bottom:6px; }
+.tarifs-card-link { font-size:13px; align-self:flex-start; }
+
+.tarifs-bundle { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.7fr) minmax(0,.95fr); gap:40px; align-items:center; margin-top:22px; padding:36px; background:#e5e9de; border:1px solid #d6ded1; border-radius:12px; }
+.tarifs-bundle-copy { min-width:0; }
+.tarifs-bundle h3 { margin:18px 0 12px; font-size:32px; font-weight:500; letter-spacing:-.05em; line-height:1.15; }
+.tarifs-bundle-copy p:not(.atlas-kicker) { font-size:14px; line-height:1.8; color:var(--atlas-muted); }
+/* Trois feuilles posées sur un socle vert, comme sur la page bundle. */
+.tarifs-bundle-sheets { position:relative; display:flex; justify-content:center; align-items:flex-end; min-height:170px; padding-bottom:20px; }
+.tarifs-bundle-sheets::after { content:''; position:absolute; left:6%; right:6%; bottom:0; height:20px; border-radius:6px; background:var(--atlas-ink); box-shadow:inset 0 3px 0 var(--atlas-red); }
+.tarifs-sheet { position:relative; display:flex; flex-direction:column; gap:7px; width:92px; height:124px; margin-inline:-10px; padding:14px 12px; background:#fbfbf5; border:1px solid #16382f33; border-radius:4px; box-shadow:0 12px 24px #16382f1c; }
+.tarifs-sheet b { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:.06em; margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tarifs-sheet i { display:block; height:5px; border-radius:2px; background:#dfe6da; }
+.tarifs-sheet i:nth-of-type(2) { width:78%; }
+.tarifs-sheet i:nth-of-type(3) { width:56%; }
+.tarifs-sheet-tares { transform:rotate(-7deg) translateY(4px); }
+.tarifs-sheet-classifications { z-index:1; transform:translateY(-10px); }
+.tarifs-sheet-finma { transform:rotate(7deg) translateY(4px); }
+.atlas-site[data-motion='on'] .tarifs-bundle:hover .tarifs-sheet-tares { transform:rotate(-10deg) translate(-6px,0); }
+.atlas-site[data-motion='on'] .tarifs-bundle:hover .tarifs-sheet-finma { transform:rotate(10deg) translate(6px,0); }
+.atlas-site[data-motion='on'] .tarifs-sheet { transition:transform .45s cubic-bezier(.16,1,.3,1); }
+.tarifs-bundle-box { min-width:0; padding:26px; background:#fbfbf5; border:1px solid #d0d9cc; border-radius:8px; }
+.tarifs-was { display:flex; flex-wrap:wrap; gap:4px 12px; font-size:12px; color:var(--atlas-muted); }
+.tarifs-was span { color:var(--atlas-red); font-weight:560; }
+.tarifs-bundle-box .atlas-purchase-price { margin:10px 0 4px; }
+.tarifs-bundle-box .atlas-btn { width:100%; margin-top:10px; }
+.tarifs-bundle-box .checkout-legal { font-size:11px; margin-bottom:0; }
+
+.tarifs-benefits { margin-top:10px; }
+
+/* Accès MCP : l’offre gratuite ouverte, les offres payantes visiblement fermées. */
+.tarifs-plans { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; }
+.tarifs-plan { position:relative; display:flex; flex-direction:column; min-width:0; padding:28px 24px 24px; background:#fbfbf5; border:1px solid var(--atlas-line); border-radius:10px; }
+.tarifs-plan-open { border-color:var(--atlas-ink); box-shadow:0 16px 36px #16382f14; }
+.tarifs-plan-closed { background:repeating-linear-gradient(-45deg,#f4f3ed 0 10px,#efefe7 10px 20px); color:var(--atlas-muted); }
+.tarifs-plan-badge { position:absolute; top:-11px; right:18px; padding:3px 10px; border-radius:4px; background:var(--atlas-red); color:#fff; font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+.tarifs-plan-tier { font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--atlas-muted); }
+.tarifs-plan-price { margin-top:10px!important; font-size:34px; font-weight:480; letter-spacing:-.05em; line-height:1.15; color:var(--atlas-ink); font-variant-numeric:tabular-nums; }
+.tarifs-plan-closed .tarifs-plan-price { color:var(--atlas-muted); }
+.tarifs-plan-price small { font-size:13px; letter-spacing:0; font-weight:450; }
+.tarifs-plan-quote { font-size:28px; }
+.tarifs-plan-sub { margin-top:10px!important; font-size:13px; line-height:1.7; color:var(--atlas-muted); }
+.tarifs-plan ul { list-style:none; margin:16px 0 20px; padding:0; display:grid; gap:6px; }
+.tarifs-plan li { position:relative; padding-left:16px; font-size:12.5px; line-height:1.65; color:var(--atlas-muted); overflow-wrap:anywhere; }
+.tarifs-plan li::before { content:''; position:absolute; left:0; top:.7em; width:5px; height:5px; border-radius:1px; background:var(--atlas-ink); }
+.tarifs-plan .atlas-btn { margin-top:auto; width:100%; }
+.tarifs-plan-status { margin-top:auto!important; padding:12px 14px; border:1px dashed #b83a2c80; border-radius:6px; background:#f4f3edd9; font-size:12px; font-weight:560; color:#8d2a1e; text-align:center; }
+
+.tarifs-samples ul { list-style:none; margin:12px 0 0; padding:0; }
+.tarifs-samples li { border-top:1px solid var(--atlas-line); }
+.tarifs-samples li:first-child { border-top:0; }
+.tarifs-samples a { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 16px; padding:14px 0; color:var(--atlas-ink); text-decoration:none; font-size:14px; font-weight:560; }
+.tarifs-samples a span:last-child { color:var(--atlas-red); font-size:12px; font-weight:500; }
+.tarifs-samples a:hover span:first-child { text-decoration:underline; }
+
+@media (max-width:1100px) {
+ .tarifs-hero-grid { gap:48px; grid-template-columns:minmax(0,1fr) minmax(0,420px); }
+ .tarifs-plans { grid-template-columns:repeat(2,minmax(0,1fr)); gap:26px 18px; }
+ .tarifs-bundle { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+ .tarifs-bundle-sheets { display:none; }
+}
+@media (max-width:980px) {
+ .tarifs-hero-grid { grid-template-columns:minmax(0,1fr); gap:48px; }
+ .tarifs-ledger { max-width:520px; transform:rotate(-.8deg); }
+ .tarifs-grid { grid-template-columns:minmax(0,1fr); max-width:620px; }
+}
+@media (max-width:760px) {
+ .tarifs-hero { padding:14px 0 50px; }
+ .tarifs-hero h1 { font-size:clamp(46px,12.5vw,64px); margin:20px 0; }
+ .tarifs-ledger { margin:0 6px; padding:24px 20px 20px; transform:none; }
+ .tarifs-ledger::before { left:20px; }
+ .tarifs-grid { gap:16px; }
+ .tarifs-card { padding:26px 20px 18px; }
+ .tarifs-card h3 { font-size:25px; }
+ .tarifs-card-price strong { font-size:36px; }
+ .tarifs-bundle { grid-template-columns:minmax(0,1fr); gap:24px; padding:24px 20px; }
+ .tarifs-bundle h3 { font-size:27px; }
+ .tarifs-bundle-box { padding:22px 18px; }
+ .tarifs-plans { grid-template-columns:minmax(0,1fr); gap:24px; }
+}

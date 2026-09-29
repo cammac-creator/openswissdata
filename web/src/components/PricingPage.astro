@@ -1,0 +1,265 @@
+---
+/**
+ * Tarifs FR/DE/EN au style Atlas. Les montants des fichiers, du bundle et des prolongations
+ * viennent de web/src/lib/offers.ts (comparé au référentiel serveur par les tests).
+ * Les abonnements MCP Pro et Business restent FERMÉS : prix conservés pour information,
+ * aucun formulaire. Une réouverture impose de modifier cette page, les trois pages MCP et
+ * le contrôle serveur MCP_SUBSCRIPTIONS_OPEN dans le même chantier (AGENTS.md).
+ */
+import AtlasLayout from "../layouts/AtlasLayout.astro";
+import CheckoutNotice from "./CheckoutNotice.astro";
+import "../styles/atlas-service.css";
+import "../styles/atlas-tarifs.css";
+import { getLangFromPath, localizePath } from "../i18n/utils";
+import { BUNDLE_OFFER, BUNDLE_SAVING, BUNDLE_SAVING_PERCENT, FILE_OFFERS, SEPARATE_TOTAL, type FileProductId } from "../lib/offers";
+import { SUPPORT_EMAIL } from "../lib/customer-care";
+import { canonicalUrl } from "../lib/structured-data";
+
+// Offres MCP fermées : montants et quotas inchangés, identiques aux pages MCP et à src/mcp/oauth/scopes.ts.
+const MCP_CLOSED = { pro: { monthly: 49, requests: 5000 }, business: { monthly: 199, requests: 50000 } } as const;
+
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => localizePath(path, lang);
+const chf = (value: number) => (lang === "fr" ? `${value} CHF` : `CHF ${value}`);
+const count = (value: number) => value.toLocaleString(lang === "de" ? "de-CH" : lang === "en" ? "en-GB" : "fr-CH");
+const R = FILE_OFFERS;
+const copy = {
+ fr: {
+  title: "Tarifs des fichiers et de l’accès MCP | openswissdata",
+  description: `Tarifs OpenSwissData : TARES ${R.tares.price} CHF, Classifications ${R.classifications.price} CHF, registre FINMA ${R.finma.price} CHF, ou les trois pour ${BUNDLE_OFFER.price} CHF. Paiement unique, 360 jours de mises à jour. Accès MCP gratuit ; abonnements payants fermés.`,
+  home: "Accueil", crumb: "Tarifs", kicker: "Tarifs · Paiement unique en CHF", hero: "Des prix clairs,", accent: "payés une fois.",
+  lede: "Trois fichiers de données suisses, ou les trois ensemble. Paiement unique, 360 jours de mises à jour inclus, aucun renouvellement automatique. L’accès MCP gratuit reste ouvert ; les abonnements payants ne prennent plus de nouvelles souscriptions.",
+  choose: "Choisir un fichier", tryMcp: "Tester le MCP gratuitement", footnote: ["Paiement Stripe en CHF", "Sans renouvellement automatique", "Remboursement sous 14 jours selon les CGV"],
+  closed: "Les nouvelles souscriptions Pro et Business sont fermées : aucune page de paiement n’a été ouverte. L’accès MCP gratuit et les achats de fichiers restent disponibles.",
+  ledgerTitle: "Relevé des prix", ledgerSub: "Francs suisses · paiement unique", ledgerProduct: "Fichier", ledgerPrice: "Prix", separate: "Achats séparés", bundleRow: "Bundle des trois fichiers", saving: "Économie", renewalLine: "Prolongation facultative, par an et par fichier",
+  filesKicker: "01 / Les fichiers", filesTitle: "Trois fichiers, un paiement chacun.", filesIntro: "Chaque achat donne l’archive complète, sa fiche qualité et 360 jours de mises à jour. Les échantillons se consultent gratuitement sur chaque fiche.",
+  once: "paiement unique", renewal: "Prolongation facultative", perYear: "par an", buy: "Acheter", readSheet: "Lire la fiche",
+  bundleKicker: "Bundle · Trois fichiers", bundleTitle: "Les trois fichiers, un seul achat.", bundleText: `TARES, Classifications Standard et FINMA : le même contenu que les trois achats séparés, pour ${BUNDLE_SAVING} CHF de moins.`, bundleSaved: `Économie : ${BUNDLE_SAVING} CHF (${BUNDLE_SAVING_PERCENT} %)`, instead: "au lieu de", buyBundle: "Acheter le bundle", bundleLink: "Voir la composition",
+  includedKicker: "02 / Compris", includedTitle: "Ce que comprend chaque achat.", includedIntro: "Les mêmes règles pour les trois fichiers et le bundle. Les conditions de vente font foi.", terms: "Conditions de vente",
+  included: [
+   ["Paiement unique", "Aucun abonnement ni renouvellement automatique. Le paiement est traité par Stripe en CHF."],
+   ["360 jours de mises à jour", "FINMA : collecte planifiée chaque jour. TARES : chaque semaine. Classifications : après contrôle des sources officielles. Une collecte peut être bloquée si ses contrôles échouent."],
+   ["Prolongation facultative", `Après 360 jours, vous gardez les versions reçues ou vous prolongez un fichier : TARES ${R.tares.renewal} CHF, Classifications ${R.classifications.renewal} CHF, FINMA ${R.finma.renewal} CHF par an.`],
+   ["Livraison et espace client", "Un email donne accès à l’archive après confirmation du paiement ; votre espace client garde les versions comprises dans vos droits."],
+   ["Provenance vérifiable", "Un manifeste signé Ed25519 et des empreintes SHA-256 accompagnent chaque archive. Les sources et dates de collecte sont documentées."],
+   ["Remboursement sous 14 jours", "Remboursement intégral sur demande dans les 14 jours, sans justification, sauf redistribution des fichiers à un tiers en violation de la licence."]],
+  mcpKicker: "03 / Accès MCP", mcpTitle: "Le serveur MCP gratuit reste ouvert.", mcpIntro: "Les abonnements Pro et Business ne prennent plus de nouvelles souscriptions. Leurs prix restent affichés pour information ; les abonnements existants se gèrent depuis l’espace client.",
+  free: ["Free", "Pour tester et prototyper, sans compte.", ["100 appels par heure et par réseau", "Trois outils sans compte : tariff_lookup, kyc_check et cross_walk", "Aucun niveau de service garanti"], "Tester maintenant"],
+  month: "/mois", closedBadge: "Fermé", closedStatus: "Nouvelles souscriptions fermées", requests: "requêtes par mois",
+  enterprise: ["Enterprise", "Sur devis", "Volumes, formats ou documentation à définir selon votre besoin, avant tout engagement.", "Demander un devis"],
+  faqKicker: "04 / Questions fréquentes", faqTitle: "Avant de choisir.",
+  faq: [
+   ["Les fichiers sont-ils vendus par abonnement ?", "Non. Chaque fichier se paie une fois, en CHF, avec 360 jours de mises à jour. Aucun renouvellement automatique n’est prévu."],
+   ["Que se passe-t-il après 360 jours ?", `Vous gardez les versions reçues. Chaque fichier se prolonge séparément : TARES ${R.tares.renewal} CHF, Classifications ${R.classifications.renewal} CHF et FINMA ${R.finma.renewal} CHF par an.`],
+   ["Que paie-t-on exactement ?", "Les sources sont publiques. Le prix rémunère leur préparation : collecte contrôlée, normalisation, formats prêts à importer et provenance signée. La licence porte sur cette compilation ; les conditions propres à chaque source restent applicables."],
+   ["Comment reçoit-on les fichiers ?", "Après confirmation du paiement par Stripe, un email vous donne accès à l’archive ZIP, normalement en quelques minutes. Le lien est utilisable une fois pendant 48 heures ; vos fichiers restent accessibles dans votre espace client."],
+   ["Peut-on obtenir une facture au nom de l’entreprise ?", "Le reçu Stripe est disponible dans votre espace client. Pour une facture au nom de votre entreprise, envoyez-nous sa raison sociale et son adresse de facturation."],
+   ["Et si le fichier ne convient pas ?", "Vous pouvez demander un remboursement intégral dans les 14 jours suivant l’achat, sans justification, sauf redistribution des fichiers à un tiers en violation de la licence. Les conditions de vente font foi."],
+   ["Les abonnements Pro et Business sont-ils disponibles ?", "Les nouvelles souscriptions sont fermées. L’accès MCP gratuit reste ouvert, et les abonnements existants se gèrent depuis l’espace client et son portail de facturation."]],
+  closingKicker: "Une question avant d’acheter ?", closingTitle: "Vérifiez d’abord, achetez ensuite.", closingText: "Chaque fiche propose un échantillon gratuit et décrit ses limites. Pour une question sur un fichier, une facture ou les conditions, écrivez-nous.", support: "Page support", samples: "Échantillons gratuits", sample: "Voir l’échantillon",
+  names: { tares: "TARES", classifications: "Classifications Standard", finma: "FINMA" },
+ },
+ de: {
+  title: "Preise für Dateien und MCP-Zugang | openswissdata",
+  description: `OpenSwissData-Preise: TARES CHF ${R.tares.price}, Klassifikationen CHF ${R.classifications.price}, FINMA-Register CHF ${R.finma.price} oder alle drei für CHF ${BUNDLE_OFFER.price}. Einmalzahlung, 360 Tage Aktualisierungen. Kostenloser MCP-Zugang; bezahlte Abonnements geschlossen.`,
+  home: "Startseite", crumb: "Preise", kicker: "Preise · Einmalzahlung in CHF", hero: "Klare Preise,", accent: "einmal bezahlt.",
+  lede: "Drei Schweizer Datensätze oder alle drei zusammen. Einmalzahlung, 360 Tage Aktualisierungen inklusive, keine automatische Erneuerung. Der kostenlose MCP-Zugang bleibt offen; bezahlte Abonnements nehmen keine neuen Anmeldungen an.",
+  choose: "Datei wählen", tryMcp: "MCP kostenlos testen", footnote: ["Zahlung über Stripe in CHF", "Keine automatische Erneuerung", "Erstattung innert 14 Tagen gemäss AGB"],
+  closed: "Neue Pro- und Business-Abonnements sind geschlossen: Es wurde keine Zahlungsseite geöffnet. Der kostenlose MCP-Zugang und die Dateikäufe bleiben verfügbar.",
+  ledgerTitle: "Preisübersicht", ledgerSub: "Schweizer Franken · Einmalzahlung", ledgerProduct: "Datei", ledgerPrice: "Preis", separate: "Einzelkäufe", bundleRow: "Bundle aller drei Dateien", saving: "Ersparnis", renewalLine: "Freiwillige Verlängerung, pro Jahr und Datei",
+  filesKicker: "01 / Die Dateien", filesTitle: "Drei Dateien, je eine Zahlung.", filesIntro: "Jeder Kauf umfasst das vollständige Archiv, seinen Qualitätsbericht und 360 Tage Aktualisierungen. Die Muster lassen sich auf jeder Produktseite kostenlos ansehen.",
+  once: "Einmalzahlung", renewal: "Freiwillige Verlängerung", perYear: "pro Jahr", buy: "Kaufen", readSheet: "Produktseite lesen",
+  bundleKicker: "Bundle · Drei Dateien", bundleTitle: "Alle drei Dateien, ein Kauf.", bundleText: `TARES, Classifications Standard und FINMA: derselbe Inhalt wie bei drei Einzelkäufen, für CHF ${BUNDLE_SAVING} weniger.`, bundleSaved: `Ersparnis: CHF ${BUNDLE_SAVING} (${BUNDLE_SAVING_PERCENT} %)`, instead: "statt", buyBundle: "Bundle kaufen", bundleLink: "Zusammensetzung ansehen",
+  includedKicker: "02 / Inbegriffen", includedTitle: "Was jeder Kauf umfasst.", includedIntro: "Dieselben Regeln für die drei Dateien und das Bundle. Massgebend sind die Verkaufsbedingungen.", terms: "Verkaufsbedingungen",
+  included: [
+   ["Einmalzahlung", "Kein Abonnement und keine automatische Erneuerung. Die Zahlung wird von Stripe in CHF abgewickelt."],
+   ["360 Tage Aktualisierungen", "FINMA: täglich geplante Erhebung. TARES: wöchentlich. Klassifikationen: nach Prüfung der offiziellen Quellen. Eine Erhebung kann bei fehlgeschlagenen Kontrollen ausgesetzt werden."],
+   ["Freiwillige Verlängerung", `Nach 360 Tagen behalten Sie die erhaltenen Versionen oder verlängern eine Datei: TARES CHF ${R.tares.renewal}, Klassifikationen CHF ${R.classifications.renewal}, FINMA CHF ${R.finma.renewal} pro Jahr.`],
+   ["Lieferung und Kundenkonto", "Nach der Zahlungsbestätigung gibt eine E-Mail Zugriff auf das Archiv; Ihr Kundenkonto enthält die von Ihren Rechten erfassten Versionen."],
+   ["Überprüfbare Herkunft", "Jedes Archiv enthält ein mit Ed25519 signiertes Manifest und SHA-256-Prüfsummen. Quellen und Erhebungsdaten sind dokumentiert."],
+   ["Erstattung innert 14 Tagen", "Vollständige Erstattung auf Anfrage innert 14 Tagen, ohne Begründung, ausser bei lizenzwidriger Weitergabe der Dateien an Dritte."]],
+  mcpKicker: "03 / MCP-Zugang", mcpTitle: "Der kostenlose MCP-Server bleibt offen.", mcpIntro: "Pro- und Business-Abonnements nehmen keine neuen Anmeldungen an. Ihre Preise bleiben zur Information sichtbar; bestehende Abonnements verwalten Sie im Kundenkonto.",
+  free: ["Free", "Zum Testen und Entwickeln, ohne Konto.", ["100 Aufrufe pro Stunde und Netzwerk", "Drei Werkzeuge ohne Konto: tariff_lookup, kyc_check und cross_walk", "Kein garantiertes Service-Level"], "Jetzt testen"],
+  month: "/Monat", closedBadge: "Geschlossen", closedStatus: "Neue Abonnements geschlossen", requests: "Anfragen pro Monat",
+  enterprise: ["Enterprise", "Auf Anfrage", "Volumen, Formate oder Dokumentation nach Ihrem Bedarf, vor jeder Verpflichtung zu klären.", "Offerte anfragen"],
+  faqKicker: "04 / Häufige Fragen", faqTitle: "Vor der Wahl.",
+  faq: [
+   ["Werden die Dateien im Abonnement verkauft?", "Nein. Jede Datei wird einmal in CHF bezahlt, mit 360 Tagen Aktualisierungen. Eine automatische Erneuerung gibt es nicht."],
+   ["Was geschieht nach 360 Tagen?", `Sie behalten die erhaltenen Versionen. Jede Datei wird separat verlängert: TARES CHF ${R.tares.renewal}, Klassifikationen CHF ${R.classifications.renewal} und FINMA CHF ${R.finma.renewal} pro Jahr.`],
+   ["Wofür bezahlt man genau?", "Die Quellen sind öffentlich. Der Preis vergütet ihre Aufbereitung: geprüfte Erhebung, Normalisierung, importfertige Formate und signierte Herkunft. Die Lizenz betrifft diese Zusammenstellung; die Bedingungen jeder Quelle bleiben anwendbar."],
+   ["Wie erhalte ich die Dateien?", "Nach der Zahlungsbestätigung durch Stripe gibt Ihnen eine E-Mail Zugriff auf das ZIP-Archiv, normalerweise innert weniger Minuten. Der Link ist 48 Stunden lang einmal nutzbar; Ihre Dateien bleiben im Kundenkonto zugänglich."],
+   ["Erhalte ich eine Rechnung auf mein Unternehmen?", "Der Stripe-Zahlungsbeleg steht in Ihrem Kundenkonto bereit. Für eine Rechnung auf Ihr Unternehmen senden Sie uns bitte Firmennamen und Rechnungsadresse."],
+   ["Und wenn die Datei nicht passt?", "Sie können innerhalb von 14 Tagen nach dem Kauf ohne Begründung die vollständige Erstattung verlangen, ausser bei einer lizenzwidrigen Weitergabe der Dateien an Dritte. Massgebend sind die Verkaufsbedingungen."],
+   ["Sind Pro- und Business-Abonnements erhältlich?", "Neue Abonnements sind geschlossen. Der kostenlose MCP-Zugang bleibt offen; bestehende Abonnements verwalten Sie im Kundenkonto und dessen Abrechnungsportal."]],
+  closingKicker: "Eine Frage vor dem Kauf?", closingTitle: "Zuerst prüfen, dann kaufen.", closingText: "Jede Produktseite bietet ein kostenloses Muster und beschreibt ihre Grenzen. Bei Fragen zu einer Datei, einer Rechnung oder den Bedingungen schreiben Sie uns.", support: "Zum Support", samples: "Kostenlose Muster", sample: "Muster ansehen",
+  names: { tares: "TARES", classifications: "Classifications Standard", finma: "FINMA" },
+ },
+ en: {
+  title: "Pricing for files and MCP access | openswissdata",
+  description: `OpenSwissData pricing: TARES CHF ${R.tares.price}, Classifications CHF ${R.classifications.price}, FINMA registry CHF ${R.finma.price}, or all three for CHF ${BUNDLE_OFFER.price}. One-time payment, 360 days of updates. Free MCP access; paid subscriptions closed.`,
+  home: "Home", crumb: "Pricing", kicker: "Pricing · One-time payment in CHF", hero: "Clear prices,", accent: "paid once.",
+  lede: "Three Swiss datasets, or all three together. One-time payment, 360 days of updates included, no automatic renewal. Free MCP access stays open; paid subscriptions no longer accept new sign-ups.",
+  choose: "Choose a file", tryMcp: "Try the MCP for free", footnote: ["Stripe payment in CHF", "No automatic renewal", "Refund within 14 days under the terms"],
+  closed: "New Pro and Business subscriptions are closed: no payment page was opened. Free MCP access and file purchases remain available.",
+  ledgerTitle: "Price summary", ledgerSub: "Swiss francs · one-time payment", ledgerProduct: "File", ledgerPrice: "Price", separate: "Separate purchases", bundleRow: "Bundle of all three files", saving: "Saving", renewalLine: "Optional extension, per year and file",
+  filesKicker: "01 / The files", filesTitle: "Three files, one payment each.", filesIntro: "Each purchase includes the full archive, its quality report and 360 days of updates. Samples can be checked for free on each product page.",
+  once: "one-time payment", renewal: "Optional extension", perYear: "per year", buy: "Buy", readSheet: "Read the product page",
+  bundleKicker: "Bundle · Three files", bundleTitle: "All three files, one purchase.", bundleText: `TARES, Classifications Standard and FINMA: the same content as three separate purchases, for CHF ${BUNDLE_SAVING} less.`, bundleSaved: `Saving: CHF ${BUNDLE_SAVING} (${BUNDLE_SAVING_PERCENT}%)`, instead: "instead of", buyBundle: "Buy the bundle", bundleLink: "See what is inside",
+  includedKicker: "02 / Included", includedTitle: "What every purchase includes.", includedIntro: "The same rules for the three files and the bundle. The sales terms prevail.", terms: "Sales terms",
+  included: [
+   ["One-time payment", "No subscription and no automatic renewal. Payment is processed by Stripe in CHF."],
+   ["360 days of updates", "FINMA: collection scheduled daily. TARES: weekly. Classifications: after the official sources are checked. Failed checks can block a collection."],
+   ["Optional extension", `After 360 days, keep the versions you received or extend a file: TARES CHF ${R.tares.renewal}, Classifications CHF ${R.classifications.renewal}, FINMA CHF ${R.finma.renewal} per year.`],
+   ["Delivery and account", "An email gives access to the archive once the payment is confirmed; your account keeps the versions covered by your rights."],
+   ["Verifiable provenance", "Each archive comes with an Ed25519-signed manifest and SHA-256 checksums. Sources and collection dates are documented."],
+   ["Refund within 14 days", "Full refund on request within 14 days, without giving a reason, unless the files have been redistributed to a third party in breach of the licence."]],
+  mcpKicker: "03 / MCP access", mcpTitle: "The free MCP server stays open.", mcpIntro: "Pro and Business subscriptions no longer accept new sign-ups. Their prices remain shown for information; existing subscriptions are managed from your account.",
+  free: ["Free", "To test and prototype, without an account.", ["100 calls per hour per network", "Three tools without an account: tariff_lookup, kyc_check and cross_walk", "No guaranteed service level"], "Try it now"],
+  month: "/month", closedBadge: "Closed", closedStatus: "New subscriptions closed", requests: "requests per month",
+  enterprise: ["Enterprise", "On request", "Volumes, formats or documentation defined around your needs, before any commitment.", "Request a quote"],
+  faqKicker: "04 / Frequently asked", faqTitle: "Before you choose.",
+  faq: [
+   ["Are the files sold as a subscription?", "No. Each file is paid once, in CHF, with 360 days of updates. There is no automatic renewal."],
+   ["What happens after 360 days?", `You keep the versions you received. Each file is extended separately: TARES CHF ${R.tares.renewal}, Classifications CHF ${R.classifications.renewal} and FINMA CHF ${R.finma.renewal} per year.`],
+   ["What exactly am I paying for?", "The sources are public. The price pays for their preparation: checked collection, normalisation, import-ready formats and signed provenance. The licence covers this compilation; each source’s own conditions remain applicable."],
+   ["How are the files delivered?", "Once Stripe confirms the payment, an email gives you access to the ZIP archive, normally within a few minutes. The link can be used once within 48 hours; your files remain available in your account."],
+   ["Can I get an invoice addressed to my company?", "The Stripe receipt is available in your account. For an invoice addressed to your company, send us its legal name and billing address."],
+   ["What if the file does not suit me?", "You may request a full refund within 14 days of purchase without giving a reason, unless the files have been redistributed to a third party in breach of the licence. The sales terms prevail."],
+   ["Are Pro and Business subscriptions available?", "New subscriptions are closed. Free MCP access stays open, and existing subscriptions are managed from your account and its billing portal."]],
+  closingKicker: "A question before buying?", closingTitle: "Check first, then buy.", closingText: "Each product page offers a free sample and describes its limits. For a question about a file, an invoice or the terms, write to us.", support: "Support page", samples: "Free samples", sample: "See the sample",
+  names: { tares: "TARES", classifications: "Classifications Standard", finma: "FINMA" },
+ },
+}[lang];
+const PRODUCT_COPY: Record<typeof lang, Record<FileProductId, { label: string; source: string; title: string; items: string[]; formats: string; cadence: string }>> = {
+ fr: {
+  tares: { label: "TARES", source: "OFDF · BAZG", title: "Tarif douanier", items: ["Numéros de tarif à huit chiffres, désignations en quatre langues", "Toutes les lignes de taux en vigueur, avec unités, dates et conditions", "Résumé du droit de base, jamais le taux le plus bas choisi"], formats: "CSV · JSON · Parquet · SQL", cadence: "Collecte planifiée chaque semaine" },
+  classifications: { label: "CLASSIFICATIONS STANDARD", source: "OFS · Eurostat · ONU", title: "NOGA · NACE · ISIC", items: ["NOGA 2008 et 2025, NACE Rév. 2 et 2.1, ISIC Rév. 4", "Correspondances par paire, avec source et précision", "Niveaux, parents et libellés selon les langues de chaque source"], formats: "CSV · JSON · Parquet · SQL", cadence: "Publication après contrôle des sources" },
+  finma: { label: "FINMA REGISTRY", source: "FINMA · GLEIF", title: "Registre FINMA", items: ["Registre UID public de la FINMA, une ligne par autorisation", "Liste d’avertissement séparée du registre", "LEI et adresses GLEIF par correspondance exacte de l’UID"], formats: "Excel · CSV · JSON · Parquet · SQL", cadence: "Collecte planifiée chaque jour" },
+ },
+ de: {
+  tares: { label: "TARES", source: "BAZG", title: "Zolltarif", items: ["Achtstellige Tarifnummern, Bezeichnungen in vier Sprachen", "Alle geltenden Tarifzeilen mit Einheiten, Daten und Bedingungen", "Zusammenfassung des Normalansatzes, nie der tiefste Ansatz ausgewählt"], formats: "CSV · JSON · Parquet · SQL", cadence: "Wöchentlich geplante Erhebung" },
+  classifications: { label: "CLASSIFICATIONS STANDARD", source: "BFS · Eurostat · UNO", title: "NOGA · NACE · ISIC", items: ["NOGA 2008 und 2025, NACE Rev. 2 und 2.1, ISIC Rev. 4", "Paarweise Zuordnungen mit Quelle und Genauigkeit", "Ebenen, übergeordnete Codes und Bezeichnungen je nach Sprachen der Quelle"], formats: "CSV · JSON · Parquet · SQL", cadence: "Veröffentlichung nach Prüfung der Quellen" },
+  finma: { label: "FINMA REGISTRY", source: "FINMA · GLEIF", title: "FINMA-Register", items: ["Öffentliches UID-Register der FINMA, eine Zeile pro Bewilligung", "Vom Register getrennte Warnliste", "LEI und GLEIF-Adressen über exakte UID-Zuordnung"], formats: "Excel · CSV · JSON · Parquet · SQL", cadence: "Täglich geplante Erhebung" },
+ },
+ en: {
+  tares: { label: "TARES", source: "FOCBS · BAZG", title: "Customs tariff", items: ["Eight-digit tariff numbers, descriptions in four languages", "Every rate row in force, with units, dates and conditions", "Base-duty summary, never the lowest rate picked"], formats: "CSV · JSON · Parquet · SQL", cadence: "Collection scheduled weekly" },
+  classifications: { label: "CLASSIFICATIONS STANDARD", source: "FSO · Eurostat · UN", title: "NOGA · NACE · ISIC", items: ["NOGA 2008 and 2025, NACE Rev. 2 and 2.1, ISIC Rev. 4", "Pairwise mappings with source and precision", "Levels, parents and labels in each source’s languages"], formats: "CSV · JSON · Parquet · SQL", cadence: "Published after the sources are checked" },
+  finma: { label: "FINMA REGISTRY", source: "FINMA · GLEIF", title: "FINMA registry", items: ["FINMA public UID registry, one row per authorisation", "Warning list kept separate from the registry", "GLEIF LEIs and addresses through exact UID matches"], formats: "Excel · CSV · JSON · Parquet · SQL", cadence: "Collection scheduled daily" },
+ },
+};
+const products = PRODUCT_COPY[lang];
+const ORDER = ["tares", "classifications", "finma"] as const satisfies readonly FileProductId[];
+const inLanguage = { fr: "fr-CH", de: "de-CH", en: "en" }[lang];
+const pageJsonLd = {
+ "@context": "https://schema.org",
+ "@graph": [
+  { "@type": "FAQPage", url: canonicalUrl("/pricing", lang), inLanguage, mainEntity: copy.faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
+  { "@type": "BreadcrumbList", itemListElement: [
+   { "@type": "ListItem", position: 1, name: copy.home, item: canonicalUrl("/", lang) },
+   { "@type": "ListItem", position: 2, name: copy.crumb, item: canonicalUrl("/pricing", lang) }] },
+ ],
+};
+const quoteHref = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(`openswissdata Enterprise (${{ fr: "devis", de: "Offerte", en: "quote" }[lang]})`)}`;
+---
+<AtlasLayout title={copy.title} description={copy.description} articleJsonLd={pageJsonLd}>
+<div class="tarifs">
+ <div class="atlas-shell atlas-breadcrumb"><a href={L("/")}>{copy.home}</a><span aria-hidden="true">/</span><span>{copy.crumb}</span></div>
+ <div class="atlas-shell"><p class="service-banner" data-closed-banner role="status" hidden>{copy.closed}</p></div>
+
+ <section class="tarifs-hero"><div class="atlas-shell tarifs-hero-grid">
+  <div data-atlas-enter>
+   <p class="atlas-kicker">{copy.kicker}</p>
+   <h1>{copy.hero}<br/><em>{copy.accent}</em></h1>
+   <p class="atlas-lede">{copy.lede}</p>
+   <div class="atlas-actions"><a class="atlas-btn" href="#fichiers">{copy.choose}<span aria-hidden="true">↓</span></a><a class="atlas-text-link" href={`${L("/mcp")}#install`}>{copy.tryMcp}<span aria-hidden="true">↗</span></a></div>
+   <div class="atlas-hero-footnote">{copy.footnote.map(item => <span>{item}</span>)}</div>
+  </div>
+  <figure class="tarifs-ledger" data-atlas-enter>
+   <figcaption><strong>{copy.ledgerTitle}</strong><span>{copy.ledgerSub}</span></figcaption>
+   <table>
+    <thead><tr><th scope="col">{copy.ledgerProduct}</th><th scope="col">{copy.ledgerPrice}</th></tr></thead>
+    <tbody>
+     {ORDER.map(id => <tr><th scope="row">{copy.names[id]}</th><td>{chf(FILE_OFFERS[id].price)}</td></tr>)}
+     <tr class="tarifs-ledger-sum"><th scope="row">{copy.separate}</th><td>{chf(SEPARATE_TOTAL)}</td></tr>
+     <tr class="tarifs-ledger-bundle"><th scope="row">{copy.bundleRow}</th><td>{chf(BUNDLE_OFFER.price)}</td></tr>
+     <tr class="tarifs-ledger-saving"><th scope="row">{copy.saving}</th><td>{chf(BUNDLE_SAVING)} · {BUNDLE_SAVING_PERCENT} %</td></tr>
+    </tbody>
+   </table>
+   <p class="tarifs-ledger-foot"><span>{copy.renewalLine}</span>{ORDER.map(id => <b>{copy.names[id].split(" ")[0]} {chf(FILE_OFFERS[id].renewal)}</b>)}</p>
+  </figure>
+ </div></section>
+
+ <section class="atlas-section tarifs-files" id="fichiers" aria-labelledby="fichiers-titre"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.filesKicker}</p><h2 id="fichiers-titre">{copy.filesTitle}</h2></div><p class="atlas-section-intro">{copy.filesIntro}</p></div>
+  <div class="tarifs-grid">
+   {ORDER.map(id => { const product = products[id]; return <article class={`tarifs-card tarifs-card-${id}`} data-atlas-enter>
+    <div class="tarifs-card-head"><p class="atlas-kicker">{product.label}</p><span>{product.source}</span></div>
+    <h3>{product.title}</h3>
+    <ul>{product.items.map(item => <li>{item}</li>)}</ul>
+    <p class="tarifs-card-meta"><span>{product.formats}</span><span>{product.cadence}</span></p>
+    <div class="tarifs-card-price"><strong>{chf(FILE_OFFERS[id].price)}</strong><span>{copy.once}</span></div>
+    <p class="tarifs-card-renewal">{copy.renewal} · {chf(FILE_OFFERS[id].renewal)} {copy.perYear}</p>
+    <form method="POST" action="/api/checkout/start"><input type="hidden" name="locale" value={lang} /><input type="hidden" name="dataset_ids" value={id} /><button class="atlas-btn" type="submit">{copy.buy} · {chf(FILE_OFFERS[id].price)}<span aria-hidden="true">↗</span></button></form>
+    <CheckoutNotice />
+    <a class="atlas-text-link tarifs-card-link" href={L(`/datasets/${id}`)}>{copy.readSheet}<span aria-hidden="true">↗</span></a>
+   </article>; })}
+  </div>
+  <article class="tarifs-bundle" data-atlas-enter>
+   <div class="tarifs-bundle-copy">
+    <p class="atlas-kicker">{copy.bundleKicker}</p>
+    <h3>{copy.bundleTitle}</h3>
+    <p>{copy.bundleText}</p>
+    <a class="atlas-text-link" href={L("/bundle")}>{copy.bundleLink}<span aria-hidden="true">↗</span></a>
+   </div>
+   <div class="tarifs-bundle-sheets" aria-hidden="true">{ORDER.map(id => <span class={`tarifs-sheet tarifs-sheet-${id}`}><b>{{ tares: "TARES", classifications: "NOGA", finma: "FINMA" }[id]}</b><i></i><i></i><i></i></span>)}</div>
+   <div class="tarifs-bundle-box">
+    <p class="tarifs-was"><s>{chf(SEPARATE_TOTAL)}</s> <span>{copy.bundleSaved}</span></p>
+    <div class="atlas-purchase-price"><strong>{BUNDLE_OFFER.price}</strong><span>CHF</span></div>
+    <form method="POST" action="/api/checkout/start"><input type="hidden" name="locale" value={lang} /><input type="hidden" name="dataset_ids" value="bundle" /><button class="atlas-btn" type="submit">{copy.buyBundle}<span aria-hidden="true">↗</span></button></form>
+    <CheckoutNotice />
+   </div>
+  </article>
+ </div></section>
+
+ <section class="atlas-section atlas-method tarifs-included" id="compris" aria-labelledby="compris-titre"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.includedKicker}</p><h2 id="compris-titre">{copy.includedTitle}</h2></div><div><p class="atlas-section-intro">{copy.includedIntro}</p><a class="atlas-text-link" href={L("/legal/cgv")}>{copy.terms} ↗</a></div></div>
+  <div class="atlas-benefits tarifs-benefits">{copy.included.map(([title, text], index) => <article class="atlas-benefit" data-atlas-enter><span>0{index + 1}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
+ </div></section>
+
+ <section class="atlas-section tarifs-mcp" id="mcp" aria-labelledby="mcp-titre"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.mcpKicker}</p><h2 id="mcp-titre">{copy.mcpTitle}</h2></div><p class="atlas-section-intro">{copy.mcpIntro}</p></div>
+  <div class="tarifs-plans" data-atlas-enter>
+   <article class="tarifs-plan tarifs-plan-open">
+    <p class="tarifs-plan-tier">{copy.free[0]}</p>
+    <p class="tarifs-plan-price">{chf(0)}</p>
+    <p class="tarifs-plan-sub">{copy.free[1]}</p>
+    <ul>{(copy.free[2] as string[]).map(item => <li>{item}</li>)}</ul>
+    <a class="atlas-btn" href={`${L("/mcp")}#install`}>{copy.free[3]}<span aria-hidden="true">↗</span></a>
+   </article>
+   {(["pro", "business"] as const).map(plan => <article class="tarifs-plan tarifs-plan-closed">
+    <span class="tarifs-plan-badge">{copy.closedBadge}</span>
+    <p class="tarifs-plan-tier">{plan === "pro" ? "Pro" : "Business"}</p>
+    <p class="tarifs-plan-price">{chf(MCP_CLOSED[plan].monthly)}<small>{copy.month}</small></p>
+    <ul><li>{count(MCP_CLOSED[plan].requests)} {copy.requests}</li></ul>
+    <p class="tarifs-plan-status">{copy.closedStatus}</p>
+   </article>)}
+   <article class="tarifs-plan">
+    <p class="tarifs-plan-tier">{copy.enterprise[0]}</p>
+    <p class="tarifs-plan-price tarifs-plan-quote">{copy.enterprise[1]}</p>
+    <p class="tarifs-plan-sub">{copy.enterprise[2]}</p>
+    <a class="atlas-btn atlas-btn-secondary" href={quoteHref}>{copy.enterprise[3]}<span aria-hidden="true">↗</span></a>
+   </article>
+  </div>
+ </div></section>
+
+ <section class="atlas-section atlas-faq" id="questions"><div class="atlas-shell atlas-faq-grid"><div data-atlas-enter><p class="atlas-kicker">{copy.faqKicker}</p><h2 class="atlas-section-title">{copy.faqTitle}</h2><a href={L("/legal/cgv")} class="atlas-text-link">{copy.terms} ↗</a></div><div>{copy.faq.map(([question, answer]) => <details><summary>{question}</summary><p>{answer}</p></details>)}</div></div></section>
+
+ <section class="atlas-shell" aria-labelledby="tarifs-fin"><div class="atlas-purchase" data-atlas-enter>
+  <div><p class="atlas-kicker">{copy.closingKicker}</p><h2 id="tarifs-fin">{copy.closingTitle}</h2><p>{copy.closingText}</p><div class="atlas-actions"><a class="atlas-text-link" href={L("/support")}>{copy.support} ↗</a><a class="atlas-text-link" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL} ↗</a></div></div>
+  <div class="atlas-purchase-box tarifs-samples"><p>{copy.samples}</p><ul>{ORDER.map(id => <li><a href={L(`/datasets/${id}`)}><span>{copy.names[id]}</span><span>{copy.sample} ↗</span></a></li>)}</ul></div>
+ </div></section>
+</div>
+<script>
+ import '../scripts/pricing';
+</script>
+</AtlasLayout>

@@ -27,7 +27,7 @@ const mcpHref = localizePath("/mcp", lang);
       <a href={`${homeHref}#datasets`}>{t("nav.datasets", lang)}</a>
       <a href={`${homeHref}#how`}>{t("nav.how", lang)}</a>
       <a href={mcpHref}>MCP</a>
-      <a href="/pricing">{lang === "de" ? "Preise" : lang === "en" ? "Pricing" : "Tarifs"}</a>
+      <a href={localizePath("/pricing", lang)}>{lang === "de" ? "Preise" : lang === "en" ? "Pricing" : "Tarifs"}</a>
       <a href={blogHref}>{t("nav.blog", lang)}</a>
     </nav>
     <LangSwitcher variant="compact" monolingual={monolingual} />
