@@ -83,6 +83,12 @@ describe("Guides FINMA : sources et liens", () => {
     }
   });
 
+  it.each(cases)("%s en %s : libellés de code et de tableau uniques (régions distinctes pour les lecteurs d’écran)", (id, lang) => {
+    const blocks = GUIDES[id][lang].sections.flatMap(s => s.blocks);
+    const labels = blocks.flatMap(b => b.type === "code" ? [b.label] : b.type === "table" ? [b.caption] : []);
+    expect(new Set(labels).size).toBe(labels.length);
+  });
+
   it.each(cases)("%s en %s : renvoie à la fiche produit", (id, lang) => {
     const texts = allTexts(id, lang).join("\n");
     expect(texts).toContain("(@/datasets/finma/)");
