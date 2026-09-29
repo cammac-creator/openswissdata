@@ -10,6 +10,8 @@ interface Props {
   datasetJsonLd?: Record<string, unknown>;
   productJsonLd?: Record<string, unknown>;
   articleJsonLd?: Record<string, unknown>;
+  /** Page privée (espace client) : noindex, sans canonique ni variantes de langue. */
+  noindex?: boolean;
 }
 ---
 <BaseLayout {...Astro.props} appearance="atlas">

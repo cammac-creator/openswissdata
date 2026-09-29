@@ -1,12 +1,6 @@
 ---
-// Espace client (FR). Le markup + style + script sont mutualisés dans
-// AccountApp.astro ; cette route n'est qu'un wrapper langue. Voir aussi
-// /de/account et /en/account. noindex (page privée) ; monolingual=false car
-// la page existe désormais dans les 3 langues → le sélecteur de langue
-// pointe correctement d'une version à l'autre.
-import BaseLayout from "../layouts/BaseLayout.astro";
+// Espace client (FR). Présentation, textes et script dans AccountApp.astro ; cette route n'est
+// qu'une enveloppe de langue. Page privée : noindex, sans canonique ni variantes de langue.
 import AccountApp from "../components/AccountApp.astro";
 ---
-<BaseLayout title="Espace client — openswissdata" noindex={true}>
-  <AccountApp lang="fr" />
-</BaseLayout>
+<AccountApp lang="fr" />

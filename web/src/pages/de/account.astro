@@ -1,9 +1,5 @@
 ---
-// Kundenbereich (DE). Markup/Style/Script geteilt über AccountApp.astro ;
-// diese Route ist nur ein Sprach-Wrapper. Siehe auch /account und /en/account.
-import BaseLayout from "../../layouts/BaseLayout.astro";
+// Kundenkonto (DE). Darstellung, Texte und Skript in AccountApp.astro ; nur eine Sprachhülle.
 import AccountApp from "../../components/AccountApp.astro";
 ---
-<BaseLayout title="Kundenbereich — openswissdata" noindex={true}>
-  <AccountApp lang="de" />
-</BaseLayout>
+<AccountApp lang="de" />

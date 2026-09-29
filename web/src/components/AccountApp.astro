@@ -1,970 +1,274 @@
 ---
+/* ============================================================================
+   Espace client — composant partagé FR/DE/EN (connexion + tableau de bord), style Atlas.
+
+   Les trois routes (/account, /de/account, /en/account) ne sont que des enveloppes de
+   langue. Les textes vivent dans deux dictionnaires TYPÉS : un Record<Lang, …> fait
+   échouer le build sur une clé manquante, là où t() retomberait sur le français.
+
+   Le comportement est dans web/src/scripts/account.ts : mêmes appels réseau qu'avant
+   (adresses, méthodes, en-têtes, corps et cookies inchangés). Ce composant ne décide
+   d'aucune logique de session, de cookie, d'origine ni de téléchargement.
+
+   Sans JavaScript : les vues dynamiques restent masquées (attribut hidden) ; un bloc
+   <noscript> explique la situation et le trajet d'achat et l'aide restent lisibles.
+   ============================================================================ */
 import type { Lang } from "../i18n/utils";
 import { localizePath } from "../i18n/utils";
+import AtlasLayout from "../layouts/AtlasLayout.astro";
+import PurchaseJourney from "./PurchaseJourney.astro";
+import "../styles/atlas-service.css";
+import "../styles/atlas-compte.css";
+import { BUNDLE_OFFER } from "../lib/offers";
+import { HELP_TOPICS, SUPPORT_EMAIL, supportMailto } from "../lib/customer-care";
 
-interface Props {
-  lang: Lang;
-}
+interface Props { lang: Lang }
 const { lang } = Astro.props;
+const L = (path: string) => localizePath(path, lang);
+const chf = (value: number) => (lang === "fr" ? `${value} CHF` : `CHF ${value}`);
 
-/* ============================================================================
-   Espace client — composant partagé FR/DE/EN (login + dashboard).
-
-   i18n : l'espace client appartient à la couche « app / transactionnel »
-   (comme les emails dans src/lib/email.ts), distincte du catalogue marketing
-   t()/JSON. On garde donc la copie dans un dict TYPÉ colocalisé : un
-   Record<Lang, …> fait ÉCHOUER le build sur une clé manquante, là où t()
-   retomberait silencieusement sur le FR (i18n/utils.ts) — on gagne la
-   complétude à la compilation.
-
-   Le markup, le <style> et le <script> sont mutualisés ici : les 3 routes
-   (/account, /de/account, /en/account) ne sont que de minces wrappers. Les
-   identifiants DOM (#login-view, #banner, …) restent identiques dans les 3
-   langues ; seules les chaînes changent. Les chaînes côté JS sont injectées
-   via define:vars sous un SEUL objet namespacé `osdAcct` — les scripts
-   is:inline partagent le scope top-level de la page, le préfixe évite toute
-   collision avec les const de BaseLayout (navEl/reveals/io…).
-   ============================================================================ */
-
-interface AccountCopy {
-  bcHome: string;
-  bcCurrent: string;
-  loginEyebrow1: string;
-  loginEyebrow2: string;
-  loginH1: string;
-  loginLedeHtml: string;
-  fieldLabel: string;
-  emailPlaceholder: string;
-  submitBtn: string;
-  reassure: string;
-  onboardingTitle: string;
-  dashH1: string;
-  logoutBtn: string;
-  emptyEyebrow: string;
-  emptyTitle: string;
-  emptySub: string;
-  emptyCta: string;
-  mcpTitle: string;
-  mcpName: string;
-  mcpStatus: string;
-  mcpPortalBtn: string;
-  loading: string;
-}
-
-interface AccountJsCopy {
-  bannerCheckoutSuccess: string;
-  bannerCheckoutCancelled: string;
-  bannerAuthOk: string;
-  bannerAuthInvalid: string;
-  bannerAuthExpired: string;
-  noVersion: string;
-  updatesUntil: string;
-  dlDownload: string;
-  dlPreparing: string;
-  dlRetry: string;
-  dlError: string;
-  tierStandalone: string;
-  tierBusiness: string;
-  tierPro: string;
-  tierStandard: string;
-  tierFree: string;
-  mcpKey: string;
-  mcpOpening: string;
-  mcpRetry: string;
-  mcpPortalError: string;
-  loginSending: string;
-  loginSuccess: string;
-  loginError: string;
-  loginLimited: string;
-  loginNetworkError: string;
-  loadError: string;
-  logoutError: string;
-}
-
-const COPY: Record<Lang, AccountCopy> = {
+const COPY = {
   fr: {
-    bcHome: "accueil",
-    bcCurrent: "Espace client",
-    loginEyebrow1: "Espace client",
-    loginEyebrow2: "lien magique",
-    loginH1: "Bienvenue.",
-    loginLedeHtml: "Entrez votre adresse email — nous vous enverrons un lien de connexion valable <strong>15&nbsp;minutes</strong>. Pas de mot de passe à retenir.",
-    fieldLabel: "Adresse email",
-    emailPlaceholder: "vous@entreprise.com",
-    submitBtn: "Recevoir le lien",
-    reassure: "Aucun mot de passe stocké. Le lien expire automatiquement après usage.",
-    onboardingTitle: "Comment ça marche",
-    dashH1: "Mes datasets",
-    logoutBtn: "Se déconnecter",
-    emptyEyebrow: "Aucun dataset",
-    emptyTitle: "Votre espace est vide pour l'instant.",
-    emptySub: "Composez votre accès sur le bundle complet — TARES, Classifications et FINMA réunis.",
-    emptyCta: "Voir le bundle — 797 CHF",
-    mcpTitle: "Abonnement MCP",
-    mcpName: "Serveur MCP openswissdata",
-    mcpStatus: "Abonnement",
-    mcpPortalBtn: "Gérer mon abonnement",
-    loading: "Chargement de votre espace…",
+    title: "Espace client | openswissdata", description: "Espace client OpenSwissData : connexion par lien envoyé par email, téléchargement des fichiers achetés, reçus Stripe et conditions de vente acceptées.",
+    home: "Accueil", crumb: "Espace client", loading: "Chargement de votre espace…",
+    kicker: "Espace client · Connexion par email", hero: "Vos fichiers,", accent: "au même endroit.",
+    lede: "Téléchargez vos archives, retrouvez vos reçus et les conditions acceptées. Pas de mot de passe : un lien de connexion vous est envoyé par email.",
+    facts: ["Lien valable 15 minutes", "Une confirmation avant l’ouverture", "Les versions comprises dans vos droits"],
+    cardKicker: "Connexion", cardTitle: "Recevoir un lien de connexion", fieldLabel: "Adresse email utilisée pour l’achat", placeholder: "vous@entreprise.com", submit: "Recevoir le lien",
+    steps: ["Saisissez l’adresse utilisée lors de l’achat.", "Ouvrez le lien reçu dans le navigateur où vous voulez consulter vos fichiers. Il est valable 15 minutes et ne sert qu’une fois.", "Confirmez sur la page qui s’ouvre : aucun compte ne s’ouvre sans ce clic."],
+    notCustomer: "Pas encore client ?", browse: "Voir les fichiers",
+    noscriptTitle: "Espace client", noscriptText: "L’espace client a besoin de JavaScript pour demander un lien de connexion et afficher vos fichiers. Les liens de téléchargement reçus par email, eux, fonctionnent sans JavaScript.", noscriptHelp: "Besoin d’aide ? Écrivez à",
+    dashKicker: "Espace client", dashTitle: "Vos fichiers", dashIntro: "Téléchargez les versions comprises dans vos droits. Conservez une copie des fichiers reçus.", logout: "Se déconnecter", filesLabel: "Fichiers achetés",
+    emptyKicker: "Aucun fichier sur ce compte", emptyTitle: "Votre espace est prêt, mais vide.", emptyText: "Un achat récent apparaît ici dès que le paiement est confirmé. Si vous avez déjà acheté un fichier, vérifiez que vous êtes connecté avec l’adresse saisie chez Stripe.",
+    emptyBundle: `Les trois fichiers ensemble · ${chf(BUNDLE_OFFER.price)}`, emptyHelp: "Un achat manque ?",
+    receiptsKicker: "Reçus et conditions", receiptsTitle: "Vos achats", receiptsIntro: "Le reçu Stripe et les conditions acceptées de chaque achat. Pour une facture au nom de votre entreprise, envoyez-nous sa raison sociale et son adresse de facturation.", invoice: "Demander une facture",
+    mcpKicker: "Abonnement MCP", mcpName: "Serveur MCP openswissdata", mcpStatus: "Abonnement", mcpPortal: "Gérer mon abonnement",
+    helpKicker: "Besoin d’aide ?", helpTitle: "Les réponses aux situations courantes.", helpAll: "Tout le support", helpWrite: "Écrire au support",
   },
   de: {
-    bcHome: "Startseite",
-    bcCurrent: "Kundenbereich",
-    loginEyebrow1: "Kundenbereich",
-    loginEyebrow2: "Magic Link",
-    loginH1: "Willkommen.",
-    loginLedeHtml: "Geben Sie Ihre E-Mail-Adresse ein — wir senden Ihnen einen Anmeldelink, gültig <strong>15&nbsp;Minuten</strong>. Kein Passwort nötig.",
-    fieldLabel: "E-Mail-Adresse",
-    emailPlaceholder: "sie@unternehmen.com",
-    submitBtn: "Link erhalten",
-    reassure: "Kein Passwort gespeichert. Der Link verfällt automatisch nach Gebrauch.",
-    onboardingTitle: "So funktioniert's",
-    dashH1: "Meine Datensätze",
-    logoutBtn: "Abmelden",
-    emptyEyebrow: "Keine Datensätze",
-    emptyTitle: "Ihr Bereich ist derzeit leer.",
-    emptySub: "Stellen Sie Ihren Zugang mit dem Komplettpaket zusammen — TARES, Klassifikationen und FINMA vereint.",
-    emptyCta: "Paket ansehen — 797 CHF",
-    mcpTitle: "MCP-Abonnement",
-    mcpName: "MCP-Server openswissdata",
-    mcpStatus: "Abonnement",
-    mcpPortalBtn: "Abonnement verwalten",
-    loading: "Ihr Bereich wird geladen…",
+    title: "Kundenkonto | openswissdata", description: "OpenSwissData-Kundenkonto: Anmeldung per E-Mail-Link, Download der gekauften Dateien, Stripe-Belege und akzeptierte Verkaufsbedingungen.",
+    home: "Startseite", crumb: "Kundenkonto", loading: "Ihr Kundenkonto wird geladen…",
+    kicker: "Kundenkonto · Anmeldung per E-Mail", hero: "Ihre Dateien,", accent: "an einem Ort.",
+    lede: "Laden Sie Ihre Archive herunter und finden Sie Belege und akzeptierte Bedingungen. Kein Passwort: Sie erhalten einen Anmeldelink per E-Mail.",
+    facts: ["Link 15 Minuten gültig", "Eine Bestätigung vor dem Öffnen", "Die von Ihren Rechten erfassten Versionen"],
+    cardKicker: "Anmeldung", cardTitle: "Anmeldelink erhalten", fieldLabel: "Beim Kauf verwendete E-Mail-Adresse", placeholder: "sie@unternehmen.com", submit: "Link erhalten",
+    steps: ["Geben Sie die beim Kauf verwendete Adresse ein.", "Öffnen Sie den Link im Browser, in dem Sie Ihre Dateien ansehen möchten. Er ist 15 Minuten gültig und nur einmal nutzbar.", "Bestätigen Sie auf der angezeigten Seite: Ohne diesen Klick wird kein Konto geöffnet."],
+    notCustomer: "Noch kein Kunde?", browse: "Dateien ansehen",
+    noscriptTitle: "Kundenkonto", noscriptText: "Das Kundenkonto braucht JavaScript, um einen Anmeldelink anzufordern und Ihre Dateien anzuzeigen. Die per E-Mail erhaltenen Download-Links funktionieren auch ohne JavaScript.", noscriptHelp: "Brauchen Sie Hilfe? Schreiben Sie an",
+    dashKicker: "Kundenkonto", dashTitle: "Ihre Dateien", dashIntro: "Laden Sie die von Ihren Rechten erfassten Versionen herunter. Bewahren Sie eine Kopie der erhaltenen Dateien auf.", logout: "Abmelden", filesLabel: "Gekaufte Dateien",
+    emptyKicker: "Keine Dateien in diesem Konto", emptyTitle: "Ihr Konto ist bereit, aber leer.", emptyText: "Ein neuer Kauf erscheint hier, sobald die Zahlung bestätigt ist. Haben Sie bereits eine Datei gekauft, prüfen Sie, ob Sie mit der bei Stripe angegebenen Adresse angemeldet sind.",
+    emptyBundle: `Alle drei Dateien zusammen · ${chf(BUNDLE_OFFER.price)}`, emptyHelp: "Fehlt ein Kauf?",
+    receiptsKicker: "Belege und Bedingungen", receiptsTitle: "Ihre Käufe", receiptsIntro: "Der Stripe-Beleg und die akzeptierten Bedingungen jedes Kaufs. Für eine Rechnung auf Ihr Unternehmen senden Sie uns bitte Firmennamen und Rechnungsadresse.", invoice: "Rechnung anfordern",
+    mcpKicker: "MCP-Abonnement", mcpName: "MCP-Server openswissdata", mcpStatus: "Abonnement", mcpPortal: "Abonnement verwalten",
+    helpKicker: "Brauchen Sie Hilfe?", helpTitle: "Antworten auf häufige Situationen.", helpAll: "Zum Support", helpWrite: "Support kontaktieren",
   },
   en: {
-    bcHome: "home",
-    bcCurrent: "Account",
-    loginEyebrow1: "Account",
-    loginEyebrow2: "magic link",
-    loginH1: "Welcome.",
-    loginLedeHtml: "Enter your email address — we'll send you a sign-in link valid for <strong>15&nbsp;minutes</strong>. No password to remember.",
-    fieldLabel: "Email address",
-    emailPlaceholder: "you@company.com",
-    submitBtn: "Get the link",
-    reassure: "No password stored. The link expires automatically after use.",
-    onboardingTitle: "How it works",
-    dashH1: "My datasets",
-    logoutBtn: "Sign out",
-    emptyEyebrow: "No datasets",
-    emptyTitle: "Your space is empty for now.",
-    emptySub: "Build your access with the complete bundle — TARES, Classifications and FINMA together.",
-    emptyCta: "View the bundle — 797 CHF",
-    mcpTitle: "MCP subscription",
-    mcpName: "openswissdata MCP server",
-    mcpStatus: "Subscription",
-    mcpPortalBtn: "Manage my subscription",
-    loading: "Loading your space…",
+    title: "Your account | openswissdata", description: "OpenSwissData account: sign in with an emailed link, download the files you bought, Stripe receipts and accepted sales terms.",
+    home: "Home", crumb: "Your account", loading: "Loading your account…",
+    kicker: "Your account · Email sign-in", hero: "Your files,", accent: "in one place.",
+    lede: "Download your archives and find your receipts and accepted terms. No password: a sign-in link is sent to you by email.",
+    facts: ["Link valid for 15 minutes", "One confirmation before opening", "The versions covered by your rights"],
+    cardKicker: "Sign in", cardTitle: "Get a sign-in link", fieldLabel: "Email address used for the purchase", placeholder: "you@company.com", submit: "Get the link",
+    steps: ["Enter the address you used for the purchase.", "Open the link in the browser where you want to see your files. It is valid for 15 minutes and works only once.", "Confirm on the page that opens: no account opens without that click."],
+    notCustomer: "Not a customer yet?", browse: "See the files",
+    noscriptTitle: "Your account", noscriptText: "Your account needs JavaScript to request a sign-in link and show your files. The download links you receive by email work without JavaScript.", noscriptHelp: "Need help? Write to",
+    dashKicker: "Your account", dashTitle: "Your files", dashIntro: "Download the versions covered by your rights. Keep a copy of the files you receive.", logout: "Sign out", filesLabel: "Purchased files",
+    emptyKicker: "No files in this account", emptyTitle: "Your account is ready, but empty.", emptyText: "A recent purchase appears here once the payment is confirmed. If you have already bought a file, check that you are signed in with the address entered at Stripe.",
+    emptyBundle: `All three files together · ${chf(BUNDLE_OFFER.price)}`, emptyHelp: "Is a purchase missing?",
+    receiptsKicker: "Receipts and terms", receiptsTitle: "Your purchases", receiptsIntro: "The Stripe receipt and accepted terms for each purchase. For an invoice addressed to your company, send us its legal name and billing address.", invoice: "Request an invoice",
+    mcpKicker: "MCP subscription", mcpName: "openswissdata MCP server", mcpStatus: "Subscription", mcpPortal: "Manage my subscription",
+    helpKicker: "Need help?", helpTitle: "Answers to common situations.", helpAll: "All support", helpWrite: "Contact support",
   },
-};
+} satisfies Record<Lang, Record<string, string | string[]>>;
 
-const JS: Record<Lang, AccountJsCopy> = {
+/** Textes lus par le script ; toujours insérés avec textContent, jamais comme HTML. */
+const SCRIPT = {
   fr: {
-    bannerCheckoutSuccess: "✓ Paiement reçu. Vous allez recevoir un email de confirmation avec un lien de connexion sous 5 minutes. Vérifiez aussi vos spams si rien n'arrive.",
-    bannerCheckoutCancelled: "Paiement annulé — aucun montant n'a été débité. Vous pouvez réessayer à tout moment.",
-    bannerAuthOk: "Connexion réussie.",
-    bannerAuthInvalid: "Ce lien de connexion n'est pas valide. Veuillez en demander un nouveau.",
-    bannerAuthExpired: "Ce lien de connexion a expiré. Veuillez en demander un nouveau.",
-    noVersion: "aucune version disponible",
-    updatesUntil: " · mises à jour jusqu'au ",
-    dlDownload: "Télécharger",
-    dlPreparing: "Préparation…",
-    dlRetry: "Réessayer",
-    dlError: "Échec du téléchargement : ",
-    tierStandalone: "Pro — 5 000 req/mois",
-    tierBusiness: "Business — 50 000 req/mois",
-    tierPro: "Pro",
-    tierStandard: "Standard",
-    tierFree: "Free",
-    mcpKey: " · clé ",
-    mcpOpening: "Ouverture…",
-    mcpRetry: "Réessayer",
-    mcpPortalError: "Impossible d'ouvrir le portail de facturation. Réessayez plus tard.",
-    loginSending: "Envoi en cours…",
-    loginSuccess: "✓ Vérifiez votre boîte de réception — le lien est valable 15 minutes.",
-    loginLimited: "Trop de demandes rapprochées. Patientez avant de réessayer, ou ouvrez un lien déjà reçu.",
-    loginError: "Une erreur est survenue. Veuillez réessayer.",
-    loginNetworkError: "Erreur réseau. Veuillez réessayer.",
-    logoutError: "La déconnexion n’a pas pu être confirmée. Réessayez avant de quitter cet appareil.",
-    loadError: "Impossible de charger votre espace client. Veuillez actualiser la page.",
+    bannerCheckoutSuccess: "Merci. Dès que Stripe confirme le paiement, un email vous donne accès à vos fichiers, normalement en quelques minutes. Rien reçu ? Regardez les indésirables, puis connectez-vous avec l’adresse utilisée pour l’achat.",
+    bannerCheckoutCancelled: "Paiement interrompu. Si vous avez quitté la page de paiement avant de confirmer, aucun achat n’a été enregistré.",
+    bannerAuthOk: "Connexion confirmée. Bienvenue dans votre espace.",
+    bannerAuthInvalid: "Ce lien de connexion n’est pas valide. Demandez-en un nouveau avec votre adresse email.",
+    bannerAuthExpired: "Ce lien de connexion a expiré ou a déjà servi. Demandez-en un nouveau : il sera valable 15 minutes.",
+    noVersion: "Aucune version disponible pour le moment", versionLabel: "Version", untilLabel: "Mises à jour jusqu’au", endedLabel: "Mises à jour terminées le",
+    endedNote: "La version affichée est la dernière comprise dans votre achat.",
+    dlDownload: "Télécharger", dlPreparing: "Préparation…", dlRetry: "Réessayer", dlStarted: "Téléchargement lancé. S’il ne démarre pas, réessayez : le lien préparé expire après cinq minutes.",
+    dlSession: "Votre session a expiré. Actualisez la page, puis demandez un nouveau lien de connexion.",
+    dlForbidden: "Ce fichier n’est plus accessible depuis ce compte. S’il s’agit d’une erreur, écrivez-nous.",
+    dlNoVersion: "Aucune version n’est disponible pour la période couverte par votre achat. Écrivez-nous en indiquant le produit.",
+    dlUnavailable: "Le téléchargement n’a pas pu être préparé. Réessayez dans un instant.",
+    network: "Le service ne répond pas. Vérifiez votre connexion, puis réessayez.",
+    productPage: "Fiche du produit", filesError: "La liste de vos fichiers n’a pas pu être chargée. Actualisez la page dans un instant.",
+    orderLabel: "Achat du", receipt: "Reçu Stripe", receiptOpening: "Ouverture…", receiptError: "Reçu indisponible pour le moment. Pour votre reçu ou une facture professionnelle, écrivez à contact@openswissdata.com.",
+    legalAccepted: "CGV acceptées", legalNone: "Aucune preuve d’acceptation versionnée n’est disponible pour cet achat.", refunded: "Remboursé", partialRefund: "Remboursement enregistré : ",
+    tierStandalone: "Pro — 5 000 req/mois", tierBusiness: "Business — 50 000 req/mois", tierPro: "Pro", tierStandard: "Standard", tierFree: "Free", mcpKey: " · clé ",
+    mcpOpening: "Ouverture…", mcpRetry: "Réessayer", mcpPortalError: "Impossible d’ouvrir le portail de facturation. Réessayez plus tard.",
+    loginSending: "Envoi en cours…", loginSuccess: "Si cette adresse correspond à un achat, un lien de connexion vient de partir. Ouvrez-le dans les 15 minutes, dans le navigateur où vous voulez consulter vos fichiers.",
+    loginLimited: "Trop de demandes rapprochées. Patientez avant de réessayer, ou ouvrez un lien déjà reçu.", loginInvalid: "Cette adresse email ne semble pas valide. Vérifiez-la, puis réessayez.",
+    loginUnavailable: "Le service de connexion est momentanément indisponible. Réessayez dans un instant.", loginError: "Une erreur est survenue. Veuillez réessayer.", loginNetworkError: "Erreur réseau. Veuillez réessayer.",
+    loadError: "Impossible de charger votre espace client. Actualisez la page dans un instant.",
+    logoutPending: "Déconnexion…", logoutError: "La déconnexion n’a pas pu être confirmée. Réessayez avant de quitter cet appareil.",
   },
   de: {
-    bannerCheckoutSuccess: "✓ Zahlung erhalten. Sie erhalten innerhalb von 5 Minuten eine Bestätigungs-E-Mail mit einem Anmeldelink. Prüfen Sie auch Ihren Spam-Ordner, falls nichts ankommt.",
-    bannerCheckoutCancelled: "Zahlung abgebrochen — es wurde kein Betrag belastet. Sie können es jederzeit erneut versuchen.",
-    bannerAuthOk: "Anmeldung erfolgreich.",
-    bannerAuthInvalid: "Dieser Anmeldelink ist ungültig. Bitte fordern Sie einen neuen an.",
-    bannerAuthExpired: "Dieser Anmeldelink ist abgelaufen. Bitte fordern Sie einen neuen an.",
-    noVersion: "keine Version verfügbar",
-    updatesUntil: " · Updates bis ",
-    dlDownload: "Herunterladen",
-    dlPreparing: "Wird vorbereitet…",
-    dlRetry: "Erneut versuchen",
-    dlError: "Download fehlgeschlagen: ",
-    tierStandalone: "Pro — 5'000 Anf./Monat",
-    tierBusiness: "Business — 50'000 Anf./Monat",
-    tierPro: "Pro",
-    tierStandard: "Standard",
-    tierFree: "Free",
-    mcpKey: " · Schlüssel ",
-    mcpOpening: "Wird geöffnet…",
-    mcpRetry: "Erneut versuchen",
-    mcpPortalError: "Das Abrechnungsportal kann nicht geöffnet werden. Bitte versuchen Sie es später erneut.",
-    loginSending: "Wird gesendet…",
-    loginSuccess: "✓ Prüfen Sie Ihren Posteingang — der Link ist 15 Minuten gültig.",
-    loginLimited: "Zu viele Anfragen kurz hintereinander. Warten Sie vor einem neuen Versuch oder öffnen Sie einen bereits erhaltenen Link.",
-    loginError: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-    loginNetworkError: "Netzwerkfehler. Bitte versuchen Sie es erneut.",
-    logoutError: "Die Abmeldung konnte nicht bestätigt werden. Versuchen Sie es erneut, bevor Sie dieses Gerät verlassen.",
-    loadError: "Ihr Kundenbereich kann nicht geladen werden. Bitte aktualisieren Sie die Seite.",
+    bannerCheckoutSuccess: "Vielen Dank. Sobald Stripe die Zahlung bestätigt, gibt Ihnen eine E-Mail Zugriff auf Ihre Dateien, normalerweise innert weniger Minuten. Nichts erhalten? Prüfen Sie den Spamordner und melden Sie sich mit der Kauf-E-Mail an.",
+    bannerCheckoutCancelled: "Zahlung abgebrochen. Wenn Sie die Zahlungsseite vor der Bestätigung verlassen haben, wurde kein Kauf erfasst.",
+    bannerAuthOk: "Anmeldung bestätigt. Willkommen in Ihrem Kundenkonto.",
+    bannerAuthInvalid: "Dieser Anmeldelink ist ungültig. Fordern Sie mit Ihrer E-Mail-Adresse einen neuen an.",
+    bannerAuthExpired: "Dieser Anmeldelink ist abgelaufen oder wurde bereits verwendet. Fordern Sie einen neuen an: Er ist 15 Minuten gültig.",
+    noVersion: "Derzeit keine Version verfügbar", versionLabel: "Version", untilLabel: "Aktualisierungen bis", endedLabel: "Aktualisierungen beendet am",
+    endedNote: "Die angezeigte Version ist die letzte, die Ihr Kauf umfasst.",
+    dlDownload: "Herunterladen", dlPreparing: "Wird vorbereitet…", dlRetry: "Erneut versuchen", dlStarted: "Download gestartet. Beginnt er nicht, versuchen Sie es erneut: Der vorbereitete Link läuft nach fünf Minuten ab.",
+    dlSession: "Ihre Sitzung ist abgelaufen. Laden Sie die Seite neu und fordern Sie einen neuen Anmeldelink an.",
+    dlForbidden: "Diese Datei ist in diesem Konto nicht mehr zugänglich. Handelt es sich um einen Fehler, schreiben Sie uns.",
+    dlNoVersion: "Für den von Ihrem Kauf erfassten Zeitraum ist keine Version verfügbar. Schreiben Sie uns mit Angabe des Produkts.",
+    dlUnavailable: "Der Download konnte nicht vorbereitet werden. Bitte versuchen Sie es gleich noch einmal.",
+    network: "Der Dienst antwortet nicht. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    productPage: "Produktseite", filesError: "Die Liste Ihrer Dateien konnte nicht geladen werden. Laden Sie die Seite gleich neu.",
+    orderLabel: "Kauf vom", receipt: "Stripe-Beleg", receiptOpening: "Wird geöffnet…", receiptError: "Beleg derzeit nicht verfügbar. Für Ihren Beleg oder Ihre Firmenrechnung wenden Sie sich bitte an contact@openswissdata.com.",
+    legalAccepted: "Akzeptierte AGB", legalNone: "Für diesen Kauf liegt kein versionierter Zustimmungsnachweis vor.", refunded: "Erstattet", partialRefund: "Erfasste Erstattung: ",
+    tierStandalone: "Pro — 5'000 Anf./Monat", tierBusiness: "Business — 50'000 Anf./Monat", tierPro: "Pro", tierStandard: "Standard", tierFree: "Free", mcpKey: " · Schlüssel ",
+    mcpOpening: "Wird geöffnet…", mcpRetry: "Erneut versuchen", mcpPortalError: "Das Abrechnungsportal kann nicht geöffnet werden. Bitte versuchen Sie es später erneut.",
+    loginSending: "Wird gesendet…", loginSuccess: "Gehört diese Adresse zu einem Kauf, ist soeben ein Anmeldelink unterwegs. Öffnen Sie ihn innert 15 Minuten im Browser, in dem Sie Ihre Dateien ansehen möchten.",
+    loginLimited: "Zu viele Anfragen kurz hintereinander. Warten Sie vor einem neuen Versuch oder öffnen Sie einen bereits erhaltenen Link.", loginInvalid: "Diese E-Mail-Adresse scheint ungültig. Bitte prüfen Sie sie und versuchen Sie es erneut.",
+    loginUnavailable: "Die Anmeldung ist vorübergehend nicht verfügbar. Bitte versuchen Sie es gleich noch einmal.", loginError: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.", loginNetworkError: "Netzwerkfehler. Bitte versuchen Sie es erneut.",
+    loadError: "Ihr Kundenkonto kann nicht geladen werden. Laden Sie die Seite gleich neu.",
+    logoutPending: "Abmeldung…", logoutError: "Die Abmeldung konnte nicht bestätigt werden. Versuchen Sie es erneut, bevor Sie dieses Gerät verlassen.",
   },
   en: {
-    bannerCheckoutSuccess: "✓ Payment received. You'll get a confirmation email with a sign-in link within 5 minutes. Check your spam folder too if nothing arrives.",
-    bannerCheckoutCancelled: "Payment cancelled — no amount was charged. You can try again at any time.",
-    bannerAuthOk: "Signed in successfully.",
-    bannerAuthInvalid: "This sign-in link is not valid. Please request a new one.",
-    bannerAuthExpired: "This sign-in link has expired. Please request a new one.",
-    noVersion: "no version available",
-    updatesUntil: " · updates until ",
-    dlDownload: "Download",
-    dlPreparing: "Preparing…",
-    dlRetry: "Retry",
-    dlError: "Download failed: ",
-    tierStandalone: "Pro — 5,000 req/month",
-    tierBusiness: "Business — 50,000 req/month",
-    tierPro: "Pro",
-    tierStandard: "Standard",
-    tierFree: "Free",
-    mcpKey: " · key ",
-    mcpOpening: "Opening…",
-    mcpRetry: "Retry",
-    mcpPortalError: "Unable to open the billing portal. Please try again later.",
-    loginSending: "Sending…",
-    loginSuccess: "✓ Check your inbox — the link is valid for 15 minutes.",
-    loginLimited: "Too many requests in a short time. Wait before trying again, or open a link you have already received.",
-    loginError: "An error occurred. Please try again.",
-    loginNetworkError: "Network error. Please try again.",
-    logoutError: "Sign-out could not be confirmed. Please try again before leaving this device.",
-    loadError: "Unable to load your account. Please refresh the page.",
+    bannerCheckoutSuccess: "Thank you. As soon as Stripe confirms the payment, an email gives you access to your files, normally within a few minutes. Nothing received? Check your spam folder, then sign in with the address used for the purchase.",
+    bannerCheckoutCancelled: "Payment interrupted. If you left the payment page before confirming, no purchase was recorded.",
+    bannerAuthOk: "Sign-in confirmed. Welcome to your account.",
+    bannerAuthInvalid: "This sign-in link is not valid. Request a new one with your email address.",
+    bannerAuthExpired: "This sign-in link has expired or was already used. Request a new one: it will be valid for 15 minutes.",
+    noVersion: "No version available yet", versionLabel: "Version", untilLabel: "Updates until", endedLabel: "Updates ended on",
+    endedNote: "The version shown is the last one covered by your purchase.",
+    dlDownload: "Download", dlPreparing: "Preparing…", dlRetry: "Try again", dlStarted: "Download started. If it does not begin, try again: the prepared link expires after five minutes.",
+    dlSession: "Your session has expired. Refresh the page, then request a new sign-in link.",
+    dlForbidden: "This file is no longer available from this account. If this is a mistake, write to us.",
+    dlNoVersion: "No version is available for the period covered by your purchase. Write to us and name the product.",
+    dlUnavailable: "The download could not be prepared. Please try again in a moment.",
+    network: "The service is not responding. Check your connection, then try again.",
+    productPage: "Product page", filesError: "Your file list could not be loaded. Refresh the page in a moment.",
+    orderLabel: "Purchase of", receipt: "Stripe receipt", receiptOpening: "Opening…", receiptError: "Receipt unavailable for now. For your receipt or a business invoice, email contact@openswissdata.com.",
+    legalAccepted: "Accepted terms", legalNone: "No versioned acceptance record is available for this purchase.", refunded: "Refunded", partialRefund: "Refund recorded: ",
+    tierStandalone: "Pro — 5,000 req/month", tierBusiness: "Business — 50,000 req/month", tierPro: "Pro", tierStandard: "Standard", tierFree: "Free", mcpKey: " · key ",
+    mcpOpening: "Opening…", mcpRetry: "Try again", mcpPortalError: "Unable to open the billing portal. Please try again later.",
+    loginSending: "Sending…", loginSuccess: "If this address matches a purchase, a sign-in link is on its way. Open it within 15 minutes, in the browser where you want to see your files.",
+    loginLimited: "Too many requests in a short time. Wait before trying again, or open a link you have already received.", loginInvalid: "This email address does not look valid. Please check it and try again.",
+    loginUnavailable: "Sign-in is temporarily unavailable. Please try again in a moment.", loginError: "An error occurred. Please try again.", loginNetworkError: "Network error. Please try again.",
+    loadError: "Unable to load your account. Please refresh the page in a moment.",
+    logoutPending: "Signing out…", logoutError: "Sign-out could not be confirmed. Please try again before leaving this device.",
   },
-};
+} satisfies Record<Lang, Record<string, string>>;
+
+const PRODUCTS = {
+  fr: { tares: ["Tarif douanier", "CSV · JSON · Parquet · SQL"], classifications: ["NOGA · NACE · ISIC", "CSV · JSON · Parquet · SQL"], finma: ["Registre FINMA", "Excel · CSV · JSON · Parquet · SQL"] },
+  de: { tares: ["Zolltarif", "CSV · JSON · Parquet · SQL"], classifications: ["NOGA · NACE · ISIC", "CSV · JSON · Parquet · SQL"], finma: ["FINMA-Register", "Excel · CSV · JSON · Parquet · SQL"] },
+  en: { tares: ["Customs tariff", "CSV · JSON · Parquet · SQL"], classifications: ["NOGA · NACE · ISIC", "CSV · JSON · Parquet · SQL"], finma: ["FINMA registry", "Excel · CSV · JSON · Parquet · SQL"] },
+} satisfies Record<Lang, Record<string, [string, string]>>;
 
 const c = COPY[lang];
-const s = JS[lang];
-
-const accountPath = localizePath("/account", lang);
+const accountPath = L("/account");
 const dateLocale = lang === "de" ? "de-CH" : lang === "en" ? "en-GB" : "fr-CH";
-
-// Liens d'onboarding — hrefs localisés calculés une fois (pas de préfixe
-// /de/ saisi à la main), texte par langue assemblé par template literal.
-const bundleHref = localizePath("/bundle", lang);
-const taresHref = localizePath("/datasets/tares", lang);
-const classHref = localizePath("/datasets/classifications", lang);
-const finmaHref = localizePath("/datasets/finma", lang);
-
-const steps: Record<Lang, string[]> = {
-  fr: [
-    `<strong>Pas encore client&nbsp;?</strong> Choisissez vos datasets sur <a href="${bundleHref}">la page bundle</a> ou les pages <a href="${taresHref}">TARES</a>, <a href="${classHref}">Classifications</a>, <a href="${finmaHref}">FINMA</a>.`,
-    `<strong>Achat sécurisé</strong> via Stripe (cartes, Apple Pay, Google Pay).`,
-    `<strong>Réception immédiate</strong> d'un email avec un lien de téléchargement direct (ZIP signé Ed25519).`,
-    `<strong>Accès permanent</strong> ici via le lien de connexion, à tout moment pendant les 360&nbsp;jours d'updates inclus.`,
-  ],
-  de: [
-    `<strong>Noch kein Kunde?</strong> Wählen Sie Ihre Datensätze auf <a href="${bundleHref}">der Paketseite</a> oder den Seiten <a href="${taresHref}">TARES</a>, <a href="${classHref}">Klassifikationen</a>, <a href="${finmaHref}">FINMA</a>.`,
-    `<strong>Sichere Zahlung</strong> über Stripe (Karten, Apple Pay, Google Pay).`,
-    `<strong>Sofortiger Erhalt</strong> einer E-Mail mit einem direkten Download-Link (Ed25519-signiertes ZIP).`,
-    `<strong>Dauerhafter Zugang</strong> hier über den Anmeldelink, jederzeit während der inbegriffenen 360&nbsp;Tage Updates.`,
-  ],
-  en: [
-    `<strong>Not a customer yet?</strong> Choose your datasets on <a href="${bundleHref}">the bundle page</a> or the <a href="${taresHref}">TARES</a>, <a href="${classHref}">Classifications</a>, <a href="${finmaHref}">FINMA</a> pages.`,
-    `<strong>Secure payment</strong> via Stripe (cards, Apple Pay, Google Pay).`,
-    `<strong>Instant delivery</strong> of an email with a direct download link (Ed25519-signed ZIP).`,
-    `<strong>Permanent access</strong> here via the sign-in link, anytime during the 360&nbsp;days of updates included.`,
-  ],
-};
-const stepsLang = steps[lang];
+const products = Object.fromEntries(Object.entries(PRODUCTS[lang]).map(([id, [label, formats]]) => [id, { label, formats, href: L(`/datasets/${id}`) }]));
+const scriptCopy = { s: SCRIPT[lang], accountPath, dateLocale, products };
+const helpTopics = HELP_TOPICS[lang].filter(topic => ["email-absent", "lien-expire", "connexion", "recu-facture"].includes(topic.id));
+const supportPath = L("/support");
 ---
-<div class="bg-grid"></div>
+<AtlasLayout title={c.title} description={c.description} noindex={true}>
+<div class="compte" data-account={JSON.stringify(scriptCopy)}>
+ <div class="atlas-shell atlas-breadcrumb"><a href={L("/")}>{c.home}</a><span aria-hidden="true">/</span><span>{c.crumb}</span></div>
+ <div class="atlas-shell"><p id="banner" class="service-banner" role="status" aria-live="polite" hidden></p></div>
 
-<section class="v4-hero ds-page">
-  <div class="container-v4">
-    <nav class="ds-breadcrumb">
-      <a href={accountPath === "/account" ? "/" : `/${lang}/`}>{c.bcHome}</a>
-      <span class="sep">·</span>
-      <span class="current">{c.bcCurrent}</span>
-    </nav>
+ <noscript>
+  <section class="compte-hero compte-noscript"><div class="atlas-shell">
+   <p class="atlas-kicker">{c.kicker}</p>
+   <h1>{c.noscriptTitle}</h1>
+   <p class="atlas-lede">{c.noscriptText}</p>
+   <p class="compte-noscript-help">{c.noscriptHelp} <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> · <a href={supportPath}>{c.helpAll}</a></p>
+  </div></section>
+ </noscript>
 
-    <div id="banner" class="account-banner hidden" role="status" aria-live="polite"></div>
+ <section id="loading-view" class="compte-loading" hidden><div class="atlas-shell">
+  <div class="compte-loading-card" role="status"><span class="compte-loading-dot" aria-hidden="true"></span><span data-loading-text>{c.loading}</span></div>
+ </div></section>
 
-    <!-- Login view -->
-    <div id="login-view" class="hidden account-view">
-      <div class="account-login-grid">
-        <!-- Colonne gauche : connexion -->
-        <div class="account-login-main">
-          <div class="v4-eyebrow">
-            <span>{c.loginEyebrow1}</span>
-            <span style="opacity:.4">·</span>
-            <span>{c.loginEyebrow2}</span>
-          </div>
-          <h1 class="v4-h1 account-h1">{c.loginH1}</h1>
-          <p class="v4-lede account-lede" set:html={c.loginLedeHtml}></p>
-
-          <div class="account-login-card">
-            <form id="login-form" class="account-form">
-              <label for="login-email" class="account-field-label">{c.fieldLabel}</label>
-              <div class="account-input-row">
-                <input
-                  id="login-email"
-                  type="email"
-                  name="email"
-                  required
-                  autocomplete="email"
-                  placeholder={c.emailPlaceholder}
-                />
-                <button type="submit" class="v4-btn v4-btn-primary account-submit">
-                  {c.submitBtn} <span class="arrow">→</span>
-                </button>
-              </div>
-              <p id="login-msg" class="account-msg" role="status" aria-atomic="true"></p>
-            </form>
-            <p class="account-login-reassure">
-              <span class="account-lock" aria-hidden="true"></span>
-              {c.reassure}
-            </p>
-          </div>
-        </div>
-
-        <!-- Colonne droite : onboarding -->
-        <aside class="account-onboarding">
-          <h3 class="account-panel-eyebrow">{c.onboardingTitle}</h3>
-          <ol class="account-steps">
-            {stepsLang.map((html, i) => (
-              <li>
-                <span class="account-step-num">{i + 1}</span>
-                <span class="account-step-body" set:html={html}></span>
-              </li>
-            ))}
-          </ol>
-        </aside>
-      </div>
-    </div>
-
-    <!-- Dashboard view -->
-    <div id="dashboard-view" class="hidden account-view">
-      <div class="account-dash">
-        <div class="account-header">
-          <div>
-            <div class="v4-eyebrow">
-              <span>{c.loginEyebrow1}</span>
-              <span style="opacity:.4">·</span>
-              <span id="dashboard-email"></span>
-            </div>
-            <h1 class="v4-h1 account-h1 account-h1-dash">{c.dashH1}</h1>
-          </div>
-          <button id="logout-btn" class="v4-btn v4-btn-secondary account-logout">{c.logoutBtn}</button>
-        </div>
-
-        <ul id="datasets-list" class="account-datasets-list"></ul>
-
-        <div id="empty-state" class="hidden account-empty">
-          <div class="account-empty-inner">
-            <span class="account-empty-eyebrow">{c.emptyEyebrow}</span>
-            <span class="account-empty-title">{c.emptyTitle}</span>
-            <span class="account-empty-sub">{c.emptySub}</span>
-            <a class="v4-btn v4-btn-primary account-empty-cta" href={bundleHref}>{c.emptyCta} <span class="arrow">→</span></a>
-          </div>
-        </div>
-
-        <div id="mcp-section" class="hidden account-mcp">
-          <h3 class="account-panel-eyebrow account-mcp-title">{c.mcpTitle}</h3>
-          <div class="account-mcp-card">
-            <div class="account-mcp-info">
-              <div class="account-mcp-head">
-                <span class="account-mcp-name">{c.mcpName}</span>
-                <span class="account-mcp-status"><span class="account-mcp-dot" aria-hidden="true"></span>{c.mcpStatus}</span>
-              </div>
-              <div id="mcp-meta" class="account-mcp-meta"></div>
-            </div>
-            <button id="mcp-portal-btn" class="v4-btn v4-btn-secondary account-mcp-btn">{c.mcpPortalBtn}</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="loading-view" class="account-loading">
-      <span class="account-loading-inner">
-        <span class="account-loading-dot" aria-hidden="true"></span>{c.loading}
-      </span>
-    </div>
+ <section id="login-view" class="compte-hero" hidden aria-labelledby="login-title"><div class="atlas-shell compte-hero-grid">
+  <div class="compte-intro" data-atlas-enter>
+   <p class="atlas-kicker">{c.kicker}</p>
+   <h1 id="login-title">{c.hero}<br/><em>{c.accent}</em></h1>
+   <p class="atlas-lede">{c.lede}</p>
+   <ul class="compte-facts">{c.facts.map(fact => <li>{fact}</li>)}</ul>
   </div>
-</section>
+  <div class="compte-login-card" data-atlas-enter>
+   <p class="compte-card-kicker">{c.cardKicker}</p>
+   <h2>{c.cardTitle}</h2>
+   <form id="login-form" class="compte-form">
+    <label for="login-email">{c.fieldLabel}</label>
+    <input id="login-email" type="email" name="email" required autocomplete="email" inputmode="email" spellcheck="false" placeholder={c.placeholder} />
+    <button type="submit" class="atlas-btn">{c.submit}<span aria-hidden="true">→</span></button>
+    <p id="login-msg" class="compte-msg" role="status" aria-atomic="true"></p>
+   </form>
+   <ol class="compte-login-steps">{c.steps.map((step, index) => <li><span aria-hidden="true">{index + 1}</span><p>{step}</p></li>)}</ol>
+   <p class="compte-card-foot">{c.notCustomer} <a href={`${L("/")}#datasets`}>{c.browse}</a></p>
+  </div>
+ </div></section>
 
-<style>
-  /* ============================================================
-     Espace client — login + dashboard
-     IMPORTANT : aucun `display` n'est posé sur les éléments que le
-     <script> bascule via .hidden (#login-view, #dashboard-view,
-     #loading-view, #banner, #empty-state, #mcp-section). En Tailwind v4
-     `.hidden{display:none}` vit dans @layer utilities ; un style Astro
-     hors-layer l'emporterait et casserait le toggle. La mise en page
-     (grid/flex) est donc portée par des WRAPPERS INTÉRIEURS.
-     ============================================================ */
+ <section id="dashboard-view" class="compte-dash" hidden aria-labelledby="dashboard-title"><div class="atlas-shell">
+  <div class="compte-dash-head">
+   <div>
+    <p class="atlas-kicker">{c.dashKicker}</p>
+    <p id="dashboard-email" class="compte-email"></p>
+    <h1 id="dashboard-title">{c.dashTitle}</h1>
+    <p class="compte-dash-intro">{c.dashIntro}</p>
+   </div>
+   <button id="logout-btn" type="button" class="atlas-btn atlas-btn-secondary compte-logout">{c.logout}</button>
+  </div>
 
-  .account-view { max-width: 980px; margin: 0 auto; padding: 8px 0 24px; }
+  <ul id="datasets-list" class="compte-files" aria-label={c.filesLabel}></ul>
+  <p id="files-error" class="service-banner is-error" role="status" hidden></p>
 
-  /* ---------- Bandeau d'état (textContent piloté par le JS) ---------- */
-  .account-banner {
-    padding: 14px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    line-height: 1.5;
-    margin: 0 auto 36px;
-    max-width: 980px;
-  }
-  .account-banner.success { background: var(--green-soft); border: 1px solid rgba(21,128,61,.30); color: var(--green); }
-  .account-banner.warn    { background: var(--amber-soft); border: 1px solid rgba(200,160,90,.40); color: #8a6d2f; }
-  .account-banner.error   { background: var(--accent-soft); border: 1px solid rgba(220,31,45,.30); color: var(--accent); }
+  <div id="empty-state" class="compte-empty" hidden>
+   <span class="compte-empty-art" aria-hidden="true"><svg viewBox="0 0 64 64" focusable="false"><path d="M8 18h18l5 6h25v28H8z"/><path d="M8 24h48"/><path class="compte-empty-plus" d="M32 32v12M26 38h12"/></svg></span>
+   <div>
+    <p class="atlas-kicker">{c.emptyKicker}</p>
+    <h2>{c.emptyTitle}</h2>
+    <p>{c.emptyText}</p>
+    <div class="atlas-actions"><a class="atlas-btn" href={L("/bundle")}>{c.emptyBundle}<span aria-hidden="true">↗</span></a><a class="atlas-text-link" href={`${supportPath}#email-absent`}>{c.emptyHelp}<span aria-hidden="true">↗</span></a></div>
+   </div>
+  </div>
 
-  /* =========================================================
-     VUE CONNEXION
-     ========================================================= */
-  .account-login-grid {
-    display: grid;
-    grid-template-columns: 1.1fr .9fr;
-    gap: 56px;
-    align-items: start;
-  }
-  @media (max-width: 880px) {
-    .account-login-grid { grid-template-columns: 1fr; gap: 36px; }
-  }
+  <section id="receipts-section" class="compte-receipts" hidden aria-labelledby="receipts-title">
+   <div class="compte-section-head">
+    <div><p class="atlas-kicker">{c.receiptsKicker}</p><h2 id="receipts-title">{c.receiptsTitle}</h2></div>
+    <p>{c.receiptsIntro} <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(c.invoice)}`}>{c.invoice}</a></p>
+   </div>
+   <ul id="receipts-list" class="compte-receipt-list"></ul>
+  </section>
 
-  .account-h1 { margin-bottom: 16px; }
-  .account-lede { margin-bottom: 28px; max-width: 46ch; }
+  <section id="mcp-section" class="compte-mcp" hidden aria-labelledby="mcp-title">
+   <div>
+    <p class="atlas-kicker">{c.mcpKicker}</p>
+    <h2 id="mcp-title">{c.mcpName} <span class="compte-mcp-status"><span aria-hidden="true"></span>{c.mcpStatus}</span></h2>
+    <p id="mcp-meta" class="compte-mcp-meta"></p>
+    <p id="mcp-msg" class="compte-mcp-msg" role="status"></p>
+   </div>
+   <button id="mcp-portal-btn" type="button" class="atlas-btn">{c.mcpPortal}<span aria-hidden="true">↗</span></button>
+  </section>
+ </div></section>
 
-  /* Carte du formulaire de connexion — focal de la vue */
-  .account-login-card {
-    background: var(--bg-card);
-    border: 1px solid var(--line-strong);
-    border-radius: 14px;
-    padding: 26px 26px 22px;
-    box-shadow: 0 12px 32px -20px rgba(10,10,12,.18);
-  }
-  .account-field-label {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    margin-bottom: 10px;
-  }
-  .account-form { margin: 0; }
-  .account-input-row { display: flex; gap: 10px; align-items: stretch; }
-  @media (max-width: 520px) {
-    .account-input-row { flex-direction: column; }
-  }
-  .account-form input {
-    flex: 1 1 auto;
-    min-width: 0;
-    padding: 13px 15px;
-    border: 1px solid var(--line-strong);
-    border-radius: 9px;
-    font-size: 15px;
-    font-family: var(--font-sans);
-    color: var(--ink);
-    background: var(--bg);
-    transition: border-color .15s, box-shadow .15s, background .15s;
-  }
-  .account-form input::placeholder { color: var(--ink-mute); }
-  .account-form input:focus {
-    outline: none;
-    background: var(--bg-card);
-    border-color: var(--ink);
-    box-shadow: 0 0 0 3px rgba(10,10,12,.08);
-  }
-  .account-submit { flex-shrink: 0; white-space: nowrap; }
-  @media (max-width: 520px) {
-    .account-submit { justify-content: center; }
-  }
+ <PurchaseJourney id="trajet" returnLink={false} />
 
-  /* Message de retour (textContent piloté par le JS) */
-  .account-msg { font-size: 13px; line-height: 1.5; color: var(--ink-mute); margin: 14px 0 0; min-height: 1px; }
-  .account-msg.ok  { color: var(--green); }
-  .account-msg.err { color: #b42332; }
-
-  .account-login-reassure {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin: 20px 0 0;
-    padding-top: 18px;
-    border-top: 1px solid var(--line);
-    font-size: 12.5px;
-    line-height: 1.55;
-    color: var(--ink-mute);
-  }
-  .account-lock {
-    flex-shrink: 0;
-    width: 12px; height: 12px;
-    margin-top: 2px;
-    border: 1.5px solid var(--ink-mute);
-    border-radius: 3px;
-    position: relative;
-  }
-  .account-lock::before {
-    content: '';
-    position: absolute;
-    left: 50%; top: -4px;
-    width: 6px; height: 6px;
-    border: 1.5px solid var(--ink-mute);
-    border-bottom: none;
-    border-radius: 6px 6px 0 0;
-    transform: translateX(-50%);
-  }
-
-  /* Panneau onboarding (colonne droite) */
-  .account-onboarding {
-    background: var(--bg-soft);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 26px 28px;
-  }
-  .account-panel-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    margin: 0 0 18px;
-    font-weight: 500;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--line);
-  }
-  .account-steps { list-style: none; margin: 0; padding: 0; counter-reset: none; }
-  .account-steps li {
-    display: flex;
-    gap: 14px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .account-steps li:last-child { border-bottom: none; padding-bottom: 0; }
-  .account-steps li:first-child { padding-top: 0; }
-  .account-step-num {
-    flex-shrink: 0;
-    width: 22px; height: 22px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border: 1px solid var(--line-strong);
-    border-radius: 50%;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--ink-soft);
-    background: var(--bg-card);
-  }
-  .account-step-body { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; }
-  .account-step-body strong { color: var(--ink); font-weight: 600; }
-  .account-onboarding a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(220,31,45,.25); }
-  .account-onboarding a:hover { border-bottom-color: var(--accent); }
-
-  /* =========================================================
-     VUE TABLEAU DE BORD
-     ========================================================= */
-  .account-dash { max-width: 760px; }
-
-  .account-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 28px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--line);
-  }
-  .account-h1-dash { font-size: clamp(28px, 3vw, 40px); margin-bottom: 0; }
-  .account-logout { font-size: 13px; padding: 10px 16px; }
-
-  .account-datasets-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-
-  /* Lignes datasets — markup généré EN DUR par le <script> via
-     document.createElement (li.ds-item > div.ds-item-info >
-     .ds-item-name + .ds-item-meta ; button.ds-item-btn).
-     CES NŒUDS NE PORTENT PAS l'attribut de scope Astro (data-astro-cid-*)
-     car ils sont créés au runtime → les sélecteurs DOIVENT être :global,
-     sinon le CSS scopé ne les atteint pas (bug latent du fichier d'origine).
-     Ces noms de classes sont uniques à /account → :global est sûr ici. */
-  :global(.ds-item) {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    padding: 18px 22px;
-    background: var(--bg-card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    transition: border-color .15s, box-shadow .15s, transform .15s;
-  }
-  :global(.ds-item:hover) {
-    border-color: var(--line-strong);
-    box-shadow: 0 10px 28px -20px rgba(10,10,12,.22);
-  }
-  :global(.ds-item-info) { min-width: 0; }
-  :global(.ds-item-name) { font-weight: 600; color: var(--ink); font-size: 15px; letter-spacing: -.01em; }
-  :global(.ds-item-meta) {
-    font-size: 12px;
-    color: var(--ink-mute);
-    margin-top: 5px;
-    font-family: var(--font-mono);
-    letter-spacing: .01em;
-    font-variant-numeric: tabular-nums;
-  }
-  :global(.ds-item-btn) {
-    flex-shrink: 0;
-    background: var(--ink); color: var(--bg);
-    padding: 10px 18px; border-radius: 8px; border: 1px solid var(--ink);
-    font-size: 13px; font-weight: 500; cursor: pointer;
-    font-family: var(--font-sans);
-    transition: background .15s, transform .15s, box-shadow .15s;
-  }
-  :global(.ds-item-btn:hover) { background: #1a1a1d; transform: translateY(-1px); box-shadow: 0 10px 22px -10px rgba(10,10,12,.30); }
-  :global(.ds-item-btn:disabled) { opacity: .55; cursor: wait; transform: none; box-shadow: none; }
-
-  /* État vide — markup riche dans un wrapper INTÉRIEUR.
-     On ne pose AUCUN display sur #empty-state (togglé via .hidden). */
-  .account-empty {
-    margin: 0;
-    padding: 40px 32px;
-    background: var(--bg-soft);
-    border: 1px dashed var(--line-strong);
-    border-radius: 14px;
-  }
-  .account-empty-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-  .account-empty-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-  }
-  .account-empty-title { font-size: 18px; font-weight: 600; color: var(--ink); letter-spacing: -.015em; margin-top: 4px; }
-  .account-empty-sub { font-size: 14px; color: var(--ink-soft); line-height: 1.55; max-width: 48ch; }
-  .account-empty-cta { margin-top: 16px; }
-
-  /* Carte abonnement MCP */
-  .account-mcp { margin-top: 40px; }
-  .account-mcp-title { margin-bottom: 16px; }
-  .account-mcp-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    flex-wrap: wrap;
-    padding: 22px 24px;
-    background: var(--bg-card);
-    border: 1px solid var(--line-strong);
-    border-radius: 14px;
-    box-shadow: 0 12px 32px -22px rgba(10,10,12,.18);
-  }
-  .account-mcp-info { min-width: 0; }
-  .account-mcp-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .account-mcp-name { font-weight: 600; font-size: 15px; color: var(--ink); letter-spacing: -.01em; }
-  .account-mcp-status {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--green);
-    padding: 3px 9px 3px 8px;
-    background: var(--green-soft);
-    border: 1px solid rgba(21,128,61,.22);
-    border-radius: 999px;
-  }
-  .account-mcp-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 0 0 rgba(21,128,61,.45);
-    animation: livepulse 2.2s ease-out infinite;
-  }
-  /* (Définition de secours si livepulse n'est pas dans global.css à cet endroit.) */
-  @keyframes livepulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(21,128,61,.45); }
-    50% { box-shadow: 0 0 0 5px rgba(21,128,61,0); }
-  }
-  .account-mcp-meta {
-    font-size: 12px;
-    color: var(--ink-mute);
-    margin-top: 6px;
-    font-family: var(--font-mono);
-    letter-spacing: .01em;
-    word-break: break-word;
-  }
-  .account-mcp-btn { flex-shrink: 0; font-size: 13px; padding: 10px 18px; }
-  /* v4-btn-secondary n'a pas d'état :disabled — parité avec ds-item-btn. */
-  .account-mcp-btn:disabled { opacity: .6; cursor: wait; transform: none; }
-
-  /* Chargement — AUCUN display sur #loading-view (togglé via .hidden).
-     Le flex est sur le wrapper intérieur ; en cas d'erreur le <script>
-     écrase le textContent (le span inner disparaît → texte simple, OK). */
-  .account-loading {
-    color: var(--ink-mute);
-    font-size: 14px;
-    padding: 32px 0;
-  }
-  .account-loading-inner {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .account-loading-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--ink-mute);
-    animation: account-blink 1.1s ease-in-out infinite;
-  }
-  @keyframes account-blink { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
-</style>
-
-  <script is:inline define:vars={{ osdAcct: { s, accountPath, dateLocale } }}>
-    (function () {
-      const qs = new URLSearchParams(window.location.search);
-      const authStatus = qs.get("auth");
-      const checkoutStatus = qs.get("checkout");
-      const banner = document.getElementById("banner");
-
-      // Post-paiement Stripe — message en priorité (avant auth)
-      if (checkoutStatus === "success") {
-        banner.textContent = osdAcct.s.bannerCheckoutSuccess;
-        banner.className = "account-banner success";
-        banner.classList.remove("hidden");
-      } else if (checkoutStatus === "cancelled") {
-        banner.textContent = osdAcct.s.bannerCheckoutCancelled;
-        banner.className = "account-banner warn";
-        banner.classList.remove("hidden");
-      } else if (authStatus === "ok") {
-        banner.textContent = osdAcct.s.bannerAuthOk;
-        banner.className = "account-banner success";
-        banner.classList.remove("hidden");
-      } else if (authStatus === "invalid") {
-        banner.textContent = osdAcct.s.bannerAuthInvalid;
-        banner.className = "account-banner error";
-        banner.classList.remove("hidden");
-      } else if (authStatus === "expired") {
-        banner.textContent = osdAcct.s.bannerAuthExpired;
-        banner.className = "account-banner warn";
-        banner.classList.remove("hidden");
-      }
-
-      const loadingEl = document.getElementById("loading-view");
-      const loginEl = document.getElementById("login-view");
-      const dashEl = document.getElementById("dashboard-view");
-      const listEl = document.getElementById("datasets-list");
-      const emptyEl = document.getElementById("empty-state");
-      const emailLabelEl = document.getElementById("dashboard-email");
-
-      function showLogin() {
-        loadingEl.classList.add("hidden");
-        dashEl.classList.add("hidden");
-        loginEl.classList.remove("hidden");
-      }
-
-      function showDashboard(customer, datasets) {
-        loadingEl.classList.add("hidden");
-        loginEl.classList.add("hidden");
-        dashEl.classList.remove("hidden");
-        emailLabelEl.textContent = customer ? customer.email : "";
-        loadReceipts().catch(() => console.warn("Reçus temporairement indisponibles"));
-        listEl.innerHTML = "";
-        if (!datasets || datasets.length === 0) {
-          emptyEl.classList.remove("hidden");
-          return;
-        }
-        emptyEl.classList.add("hidden");
-        for (const d of datasets) {
-          const li = document.createElement("li");
-          li.className = "ds-item";
-
-          const infoDiv = document.createElement("div");
-          infoDiv.className = "ds-item-info";
-          const nameEl = document.createElement("div");
-          nameEl.className = "ds-item-name";
-          nameEl.textContent = d.name;
-          const metaEl = document.createElement("div");
-          metaEl.className = "ds-item-meta";
-          const vers = d.current_version ? ("v" + d.current_version) : osdAcct.s.noVersion;
-          let meta = vers;
-          if (d.updates_until) {
-            const until = new Date(d.updates_until).toLocaleDateString(osdAcct.dateLocale);
-            meta += osdAcct.s.updatesUntil + until;
-          }
-          metaEl.textContent = meta;
-          infoDiv.appendChild(nameEl);
-          infoDiv.appendChild(metaEl);
-
-          const btn = document.createElement("button");
-          btn.className = "ds-item-btn";
-          btn.textContent = osdAcct.s.dlDownload;
-          btn.setAttribute("data-id", d.id);
-          btn.addEventListener("click", async function () {
-            btn.disabled = true;
-            btn.textContent = osdAcct.s.dlPreparing;
-            try {
-              const r = await fetch("/api/account/download-request", {
-                method: "POST",
-                credentials: "include",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ dataset_id: d.id }),
-              });
-              if (!r.ok) {
-                const err = await r.json().catch(function () { return {}; });
-                throw new Error(err.error || ("HTTP " + r.status));
-              }
-              const body = await r.json();
-              window.location.href = body.download_url;
-              btn.disabled = false;
-              btn.textContent = osdAcct.s.dlDownload;
-            } catch (e) {
-              btn.disabled = false;
-              btn.textContent = osdAcct.s.dlRetry;
-              alert(osdAcct.s.dlError + (e && e.message ? e.message : String(e)));
-            }
-          });
-
-          li.appendChild(infoDiv);
-          li.appendChild(btn);
-          listEl.appendChild(li);
-        }
-      }
-
-      async function loadReceipts() {
-        const r = await fetch("/api/account/orders", { credentials: "include" });
-        if (!r.ok) return;
-        const { orders } = await r.json();
-        if (!orders.length) return;
-        const box = document.createElement("div");
-        box.style.cssText = "margin-top:24px;padding:20px;border:1px solid #ddd;border-radius:12px";
-        const title = document.createElement("h3");
-        const lang = document.documentElement.lang.split("-")[0];
-        title.textContent = lang === "en" ? "Payment receipts" : lang === "de" ? "Zahlungsbelege" : "Reçus de paiement";
-        box.appendChild(title);
-        for (const order of orders) {
-          const button = document.createElement("button");
-          button.className = "ds-item-btn";
-          button.textContent = new Date(order.created_at).toLocaleDateString(osdAcct.dateLocale) + " · " + (order.amount_chf / 100).toFixed(2) + " CHF";
-          button.addEventListener("click", async () => {
-            button.disabled = true;
-            try {
-              const receipt = await fetch("/api/account/orders/" + order.id + "/receipt", { credentials: "include" });
-              if (!receipt.ok) throw new Error("receipt_unavailable");
-              const data = await receipt.json();
-              window.location.href = data.url;
-            } catch {
-              alert(lang === "en" ? "Please contact contact@openswissdata.com for your receipt or business invoice." : lang === "de" ? "Für Ihren Beleg oder Ihre Firmenrechnung wenden Sie sich bitte an contact@openswissdata.com." : "Pour votre reçu ou une facture professionnelle, contactez contact@openswissdata.com.");
-            } finally { button.disabled = false; }
-          });
-          box.appendChild(button);
-          const legal = document.createElement("p");
-          legal.style.cssText = "font-size:13px;margin:8px 0 18px";
-          if (order.legal?.status === "accepted" && /^\/(?:de\/|en\/)?legal\/versions\/\d{4}-\d{2}-\d{2}\/cgv$/.test(order.legal.url)) {
-            const link = document.createElement("a");
-            link.href = order.legal.url;
-            link.textContent = (lang === "de" ? "Akzeptierte AGB" : lang === "en" ? "Accepted terms" : "CGV acceptées") + " · " + order.legal.terms_version + " · " + order.legal.locale.toUpperCase();
-            legal.appendChild(link);
-          } else {
-            legal.textContent = lang === "de" ? "Für diesen Kauf liegt kein versionierter Zustimmungsnachweis vor." : lang === "en" ? "No versioned acceptance record is available for this purchase." : "Aucune preuve d’acceptation versionnée n’est disponible pour cet achat.";
-          }
-          box.appendChild(legal);
-        }
-        dashEl.appendChild(box);
-      }
-
-      const TIER_LABELS = { standalone: osdAcct.s.tierStandalone, business: osdAcct.s.tierBusiness, pro: osdAcct.s.tierPro, standard: osdAcct.s.tierStandard, free: osdAcct.s.tierFree };
-
-      async function loadMcp() {
-        const sectionEl = document.getElementById("mcp-section");
-        const metaEl = document.getElementById("mcp-meta");
-        const btn = document.getElementById("mcp-portal-btn");
-        try {
-          const r = await fetch("/api/account/mcp", { credentials: "include" });
-          if (!r.ok) return;
-          const body = await r.json();
-          const client = body.mcp_client;
-          if (!client || client.tier === "free") return; // only show for paid subscribers
-          metaEl.textContent = (TIER_LABELS[client.tier] || client.tier) + osdAcct.s.mcpKey + client.client_id;
-          sectionEl.classList.remove("hidden");
-          btn.addEventListener("click", async function () {
-            btn.disabled = true;
-            btn.textContent = osdAcct.s.mcpOpening;
-            try {
-              const pr = await fetch("/api/account/billing-portal", { method: "POST", credentials: "include" });
-              if (!pr.ok) throw new Error("HTTP " + pr.status);
-              const pb = await pr.json();
-              window.location.href = pb.url;
-            } catch (e) {
-              btn.disabled = false;
-              btn.textContent = osdAcct.s.mcpRetry;
-              alert(osdAcct.s.mcpPortalError);
-            }
-          });
-        } catch (e) {
-          // Non-blocking: the dashboard still works without the MCP section.
-        }
-      }
-
-      async function load() {
-        try {
-          const meRes = await fetch("/api/account", { credentials: "include" });
-          if (meRes.status === 401) { showLogin(); return; }
-          if (!meRes.ok) throw new Error("HTTP " + meRes.status);
-          const meBody = await meRes.json();
-          const dsRes = await fetch("/api/account/datasets", { credentials: "include" });
-          const dsBody = dsRes.ok ? await dsRes.json() : { datasets: [] };
-          showDashboard(meBody.customer, dsBody.datasets);
-          loadMcp();
-        } catch (e) {
-          loadingEl.textContent = osdAcct.s.loadError;
-        }
-      }
-
-      document.getElementById("login-form").addEventListener("submit", async function (e) {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const email = String(fd.get("email") || "").trim();
-        if (!email) return;
-        const msgEl = document.getElementById("login-msg");
-        msgEl.textContent = osdAcct.s.loginSending;
-        try {
-          const r = await fetch("/api/auth/magic-link", {
-            method: "POST",
-            credentials: "include",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ email: email }),
-          });
-          if (r.ok) {
-            msgEl.textContent = osdAcct.s.loginSuccess;
-            msgEl.className = "account-msg ok";
-          } else {
-            msgEl.textContent = r.status === 429 ? osdAcct.s.loginLimited : osdAcct.s.loginError;
-            msgEl.className = "account-msg err";
-          }
-        } catch (err) {
-          msgEl.textContent = osdAcct.s.loginNetworkError;
-          msgEl.className = "account-msg err";
-        }
-      });
-
-      document.getElementById("logout-btn").addEventListener("click", async function () {
-        const button = this;
-        button.disabled = true;
-        try {
-          const response = await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-          if (!response.ok) throw new Error("logout_unconfirmed");
-          window.location.href = osdAcct.accountPath;
-        } catch {
-          banner.textContent = osdAcct.s.logoutError;
-          banner.className = "account-banner error";
-          banner.scrollIntoView({ block: "nearest" });
-          button.disabled = false;
-        }
-      });
-
-      load();
-    })();
-  </script>
+ <section class="atlas-section compte-help" aria-labelledby="help-title"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter>
+   <div><p class="atlas-kicker">{c.helpKicker}</p><h2 id="help-title">{c.helpTitle}</h2></div>
+   <div class="atlas-actions compte-help-actions"><a class="atlas-btn" href={supportPath}>{c.helpAll}<span aria-hidden="true">↗</span></a><a class="atlas-text-link" href={supportMailto(lang)}>{c.helpWrite}<span aria-hidden="true">↗</span></a></div>
+  </div>
+  <ul class="compte-help-list" data-atlas-enter>
+   {helpTopics.map((topic, index) => <li><a href={`${supportPath}#${topic.id}`}><span aria-hidden="true">0{index + 1}</span><strong>{topic.question}</strong><em>{topic.answer[0]}</em><span class="compte-help-arrow" aria-hidden="true">↗</span></a></li>)}
+  </ul>
+ </div></section>
+</div>
+<script>
+ import '../scripts/account';
+</script>
+</AtlasLayout>

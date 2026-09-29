@@ -1,9 +1,5 @@
 ---
-// Account (EN). Markup/style/script shared via AccountApp.astro ; this route
-// is only a language wrapper. See also /account and /de/account.
-import BaseLayout from "../../layouts/BaseLayout.astro";
+// Account (EN). Presentation, copy and script live in AccountApp.astro ; language wrapper only.
 import AccountApp from "../../components/AccountApp.astro";
 ---
-<BaseLayout title="Account — openswissdata" noindex={true}>
-  <AccountApp lang="en" />
-</BaseLayout>
+<AccountApp lang="en" />
