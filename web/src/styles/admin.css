@@ -1628,6 +1628,141 @@ dialog::backdrop {
   width: 100%;
   min-width: 0
 }
+.incident-followup {
+  margin: 16px 0
+}
+.incident-task-form {
+  margin-top: 12px
+}
+/* Clôture manuelle : choix du type, note courte, récapitulatif puis confirmation ; lisible au pouce sur téléphone. */
+.incident-resolve {
+  margin: 16px 0;
+  scroll-margin-top: 115px
+}
+.incident-resolve summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer
+}
+.incident-resolve-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  min-width: 0
+}
+.resolve-kinds {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  min-width: 0
+}
+.resolve-kinds legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--muted)
+}
+.resolve-kind {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 44px;
+  padding: 12px 14px;
+  border: 1px solid #dfe4e7;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer
+}
+.resolve-kind:has(input:checked) {
+  border-color: #1d493d;
+  background: #f3f8f5
+}
+.resolve-kind input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: #1d493d
+}
+.resolve-kind span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  overflow-wrap: anywhere
+}
+.resolve-kind strong {
+  font-size: 14px;
+  font-weight: 550
+}
+.resolve-kind small {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted)
+}
+.incident-resolve-form textarea {
+  min-height: 88px
+}
+.incident-resolve-form .fine {
+  margin: 0
+}
+.resolve-status:empty {
+  display: none
+}
+.incident-resolve-form>.button,.incident-resolve-form>.text-button {
+  justify-self: start
+}
+.resolve-confirm {
+  padding: 14px 16px;
+  border: 1px solid #cfe0d6;
+  border-radius: 10px;
+  background: #f6faf7;
+  display: grid;
+  gap: 10px
+}
+.resolve-confirm p {
+  margin: 0
+}
+.resolve-summary {
+  display: grid;
+  gap: 6px
+}
+.resolve-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px
+}
+.incident-resolution {
+  margin: 14px 0;
+  padding: 12px 16px;
+  border-left: 3px solid #7aa391;
+  border-radius: 0 8px 8px 0;
+  background: #f6faf7
+}
+.incident-resolution.superseded {
+  border-left-color: #d49a35;
+  background: var(--amber-bg)
+}
+.incident-resolution.historical {
+  border-left-color: #c9d1d6;
+  background: #f7f8f9
+}
+.incident-card .incident-resolution p {
+  margin: 6px 0
+}
+.resolution-note {
+  display: block;
+  margin: 6px 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  color: var(--ink)
+}
+.incident-closures {
+  margin: 8px 0 18px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line,#e4e8eb)
+}
 /* Preuves de service : trois mesures lisibles, sans simuler un entonnoir. */
 .order-journey {
   margin-bottom: 24px
