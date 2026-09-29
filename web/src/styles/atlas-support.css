@@ -1,0 +1,71 @@
+/* Support Atlas : en-tête avec message illustré, situations courantes, contenu d’un message. */
+.support p a:not(.atlas-btn):not(.atlas-text-link):not(.support-closing-mail) { color:var(--atlas-ink); text-decoration:underline; text-decoration-color:#16382f66; text-underline-offset:4px; }
+.support-hero { padding:30px 0 70px; }
+.support-hero-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,500px); gap:76px; align-items:center; }
+.support-hero-grid>div { min-width:0; }
+.support-hero h1 { margin:25px 0 26px; font-size:clamp(50px,5.6vw,80px); font-weight:520; letter-spacing:-.07em; line-height:1.05; max-width:12ch; overflow-wrap:break-word; }
+.support-hero h1 em { font-style:normal; color:var(--atlas-red); }
+.support-motion { margin-top:22px; }
+.support-address { margin-top:6px!important; font-family:var(--font-mono); font-size:13px; overflow-wrap:anywhere; }
+.support-address a { padding-block:10px; display:inline-block; }
+
+/* Le message modèle : la liste de ce qu’il faut indiquer, dessinée comme un courriel. */
+.support-letter { position:relative; min-width:0; background:#fbfbf5; border:1px solid var(--atlas-line); border-radius:10px; box-shadow:0 30px 64px #16382f17; transform:rotate(1.2deg); }
+.support-letter-bar { display:flex; align-items:center; gap:7px; padding:14px 18px; border-bottom:1px solid var(--atlas-line); }
+.support-letter-bar span { width:9px; height:9px; border-radius:50%; background:#cfd8cc; }
+.support-letter-bar b { margin-left:10px; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--atlas-muted); }
+.support-letter-head { margin:0; padding:6px 22px; }
+.support-letter-head div { display:grid; grid-template-columns:64px minmax(0,1fr); gap:10px; padding:12px 0; border-bottom:1px solid var(--atlas-line); font-size:13px; }
+.support-letter-head dt { font-family:var(--font-mono); font-size:10px; color:var(--atlas-muted); padding-top:2px; }
+.support-letter-head dd { margin:0; font-weight:560; overflow-wrap:anywhere; }
+.support-letter-body { list-style:none; margin:0; padding:10px 22px 70px; display:grid; gap:14px; }
+.support-letter-body li { display:grid; grid-template-columns:22px minmax(0,1fr); gap:6px 12px; align-items:center; }
+.support-letter-body li>span { display:grid; place-items:center; width:22px; height:22px; border-radius:50%; background:var(--atlas-ink); color:#f4f3ed; font-family:var(--font-mono); font-size:10px; }
+.support-letter-body em { font-style:normal; font-size:12.5px; font-weight:560; }
+.support-letter-body i { grid-column:2; height:9px; border-radius:3px; background:repeating-linear-gradient(90deg,#dfe6da 0 68%,transparent 68% 72%,#e7ece2 72% 100%); }
+.support-letter-body li:nth-child(4) i { height:26px; background:linear-gradient(#e2e8dd 0 0) 0 0/100% 8px no-repeat,linear-gradient(#e7ece2 0 0) 0 13px/72% 8px no-repeat; }
+.support-stamp { position:absolute; right:22px; bottom:20px; display:inline-flex; align-items:center; gap:8px; padding:7px 12px; border:2px solid var(--atlas-red); border-radius:6px; color:var(--atlas-red); font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; transform:rotate(-6deg); background:#fbfbf5e6; }
+.support-stamp::before { content:'×'; font-size:15px; line-height:1; }
+.atlas-site[data-motion='on'] .support-letter-body i { animation:support-type 7s ease-in-out infinite; transform-origin:left center; }
+.atlas-site[data-motion='on'] .support-letter-body li:nth-child(2) i { animation-delay:.6s; }
+.atlas-site[data-motion='on'] .support-letter-body li:nth-child(3) i { animation-delay:1.2s; }
+.atlas-site[data-motion='on'] .support-letter-body li:nth-child(4) i { animation-delay:1.8s; }
+@keyframes support-type { 0% { transform:scaleX(.08); } 18%,88% { transform:scaleX(1); } 100% { transform:scaleX(.08); } }
+
+/* Ce qu’il faut écrire. */
+.support-message { border-top:1px solid var(--atlas-line); }
+.support-lists { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
+.support-lists>div { min-width:0; padding:28px 30px; border-radius:10px; }
+.support-include { background:#fbfbf5; border:1px solid var(--atlas-line); }
+.support-never { background:#f8ece7; border:1px solid #e6c9bf; }
+.support-lists h3 { font-size:20px; font-weight:540; letter-spacing:-.03em; }
+.support-lists ul { list-style:none; margin:18px 0 0; padding:0; display:grid; gap:4px; }
+.support-lists li { position:relative; padding:10px 0 10px 32px; border-top:1px solid #16382f14; font-size:14px; line-height:1.65; }
+.support-lists li:first-child { border-top:0; }
+.support-lists li::before { position:absolute; left:0; top:10px; display:grid; place-items:center; width:20px; height:20px; border-radius:4px; font-family:var(--font-mono); font-size:12px; line-height:1; }
+.support-include li::before { content:'✓'; background:var(--atlas-ink); color:#f4f3ed; }
+.support-never li::before { content:'×'; background:var(--atlas-red); color:#fff; font-size:15px; }
+.support-after { display:grid; grid-template-columns:minmax(0,.7fr) minmax(0,1.6fr) auto; gap:18px 36px; align-items:center; margin-top:26px; padding:24px 0 0; border-top:1px solid var(--atlas-line); }
+.support-after h3 { font-size:18px; font-weight:560; letter-spacing:-.025em; }
+.support-after p { font-size:14px; line-height:1.8; color:var(--atlas-muted); }
+.support-closing h2 { max-width:16ch; }
+.support-closing-box { display:flex; flex-direction:column; justify-content:center; gap:14px; }
+.support-closing-mail { font-size:clamp(18px,2vw,24px); font-weight:520; letter-spacing:-.03em; color:var(--atlas-ink)!important; text-decoration:none; overflow-wrap:anywhere; }
+.support-closing-mail:hover { text-decoration:underline; }
+.support-closing-box .atlas-btn { width:100%; margin-top:6px; }
+
+@media (max-width:1100px) { .support-hero-grid { gap:48px; grid-template-columns:minmax(0,1fr) minmax(0,440px); } }
+@media (max-width:980px) {
+ .support-hero-grid { grid-template-columns:minmax(0,1fr); gap:44px; }
+ .support-letter { max-width:540px; transform:rotate(.8deg); }
+ .support-after { grid-template-columns:minmax(0,1fr); gap:10px; }
+}
+@media (max-width:760px) {
+ .support-hero { padding:14px 0 50px; }
+ .support-hero h1 { font-size:clamp(44px,12vw,62px); margin:20px 0; }
+ .support-letter { margin:0 6px; transform:none; }
+ .support-letter-head,.support-letter-body { padding-inline:18px; }
+ .support-letter-body { padding-bottom:66px; }
+ .support-lists { grid-template-columns:minmax(0,1fr); gap:14px; }
+ .support-lists>div { padding:22px 20px; }
+}

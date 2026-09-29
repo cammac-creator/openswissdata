@@ -1,0 +1,111 @@
+---
+/**
+ * Support FR/DE/EN : situations courantes, trajet d’un achat avec « si ça bloque », et ce qu’un
+ * message doit contenir. Tout est lisible sans JavaScript. Les réponses reprennent les CGV
+ * (art. 2, 4, 8 et 9) ; aucun délai de réponse n’est promis.
+ */
+import AtlasLayout from "../layouts/AtlasLayout.astro";
+import PurchaseJourney from "./PurchaseJourney.astro";
+import "../styles/atlas-service.css";
+import "../styles/atlas-support.css";
+import { getLangFromPath, localizePath } from "../i18n/utils";
+import { HELP_TOPICS, SUPPORT_EMAIL, SUPPORT_MESSAGE, supportMailto } from "../lib/customer-care";
+import { canonicalUrl } from "../lib/structured-data";
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => (path.startsWith("mailto:") ? path : localizePath(path, lang));
+const copy = {
+ fr: {
+  title: "Support et livraison des fichiers | openswissdata", description: "Support OpenSwissData : email de livraison absent, lien expiré, connexion, fichier illisible, reçu, facture ou remboursement. Ce qu’il faut indiquer pour une réponse utile.",
+  home: "Accueil", crumb: "Support", kicker: "Support · Achats de fichiers", hero: "Une question,", accent: "un fichier qui manque ?",
+  lede: "La plupart des difficultés de livraison se règlent depuis votre espace client. Pour le reste, écrivez-nous : voici quoi indiquer pour que la réponse soit utile du premier coup.",
+  write: "Écrire au support", account: "Ouvrir mon espace client", footnote: ["Réponse par email", "Français · Deutsch · English", "Jamais de numéro de carte"],
+  letterTitle: "Nouveau message", to: "À", subject: "Objet", letterSubject: "Support OpenSwissData · FINMA", fields: ["Adresse utilisée pour l’achat", "Produit et version", "Date · référence de paiement", "Ce qui se passe"], stamp: "Sans données de carte",
+  topicsKicker: "01 / Situations courantes", topicsTitle: "Souvent, la réponse est déjà là.", topicsIntro: "Chaque réponse suit les conditions de vente en vigueur. Les liens mènent à l’action ou à l’article concerné.",
+  messageKicker: "03 / Nous écrire", messageTitle: "Un message complet, une réponse plus rapide à trouver.", messageIntro: "Vous pouvez écrire en français, en allemand ou en anglais.",
+  includeTitle: "À indiquer", neverTitle: "À ne jamais envoyer",
+  afterTitle: "Après votre message", after: "Nous répondons par email, à l’adresse qui nous a écrit. Cette page ne promet pas de délai de réponse ; en cas de défaut de livraison, vos droits sont décrits à l’article 9 des conditions de vente.", terms: "Conditions de vente",
+  pause: "Réduire les animations", closingKicker: "Support", closingTitle: "Une adresse, pour toutes les questions.", closingText: "Livraison, facture, remboursement ou question avant l’achat : un seul point d’entrée.", pricing: "Voir les tarifs",
+ },
+ de: {
+  title: "Support und Lieferung der Dateien | openswissdata", description: "OpenSwissData-Support: fehlende Liefer-E-Mail, abgelaufener Link, Anmeldung, unlesbare Datei, Beleg, Rechnung oder Erstattung. Was Sie für eine hilfreiche Antwort angeben sollten.",
+  home: "Startseite", crumb: "Support", kicker: "Support · Dateikäufe", hero: "Eine Frage,", accent: "fehlt eine Datei?",
+  lede: "Die meisten Lieferprobleme lösen Sie direkt im Kundenkonto. Für alles andere schreiben Sie uns: So geben Sie an, was wir für eine hilfreiche erste Antwort brauchen.",
+  write: "Support kontaktieren", account: "Kundenkonto öffnen", footnote: ["Antwort per E-Mail", "Français · Deutsch · English", "Nie eine Kartennummer"],
+  letterTitle: "Neue Nachricht", to: "An", subject: "Betreff", letterSubject: "Support OpenSwissData · FINMA", fields: ["Beim Kauf verwendete Adresse", "Produkt und Version", "Datum · Zahlungsreferenz", "Was geschieht"], stamp: "Ohne Kartendaten",
+  topicsKicker: "01 / Häufige Situationen", topicsTitle: "Oft steht die Antwort schon hier.", topicsIntro: "Jede Antwort folgt den geltenden Verkaufsbedingungen. Die Links führen zur Aktion oder zur betreffenden Ziffer.",
+  messageKicker: "03 / Uns schreiben", messageTitle: "Eine vollständige Nachricht, eine schneller gefundene Antwort.", messageIntro: "Sie können auf Französisch, Deutsch oder Englisch schreiben.",
+  includeTitle: "Bitte angeben", neverTitle: "Nie senden",
+  afterTitle: "Nach Ihrer Nachricht", after: "Wir antworten per E-Mail an die Adresse, die uns geschrieben hat. Diese Seite verspricht keine Antwortfrist; Ihre Rechte bei Liefermängeln stehen in Ziffer 9 der Verkaufsbedingungen.", terms: "Verkaufsbedingungen",
+  pause: "Animationen reduzieren", closingKicker: "Support", closingTitle: "Eine Adresse für alle Fragen.", closingText: "Lieferung, Rechnung, Erstattung oder eine Frage vor dem Kauf: ein einziger Zugang.", pricing: "Preise ansehen",
+ },
+ en: {
+  title: "Support and file delivery | openswissdata", description: "OpenSwissData support: missing delivery email, expired link, sign-in, unreadable file, receipt, invoice or refund. What to include for a useful answer.",
+  home: "Home", crumb: "Support", kicker: "Support · File purchases", hero: "A question,", accent: "a missing file?",
+  lede: "Most delivery issues can be solved from your account. For everything else, write to us: here is what to include so the first answer is useful.",
+  write: "Contact support", account: "Open my account", footnote: ["Answer by email", "Français · Deutsch · English", "Never a card number"],
+  letterTitle: "New message", to: "To", subject: "Subject", letterSubject: "OpenSwissData support · FINMA", fields: ["Address used for the purchase", "Product and version", "Date · payment reference", "What happens"], stamp: "No card details",
+  topicsKicker: "01 / Common situations", topicsTitle: "Often, the answer is already here.", topicsIntro: "Each answer follows the sales terms in force. The links lead to the action or to the relevant section.",
+  messageKicker: "03 / Writing to us", messageTitle: "A complete message, an answer found faster.", messageIntro: "You can write in French, German or English.",
+  includeTitle: "Please include", neverTitle: "Never send",
+  afterTitle: "After your message", after: "We reply by email, to the address that wrote to us. This page does not promise a response time; your rights in case of a delivery defect are set out in section 9 of the sales terms.", terms: "Sales terms",
+  pause: "Reduce animations", closingKicker: "Support", closingTitle: "One address for every question.", closingText: "Delivery, invoice, refund or a question before buying: a single point of contact.", pricing: "See pricing",
+ },
+}[lang];
+const topics = HELP_TOPICS[lang];
+const message = SUPPORT_MESSAGE[lang];
+const mail = supportMailto(lang);
+const pageJsonLd = {
+ "@context": "https://schema.org", "@type": "ContactPage", name: copy.title.split(" | ")[0], url: canonicalUrl("/support", lang), inLanguage: { fr: "fr-CH", de: "de-CH", en: "en" }[lang],
+ mainEntity: { "@type": "Organization", name: "openswissdata", url: "https://www.openswissdata.com", contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: SUPPORT_EMAIL, availableLanguage: ["French", "German", "English"] } },
+};
+---
+<AtlasLayout title={copy.title} description={copy.description} articleJsonLd={pageJsonLd}>
+<div class="support">
+ <div class="atlas-shell atlas-breadcrumb"><a href={L("/")}>{copy.home}</a><span aria-hidden="true">/</span><span>{copy.crumb}</span></div>
+ <section class="support-hero"><div class="atlas-shell support-hero-grid">
+  <div data-atlas-enter>
+   <p class="atlas-kicker">{copy.kicker}</p>
+   <h1>{copy.hero}<br/><em>{copy.accent}</em></h1>
+   <p class="atlas-lede">{copy.lede}</p>
+   <div class="atlas-actions"><a class="atlas-btn" href={mail}>{copy.write}<span aria-hidden="true">↗</span></a><a class="atlas-text-link" href={L("/account")}>{copy.account}<span aria-hidden="true">↗</span></a></div>
+   <p class="support-address"><a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></p>
+   <div class="atlas-hero-footnote">{copy.footnote.map(item => <span>{item}</span>)}</div>
+   <button type="button" class="atlas-motion support-motion" data-atlas-motion aria-pressed="false" hidden><span class="atlas-pause-icon" aria-hidden="true">Ⅱ</span><span>{copy.pause}</span></button>
+  </div>
+  <div class="support-letter" aria-hidden="true" data-atlas-enter>
+   <div class="support-letter-bar"><span></span><span></span><span></span><b>{copy.letterTitle}</b></div>
+   <dl class="support-letter-head"><div><dt>{copy.to}</dt><dd>{SUPPORT_EMAIL}</dd></div><div><dt>{copy.subject}</dt><dd>{copy.letterSubject}</dd></div></dl>
+   <ol class="support-letter-body">{copy.fields.map((field, index) => <li><span>{index + 1}</span><em>{field}</em><i></i></li>)}</ol>
+   <p class="support-stamp">{copy.stamp}</p>
+  </div>
+ </div></section>
+
+ <section class="atlas-section support-topics" id="situations" aria-labelledby="situations-titre"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.topicsKicker}</p><h2 id="situations-titre">{copy.topicsTitle}</h2></div><p class="atlas-section-intro">{copy.topicsIntro}</p></div>
+  <div class="help-grid">
+   {topics.map((topic, index) => <article class="help-card" id={topic.id} data-atlas-enter>
+    <span>{String(index + 1).padStart(2, "0")}</span>
+    <h3>{topic.question}</h3>
+    {topic.answer.map(paragraph => <p>{paragraph}</p>)}
+    <div class="help-links">{topic.links.map(link => <a href={L(link.href)}>{link.label}<span aria-hidden="true">↗</span></a>)}</div>
+   </article>)}
+  </div>
+ </div></section>
+
+ <PurchaseJourney id="trajet" variant="help" number="02" />
+
+ <section class="atlas-section support-message" id="ecrire" aria-labelledby="ecrire-titre"><div class="atlas-shell">
+  <div class="atlas-section-head" data-atlas-enter><div><p class="atlas-kicker">{copy.messageKicker}</p><h2 id="ecrire-titre">{copy.messageTitle}</h2></div><p class="atlas-section-intro">{copy.messageIntro}</p></div>
+  <div class="support-lists" data-atlas-enter>
+   <div class="support-include"><h3>{copy.includeTitle}</h3><ul>{message.include.map(item => <li>{item}</li>)}</ul></div>
+   <div class="support-never"><h3>{copy.neverTitle}</h3><ul>{message.never.map(item => <li>{item}</li>)}</ul></div>
+  </div>
+  <div class="support-after" data-atlas-enter><h3>{copy.afterTitle}</h3><p>{copy.after}</p><a class="atlas-text-link" href={L("/legal/cgv#defauts")}>{copy.terms} ↗</a></div>
+ </div></section>
+
+ <section class="atlas-shell" aria-labelledby="support-fin"><div class="atlas-purchase support-closing" data-atlas-enter>
+  <div><p class="atlas-kicker">{copy.closingKicker}</p><h2 id="support-fin">{copy.closingTitle}</h2><p>{copy.closingText}</p><div class="atlas-actions"><a class="atlas-text-link" href={L("/pricing")}>{copy.pricing} ↗</a><a class="atlas-text-link" href={L("/account")}>{copy.account} ↗</a></div></div>
+  <div class="atlas-purchase-box support-closing-box"><p>{copy.to}</p><a class="support-closing-mail" href={mail}>{SUPPORT_EMAIL}</a><a class="atlas-btn" href={mail}>{copy.write}<span aria-hidden="true">↗</span></a></div>
+ </div></section>
+</div>
+</AtlasLayout>

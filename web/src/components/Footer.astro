@@ -37,14 +37,15 @@ const Llegal = (path: string) => localizePath(path, lang);
           <a href={L("/datasets/tares")}>{t("footer.link_tares", lang)}</a>
           <a href={L("/datasets/classifications")}>{t("footer.link_classifications", lang)}</a>
           <a href={L("/datasets/finma")}>{t("footer.link_finma", lang)}</a>
-          <a href="/pricing">{lang === "de" ? "Preise" : lang === "en" ? "Pricing" : "Tarifs"}</a>
+          <a href={L("/pricing")}>{lang === "de" ? "Preise" : lang === "en" ? "Pricing" : "Tarifs"}</a>
           <a href={L("/codes/")}>{lang === "de" ? "NOGA-Codes" : lang === "en" ? "NOGA codes" : "Codes NOGA"}</a>
           <a href={L("/finma/")}>{lang === "de" ? "FINMA-Register" : lang === "en" ? "FINMA registry" : "Registre FINMA"}</a>
           <a href={L("/bundle")}>{t("footer.link_bundle", lang)}</a>
         </div>
         <div>
           <div class="footer-col-title">{t("footer.col_account", lang)}</div>
-          <a href="/account">{t("footer.link_account", lang)}</a>
+          <a href={L("/account")}>{t("footer.link_account", lang)}</a>
+          <a href={L("/support")}>{lang === "de" ? "Support und Lieferung" : lang === "en" ? "Support and delivery" : "Support et livraison"}</a>
           <a href="/blog">{t("footer.link_blog", lang)}</a>
           <a href="https://etlfederal.substack.com/subscribe" target="_blank" rel="noopener">{t("footer.link_newsletter", lang)}</a>
           <a href="mailto:contact@openswissdata.com">contact@openswissdata.com</a>
