@@ -1,0 +1,66 @@
+---
+/** Un bloc de guide : paragraphe, liste, citation officielle, encadré, tableau, code ou schéma. */
+import GuideText from './GuideText.astro';
+import { SOURCES, type Block } from '../lib/guides';
+import type { Lang } from '../i18n/utils';
+interface Props { block: Block; lang: Lang; cites: Record<string, number>; citeLabel: (n: number) => string; uid: string; codeLabel: string; tableLabel: string }
+const { block, lang, cites, citeLabel, uid, codeLabel, tableLabel } = Astro.props;
+const t = { lang, cites, citeLabel };
+const quoteMarks = lang === 'fr' ? ['« ', ' »'] : lang === 'de' ? ['«', '»'] : ['“', '”'];
+const source = block.type === 'quote' ? SOURCES[block.source] : undefined;
+---
+{block.type === 'p' && <p><GuideText text={block.text} {...t} /></p>}
+{block.type === 'h3' && <h3><GuideText text={block.text} {...t} /></h3>}
+{block.type === 'list' && (block.ordered
+  ? <ol class="guide-list">{block.items.map(item => <li><GuideText text={item} {...t} /></li>)}</ol>
+  : <ul class="guide-list">{block.items.map(item => <li><GuideText text={item} {...t} /></li>)}</ul>)}
+{block.type === 'quote' && source && (
+  <blockquote class="guide-quote" cite={source.url[lang]}>
+    <p>{quoteMarks[0]}{block.text}{quoteMarks[1]}</p>
+    <footer>{source.publisher[lang]}, <a href={source.url[lang]} rel="noopener">{source.title[lang]}</a><a class="guide-cite" href={`#source-${block.source}`} aria-label={`${citeLabel(cites[block.source])}${lang === 'fr' ? ' : ' : ': '}${source.publisher[lang]}, ${source.title[lang]}`}>{cites[block.source]}</a></footer>
+  </blockquote>
+)}
+{block.type === 'callout' && (
+  <div class:list={['guide-callout', { 'is-warn': block.tone === 'warn' }]} role="note" aria-labelledby={`${uid}-titre`}>
+    <h3 id={`${uid}-titre`}>{block.title}</h3>
+    <p><GuideText text={block.text} {...t} /></p>
+  </div>
+)}
+{block.type === 'table' && (
+  <figure class="guide-figure">
+    <figcaption id={`${uid}-legende`}>{block.caption}</figcaption>
+    <p class="guide-scroll-hint" id={`${uid}-aide`}>{tableLabel}<span aria-hidden="true"> →</span></p>
+    <div class="guide-scroll" tabindex="0" role="region" aria-labelledby={`${uid}-legende`} aria-describedby={`${uid}-aide`}>
+      <table class="guide-table">
+        <thead><tr>{block.head.map(cell => <th scope="col">{cell}</th>)}</tr></thead>
+        <tbody>{block.rows.map(row => <tr>{row.map((cell, index) => index === 0 ? <th scope="row"><GuideText text={cell} {...t} /></th> : <td><GuideText text={cell} {...t} /></td>)}</tr>)}</tbody>
+      </table>
+    </div>
+    {block.note && <p class="guide-note"><GuideText text={block.note} {...t} /></p>}
+  </figure>
+)}
+{block.type === 'code' && (
+  <figure class="guide-figure guide-code">
+    <figcaption><span>{block.label}</span><span aria-hidden="true">{block.language}</span></figcaption>
+    <pre tabindex="0" role="region" aria-label={`${codeLabel} · ${block.label}`} translate="no"><code>{block.code}</code></pre>
+  </figure>
+)}
+{block.type === 'path' && (
+  <figure class="guide-path">
+    <figcaption>{block.label}</figcaption>
+    <ol>{block.steps.map(step => <li><strong>{step.title}</strong><span><GuideText text={step.text} {...t} /></span></li>)}</ol>
+  </figure>
+)}
+{block.type === 'entry' && (
+  <figure class="guide-entry">
+    <figcaption>{block.label}</figcaption>
+    <div class="guide-entry-window">
+      <p><span>{block.window}</span><span aria-hidden="true">finma.ch</span></p>
+      <dl>{block.fields.map(field => <div><dt>{field.name}</dt><dd><GuideText text={field.note} {...t} /></dd></div>)}</dl>
+    </div>
+    <div class="guide-entry-notes">
+      <section aria-labelledby={`${uid}-dit`}><h3 id={`${uid}-dit`}>{block.saysTitle}</h3><ul>{block.says.map(item => <li><GuideText text={item} {...t} /></li>)}</ul></section>
+      <section aria-labelledby={`${uid}-tait`}><h3 id={`${uid}-tait`}>{block.notTitle}</h3><ul>{block.not.map(item => <li><GuideText text={item} {...t} /></li>)}</ul></section>
+    </div>
+  </figure>
+)}

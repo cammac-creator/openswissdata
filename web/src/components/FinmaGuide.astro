@@ -1,0 +1,93 @@
+---
+/**
+ * Page d’un guide FINMA (FR/DE/EN) : sommaire, sections, sources officielles numérotées,
+ * avertissement, lien vers la fiche produit et l’échantillon, autres guides.
+ * Lisible sans JavaScript ; aucune date de publication inventée.
+ */
+import AtlasLayout from '../layouts/AtlasLayout.astro';
+import GuideBlock from './GuideBlock.astro';
+import '../styles/atlas-guides.css';
+import { getLangFromPath, localizePath } from '../i18n/utils';
+import { FILE_OFFERS } from '../lib/offers';
+import { guideJsonLd } from '../lib/structured-data';
+import { GUIDE_IDS, GUIDE_UI, SAMPLE_CSV_URL, SOURCES, citationOrder, guidePath, readingMinutes, type GuideId } from '../lib/guides';
+import { GUIDES } from '../content/guides-finma';
+interface Props { id: GuideId }
+const { id } = Astro.props;
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => localizePath(path, lang);
+const definition = GUIDES[id];
+const copy = definition[lang];
+const ui = GUIDE_UI[lang];
+const order = citationOrder(copy);
+const cites = Object.fromEntries(order.map((source, index) => [source, index + 1]));
+const pad = (n: number) => String(n).padStart(2, '0');
+const path = `/guides/${id}/`;
+const series = [...GUIDE_IDS].sort((a, b) => GUIDES[a].order - GUIDES[b].order);
+const others = series.filter(other => other !== id);
+const jsonLd = guideJsonLd({
+  lang, path, type: definition.schemaType, headline: copy.title, description: copy.description,
+  breadcrumb: [{ name: ui.catalogue, path: '/' }, { name: ui.product, path: '/datasets/finma' }, { name: copy.short, path }],
+  citations: order.map(source => ({ name: SOURCES[source].title[lang], url: SOURCES[source].url[lang], publisher: SOURCES[source].publisher[lang] })),
+});
+const blockProps = { lang, cites, citeLabel: ui.citeLabel, codeLabel: ui.codeLabel, tableLabel: ui.tableLabel };
+---
+<AtlasLayout title={`${copy.title} | openswissdata`} description={copy.description} image="/og-finma.png" articleJsonLd={jsonLd}>
+<div class="guide" data-guide={id}>
+ <nav class="atlas-shell atlas-breadcrumb" aria-label={ui.breadcrumb}><a href={`${L('/')}#datasets`}>{ui.catalogue}</a><span aria-hidden="true">/</span><a href={L('/datasets/finma/')}>{ui.product}</a><span aria-hidden="true">/</span><span>{copy.short}</span></nav>
+
+ <header class="atlas-shell guide-hero">
+  <div>
+   <p class="atlas-kicker">{ui.kicker(definition.order, GUIDE_IDS.length)}</p>
+   <h1>{copy.h1}<br/><em>{copy.accent}</em></h1>
+   <p class="guide-lede">{copy.lede}</p>
+   <ul class="guide-meta"><li>{ui.reading(readingMinutes(copy))}</li><li>{ui.sourcesCount(order.length)}</li><li>{ui.consulted}</li></ul>
+  </div>
+  <nav class="guide-series" aria-labelledby="guide-series-titre">
+   <p id="guide-series-titre">{ui.guides} FINMA</p>
+   <ol>{series.map(other => other === id
+     ? <li><span aria-current="page"><span>{pad(GUIDES[other].order)}</span><span>{GUIDES[other][lang].short}</span></span></li>
+     : <li><a href={guidePath(other, lang)}><span>{pad(GUIDES[other].order)}</span><span>{GUIDES[other][lang].short}</span></a></li>)}</ol>
+  </nav>
+ </header>
+
+ <div class="atlas-shell guide-body">
+  <nav class="guide-toc" aria-labelledby="guide-sommaire"><p id="guide-sommaire">{ui.toc}</p><ol>{copy.sections.map(section => <li><a href={`#${section.id}`}>{section.title}</a></li>)}<li><a href="#sources">{ui.sourcesTitle}</a></li></ol></nav>
+  <div class="guide-content" id="guide-texte">
+   <details class="guide-toc-mobile"><summary>{ui.toc}</summary><ol>{copy.sections.map(section => <li><a href={`#${section.id}`}>{section.title}</a></li>)}<li><a href="#sources">{ui.sourcesTitle}</a></li></ol></details>
+
+   {copy.sections.map((section, index) => (
+    <section class="guide-section" id={section.id} aria-labelledby={`${section.id}-titre`}>
+     <header><span aria-hidden="true">{pad(index + 1)}</span><h2 id={`${section.id}-titre`}>{section.title}</h2></header>
+     {section.blocks.map((block, position) => <GuideBlock block={block} uid={`${section.id}-${position}`} {...blockProps} />)}
+    </section>
+   ))}
+
+   <aside class="guide-disclaimer" aria-labelledby="guide-avertissement"><h2 id="guide-avertissement">{ui.disclaimerTitle}</h2><p>{ui.disclaimer}</p></aside>
+
+   <section class="guide-cta" aria-labelledby="guide-fichier">
+    <div><p class="atlas-kicker">{ui.ctaKicker}</p><h2 id="guide-fichier">{ui.ctaTitle}</h2><p>{ui.ctaText(FILE_OFFERS.finma.price)}</p></div>
+    <div class="guide-cta-actions">
+     <a class="atlas-btn" href={L('/datasets/finma/')}>{ui.ctaProduct}<span aria-hidden="true">→</span></a>
+     <a class="atlas-text-link" href={SAMPLE_CSV_URL}>{ui.ctaSample}<span aria-hidden="true">↓</span></a>
+     <small>{ui.ctaSampleNote}</small>
+    </div>
+   </section>
+
+   <section class="guide-related" aria-labelledby="guide-autres">
+    <h2 id="guide-autres">{ui.relatedTitle}</h2>
+    <ul>{others.map(other => <li><span>{ui.kicker(GUIDES[other].order, GUIDE_IDS.length)}</span><h3><a href={guidePath(other, lang)}>{GUIDES[other][lang].title}</a></h3><p>{GUIDES[other][lang].summary}</p></li>)}</ul>
+   </section>
+
+   <section class="guide-sources" id="sources" aria-labelledby="guide-sources-titre">
+    <h2 id="guide-sources-titre">{ui.sourcesTitle}</h2>
+    <p>{ui.sourcesIntro}</p>
+    <ol>{order.map(source => { const doc = SOURCES[source]; const docLang = doc.documentLanguage?.[lang]; return (
+     <li id={`source-${source}`}><strong>{doc.publisher[lang]}</strong> · <a href={doc.url[lang]} rel="noopener">{doc.title[lang]}</a>{docLang && <> ({ui.sourceLang} {docLang})</>}<span>{doc.url[lang]}</span></li>
+    ); })}</ol>
+    <a class="guide-top" href="#guide-texte">{ui.backToTop} ↑</a>
+   </section>
+  </div>
+ </div>
+</div>
+</AtlasLayout>

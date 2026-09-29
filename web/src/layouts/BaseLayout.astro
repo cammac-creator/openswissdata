@@ -16,6 +16,8 @@ interface Props {
    */
   productJsonLd?: Record<string, unknown>;
   datasetJsonLd?: Record<string, unknown>;
+  /** Guide : Article ou TechArticle et fil d’Ariane, dans un même graphe schema.org. */
+  articleJsonLd?: Record<string, unknown>;
   /** When true, emits <meta name="robots" content="noindex,nofollow">. */
   noindex?: boolean;
   /** Désactive les variantes de langue pour les pages réellement monolingues. */
@@ -23,7 +25,7 @@ interface Props {
   appearance?: "atlas";
 }
 
-const { title, description, image = "/og-default.png", productJsonLd, datasetJsonLd, noindex = false, monolingual = false, appearance } = Astro.props;
+const { title, description, image = "/og-default.png", productJsonLd, datasetJsonLd, articleJsonLd, noindex = false, monolingual = false, appearance } = Astro.props;
 const lang = getLangFromPath(Astro.url.pathname);
 const htmlLang = lang === "de" ? "de-CH" : lang === "fr" ? "fr-CH" : "en";
 
@@ -109,6 +111,10 @@ const orgDescription = lang === "de"
 
     {datasetJsonLd && (
       <script type="application/ld+json" set:html={jsonForHtml(datasetJsonLd)} />
+    )}
+
+    {articleJsonLd && (
+      <script type="application/ld+json" set:html={jsonForHtml(articleJsonLd)} />
     )}
 
     {Astro.url.hostname === "www.openswissdata.com" && (

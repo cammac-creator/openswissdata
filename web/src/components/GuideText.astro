@@ -1,0 +1,13 @@
+---
+/** Texte d’un guide : liens, code, gras et renvois numérotés vers les sources, sans HTML brut. */
+import { parseInline, SOURCES } from '../lib/guides';
+import type { Lang } from '../i18n/utils';
+interface Props { text: string; lang: Lang; cites: Record<string, number>; citeLabel: (n: number) => string }
+const { text, lang, cites, citeLabel } = Astro.props;
+const parts = parseInline(text, lang);
+---
+{parts.map(part => part.kind === 'text' ? part.text
+ : part.kind === 'strong' ? <strong>{part.text}</strong>
+ : part.kind === 'code' ? <code translate="no">{part.text}</code>
+ : part.kind === 'link' ? (part.external ? <a href={part.href} rel="noopener">{part.text}</a> : <a href={part.href}>{part.text}</a>)
+ : <a class="guide-cite" href={`#source-${part.source}`} aria-label={`${citeLabel(cites[part.source])}${lang === 'fr' ? ' : ' : ': '}${SOURCES[part.source].publisher[lang]}, ${SOURCES[part.source].title[lang]}`}>{cites[part.source]}</a>)}

@@ -1,0 +1,7 @@
+---
+import FinmaGuide from "../../../components/FinmaGuide.astro";
+import { GUIDE_IDS, type GuideId } from "../../../lib/guides";
+export function getStaticPaths() { return GUIDE_IDS.map(guide => ({ params: { guide } })); }
+const { guide } = Astro.params as { guide: GuideId };
+---
+<FinmaGuide id={guide} />

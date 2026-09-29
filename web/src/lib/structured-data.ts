@@ -83,6 +83,44 @@ export function datasetJsonLd(id: FileProductId, lang: Lang, description: string
   };
 }
 
+/**
+ * Guide : Article ou TechArticle et fil d’Ariane, sans date de publication ni de modification
+ * (aucune date significative n’est connue au build). Les citations sont les sources officielles
+ * réellement consultées ; le fichier OpenSwissData est seulement mentionné.
+ */
+export function guideJsonLd(args: {
+  lang: Lang; path: string; type: 'Article' | 'TechArticle'; headline: string; description: string;
+  breadcrumb: Array<{ name: string; path: string }>; citations: Array<{ name: string; url: string; publisher: string }>;
+}): Record<string, unknown> {
+  const url = canonicalUrl(args.path, args.lang);
+  const author = { '@type': 'Organization', name: 'OpenSwissData', url: ORIGIN };
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': args.type,
+        '@id': `${url}#guide`,
+        headline: args.headline,
+        description: args.description,
+        url,
+        mainEntityOfPage: url,
+        inLanguage: LANGUAGE_TAGS[args.lang],
+        isAccessibleForFree: true,
+        image: `${ORIGIN}/og-finma.png`,
+        author,
+        publisher: { ...author, logo: { '@type': 'ImageObject', url: `${ORIGIN}/icon-512.png` } },
+        about: { '@type': 'GovernmentOrganization', name: 'FINMA', url: 'https://www.finma.ch/' },
+        mentions: { '@type': 'Dataset', name: DATASETS.finma[args.lang].name, url: canonicalUrl('/datasets/finma', args.lang) },
+        citation: args.citations.map(source => ({ '@type': 'CreativeWork', name: source.name, url: source.url, publisher: { '@type': 'Organization', name: source.publisher } })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: args.breadcrumb.map((item, index) => ({ '@type': 'ListItem', position: index + 1, name: item.name, item: canonicalUrl(item.path, args.lang) })),
+      },
+    ],
+  };
+}
+
 /** Offre schema.org sans date de validité, livraison ni retour inventés. */
 export function productJsonLd(id: FileProductId | 'bundle', lang: Lang, details: { name: string; description: string; image: string }): Record<string, unknown> {
   const path = id === 'bundle' ? '/bundle' : `/datasets/${id}`;
