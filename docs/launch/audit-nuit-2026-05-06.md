@@ -9,7 +9,7 @@
 **SECRET WEBHOOK STRIPE LIVE LEAKÉ EN CLAIR DANS LE REPO PUBLIC GITHUB.**
 
 - Fichier : `docs/preflight-14-stripe-live.md` (HEAD)
-- Commit d'origine : `6713d38` (feat(stripe): #14 LIVE switch — 25 avril 2026)
+- Commit d'origine : `[commit retiré de l’historique le 29.09.2026]` (feat(stripe): #14 LIVE switch — 25 avril 2026)
 - Repo `cammac-creator/openswissdata` est **public** (visibility: PUBLIC, isPrivate: false)
 - Secret exposé : `[secret retiré du document public]` (Stripe webhook signing secret LIVE)
 - Le fichier expose aussi en clair : Account ID `acct_1TP3BlRenAUXTSv7`, 7 Price IDs LIVE, 4 Product IDs LIVE
@@ -64,7 +64,7 @@ Aucun warning bloquant remonté. Le test 1 skipped est un test Pro tier OAuth e2
 - `?? docs/launch/audit-nuit-2026-05-06.md` (ce rapport, en cours)
 - `?? .design-preview/*.html` (8 fichiers, mockups, untracked — comportement normal pour le dossier de travail design)
 
-`git log --oneline -20` : commits récents cohérents et bien typés (feat:, fix:, docs:). Last commit utile : `f08aaa0 feat(launch): mailing-list 394 contacts B2B Suisse pour Substack`.
+`git log --oneline -20` : commits récents cohérents et bien typés (feat:, fix:, docs:). Last commit utile : `[commit retiré de l’historique le 29.09.2026] feat(launch): mailing-list 394 contacts B2B Suisse pour Substack`.
 
 `.gitignore` couvre :
 - `node_modules/`, `dist/`, `.env`, `.env.*` (avec exception `!.env.example`)
@@ -111,7 +111,7 @@ Aucun 404/500 détecté sur les URLs principales.
 ### 1.5 Sécurité
 
 **🔥 1 vrai secret leaké détecté** (cf. TL;DR ci-dessus) :
-- `[secret retiré du document public]` dans `docs/preflight-14-stripe-live.md` (HEAD) + git history (commit `6713d38`).
+- `[secret retiré du document public]` dans `docs/preflight-14-stripe-live.md` (HEAD) + git history (commit `[commit retiré de l’historique le 29.09.2026]`).
 - Repo public sur GitHub.
 
 **IDs métier exposés en clair dans le même fichier** (non secrets au sens strict, mais sensibles) :
@@ -157,7 +157,7 @@ L'agent a effectué un seul commit consolidé (corrections triviales sécuritair
 | Hash | Description | Fichiers |
 |---|---|---|
 | `f08092a` | `fix(audit-nuit): typos prénom + 8→9 tools dans drafts promo` | `packages/schemas/README.md` (1 ligne), `docs/perfectionnement-2026-04-29/PROMO-DRAFTS.md` (7 occurrences) |
-| `7ac7553` | `docs(audit-nuit): rapport audit nuit 2026-05-06 — alerte secret Stripe leaké` | `docs/launch/audit-nuit-2026-05-06.md` (ce rapport) |
+| `[commit retiré de l’historique le 29.09.2026]` | `docs(audit-nuit): rapport audit nuit 2026-05-06 — alerte secret Stripe leaké` | `docs/launch/audit-nuit-2026-05-06.md` (ce rapport) |
 
 Aucune autre modification effectuée — toutes les autres trouvailles sont flaggées en Phase 3 pour décision humaine.
 
