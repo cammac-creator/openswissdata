@@ -2,7 +2,7 @@
 
 **Swiss federal reference data for AI agents and developers:** the Swiss customs tariff (TARES, 8-digit tariff numbers with MFN duty and preferential regimes), the FINMA register of supervised institutions and the FINMA warnings list, and NOGA / NACE / ISIC activity-code correspondences.
 
-- **Free MCP endpoint, no key or sign-up:** `https://mcp.openswissdata.com/jsonrpc`, three tools (`tariff_lookup`, `kyc_check`, `cross_walk`), 100 calls per hour per IP address. Claude Code: `claude mcp add --transport http openswissdata https://mcp.openswissdata.com/jsonrpc`. Local-process clients: `npx -y @openswissdata/mcp`.
+- **Free MCP endpoint, no key or sign-up:** `https://mcp.openswissdata.com/jsonrpc`, three tools (`tariff_lookup`, `kyc_check`, `cross_walk`), 100 calls per hour per IP address, plus a free trial of the three search tools (`tariff_semantic_search`, `classify_text`, `finma_search`): 20 calls per day per IP address in total. Claude Code: `claude mcp add --transport http openswissdata https://mcp.openswissdata.com/jsonrpc`. Local-process clients: `npx -y @openswissdata/mcp`.
 - **Full datasets as signed files:** [openswissdata.com](https://www.openswissdata.com/en/). Summary for AI agents: [llms.txt](https://www.openswissdata.com/llms.txt).
 - Unofficial copies: binding decisions belong to the official sources (xtares.admin.ch, finma.ch, the Swiss Federal Statistical Office).
 
@@ -13,13 +13,13 @@
 | `tariff_lookup` | Free, no key | Swiss customs tariff line for an 8-digit tariff number (MFN duty, preferential regimes, restrictions, relief codes), or the Swiss lines under a 2- to 7-digit HS prefix |
 | `kyc_check` | Free, no key | FINMA register of supervised institutions and FINMA warning list, searched by name, closest matches first |
 | `cross_walk` | Free, no key | Correspondence of an activity code between NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4, with the relation type and its source |
-| `tariff_semantic_search` | Existing access grant | TARES lines from a description in French, German, Italian or English, using each line's official hierarchy |
+| `tariff_semantic_search` | Free trial, no key (20 calls/day in total) | TARES lines from a description in French, German, Italian or English, using each line's official hierarchy |
 | `tariff_changelog` | Existing access grant | MFN duty history of a tariff number across archived releases |
-| `classify_text` | Existing access grant | NOGA 2025 subclasses suggested for an activity description (FR/DE/IT/EN) |
-| `finma_search` | Existing access grant | FINMA register search tolerant of accents, legal forms and typos, each match labelled with its type |
+| `classify_text` | Free trial, no key (20 calls/day in total) | NOGA 2025 subclasses suggested for an activity description (FR/DE/IT/EN) |
+| `finma_search` | Free trial, no key (20 calls/day in total) | FINMA register search tolerant of accents, legal forms and typos, each match labelled with its type |
 | `entity_history` | Existing access grant | Change history of a FINMA-supervised entity by Swiss UID |
 
-New Pro subscriptions are closed; the three free tools need no sign-up. The endpoint accepts browser calls (CORS, any origin, no cookies).
+New Pro subscriptions are closed; the three free tools and the search trial need no sign-up. The endpoint accepts browser calls (CORS, any origin, no cookies).
 
 ---
 

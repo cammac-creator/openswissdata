@@ -1,11 +1,57 @@
-/** Requêtes et index partagent les mêmes poids q8, chargés localement à la demande. */
-import { createEmbeddingExtractor } from "../lib/embedding-model.js";
+/**
+ * Requêtes et index partagent les mêmes poids q8, chargés localement à la demande.
+ * Le modèle vit dans un processus à part, arrêté après dix minutes sans recherche :
+ * libérer le modèle dans le processus principal ne rendait pas sa mémoire (mesure du 29.09.2026).
+ */
+import { fork, type ChildProcess } from "node:child_process";
+import { fileURLToPath } from "node:url";
 export { EMBEDDING_MODEL } from "../lib/embedding-model.js";
 export const EMBEDDING_DIMENSIONS = 768;
-let _extractorPromise: ReturnType<typeof createEmbeddingExtractor> | null = null;
-async function getExtractor() {
-  if (!_extractorPromise) _extractorPromise=createEmbeddingExtractor().catch(error=>{_extractorPromise=null;throw error;});
-  return _extractorPromise;
+
+type Pending = { resolve: (vector: Float32Array) => void; reject: (error: Error) => void; timer: NodeJS.Timeout };
+type Worker = { proc: ChildProcess; pending: Map<number, Pending>; idle: NodeJS.Timeout | null };
+
+const source = import.meta.url.endsWith(".ts");
+const settings = {
+  workerPath: fileURLToPath(new URL(source ? "../lib/embedding-worker.ts" : "../lib/embedding-worker.js", import.meta.url)),
+  idleMs: 10 * 60_000,
+  requestMs: 120_000,
+};
+let worker: Worker | null = null;
+let nextId = 0;
+
+function stopWorker(current: Worker, error: Error): void {
+  if (worker === current) worker = null;
+  if (current.idle) clearTimeout(current.idle);
+  for (const request of current.pending.values()) { clearTimeout(request.timer); request.reject(error); }
+  current.pending.clear();
+  current.proc.kill("SIGKILL");
+}
+
+function startWorker(): Worker {
+  const proc = fork(settings.workerPath, [], {
+    execArgv: settings.workerPath.endsWith(".ts") ? ["--import", "tsx"] : [],
+    cwd: fileURLToPath(new URL("../../", import.meta.url)),
+    // Aucun identifiant applicatif ne passe au processus du modèle.
+    env: { PATH: process.env.PATH, TMPDIR: process.env.TMPDIR, LANG: "C.UTF-8" },
+    stdio: ["ignore", "ignore", "ignore", "ipc"],
+  });
+  const current: Worker = { proc, pending: new Map(), idle: null };
+  proc.on("message", (message: { id?: number; vector?: number[]; error?: string }) => {
+    const request = typeof message?.id === "number" ? current.pending.get(message.id) : undefined;
+    if (!request) return;
+    current.pending.delete(message.id!);
+    clearTimeout(request.timer);
+    if (Array.isArray(message.vector) && message.vector.length === EMBEDDING_DIMENSIONS) request.resolve(Float32Array.from(message.vector));
+    else request.reject(new Error("embedQuery: worker failed"));
+    if (current.pending.size === 0 && worker === current) {
+      current.idle = setTimeout(() => stopWorker(current, new Error("embedQuery: worker stopped")), settings.idleMs);
+      current.idle.unref();
+    }
+  });
+  proc.once("error", () => stopWorker(current, new Error("embedQuery: worker failed")));
+  proc.once("exit", () => stopWorker(current, new Error("embedQuery: worker exited")));
+  return current;
 }
 
 /**
@@ -19,15 +65,14 @@ export async function embedQuery(text: string): Promise<Float32Array> {
   if (!trimmed) {
     throw new Error("embedQuery: empty input");
   }
-  const extractor = await getExtractor();
-  const tensor = await extractor(trimmed, { pooling: "mean", normalize: true });
-  const data = tensor.data as Float32Array;
-  if (data.length !== EMBEDDING_DIMENSIONS) {
-    throw new Error(
-      `embedQuery: unexpected output shape ${data.length}, expected ${EMBEDDING_DIMENSIONS}`,
-    );
-  }
-  return data;
+  const current = worker ??= startWorker();
+  if (current.idle) { clearTimeout(current.idle); current.idle = null; }
+  const id = ++nextId;
+  return new Promise<Float32Array>((resolve, reject) => {
+    const timer = setTimeout(() => stopWorker(current, new Error("embedQuery: timeout")), settings.requestMs);
+    current.pending.set(id, { resolve, reject, timer });
+    current.proc.send({ id, text: trimmed }, (error) => { if (error) stopWorker(current, new Error("embedQuery: worker unreachable")); });
+  });
 }
 
 /**
@@ -55,7 +100,18 @@ export function cosineSimilarity(a: Float32Array | number[], b: Float32Array | n
   return dot / denom;
 }
 
-/** Test helper: clears the cached extractor pipeline. */
+/** Test helper: stops the model process and rejects what was waiting. */
 export function _resetEmbedderCache(): void {
-  _extractorPromise = null;
+  if (worker) stopWorker(worker, new Error("embedQuery: reset"));
+}
+
+/** Test helper: another worker script and shorter delays, for the protocol tests. */
+export function _configureEmbedderForTests(options: Partial<typeof settings>): void {
+  _resetEmbedderCache();
+  Object.assign(settings, options);
+}
+
+/** Test helper: pid of the running model process, or null. */
+export function _embedderWorkerPid(): number | null {
+  return worker?.proc.pid ?? null;
 }
