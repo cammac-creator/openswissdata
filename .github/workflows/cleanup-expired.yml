@@ -47,7 +47,7 @@ jobs:
               sys.exit(1)
           print('HTTP',sys.argv[2])
           legacy={'magic_links','sessions','download_tokens','mcp_oauth_codes','request_log','events','download_activity','delivery_message_references','bronze_dashboard','bronze_financial','auth_request_limits','checkout_request_limits','delivery_incident_events','delivery_incidents'}
-          # Transition des durées de conservation (29.09.2026) : l'ancien témoin (14) et le nouveau (18) sont acceptés jusqu'au resserrage.
+          # Durées de conservation (29.09.2026) : témoin à 18 catégories exactes ; l'ancien format à 14 n'est plus accepté.
           expected=legacy|{'purchase_records','crm_records','customer_accounts','erasure_registry'}
           entries=data.get('entries') if isinstance(data,dict) else None
           valid=isinstance(entries,list) and all(isinstance(e,dict) and isinstance(e.get('name'),str) and e.get('name') in expected|{'cleanup_proof'} and e.get('status') in ('ok','not_applicable','error') for e in entries)
@@ -55,7 +55,7 @@ jobs:
               for entry in entries:
                   print(entry['name']+': '+entry['status'])
           names={e['name'] for e in entries} if valid else set()
-          complete=valid and len(entries)==len(names) and names in (legacy,expected) and all(e['status']!='error' for e in entries)
+          complete=valid and len(entries)==len(expected) and names==expected and all(e['status']!='error' for e in entries)
           if sys.argv[2]!='200' or not isinstance(data,dict) or data.get('ok') is not True or not complete:
               print('::error::Nettoyage incomplet ou preuve absente ; consulter le CRM privé.')
               sys.exit(1)
