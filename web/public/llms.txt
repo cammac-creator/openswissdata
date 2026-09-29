@@ -37,6 +37,14 @@ One-off payments in CHF, no automatic renewal, 360 days of updates included. Eac
 - [FINMA: current version, counts and sample (JSON)](https://www.openswissdata.com/api/catalog/finma) · [CSV sample](https://www.openswissdata.com/api/catalog/finma?format=csv)
 - [Classifications: current version, counts and sample (JSON)](https://www.openswissdata.com/api/catalog/classifications) · [CSV sample](https://www.openswissdata.com/api/catalog/classifications?format=csv)
 
+## Guides (English, French and German)
+
+Written from FINMA, FSO, FOJ, SECO and GLEIF pages, with the official sources listed on each guide. The same address with `/guides/…` (French) or `/de/guides/…` (German) serves the other languages.
+
+- [How to check whether a firm is authorised by FINMA](https://www.openswissdata.com/en/guides/finma-authorisation-check/): which FINMA list to use for each type of provider, what an entry or a missing entry means, UID and LEI.
+- [The FINMA warning list: what it says and what it does not](https://www.openswissdata.com/en/guides/finma-warning-list/): who is on it, why an entry is not proof of a breach, how to handle similar names.
+- [Automating FINMA checks on your counterparties](https://www.openswissdata.com/en/guides/finma-screening-automation/): matching by UID, then LEI, then name, with tested SQLite and Python examples and the free `kyc_check` tool.
+
 ## Documentation
 
 - [MCP server page](https://www.openswissdata.com/en/mcp)

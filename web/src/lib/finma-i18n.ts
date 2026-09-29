@@ -85,6 +85,8 @@ export interface FinmaStrings {
   detailsTitle: string; detailsEm: string;
   meansTitle: string; meansEm: string;
   verifyTitle: string; verifyEm: string; verifyIntro: string; verifyCta: string;
+  /** Lien vers le guide qui explique la vérification et la lecture d'une absence. */
+  verifyGuide: string;
   mcpCtaTitle: string; mcpCtaEm: string; mcpCtaIntro: string; mcpCtaButton: string;
   neighborsTitle: (typeLabel: string) => string; neighborsEm: string;
   footer: string;
@@ -109,6 +111,7 @@ export const FINMA_STR: Record<Lang, FinmaStrings> = {
     verifyTitle: "Vérifier", verifyEm: "à la source",
     verifyIntro: "Cette fiche reprend des données publiques du registre FINMA. Pour le statut faisant foi et à jour, consultez le registre officiel :",
     verifyCta: "Registre officiel FINMA",
+    verifyGuide: "Guide : vérifier une autorisation FINMA et lire une absence",
     mcpCtaTitle: "Vérifier la FINMA", mcpCtaEm: "par API",
     mcpCtaIntro: "Interrogez le statut d'autorisation FINMA par API, dans vos workflows — via le serveur MCP, directement dans Claude Code, Cursor ou Cline. Données issues d'un instantané du registre public ; le statut faisant foi reste celui de finma.ch. Gratuit pour tester, sans compte.",
     mcpCtaButton: "Brancher le MCP — gratuit",
@@ -134,6 +137,7 @@ export const FINMA_STR: Record<Lang, FinmaStrings> = {
     verifyTitle: "An der Quelle", verifyEm: "prüfen",
     verifyIntro: "Dieser Eintrag gibt öffentliche Daten des FINMA-Registers wieder. Für den massgebenden und aktuellen Status konsultieren Sie das offizielle Register:",
     verifyCta: "Offizielles FINMA-Register",
+    verifyGuide: "Leitfaden: eine FINMA-Bewilligung prüfen und einen fehlenden Eintrag richtig lesen",
     mcpCtaTitle: "FINMA-Status", mcpCtaEm: "per API",
     mcpCtaIntro: "Fragen Sie den FINMA-Bewilligungsstatus per API in Ihren Workflows ab — über den MCP-Server, direkt in Claude Code, Cursor oder Cline. Daten aus einem Auszug des öffentlichen Registers; massgebend bleibt der Status auf finma.ch. Kostenlos testen, ohne Konto.",
     mcpCtaButton: "MCP einbinden — gratis",
@@ -159,6 +163,7 @@ export const FINMA_STR: Record<Lang, FinmaStrings> = {
     verifyTitle: "Verify", verifyEm: "at source",
     verifyIntro: "This entry reproduces public data from the FINMA register. For the authoritative, up-to-date status, consult the official register:",
     verifyCta: "Official FINMA register",
+    verifyGuide: "Guide: checking a FINMA authorisation and reading a missing entry",
     mcpCtaTitle: "Check FINMA", mcpCtaEm: "by API",
     mcpCtaIntro: "Query FINMA authorisation status by API, inside your workflows — via the MCP server, straight from Claude Code, Cursor or Cline. Data from a public-register snapshot; the authoritative status remains finma.ch's. Free to try, no account.",
     mcpCtaButton: "Connect the MCP — free",

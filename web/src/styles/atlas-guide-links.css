@@ -1,0 +1,8 @@
+/* Liens vers les guides depuis la fiche FINMA : une rangée sobre sous la couverture. */
+.guide-links { margin-top:48px; padding-top:26px; border-top:1px solid var(--atlas-line); }
+.guide-links ul { list-style:none; margin:16px 0 0; padding:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.guide-links a { display:grid; grid-template-columns:28px minmax(0,1fr) 16px; gap:10px; align-items:baseline; height:100%; padding:18px; border:1px solid var(--atlas-line); border-radius:10px; background:#fbfbf5; color:var(--atlas-ink); text-decoration:none; font-size:14px; line-height:1.5; font-weight:550; }
+.guide-links a:hover { border-color:#16382f55; }
+.guide-links a span:first-child { font-family:var(--font-mono); font-size:11px; color:var(--atlas-red); font-weight:500; }
+.guide-links a span:last-child { color:var(--atlas-red); }
+@media (max-width:760px) { .guide-links ul { grid-template-columns:minmax(0,1fr); } }

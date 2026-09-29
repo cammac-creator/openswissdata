@@ -3,6 +3,7 @@ import { jsonForHtml } from "../lib/html";
 import { neighborsOfType, type FinmaEntity } from "../lib/finma-helpers";
 import { FINMA_STR, typeLabel, licenceFor, typeExplain } from "../lib/finma-i18n";
 import { localizePath, type Lang } from "../i18n/utils";
+import { guidePath } from "../lib/guides";
 
 interface Props { entity: FinmaEntity; lang: Lang; }
 const { entity, lang } = Astro.props as Props;
@@ -14,6 +15,7 @@ const homeHref = localizePath("/", lang);
 const registryHref = localizePath("/finma/", lang);
 const entHref = (slug: string) => localizePath(`/finma/${slug}`, lang);
 const mcpHref = localizePath("/mcp#install", lang);
+const guideHref = guidePath("finma-authorisation-check", lang);
 const officialUrl = entity.src || "https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/";
 
 const fields: Array<{ label: string; value: string; mono?: boolean }> = [
@@ -95,6 +97,7 @@ const breadcrumbLd = {
       <p style="font-size:15px;line-height:1.6;">
         <a href={officialUrl} target="_blank" rel="noopener">{S.verifyCta} — finma.ch</a>
       </p>
+      <p style="font-size:15px;line-height:1.6;margin-top:10px;"><a href={guideHref}>{S.verifyGuide} →</a></p>
     </section>
 
     <section class="ds-section reveal">
