@@ -8,7 +8,7 @@ export const BACKUP_CHECK_ERRORS = ['backup_bytes_differ', 'backup_integrity_fai
 export type BackupCheckError = typeof BACKUP_CHECK_ERRORS[number];
 export type BackupInspection = {
   version: 1; byte_match: true; integrity: 'ok'; foreign_keys: 'ok'; required_schema: 'ok'; current_versions: 'ok'; duration_ms: number;
-  schema_profile?: 'service-crm-2026-09-26' | 'service-crm-2026-09-29';
+  schema_profile?: 'service-crm-2026-09-26' | 'service-crm-2026-09-29' | 'service-retention-2026-09-29';
 };
 export class BackupInspectionError extends Error {
   constructor(readonly code: BackupCheckError) { super(code); }
@@ -49,12 +49,14 @@ export async function inspectRestoredBackup(snapshotPath: string, restoredPath: 
         'SELECT customer_id,code,source FROM crm_languages LIMIT 0',
         // Profil du 29.09 : preuves de clôture manuelle des incidents.
         'SELECT id,incident_id,delivery_id,kind,note,resolved_at,resolved_by FROM delivery_incident_resolutions LIMIT 0',
+        // Profil service-retention : registre des effacements, nécessaire au rejeu après restauration.
+        'SELECT category,subject_id,erased_at FROM retention_erasures LIMIT 0',
       ]) db.prepare(sql).all();
     } catch { throw new BackupInspectionError('backup_schema_failed'); }
     if (db.prepare('SELECT 1 FROM datasets d WHERE d.current_version IS NOT NULL AND NOT EXISTS (SELECT 1 FROM versions v WHERE v.dataset_id=d.id AND v.version=d.current_version) LIMIT 1').get()) {
       throw new BackupInspectionError('backup_versions_failed');
     }
-    return { version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok', duration_ms: Date.now() - started, schema_profile: 'service-crm-2026-09-29' };
+    return { version: 1, byte_match: true, integrity: 'ok', foreign_keys: 'ok', required_schema: 'ok', current_versions: 'ok', duration_ms: Date.now() - started, schema_profile: 'service-retention-2026-09-29' };
   } finally { db.close(); }
 }
 

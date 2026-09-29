@@ -415,6 +415,17 @@ CREATE TABLE IF NOT EXISTS crm_languages (
   updated_at INTEGER NOT NULL
 );
 
+-- Registre des effacements de conservation (décision du 29.09.2026) : identifiant interne, catégorie et date,
+-- sans aucune donnée personnelle. Pas de clé étrangère : l'entrée survit à l'effacement qu'elle décrit.
+-- Jamais purgé. Une copie hors du fichier SQLite (retention/erasures.json) est rejouée au démarrage réel.
+CREATE TABLE IF NOT EXISTS retention_erasures (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  category TEXT NOT NULL CHECK(category IN ('purchase_order','crm_records','customer_account')),
+  subject_id INTEGER NOT NULL CHECK(typeof(subject_id)='integer' AND subject_id>0),
+  erased_at INTEGER NOT NULL CHECK(typeof(erased_at)='integer' AND erased_at>=1000000000000),
+  UNIQUE(category,subject_id,erased_at)
+);
+
 -- Limites de connexion : identifiants HMAC, sans adresse IP ni email en clair.
 CREATE TABLE IF NOT EXISTS auth_request_limits (
   scope TEXT NOT NULL CHECK(scope IN ('ip','email')),

@@ -71,7 +71,7 @@ describe('Protection durable des demandes Checkout',()=>{
   });
   it('retire seulement les compteurs expirés et invalide un témoin antérieur sans cette catégorie',async()=>{
     consumeCheckoutLimit(db,'192.0.2.1',NOW);consumeCheckoutLimit(db,'192.0.2.2',NOW+1);
-    const proof=await runFullCleanup(db,NOW+6000);expect(proof.ok).toBe(true);expect(proof.entries).toHaveLength(14);
+    const proof=await runFullCleanup(db,NOW+6000);expect(proof.ok).toBe(true);expect(proof.entries).toHaveLength(18);
     expect(proof.entries.find(x=>x.name==='checkout_request_limits')).toMatchObject({status:'ok',deleted:1});expect(count()).toEqual({n:1});expect(readCleanupProof(db)).toEqual(proof);
     const old={...proof,entries:proof.entries.filter(x=>x.name!=='checkout_request_limits'),totalDeleted:proof.totalDeleted-1};
     db.prepare("UPDATE operation_checks SET details_json=? WHERE name='cleanup'").run(JSON.stringify(old));expect(readCleanupProof(db)).toBeNull();

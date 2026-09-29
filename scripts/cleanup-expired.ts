@@ -1,4 +1,4 @@
-// Or SQLite et bronze technique → expiration et témoin minimal ; achats et droits conservés.
+// Or SQLite et bronze technique → expiration et témoin minimal ; achats, suivi et comptes seulement aux durées décidées (docs/conservation-des-donnees.md).
 /**
  * Cleanup expired ephemeral rows.
  *

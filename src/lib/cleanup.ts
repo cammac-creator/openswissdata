@@ -1,5 +1,6 @@
 import {DOWNLOAD_ACTIVITY_RETENTION_MS} from './service-retention.js';
-// Or SQLite et bronze technique chiffré → expiration contrôlée ; aucune suppression des achats ou droits.
+// Or SQLite et bronze technique chiffré → expiration contrôlée. Achats, suivi client et comptes ne sont effacés
+// qu'aux durées décidées le 29.09.2026 (retention-rules.ts), avec inscription au registre des effacements.
 import type Database from 'better-sqlite3';
 import { bronzePath } from './data-paths.js';
 import { purgeExpiredBronze } from './bronze-retention.js';
@@ -8,10 +9,18 @@ import type { CleanupEntry, CleanupResult, CleanupProof } from './cleanup-types.
 import { CLEANUP_CATEGORIES } from './cleanup-types.js';
 import { z } from 'zod';
 import { EVENT_RETENTION_MS } from './event-retention.js';
+import { applyAccountRetention, applyCrmRetention, applyPurchaseRetention, RetentionError, type RuleOutcome } from './retention-rules.js';
+import { syncErasureMirror } from './erasure-registry.js';
 export type { CleanupEntry, CleanupResult } from './cleanup-types.js';
 
 const DAY = 86_400_000;
 const running = new WeakMap<Database.Database, Promise<CleanupProof>>();
+// Ordre imposé : un compte n'est effacé qu'après ses achats et son suivi, jamais par cascade.
+const RETENTION_RULES: Array<{ name: CleanupEntry['name']; unit: CleanupEntry['unit']; apply: (db: Database.Database, now: number) => RuleOutcome }> = [
+  { name: 'purchase_records', unit: 'orders', apply: applyPurchaseRetention },
+  { name: 'crm_records', unit: 'customers', apply: applyCrmRetention },
+  { name: 'customer_accounts', unit: 'customers', apply: applyAccountRetention },
+];
 
 export function runCleanup(db: Database.Database, now = Date.now()): CleanupResult {
   const entries: CleanupEntry[] = [];
@@ -54,6 +63,15 @@ export function runCleanup(db: Database.Database, now = Date.now()): CleanupResu
       entries.push({ name: plan.name, deleted: 0, status: 'error', unit, error: 'database_error' });
     }
   }
+  for (const rule of RETENTION_RULES) {
+    try {
+      // Chaque règle est une transaction sans réseau : un échec l'annule entière, les suivantes continuent.
+      const outcome = rule.apply(db, now);
+      entries.push({ name: rule.name, deleted: outcome.deleted, status: outcome.error ? 'error' : 'ok', unit: rule.unit, ...(outcome.error ? { error: outcome.error } : {}) });
+    } catch (error) {
+      entries.push({ name: rule.name, deleted: 0, status: 'error', unit: rule.unit, error: error instanceof RetentionError && error.code === 'timestamp_format' ? 'timestamp_format' : 'database_error' });
+    }
+  }
   return { ok: entries.every(e => e.status !== 'error'), entries, totalDeleted: entries.reduce((n, e) => n + e.deleted, 0) };
 }
 
@@ -82,6 +100,14 @@ async function performFullCleanup(db: Database.Database, now: number): Promise<C
       result.entries.push({ name, deleted: 0, status: 'error', unit: 'folders', error: 'storage_error' });
     }
   }
+  try {
+    // Après les règles : la copie hors base doit contenir chaque effacement validé avant une éventuelle restauration.
+    syncErasureMirror(db);
+    result.entries.push({ name: 'erasure_registry', deleted: 0, status: 'ok', unit: 'rows' });
+  } catch {
+    result.ok = false;
+    result.entries.push({ name: 'erasure_registry', deleted: 0, status: 'error', unit: 'rows', error: 'storage_error' });
+  }
   const proof: CleanupProof = { ...result, checked_at: now };
   try {
     db.prepare("INSERT INTO operation_checks(name,checked_at,details_json) VALUES('cleanup',?,?) ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json")
@@ -97,9 +123,9 @@ const proofSchema = z.object({
   ok: z.boolean(), checked_at: z.number().int().nonnegative().max(8_640_000_000_000_000), totalDeleted: z.number().int().nonnegative().safe(),
   entries: z.array(z.object({
     name: z.enum(CLEANUP_CATEGORIES), deleted: z.number().int().nonnegative().safe(),
-    status: z.enum(['ok', 'not_applicable', 'error']), unit: z.enum(['rows', 'references', 'folders']),
+    status: z.enum(['ok', 'not_applicable', 'error']), unit: z.enum(['rows', 'references', 'folders', 'orders', 'customers']),
     error: z.enum(['database_error', 'storage_error', 'proof_error', 'timestamp_format']).optional(),
-  })).min(14).max(15),
+  })).min(CLEANUP_CATEGORIES.length - 1).max(CLEANUP_CATEGORIES.length),
 });
 
 /** N’expose que le témoin connu et cohérent ; un ancien/mauvais JSON n’est pas une preuve de réussite. */

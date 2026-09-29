@@ -29,6 +29,8 @@ import { startOrderDeliveryWorker } from "./lib/order-delivery.js";
 import { startFinancialWorker } from "./lib/stripe-financial.js";
 import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
+import { getDb } from "./lib/db.js";
+import { ErasureRegistryError, replayErasureRegistry } from "./lib/erasure-registry.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
 import { CHECKOUT_NOTICE_CSP, isCheckoutNotice } from './lib/checkout-notice.js';
 import {LOGIN_CONFIRMATION_CSP} from './lib/login-confirmation-page.js';
@@ -313,6 +315,17 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const env = loadEnv();
+  // Avant toute ouverture et avant les files : une base restaurée ne doit pas faire revenir des données effacées.
+  try {
+    const replay = replayErasureRegistry(getDb());
+    const reapplied = Object.values(replay.reapplied).reduce((sum, count) => sum + count, 0);
+    console.info(`[conservation] registre des effacements rejoué : ${replay.entries} entrée(s), ${reapplied} effacement(s) réappliqué(s)`);
+  } catch (error) {
+    // Seuls un code fermé, la catégorie et l'identifiant interne sont journalisés, jamais une valeur client.
+    const detail = error instanceof ErasureRegistryError ? { code: error.code, ...(error.entry ?? {}) } : { code: 'replay_failed' };
+    console.error("[conservation] registre des effacements non rejoué ; service non ouvert", detail);
+    process.exit(1);
+  }
   const app = createApp();
   serve({ fetch: app.fetch, port: env.PORT });
   console.log(`Listening on :${env.PORT}`);
