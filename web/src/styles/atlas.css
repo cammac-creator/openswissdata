@@ -195,7 +195,8 @@
 .atlas-meter { display:block; height:3px; width:100%; min-width:60px; background:#c9d4c6; border-radius:2px; margin-top:7px; overflow:hidden; }
 .atlas-meter span { display:block; width:0; height:100%; background:var(--atlas-ink); }
 .atlas-site[data-motion='on'] .atlas-meter span { transition:width 1.1s cubic-bezier(.16,1,.3,1); }
-.atlas-limits { margin:0; padding-left:20px; display:grid; gap:20px; }
+/* Le reset Tailwind retire les puces des listes : les limites gardent leur carré rouge. */
+.atlas-limits { margin:0; padding-left:20px; display:grid; gap:20px; list-style:square outside; }
 .atlas-limits li { font-size:13px; color:var(--atlas-muted); line-height:1.8; padding-left:4px; }
 .atlas-limits li::marker { color:var(--atlas-red); }
 .atlas-history { margin-top:28px; padding:22px 0 0; border-top:1px solid var(--atlas-line); }

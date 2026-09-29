@@ -39,10 +39,10 @@ const finalDescription = description ?? defaultDescription;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const hreflangs = getHreflangAlternates(Astro.url.pathname);
 const orgDescription = lang === "de"
-  ? "Offizielle Schweizer Datensätze normalisiert — TARES (Zoll), NOGA/NACE/ISIC, FINMA-Register. Multi-Format (CSV, Parquet, JSON, SQL), Ed25519-Signatur, automatische Updates."
+  ? "Offizielle Schweizer Datensätze normalisiert — TARES (Zoll), NOGA/NACE/ISIC, FINMA-Register. Multi-Format (CSV, Parquet, JSON, SQL), Ed25519-Signatur, geplante und geprüfte Erhebungen."
   : lang === "en"
-    ? "Official Swiss datasets normalized — TARES (customs), NOGA/NACE/ISIC, FINMA registry. Multi-format (CSV, Parquet, JSON, SQL), Ed25519 signature, automatic updates."
-    : "Datasets officiels suisses normalisés — TARES (douanes), NOGA/NACE/ISIC, registre FINMA. Format multi (CSV, Parquet, JSON, SQL), signature Ed25519, mises à jour automatiques.";
+    ? "Official Swiss datasets normalized — TARES (customs), NOGA/NACE/ISIC, FINMA registry. Multi-format (CSV, Parquet, JSON, SQL), Ed25519 signature, scheduled and checked collections."
+    : "Datasets officiels suisses normalisés — TARES (douanes), NOGA/NACE/ISIC, registre FINMA. Format multi (CSV, Parquet, JSON, SQL), signature Ed25519, collectes planifiées et contrôlées.";
 ---
 <!DOCTYPE html>
 <html lang={htmlLang} class:list={{ 'atlas-document': appearance === 'atlas' }}>
