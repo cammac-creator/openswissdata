@@ -4,7 +4,7 @@ export type CleanupEntry = {
   deleted: number;
   status: 'ok' | 'not_applicable' | 'error';
   unit: 'rows' | 'references' | 'folders' | 'orders' | 'customers';
-  error?: 'database_error' | 'storage_error' | 'proof_error' | 'timestamp_format';
+  error?: 'database_error' | 'storage_error' | 'proof_error' | 'timestamp_format' | 'replay_pending' | 'registry_suspended';
 };
 export type CleanupResult = {
   ok: boolean;

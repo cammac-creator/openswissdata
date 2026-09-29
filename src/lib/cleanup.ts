@@ -10,7 +10,7 @@ import { CLEANUP_CATEGORIES } from './cleanup-types.js';
 import { z } from 'zod';
 import { EVENT_RETENTION_MS } from './event-retention.js';
 import { applyAccountRetention, applyCrmRetention, applyPurchaseRetention, RetentionError, type RuleOutcome } from './retention-rules.js';
-import { syncErasureMirror } from './erasure-registry.js';
+import { reapplyErasures } from './erasure-registry.js';
 export type { CleanupEntry, CleanupResult } from './cleanup-types.js';
 
 const DAY = 86_400_000;
@@ -100,13 +100,15 @@ async function performFullCleanup(db: Database.Database, now: number): Promise<C
       result.entries.push({ name, deleted: 0, status: 'error', unit: 'folders', error: 'storage_error' });
     }
   }
-  try {
-    // Après les règles : la copie hors base doit contenir chaque effacement validé avant une éventuelle restauration.
-    syncErasureMirror(db);
-    result.entries.push({ name: 'erasure_registry', deleted: 0, status: 'ok', unit: 'rows' });
-  } catch {
+  // Après les règles : réapplique ce qu'une restauration aurait ramené, puis copie hors base chaque effacement validé.
+  // Le rejeu ne lève jamais d'exception ; son témoin distingue suspension, copie illisible et entrées en attente.
+  const replay = reapplyErasures(db, now, 'cleanup');
+  if (replay.status === 'ok') result.entries.push({ name: 'erasure_registry', deleted: 0, status: 'ok', unit: 'rows' });
+  else {
     result.ok = false;
-    result.entries.push({ name: 'erasure_registry', deleted: 0, status: 'error', unit: 'rows', error: 'storage_error' });
+    const error = replay.status === 'suspended' ? 'registry_suspended' as const : replay.issues.includes('database_error') ? 'database_error' as const
+      : replay.issues.some(issue => issue !== 'replay_pending') ? 'storage_error' as const : 'replay_pending' as const;
+    result.entries.push({ name: 'erasure_registry', deleted: 0, status: 'error', unit: 'rows', error });
   }
   const proof: CleanupProof = { ...result, checked_at: now };
   try {
@@ -124,7 +126,7 @@ const proofSchema = z.object({
   entries: z.array(z.object({
     name: z.enum(CLEANUP_CATEGORIES), deleted: z.number().int().nonnegative().safe(),
     status: z.enum(['ok', 'not_applicable', 'error']), unit: z.enum(['rows', 'references', 'folders', 'orders', 'customers']),
-    error: z.enum(['database_error', 'storage_error', 'proof_error', 'timestamp_format']).optional(),
+    error: z.enum(['database_error', 'storage_error', 'proof_error', 'timestamp_format', 'replay_pending', 'registry_suspended']).optional(),
   })).min(CLEANUP_CATEGORIES.length - 1).max(CLEANUP_CATEGORIES.length),
 });
 

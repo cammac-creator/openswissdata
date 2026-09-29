@@ -30,7 +30,7 @@ import { startFinancialWorker } from "./lib/stripe-financial.js";
 import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
 import { getDb } from "./lib/db.js";
-import { ErasureRegistryError, replayErasureRegistry } from "./lib/erasure-registry.js";
+import { reapplyErasures } from "./lib/erasure-registry.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
 import { CHECKOUT_NOTICE_CSP, isCheckoutNotice } from './lib/checkout-notice.js';
 import {LOGIN_CONFIRMATION_CSP} from './lib/login-confirmation-page.js';
@@ -315,16 +315,18 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const env = loadEnv();
-  // Avant toute ouverture et avant les files : une base restaurée ne doit pas faire revenir des données effacées.
-  try {
-    const replay = replayErasureRegistry(getDb());
+  // Avant l'ouverture et avant les files : réapplique ce qu'une restauration aurait ramené. Jamais bloquant :
+  // une anomalie reste visible (journal, témoin erasure_replay, catégorie erasure_registry) et le service s'ouvre.
+  let database;
+  try { database = getDb(); }
+  catch { console.error("[conservation] base indisponible au démarrage ; registre des effacements repris au prochain nettoyage"); }
+  if (database) {
+    const replay = reapplyErasures(database, Date.now(), "startup");
     const reapplied = Object.values(replay.reapplied).reduce((sum, count) => sum + count, 0);
-    console.info(`[conservation] registre des effacements rejoué : ${replay.entries} entrée(s), ${reapplied} effacement(s) réappliqué(s)`);
-  } catch (error) {
-    // Seuls un code fermé, la catégorie et l'identifiant interne sont journalisés, jamais une valeur client.
-    const detail = error instanceof ErasureRegistryError ? { code: error.code, ...(error.entry ?? {}) } : { code: 'replay_failed' };
-    console.error("[conservation] registre des effacements non rejoué ; service non ouvert", detail);
-    process.exit(1);
+    if (replay.status === "ok") console.info(`[conservation] registre des effacements rejoué : ${replay.pending} entrée(s) en attente, ${reapplied} effacement(s) réappliqué(s)`);
+    else if (replay.status === "suspended") console.warn("[conservation] rejeu du registre suspendu (OSD_SKIP_ERASURE_REPLAY) ; service ouvert");
+    // Codes fermés, catégories et identifiants internes seulement, jamais une valeur client.
+    else console.error("[conservation] registre des effacements à examiner ; service ouvert", { issues: replay.issues, reapplied, future: replay.future, deferred: replay.deferred_entries });
   }
   const app = createApp();
   serve({ fetch: app.fetch, port: env.PORT });

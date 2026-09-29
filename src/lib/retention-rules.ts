@@ -173,7 +173,9 @@ const LAST_CONTACT_SQL = `MAX(c.created_at,
   COALESCE((SELECT l.updated_at FROM crm_languages l WHERE l.customer_id=c.id),0),
   COALESCE((SELECT MAX(s.created_at) FROM sessions s WHERE s.customer_id=c.id),0))`;
 // Jamais pendant une action ou un incident ouvert (y compris clos manuellement mais encore ouvert pour la machine),
-// une vérification financière ou un litige, ni pour un compte interne ou relié à une application MCP.
+// une vérification financière ou un litige, ni pour un compte interne ou relié à une application MCP. Toute commande
+// que la règle 1 ne considère pas comme réglée (statut manuel, rapprochement Stripe en attente, livraison en cours)
+// protège aussi le suivi qui l'explique.
 const CRM_PROTECTED_SQL = `EXISTS(SELECT 1 FROM crm_tasks t WHERE t.customer_id=c.id AND t.done_at IS NULL)
   OR EXISTS(SELECT 1 FROM orders o JOIN order_deliveries d ON d.order_id=o.id JOIN delivery_incidents i ON i.delivery_id=d.id
     WHERE o.customer_id=c.id AND i.state='open')
@@ -181,6 +183,7 @@ const CRM_PROTECTED_SQL = `EXISTS(SELECT 1 FROM crm_tasks t WHERE t.customer_id=
     JOIN delivery_incident_tasks l ON l.incident_id=i.id JOIN crm_tasks t ON t.id=l.task_id WHERE o.customer_id=c.id AND t.done_at IS NULL)
   OR EXISTS(SELECT 1 FROM orders o WHERE o.customer_id=c.id AND (o.status IN ('disputed','financial_pending')
     OR COALESCE(o.dispute_status,'') IN ('needs_response','under_review','warning_needs_response','warning_under_review')))
+  OR EXISTS(SELECT 1 FROM orders o WHERE o.customer_id=c.id AND NOT (${ORDER_SETTLED_SQL}))
   OR EXISTS(SELECT 1 FROM crm_profiles p WHERE p.customer_id=c.id AND p.internal<>0)
   OR EXISTS(SELECT 1 FROM mcp_clients m WHERE m.customer_id=c.id)`;
 const CRM_CLOCKS = [['customers', 'created_at'], ['orders', 'created_at'], ['order_deliveries', 'sent_at'], ['delivery_incident_resolutions', 'resolved_at'],

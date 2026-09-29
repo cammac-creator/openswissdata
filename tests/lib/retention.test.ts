@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -8,7 +8,7 @@ import type Database from 'better-sqlite3';
 import { closeDb, getDb } from '../../src/lib/db.js';
 import { readCleanupProof, runCleanup, runFullCleanup } from '../../src/lib/cleanup.js';
 import { applyAccountRetention, applyCrmRetention, applyPurchaseRetention, previewRetention, purchaseBoundary, RETENTION_DATE_FLOOR, yearsBefore } from '../../src/lib/retention-rules.js';
-import { ErasureRegistryError, readErasureMirror, replayErasureRegistry } from '../../src/lib/erasure-registry.js';
+import { readErasureMirror, readErasureReplay, reapplyErasures } from '../../src/lib/erasure-registry.js';
 import { swissMidnight } from '../../src/lib/crm-period.js';
 import { refreshOrderRights } from '../../src/lib/order-rights.js';
 import { renderCleanupStatus } from '../../web/src/lib/cleanup-status.js';
@@ -26,7 +26,7 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
   });
   afterEach(() => {
     closeDb(); rmSync(dir, { recursive: true, force: true });
-    delete process.env.DATABASE_PATH; delete process.env.ADMIN_EMAILS; delete process.env.CRM_INTERNAL_EMAILS;
+    delete process.env.DATABASE_PATH; delete process.env.ADMIN_EMAILS; delete process.env.CRM_INTERNAL_EMAILS; delete process.env.OSD_SKIP_ERASURE_REPLAY;
   });
 
   const count = (table: string, where = '1', ...params: unknown[]) => (db.prepare(`SELECT COUNT(*) n FROM ${table} WHERE ${where}`).get(...params) as { n: number }).n;
@@ -204,6 +204,10 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
       ['une adresse administrateur', () => { process.env.ADMIN_EMAILS = 'autre@example.test, Client@Example.test'; }],
       ['une adresse interne du bureau', () => { process.env.CRM_INTERNAL_EMAILS = 'client@example.test'; }],
       ['une application MCP reliée, même révoquée', (c, _admin, old) => { mcpClient(c, old, old + DAY); }],
+      // Toute commande que la règle 1 ne tient pas pour réglée protège aussi le suivi qui l'explique.
+      ['un statut de commande manuel', (c, _admin, old) => { order(c, old, { status: 'manual_hold' }); }],
+      ['un rapprochement Stripe en attente', (c, _admin, old) => { order(c, old, { intent: 'pi_fictif_suivi' }); db.prepare("INSERT INTO stripe_financial_jobs(charge_id,payment_intent,livemode,revision,checked_revision,state,next_attempt_at) VALUES('ch_fictif_suivi','pi_fictif_suivi',1,2,1,'pending',?)").run(old); }],
+      ['une livraison en vérification', (c, _admin, old) => { order(c, old, { delivery: 'review' }); }],
     ];
     it.each(guards)('n’efface jamais le suivi pendant %s', (_label, guard) => {
       const old = cutoff - 800 * DAY, admin = customer('bureau@example.test', old), c = customer('client@example.test', old);
@@ -289,7 +293,12 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
       expect(again.entries.filter(e => ['purchase_records', 'crm_records', 'customer_accounts'].includes(e.name)).every(e => e.deleted === 0 && e.status === 'ok')).toBe(true);
       expect(registry()).toEqual(expected);
     });
-    it('rejoue le registre après restauration d’une sauvegarde antérieure : rien de ce qui a été effacé ne revient', async () => {
+    const writeMirror = (entries: Array<{ category: string; subject_id: number; erased_at: number }>) => {
+      mkdirSync(join(dir, 'retention'), { recursive: true });
+      writeFileSync(join(dir, 'retention', 'erasures.json'), JSON.stringify({ version: 1, entries }));
+    };
+    const zero = { purchase_order: 0, crm_records: 0, customer_account: 0 };
+    it('réapplique après restauration d’une sauvegarde antérieure : rien de ce qui a été effacé ne revient', async () => {
       const { admin, c, purchase, recent } = scenario();
       const snapshot = join(dir, 'instantane.sqlite');
       await db.backup(snapshot);
@@ -300,60 +309,108 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
       for (const suffix of ['-wal', '-shm']) rmSync(dbPath + suffix, { force: true });
       db = getDb();
       expect([count('customers', 'id=?', c), count('orders', 'id=?', purchase.order), count('crm_notes', 'customer_id=?', c), count('retention_erasures')]).toEqual([1, 1, 1, 0]);
-      const replay = replayErasureRegistry(db, NOW + DAY);
-      expect(replay).toEqual({ entries: 3, merged: 3, newer: 0, reapplied: { purchase_order: 1, crm_records: 1, customer_account: 1 }, mirror: 'unchanged' });
+      expect(reapplyErasures(db, NOW + DAY, 'startup')).toEqual({ status: 'ok', origin: 'startup', checked_at: NOW + DAY, issues: [], mirror_entries: 3, pending: 3, future: 0,
+        reapplied: { purchase_order: 1, crm_records: 1, customer_account: 1 }, deferred: 0, deferred_entries: [], mirror: 'unchanged' });
       expect(db.prepare('SELECT id FROM customers ORDER BY id').all()).toEqual([{ id: admin }, { id: recent }]);
       for (const table of ['orders', 'order_legal', 'order_grants', 'order_deliveries', 'crm_notes', 'crm_profiles', 'sessions']) expect(count(table, `${table === 'orders' ? 'customer_id' : table.startsWith('order_') ? 'order_id' : 'customer_id'}=?`, table.startsWith('order_') ? purchase.order : c)).toBe(0);
-      expect([count('orders', 'customer_id=?', recent), count('crm_notes', 'customer_id=?', recent)]).toEqual([1, 1]);
+      expect([count('orders', 'customer_id=?', recent), count('crm_notes', 'customer_id=?', recent), count('retention_erasures')]).toEqual([1, 1, 3]);
       foreignKeysIntact();
-      const witness = db.prepare("SELECT checked_at,details_json FROM operation_checks WHERE name='erasure_replay'").get() as { checked_at: number; details_json: string };
-      expect(witness.checked_at).toBe(NOW + DAY);
-      expect(witness.details_json).not.toContain('example.test');
-      expect(replayErasureRegistry(db, NOW + 2 * DAY)).toEqual({ entries: 3, merged: 0, newer: 0, reapplied: { purchase_order: 0, crm_records: 0, customer_account: 0 }, mirror: 'unchanged' });
+      expect(readErasureReplay(db)).toMatchObject({ status: 'ok', origin: 'startup', checked_at: NOW + DAY });
+      expect(JSON.stringify(readErasureReplay(db))).not.toContain('example.test');
+      // Entrées désormais dans la table : un second démarrage ne réapplique plus rien.
+      expect(reapplyErasures(db, NOW + 2 * DAY, 'startup')).toMatchObject({ status: 'ok', pending: 0, reapplied: zero });
     });
     it('garde les lignes postérieures à l’effacement et un identifiant réattribué après restauration', () => {
       const erasedAt = Date.UTC(2031, 0, 1), admin = customer('bureau@example.test', erasedAt - 900 * DAY);
       const returning = customer('revenu@example.test', erasedAt - 800 * DAY);
       note(returning, erasedAt - DAY, admin); note(returning, erasedAt + DAY, admin); profile(returning, erasedAt + DAY);
       const reused = customer('nouvel@example.test', erasedAt + DAY), later = order(reused, erasedAt + DAY);
-      const insert = db.prepare('INSERT INTO retention_erasures(category,subject_id,erased_at) VALUES(?,?,?)');
-      insert.run('crm_records', returning, erasedAt); insert.run('purchase_order', later.order, erasedAt); insert.run('customer_account', reused, erasedAt);
-      expect(replayErasureRegistry(db, erasedAt + 2 * DAY)).toMatchObject({ entries: 3, newer: 2, reapplied: { purchase_order: 0, crm_records: 1, customer_account: 0 } });
+      writeMirror([{ category: 'crm_records', subject_id: returning, erased_at: erasedAt }, { category: 'purchase_order', subject_id: later.order, erased_at: erasedAt }, { category: 'customer_account', subject_id: reused, erased_at: erasedAt }]);
+      expect(reapplyErasures(db, erasedAt + 2 * DAY, 'startup')).toMatchObject({ status: 'ok', pending: 3, reapplied: { purchase_order: 0, crm_records: 1, customer_account: 0 } });
       expect(db.prepare('SELECT created_at FROM crm_notes').all()).toEqual([{ created_at: erasedAt + DAY }]);
-      expect([count('crm_profiles'), count('orders'), count('customers', 'id=?', reused)]).toEqual([1, 1, 1]);
+      expect([count('crm_profiles'), count('orders'), count('customers', 'id=?', reused), count('retention_erasures')]).toEqual([1, 1, 1, 3]);
+    });
+    it('ne réapplique jamais une entrée déjà dans la table, ni une entrée datée dans le futur', () => {
+      const now = Date.UTC(2031, 0, 1), admin = customer('bureau@example.test', now - 900 * DAY), c = customer('client@example.test', now - 800 * DAY);
+      note(c, now - 10 * DAY, admin);
+      // Déjà appliquée dans cette base : une note datée avant (horloge, reprise, SQL manuel) n'est pas effacée au redémarrage.
+      db.prepare('INSERT INTO retention_erasures(category,subject_id,erased_at) VALUES(?,?,?)').run('crm_records', c, now - DAY);
+      writeMirror([{ category: 'crm_records', subject_id: c, erased_at: now - DAY }, { category: 'crm_records', subject_id: c, erased_at: now + 365 * DAY }]);
+      expect(reapplyErasures(db, now, 'startup')).toMatchObject({ status: 'error', issues: ['replay_pending'], pending: 1, future: 1, reapplied: zero, deferred: 0 });
+      expect([count('crm_notes'), count('retention_erasures')]).toEqual([1, 1]);
     });
     it('démarre normalement sans copie ni effacement, et crée la copie vide', () => {
-      expect(replayErasureRegistry(db, Date.UTC(2031, 0, 1))).toEqual({ entries: 0, merged: 0, newer: 0, reapplied: { purchase_order: 0, crm_records: 0, customer_account: 0 }, mirror: 'created' });
+      expect(reapplyErasures(db, Date.UTC(2031, 0, 1), 'startup')).toMatchObject({ status: 'ok', mirror_entries: 0, pending: 0, reapplied: zero, mirror: 'created' });
       expect(readErasureMirror(join(dir, 'retention', 'erasures.json'))).toEqual([]);
     });
-    it('refuse une copie illisible ou remplacée par un lien, sans rien effacer', () => {
+    it.each([
+      ['illisible', () => writeFileSync(join(dir, 'retention', 'erasures.json'), '{')],
+      ['vide', () => writeFileSync(join(dir, 'retention', 'erasures.json'), '')],
+      ['remplacée par un lien', () => { writeFileSync(join(dir, 'ailleurs.json'), JSON.stringify({ version: 1, entries: [] })); symlinkSync(join(dir, 'ailleurs.json'), join(dir, 'retention', 'erasures.json')); }],
+    ])('signale une copie %s sans lever d’erreur, sans rien effacer ni la réécrire', async (_label, prepare) => {
       const admin = customer('bureau@example.test', Date.UTC(2026, 0, 1)), c = customer('client@example.test', Date.UTC(2026, 0, 1));
       note(c, Date.UTC(2026, 0, 2), admin);
-      mkdirSync(join(dir, 'retention'));
-      writeFileSync(join(dir, 'retention', 'erasures.json'), '{');
-      let failure: unknown;
-      try { replayErasureRegistry(db); } catch (error) { failure = error; }
-      expect(failure).toMatchObject({ code: 'mirror_unreadable' });
-      rmSync(join(dir, 'retention', 'erasures.json'));
-      writeFileSync(join(dir, 'ailleurs.json'), JSON.stringify({ version: 1, entries: [{ category: 'crm_records', subject_id: c, erased_at: Date.UTC(2031, 0, 1) }] }));
-      symlinkSync(join(dir, 'ailleurs.json'), join(dir, 'retention', 'erasures.json'));
-      expect(() => replayErasureRegistry(db)).toThrow(ErasureRegistryError);
+      mkdirSync(join(dir, 'retention')); prepare();
+      const before = lstatSync(join(dir, 'retention', 'erasures.json')).isSymbolicLink() ? 'lien' : readFileSync(join(dir, 'retention', 'erasures.json'), 'utf8');
+      expect(reapplyErasures(db, Date.UTC(2031, 0, 1), 'startup')).toMatchObject({ status: 'error', issues: ['mirror_unreadable'], reapplied: zero });
+      expect(lstatSync(join(dir, 'retention', 'erasures.json')).isSymbolicLink() ? 'lien' : readFileSync(join(dir, 'retention', 'erasures.json'), 'utf8')).toBe(before);
       expect([count('crm_notes'), count('retention_erasures')]).toEqual([1, 0]);
+      const proof = await runFullCleanup(db, Date.UTC(2026, 9, 1));
+      expect(proof.entries.find(e => e.name === 'erasure_registry')).toMatchObject({ status: 'error', error: 'storage_error' });
     });
-    it('refuse le démarrage si un compte à effacer garde un achat, annule tout le rejeu et ne nomme que l’identifiant interne', () => {
+    it('garde le service quand la copie ne peut pas être écrite : témoin rouge, rien d’autre', () => {
+      mkdirSync(join(dir, 'retention'), { mode: 0o500 });
+      try {
+        expect(reapplyErasures(db, Date.UTC(2031, 0, 1), 'startup')).toMatchObject({ status: 'error', issues: ['mirror_write_failed'], mirror: 'failed' });
+        expect(readErasureReplay(db)).toMatchObject({ status: 'error', issues: ['mirror_write_failed'] });
+      } finally { chmodSync(join(dir, 'retention'), 0o700); }
+    });
+    it('efface d’abord le suivi résiduel d’un compte restauré, puis le compte', () => {
+      // Langue posée le 05.12.2035, sauvegarde le 15.12, langue retirée à la main le 20.12 (hors registre), effacement le 01.01.2036.
+      const erasedAt = swissMidnight('2036-01-01'), c = customer('client@example.test', Date.UTC(2025, 5, 1)), purchase = order(c, Date.UTC(2025, 5, 2));
+      language(c, Date.UTC(2035, 11, 5));
+      writeMirror([{ category: 'purchase_order', subject_id: purchase.order, erased_at: erasedAt }, { category: 'customer_account', subject_id: c, erased_at: erasedAt }]);
+      expect(reapplyErasures(db, erasedAt + DAY, 'startup')).toMatchObject({ status: 'ok', deferred: 0, reapplied: { purchase_order: 1, crm_records: 0, customer_account: 1 } });
+      expect([count('customers'), count('crm_languages'), count('orders')]).toEqual([0, 0, 0]);
+      foreignKeysIntact();
+    });
+    it('reporte un compte qui garde un achat, sans erreur levée, et le signale au bureau par son seul identifiant interne', async () => {
       const admin = customer('bureau@example.test', Date.UTC(2026, 0, 1)), c = customer('client@example.test', Date.UTC(2026, 0, 1));
       note(c, Date.UTC(2026, 0, 2), admin); order(c, Date.UTC(2026, 0, 3));
-      const erasedAt = Date.UTC(2037, 0, 1);
-      mkdirSync(join(dir, 'retention'));
-      writeFileSync(join(dir, 'retention', 'erasures.json'), JSON.stringify({ version: 1, entries: [
-        { category: 'crm_records', subject_id: c, erased_at: erasedAt }, { category: 'customer_account', subject_id: c, erased_at: erasedAt },
-      ] }));
-      let failure: unknown;
-      try { replayErasureRegistry(db, erasedAt + DAY); } catch (error) { failure = error; }
-      expect(failure).toBeInstanceOf(ErasureRegistryError);
-      expect(failure).toMatchObject({ code: 'replay_failed', entry: { category: 'customer_account', subject_id: c } });
-      expect(JSON.stringify(failure)).not.toContain('example.test');
-      expect([count('crm_notes'), count('orders'), count('retention_erasures')]).toEqual([1, 1, 0]);
+      // En 2031, la règle 1 garde encore l'achat de 2026 : le compte reste bloqué au nettoyage suivant.
+      const erasedAt = Date.UTC(2031, 0, 1);
+      writeMirror([{ category: 'crm_records', subject_id: c, erased_at: erasedAt }, { category: 'customer_account', subject_id: c, erased_at: erasedAt }]);
+      const replay = reapplyErasures(db, erasedAt + DAY, 'startup');
+      expect(replay).toMatchObject({ status: 'error', issues: ['replay_pending'], deferred: 1, reapplied: { purchase_order: 0, crm_records: 1, customer_account: 0 },
+        deferred_entries: [{ category: 'customer_account', subject_id: c, reason: 'account_has_records' }] });
+      expect(JSON.stringify(replay)).not.toContain('example.test');
+      // Le suivi a été réappliqué ; le compte reste en attente dans la copie, jamais effacé par cascade.
+      expect([count('crm_notes'), count('orders'), count('customers', 'id=?', c)]).toEqual([0, 1, 1]);
+      expect(registry()).toEqual([{ category: 'crm_records', subject_id: c, erased_at: erasedAt }]);
+      expect(readErasureMirror(join(dir, 'retention', 'erasures.json'))).toHaveLength(2);
+      const proof = await runFullCleanup(db, erasedAt + 2 * DAY);
+      expect(proof.entries.find(e => e.name === 'erasure_registry')).toMatchObject({ status: 'error', error: 'replay_pending' });
+      const html = renderCleanupStatus(proof, erasedAt + 2 * DAY, undefined, readErasureReplay(db));
+      expect(html).toContain('Registre des effacements à examiner');
+      expect(html).toContain(`compte n° ${c}`);
+      expect(html).not.toContain('example.test');
+    });
+    it('suspend la réapplication avec OSD_SKIP_ERASURE_REPLAY=1, sans toucher la copie, et le montre en rouge', async () => {
+      const admin = customer('bureau@example.test', Date.UTC(2026, 0, 1)), c = customer('client@example.test', Date.UTC(2026, 0, 1));
+      note(c, Date.UTC(2026, 0, 2), admin);
+      writeMirror([{ category: 'crm_records', subject_id: c, erased_at: Date.UTC(2030, 0, 1) }]);
+      const before = readFileSync(join(dir, 'retention', 'erasures.json'), 'utf8');
+      process.env.OSD_SKIP_ERASURE_REPLAY = '1';
+      expect(reapplyErasures(db, Date.UTC(2031, 0, 1), 'startup')).toMatchObject({ status: 'suspended', reapplied: zero, mirror: 'skipped' });
+      const proof = await runFullCleanup(db, Date.UTC(2026, 9, 1));
+      expect(proof.entries.find(e => e.name === 'erasure_registry')).toMatchObject({ status: 'error', error: 'registry_suspended' });
+      expect(renderCleanupStatus(proof, Date.UTC(2026, 9, 1), undefined, readErasureReplay(db))).toContain('suspendue par OSD_SKIP_ERASURE_REPLAY');
+      expect([count('crm_notes'), readFileSync(join(dir, 'retention', 'erasures.json'), 'utf8')]).toEqual([1, before]);
+    });
+    it('n’arrête jamais le démarrage à cause du registre', () => {
+      const entry = readFileSync(fileURLToPath(new URL('../../src/index.ts', import.meta.url)), 'utf8');
+      expect(entry).toContain('reapplyErasures(database, Date.now(), "startup")');
+      expect(entry).not.toMatch(/process\.exit\(1\)/);
     });
   });
 
