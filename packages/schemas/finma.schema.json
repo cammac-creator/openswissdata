@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://openswissdata.com/schemas/finma/v1",
   "title": "FINMA Registry Dataset",
-  "description": "FINMA authorised institutions registry (unified across 10 source lists)",
+  "description": "FINMA authorised institutions registry (unified from FINMA's public source lists)",
   "type": "array",
   "items": {
     "type": "object",
@@ -17,9 +17,11 @@
           "securities_firm",
           "fund_representative",
           "payment_institution",
-          "sro_member",
           "supervisory_org",
-          "insurance_intermediary"
+          "insurance_intermediary",
+          "fintech",
+          "infrastructure",
+          "other"
         ]
       },
       "name": { "type": "string" },

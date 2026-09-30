@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def load_finma_registry(csv_path: str | Path) -> pd.DataFrame:
-    """Load the unified FINMA registry CSV (all 10 entity types).
+    """Load the unified FINMA registry CSV (all entity types present in the bundle).
 
     Args:
         csv_path: path to finma_registry.csv from the FINMA bundle ZIP.

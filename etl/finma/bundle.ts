@@ -8,6 +8,8 @@ import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
 import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
 import type { FinmaEntity, FinmaEntityType, FinmaWarning } from "./types.js";
+import { FINMA_BUNDLE_ENTITY_TYPES } from "./types.js";
+import { AUTH_TYPE_TO_ENTITY_TYPE } from "./sources.js";
 import type { ZefixData } from "./ingest-zefix.js";
 import type { DeltaChange } from "./delta.js";
 
@@ -81,6 +83,17 @@ const FINMA_WITH_ZEFIX_PARQUET_SCHEMA = new parquet.ParquetSchema({
 });
 
 const DATASET_LICENSE = datasetLicense("finma");
+
+// Mêmes adresses que web/src/lib/guides.ts (SOURCES['finma-oar'].url).
+// Le README reste rédigé en français ; la phrase de couverture est
+// répétée en allemand et en anglais (voir plus bas) pour un acheteur qui
+// n'a lu que la fiche produit dans une de ces deux langues.
+const FINMA_OAR_SEARCH_URL_FR =
+  "https://www.finma.ch/fr/autorisation/organisme-d-autoregulation-oar/recherche-de-membres-oar/";
+const FINMA_OAR_SEARCH_URL_DE =
+  "https://www.finma.ch/de/bewilligung/selbstregulierungsorganisationen-sro/sro-mitglieder-suche/";
+const FINMA_OAR_SEARCH_URL_EN =
+  "https://www.finma.ch/en/authorisation/self-regulatory-organisations-sros/sro-member-search/";
 
 export interface FinmaBundleInput {
   entities: FinmaEntity[];
@@ -176,12 +189,7 @@ export async function buildBundle(
   mkdirSync(workDir, { recursive: true });
 
   const countByType = {} as Record<FinmaEntityType, number>;
-  const entityTypes: FinmaEntityType[] = [
-    "bank", "insurance", "asset_manager_collective", "asset_manager_individual",
-    "securities_firm", "fund_representative", "payment_institution",
-    "sro_member", "supervisory_org", "insurance_intermediary",
-    "fintech", "infrastructure", "other",
-  ];
+  const entityTypes: FinmaEntityType[] = FINMA_BUNDLE_ENTITY_TYPES;
   for (const t of entityTypes) countByType[t] = 0;
   for (const e of input.entities) countByType[e.entity_type] = (countByType[e.entity_type] ?? 0) + 1;
   const warningListedFlagCount = input.entities.reduce((acc, e) => acc + (e.is_warning_listed ? 1 : 0), 0);
@@ -371,6 +379,23 @@ export async function buildBundle(
   XLSX.writeFile(workbook, join(workDir, "finma.xlsx"));
 
   // Schema
+  //
+  // L'énumération entity_type livrée n'est pas la liste complète des
+  // catégories connues du code (entityTypes ci-dessus, qui sert aussi à
+  // countByType et à la boucle des CSV par catégorie) : c'est le sous-
+  // ensemble que cette archive peut légitimement justifier — soit parce
+  // qu'un libellé AuthorisationTypeEN de la collecte de production s'y
+  // mappe réellement (AUTH_TYPE_TO_ENTITY_TYPE, "other" compris, le
+  // fourre-tout), soit parce qu'une ligne de CETTE archive porte déjà ce
+  // type (couvre un tiers "zefix" ou une source future). Sans ce filtre,
+  // une catégorie qui n'a jamais eu et n'aura jamais de ligne (l'ancien
+  // sro_member, ou aujourd'hui payment_institution/insurance_intermediary)
+  // resterait listée comme si le fichier pouvait la contenir — exactement
+  // la promesse rompue documentée dans
+  // docs/internal/audit-global-20260925/sro-20260930/RAPPORT.md.
+  const reachableEntityTypes = new Set<FinmaEntityType>([...Object.values(AUTH_TYPE_TO_ENTITY_TYPE), "other"]);
+  const presentEntityTypes = new Set(input.entities.map(e => e.entity_type));
+  const schemaEntityTypes = entityTypes.filter(t => reachableEntityTypes.has(t) || presentEntityTypes.has(t));
   const schema = {
     $schema: "http://json-schema.org/draft-07/schema#",
     title: "FINMA Registry Dataset",
@@ -379,7 +404,7 @@ export async function buildBundle(
       type: "object",
       required: ["entity_type", "name", "source_list", "source_url"],
       properties: {
-        entity_type: { enum: entityTypes },
+        entity_type: { enum: schemaEntityTypes },
         name: { type: "string" },
         uid: { type: "string", pattern: "^CHE-\\d{3}\\.\\d{3}\\.\\d{3}$" },
         lei: { type: "string", pattern: "^[A-Z0-9]{20}$" },
@@ -491,6 +516,11 @@ Un champ vide signifie inconnu, et non absence d'autorisation ou absence de risq
 La présence dans le registre est celle observée à la date de collecte. Elle ne remplace pas la vérification sur finma.ch.
 Les dates du changelog sont des dates d'observation, pas des dates de décision de la FINMA.
 Le champ historique is_warning_listed est désormais vide/null : les anciennes valeurs fondées sur la ressemblance des noms ne confirmaient pas une identité et ne doivent pas être utilisées comme telles.
+
+Ce fichier ne contient pas les affiliations aux organismes d'autorégulation (OAR/SRO, loi sur le blanchiment d'argent) ni le registre des intermédiaires d'assurance. Pour vérifier une affiliation à un OAR, consultez la recherche officielle de la FINMA : ${FINMA_OAR_SEARCH_URL_FR}
+
+DE: Diese Datei enthält keine Zugehörigkeiten zu Selbstregulierungsorganisationen (OAR/SRO, Geldwäschereigesetz) und kein Register der Versicherungsvermittlerinnen und Versicherungsvermittler. SRO-Mitglieder-Suche der FINMA: ${FINMA_OAR_SEARCH_URL_DE}
+EN: This file does not contain self-regulatory organisation (OAR/SRO) affiliations under the anti-money-laundering act, nor the register for insurance intermediaries. FINMA's official SRO member search: ${FINMA_OAR_SEARCH_URL_EN}
 
 ## Couverture par catégorie
 

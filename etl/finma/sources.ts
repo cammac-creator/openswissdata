@@ -74,12 +74,6 @@ export const FINMA_SOURCES: FinmaSource[] = [
     headers_map: { Name: "name", UID: "uid", Canton: "canton", Address: "address", "Licence date": "licence_date" },
   },
   {
-    entity_type: "sro_member",
-    source_list: "finma-sro-members",
-    source_url: "https://www.finma.ch/en/finma-public/authorised-institutions/sro-members/",
-    headers_map: { Name: "name", UID: "uid", Canton: "canton", SRO: "licence_type" },
-  },
-  {
     entity_type: "supervisory_org",
     source_list: "finma-supervisory-orgs",
     source_url: "https://www.finma.ch/en/finma-public/authorised-institutions/supervisory-organisations/",

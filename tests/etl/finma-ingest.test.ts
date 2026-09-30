@@ -7,9 +7,11 @@ import { join } from "node:path";
 const fixtureDir = join(process.cwd(), "etl/finma/fixtures");
 
 describe("finma sources registry", () => {
-  it("exposes 10 distinct entity types", () => {
+  it("exposes 9 distinct entity types", () => {
+    // sro_member removed 2026-09-30: dead source (404 at FINMA, never
+    // produced by uid.csv ingestion either) — see etl/finma/SOURCES.md.
     const types = new Set(FINMA_SOURCES.map(s => s.entity_type));
-    expect(types.size).toBe(10);
+    expect(types.size).toBe(9);
   });
 
   it("every source has a headers_map mapping to 'name'", () => {

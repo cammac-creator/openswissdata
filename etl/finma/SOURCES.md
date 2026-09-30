@@ -77,7 +77,7 @@ we ingest directly from the FINMA primary source.
 
 ## Sources covered (registry)
 
-10 sources registered in `sources.ts`:
+9 sources registered in `sources.ts`:
 1. Banks
 2. Insurance companies
 3. Payment institutions (PSP / fintechs)
@@ -85,9 +85,14 @@ we ingest directly from the FINMA primary source.
 5. Asset managers individual
 6. Securities firms
 7. Fund representatives
-8. SRO members
-9. Supervisory organisations
-10. Insurance intermediaries
+8. Supervisory organisations
+9. Insurance intermediaries
+
+Removed 2026-09-30: "SRO members" (`finma-sro-members`). The listed source URL
+(`.../authorised-institutions/sro-members/`) has never existed at FINMA (404),
+and no `AuthorisationTypeEN` label in the daily `uid.csv` maps to it either —
+see `AUTH_TYPE_TO_ENTITY_TYPE` in `sources.ts`. It shipped as an always-empty
+category in every archive. See `docs/internal/audit-global-20260925/sro-20260930/RAPPORT.md`.
 
 ## Testing
 

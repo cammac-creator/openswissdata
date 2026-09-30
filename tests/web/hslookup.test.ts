@@ -50,9 +50,11 @@ describe("HSLookup live demos — source-level presence (commit c1d1e22)", () =>
   });
 
   it("FINMA charge son échantillon publié et n'embarque plus des identifiants non vérifiés", () => {
-    const old=readFileSync(join(ROOT,"components/FinmaLookup.astro"),"utf8");
+    // L'ancien composant components/FinmaLookup.astro (jamais importé par une
+    // page, seulement un lien vers /datasets/finma) a été retiré le
+    // 30.09.2026 : plus rien à relire ici, son ancien contenu FINMA_SAMPLE
+    // avait déjà disparu avant sa suppression.
     const product=readFileSync(join(ROOT,"components/FinmaProduct.astro"),"utf8");
-    expect(old).not.toContain("FINMA_SAMPLE");
     expect(product).toContain("/api/catalog/finma");
     expect(product).not.toContain("CHE-101.329.561");
     expect(product).not.toContain("licdate:");

@@ -1,6 +1,0 @@
----
-import { getLangFromPath, localizePath } from "../i18n/utils";
-const lang = getLangFromPath(Astro.url.pathname);
-const text = {fr: "Consulter l’échantillon FINMA issu de la version publiée", en: "View the FINMA sample from the published version", de: "FINMA-Muster aus der veröffentlichten Version ansehen"}[lang];
----
-<a href={localizePath('/datasets/finma',lang)}>{text} →</a>

@@ -6,12 +6,24 @@ export type FinmaEntityType =
   | "securities_firm"
   | "fund_representative"
   | "payment_institution"
-  | "sro_member"
   | "supervisory_org"
   | "insurance_intermediary"
   | "fintech"
   | "infrastructure"
   | "other";
+
+/**
+ * Toutes les catégories effectivement livrées dans schema.json, le README et
+ * les fichiers finma_<type>.csv (voir bundle.ts::buildBundle). Source unique :
+ * ne pas dupliquer cette liste ailleurs (elle sert aussi de garde-fou dans
+ * tests/etl/finma-coverage-promises.test.ts).
+ */
+export const FINMA_BUNDLE_ENTITY_TYPES: FinmaEntityType[] = [
+  "bank", "insurance", "asset_manager_collective", "asset_manager_individual",
+  "securities_firm", "fund_representative", "payment_institution",
+  "supervisory_org", "insurance_intermediary",
+  "fintech", "infrastructure", "other",
+];
 
 export interface FinmaEntity {
   entity_type: FinmaEntityType;
