@@ -21,6 +21,10 @@
  *    l'incident (« SRO members », un compte figé de listes, « DSFI ») et
  *    contient bien la phrase de couverture, avec un lien vers la recherche
  *    officielle de membres OAR de la FINMA.
+ * 4. (30.09.2026) La fiche annonce l'organisme de surveillance (LEFin) des
+ *    gestionnaires et les listes des OAR et des OS, sans les présenter comme
+ *    une affiliation OAR ; la collecte de production les lit et la
+ *    construction réelle les livre, jamais vides.
  *
  * Ce que ce fichier NE couvre PAS :
  * - Il n'appelle aucun service réseau (ni finma.ch, ni l'API du site) : il ne
@@ -43,7 +47,13 @@ import { buildBundle as buildProductionBundle } from "../../etl/finma/bundle.js"
 import { withTestSignature } from "../helpers/signature.js";
 import { parseUidCsv } from "../../etl/finma/ingest.js";
 import { FINMA_BUNDLE_ENTITY_TYPES } from "../../etl/finma/types.js";
-import { AUTH_TYPE_TO_ENTITY_TYPE } from "../../etl/finma/sources.js";
+import { AUTH_TYPE_TO_ENTITY_TYPE, FINMA_AO_XLSX_URL, FINMA_SRO_XLSX_URL, FINMA_VVTR_XLSX_URL } from "../../etl/finma/sources.js";
+import {
+  assertKnownSupervisoryOrganisations,
+  attachSupervisoryOrganisations,
+  parseReferenceOrganisationsXlsx,
+  parseSupervisedManagersXlsx,
+} from "../../etl/finma/ingest-supervision.js";
 
 // Catégories que la collecte de production peut un jour produire, quel que
 // soit l'échantillon du jour ("other" est le fourre-tout universel de
@@ -145,5 +155,58 @@ describe("finma coverage promises (régression sro_member)", () => {
     expect(source).toContain("self-regulatory organisation (SRO)");
     expect(source).toContain("Selbstregulierungsorganisationen (SRO");
     expect(source).toContain("SOURCES['finma-oar']");
+  });
+
+  // Extension du 30.09.2026 (option B1) : la fiche annonce l'organisme de
+  // surveillance des gestionnaires et les listes des OAR et des OS. Même règle
+  // que ci-dessus : une promesse doit être tenue par la construction réelle.
+  it("la fiche annonce l'organisme de surveillance et les listes OAR/OS sans les confondre avec une affiliation OAR", () => {
+    const source = readFileSync(join(process.cwd(), "web/src/components/FinmaProduct.astro"), "utf8");
+    for (const [announce, lists, notAffiliation] of [
+      ["indique l’organisme de surveillance (loi sur les établissements financiers, LEFin)", "listes FINMA des OAR reconnus et des organismes de surveillance autorisés, sans leurs membres", "un organisme de surveillance n’est pas une affiliation à un OAR"],
+      ["gives the supervisory organisation under the Financial Institutions Act (FinIA)", "lists of recognised SROs and authorised supervisory organisations, without their members", "a supervisory organisation is not an SRO affiliation"],
+      ["nennt die Datei die Aufsichtsorganisation nach Finanzinstitutsgesetz (FINIG)", "anerkannten Selbstregulierungsorganisationen (SRO) und der bewilligten Aufsichtsorganisationen, ohne deren Mitglieder", "eine Aufsichtsorganisation ist keine SRO-Zugehörigkeit"],
+    ]) {
+      expect(source).toContain(announce);
+      expect(source).toContain(lists);
+      expect(source).toContain(notAffiliation);
+    }
+    // La collecte de production doit lire ces sources et les passer à l'archive.
+    const release = readFileSync(join(process.cwd(), "etl/finma/release.ts"), "utf8");
+    expect(release).toMatch(/await ingestFinmaSupervision\(/);
+    expect(release).toMatch(/buildBundle\(\{[^}]*\bsupervision\b/);
+  });
+
+  it("la construction de production livre l'organisme de surveillance et deux tables de référence jamais vides", async () => {
+    const workDir = mkdtempSync(join(tmpdir(), "osd-finma-coverage-os-"));
+    const fixtures = join(process.cwd(), "etl/finma/fixtures");
+    const csvPath = join(workDir, "uid.csv");
+    writeFileSync(csvPath, [
+      "Name;City;AuthorisationTypeDE;AuthorisationTypeFR;AuthorisationTypeIT;AuthorisationTypeEN;UID",
+      "Exemple Gestion SA;Lausanne;Vermögensverwalter;Gestionnaire de fortune;Gestore patrimoniale;Portfolio manager;CHE-101.555.555",
+    ].join("\n"), "utf8");
+    try {
+      const entities = parseUidCsv(csvPath);
+      const managers = parseSupervisedManagersXlsx(join(fixtures, "finma-vvtr-sample.xlsx"));
+      const sros = parseReferenceOrganisationsXlsx(join(fixtures, "finma-sro-sample.xlsx"), "sro", { source_url: FINMA_SRO_XLSX_URL, observed_on: "2026-09-30" });
+      const supervisoryOrganisations = parseReferenceOrganisationsXlsx(join(fixtures, "finma-ao-sample.xlsx"), "ao", { source_url: FINMA_AO_XLSX_URL, observed_on: "2026-09-30" });
+      assertKnownSupervisoryOrganisations(managers, supervisoryOrganisations);
+      const matching = attachSupervisoryOrganisations(entities, managers, { source_url: FINMA_VVTR_XLSX_URL, observed_on: "2026-09-30" });
+      const meta = (url: string) => ({ url, fetched_at: "2026-09-30T04:20:00.000Z", last_modified: null, sha256: "0".repeat(64), bytes: 1 });
+      const result = await buildBundle({ entities, supervision: { sros, supervisoryOrganisations, matching, sources: { vvtr: meta(FINMA_VVTR_XLSX_URL), sro: meta(FINMA_SRO_XLSX_URL), ao: meta(FINMA_AO_XLSX_URL) } } }, "test-coverage-os", workDir);
+      expect(result.supervisoryOrganisationRowCount).toBeGreaterThan(0);
+      for (const table of ["finma_reference_sros", "finma_reference_supervisory_organisations"]) {
+        const rows = JSON.parse(execSync(`unzip -p "${result.zipPath}" ${table}.json`, { encoding: "utf8" })) as unknown[];
+        expect(rows.length, `${table} ne doit jamais être livrée vide`).toBeGreaterThan(0);
+      }
+      const readme = execSync(`unzip -p "${result.zipPath}" README.md`, { encoding: "utf8" });
+      expect(readme).toContain("finma_reference_sros");
+      expect(readme).toContain("Ce n'est pas une affiliation à un organisme d'autorégulation");
+      expect(readme).not.toMatch(/: 0 lignes/);
+      // Une table vide ne part jamais : la construction échoue plutôt.
+      await expect(buildBundle({ entities, supervision: { sros: [], supervisoryOrganisations, matching, sources: { vvtr: meta(FINMA_VVTR_XLSX_URL), sro: meta(FINMA_SRO_XLSX_URL), ao: meta(FINMA_AO_XLSX_URL) } } }, "test-coverage-os-vide", workDir)).rejects.toThrow(/vide/);
+    } finally {
+      rmSync(workDir, { recursive: true, force: true });
+    }
   });
 });
