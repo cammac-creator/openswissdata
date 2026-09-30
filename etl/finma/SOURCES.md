@@ -1,6 +1,6 @@
 # FINMA data sources
 
-> **État au 29.09.2026.** Certains passages ci-dessous sont historiques (collecte hebdomadaire, listes XLSX par catégorie, rapprochement par ressemblance). Fonctionnement actuel : registre lu chaque jour dans `uid.csv` (`refresh-finma.yml`, créneau 04:17 UTC, souvent lancé plus tard par GitHub), type d'établissement tiré de `AuthorisationTypeEN` (`entityTypeForAuthorisation`, insensible à la casse), liste d'alerte par l'API de recherche de la FINMA (`ingest-warnings.ts`), LEI par l'API GLEIF (`ingest-gleif.ts`). En cas de doute, le code fait foi.
+> **État au 29.09.2026.** Certains passages ci-dessous sont historiques (collecte hebdomadaire, listes XLSX par catégorie, rapprochement par ressemblance). Fonctionnement actuel : registre lu chaque jour dans `uid.csv` (`refresh-finma.yml`, créneau 04:17 UTC, souvent lancé plus tard par GitHub), type d'établissement tiré de `AuthorisationTypeEN` (`entityTypeForAuthorisation`, insensible à la casse), liste d'alerte par l'API de recherche de la FINMA (`ingest-warnings.ts`), LEI par l'API GLEIF (`ingest-gleif.ts`), et depuis le 30.09.2026 organisme de surveillance des gestionnaires de fortune et trustees ainsi que les listes des OAR et des OS (`ingest-supervision.ts`, section ci-dessous). En cas de doute, le code fait foi.
 
 ## Authorised institutions registry (`finma_registry.*`)
 
@@ -14,6 +14,8 @@ FINMA publishes a single consolidated CSV with ALL authorised institutions
 
 Per-category XLSX files are still available for richer enrichment (licence
 date, status, branch addresses) — see `FINMA_PER_CATEGORY_XLSX` in `sources.ts`.
+Three of them are read daily since 2026-09-30 (`vvtr.xlsx`, `sro.xlsx`, `ao.xlsx`,
+see the section on supervisory organisations below).
 
 ### Update cadence
 
@@ -74,6 +76,60 @@ FINMA data is public. Same permission email as the registry (2026-04-17).
 OpenSanctions also republishes this list under CC-BY-NC at
 https://www.opensanctions.org/datasets/ch_finma_warnings/ — for reference only;
 we ingest directly from the FINMA primary source.
+
+## Organisme de surveillance et tables des OAR et des OS (depuis le 30.09.2026)
+
+Trois fichiers FINMA lus à chaque collecte quotidienne, après uid.csv, la liste
+d'alerte et GLEIF (`etl/finma/ingest-supervision.ts`, appelé par `release.ts`).
+Adresses : `FINMA_VVTR_XLSX_URL`, `FINMA_SRO_XLSX_URL`, `FINMA_AO_XLSX_URL`
+dans `sources.ts`.
+
+| Fichier | Contenu FINMA | Ce que l'archive en fait |
+|---|---|---|
+| `vvtr.xlsx` | « List of portfolio managers and trustees licensed by FINMA and monitored by a supervisory organisation » : nom, localité, cases Portfolio Manager / Trustee, organisme de surveillance | Colonne `supervisory_organisation` du registre (+ `_source_url`, `_observed_on`) |
+| `sro.xlsx` | Organismes d'autorégulation (OAR) reconnus : raison sociale, adresse, téléphone, e-mail, site | Table `finma_reference_sros.*` : raison sociale, adresse, site |
+| `ao.xlsx` | Organismes de surveillance (OS) autorisés : nom, adresse, localité, téléphone, e-mail, site | Table `finma_reference_supervisory_organisations.*` : nom, adresse, localité, site |
+
+**Vocabulaire.** Un OS surveille les gestionnaires de fortune et trustees selon
+la loi sur les établissements financiers (LEFin, art. 43a LFINMA). Un OAR
+(organisme d'autorégulation) relève de la loi sur le blanchiment d'argent (LBA).
+Le champ `supervisory_organisation` n'est jamais une affiliation OAR ; le fichier
+ne contient toujours pas les affiliations aux OAR (recherche officielle de la
+FINMA, une entreprise à la fois).
+
+**Rapprochement (règle du 25.09.2026 : aucune ressemblance approximative).**
+Seules les lignes « Portfolio manager » et « Trustee » du registre sont
+concernées. Une ligne reçoit l'OS si le nom ET la localité sont identiques après
+normalisation stricte (Unicode NFC, espaces réduits et retirés en bord ; casse,
+ponctuation, guillemets et forme juridique conservés : « X AG » ≠ « X SA »), si
+cette clé est unique dans vvtr.xlsx, si les lignes candidates du registre ont un
+seul UID et si le type de la ligne est coché dans vvtr.xlsx. Sinon le champ
+reste vide. Mesure du 30.09.2026 (vvtr.xlsx du jour, uid.csv du 29.09) : 1 508
+lignes vvtr sur 1 508 rattachées, aucune ambiguë ni absente ; 1 519 lignes du
+registre sur 1 608 renseignées (une société peut détenir les deux
+autorisations). Les 89 lignes vides n'ont pas de correspondance dans vvtr.xlsx ;
+la FINMA publie à part les sociétés de groupe qu'elle surveille directement
+(`grfinig.xlsx`, non repris).
+
+**Garde-fous (la version n'est pas publiée, alerte par mail du workflow).**
+Signature XLSX contrôlée avant lecture (une page HTML est refusée) ; en-tête
+repéré par son texte ; ligne « Total …: N » obligatoire et égale au nombre de
+lignes lues ; rien après le total ; drapeaux « X » ou vides, au moins un par
+ligne ; chaque OS de vvtr.xlsx doit figurer dans ao.xlsx du même passage ;
+planchers : 1 000 gestionnaires, 5 OAR, 2 OS ; au moins 95 % des lignes
+vvtr.xlsx rattachées ; `buildBundle` refuse une table de référence vide ou un
+champ promis sans aucune valeur.
+
+**Données personnelles et intégrité.** Les colonnes e-mail et téléphone ne sont
+jamais lues : deux adresses e-mail de sro.xlsx désignent des personnes. Les
+valeurs reprises le sont telles que publiées (adresses avec leurs retours à la
+ligne). Provenance : URL, date de collecte, date `Last-Modified` et SHA-256 de
+chaque fichier dans `quality.json` et le README de l'archive (accord FINMA du
+06.05.2026 : source citée, documents non altérés).
+
+**Surveillance des sources.** Les trois classeurs sont régénérés chaque nuit :
+`scripts/monitor-sources.ts` les suit en mode `xlsx-shape` (nom de feuille et
+ligne d'en-tête), références dans `etl/canary-baseline.json`.
 
 ## Sources covered (registry)
 

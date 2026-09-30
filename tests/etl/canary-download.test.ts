@@ -20,6 +20,7 @@ describe("Sources archivées avant contrôle",()=>{
   it("refuse un faux fichier Excel renvoyé avec HTTP 200",async()=>{
     vi.stubGlobal('fetch',vi.fn(async()=>new Response('texte inattendu')));
     await expect(fetchAndHash({...source,mode:'raw'})).rejects.toThrow('archive XLSX');expect(files()[0].toString()).toBe('texte inattendu');
+    await expect(fetchAndHash({...source,id:'source.fictive.forme',mode:'xlsx-shape'})).rejects.toThrow('archive XLSX');
   });
   it("échoue si le bronze ne peut pas être écrit, avant l’analyse JSON",async()=>{
     const path=join(temp,'fichier');writeFileSync(path,'fictif');vi.stubEnv('CANARY_BRONZE_DIR',path);

@@ -33,7 +33,13 @@
       "canton": { "type": "string", "pattern": "^[A-Z]{2}$" },
       "address": { "type": "string" },
       "source_list": { "type": "string" },
-      "source_url": { "type": "string", "format": "uri" }
+      "source_url": { "type": "string", "format": "uri" },
+      "supervisory_organisation": {
+        "type": "string",
+        "description": "Portfolio managers and trustees only: the supervisory organisation that supervises the institution under the Financial Institutions Act (FinIA), as named in FINMA's list vvtr.xlsx. This is not a self-regulatory organisation (SRO) affiliation under the Anti-Money Laundering Act (AMLA). Empty unless name and city match exactly and unambiguously."
+      },
+      "supervisory_organisation_source_url": { "type": "string", "format": "uri" },
+      "supervisory_organisation_observed_on": { "type": "string", "format": "date" }
     }
   }
 }

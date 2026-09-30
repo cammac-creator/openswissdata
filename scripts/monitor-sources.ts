@@ -12,6 +12,8 @@ import { pathToFileURL } from "node:url";
 import { ISIC_CSV_BY_LANG, NACE_2_1_RDF_URL } from "../etl/classifications/ingest-real.js";
 import { NACE2_URL } from "../etl/classifications/nace-official.js";
 import { NACE_ISIC_URL, OFS_METHODOLOGY_URL } from "../etl/classifications/links.js";
+import { FINMA_AO_XLSX_URL, FINMA_SRO_XLSX_URL, FINMA_VVTR_XLSX_URL } from "../etl/finma/sources.js";
+import XLSX from "../etl/shared/xlsx.js";
 
 export interface SourceCanary {
   id: string;
@@ -22,7 +24,9 @@ export interface SourceCanary {
   // continuously (rows added/removed daily) where only schema changes matter.
   // `document` hashes the bytes of a non-XLSX document (RDF, TXT, PDF) published
   // in discrete versions : même adresse que la publication, pour voir un blocage avant elle.
-  mode: "raw" | "json-shape" | "csv-shape" | "document";
+  // `xlsx-shape` : nom de la feuille et ligne d'en-tête d'un classeur régénéré
+  // chaque jour (listes FINMA) ; les lignes ajoutées ou retirées ne comptent pas.
+  mode: "raw" | "json-shape" | "csv-shape" | "document" | "xlsx-shape";
   description: string;
 }
 
@@ -77,6 +81,26 @@ export const CANARIES: SourceCanary[] = [
     url: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/csv/uid.csv",
     mode: "csv-shape",
     description: "FINMA — CSV consolidé des institutions autorisées (UID)",
+  },
+  // FINMA — trois classeurs lus par la collecte quotidienne depuis le 30.09.2026
+  // (etl/finma/ingest-supervision.ts), régénérés chaque nuit : forme seulement.
+  {
+    id: "finma.vvtr_xlsx",
+    url: FINMA_VVTR_XLSX_URL,
+    mode: "xlsx-shape",
+    description: "FINMA — gestionnaires de fortune et trustees et leur organisme de surveillance (LEFin)",
+  },
+  {
+    id: "finma.sro_xlsx",
+    url: FINMA_SRO_XLSX_URL,
+    mode: "xlsx-shape",
+    description: "FINMA — organismes d'autorégulation (OAR) reconnus",
+  },
+  {
+    id: "finma.ao_xlsx",
+    url: FINMA_AO_XLSX_URL,
+    mode: "xlsx-shape",
+    description: "FINMA — organismes de surveillance (OS) autorisés",
   },
   // BFS — NOGA via i14y JSON API
   {
@@ -200,6 +224,22 @@ export function hashCsvShape(buf: Buffer): { hash: string; headers: string[]; se
   return { hash: createHash("sha256").update(signature).digest("hex"), headers, separator };
 }
 
+/**
+ * Empreinte de forme d'un classeur XLSX : nom de la première feuille et ligne
+ * d'en-tête (première ligne d'au moins trois cellules non vides, les titres
+ * n'en ont qu'une), triée comme hashCsvShape. Le contenu des lignes est ignoré.
+ */
+export function hashXlsxShape(buf: Buffer): { hash: string; sheet: string; headers: string[] } {
+  const workbook = XLSX.read(buf, { type: "buffer" });
+  const sheet = workbook.SheetNames[0] ?? "";
+  const rows = sheet ? XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets[sheet], { header: 1, defval: null, raw: false }) : [];
+  const text = (value: unknown) => String(value ?? "").replace(/\s+/g, " ").trim();
+  const headerRow = rows.find((row) => row.filter((value) => text(value)).length >= 3) ?? [];
+  const headers = headerRow.map(text).filter((h) => h.length > 0).sort();
+  const signature = `xlsx|${sheet}|${headers.join("|")}`;
+  return { hash: createHash("sha256").update(signature).digest("hex"), sheet, headers };
+}
+
 // Sources publiques → bronze daté immuable → empreintes de contrôle.
 // Dans GitHub, le bronze reste dans l'espace temporaire du travail ; seul le rapport est conservé.
 export async function fetchAndHash(canary: SourceCanary): Promise<{ hash: string; size: number }> {
@@ -226,8 +266,13 @@ export async function fetchAndHash(canary: SourceCanary): Promise<{ hash: string
   catch(error) { if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error; }
   // Une page d'erreur HTML avec HTTP 200 n'est jamais une nouvelle référence valide.
   if(/^\s*(?:<!doctype\s+html|<html)/i.test(buf.subarray(0,300).toString()))throw new Error("La source a renvoyé une page HTML");
-  if (canary.mode === "raw") {
+  if (canary.mode === "raw" || canary.mode === "xlsx-shape") {
     if(buf.subarray(0,4).toString("hex")!=="504b0304")throw new Error("La source attendue n'est pas une archive XLSX");
+    if (canary.mode === "xlsx-shape") {
+      const { hash, headers } = hashXlsxShape(buf);
+      if (!headers.length) throw new Error("Classeur sans ligne d'en-tête reconnaissable");
+      return { hash, size: buf.length };
+    }
     return { hash: createHash("sha256").update(buf).digest("hex"), size: buf.length };
   }
   if (canary.mode === "document") {

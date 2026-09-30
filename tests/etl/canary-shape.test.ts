@@ -120,3 +120,41 @@ describe("hashCsvShape", () => {
     expect(result.headers).toEqual(["City", "Name", "UID"]);
   });
 });
+
+describe("hashXlsxShape (listes FINMA régénérées chaque jour)", () => {
+  // Fixtures fictives, même mise en page que vvtr.xlsx (titre, lignes vides, en-tête décalé, total).
+  const book = async (rows: unknown[][], sheet = "vvtr") => {
+    const { default: XLSX } = await import("../../etl/shared/xlsx.js");
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), sheet);
+    return XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }) as Buffer;
+  };
+  const shape = async (rows: unknown[][], sheet?: string) => {
+    const { hashXlsxShape } = await import("../../scripts/monitor-sources.js");
+    return hashXlsxShape(await book(rows, sheet));
+  };
+  const header = ["Name", "City", "Portfolio Manager", "Trustee", "Supervisory organisation"];
+  const table = (data: unknown[][]) => [["Titre de la liste"], [], ["", "", ""], header, ...data, [], [`Total: ${data.length}`]];
+
+  it("ignore les lignes ajoutées ou retirées et lit l'en-tête décalé", async () => {
+    const one = await shape(table([["Exemple A SA", "Bern", "X", "", "Exemple OS"]]));
+    const two = await shape(table([["Exemple A SA", "Bern", "X", "", "Exemple OS"], ["Exemple B SA", "Zug", "", "X", "Exemple OS"]]));
+    expect(one.hash).toBe(two.hash);
+    expect(one.headers).toEqual([...header].sort());
+  });
+
+  it("détecte une colonne renommée ou une feuille renommée", async () => {
+    const base = await shape(table([]));
+    const renamed = await shape([["Titre"], ["Name", "City", "Portfolio Manager", "Trustee", "Supervisory body"]]);
+    expect(renamed.hash).not.toBe(base.hash);
+    expect((await shape(table([]), "autre")).hash).not.toBe(base.hash);
+  });
+
+  it("les trois listes FINMA de la collecte sont surveillées à la même adresse", async () => {
+    const { CANARIES } = await import("../../scripts/monitor-sources.js");
+    const { FINMA_AO_XLSX_URL, FINMA_SRO_XLSX_URL, FINMA_VVTR_XLSX_URL } = await import("../../etl/finma/sources.js");
+    for (const url of [FINMA_VVTR_XLSX_URL, FINMA_SRO_XLSX_URL, FINMA_AO_XLSX_URL]) {
+      expect(CANARIES.find(c => c.url === url)?.mode, url).toBe("xlsx-shape");
+    }
+  });
+});

@@ -1,6 +1,7 @@
 import { ingestOneSource, ingestFromFinmaCsv } from "./ingest.js";
 import { FINMA_SOURCES } from "./sources.js";
-import { buildBundle } from "./bundle.js";
+import { buildBundle, type FinmaSupervisionBundleInput } from "./bundle.js";
+import { attachSupervisoryOrganisations, ingestFinmaSupervision } from "./ingest-supervision.js";
 import { ingestFinmaWarnings } from "./ingest-warnings.js";
 import { ingestGleif } from "./ingest-gleif.js";
 import { readPublishedSnapshots, buildHistory, versionDate, type PublishedVersion } from "./history.js";
@@ -68,6 +69,7 @@ export async function runRelease(
 
   let entities: FinmaEntity[] = [];
   let warnings: FinmaWarning[] = [];
+  let supervision: FinmaSupervisionBundleInput | undefined;
   if (useFixture) {
     for (const f of FIXTURE_MAP) {
       const source = FINMA_SOURCES.find((s) => s.entity_type === f.entity_type);
@@ -91,6 +93,22 @@ export async function runRelease(
     for (const entity of entities) entity.is_warning_listed = null;
     const gleif = await ingestGleif(entities, cacheDir);
     console.log(`[release-finma] GLEIF : ${gleif.matched} lignes enrichies, ${gleif.ambiguous_uids} UID ambigus non attribués`);
+
+    // Organisme de surveillance (LEFin) et tables des OAR et OS : mêmes
+    // garde-fous que les autres sources FINMA, tout échec annule la version.
+    const sup = await ingestFinmaSupervision({ cacheDir });
+    if (sup.managers.length < 1_000 || sup.sros.length < 5 || sup.supervisoryOrganisations.length < 2) {
+      throw new Error("Listes FINMA des organismes de surveillance incomplètes : publication annulée");
+    }
+    const matching = attachSupervisoryOrganisations(entities, sup.managers, {
+      source_url: sup.sources.vvtr.url, observed_on: sup.sources.vvtr.fetched_at.slice(0, 10),
+    });
+    console.log(`[release-finma] organismes de surveillance : ${matching.matched_source_rows}/${matching.source_rows} lignes FINMA rattachées, ${matching.registry_rows_with_value} lignes du registre renseignées ; ambiguës ${matching.duplicate_source_rows + matching.ambiguous_uid_source_rows}, absentes ${matching.unmatched_source_rows}, types incohérents ${matching.type_mismatch_rows}`);
+    // 1508/1508 le 30.09.2026 : une chute signale un changement de format, pas une réalité.
+    if (matching.matched_source_rows < 0.95 * matching.source_rows) {
+      throw new Error("Rapprochement des organismes de surveillance anormalement faible : publication annulée");
+    }
+    supervision = { sros: sup.sros, supervisoryOrganisations: sup.supervisoryOrganisations, matching, sources: sup.sources };
   }
   console.log(`[release-finma] total ${entities.length} entities, ${warnings.length} warnings`);
 
@@ -130,8 +148,8 @@ export async function runRelease(
   const previous = snapshots.at(-1);
   if (previous && Math.abs(entities.length - previous.entities.length) / previous.entities.length > 0.1) throw new Error("Variation FINMA supérieure à 10 % : contrôle humain nécessaire");
   const history = buildHistory(snapshots, { version, entities });
-  writeFileSync(join(outDir, `controle-${version}.json`), JSON.stringify({ version, registry_rows: entities.length, warnings: warnings.length, lei_rows: entities.filter(e => e.lei).length, history: history.coverage, changes: history.changes.length }, null, 2));
-  const bundle = await buildBundle({ entities, warnings, zefixByUid, recentChanges: history.changes, historyCoverage: history.coverage }, version, outDir);
+  writeFileSync(join(outDir, `controle-${version}.json`), JSON.stringify({ version, registry_rows: entities.length, warnings: warnings.length, lei_rows: entities.filter(e => e.lei).length, supervisory_organisation: supervision?.matching ?? null, reference_sros: supervision?.sros.length ?? 0, reference_supervisory_organisations: supervision?.supervisoryOrganisations.length ?? 0, history: history.coverage, changes: history.changes.length }, null, 2));
+  const bundle = await buildBundle({ entities, warnings, zefixByUid, supervision, recentChanges: history.changes, historyCoverage: history.coverage }, version, outDir);
   console.log(
     `[release-finma] bundle sha256 ${bundle.sha256.slice(0, 12)}..., ${(bundle.sizeBytes / 1024).toFixed(1)} KB`
   );

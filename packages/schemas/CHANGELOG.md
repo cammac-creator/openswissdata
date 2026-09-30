@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-30: supervisory organisation of portfolio managers and trustees
+
+`finma.schema.json` gains three optional properties:
+`supervisory_organisation`, `supervisory_organisation_source_url` and
+`supervisory_organisation_observed_on`. For rows whose licence type is
+"Portfolio manager" or "Trustee", `supervisory_organisation` gives the
+supervisory organisation that supervises the institution under the Financial
+Institutions Act (FinIA), copied verbatim from FINMA's list `vvtr.xlsx`. It is
+not a self-regulatory organisation (SRO) affiliation under the Anti-Money
+Laundering Act (AMLA). The value is set only when name and city are identical
+(Unicode NFC and whitespace normalised; case, punctuation and legal form kept),
+the match is unique, carries a single UID and the same licence type; otherwise
+the field stays empty. Archives also ship two reference tables with their own
+schemas (`schema_reference_sros.json`, `schema_reference_supervisory_organisations.json`):
+FINMA's lists of recognised SROs (`sro.xlsx`) and authorised supervisory
+organisations (`ao.xlsx`), limited to name, address and website (no e-mail
+addresses or phone numbers, no member lists). See `etl/finma/SOURCES.md`.
+
 ## 2026-09-30: correction
 
 `finma.schema.json`'s `entity_type` enum no longer lists `sro_member`. That

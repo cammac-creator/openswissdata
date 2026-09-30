@@ -50,6 +50,53 @@ export interface FinmaEntity {
    * aucune identité. Null signifie non établi ; consulter la liste séparée.
    */
   is_warning_listed?: boolean | null;
+  /**
+   * Organisme de surveillance (OS) qui surveille ce gestionnaire de fortune ou
+   * trustee selon la loi sur les établissements financiers (LEFin), libellé
+   * FINMA recopié tel quel depuis vvtr.xlsx. Ce n'est PAS une affiliation à un
+   * organisme d'autorégulation (OAR, loi sur le blanchiment d'argent).
+   * Vide si le rapprochement exact n'est pas établi (voir ingest-supervision.ts).
+   */
+  supervisory_organisation?: string;
+  supervisory_organisation_source_url?: string;
+  /** Date (AAAA-MM-JJ, UTC) de la collecte du fichier FINMA qui porte la valeur. */
+  supervisory_organisation_observed_on?: string;
+}
+
+/** Une ligne de vvtr.xlsx (gestionnaires de fortune et trustees surveillés par un OS). */
+export interface FinmaSupervisedManager {
+  name: string;
+  city: string;
+  portfolio_manager: boolean;
+  trustee: boolean;
+  /** Libellé FINMA de l'organisme de surveillance, recopié tel quel. */
+  supervisory_organisation: string;
+}
+
+/**
+ * Une ligne des tables de référence (sro.xlsx, ao.xlsx) : des institutions,
+ * jamais des personnes. Les colonnes e-mail et téléphone de la FINMA ne sont
+ * pas reprises (deux adresses e-mail de sro.xlsx désignent des personnes).
+ */
+export interface FinmaReferenceOrganisation {
+  name: string;
+  /** Adresse telle que publiée par la FINMA (retours à la ligne compris). */
+  address: string;
+  /** Colonne « City » de ao.xlsx (NPA et localité) ; absente de sro.xlsx. */
+  city?: string;
+  website?: string;
+  source_url: string;
+  /** Date (AAAA-MM-JJ, UTC) de la collecte du fichier FINMA. */
+  observed_on: string;
+}
+
+/** Métadonnées du bronze d'un fichier source (fetchBronze, fichier .meta.json). */
+export interface FinmaSourceFileMeta {
+  url: string;
+  fetched_at: string;
+  last_modified: string | null;
+  sha256: string;
+  bytes: number;
 }
 
 export interface FinmaSource {

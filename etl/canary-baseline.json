@@ -39,6 +39,21 @@
     "checked_at": "2026-09-25T16:18:33.863Z",
     "size": 465541
   },
+  "finma.vvtr_xlsx": {
+    "hash": "840f40c129a23c938eecac4b6ccfda7bd940ac9b98b66782194ebf916109c12f",
+    "checked_at": "2026-09-30T19:58:29.093Z",
+    "size": 180493
+  },
+  "finma.sro_xlsx": {
+    "hash": "08a57cc7932901cb597eddb2807334ef3bb81d4c40eb0d9142f2b0b3e32110b6",
+    "checked_at": "2026-09-30T19:58:29.096Z",
+    "size": 113479
+  },
+  "finma.ao_xlsx": {
+    "hash": "b816e3c7986c6811d7ee90b16ee6dbaf4da9915857b388aa239d31897c877361",
+    "checked_at": "2026-09-30T19:58:29.099Z",
+    "size": 112749
+  },
   "bfs.noga_2025": {
     "hash": "1d2451f528b26b6a40c6ac9f6d41c66ff5ba10317ccf7af2fa791aef66501638",
     "checked_at": "2026-09-25T16:18:33.863Z",

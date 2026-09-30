@@ -106,7 +106,9 @@ export const FINMA_PER_CATEGORY_XLSX: Record<string, string> = {
   foreign_collective_invest_schemes: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/afetr.xlsx",
   fund_management_and_managers: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/flvervt.xlsx",
   manager_repoffices: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/repvkv.xlsx",
-  portfolio_managers_sro: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/vvtr.xlsx",
+  // Ancienne clé « portfolio_managers_sro » : ce fichier donne l'organisme de
+  // surveillance (OS, LEFin) de chaque gestionnaire, pas une affiliation OAR (LBA).
+  portfolio_managers_supervised_by_so: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/vvtr.xlsx",
   portfolio_managers_finig: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/grfinig.xlsx",
   portfolio_managers_repoffices: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/repvvtr.xlsx",
   trading_venues: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/bourses.xlsx",
@@ -115,6 +117,21 @@ export const FINMA_PER_CATEGORY_XLSX: Record<string, string> = {
   prospectus_reviewers: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/prprosp.xlsx",
   registration_bodies: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/regst.xlsx",
 };
+
+/**
+ * Trois fichiers FINMA lus chaque jour avec uid.csv depuis le 30.09.2026
+ * (voir ingest-supervision.ts) :
+ * - vvtr.xlsx : gestionnaires de fortune et trustees autorisés par la FINMA,
+ *   avec l'organisme de surveillance (OS, loi sur les établissements
+ *   financiers, LEFin) qui surveille chacun. Ce n'est pas une affiliation à un
+ *   organisme d'autorégulation (OAR, loi sur le blanchiment d'argent, LBA).
+ * - sro.xlsx : organismes d'autorégulation (OAR) reconnus par la FINMA.
+ * - ao.xlsx : organismes de surveillance (OS) autorisés par la FINMA.
+ * Les adresses restent celles de FINMA_PER_CATEGORY_XLSX : une seule source.
+ */
+export const FINMA_VVTR_XLSX_URL = FINMA_PER_CATEGORY_XLSX.portfolio_managers_supervised_by_so;
+export const FINMA_SRO_XLSX_URL = FINMA_PER_CATEGORY_XLSX.sros;
+export const FINMA_AO_XLSX_URL = FINMA_PER_CATEGORY_XLSX.supervisory_orgs;
 
 /**
  * Map FINMA AuthorisationTypeEN labels (37 distinct values in 2026-04 snapshot)
