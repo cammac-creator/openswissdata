@@ -519,8 +519,8 @@ Le champ historique is_warning_listed est désormais vide/null : les anciennes v
 
 Ce fichier ne contient pas les affiliations aux organismes d'autorégulation (OAR/SRO, loi sur le blanchiment d'argent) ni le registre des intermédiaires d'assurance. Pour vérifier une affiliation à un OAR, consultez la recherche officielle de la FINMA : ${FINMA_OAR_SEARCH_URL_FR}
 
-DE: Diese Datei enthält keine Zugehörigkeiten zu Selbstregulierungsorganisationen (OAR/SRO, Geldwäschereigesetz) und kein Register der Versicherungsvermittlerinnen und Versicherungsvermittler. SRO-Mitglieder-Suche der FINMA: ${FINMA_OAR_SEARCH_URL_DE}
-EN: This file does not contain self-regulatory organisation (OAR/SRO) affiliations under the anti-money-laundering act, nor the register for insurance intermediaries. FINMA's official SRO member search: ${FINMA_OAR_SEARCH_URL_EN}
+DE: Diese Datei enthält keine Zugehörigkeiten zu Selbstregulierungsorganisationen (SRO, Geldwäschereigesetz GwG) und kein Register der Versicherungsvermittlerinnen und Versicherungsvermittler. SRO-Mitglieder-Suche der FINMA: ${FINMA_OAR_SEARCH_URL_DE}
+EN: This file does not contain self-regulatory organisation (SRO) affiliations under the Anti-Money Laundering Act (AMLA), nor the register for insurance intermediaries. FINMA's official SRO member search: ${FINMA_OAR_SEARCH_URL_EN}
 
 ## Couverture par catégorie
 

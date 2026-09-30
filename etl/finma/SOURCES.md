@@ -90,8 +90,8 @@ we ingest directly from the FINMA primary source.
 
 Removed 2026-09-30: "SRO members" (`finma-sro-members`). The listed source URL
 (`.../authorised-institutions/sro-members/`) has never existed at FINMA (404),
-and no `AuthorisationTypeEN` label in the daily `uid.csv` maps to it either —
-see `AUTH_TYPE_TO_ENTITY_TYPE` in `sources.ts`. It shipped as an always-empty
+and no `AuthorisationTypeEN` label in the daily `uid.csv` maps to it either
+(see `AUTH_TYPE_TO_ENTITY_TYPE` in `sources.ts`). It shipped as an always-empty
 category in every archive. See `docs/internal/audit-global-20260925/sro-20260930/RAPPORT.md`.
 
 ## Testing
