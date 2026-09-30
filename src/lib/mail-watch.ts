@@ -80,13 +80,17 @@ export function alertText(message: Pick<MailWatchCandidate, 'domain' | 'fromName
   const name = organisation(message.domain);
   const address = clip(compact(message.fromAddress), 254);
   const display = clip(compact(message.fromName), 120);
+  // Organisme officiel : expéditeur, objet et extrait. Autre domaine (un client) : ni nom, ni adresse, ni objet,
+  // ni extrait ; seulement le domaine et l'heure, pour qu'aucune donnée personnelle d'un client ne parte vers Telegram.
+  const official = Boolean(INSTITUTIONS[message.domain]);
   const lines = [
     `📬 OpenSwissData : réponse reçue de ${name}`,
-    `De : ${display && display.toLowerCase() !== address.toLowerCase() ? `${display} <${address}>` : address}`,
-    `Objet : ${clip(compact(message.subject), 300) || '(sans objet)'}`,
+    ...(official ? [
+      `De : ${display && display.toLowerCase() !== address.toLowerCase() ? `${display} <${address}>` : address}`,
+      `Objet : ${clip(compact(message.subject), 300) || '(sans objet)'}`,
+    ] : ['Message d’un client : lire dans contact@.']),
     `Reçu : ${swissTime(message.receivedAt)}`,
-    // Aucun extrait pour un domaine qui n'est pas un organisme officiel, même si l'appelant en fournit un.
-    ...(message.extract && INSTITUTIONS[message.domain] ? [message.extract] : []),
+    ...(message.extract && official ? [message.extract] : []),
     `Dis « réponse ${name} » à Claude pour la suite.`,
   ];
   return clip(lines.join('\n'), TELEGRAM_LIMIT);

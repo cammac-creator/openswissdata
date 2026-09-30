@@ -120,7 +120,9 @@ describe('Veille des réponses dans la boîte de support', () => {
     const fetcher = telegramOk();
     await run(fetcher);
     const [sent] = sentTexts(fetcher);
-    expect(sent.text).toBe(['📬 OpenSwissData : réponse reçue de client.example.test', 'De : Acheteur <achat@client.example.test>', 'Objet : Re: votre commande', 'Reçu : 30.09.2026 13:00', 'Dis « réponse client.example.test » à Claude pour la suite.'].join('\n'));
+    expect(sent.text).toBe(['📬 OpenSwissData : réponse reçue de client.example.test', 'Message d’un client : lire dans contact@.', 'Reçu : 30.09.2026 13:00', 'Dis « réponse client.example.test » à Claude pour la suite.'].join('\n'));
+    // Aucune donnée personnelle du client ne part vers Telegram.
+    expect(sent.text).not.toMatch(/Acheteur|achat@|votre commande/);
     expect(imap.calls.some(c => c.name === 'fetchOne')).toBe(false);
   });
 
@@ -267,7 +269,7 @@ describe('Règles de la veille', () => {
     expect(html).toBe('Madame, Monsieur, Votre demande est transmise.');
     const text = alertText({ domain: 'client.example.test', fromName: '', fromAddress: 'a@client.example.test', subject: '', receivedAt: NOW, extract: 'NE-PAS-ENVOYER' });
     expect(text).not.toContain('NE-PAS-ENVOYER');
-    expect(text).toContain('De : a@client.example.test\nObjet : (sans objet)');
+    expect(text).not.toMatch(/De :|Objet :|a@client/);
   });
   it('borne le texte envoyé à 4 000 caractères sans couper une paire de substitution', () => {
     const text = alertText({ domain: 'finma.ch', fromName: 'N', fromAddress: 'a@finma.ch', subject: '😀'.repeat(5000), receivedAt: NOW, extract: 'x' });
