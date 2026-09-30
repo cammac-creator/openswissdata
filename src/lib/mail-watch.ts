@@ -1,0 +1,283 @@
+// Veille des réponses attendues dans la boîte de support contact@ (FINMA, OFS, ONU et domaines configurés).
+// Lecture seule : dossiers ouverts en EXAMINE (readOnly), enveloppes et corps lus en BODY.PEEK ; aucun drapeau,
+// déplacement ni effacement. Alerte Telegram en texte brut. Aucun contenu n'est conservé : le témoin
+// `operation_checks/mail_watch` garde des compteurs, des dates, un code fermé et des empreintes des messages signalés.
+import { createHash } from 'node:crypto';
+import type Database from 'better-sqlite3';
+import type { ImapFlow } from 'imapflow';
+import { simpleParser } from 'mailparser';
+import { getDb } from './db.js';
+import { currentMessage } from './crm-language.js';
+import { connection, imap } from '../routes/crm-mail.js';
+import type { MailWatchCode, MailWatchStatus } from './mail-watch-types.js';
+
+const CHECK = 'mail_watch';
+const START_DELAY = 60_000;
+const INTERVAL = 10 * 60_000;
+const WINDOW = 3 * 86_400_000;
+const MAX_ALERTS = 5;
+const MAX_SEEN = 300;
+const MAX_FETCH = 100;
+const EXTRACT_LENGTH = 400;
+const SOURCE_LIMIT = 256_000;
+const TELEGRAM_TIMEOUT = 10_000;
+const TELEGRAM_LIMIT = 4000;
+const OWN_DOMAIN = 'openswissdata.com';
+// Organismes officiels : seuls leurs messages portent un extrait. Un autre domaine surveillé (un client, ajouté par
+// OSD_MAIL_WATCH_DOMAINS dans la configuration du serveur, jamais dans ce dépôt public) n'envoie qu'expéditeur et objet.
+const INSTITUTIONS: Readonly<Record<string, string>> = { 'finma.ch': 'FINMA', 'bfs.admin.ch': 'OFS', 'un.org': 'ONU' };
+export const DEFAULT_WATCH_DOMAINS: readonly string[] = Object.keys(INSTITUTIONS);
+const CODES: ReadonlySet<string> = new Set<MailWatchCode>(['not_configured', 'telegram_config_invalid', 'mailbox_not_connected', 'mailbox_unreadable', 'imap_failed', 'telegram_http', 'telegram_timeout', 'telegram_network', 'telegram_not_ok']);
+
+type State = MailWatchStatus & { version: 1; seen: string[] };
+type TelegramConfig = { token: string; chat: string };
+type Sent = { ok: true } | { ok: false; code: MailWatchCode; http_status?: number };
+export type MailWatchCandidate = { key: string; folder: string; uid: number; validity: string; domain: string; fromName: string; fromAddress: string; subject: string; receivedAt: number; extract: string | null };
+type Dependencies = {
+  database: () => Database.Database;
+  now: () => number;
+  connection: () => { user: string; pass: string } | null;
+  withImap: typeof imap;
+  fetch: typeof fetch;
+};
+const defaults: Dependencies = {
+  database: getDb,
+  now: Date.now,
+  connection: () => connection('support'),
+  withImap: imap,
+  fetch: (input, init) => fetch(input, init),
+};
+
+/** Domaines surveillés : `OSD_MAIL_WATCH_DOMAINS` (liste séparée par des virgules) remplace la liste par défaut. */
+export function watchedDomains(value = process.env.OSD_MAIL_WATCH_DOMAINS): string[] {
+  const valid = (value ?? '').split(',').map(d => d.trim().toLowerCase().replace(/^@/, '').replace(/\.$/, ''))
+    .filter(d => d.length <= 253 && /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/.test(d));
+  const unique = [...new Set(valid)].slice(0, 20);
+  return unique.length ? unique : [...DEFAULT_WATCH_DOMAINS];
+}
+const domainOf = (address: string): string => address.slice(address.lastIndexOf('@') + 1).trim().toLowerCase().replace(/\.$/, '');
+/** Domaine exact ou sous-domaine ; la recherche FROM d'IMAP n'est qu'une sous-chaîne (`un.org` trouve aussi `fun.org`). */
+export function watchedDomainFor(address: string, domains: readonly string[]): string | null {
+  if (address.lastIndexOf('@') < 1) return null;
+  const host = domainOf(address);
+  return domains.filter(d => host === d || host.endsWith(`.${d}`)).sort((a, b) => b.length - a.length)[0] ?? null;
+}
+const organisation = (domain: string) => INSTITUTIONS[domain] ?? domain;
+const compact = (text: string) => text.replace(/[\p{Cc}\p{Cf}\s]+/gu, ' ').trim();
+// Coupe par point de code : une moitié de paire de substitution rendrait le texte invalide pour Telegram.
+const clip = (text: string, max: number) => { const chars = Array.from(text); return chars.length > max ? `${chars.slice(0, max - 1).join('').trimEnd()}…` : text; };
+const swissTime = (time: number) => new Intl.DateTimeFormat('fr-CH', { timeZone: 'Europe/Zurich', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(time);
+const fingerprint = (key: string) => createHash('sha256').update(key).digest('hex').slice(0, 32);
+
+/** Début du texte brut (partie text/plain, sinon HTML réduit en texte), sans la citation de notre lettre. */
+export async function extractText(source: Buffer): Promise<string | null> {
+  const parsed = await simpleParser(source, { skipImageLinks: true, skipTextToHtml: true, maxHtmlLengthToParse: 500_000 });
+  const text = compact(currentMessage(parsed.text ?? ''));
+  return text ? clip(text, EXTRACT_LENGTH) : null;
+}
+
+export function alertText(message: Pick<MailWatchCandidate, 'domain' | 'fromName' | 'fromAddress' | 'subject' | 'receivedAt' | 'extract'>): string {
+  const name = organisation(message.domain);
+  const address = clip(compact(message.fromAddress), 254);
+  const display = clip(compact(message.fromName), 120);
+  const lines = [
+    `📬 OpenSwissData : réponse reçue de ${name}`,
+    `De : ${display && display.toLowerCase() !== address.toLowerCase() ? `${display} <${address}>` : address}`,
+    `Objet : ${clip(compact(message.subject), 300) || '(sans objet)'}`,
+    `Reçu : ${swissTime(message.receivedAt)}`,
+    // Aucun extrait pour un domaine qui n'est pas un organisme officiel, même si l'appelant en fournit un.
+    ...(message.extract && INSTITUTIONS[message.domain] ? [message.extract] : []),
+    `Dis « réponse ${name} » à Claude pour la suite.`,
+  ];
+  return clip(lines.join('\n'), TELEGRAM_LIMIT);
+}
+
+function telegramConfig(): TelegramConfig | 'missing' | 'invalid' {
+  const token = process.env.OSD_VEILLE_TELEGRAM_TOKEN?.trim() ?? '';
+  const chat = process.env.OSD_VEILLE_TELEGRAM_CHAT?.trim() ?? '';
+  if (!token || !chat) return 'missing';
+  // Le jeton entre dans le chemin de l'adresse : un format inattendu n'est jamais envoyé.
+  if (!/^\d{1,20}:[A-Za-z0-9_-]{20,100}$/.test(token) || !/^(?:-?\d{1,20}|@[A-Za-z0-9_]{5,64})$/.test(chat)) return 'invalid';
+  return { token, chat };
+}
+
+async function sendTelegram(config: TelegramConfig, text: string, fetcher: typeof fetch): Promise<Sent> {
+  let response: Response;
+  try {
+    response = await fetcher(`https://api.telegram.org/bot${config.token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ chat_id: config.chat, text, link_preview_options: { is_disabled: true } }),
+      redirect: 'error',
+      signal: AbortSignal.timeout(TELEGRAM_TIMEOUT),
+    });
+  } catch (error) {
+    // Le message d'une erreur réseau peut citer l'adresse, donc le jeton : seul un code fermé est gardé.
+    return { ok: false, code: error instanceof Error && error.name === 'TimeoutError' ? 'telegram_timeout' : 'telegram_network' };
+  }
+  if (!response.ok) {
+    await response.body?.cancel().catch(() => undefined);
+    return { ok: false, code: 'telegram_http', http_status: response.status };
+  }
+  const body: unknown = await response.json().catch(() => null);
+  return typeof body === 'object' && body !== null && (body as { ok?: unknown }).ok === true ? { ok: true } : { ok: false, code: 'telegram_not_ok' };
+}
+
+async function collect(client: ImapFlow, domains: readonly string[], now: number, seen: ReadonlySet<string>) {
+  const since = now - WINDOW;
+  // Boîte de réception et indésirables : une réponse attendue peut être classée en spam par erreur.
+  const folders = (await client.list()).filter(f => f.path === 'INBOX' || f.specialUse === '\\Junk').slice(0, 2);
+  const keys = new Set<string>();
+  const fresh: MailWatchCandidate[] = [];
+  for (const folder of folders) {
+    const mailbox = await client.mailboxOpen(folder.path, { readOnly: true });
+    const validity = mailbox.uidValidity.toString();
+    const uids = await client.search({ since: new Date(since), or: domains.map(from => ({ from })) }, { uid: true });
+    if (!Array.isArray(uids) || !uids.length) continue;
+    // Enveloppe seulement ; aucune autre commande IMAP n'est lancée pendant la lecture du flux.
+    for await (const m of client.fetch(uids.slice(-MAX_FETCH), { envelope: true, uid: true, internalDate: true }, { uid: true })) {
+      const envelope = m.envelope;
+      const sender = envelope?.from?.find(a => a.address);
+      const address = sender?.address?.trim() ?? '';
+      if (!envelope || !address) continue;
+      const host = domainOf(address);
+      // Copies de nos propres envois (contact@ en copie cachée) : jamais une réponse.
+      if (host === OWN_DOMAIN || host.endsWith(`.${OWN_DOMAIN}`)) continue;
+      const domain = watchedDomainFor(address, domains);
+      if (!domain) continue;
+      const receivedAt = new Date(m.internalDate ?? envelope.date ?? Number.NaN).getTime();
+      if (!Number.isFinite(receivedAt) || receivedAt < since) continue;
+      const messageId = envelope.messageId?.trim();
+      // Le Message-ID suit un message déplacé entre dossiers ; à défaut, dossier + UIDVALIDITY + UID.
+      const key = fingerprint(messageId ? `mid:${messageId}` : `uid:${folder.path}:${validity}:${m.uid}`);
+      if (keys.has(key)) continue;
+      keys.add(key);
+      if (seen.has(key)) continue;
+      fresh.push({ key, folder: folder.path, uid: m.uid, validity, domain, fromName: sender?.name ?? '', fromAddress: address, subject: envelope.subject ?? '', receivedAt, extract: null });
+    }
+  }
+  fresh.sort((a, b) => a.receivedAt - b.receivedAt);
+  const selected = fresh.slice(0, MAX_ALERTS);
+  // Extrait des seuls organismes officiels, après la lecture des enveloppes. Un échec laisse l'alerte partir sans extrait.
+  for (const folder of new Set(selected.filter(c => INSTITUTIONS[c.domain]).map(c => c.folder))) {
+    try {
+      const mailbox = await client.mailboxOpen(folder, { readOnly: true });
+      for (const candidate of selected.filter(c => c.folder === folder && INSTITUTIONS[c.domain])) {
+        if (mailbox.uidValidity.toString() !== candidate.validity) continue;
+        try {
+          const m = await client.fetchOne(String(candidate.uid), { source: { maxLength: SOURCE_LIMIT } }, { uid: true });
+          if (m && m.source) candidate.extract = await extractText(m.source);
+        } catch { /* Alerte sans extrait. */ }
+      }
+    } catch { /* Alerte sans extrait. */ }
+  }
+  return { matched: keys.size, fresh: fresh.length, selected };
+}
+
+const count = (value: unknown) => (Number.isSafeInteger(value) && (value as number) >= 0 ? (value as number) : 0);
+const stamp = (value: unknown) => (Number.isSafeInteger(value) && (value as number) > 0 ? (value as number) : null);
+function readState(db: Database.Database): State | null {
+  const row = db.prepare('SELECT checked_at,details_json FROM operation_checks WHERE name=?').get(CHECK) as { checked_at: number; details_json: string } | undefined;
+  if (!row) return null;
+  let raw: Record<string, unknown>;
+  try { raw = JSON.parse(row.details_json) as Record<string, unknown>; } catch { return null; }
+  if (!raw || typeof raw !== 'object') return null;
+  const status = raw.status === 'ok' || raw.status === 'inactive' || raw.status === 'error' ? raw.status : 'error';
+  return {
+    version: 1,
+    checked_at: row.checked_at,
+    status,
+    code: typeof raw.code === 'string' && CODES.has(raw.code) ? (raw.code as MailWatchCode) : null,
+    http_status: Number.isSafeInteger(raw.http_status) && (raw.http_status as number) >= 100 && (raw.http_status as number) < 600 ? (raw.http_status as number) : null,
+    last_success_at: stamp(raw.last_success_at),
+    last_alert_at: stamp(raw.last_alert_at),
+    matched: count(raw.matched),
+    alerted: count(raw.alerted),
+    pending: count(raw.pending),
+    total_alerted: count(raw.total_alerted),
+    domains: count(raw.domains),
+    seen: Array.isArray(raw.seen) ? raw.seen.filter((k): k is string => typeof k === 'string' && /^[0-9a-f]{32}$/.test(k)).slice(-MAX_SEEN) : [],
+  };
+}
+function publicView(state: State): MailWatchStatus {
+  const { checked_at, status, code, http_status, last_success_at, last_alert_at, matched, alerted, pending, total_alerted, domains } = state;
+  return { checked_at, status, code, http_status, last_success_at, last_alert_at, matched, alerted, pending, total_alerted, domains };
+}
+function save(db: Database.Database, state: State): State {
+  db.prepare('INSERT INTO operation_checks(name,checked_at,details_json) VALUES(?,?,?) ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json')
+    .run(CHECK, state.checked_at, JSON.stringify(state));
+  return state;
+}
+
+/** Témoin exposé au bureau : jamais la liste des empreintes. */
+export function readMailWatchStatus(db: Database.Database = getDb()): MailWatchStatus | null {
+  const state = readState(db);
+  return state ? publicView(state) : null;
+}
+
+/** Un passage complet. Ne marque un message signalé qu'après `ok:true` de Telegram. */
+export async function runMailWatch(overrides: Partial<Dependencies> = {}): Promise<MailWatchStatus> {
+  const deps: Dependencies = { ...defaults, ...overrides };
+  const db = deps.database();
+  const now = deps.now();
+  const previous = readState(db);
+  let state: State = {
+    version: 1, checked_at: now, status: 'ok', code: null, http_status: null,
+    last_success_at: previous?.last_success_at ?? null, last_alert_at: previous?.last_alert_at ?? null,
+    matched: 0, alerted: 0, pending: 0, total_alerted: previous?.total_alerted ?? 0, domains: 0, seen: previous?.seen ?? [],
+  };
+  const finish = (patch: Partial<State>) => publicView(save(db, { ...state, ...patch }));
+  const telegram = telegramConfig();
+  if (telegram === 'missing') return finish({ status: 'inactive', code: 'not_configured' });
+  if (telegram === 'invalid') return finish({ status: 'inactive', code: 'telegram_config_invalid' });
+  const domains = watchedDomains();
+  state.domains = domains.length;
+  let auth: { user: string; pass: string } | null;
+  try { auth = deps.connection(); } catch { return finish({ status: 'error', code: 'mailbox_unreadable' }); }
+  if (!auth) return finish({ status: 'inactive', code: 'mailbox_not_connected' });
+  let found: Awaited<ReturnType<typeof collect>>;
+  const seen = new Set(state.seen);
+  try { found = await deps.withImap(auth, client => collect(client, domains, now, seen)); }
+  catch { return finish({ status: 'error', code: 'imap_failed' }); }
+  state = { ...state, matched: found.matched, pending: found.fresh };
+  for (const candidate of found.selected) {
+    const sent = await sendTelegram(telegram, alertText(candidate), deps.fetch);
+    if (!sent.ok) return finish({ status: 'error', code: sent.code, http_status: sent.http_status ?? null });
+    state = {
+      ...state, alerted: state.alerted + 1, pending: state.pending - 1, total_alerted: state.total_alerted + 1, last_alert_at: deps.now(),
+      seen: [...state.seen.filter(k => k !== candidate.key), candidate.key].slice(-MAX_SEEN),
+    };
+    // Marqué aussitôt : un arrêt en cours de passage ne renverra pas cette alerte.
+    save(db, state);
+  }
+  return finish({ status: 'ok', code: null, last_success_at: now });
+}
+
+/** Minuterie du point d'entrée réel (jamais dans createApp) : premier passage après 60 s, puis toutes les 10 minutes. */
+export function startMailWatch(overrides: Partial<Dependencies> & { run?: () => Promise<MailWatchStatus> } = {}): () => void {
+  const { run = () => runMailWatch(overrides) } = overrides;
+  let stopped = false;
+  let timer: ReturnType<typeof setTimeout>;
+  const schedule = (delay: number) => {
+    if (stopped) return;
+    timer = setTimeout(() => void tick(), delay);
+    timer.unref();
+  };
+  const tick = async () => {
+    if (stopped) return;
+    try {
+      const result = await run();
+      // Codes fermés et nombres seulement : jamais d'adresse, d'objet, d'extrait ni de message d'erreur brut.
+      if (result.status === 'error') console.error(`[veille courrier] passage en échec (${result.code ?? 'inconnu'}) ; nouvel essai dans dix minutes`);
+      else if (result.alerted) console.info(`[veille courrier] ${result.alerted} alerte(s) envoyée(s)`);
+    } catch {
+      console.error('[veille courrier] passage interrompu ; nouvel essai dans dix minutes');
+    } finally {
+      // Une seule minuterie, réarmée après la fin : aucun passage concurrent ni relance après arrêt.
+      schedule(INTERVAL);
+    }
+  };
+  schedule(START_DELAY);
+  console.info('[veille courrier] minuterie active ; premier passage après 60 secondes');
+  return () => { stopped = true; clearTimeout(timer); };
+}

@@ -10,4 +10,10 @@ describe('Confidentialité des rapports d’erreur',()=>{
   const event=config.beforeSend({request:{headers:{cookie:'osd_session=SECRET_SESSION'},data:{pass:'SECRET_PASSWORD'},url:'https://example.test/?token=SECRET_LINK'},user:{email:'private@example.test'},breadcrumbs:[{data:{url:'SECRET_BREADCRUMB'}}],transaction:'GET /api/download/SECRET_TOKEN',extra:{path:'/api/admin/crm/customers/:id',method:'PATCH',headers:{cookie:'SECRET_SESSION'},body:'SECRET_PASSWORD'},message:'Erreur'});
   const wire=JSON.stringify(event);expect(wire).not.toContain('SECRET_');expect(wire).not.toContain('private@example.test');expect(event.extra).toEqual({path:'/api/admin/crm/customers/:id',method:'PATCH'});
  });
+ it('masque un jeton Telegram cité dans une erreur',()=>{
+  process.env.SENTRY_DSN='https://public@example.test/1';initSentry();
+  const config=mocks.init.mock.calls[0][0];const token='123456789:jeton-fictif-TELEGRAM-abcdefghij';
+  const event=config.beforeSend({message:`échec https://api.telegram.org/bot${token}/sendMessage`,exception:{values:[{value:`request to https://api.telegram.org/bot${token}/sendMessage failed`}]}});
+  expect(JSON.stringify(event)).not.toContain('jeton-fictif');expect(event.message).toContain('bot***');
+ });
 });

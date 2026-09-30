@@ -45,6 +45,8 @@ export function initSentry(): void {
       // Defensive: drop common secret-looking strings before sending.
       const clean = (s: string) =>
         s
+          // Jeton Telegram de la veille du courrier : il figure dans le chemin de l’adresse d’envoi.
+          .replace(/bot\d+:[A-Za-z0-9_-]+/g, "bot***")
           .replace(/Bearer\s+[A-Za-z0-9._-]+/g, "Bearer ***")
           .replace(/whsec_[A-Za-z0-9]+/g, "whsec_***")
           .replace(/sk_(live|test)_[A-Za-z0-9]+/g, "sk_$1_***")

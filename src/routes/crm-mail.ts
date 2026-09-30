@@ -31,7 +31,8 @@ export function connection(account: Account = "support") {
 }
 const activeClients = new Map<string, Set<ImapFlow>>();
 const activeReads = new Map<string, Set<Promise<unknown>>>();
-async function imap<T>(auth: { user: string; pass: string }, run: (client: ImapFlow) => Promise<T>): Promise<T> {
+// Exportée pour la veille des réponses (src/lib/mail-watch.ts) : même connexion, et une déconnexion du bureau la ferme aussi.
+export async function imap<T>(auth: { user: string; pass: string }, run: (client: ImapFlow) => Promise<T>): Promise<T> {
   const client = new ImapFlow({ host: "mail.infomaniak.com", port: 993, secure: true, auth, logger: false, connectionTimeout: 10_000, greetingTimeout: 10_000, socketTimeout: 20_000, disableAutoIdle: true });
   const clients = activeClients.get(auth.user) ?? new Set<ImapFlow>();
   clients.add(client); activeClients.set(auth.user, clients);
