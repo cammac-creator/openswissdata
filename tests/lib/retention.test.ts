@@ -14,7 +14,7 @@ import { refreshOrderRights } from '../../src/lib/order-rights.js';
 import { renderCleanupStatus } from '../../web/src/lib/cleanup-status.js';
 
 // Personnes, achats et identifiants entièrement fictifs ; aucune base réelle ni appel réseau.
-const DAY = 86_400_000;
+const DAY = 86_400_000, HOUR = 3_600_000;
 describe('Durées de conservation du 29.09.2026 et registre des effacements', () => {
   let dir: string, dbPath: string, db: Database.Database, sessions = 0;
   beforeEach(() => {
@@ -62,6 +62,10 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
     .run(`osd_fictif_${++sessions}`, customerId, at, revokedAt);
   const registry = () => db.prepare('SELECT category,subject_id,erased_at FROM retention_erasures ORDER BY id').all();
   const foreignKeysIntact = () => expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+  const writeMirror = (entries: Array<{ category: string; subject_id: number; erased_at: number }>) => {
+    mkdirSync(join(dir, 'retention'), { recursive: true });
+    writeFileSync(join(dir, 'retention', 'erasures.json'), JSON.stringify({ version: 1, entries }));
+  };
 
   it('n’efface rien aujourd’hui : aucune donnée de 2026 n’atteint l’âge requis', () => {
     const now = Date.now(), admin = customer('bureau@example.test', now - 30 * DAY), c = customer('client@example.test', now - 20 * DAY);
@@ -111,10 +115,12 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
       const closed = incident(old.delivery, 'accepted', firstKept - 1), followUp = task(c, firstKept - 1, firstKept);
       resolution(closed, old.delivery, admin, firstKept - 1); link(closed, followUp, admin, firstKept - 1); note(c, firstKept - 1, admin);
       db.prepare("INSERT INTO download_activity(customer_id,dataset_id,version,order_id,source,created_at) VALUES(?,'finma','2025.12.31',?,'email',?)").run(c, old.order, firstKept - 1);
-      for (const [charge, intent] of [['ch_fictif_ancien', 'pi_fictif_ancien'], ['ch_fictif_garde', 'pi_fictif_garde']]) {
+      // Notification reçue le jour de chaque achat. Depuis le 30.09.2026, une notification de 2026 (remboursement,
+      // contestation) garderait l'achat de 2025 jusqu'en 2037 : voir l'ancrage sur le dernier mouvement ci-dessous.
+      for (const [charge, intent, movedAt] of [['ch_fictif_ancien', 'pi_fictif_ancien', firstKept - 1], ['ch_fictif_garde', 'pi_fictif_garde', firstKept]] as const) {
         db.prepare('INSERT INTO stripe_charge_states(charge_id,payment_intent,amount_chf,refunded_chf,dispute_status,livemode,checked_at) VALUES(?,?,29900,0,NULL,1,?)').run(charge, intent, firstKept);
         db.prepare("INSERT INTO stripe_financial_jobs(charge_id,payment_intent,livemode,revision,checked_revision,state,next_attempt_at,checked_at) VALUES(?,?,1,1,1,'synced',?,?)").run(charge, intent, firstKept, firstKept);
-        db.prepare('INSERT INTO stripe_financial_events(id,charge_id,created_at) VALUES(?,?,?)').run(`evt_${charge}`, charge, firstKept);
+        db.prepare('INSERT INTO stripe_financial_events(id,charge_id,created_at) VALUES(?,?,?)').run(`evt_${charge}`, charge, movedAt);
       }
       const alone = customer('seul@example.test', firstKept - 200 * DAY), lonely = order(alone, firstKept - DAY);
 
@@ -150,6 +156,137 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
       expect(applyPurchaseRetention(db, at2036)).toEqual({ deleted: 0 });
       expect(count('orders')).toBe(7);
       expect(registry()).toEqual([]);
+    });
+  });
+
+  describe('Règle 1 : ancrage sur le dernier mouvement de paiement (décision du 30.09.2026)', () => {
+    const at2036 = swissMidnight('2036-01-01'), at2037 = swissMidnight('2037-01-01');
+    // Paiement réglé et rapproché : état, travail synchronisé et notifications reçues (dates de réception).
+    const payment = (intent: string, charge: string, checkedAt: number, movements: number[], refunded = 0, dispute: string | null = null) => {
+      db.prepare('INSERT INTO stripe_charge_states(charge_id,payment_intent,amount_chf,refunded_chf,dispute_status,livemode,checked_at) VALUES(?,?,29900,?,?,1,?)').run(charge, intent, refunded, dispute, checkedAt);
+      db.prepare("INSERT INTO stripe_financial_jobs(charge_id,payment_intent,livemode,revision,checked_revision,state,next_attempt_at,checked_at) VALUES(?,?,1,1,1,'synced',?,?)").run(charge, intent, checkedAt + 6 * HOUR, checkedAt);
+      movements.forEach((at, index) => db.prepare('INSERT INTO stripe_financial_events(id,charge_id,created_at) VALUES(?,?,?)').run(`evt_fictif_${charge}_${index}`, charge, at));
+    };
+    const orderIds = () => (db.prepare('SELECT id FROM orders ORDER BY id').all() as Array<{ id: number }>).map(row => row.id);
+
+    it('garde un achat du 20.12.2025 remboursé le 10.01.2026 jusqu’au 31.12.2036 à 23 h 59 min 59,999 s (heure suisse), l’efface au premier passage de 2037 ; un achat sans remboursement garde la frontière de 2036', () => {
+      const bought = swissMidnight('2025-12-20') + 14 * HOUR, refundedAt = swissMidnight('2026-01-10') + 10 * HOUR;
+      const c = customer('rembourse@example.test', bought - DAY), other = customer('simple@example.test', bought - DAY);
+      const refunded = order(c, bought, { intent: 'pi_fictif_rembourse', status: 'refunded' });
+      db.prepare('UPDATE orders SET refunded_chf=29900 WHERE id=?').run(refunded.order);
+      payment('pi_fictif_rembourse', 'ch_fictif_rembourse', refundedAt + 5 * 60_000, [refundedAt, refundedAt + 2_000], 29900);
+      const plain = order(other, bought, { intent: 'pi_fictif_simple' });
+      payment('pi_fictif_simple', 'ch_fictif_simple', bought + HOUR, []);
+
+      // Sans remboursement : frontière inchangée, première milliseconde de 2036.
+      expect(previewRetention(db, at2036 - 1).purchase_records).toBe(0);
+      expect(previewRetention(db, at2036).purchase_records).toBe(1);
+      expect(applyPurchaseRetention(db, at2036 - 1)).toEqual({ deleted: 0 });
+      expect(applyPurchaseRetention(db, at2036)).toEqual({ deleted: 1 });
+      expect(orderIds()).toEqual([refunded.order]);
+
+      // Remboursé en 2026 : pièce de l'exercice 2026, gardée jusqu'à la dernière milliseconde de 2036.
+      expect(previewRetention(db, at2037 - 1).purchase_records).toBe(0);
+      expect(applyPurchaseRetention(db, at2037 - 1)).toEqual({ deleted: 0 });
+      expect(orderIds()).toEqual([refunded.order]);
+      expect(previewRetention(db, at2037).purchase_records).toBe(1);
+      expect(applyPurchaseRetention(db, at2037)).toEqual({ deleted: 1 });
+      expect(orderIds()).toEqual([]);
+      expect([count('stripe_financial_events'), count('stripe_charge_states'), count('stripe_financial_jobs'), count('order_legal')]).toEqual([0, 0, 0, 0]);
+      expect(registry()).toEqual([{ category: 'purchase_order', subject_id: plain.order, erased_at: at2036 }, { category: 'purchase_order', subject_id: refunded.order, erased_at: at2037 }]);
+      foreignKeysIntact();
+    });
+
+    it.each([
+      ['perdue', 'dispute_lost', 'lost'],
+      ['gagnée', 'paid', 'won'],
+    ])('garde jusqu’à fin 2036 un achat de 2025 dont la contestation est close (%s) en 2026', (_label, status, dispute) => {
+      const bought = swissMidnight('2025-11-15') + 9 * HOUR, opened = swissMidnight('2025-12-20') + 11 * HOUR, closed = swissMidnight('2026-02-03') + 16 * HOUR;
+      const c = customer('conteste@example.test', bought - DAY), contested = order(c, bought, { intent: 'pi_fictif_conteste', status });
+      db.prepare('UPDATE orders SET dispute_status=? WHERE id=?').run(dispute, contested.order);
+      payment('pi_fictif_conteste', 'ch_fictif_conteste', closed + HOUR, [opened, closed], 0, dispute);
+      expect([previewRetention(db, at2036).purchase_records, previewRetention(db, at2037 - 1).purchase_records]).toEqual([0, 0]);
+      expect(applyPurchaseRetention(db, at2037 - 1)).toEqual({ deleted: 0 });
+      expect(previewRetention(db, at2037).purchase_records).toBe(1);
+      expect(applyPurchaseRetention(db, at2037)).toEqual({ deleted: 1 });
+      expect(count('orders')).toBe(0);
+    });
+
+    it('compte l’année suisse du mouvement : une notification du 31.12.2026 à 23 h 30 UTC appartient à 2027', () => {
+      const c = customer('nouvel-an@example.test', Date.UTC(2026, 4, 1)), late = order(c, Date.UTC(2026, 5, 1), { intent: 'pi_fictif_nouvel_an', status: 'refunded' });
+      payment('pi_fictif_nouvel_an', 'ch_fictif_nouvel_an', Date.UTC(2027, 0, 1), [Date.UTC(2026, 11, 31, 23, 30)], 29900);
+      expect(previewRetention(db, swissMidnight('2038-01-01') - 1).purchase_records).toBe(0);
+      expect(applyPurchaseRetention(db, swissMidnight('2038-01-01') - 1)).toEqual({ deleted: 0 });
+      expect(applyPurchaseRetention(db, swissMidnight('2038-01-01'))).toEqual({ deleted: 1 });
+      expect(registry()).toEqual([{ category: 'purchase_order', subject_id: late.order, erased_at: swissMidnight('2038-01-01') }]);
+    });
+
+    it('ne prolonge jamais une commande par la notification d’un autre paiement, même chez le même client', () => {
+      const bought = Date.UTC(2025, 5, 1), c = customer('deux-achats@example.test', bought - DAY);
+      const first = order(c, bought, { intent: 'pi_fictif_premier' }), second = order(c, bought, { intent: 'pi_fictif_second', status: 'refunded' });
+      payment('pi_fictif_premier', 'ch_fictif_premier', bought + HOUR, []);
+      payment('pi_fictif_second', 'ch_fictif_second', Date.UTC(2026, 2, 1), [Date.UTC(2026, 2, 1)], 29900);
+      expect(previewRetention(db, at2036).purchase_records).toBe(1);
+      expect(applyPurchaseRetention(db, at2036)).toEqual({ deleted: 1 });
+      expect(orderIds()).toEqual([second.order]);
+      expect([count('stripe_financial_events', "charge_id='ch_fictif_second'"), count('stripe_charge_states', "charge_id='ch_fictif_premier'")]).toEqual([1, 0]);
+      expect(registry()).toEqual([{ category: 'purchase_order', subject_id: first.order, erased_at: at2036 }]);
+      expect(applyPurchaseRetention(db, at2037)).toEqual({ deleted: 1 });
+      expect(orderIds()).toEqual([]);
+    });
+
+    it('ignore les relectures du rapprochement toutes les six heures : la frontière ne bouge pas', () => {
+      const bought = Date.UTC(2025, 5, 1), refundedAt = Date.UTC(2025, 5, 10), c = customer('relu@example.test', bought - DAY);
+      order(c, bought, { intent: 'pi_fictif_relu', status: 'refunded' });
+      payment('pi_fictif_relu', 'ch_fictif_relu', refundedAt, [refundedAt], 29900);
+      // Mêmes écritures que reconcileCharge à chaque relecture synchronisée, jusqu'à la veille du passage.
+      for (let at = swissMidnight('2035-12-30'); at < at2036; at += 6 * HOUR) {
+        db.prepare('UPDATE stripe_charge_states SET checked_at=?').run(at);
+        db.prepare('UPDATE stripe_financial_jobs SET checked_at=?,next_attempt_at=?').run(at, at + 6 * HOUR);
+        db.prepare('UPDATE orders SET financial_checked_at=?').run(at);
+      }
+      expect(db.prepare('SELECT o.financial_checked_at o, s.checked_at s, j.checked_at j FROM orders o, stripe_charge_states s, stripe_financial_jobs j').get())
+        .toEqual({ o: at2036 - 6 * HOUR, s: at2036 - 6 * HOUR, j: at2036 - 6 * HOUR });
+      expect(previewRetention(db, at2036 - 1).purchase_records).toBe(0);
+      expect(previewRetention(db, at2036).purchase_records).toBe(1);
+      expect(applyPurchaseRetention(db, at2036)).toEqual({ deleted: 1 });
+    });
+
+    it.each([
+      ['en secondes', Math.floor(Date.UTC(2026, 0, 10) / 1000)],
+      ['de remplacement (2001)', 1_000_000_000_000],
+    ])('refuse une notification financière datée %s : timestamp_format, rien effacé', (_label, badDate) => {
+      const bought = Date.UTC(2025, 5, 1), c = customer('date@example.test', bought - DAY);
+      order(c, bought);
+      order(c, bought, { intent: 'pi_fictif_date', status: 'refunded' });
+      payment('pi_fictif_date', 'ch_fictif_date', Date.UTC(2026, 0, 10), [badDate], 29900);
+      expect(previewRetention(db, at2037).purchase_records).toBe('timestamp_format');
+      const result = runCleanup(db, at2037);
+      expect(result.entries.find(e => e.name === 'purchase_records')).toMatchObject({ status: 'error', error: 'timestamp_format', deleted: 0 });
+      expect([count('orders'), count('stripe_financial_events'), count('retention_erasures')]).toEqual([2, 1, 0]);
+    });
+
+    it('au rejeu, reporte une commande dont une notification reliée est sous le plancher, sans rien effacer', () => {
+      const bought = Date.UTC(2025, 5, 1), c = customer('rejeu-date@example.test', bought - DAY);
+      const restored = order(c, bought, { intent: 'pi_fictif_rejeu_date', status: 'refunded' });
+      payment('pi_fictif_rejeu_date', 'ch_fictif_rejeu_date', Date.UTC(2025, 6, 1), [1_000_000_000_000], 29900);
+      writeMirror([{ category: 'purchase_order', subject_id: restored.order, erased_at: at2036 }]);
+      expect(reapplyErasures(db, at2036 + DAY, 'startup')).toMatchObject({ status: 'error', issues: ['replay_pending'], deferred: 1,
+        reapplied: { purchase_order: 0, crm_records: 0, customer_account: 0 }, deferred_entries: [{ category: 'purchase_order', subject_id: restored.order, reason: 'timestamp_format' }] });
+      expect([count('orders'), count('stripe_financial_events'), count('retention_erasures')]).toEqual([1, 1, 0]);
+    });
+
+    it('au rejeu, garde une commande dont une notification a été reçue après la date de l’effacement', () => {
+      // Effacée le 01.01.2036, base restaurée, puis notification reçue le 11.01.2036 : l'effacement ne l'a jamais couverte.
+      const bought = Date.UTC(2025, 5, 1), later = at2036 + 10 * DAY, c = customer('rejeu-recent@example.test', bought - DAY);
+      const restored = order(c, bought, { intent: 'pi_fictif_rejeu_recent', status: 'refunded' });
+      payment('pi_fictif_rejeu_recent', 'ch_fictif_rejeu_recent', later, [bought + DAY, later], 29900);
+      writeMirror([{ category: 'purchase_order', subject_id: restored.order, erased_at: at2036 }]);
+      expect(reapplyErasures(db, at2036 + 20 * DAY, 'startup')).toMatchObject({ status: 'ok', pending: 1, deferred: 0, reapplied: { purchase_order: 0, crm_records: 0, customer_account: 0 } });
+      expect([count('orders'), count('stripe_financial_events'), count('retention_erasures')]).toEqual([1, 2, 1]);
+      // La règle reprend la main : dix ans après la fin de 2036, année du dernier mouvement.
+      expect(previewRetention(db, swissMidnight('2047-01-01') - 1).purchase_records).toBe(0);
+      expect(previewRetention(db, swissMidnight('2047-01-01')).purchase_records).toBe(1);
     });
   });
 
@@ -293,11 +430,7 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
       expect(again.entries.filter(e => ['purchase_records', 'crm_records', 'customer_accounts'].includes(e.name)).every(e => e.deleted === 0 && e.status === 'ok')).toBe(true);
       expect(registry()).toEqual(expected);
     });
-    const writeMirror = (entries: Array<{ category: string; subject_id: number; erased_at: number }>) => {
-      mkdirSync(join(dir, 'retention'), { recursive: true });
-      writeFileSync(join(dir, 'retention', 'erasures.json'), JSON.stringify({ version: 1, entries }));
-    };
-    const zero = { purchase_order: 0, crm_records: 0, customer_account: 0 };
+    const zero ={ purchase_order: 0, crm_records: 0, customer_account: 0 };
     it('réapplique après restauration d’une sauvegarde antérieure : rien de ce qui a été effacé ne revient', async () => {
       const { admin, c, purchase, recent } = scenario();
       const snapshot = join(dir, 'instantane.sqlite');

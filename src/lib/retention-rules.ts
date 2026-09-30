@@ -1,6 +1,7 @@
 // Durées de conservation décidées par Claude-Alain le 29.09.2026, appliquées par le nettoyage périodique.
-// Achats et preuves : dix ans après la fin de l'année civile suisse de l'achat. Suivi client : trois ans après
-// le dernier achat ou échange connu de la base. Compte : dix ans sans achat, une fois achats et suivi effacés.
+// Achats et preuves : dix ans après la fin de l'année civile suisse du dernier mouvement de paiement de la commande
+// (achat, remboursement, contestation ; décision du 30.09.2026). Suivi client : trois ans après le dernier achat ou
+// échange connu de la base. Compte : dix ans sans achat, une fois achats et suivi effacés.
 // Chaque effacement est inscrit dans retention_erasures dans la même transaction, sans réseau.
 // Les mêmes fonctions d'effacement servent à la règle et au rejeu après restauration (erasure-registry.ts).
 import type Database from 'better-sqlite3';
@@ -34,7 +35,10 @@ export function yearsBefore(now: number, years: number): number {
   return Date.UTC(year, month, day, at.getUTCHours(), at.getUTCMinutes(), at.getUTCSeconds(), at.getUTCMilliseconds());
 }
 
-/** Première milliseconde encore conservée : 1er janvier, heure suisse, de l'année courante moins dix. */
+/**
+ * Première milliseconde encore conservée : 1er janvier, heure suisse, de l'année courante moins dix. Une commande dont
+ * le dernier mouvement de paiement est antérieur à cet instant a vu son année civile close depuis dix ans.
+ */
 export function purchaseBoundary(now: number): number {
   return swissMidnight(`${Number(swissDay(now).slice(0, 4)) - PURCHASE_RETENTION_YEARS}-01-01`);
 }
@@ -58,6 +62,17 @@ const ORDER_SETTLED_SQL = `o.status IN ('paid','refunded','dispute_lost')
   AND (o.stripe_payment_intent IS NULL OR NOT EXISTS(SELECT 1 FROM stripe_financial_jobs j WHERE j.payment_intent=o.stripe_payment_intent
     AND (j.state<>'synced' OR j.checked_revision<j.revision)))`;
 
+// Paiements de la commande : exactement ceux dont eraseOrder efface les traces Stripe. Une notification d'un autre
+// paiement ne prolonge donc jamais cette commande.
+const ORDER_CHARGES_SQL = `SELECT charge_id FROM stripe_charge_states WHERE payment_intent=o.stripe_payment_intent
+  UNION SELECT charge_id FROM stripe_financial_jobs WHERE payment_intent=o.stripe_payment_intent`;
+// Dernier mouvement de paiement : l'achat, ou la réception la plus récente d'une notification Stripe de remboursement
+// ou de contestation pour ses paiements (stripe_financial_events.created_at, jamais réécrite). Jamais les dates de
+// relecture (orders.financial_checked_at, stripe_charge_states.checked_at, stripe_financial_jobs.checked_at) :
+// le rapprochement les renouvelle toutes les six heures, et plus rien ne serait jamais effacé.
+const LAST_PAYMENT_SQL = `MAX(o.created_at, COALESCE((SELECT MAX(e.created_at) FROM stripe_financial_events e
+  WHERE e.charge_id IN (${ORDER_CHARGES_SQL})),0))`;
+
 /**
  * Commande et traces qui en dépendent : livraisons, incidents, preuves de clôture, liaisons d'actions, droits,
  * preuve des CGV, traces de téléchargement et états financiers de son paiement. Jamais le compte, ni les notes
@@ -67,8 +82,12 @@ export function eraseOrder(db: Database.Database, orderId: number, bound: number
   const order = db.prepare('SELECT customer_id,stripe_payment_intent,created_at FROM orders WHERE id=?').get(orderId) as
     { customer_id: number; stripe_payment_intent: string | null; created_at: unknown } | undefined;
   if (!order) return 'absent';
-  if (!isMs(order.created_at)) throw new RetentionError('timestamp_format');
-  if (order.created_at > bound) return 'newer';
+  // Le rejeu appelle cette fonction sans le précontrôle de la règle : les dates des mouvements sont vérifiées ici.
+  const movements = (db.prepare(`SELECT e.created_at d FROM orders o, stripe_financial_events e WHERE o.id=? AND e.charge_id IN (${ORDER_CHARGES_SQL})`)
+    .all(orderId) as Array<{ d: unknown }>).map(row => row.d);
+  if (!isMs(order.created_at) || !movements.every(isMs)) throw new RetentionError('timestamp_format');
+  // Un mouvement postérieur à la borne (notification reçue après l'effacement puis une restauration) garde la commande.
+  if (movements.reduce((latest, at) => Math.max(latest, at), order.created_at) > bound) return 'newer';
   const deliveries = 'SELECT id FROM order_deliveries WHERE order_id=?';
   const incidents = `SELECT id FROM delivery_incidents WHERE delivery_id IN (${deliveries})`;
   db.prepare(`DELETE FROM delivery_incident_resolutions WHERE delivery_id IN (${deliveries})`).run(orderId);
@@ -141,12 +160,12 @@ export function eraseCustomerAccount(db: Database.Database, customerId: number, 
 
 const isInternal = (email: string, internal: string[]) => internal.includes(emailKey(email));
 
-const PURCHASE_CLOCKS = [['orders', 'created_at']] as const;
+const PURCHASE_CLOCKS = [['orders', 'created_at'], ['stripe_financial_events', 'created_at']] as const;
 function purchaseCandidates(db: Database.Database, now: number): number[] {
-  return (db.prepare(`SELECT o.id FROM orders o WHERE o.created_at<? AND ${ORDER_SETTLED_SQL} ORDER BY o.id`).all(purchaseBoundary(now)) as Array<{ id: number }>).map(row => row.id);
+  return (db.prepare(`SELECT o.id FROM orders o WHERE ${LAST_PAYMENT_SQL}<? AND ${ORDER_SETTLED_SQL} ORDER BY o.id`).all(purchaseBoundary(now)) as Array<{ id: number }>).map(row => row.id);
 }
 
-/** Règle 1 : commandes réglées dont l'année civile suisse est close depuis dix ans. */
+/** Règle 1 : commandes réglées dont l'année civile suisse du dernier mouvement de paiement est close depuis dix ans. */
 export function applyPurchaseRetention(db: Database.Database, now: number): RuleOutcome {
   if (!datesAreMilliseconds(db, PURCHASE_CLOCKS)) return { deleted: 0, error: 'timestamp_format' };
   return db.transaction(() => {
