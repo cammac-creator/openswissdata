@@ -20,6 +20,10 @@ on:
       - "scripts/search-eval/**"
       - "scripts/evaluate-search.ts"
       - "src/scripts/prepare-embedding.ts"
+      - "src/mcp/embedder.ts"
+      - "src/mcp/search-index.ts"
+      - "src/lib/embedding-*.ts"
+      - "src/mcp/data/finma_registry.csv"
       - ".github/workflows/search-bench.yml"
   pull_request:
     paths:
@@ -32,6 +36,10 @@ on:
       - "scripts/search-eval/**"
       - "scripts/evaluate-search.ts"
       - "src/scripts/prepare-embedding.ts"
+      - "src/mcp/embedder.ts"
+      - "src/mcp/search-index.ts"
+      - "src/lib/embedding-*.ts"
+      - "src/mcp/data/finma_registry.csv"
       - ".github/workflows/search-bench.yml"
 
 permissions:
