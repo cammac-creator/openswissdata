@@ -30,6 +30,7 @@ import { startFinancialWorker } from "./lib/stripe-financial.js";
 import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
 import { startMailWatch } from "./lib/mail-watch.js";
+import { startWorkflowWatch } from "./lib/workflow-watch.js";
 import { getDb } from "./lib/db.js";
 import { reapplyErasures } from "./lib/erasure-registry.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
@@ -343,6 +344,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const stopIncidents = startDeliveryIncidentWorker();
   // Veille des réponses dans la boîte de support (lecture seule, alerte Telegram) ; inactive sans ses variables.
   const stopMailWatch = startMailWatch();
+  // Veille des tâches planifiées GitHub et de la page FINMA des membres OAR (lecture seule, alerte Telegram).
+  const stopWorkflowWatch = startWorkflowWatch();
 
   // Flush Sentry events on graceful shutdown so errors right before
   // SIGTERM aren't lost.
@@ -352,6 +355,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     stopCleanup();
     stopIncidents();
     stopMailWatch();
+    stopWorkflowWatch();
     console.log(`[shutdown] received ${sig}, flushing Sentry…`);
     await flushSentry(2000);
     process.exit(0);
