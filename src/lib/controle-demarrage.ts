@@ -86,6 +86,18 @@ function save(db: Database.Database, now: number, alerted: boolean): void {
   ).run(CHECK, now, JSON.stringify({ version: 1, status: 'error', code: 'admin_emails_empty', alerted }));
 }
 
+/** Une alerte passée ne reste pas affichée quand l'adresse du bureau est de nouveau renseignée. */
+function clearPreviousAlert(db: Database.Database, now: number): boolean {
+  const row = db.prepare('SELECT details_json FROM operation_checks WHERE name=?').get(CHECK) as { details_json: string } | undefined;
+  if (!row) return false;
+  let previous: { status?: unknown } = {};
+  try { previous = JSON.parse(row.details_json) as { status?: unknown }; } catch { previous = { status: 'error' }; }
+  if (previous.status !== 'error') return false;
+  db.prepare('UPDATE operation_checks SET checked_at=?, details_json=? WHERE name=?')
+    .run(now, JSON.stringify({ version: 1, status: 'ok', code: null, alerted: false }), CHECK);
+  return true;
+}
+
 export type AdminEmailsStartupResult =
   | { checked: false }
   | { checked: true; alerted: boolean; code: 'admin_emails_empty' | 'startup_check_failed' };
@@ -98,7 +110,11 @@ export async function checkAdminEmailsAtStartup(overrides: Partial<Dependencies>
   const deps: Dependencies = { ...defaults, ...overrides };
   try {
     if (!deps.isProduction()) return { checked: false };
-    if (validAdminAddresses(deps.adminEmails()).length) return { checked: false };
+    if (validAdminAddresses(deps.adminEmails()).length) {
+      try { clearPreviousAlert(deps.database(), deps.now()); }
+      catch { console.error('[démarrage] témoin ADMIN_EMAILS non remis à jour (base indisponible)'); }
+      return { checked: false };
+    }
 
     let alerted = false;
     const telegram = telegramConfig();

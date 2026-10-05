@@ -101,6 +101,23 @@ describe('Contrôle de démarrage ADMIN_EMAILS (tâche osd.T08)', () => {
     expect(witness()).toBeUndefined();
   });
 
+  it("adresse de nouveau renseignée après une alerte : le témoin repasse à « ok », sans message", async () => {
+    const tg: Telegram = { calls: [], status: 200, ok: true, fail: false };
+    await checkAdminEmailsAtStartup({ isProduction: () => true, adminEmails: () => '', now: () => NOW, fetch: makeFetch(tg) });
+    expect(JSON.parse(witness()!.details_json)).toMatchObject({ status: 'error' });
+    const result = await checkAdminEmailsAtStartup({
+      isProduction: () => true,
+      adminEmails: () => 'bureau@openswissdata.com',
+      now: () => NOW + 1_000,
+      fetch: makeFetch(tg),
+    });
+    expect(result).toEqual({ checked: false });
+    expect(tg.calls).toHaveLength(1);
+    const row = witness()!;
+    expect(row.checked_at).toBe(NOW + 1_000);
+    expect(JSON.parse(row.details_json)).toEqual({ version: 1, status: 'ok', code: null, alerted: false });
+  });
+
   it('hors production : aucun témoin, aucun message Telegram, même avec ADMIN_EMAILS vide', async () => {
     const tg: Telegram = { calls: [], status: 200, ok: true, fail: false };
     const result = await checkAdminEmailsAtStartup({
