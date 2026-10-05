@@ -1,0 +1,419 @@
+{
+  "generated_at": "2026-10-05T22:56:36.044Z",
+  "node": "v24.11.1",
+  "platform": "darwin/arm64",
+  "cases": {
+    "T01": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T02": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T03": {
+      "status": "echec",
+      "rank": 9
+    },
+    "T04": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T05": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T06": {
+      "status": "echec",
+      "rank": 17
+    },
+    "T07": {
+      "status": "echec",
+      "rank": 7
+    },
+    "T08": {
+      "status": "rang5",
+      "rank": 3
+    },
+    "T09": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T10": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T11": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T12": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T13": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T14": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T15": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T16": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T17": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T18": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T19": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T20": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T21": {
+      "status": "rang5",
+      "rank": 2
+    },
+    "T22": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T23": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T24": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T25": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T26": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T27": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T28": {
+      "status": "echec",
+      "rank": null
+    },
+    "T29": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T30": {
+      "status": "rang5",
+      "rank": 2
+    },
+    "T31": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T32": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T33": {
+      "status": "echec",
+      "rank": 6
+    },
+    "T34": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T35": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T36": {
+      "status": "echec",
+      "rank": null
+    },
+    "T37": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T38": {
+      "status": "echec",
+      "rank": null
+    },
+    "T39": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T40": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T41": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T42": {
+      "status": "rang5",
+      "rank": 3
+    },
+    "T43": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T44": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T45": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T46": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T47": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T48": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "T49": {
+      "status": "echec",
+      "rank": null
+    },
+    "T50": {
+      "status": "echec",
+      "rank": 6
+    },
+    "T51": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "TC1": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "TC2": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "TC3": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "TC4": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N01": {
+      "status": "rang5",
+      "rank": 2
+    },
+    "N02": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N03": {
+      "status": "rang5",
+      "rank": 2
+    },
+    "N04": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N05": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N06": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N07": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N08": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N09": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N10": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N11": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N12": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N13": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N14": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N15": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N16": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N17": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N18": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N19": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N20": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N21": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N22": {
+      "status": "rang5",
+      "rank": 4
+    },
+    "N23": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "N24": {
+      "status": "echec",
+      "rank": null
+    },
+    "NC1": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "NC2": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F01": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F02": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F03": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F04": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F05": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F06": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F07": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F08": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F09": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F10": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F11": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F12": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F13": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F14": {
+      "status": "rang5",
+      "rank": 3
+    },
+    "F15": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F16": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F17": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F18": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F19": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F20": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F21": {
+      "status": "rang1",
+      "rank": 1
+    },
+    "F22": {
+      "status": "rang1",
+      "rank": 1
+    }
+  }
+}

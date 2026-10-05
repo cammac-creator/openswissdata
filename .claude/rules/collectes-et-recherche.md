@@ -23,6 +23,7 @@ paths:
   - ".github/workflows/refresh-*.yml"
   - ".github/workflows/release-classifications.yml"
   - ".github/workflows/monitor-sources.yml"
+  - ".github/workflows/search-bench.yml"
   - "tests/etl/**"
   - "tests/lba/**"
   - "docs/securite-dependances.md"

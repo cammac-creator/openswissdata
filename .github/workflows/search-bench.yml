@@ -1,0 +1,96 @@
+name: Banc de la recherche sémantique
+
+# tâche osd.S15 : le banc (scripts/evaluate-search.ts --comparer) rejoue le jeu principal et
+# échoue si un cas recule par rapport à la référence enregistrée (scripts/search-eval/reference.json).
+# Jamais le jeu de contrôle ici (mesuré à la main, une seule fois).
+
+on:
+  schedule:
+    - cron: "15 6 * * 1"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "src/mcp/data/embeddings/**"
+      - "src/mcp/name-match.ts"
+      - "src/mcp/lexical-index*"
+      - "src/mcp/tools/**search**"
+      - "src/mcp/tools/classify*"
+      - "scripts/build-search-indexes.ts"
+      - "scripts/search-eval/**"
+      - "scripts/evaluate-search.ts"
+      - "src/scripts/prepare-embedding.ts"
+      - ".github/workflows/search-bench.yml"
+  pull_request:
+    paths:
+      - "src/mcp/data/embeddings/**"
+      - "src/mcp/name-match.ts"
+      - "src/mcp/lexical-index*"
+      - "src/mcp/tools/**search**"
+      - "src/mcp/tools/classify*"
+      - "scripts/build-search-indexes.ts"
+      - "scripts/search-eval/**"
+      - "scripts/evaluate-search.ts"
+      - "src/scripts/prepare-embedding.ts"
+      - ".github/workflows/search-bench.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: search-bench-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  comparer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Poids publics figés : la préparation revérifie taille et empreinte de chaque fichier du cache
+      # (même clé que le job « build » de ci.yml, pour réutiliser le même cache déjà chaud).
+      - name: Réutiliser le modèle public déjà vérifié
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: dist/models
+          key: modeles-${{ hashFiles('src/lib/embedding-model.ts', 'src/lib/translation-model.ts') }}
+      - name: Préparer le modèle figé de recherche
+        run: npm run models:prepare:embedding
+      - name: Comparer le banc à la référence enregistrée (jeu principal, jamais le jeu de contrôle)
+        id: comparer
+        run: npx tsx scripts/evaluate-search.ts --comparer scripts/search-eval/reference.json
+        continue-on-error: true
+      - name: Résumer la comparaison
+        if: always()
+        run: |
+          if [ "${{ steps.comparer.outcome }}" = "success" ]; then
+            echo "## Banc de la recherche : aucun recul" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Banc de la recherche : recul détecté" >> "$GITHUB_STEP_SUMMARY"
+            echo "Un ou plusieurs cas du jeu principal répondent moins bien qu'à la référence enregistrée. Consulter les journaux de l'étape « Comparer »." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Signaler un recul dans le résultat de la tâche
+        if: steps.comparer.outcome != 'success'
+        run: |
+          echo "::error::Le banc de la recherche a reculé par rapport à la référence enregistrée (scripts/search-eval/reference.json)."
+          exit 1
+      - name: Prévenir par mail d'un changement d'état
+        # Jamais sur une PR : previousConclusion ne lit que les tâches de main (alert-email.mjs),
+        # une PR rouge isolée serait alors annoncée comme une panne à chaque fois.
+        if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Banc de la recherche sémantique
+          ALERT_WORKFLOW: search-bench.yml
+          ALERT_DETAIL: Un cas du jeu principal de recherche (TARES, NOGA ou FINMA) a reculé par rapport à la référence enregistrée, ou la mesure a échoué techniquement.
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

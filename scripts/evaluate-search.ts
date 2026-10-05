@@ -7,6 +7,7 @@
  *
  *   npx tsx scripts/evaluate-search.ts [--tool tares|noga|finma|all] [--out resultats.json]
  *                                      [--structure Tarifstruktur.xlsx] [--holdout]
+ *                                      [--enregistrer reference.json] [--comparer reference.json]
  *
  * Préalable : `npm run models:prepare:embedding` (poids figés dans dist/models). Pendant la mesure,
  * `fetch` est remplacé par une fonction qui échoue : un téléchargement caché ferait échouer le script.
@@ -16,6 +17,11 @@
  * Groupes : langues du jeu principal (et leur ensemble), requêtes en forme de code, puis « contrôle »
  * (jeu écrit après le choix de la méthode, rapporté séparément, mesuré seulement avec --holdout ;
  * ses attentes et désignations sont vérifiées à chaque exécution).
+ *
+ * tâche osd.S15 : banc rejoué seul. `--enregistrer` écrit une référence (par cas du jeu PRINCIPAL
+ * seulement : réussi au rang 1, au rang 5, ou échoué) à partir d'une vraie exécution, jamais à la
+ * main ; `--comparer` rejoue et échoue (code 1) si un cas recule par rapport à cette référence
+ * (un progrès est signalé, jamais bloquant). Les deux exigent `--tool all` (par défaut).
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -43,6 +49,11 @@ const tool = option("--tool") ?? "all";
 // Le jeu de contrôle n'est mesuré qu'à la demande explicite, une fois la méthode figée.
 const withHoldout = args.includes("--holdout");
 if (!["tares", "noga", "finma", "all"].includes(tool)) throw new Error("--tool attend tares, noga, finma ou all");
+const registerPath = option("--enregistrer");
+const comparePath = option("--comparer");
+if ((registerPath || comparePath) && tool !== "all") {
+  throw new Error("--enregistrer et --comparer exigent --tool all (ne pas passer --tool)");
+}
 
 const cases = JSON.parse(readFileSync(`${root}scripts/search-eval/cases.json`, "utf8")) as Cases;
 const holdoutCases = { tares: cases.tares_holdout, noga: cases.noga_holdout };
@@ -204,3 +215,68 @@ for (const key of ["tares", "noga", "finma"]) {
 if (misses.length) console.log(["", "Requêtes sans réponse juste en tête :", ...misses.map((m) => `- ${m}`)].join("\n"));
 const outPath = option("--out");
 if (outPath) writeFileSync(outPath, JSON.stringify(output, null, 2));
+
+// tâche osd.S15 : référence par cas du jeu PRINCIPAL (jamais le jeu de contrôle), enregistrée
+// seulement par une vraie exécution du script, et comparaison qui bloque un recul de cas.
+type CaseStatus = "rang1" | "rang5" | "echec";
+const STATUS_RANK: Record<CaseStatus, number> = { echec: 0, rang5: 1, rang1: 2 };
+const statusOf = (rank: number | null): CaseStatus => (rank === 1 ? "rang1" : rank !== null && rank <= 5 ? "rang5" : "echec");
+function mainCases(): CaseResult[] {
+  const all: CaseResult[] = [];
+  for (const key of ["tares", "noga", "finma"] as const) {
+    const block = output[key] as { results: CaseResult[] } | undefined;
+    if (block) for (const r of block.results) if (r.group !== "contrôle") all.push(r);
+  }
+  return all;
+}
+
+if (registerPath) {
+  const cases_ = mainCases();
+  const entries = cases_.map((r) => [r.id, { status: statusOf(r.rank), rank: r.rank }] as const);
+  const reference = {
+    generated_at: new Date().toISOString(),
+    node: process.version,
+    platform: `${process.platform}/${process.arch}`,
+    cases: Object.fromEntries(entries),
+  };
+  // Un identifiant de cas dupliqué entre outils écraserait silencieusement une entrée.
+  if (Object.keys(reference.cases).length !== entries.length) throw new Error("--enregistrer : identifiants de cas en collision entre outils");
+  writeFileSync(registerPath, `${JSON.stringify(reference, null, 2)}\n`);
+  console.log(`\nRéférence enregistrée (jeu principal seul, code compris, jamais le jeu de contrôle) : ${entries.length} cas dans ${registerPath} (${reference.platform}, Node ${reference.node}).`);
+}
+
+if (comparePath) {
+  const reference = JSON.parse(readFileSync(comparePath, "utf8")) as { cases: Record<string, { status: CaseStatus; rank: number | null }> };
+  const cases_ = mainCases();
+  const regressions: string[] = [];
+  const progress: string[] = [];
+  const nouveaux: string[] = [];
+  for (const r of cases_) {
+    const before = reference.cases[r.id];
+    const after = statusOf(r.rank);
+    if (!before) { nouveaux.push(`${r.id} (statut actuel ${after})`); continue; }
+    if (STATUS_RANK[after] < STATUS_RANK[before.status]) {
+      regressions.push(`${r.id} « ${r.query} » : ${before.status} (rang ${before.rank ?? "absent"}) → ${after} (rang ${r.rank ?? "absent"})`);
+    } else if (STATUS_RANK[after] > STATUS_RANK[before.status]) {
+      progress.push(`${r.id} : ${before.status} → ${after}`);
+    }
+  }
+  const disparus = Object.keys(reference.cases).filter((id) => !cases_.some((r) => r.id === id));
+  console.log(`\nComparaison à la référence (${Object.keys(reference.cases).length} cas) : ${regressions.length} recul(s), ${progress.length} progrès, ${nouveaux.length} nouveau(x) cas${disparus.length ? `, ${disparus.length} disparu(s)` : ""}.`);
+  if (progress.length) console.log(["Progrès (ne fait pas échouer la comparaison) :", ...progress.map((p) => `- ${p}`)].join("\n"));
+  if (nouveaux.length) console.log(["Cas sans référence (nouveaux, ne font pas échouer la comparaison) :", ...nouveaux.map((p) => `- ${p}`)].join("\n"));
+  if (disparus.length) console.log(["Cas de la référence absents de cette mesure (ignorés) :", ...disparus.map((id) => `- ${id}`)].join("\n"));
+  if (regressions.length) {
+    console.error(["", "RECUL par rapport à la référence enregistrée :", ...regressions.map((r) => `- ${r}`)].join("\n"));
+    process.exit(1);
+  }
+  console.log("Aucun recul par rapport à la référence.");
+}
+
+// Le modèle vit dans un processus à part relié par IPC (src/mcp/embedder.ts) : son canal garde
+// le script ouvert jusqu'à dix minutes d'inactivité si on ne l'arrête pas nous-mêmes ici.
+if (tool === "tares" || tool === "noga" || tool === "all") {
+  const { _resetEmbedderCache } = await import("../src/mcp/embedder.js");
+  _resetEmbedderCache();
+}
+process.exitCode ??= 0;
