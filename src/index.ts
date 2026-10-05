@@ -31,6 +31,7 @@ import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
 import { startMailWatch } from "./lib/mail-watch.js";
 import { startWorkflowWatch } from "./lib/workflow-watch.js";
+import { checkAdminEmailsAtStartup } from "./lib/controle-demarrage.js";
 import { getDb } from "./lib/db.js";
 import { reapplyErasures } from "./lib/erasure-registry.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
@@ -346,6 +347,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const stopMailWatch = startMailWatch();
   // Veille des tâches planifiées GitHub et de la page FINMA des membres OAR (lecture seule, alerte Telegram).
   const stopWorkflowWatch = startWorkflowWatch();
+  // ADMIN_EMAILS vide en production = plus de compte autorisé pour le bureau (tâche osd.T08). Après serve() :
+  // ne retarde jamais l'ouverture du service ni /api/health/ready. Jamais bloquant, aucune exception ne remonte.
+  void checkAdminEmailsAtStartup();
 
   // Flush Sentry events on graceful shutdown so errors right before
   // SIGTERM aren't lost.
