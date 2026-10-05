@@ -1,5 +1,5 @@
 {
- "description": "Promesses publiques d'OpenSwissData vérifiées après chaque collecte FINMA contre la donnée servie, par la tâche séparée verify-promises.yml et scripts/promesses/verifier.mjs (charte osd.Q01, version vérifiée du 02.10.2026). La fraîcheur FINMA n'est pas ici : la collecte la contrôle et l'alerte déjà. Ajouter une promesse est RELU ; en retirer une ou en assouplir une est F7 (BOUTON). Valeurs relevées sur la production le 02.10.2026 par l'audit de la charte. Deux promesses en attente de la mise en ligne de leurs compteurs (voir en_attente, relecture du 05.10.2026).",
+ "description": "Promesses publiques d'OpenSwissData vérifiées après chaque collecte FINMA contre la donnée servie, par la tâche séparée verify-promises.yml et scripts/promesses/verifier.mjs (charte osd.Q01, version vérifiée du 02.10.2026). La fraîcheur FINMA n'est pas ici : la collecte la contrôle et l'alerte déjà. Ajouter une promesse est RELU ; en retirer une ou en assouplir une est F7 (BOUTON). Valeurs relevées sur la production le 02.10.2026 par l'audit de la charte. Organisme de surveillance (seuil 1 369 = 90 % des 1 521 lignes servies le 06.10.2026) et une promesse par catégorie du schéma livré (« other » exclue : toujours listée, vide par construction, bundle.ts) activés le 06.10.2026 après lecture des valeurs servies.",
  "catalogues": {
   "finma": "https://www.openswissdata.com/api/catalog/finma",
   "tares": "https://www.openswissdata.com/api/catalog/tares",
@@ -157,18 +157,77 @@
     "sro_member",
     "sanctions SECO"
    ]
-  }
- ],
- "en_attente": [
-  {
-   "id": "finma-organisme-surveillance",
-   "promesse": "Organisme de surveillance des gestionnaires et trustees (fiche FINMA, 00f85dd)",
-   "a_faire": "Le catalogue expose supervisory_organisation_rows depuis bf4b570. Une fois ce code servi (/api/health = bf4b570 ou plus récent), lire la valeur sur https://www.openswissdata.com/api/catalog/finma, puis activer : champ supervisory_organisation_rows, op >=, valeur = 90 % de la valeur lue (le journal de la collecte du 05.10 annonce 1 510 lignes rattachées, chiffre non encore servi)."
   },
   {
-   "id": "finma-categories-non-vides",
-   "promesse": "Aucune catégorie annoncée par la fiche avec 0 ligne (version en ligne du test C4)",
-   "a_faire": "Le catalogue expose entity_type_rows (énumération du schéma livré, 0 compris) depuis bf4b570. NE PAS activer « toutes>= 1 » sur tout l'objet : etl/finma/bundle.ts l. 531 garde toujours « other » dans l'énumération, et le test C4 autorise une catégorie atteignable mais vide ce jour-là ; la promesse resterait rouge pour toujours et, l'alerte n'écrivant qu'au changement d'état, elle étoufferait les autres. Une fois servi : lire entity_type_rows, puis activer une promesse par catégorie que la fiche annonce explicitement (pas « other »), chacune >= 1."
+   "id": "finma-organisme-surveillance",
+   "catalogue": "finma",
+   "champ": "supervisory_organisation_rows",
+   "op": ">=",
+   "valeur": 1369
+  },
+  {
+   "id": "finma-categorie-bank",
+   "catalogue": "finma",
+   "champ": "entity_type_rows.bank",
+   "op": ">=",
+   "valeur": 1
+  },
+  {
+   "id": "finma-categorie-insurance",
+   "catalogue": "finma",
+   "champ": "entity_type_rows.insurance",
+   "op": ">=",
+   "valeur": 1
+  },
+  {
+   "id": "finma-categorie-asset_manager_collective",
+   "catalogue": "finma",
+   "champ": "entity_type_rows.asset_manager_collective",
+   "op": ">=",
+   "valeur": 1
+  },
+  {
+   "id": "finma-categorie-asset_manager_individual",
+   "catalogue": "finma",
+   "champ": "entity_type_rows.asset_manager_individual",
+   "op": ">=",
+   "valeur": 1
+  },
+  {
+   "id": "finma-categorie-securities_firm",
+   "catalogue": "finma",
+   "champ": "entity_type_rows.securities_firm",
+   "op": ">=",
+   "valeur": 1
+  },
+  {
+   "id": "finma-categorie-fund_representative",
+   "catalogue": "finma",
+   "champ": "entity_type_rows.fund_representative",
+   "op": ">=",
+   "valeur": 1
+  },
+  {
+   "id": "finma-categorie-supervisory_org",
+   "catalogue": "finma",
+   "champ": "entity_type_rows.supervisory_org",
+   "op": ">=",
+   "valeur": 1
+  },
+  {
+   "id": "finma-categorie-fintech",
+   "catalogue": "finma",
+   "champ": "entity_type_rows.fintech",
+   "op": ">=",
+   "valeur": 1
+  },
+  {
+   "id": "finma-categorie-infrastructure",
+   "catalogue": "finma",
+   "champ": "entity_type_rows.infrastructure",
+   "op": ">=",
+   "valeur": 1
   }
- ]
+ ],
+ "en_attente": []
 }

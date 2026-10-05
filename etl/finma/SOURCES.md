@@ -58,8 +58,8 @@ a new unauthorised provider.
 
 No fuzzy cross-reference is made. `release.ts` sets `is_warning_listed` to null on
 every registry row: the warning list is shipped as its own table and is never matched
-to an authorised entity by approximate name. The former fuzzy helper
-(`flagWarningsOnRegistry`, never called) was removed on 2026-10-05 (tâche osd.N03).
+to an authorised entity by approximate name. The former fuzzy helper,
+never called, was removed on 2026-10-05 (tâche osd.N03).
 
 ### Update cadence
 
