@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # openswissdata — project instructions
 
 ## Stack
