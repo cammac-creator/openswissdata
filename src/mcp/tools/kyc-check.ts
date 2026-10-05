@@ -11,7 +11,7 @@
 
 import { z } from "zod";
 import { getFinmaRegistry, getFinmaWarnings } from "../data-loader.js";
-import { foldName, rankedMatches } from "../name-match.js";
+import { foldName, MATCH_RANKS, nameMatcher, rankedMatches } from "../name-match.js";
 
 export const kycCheckSchema = {
   type: "object",
@@ -116,13 +116,43 @@ export function kycCheckHandler(args: unknown): {
     warning_total: warningAll.length,
   };
 
+  // tâche osd.S10 : seul un nom identique (rang "exact" de name-match.ts, après repliement) déclenche
+  // la ligne WARNING ; un nom seulement proche est montré à part, sans jamais dire "WARNING" ni "match".
+  const warningRank = nameMatcher(needle);
+  const warningAllRanks = warningAll.map((w) => warningRank(foldName(w.name)));
+  const exactWarningTotal = warningAllRanks.filter((r) => r === 0).length;
+  const nearWarningTotal = warningAll.length - exactWarningTotal;
+  // warningAll (et donc warningMatches) est déjà trié par rang croissant : les égalités, s'il y en a,
+  // sont toujours en tête de la tranche affichée — aucun changement de tri ni de nombre ici.
+  const shownRanks = warningAllRanks.slice(0, top_k);
+  const splitAt = shownRanks.findIndex((r) => r !== 0);
+  const exactSplit = splitAt === -1 ? warningMatches.length : splitAt;
+  const exactWarnings = warningMatches.slice(0, exactSplit);
+  const nearWarnings = warningMatches.slice(exactSplit);
+
   const lines: string[] = [];
   const shown = (count: number, total: number) => (total > count ? ` (closest ${count} shown)` : "");
-  if (warningMatches.length > 0) {
-    lines.push(`WARNING: ${warningAll.length} FINMA warning entry/entries match "${name}"${shown(warningMatches.length, warningAll.length)}.`);
-    for (const w of warningMatches) {
+  if (exactWarningTotal > 0) {
+    lines.push(`WARNING: ${exactWarningTotal} FINMA warning entry/entries match "${name}" exactly${shown(exactWarnings.length, exactWarningTotal)}.`);
+    for (const w of exactWarnings) {
       lines.push(`  - ${w.name} (${w.warning_type}, added ${w.date_added})`);
     }
+    lines.push("");
+  }
+  if (nearWarningTotal > 0 && nearWarnings.length === 0) {
+    // Les noms identiques occupent déjà tout top_k : dire combien de noms proches restent, sans titre vide.
+    lines.push(`Similar name(s) on the FINMA warnings list, to verify: ${nearWarningTotal} not shown (raise top_k to list them).`);
+    lines.push("");
+  } else if (nearWarningTotal > 0) {
+    lines.push(`Similar name(s) on the FINMA warnings list, to verify${shown(nearWarnings.length, nearWarningTotal)}:`);
+    for (let i = 0; i < nearWarnings.length; i++) {
+      const w = nearWarnings[i];
+      // Les entrées de warningAll ont déjà passé rankedMatches : leur rang n'est jamais `null` ici.
+      const rankValue = shownRanks[exactSplit + i];
+      const rankLabel = rankValue === null ? "substring" : MATCH_RANKS[rankValue];
+      lines.push(`  - ${w.name} (${w.warning_type}, added ${w.date_added}) — rank: ${rankLabel}`);
+    }
+    lines.push("A similar name is not an identification; compare against the FINMA detail page before concluding anything.");
     lines.push("");
   }
   lines.push(`FINMA registry: ${registryAll.length} authorised entity/entities matching "${name}"${shown(registryMatches.length, registryAll.length)}:`);
@@ -146,7 +176,7 @@ export function kycCheckHandler(args: unknown): {
 export const kycCheckTool = {
   name: "kyc_check",
   description:
-    "Search the FINMA register of supervised institutions and the FINMA warnings list by name (case- and accent-insensitive). Returns the closest top_k authorised entities and warning entries (exact name, then whole word, then substring; all words in any order as a fallback) with the total number of matches. Use it for basic counterparty screening; no result is not a compliance certificate.",
+    "Search the FINMA register of supervised institutions and the FINMA warnings list by name (case- and accent-insensitive). Returns the closest top_k authorised entities and warning entries (exact name, then whole word, then substring; all words in any order as a fallback) with the total number of matches. Only an identical name is reported as a FINMA warning-list match; a merely similar name is listed separately, to verify, and is never called a match. Use it for basic counterparty screening; no result is not a compliance certificate.",
   inputSchema: kycCheckSchema,
   handler: kycCheckHandler,
 } as const;
