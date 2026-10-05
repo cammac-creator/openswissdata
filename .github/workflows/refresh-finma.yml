@@ -41,6 +41,9 @@ jobs:
           BASE_URL: https://www.openswissdata.com
           ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
           OSD_SIGNING_KEY_ED25519: ${{ secrets.OSD_SIGNING_KEY_ED25519 }}
+          # tâche osd.S05 : rapport d'arrêt d'un contrôle, fichier temporaire du job,
+          # jamais commité ni publié ; lu par l'étape d'alerte ci-dessous (même chemin).
+          FINMA_CONTROL_REPORT_FILE: ${{ runner.temp }}/osd-finma-controle.json
         run: npm run etl:finma
       - name: Vérifier la version réellement distribuée
         run: |
@@ -63,6 +66,7 @@ jobs:
           ALERT_TASK: Collecte FINMA
           ALERT_WORKFLOW: refresh-finma.yml
           ALERT_DETAIL: La collecte, le contrôle ou la publication FINMA n'a pas abouti ; la version distribuée reste la précédente.
+          ALERT_REPORT_FILE: ${{ runner.temp }}/osd-finma-controle.json
           GITHUB_TOKEN: ${{ github.token }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}

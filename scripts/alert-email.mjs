@@ -22,6 +22,23 @@ export function describeMonitorReport(report) {
   return report.checks.map(c => `${c.name} : ${c.ok ? 'vérifié' : 'à vérifier'} · HTTP ${c.http ?? 'absent'} · ${c.reason}${c.revision ? ' · révision ' + String(c.revision).slice(0, 7) : ''}${c.version ? ' · édition ' + c.version : ''}`);
 }
 
+// tâche osd.S05 : une collecte (FINMA, puis TARES si simple) qui s'arrête sur
+// un de ses contrôles écrit un rapport { stop: {...} } au lieu de la liste
+// `checks` du moniteur public ; même fichier (ALERT_REPORT_FILE), deux formes.
+export function describeControlStop(stop) {
+  if (!stop) return [];
+  const lines = [`${stop.control} : lu « ${stop.observed} », attendu « ${stop.expected} » (source : ${stop.source}, ${stop.date})`, stop.stays_served];
+  for (const o of stop.options ?? []) lines.push(`Suite possible (${o.level}) : ${o.label}`);
+  return lines;
+}
+
+export function describeReport(report) {
+  if (!report) return [];
+  if (Array.isArray(report.checks)) return describeMonitorReport(report);
+  if (report.stop) return describeControlStop(report.stop);
+  return [];
+}
+
 export function buildAlertEmail({ kind, task, lines = [], runUrl, when = new Date(), simulated = false }) {
   const at = swissTime(when);
   const subject = kind === 'panne'
@@ -83,7 +100,7 @@ export async function runAlert(env, { fetchImpl = fetch, now = () => new Date(),
   if (!env.RESEND_API_KEY || !env.RESEND_FROM_EMAIL || !env.ALERT_EMAIL) return { sent: false, reason: 'not_configured', kind, previous, lookup };
   let lines = [];
   if (env.ALERT_REPORT_FILE) {
-    try { lines = describeMonitorReport(JSON.parse(readFileSync(env.ALERT_REPORT_FILE, 'utf8'))); } catch { lines = []; }
+    try { lines = describeReport(JSON.parse(readFileSync(env.ALERT_REPORT_FILE, 'utf8'))); } catch { lines = []; }
   }
   if (!lines.length && env.ALERT_DETAIL && kind === 'panne') lines = [env.ALERT_DETAIL];
   const runUrl = `https://github.com/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}`;

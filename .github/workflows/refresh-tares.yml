@@ -79,6 +79,10 @@ jobs:
           ALERT_TASK: Publication TARES
           ALERT_WORKFLOW: refresh-tares.yml
           ALERT_DETAIL: La collecte, le contrôle ou la publication TARES n'a pas abouti ; la version vendue reste la précédente.
+          # tâche osd.S05 : même mécanisme que FINMA ; TARES n'écrit pas encore de
+          # rapport d'arrêt (ses contrôles sont des échecs techniques, pas un choix
+          # humain entre options), le texte fixe ci-dessus reste donc le seul repli.
+          ALERT_REPORT_FILE: ${{ runner.temp }}/osd-tares-controle.json
           GITHUB_TOKEN: ${{ github.token }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}

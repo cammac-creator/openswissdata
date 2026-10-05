@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { buildAlertEmail, decideAlert, describeMonitorReport, runAlert } from '../../scripts/alert-email.mjs';
+import { writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { buildAlertEmail, decideAlert, describeControlStop, describeMonitorReport, describeReport, runAlert } from '../../scripts/alert-email.mjs';
 
 const env = (over: Record<string, string> = {}) => ({
   GITHUB_REPOSITORY: 'cammac-creator/openswissdata', GITHUB_RUN_ID: '42', GITHUB_TOKEN: 'jeton-fictif',
@@ -62,6 +64,51 @@ describe('Alerte par mail sur changement d’état', () => {
     const result = await runAlert(env(), { fetchImpl: refused });
     expect(result).toMatchObject({ sent: false, reason: 'provider_refused', http: 422 });
     expect(JSON.stringify(result)).not.toContain('détail du prestataire');
+  });
+});
+
+describe('Rapport d’arrêt d’un contrôle (osd.S05)', () => {
+  const stop = {
+    control: 'variation_finma_superieure_10_pourcent',
+    observed: '2 200 entités',
+    expected: "variation d'au plus 10 % depuis la version précédente (3 000 entités)",
+    source: 'FINMA (uid.csv, collecte quotidienne)',
+    date: '2026-10-05',
+    stays_served: 'la version précédente reste en vente',
+    options: [
+      { label: 'vérifier la source officielle à la main', level: 'AUTO' },
+      { label: 'adopter la nouvelle valeur après comparaison', level: 'RELU' },
+    ],
+  };
+
+  it('décrit le contrôle, la valeur lue et attendue, la source et les suites possibles', () => {
+    const lines = describeControlStop(stop);
+    expect(lines[0]).toBe("variation_finma_superieure_10_pourcent : lu « 2 200 entités », attendu « variation d'au plus 10 % depuis la version précédente (3 000 entités) » (source : FINMA (uid.csv, collecte quotidienne), 2026-10-05)");
+    expect(lines).toContain('la version précédente reste en vente');
+    expect(lines).toContain('Suite possible (AUTO) : vérifier la source officielle à la main');
+    expect(lines).toContain('Suite possible (RELU) : adopter la nouvelle valeur après comparaison');
+    expect(describeControlStop(null)).toEqual([]);
+  });
+
+  it('describeReport distingue le format du moniteur public et celui d’un arrêt de contrôle', () => {
+    expect(describeReport({ checks: [{ name: 'ready', ok: true, http: 200, reason: 'verified' }] })).toEqual(['ready : vérifié · HTTP 200 · verified']);
+    expect(describeReport({ stop })).toEqual(describeControlStop(stop));
+    expect(describeReport(null)).toEqual([]);
+    expect(describeReport({})).toEqual([]);
+  });
+
+  it('runAlert décrit l’arrêt dans le mail au lieu du texte fixe quand un rapport est fourni', async () => {
+    const path = `${tmpdir()}/osd-alert-stop-${process.pid}-${Date.now()}.json`;
+    writeFileSync(path, JSON.stringify({ stop }));
+    try {
+      const fetchImpl = fetcher('success');
+      const result = await runAlert(env({ ALERT_REPORT_FILE: path, ALERT_DETAIL: 'Texte fixe, ne doit pas apparaître.' }), { fetchImpl, now: () => new Date('2026-10-05T10:00:00Z') });
+      expect(result).toMatchObject({ sent: true, kind: 'panne' });
+      const body = JSON.parse(String((fetchImpl.mock.calls[1] as [string, RequestInit])[1].body));
+      expect(body.text).toContain('variation_finma_superieure_10_pourcent');
+      expect(body.text).toContain('Suite possible (RELU) : adopter la nouvelle valeur après comparaison');
+      expect(body.text).not.toContain('Texte fixe, ne doit pas apparaître.');
+    } finally { rmSync(path, { force: true }); }
   });
 });
 

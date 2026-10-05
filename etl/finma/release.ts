@@ -11,6 +11,11 @@ import { uploadZip } from "../../src/lib/r2.js";
 import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FinmaEntity, FinmaWarning } from "./types.js";
+import { writeControlStopReport } from "./control-report.js";
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 function todayVersion(): string {
   const d = new Date();
@@ -89,7 +94,21 @@ export async function runRelease(
     warnings = warn.warnings;
     console.log(`[release-finma] ingested ${warnings.length} warnings. categories: ${JSON.stringify(warn.stats.categoryCounts)}`);
 
-    if (entities.length < 2_000 || warnings.length < 1_000) throw new Error("Sources FINMA incomplètes : publication annulée");
+    if (entities.length < 2_000 || warnings.length < 1_000) {
+      writeControlStopReport({
+        control: "sources_finma_incompletes",
+        observed: `${entities.length} entités, ${warnings.length} avertissements`,
+        expected: "au moins 2 000 entités et 1 000 avertissements",
+        source: "FINMA (uid.csv et liste des avertissements)",
+        date: today(),
+        stays_served: "la version précédente reste en vente",
+        options: [
+          { label: "vérifier la source officielle à la main", level: "AUTO" },
+          { label: "relancer la collecte après correction de la source", level: "AUTO" },
+        ],
+      });
+      throw new Error("Sources FINMA incomplètes : publication annulée");
+    }
     for (const entity of entities) entity.is_warning_listed = null;
     const gleif = await ingestGleif(entities, cacheDir);
     console.log(`[release-finma] GLEIF : ${gleif.matched} lignes enrichies, ${gleif.ambiguous_uids} UID ambigus non attribués`);
@@ -98,6 +117,18 @@ export async function runRelease(
     // garde-fous que les autres sources FINMA, tout échec annule la version.
     const sup = await ingestFinmaSupervision({ cacheDir });
     if (sup.managers.length < 1_000 || sup.sros.length < 5 || sup.supervisoryOrganisations.length < 2) {
+      writeControlStopReport({
+        control: "listes_surveillance_finma_incompletes",
+        observed: `${sup.managers.length} gestionnaires, ${sup.sros.length} OAR, ${sup.supervisoryOrganisations.length} OS`,
+        expected: "au moins 1 000 gestionnaires, 5 OAR et 2 OS",
+        source: "FINMA (vvtr.xlsx, sro.xlsx, ao.xlsx)",
+        date: today(),
+        stays_served: "la version précédente reste en vente",
+        options: [
+          { label: "vérifier les trois classeurs FINMA à la main", level: "AUTO" },
+          { label: "relancer la collecte après correction de la source", level: "AUTO" },
+        ],
+      });
       throw new Error("Listes FINMA des organismes de surveillance incomplètes : publication annulée");
     }
     const matching = attachSupervisoryOrganisations(entities, sup.managers, {
@@ -106,6 +137,18 @@ export async function runRelease(
     console.log(`[release-finma] organismes de surveillance : ${matching.matched_source_rows}/${matching.source_rows} lignes FINMA rattachées, ${matching.registry_rows_with_value} lignes du registre renseignées ; ambiguës ${matching.duplicate_source_rows + matching.ambiguous_uid_source_rows}, absentes ${matching.unmatched_source_rows}, types incohérents ${matching.type_mismatch_rows}`);
     // 1508/1508 le 30.09.2026 : une chute signale un changement de format, pas une réalité.
     if (matching.matched_source_rows < 0.95 * matching.source_rows) {
+      writeControlStopReport({
+        control: "rapprochement_surveillance_faible",
+        observed: `${matching.matched_source_rows}/${matching.source_rows} lignes rattachées`,
+        expected: "au moins 95 % des lignes vvtr rattachées à un OAR ou un OS",
+        source: "FINMA (vvtr.xlsx rapproché à sro.xlsx et ao.xlsx)",
+        date: today(),
+        stays_served: "la version précédente reste en vente",
+        options: [
+          { label: "vérifier le format des classeurs FINMA à la main", level: "AUTO" },
+          { label: "adopter la nouvelle valeur après comparaison", level: "RELU" },
+        ],
+      });
       throw new Error("Rapprochement des organismes de surveillance anormalement faible : publication annulée");
     }
     supervision = { sros: sup.sros, supervisoryOrganisations: sup.supervisoryOrganisations, matching, sources: sup.sources };
@@ -146,7 +189,22 @@ export async function runRelease(
 
   const snapshots = useFixture ? [] : await readPublishedSnapshots(published, cacheDir);
   const previous = snapshots.at(-1);
-  if (previous && Math.abs(entities.length - previous.entities.length) / previous.entities.length > 0.1) throw new Error("Variation FINMA supérieure à 10 % : contrôle humain nécessaire");
+  if (previous && Math.abs(entities.length - previous.entities.length) / previous.entities.length > 0.1) {
+    writeControlStopReport({
+      control: "variation_finma_superieure_10_pourcent",
+      observed: `${entities.length} entités`,
+      expected: `variation d'au plus 10 % depuis la version précédente (${previous.entities.length} entités)`,
+      source: "FINMA (uid.csv, collecte quotidienne)",
+      date: today(),
+      stays_served: "la version précédente reste en vente",
+      options: [
+        { label: "vérifier la source officielle à la main", level: "AUTO" },
+        { label: "adopter la nouvelle valeur après comparaison", level: "RELU" },
+        { label: "ajuster le seuil de variation si le motif est compris", level: "BOUTON" },
+      ],
+    });
+    throw new Error("Variation FINMA supérieure à 10 % : contrôle humain nécessaire");
+  }
   const history = buildHistory(snapshots, { version, entities });
   writeFileSync(join(outDir, `controle-${version}.json`), JSON.stringify({ version, registry_rows: entities.length, warnings: warnings.length, lei_rows: entities.filter(e => e.lei).length, supervisory_organisation: supervision?.matching ?? null, reference_sros: supervision?.sros.length ?? 0, reference_supervisory_organisations: supervision?.supervisoryOrganisations.length ?? 0, history: history.coverage, changes: history.changes.length }, null, 2));
   const bundle = await buildBundle({ entities, warnings, zefixByUid, supervision, recentChanges: history.changes, historyCoverage: history.coverage }, version, outDir);
