@@ -123,10 +123,20 @@ catalogRoute.get("/finma", async (c) => {
           selected.set(type, count + 1);
           return true;
         });
+        // Promesses vérifiables en ligne (tâche osd.Q01) : chaque catégorie annoncée par le schéma livré, avec son
+        // nombre de lignes (0 compris), et les lignes qui portent un organisme de surveillance (LEFin).
+        let announced: unknown;
+        try { announced = JSON.parse(await extractCsvFromZip(bytes, "schema.json"))?.items?.properties?.entity_type?.enum; } catch { announced = undefined; }
+        const entity_type_rows = Array.isArray(announced)
+          ? Object.fromEntries(announced.map(type => [String(type), entities.filter(entity => entity.entity_type === type).length]))
+          : null;
+        const supervisory_organisation_rows = entities.filter(entity =>
+          typeof entity.supervisory_organisation === "string" && entity.supervisory_organisation.trim() !== "").length;
         const value = {
           version: row.version, collected_on: `${row.version.slice(0, 4)}-${row.version.slice(5, 7)}-${row.version.slice(8, 10)}`,
           registry_rows: quality.registry_rows, unique_uids: quality.unique_uids,
           warning_rows: quality.warning_rows, populated_fields: quality.populated_fields,
+          entity_type_rows, supervisory_organisation_rows,
           history: quality.history, sample,
         };
         cached = { version: row.version, loaded: Date.now(), value };

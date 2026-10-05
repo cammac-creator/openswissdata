@@ -1,0 +1,42 @@
+# Promesses publiques (tâche osd.Q01, charte du 02.10.2026, posée le 05.10.2026).
+# Tâche SÉPARÉE de la collecte FINMA : une promesse non tenue envoie sa propre alerte mail et ne bloque ni la
+# publication FINMA ni le commit quotidien du témoin public. Lancée après chaque passage de la collecte FINMA
+# (réussi ou non : la fraîcheur FINMA est déjà contrôlée et alertée par la collecte elle-même, elle n'est donc pas
+# une promesse ici), et à la main. Aucun secret métier ; Resend seulement pour l'alerte, comme les autres tâches.
+# Ajouter cette tâche resserre un garde-fou : RELU. La retirer ou l'assouplir : F7, donc BOUTON.
+name: Promesses publiques
+on:
+  workflow_run:
+    workflows: ["Collecte FINMA quotidienne et contrôle de fraîcheur"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: promesses-publiques
+  cancel-in-progress: false
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Vérifier les promesses des pages contre la donnée servie
+        run: node scripts/promesses/verifier.mjs
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Promesses publiques
+          ALERT_WORKFLOW: verify-promises.yml
+          ALERT_DETAIL: Une page publique annonce quelque chose que la donnée servie ne contient pas (ou plus). Rien n'a été modifié ni retiré de la vente ; le détail est dans le résumé de la tâche.
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

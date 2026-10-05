@@ -20,11 +20,12 @@ beforeEach(() => {
  download.mockReset();
 });
 afterEach(async () => { await new Promise(r => setImmediate(r)); closeDb(); rmSync(tmp,{recursive:true,force:true}); delete process.env.DATABASE_PATH; vi.restoreAllMocks(); });
-async function publish() {
+async function publish(options: { schema?: unknown; registry?: Array<Record<string, unknown>> } = {}) {
  const zip = archiver("zip"); const chunks: Buffer[] = [];
  const ready = new Promise<Buffer>((resolve,reject) => { zip.on("data", c => chunks.push(c)); zip.on("error",reject); zip.on("end",() => resolve(Buffer.concat(chunks))); });
  zip.append(JSON.stringify({registry_rows:25,unique_uids:24,warning_rows:10,populated_fields:{lei:3},history:{gaps:[]}}),{name:"quality.json"});
- zip.append(JSON.stringify(Array.from({length:25},(_,i) => ({name:`Institution ${i}`,entity_type:"bank",uid:`UID${i}`,lei:null,is_warning_listed:null}))),{name:"finma_registry.json"});
+ zip.append(JSON.stringify(options.registry ?? Array.from({length:25},(_,i) => ({name:`Institution ${i}`,entity_type:"bank",uid:`UID${i}`,lei:null,is_warning_listed:null}))),{name:"finma_registry.json"});
+ if (options.schema) zip.append(JSON.stringify(options.schema),{name:"schema.json"});
  await zip.finalize(); const bytes=await ready; const version=`2026.09.25.${++counter}`;
  getDb().prepare("INSERT INTO versions(dataset_id,version,r2_key,sha256,size_bytes,released_at) VALUES('finma',?,'finma/test.zip',?,?,?)").run(version,createHash("sha256").update(bytes).digest("hex"),bytes.length,Date.now());
  getDb().prepare("UPDATE datasets SET current_version=? WHERE id='finma'").run(version); download.mockResolvedValue(bytes); return bytes;
@@ -34,7 +35,15 @@ describe("Qualité publique FINMA", () => {
  it("publie les contrôles et un échantillon limité, sans données clients", async () => {
   await publish(); const res=await createApp().request("/api/catalog/finma"); expect(res.status).toBe(200); const body=await res.json();
   expect(body.registry_rows).toBe(25); expect(body.sample).toHaveLength(20); expect(body.sample[0].is_warning_listed).toBeNull();
-  expect(Object.keys(body).sort()).toEqual(["collected_on","history","populated_fields","registry_rows","sample","unique_uids","version","warning_rows"].sort());
+  expect(Object.keys(body).sort()).toEqual(["collected_on","entity_type_rows","history","populated_fields","registry_rows","sample","supervisory_organisation_rows","unique_uids","version","warning_rows"].sort());
+  expect(body.entity_type_rows).toBeNull(); expect(body.supervisory_organisation_rows).toBe(0);
+ });
+ it("compte chaque catégorie annoncée par le schéma livré, zéro compris, et l'organisme de surveillance (osd.Q01)", async () => {
+  const registry=[{name:"A",entity_type:"bank"},{name:"B",entity_type:"bank"},{name:"C",entity_type:"asset_manager_individual",supervisory_organisation:"OS témoin"},{name:"D",entity_type:"asset_manager_individual",supervisory_organisation:"  "}];
+  await publish({registry,schema:{items:{properties:{entity_type:{enum:["bank","asset_manager_individual","sro_member"]}}}}});
+  const body=await (await createApp().request("/api/catalog/finma")).json();
+  expect(body.entity_type_rows).toEqual({bank:2,asset_manager_individual:2,sro_member:0});
+  expect(body.supervisory_organisation_rows).toBe(1);
  });
  it("refuse une archive altérée", async () => { await publish(); download.mockResolvedValue(Buffer.from("archive modifiée")); expect((await createApp().request("/api/catalog/finma")).status).toBe(503); });
  it("sert un CSV daté sans cache permanent", async () => { await publish(); const res=await createApp().request("/api/catalog/finma?format=csv"); expect(res.status).toBe(200); expect(res.headers.get("content-disposition")).toContain("2026.09.25"); expect(res.headers.get("cache-control")).toBe("no-store"); expect(await res.text()).toContain("Institution 0"); });

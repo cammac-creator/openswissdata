@@ -1,0 +1,177 @@
+{
+ "description": "Promesses publiques d'OpenSwissData vérifiées après chaque collecte FINMA contre la donnée servie, par la tâche séparée verify-promises.yml et scripts/promesses/verifier.mjs (charte osd.Q01, version vérifiée du 02.10.2026). La fraîcheur FINMA n'est pas ici : la collecte la contrôle et l'alerte déjà. Ajouter une promesse est RELU ; en retirer une ou en assouplir une est F7 (BOUTON). Valeurs relevées sur la production le 02.10.2026 par l'audit de la charte ; les deux promesses de l'organisme de surveillance et des catégories non vides activées le 05.10.2026 (1 510 lignes rattachées dans la collecte du jour).",
+ "catalogues": {
+  "finma": "https://www.openswissdata.com/api/catalog/finma",
+  "tares": "https://www.openswissdata.com/api/catalog/tares",
+  "classifications": "https://www.openswissdata.com/api/catalog/classifications"
+ },
+ "promesses": [
+  {
+   "id": "finma-registre",
+   "promesse": "Registre FINMA des établissements autorisés",
+   "catalogue": "finma",
+   "champ": "registry_rows",
+   "op": ">=",
+   "valeur": 2000
+  },
+  {
+   "id": "finma-alerte",
+   "promesse": "Liste d'alerte FINMA incluse",
+   "catalogue": "finma",
+   "champ": "warning_rows",
+   "op": ">=",
+   "valeur": 1000
+  },
+  {
+   "id": "finma-uid",
+   "promesse": "Numéros IDE rapprochés",
+   "catalogue": "finma",
+   "champ": "populated_fields.uid",
+   "op": "part>=",
+   "base": "registry_rows",
+   "valeur": 0.95
+  },
+  {
+   "id": "finma-lei",
+   "promesse": "LEI rapprochés par IDE exact",
+   "catalogue": "finma",
+   "champ": "populated_fields.lei",
+   "op": ">=",
+   "valeur": 700
+  },
+  {
+   "id": "finma-historique",
+   "promesse": "Historique des versions du registre",
+   "catalogue": "finma",
+   "champ": "history.snapshots",
+   "op": ">=",
+   "valeur": 61
+  },
+  {
+   "id": "finma-historique-continu",
+   "promesse": "Historique sans nouveau trou (un seul connu : 24.08 au 25.09.2026)",
+   "catalogue": "finma",
+   "champ": "history.gaps",
+   "op": "longueur<=",
+   "valeur": 1
+  },
+  {
+   "id": "tares-fraicheur",
+   "promesse": "TARES actualisé chaque semaine et le 1er du mois",
+   "catalogue": "tares",
+   "champ": "version",
+   "op": "age_jours<=",
+   "valeur": 8
+  },
+  {
+   "id": "tares-lignes",
+   "promesse": "Tarif complet à 8 chiffres",
+   "catalogue": "tares",
+   "champ": "rows",
+   "op": "entre",
+   "valeur": [
+    7000,
+    8000
+   ]
+  },
+  {
+   "id": "tares-taux",
+   "promesse": "Taux détaillés conservés",
+   "catalogue": "tares",
+   "champ": "rates",
+   "op": ">=",
+   "valeur": 200000
+  },
+  {
+   "id": "noga-2008",
+   "promesse": "NOGA 2008 complet (volume validé)",
+   "catalogue": "classifications",
+   "champ": "schemes.NOGA_2008.rows",
+   "op": "==",
+   "valeur": 1790
+  },
+  {
+   "id": "noga-2025",
+   "promesse": "NOGA 2025 complet (volume validé)",
+   "catalogue": "classifications",
+   "champ": "schemes.NOGA_2025.rows",
+   "op": "==",
+   "valeur": 1845
+  },
+  {
+   "id": "nace-2",
+   "promesse": "NACE 2 complet (volume validé)",
+   "catalogue": "classifications",
+   "champ": "schemes.NACE_2.0.rows",
+   "op": "==",
+   "valeur": 996
+  },
+  {
+   "id": "nace-2-1",
+   "promesse": "NACE 2.1 complet (volume validé)",
+   "catalogue": "classifications",
+   "champ": "schemes.NACE_2.1.rows",
+   "op": "==",
+   "valeur": 1047
+  },
+  {
+   "id": "isic-4",
+   "promesse": "ISIC 4 complet (volume validé)",
+   "catalogue": "classifications",
+   "champ": "schemes.ISIC_4.rows",
+   "op": "==",
+   "valeur": 766
+  },
+  {
+   "id": "classifications-parents",
+   "promesse": "Hiérarchie complète, aucun parent orphelin",
+   "catalogue": "classifications",
+   "champ": "orphan_parents",
+   "op": "==",
+   "valeur": 0
+  },
+  {
+   "id": "page-finma-fr-oar",
+   "promesse": "La fiche dit ce qu'elle ne contient pas (OAR)",
+   "page": "https://www.openswissdata.com/datasets/finma/",
+   "contient": "ne contient pas les affiliations aux organismes"
+  },
+  {
+   "id": "page-finma-de-oar",
+   "promesse": "Die Seite sagt, was sie nicht enthält (SRO)",
+   "page": "https://www.openswissdata.com/de/datasets/finma/",
+   "contient": "enthält keine Zugehörigkeiten zu Selbstregulierungsorganisationen"
+  },
+  {
+   "id": "page-finma-en-oar",
+   "promesse": "The page says what it does not include (SRO)",
+   "page": "https://www.openswissdata.com/en/datasets/finma/",
+   "contient": "does not include self-regulatory organisation"
+  },
+  {
+   "id": "pages-finma-sans-promesse-vide",
+   "promesse": "Aucune fiche FINMA n'annonce les membres OAR ni les sanctions SECO",
+   "page": "https://www.openswissdata.com/datasets/finma/",
+   "ne_contient_pas": [
+    "SRO members",
+    "sro_member",
+    "sanctions SECO"
+   ]
+  },
+  {
+   "id": "finma-organisme-surveillance",
+   "catalogue": "finma",
+   "champ": "supervisory_organisation_rows",
+   "op": ">=",
+   "valeur": 1400
+  },
+  {
+   "id": "finma-categories-non-vides",
+   "catalogue": "finma",
+   "champ": "entity_type_rows",
+   "op": "toutes>=",
+   "valeur": 1
+  }
+ ],
+ "en_attente": []
+}
