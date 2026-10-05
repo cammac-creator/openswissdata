@@ -42,7 +42,8 @@ type Dependencies = {
 };
 const defaults: Dependencies = {
   database: getDb,
-  now: Date.now,
+  // Lue à chaque appel, pas au chargement : une horloge simulée (tests) doit être vue.
+  now: () => Date.now(),
   connection: () => connection('support'),
   withImap: imap,
   fetch: (input, init) => fetch(input, init),
