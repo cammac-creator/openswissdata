@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: controle-sources
   cancel-in-progress: false
@@ -69,3 +70,15 @@ jobs:
         run: |
           echo "::error::Le contrôle des sources demande une vérification. Consulter le rapport et le résumé."
           exit 1
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Surveillance des sources
+          ALERT_WORKFLOW: monitor-sources.yml
+          ALERT_DETAIL: Une source publique a changé, a disparu ou est illisible. Rien n'a été publié ; la référence n'est jamais adoptée automatiquement (comparaison à faire avant).
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs
