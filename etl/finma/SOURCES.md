@@ -56,13 +56,10 @@ a new unauthorised provider.
 
 ### Cross-reference with the authorised registry
 
-`flagWarningsOnRegistry()` in `unify-schema.ts` performs a fuzzy name match
-between each warning and each authorised entity (Levenshtein-based similarity,
-normalized lowercase + legal-suffix stripping). Entities matched at score ≥ 0.8
-get `is_warning_listed = true` in the registry.
-
-Authorised registries and warning lists are disjoint by definition, so a
-match count of 0–3 is the expected (correct) outcome and not a bug.
+No fuzzy cross-reference is made. `release.ts` sets `is_warning_listed` to null on
+every registry row: the warning list is shipped as its own table and is never matched
+to an authorised entity by approximate name. The former fuzzy helper
+(`flagWarningsOnRegistry`, never called) was removed on 2026-10-05 (tâche osd.N03).
 
 ### Update cadence
 
