@@ -72,6 +72,15 @@ export interface CompanyFiche {
   // métadonnées absent/illisible) — jamais une date inventée ni l'heure de fabrication de la
   // fiche. Toujours présent, comme `address_checks`.
   address_checks_edition: string | null;
+  // `street_in_municipality` (relecture du 06.10.2026, point 2, tâche B1) : champ SÉPARÉ de
+  // `address_checks` — vérifie la rue contre SON PROPRE répertoire (les rues), pas celui des
+  // localités, et doit donc porter sa PROPRE édition datée. TOUJOURS présent (tableau vide
+  // quand la vérification ne s'applique pas), au plus un élément aujourd'hui.
+  street_checks: CrossCheck[];
+  // Édition du répertoire officiel des rues utilisé pour `street_checks` (format "AAAA-MM-JJ",
+  // tirée de `streets.meta.json`) : `null` quand elle n'est pas connue (répertoire non câblé,
+  // indisponible, ou fichier de métadonnées absent/illisible). Toujours présent.
+  street_checks_edition: string | null;
   // Ce que la fiche ne dit PAS : statut d'inscription au registre, publications FOSC,
   // sanctions SECO, organes. Toujours ces quatre valeurs, dans cet ordre (tâche osd.fiche).
   // Une 5e entrée ("official_locality_directory_checks") s'ajoute SEULEMENT quand le
@@ -245,29 +254,79 @@ function localityAddressChecks(lindasData: LindasCompany, localities: Localities
  * raisons que `parts.localities` : `undefined` laisse `address_checks` strictement inchangé.
  */
 export type StreetsAccess =
-  | { available: true; byMunicipality: ReadonlyMap<string, ReadonlySet<string>> }
+  | { available: true; byMunicipality: ReadonlyMap<string, ReadonlySet<string>>; edition: string | null }
   | { available: false };
 
-/** Dernier jeton retiré du `street_address` LINDAS s'il commence par un chiffre (numéro de
- *  rue, ex. "40", "12a" — décision de Claude-Alain du 06.10.2026, tâche B1) ; le reste est
- *  rejoint par un espace. Jamais appliqué à un jeton unique (une adresse réduite au seul
- *  numéro ne porte aucun nom de rue à vérifier). */
-function streetNameFromAddress(streetAddress: string): string {
+// Jeton « numéro de rue » : des chiffres suivis d'au plus UNE lettre (ex. "40", "12a", "12A"),
+// insensible à la casse (relecture du 06.10.2026, point 4). Un suffixe plus long ("700ème")
+// n'est jamais un numéro de rue — voir `hasExploitableStreetName` plus bas : c'est ce qui
+// protège les rues officielles qui finissent par un nombre ("Place du 700ème").
+const STREET_NUMBER_TOKEN_RE = /^\d+[a-z]?$/i;
+// Lettre isolée qui suit un numéro ("12 A" — deux jetons séparés, décision du 06.10.2026).
+const SINGLE_LETTER_TOKEN_RE = /^[a-z]$/i;
+// Case postale : jamais de vérification de rue (décision du 06.10.2026, point 4) — ce préfixe
+// ne porte aucun nom de rue, dans aucune des quatre langues officielles.
+const PO_BOX_PREFIXES_RE = /^(postfach|case postale|casella postale|postbox)\b/i;
+
+function isPoBoxAddress(streetAddress: string): boolean {
+  return PO_BOX_PREFIXES_RE.test(streetAddress.trim());
+}
+
+/** Retire, EN FIN de liste de jetons, soit un seul jeton « numéro » (ex. "40", "12a"), soit une
+ *  lettre isolée précédée d'un jeton « numéro » (ex. "12", "A" → "12 A" retiré en entier).
+ *  Fonction pure, jamais appliquée directement à la chaîne : `tokens` vient déjà du découpage
+ *  par espaces (décision du 06.10.2026, point 4). */
+function stripTrailingStreetNumber(tokens: readonly string[]): string[] {
+  if (tokens.length === 0) return [];
+  const last = tokens[tokens.length - 1];
+  if (tokens.length >= 2 && SINGLE_LETTER_TOKEN_RE.test(last) && STREET_NUMBER_TOKEN_RE.test(tokens[tokens.length - 2])) {
+    return tokens.slice(0, -2);
+  }
+  if (STREET_NUMBER_TOKEN_RE.test(last)) return tokens.slice(0, -1);
+  return [...tokens];
+}
+
+/** `true` si au moins un jeton n'est NI un numéro de rue NI une lettre isolée : une adresse
+ *  réduite à "40" ou "12 A" ne porte aucun nom de rue exploitable (décision du 06.10.2026,
+ *  point 4) — distinct d'une rue officielle qui finit par un nombre ("Place du 700ème" :
+ *  "700ème" n'est NI `STREET_NUMBER_TOKEN_RE` NI `SINGLE_LETTER_TOKEN_RE`, donc exploitable). */
+function hasExploitableStreetName(tokens: readonly string[]): boolean {
+  return tokens.some((t) => !STREET_NUMBER_TOKEN_RE.test(t) && !SINGLE_LETTER_TOKEN_RE.test(t));
+}
+
+/**
+ * Noms candidats pour la recherche dans le répertoire officiel des rues, dans l'ORDRE d'essai
+ * (décision de Claude-Alain du 06.10.2026, point 4) : d'ABORD le texte complet normalisé tel
+ * que publié par LINDAS (certaines rues officielles finissent légitimement par un nombre, ex.
+ * « Place du 700ème ») ; SEULEMENT si ce texte complet ne correspond à rien, la version sans le
+ * numéro de rue final est essayée. Jamais de candidat quand l'adresse ne porte aucun nom de rue
+ * exploitable (voir `hasExploitableStreetName`) : liste vide dans ce cas.
+ */
+function streetCandidatesFromAddress(streetAddress: string): string[] {
   const tokens = streetAddress.trim().split(/\s+/).filter((t) => t.length > 0);
-  if (tokens.length > 0 && /^\d/.test(tokens[tokens.length - 1])) tokens.pop();
-  return tokens.join(" "); // chaîne vide si l'adresse ne contenait qu'un numéro (ex. "40")
+  if (tokens.length === 0 || !hasExploitableStreetName(tokens)) return [];
+  const full = tokens.join(" ");
+  const stripped = stripTrailingStreetNumber(tokens).join(" ");
+  return stripped && stripped !== full ? [full, stripped] : [full];
 }
 
 /**
  * Vérification `street_in_municipality` (tâche osd.localites, tâche B1 — décision de
- * Claude-Alain du 06.10.2026) : le nom de rue dérivé de l'adresse LINDAS existe-t-il parmi
- * les rues officielles de la COMMUNE DU SIÈGE (`municipality_bfs_id`) ? Émise seulement quand
- * la commune du siège ET un nom de rue exploitable sont connus (sinon tableau vide — jamais
- * une vérification bancale). Quand la rue n'est pas trouvée dans la commune du siège mais
- * existe dans une AUTRE commune partageant le même NPA que l'adresse (le siège et l'adresse
- * postale peuvent légitimement différer), le résultat reste "no" avec un détail qui le dit —
- * un fait, jamais un verdict. `localities` reste optionnel : sans répertoire des localités,
- * ce recoupement supplémentaire est simplement omis (résultat "no" générique).
+ * Claude-Alain du 06.10.2026, affinée le 06.10.2026) : le nom de rue dérivé de l'adresse LINDAS
+ * existe-t-il parmi les rues officielles de la COMMUNE DU SIÈGE (`municipality_bfs_id`) ? Émise
+ * seulement quand la commune du siège ET un nom de rue exploitable sont connus, et JAMAIS pour
+ * une case postale (`isPoBoxAddress`) — sinon tableau vide, jamais une vérification bancale.
+ * Quand la rue n'est pas trouvée dans la commune du siège mais existe dans une AUTRE commune
+ * partageant le même NPA que l'adresse (le siège et l'adresse postale peuvent légitimement
+ * différer), le résultat reste "no" avec un détail qui le dit — un fait, jamais un verdict.
+ * `localities` reste optionnel : sans répertoire des localités, ce recoupement supplémentaire
+ * est simplement omis (résultat "no" générique).
+ *
+ * Libellé « no » générique (relecture du 06.10.2026, point 3) : « Street not found among the
+ * official street names of the seat municipality. » — le répertoire des rues exclut par
+ * construction les tronçons `real` non officiels (3 308 au 06.10.2026, voir
+ * `scripts/sync-streets.ts`) : un "no" dit seulement que le nom n'est pas parmi les noms
+ * OFFICIELS connus, jamais que la rue n'existe pas physiquement.
  */
 function streetInMunicipalityCheck(lindasData: LindasCompany, streets: StreetsAccess, localities: LocalitiesAccess | undefined): CrossCheck[] {
   if (!streets.available) return [];
@@ -275,13 +334,13 @@ function streetInMunicipalityCheck(lindasData: LindasCompany, streets: StreetsAc
   if (!bfsId) return [];
   const streetAddress = lindasData.street_address;
   if (!streetAddress) return [];
-  const streetName = streetNameFromAddress(streetAddress);
-  if (!streetName) return [];
-  const normalized = normalizeStreetName(streetName);
+  if (isPoBoxAddress(streetAddress)) return []; // case postale : jamais de vérification de rue
+  const candidates = streetCandidatesFromAddress(streetAddress);
+  if (candidates.length === 0) return [];
   const sources = ["ofrc.zefix_lindas", "swisstopo.streets"];
 
   const seatStreets = streets.byMunicipality.get(bfsId);
-  if (seatStreets?.has(normalized)) {
+  if (candidates.some((name) => seatStreets?.has(normalizeStreetName(name)))) {
     return [{
       check: "street_in_municipality",
       sources,
@@ -294,14 +353,15 @@ function streetInMunicipalityCheck(lindasData: LindasCompany, streets: StreetsAc
   if (postalCode && localities?.available) {
     const municipalitiesForPostalCode = localities.byPostalCode.get(postalCode) ?? [];
     const foundElsewhere = municipalitiesForPostalCode.some(
-      (row) => row.municipality_bfs_id !== bfsId && (streets.byMunicipality.get(row.municipality_bfs_id)?.has(normalized) ?? false),
+      (row) => row.municipality_bfs_id !== bfsId &&
+        candidates.some((name) => streets.byMunicipality.get(row.municipality_bfs_id)?.has(normalizeStreetName(name))),
     );
     if (foundElsewhere) {
       return [{
         check: "street_in_municipality",
         sources,
         result: false,
-        detail: "Street not found in the official street directory of the seat municipality, but found in another municipality sharing the same postal code (the seat and the address can differ).",
+        detail: "Street not found among the official street names of the seat municipality, but found in another municipality sharing the same postal code (the seat and the address can differ).",
       }];
     }
   }
@@ -310,7 +370,7 @@ function streetInMunicipalityCheck(lindasData: LindasCompany, streets: StreetsAc
     check: "street_in_municipality",
     sources,
     result: false,
-    detail: "Street not found in the official street directory of the seat municipality.",
+    detail: "Street not found among the official street names of the seat municipality.",
   }];
 }
 
@@ -533,12 +593,18 @@ export function buildCompanyFiche(
   const address_checks: CrossCheck[] = [];
   if (lindasData && hasPublishedAddress(lindasData)) {
     if (parts.localities) address_checks.push(...localityAddressChecks(lindasData, parts.localities));
-    // street_in_municipality (tâche osd.localites, tâche B1) : AJOUTÉ à la même section
-    // `address_checks`, jamais un champ séparé ni une édition supplémentaire dans l'en-tête
-    // du rendu texte (`renderAddressChecks` reste inchangé, générique sur ce tableau).
-    if (parts.streets) address_checks.push(...streetInMunicipalityCheck(lindasData, parts.streets, parts.localities));
   }
   const address_checks_edition: string | null = parts.localities && parts.localities.available ? parts.localities.edition : null;
+
+  // street_in_municipality (tâche osd.localites, tâche B1, relecture du 06.10.2026, point 2) :
+  // champ SÉPARÉ `street_checks`, avec SA PROPRE édition datée (celle du répertoire des rues,
+  // jamais celle des localités) — ce n'est pas la même référence officielle que les trois
+  // vérifications de `address_checks` ci-dessus.
+  const street_checks: CrossCheck[] = [];
+  if (lindasData && hasPublishedAddress(lindasData) && parts.streets) {
+    street_checks.push(...streetInMunicipalityCheck(lindasData, parts.streets, parts.localities));
+  }
+  const street_checks_edition: string | null = parts.streets && parts.streets.available ? parts.streets.edition : null;
 
   const not_covered: string[] = [...NOT_COVERED];
   // Répertoire câblé mais illisible : signalé, jamais une exception (revue point 5). Un
@@ -559,6 +625,8 @@ export function buildCompanyFiche(
     cross_checks,
     address_checks,
     address_checks_edition,
+    street_checks,
+    street_checks_edition,
     not_covered,
     notice: NOTICE,
   };
@@ -603,7 +671,7 @@ export async function companyCheck(
   // quand le fichier est absent ou illisible.
   const streetsLoaded = getStreets();
   const streets: StreetsAccess = streetsLoaded
-    ? { available: true, byMunicipality: streetsLoaded.byMunicipality }
+    ? { available: true, byMunicipality: streetsLoaded.byMunicipality, edition: streetsLoaded.edition }
     : { available: false };
   const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, localities, streets, now: deps.now });
   return { ok: true, fiche };

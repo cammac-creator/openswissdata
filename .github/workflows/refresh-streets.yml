@@ -38,7 +38,7 @@ jobs:
       - name: Vérifier avant de publier (jamais de commit sans ces contrôles verts)
         run: |
           npm run typecheck
-          npx vitest run tests/mcp/company-localities.test.ts tests/mcp/company-check-tool.test.ts tests/mcp/company-check.test.ts tests/mcp/data-loader-localities.test.ts tests/scripts/sync-streets.test.ts tests/scripts/build-data-files.test.ts
+          npx vitest run tests/mcp/company-localities.test.ts tests/mcp/company-streets.test.ts tests/mcp/company-check-tool.test.ts tests/mcp/company-check.test.ts tests/mcp/data-loader-localities.test.ts tests/mcp/data-loader-streets.test.ts tests/scripts/sync-streets.test.ts tests/scripts/build-data-files.test.ts
       - name: Committer les fichiers s'ils ont changé
         run: |
           git config user.name "OpenSwissData"

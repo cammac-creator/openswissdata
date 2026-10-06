@@ -16,11 +16,11 @@
  */
 import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { buildCompanyFiche, companyCheck, type LocalitiesAccess, type StreetsAccess } from "../../src/mcp/company/check.js";
+import { buildCompanyFiche, companyCheck, type LocalitiesAccess } from "../../src/mcp/company/check.js";
 import { companyCheckHandler } from "../../src/mcp/tools/company-check.js";
 import { LINDAS_ENDPOINT, resetLindasCache } from "../../src/mcp/company/lindas.js";
 import { resetGleifCache } from "../../src/mcp/company/gleif.js";
-import { _resetDataLoaderCache, normalizeStreetName, type LocalityRow } from "../../src/mcp/data-loader.js";
+import { _resetDataLoaderCache, type LocalityRow } from "../../src/mcp/data-loader.js";
 import type { FinmaRegistryRow } from "../../src/mcp/data-loader.js";
 import type { GleifRecord, LindasCompany, Part } from "../../src/mcp/company/types.js";
 
@@ -62,17 +62,6 @@ function directory(rows: LocalityRow[], edition: string | null = null): Localiti
   return { available: true, byPostalCode: byPostalCode(rows), edition };
 }
 
-/** Répertoire des rues en mémoire pour les tests (tâche osd.localites, tâche B1) : les noms
- *  fournis sont normalisés avec la MÊME fonction que la production (`normalizeStreetName`),
- *  jamais une normalisation réécrite ici qui pourrait diverger. */
-function streetsDirectory(byMunicipality: Record<string, string[]>): StreetsAccess {
-  const map = new Map<string, Set<string>>();
-  for (const [bfsId, streets] of Object.entries(byMunicipality)) {
-    map.set(bfsId, new Set(streets.map(normalizeStreetName)));
-  }
-  return { available: true, byMunicipality: map };
-}
-
 /** Société fictive de forme ouverte (0106, SA), adresse AXA-like (8400 Winterthur 230 ZH). */
 const OPEN_FORM_COMPANY: LindasCompany = {
   legal_name: "Société Fictive SA",
@@ -93,14 +82,13 @@ const OPEN_FORM_COMPANY: LindasCompany = {
 
 const UID = "CHE-103.137.179"; // IDE réel AXA, réutilisé seulement comme identifiant de fiche
 
-function ficheWith(lindasData: LindasCompany, localities: LocalitiesAccess | undefined, streets?: StreetsAccess): ReturnType<typeof buildCompanyFiche> {
+function ficheWith(lindasData: LindasCompany, localities: LocalitiesAccess | undefined): ReturnType<typeof buildCompanyFiche> {
   const lindas: Part<LindasCompany> = { available: true, found: true, retrieved_at: new Date(DEBUT).toISOString(), data: lindasData };
   return buildCompanyFiche(UID, {
     lindas,
     gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
     finma: { available: true, rows: [] },
     localities,
-    streets,
     now,
   });
 }
@@ -341,135 +329,5 @@ describe("companyCheck (bout en bout) : localities câblé PAR DÉFAUT, réperto
     const meta = JSON.parse(readFileSync(new URL("../../src/mcp/data/localities.meta.json", import.meta.url), "utf8")) as { edition: string };
     expect(meta.edition).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(result.fiche.address_checks_edition).toBe(meta.edition);
-  });
-
-  // Nouveau test (tâche B1, répertoire des rues) : AJOUTÉ à la suite de l'existant ci-dessus,
-  // sans y toucher. companyCheck() câble aussi `streets` par défaut depuis le fichier réel
-  // embarqué : la même adresse réelle (General Guisan-Strasse 40, Winterthur 230) doit donner
-  // `street_in_municipality: true`, lu depuis le répertoire officiel des rues.
-  it("AXA Leben AG : companyCheck() sans deps.streets rend déjà street_in_municipality=true, lu depuis le fichier embarqué", async () => {
-    const fetchMock = async (url: string | URL) => {
-      const href = typeof url === "string" ? url : url.toString();
-      return href.startsWith(LINDAS_ENDPOINT) ? jsonResponse(LINDAS_AXA) : jsonResponse(GLEIF_AXA);
-    };
-    const result = await companyCheck("CHE-103.137.179", { fetch: fetchMock, now, finma: () => [finmaRow()] });
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    const street = result.fiche.address_checks.find((c) => c.check === "street_in_municipality");
-    expect(street?.result).toBe(true);
-    expect(street?.detail).toBe("Street found in the official street directory of the seat municipality.");
-    expect(result.fiche.not_covered).not.toContain("official_street_directory_checks");
-  });
-});
-
-/**
- * Vérification `street_in_municipality` (répertoire officiel des rues, swisstopo — tâche
- * osd.localites, tâche B1 du plan `2026-10-06-prospection-et-api.md`, décision de
- * Claude-Alain du 06.10.2026). Même champ `address_checks` que les vérifications ci-dessus
- * (jamais un champ séparé), même esprit : des FAITS, jamais un verdict.
- */
-describe("buildCompanyFiche : street_in_municipality (répertoire officiel des rues)", () => {
-  // Adresse réelle d'AXA Leben AG au 06.10.2026 : General Guisan-Strasse 40, 8400 Winterthur
-  // (numéro OFS de commune 230). Le nom officiel au répertoire des rues porte un trait
-  // d'union ("General-Guisan-Strasse") : la vérification doit les traiter comme identiques
-  // (règle "trait d'union ≡ espace", réservée aux noms de rue).
-  const AXA_LIKE_COMPANY: LindasCompany = { ...OPEN_FORM_COMPANY, street_address: "General Guisan-Strasse 40" };
-
-  it("`streets` absent (undefined) : aucune entrée street_in_municipality, address_checks des localités inchangé", () => {
-    const fiche = ficheWith(AXA_LIKE_COMPANY, directory([WINTERTHUR_8400]), undefined);
-    expect(fiche.address_checks.map((c) => c.check)).not.toContain("street_in_municipality");
-    expect(fiche.address_checks).toHaveLength(3); // les trois vérifications de localités, inchangées
-    expect(fiche.not_covered).not.toContain("official_street_directory_checks");
-  });
-
-  it("répertoire des rues absent (`{ available: false }`) : aucune entrée, not_covered le dit, jamais une exception", () => {
-    const fiche = ficheWith(AXA_LIKE_COMPANY, directory([WINTERTHUR_8400]), { available: false });
-    expect(fiche.address_checks.map((c) => c.check)).not.toContain("street_in_municipality");
-    expect(fiche.not_covered).toContain("official_street_directory_checks");
-  });
-
-  it("rue trouvée dans la commune du siège, avec un trait d'union à la place d'un espace (\"General Guisan-Strasse\" ↔ \"General-Guisan-Strasse\") : yes, texte exact de la décision du 06.10.2026", () => {
-    const streets = streetsDirectory({ "230": ["General-Guisan-Strasse"] });
-    const fiche = ficheWith(AXA_LIKE_COMPANY, directory([WINTERTHUR_8400]), streets);
-    const check = fiche.address_checks.find((c) => c.check === "street_in_municipality");
-    expect(check).toMatchObject({
-      result: true,
-      detail: "Street found in the official street directory of the seat municipality.",
-      sources: ["ofrc.zefix_lindas", "swisstopo.streets"],
-    });
-  });
-
-  it("rue inconnue (absente de toute commune) : no, détail générique, jamais une approximation", () => {
-    const streets = streetsDirectory({ "230": ["Bahnhofplatz"] }); // General-Guisan-Strasse absente
-    const fiche = ficheWith(AXA_LIKE_COMPANY, directory([WINTERTHUR_8400]), streets);
-    const check = fiche.address_checks.find((c) => c.check === "street_in_municipality");
-    expect(check?.result).toBe(false);
-    expect(check?.detail).toBe("Street not found in the official street directory of the seat municipality.");
-  });
-
-  it("rue absente de la commune du siège MAIS présente dans une autre commune du même NPA : no, détail qui le dit (le siège et l'adresse peuvent différer), un fait jamais un verdict", () => {
-    // NPA 8310 Kemptthal couvre Lindau (176) ET Winterthur (230) ; la rue n'existe qu'à Lindau,
-    // mais le siège déclaré est à Winterthur : le fait est signalé sans jamais dire "faux" ou "risqué".
-    const company: LindasCompany = { ...AXA_LIKE_COMPANY, postal_code: "8310", locality: "Kemptthal", municipality: "Winterthur", municipality_bfs_id: "230" };
-    // La rue existe à Lindau (176), pas à Winterthur (230) — le siège déclaré.
-    const streets = streetsDirectory({ "176": ["General-Guisan-Strasse"] });
-    const fiche = ficheWith(company, directory([KEMPTTHAL_LINDAU, KEMPTTHAL_WINTERTHUR]), streets);
-    const check = fiche.address_checks.find((c) => c.check === "street_in_municipality");
-    expect(check?.result).toBe(false);
-    expect(check?.detail).toBe(
-      "Street not found in the official street directory of the seat municipality, but found in another municipality sharing the same postal code (the seat and the address can differ).",
-    );
-  });
-
-  it("rue absente de la commune du siège ET absente des autres communes du NPA : no, détail générique (pas de fausse piste \"ailleurs\")", () => {
-    const company: LindasCompany = { ...AXA_LIKE_COMPANY, postal_code: "8310", locality: "Kemptthal", municipality: "Winterthur", municipality_bfs_id: "230" };
-    const streets = streetsDirectory({ "176": ["Chemin de la Chapelle"] }); // ni 230 ni 176 ne portent General-Guisan-Strasse
-    const fiche = ficheWith(company, directory([KEMPTTHAL_LINDAU, KEMPTTHAL_WINTERTHUR]), streets);
-    const check = fiche.address_checks.find((c) => c.check === "street_in_municipality");
-    expect(check?.result).toBe(false);
-    expect(check?.detail).toBe("Street not found in the official street directory of the seat municipality.");
-  });
-
-  it("`localities` absent mais `streets` présent : la vérification principale fonctionne quand même (seul le recoupement \"ailleurs dans le NPA\" dépend des localités)", () => {
-    const streets = streetsDirectory({ "230": ["General-Guisan-Strasse"] });
-    const fiche = ficheWith(AXA_LIKE_COMPANY, undefined, streets);
-    const check = fiche.address_checks.find((c) => c.check === "street_in_municipality");
-    expect(check?.result).toBe(true);
-    expect(fiche.address_checks).toHaveLength(1); // aucune vérification de localités (undefined), seule celle-ci
-  });
-
-  it("municipality_bfs_id inconnu (commune du siège non publiée) : aucune vérification émise", () => {
-    const company: LindasCompany = { ...AXA_LIKE_COMPANY, municipality_bfs_id: null };
-    const streets = streetsDirectory({ "230": ["General-Guisan-Strasse"] });
-    const fiche = ficheWith(company, directory([WINTERTHUR_8400]), streets);
-    expect(fiche.address_checks.map((c) => c.check)).not.toContain("street_in_municipality");
-  });
-
-  it("adresse réduite au seul numéro (aucun nom de rue exploitable) : aucune vérification émise", () => {
-    const company: LindasCompany = { ...AXA_LIKE_COMPANY, street_address: "40" };
-    const streets = streetsDirectory({ "230": ["General-Guisan-Strasse"] });
-    const fiche = ficheWith(company, directory([WINTERTHUR_8400]), streets);
-    expect(fiche.address_checks.map((c) => c.check)).not.toContain("street_in_municipality");
-  });
-
-  it("entreprise individuelle (0101) : adresse non publiée → aucune vérification de rue, même avec un répertoire disponible", () => {
-    const individuelle: LindasCompany = { ...AXA_LIKE_COMPANY, legal_form_code: "0101" };
-    const streets = streetsDirectory({ "230": ["General-Guisan-Strasse"] });
-    const fiche = ficheWith(individuelle, directory([WINTERTHUR_8400]), streets);
-    expect(fiche.address_checks).toEqual([]);
-    expect(fiche.not_covered).not.toContain("official_street_directory_checks"); // répertoire disponible, juste non applicable ici
-  });
-
-  it("aucun mot de verdict dans le détail de street_in_municipality (yes et no)", () => {
-    const banned = ["safe", "risky", "compliant", "verified", "trustworthy", "suspicious", "valid company"];
-    const streetsYes = streetsDirectory({ "230": ["General-Guisan-Strasse"] });
-    const ficheYes = ficheWith(AXA_LIKE_COMPANY, directory([WINTERTHUR_8400]), streetsYes);
-    const streetsNo = streetsDirectory({ "230": ["Bahnhofplatz"] });
-    const ficheNo = ficheWith(AXA_LIKE_COMPANY, directory([WINTERTHUR_8400]), streetsNo);
-    for (const fiche of [ficheYes, ficheNo]) {
-      const check = fiche.address_checks.find((c) => c.check === "street_in_municipality");
-      const lower = (check?.detail ?? "").toLowerCase();
-      for (const word of banned) expect(lower).not.toContain(word);
-    }
   });
 });

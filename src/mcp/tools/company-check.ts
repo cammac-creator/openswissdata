@@ -154,6 +154,25 @@ function renderAddressChecks(fiche: CompanyFiche): string[] {
 }
 
 /**
+ * `street_in_municipality` (relecture du 06.10.2026, point 2, tâche B1) : section À PART de
+ * « Address checks » ci-dessus, datée et attribuée à SON PROPRE répertoire (les rues, pas les
+ * localités) — `fiche.street_checks_edition`, jamais l'édition des localités. Même rendu
+ * "yes"/"no" que `renderAddressChecks`, générique sur le tableau (au plus un élément aujourd'hui).
+ */
+function renderStreetChecks(fiche: CompanyFiche): string[] {
+  const edition = fiche.street_checks_edition ? `, edition ${fiche.street_checks_edition}` : "";
+  const lines: string[] = [`Street check (official street directory, swisstopo${edition}):`];
+  if (fiche.street_checks.length === 0) {
+    lines.push("  (none: no published commercial register street address to check, or the directory is not available)");
+    return lines;
+  }
+  for (const c of fiche.street_checks) {
+    lines.push(`  - ${c.check}: ${c.result ? "yes" : "no"} — ${c.detail}`);
+  }
+  return lines;
+}
+
+/**
  * Résumé lisible (`content[0].text`) : factuel, en anglais, qui cite pour chaque groupe sa
  * source et l'heure de lecture, liste les recoupements en "identical"/"different", et
  * rappelle ce qui n'est pas couvert ainsi que la notice. AUCUN mot de verdict — vérifié par
@@ -172,6 +191,8 @@ function renderSummary(fiche: CompanyFiche): string {
   lines.push(...renderCrossChecks(fiche));
   lines.push("");
   lines.push(...renderAddressChecks(fiche));
+  lines.push("");
+  lines.push(...renderStreetChecks(fiche));
   lines.push("");
   // Phrase claire plutôt qu'une liste de jetons (relecture finale du 06.10.2026) : les
   // lecteurs de ce résumé ne connaissent pas les noms de champs internes de `not_covered`.

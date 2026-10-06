@@ -128,8 +128,10 @@ let _localities: LocalityRow[] | null = null;
 let _localitiesByPostalCode: Map<string, LocalityRow[]> | null = null;
 let _localitiesLoadFailed = false;
 let _localitiesEdition: string | null = null;
-let _streets: StreetRow[] | null = null;
+// PAS de `_streets: StreetRow[]` ici (relecture du 06.10.2026, point 5) : le tableau complet des
+// rues ne doit jamais être une variable de module — voir le commentaire de `getStreets()`.
 let _streetsByMunicipality: Map<string, Set<string>> | null = null;
+let _streetsMunicipalityInfo: Map<string, { municipality: string; canton: string }> | null = null;
 let _streetsLoadFailed = false;
 let _streetsEdition: string | null = null;
 let _classificationLinks: ClassificationLink[] | null = null;
@@ -300,6 +302,20 @@ export function normalizeStreetName(value: string): string {
     .trim();
 }
 
+/** Nom de commune et canton par numéro OFS, dérivés du répertoire des rues (tâche B1, relecture
+ *  du 06.10.2026, point 5) : un répertoire ~2 000 entrées (une par commune), PAS le tableau
+ *  complet de ~221 000 lignes — `src/lib/commune-profile.ts` s'en sert pour son repli de nom/
+ *  canton quand le répertoire des localités est absent, sans jamais garder les lignes brutes en
+ *  mémoire. Fonction pure, testée directement avec des lignes en mémoire. */
+export function buildStreetsMunicipalityInfo(rows: readonly StreetRow[]): Map<string, { municipality: string; canton: string }> {
+  const info = new Map<string, { municipality: string; canton: string }>();
+  for (const row of rows) {
+    if (!row.municipality_bfs_id || info.has(row.municipality_bfs_id)) continue;
+    info.set(row.municipality_bfs_id, { municipality: row.municipality, canton: row.canton });
+  }
+  return info;
+}
+
 /**
  * Répertoire officiel des rues (tâche osd.localites, tâche B1), indexé par numéro OFS de
  * commune → ensemble des noms de rue normalisés. Fichier compressé (`streets.csv.gz`, lu par
@@ -307,27 +323,19 @@ export function normalizeStreetName(value: string): string {
  * l'absence ou à une lecture illisible : `null`, JAMAIS une exception — `company_check` sert
  * alors la fiche sans la vérification `street_in_municipality` qui en dépend (voir
  * `src/mcp/company/check.ts`). Même motif que `getLocalities()` ci-dessus.
+ *
+ * Mémoire (relecture du 06.10.2026, point 5) : le tableau de ~221 000 lignes construit ici reste
+ * une variable LOCALE à cette fonction — seuls l'index (`byMunicipality`) et le petit répertoire
+ * nom/canton (`municipalityInfo`, une entrée par commune) sont gardés en mémoire entre les
+ * appels ; le tableau complet n'est jamais assigné à une variable de module et peut donc être
+ * libéré par le ramasse-miettes dès que cette fonction retourne. `_streetsRowsForTest()`
+ * ci-dessous recharge le tableau à la demande, SEULEMENT pour les tests qui en ont besoin.
  */
-export function getStreets(): { rows: readonly StreetRow[]; byMunicipality: ReadonlyMap<string, ReadonlySet<string>>; edition: string | null } | null {
+export function getStreets(): { byMunicipality: ReadonlyMap<string, ReadonlySet<string>>; municipalityInfo: ReadonlyMap<string, { municipality: string; canton: string }>; edition: string | null } | null {
   if (_streetsLoadFailed) return null;
-  if (!_streets || !_streetsByMunicipality) {
+  if (!_streetsByMunicipality || !_streetsMunicipalityInfo) {
     try {
-      const raw = gunzipSync(readFileSync(join(DATA_DIR, "streets.csv.gz"))).toString("utf8");
-      // Mode tableau (`columns: false`) puis correspondance manuelle, PAS `columns: true` :
-      // mesuré le 06.10.2026, le mode objet de `csv-parse` est environ 5,6× plus lent sur les
-      // ~220 000 lignes de ce fichier (2,4 s contre 0,4 s) — un répertoire aussi volumineux
-      // doit rester bien en-deçà du délai des tests qui déclenchent `companyCheck()` par
-      // défaut. L'ordre des colonnes est fixe et contrôlé par `scripts/sync-streets.ts`
-      // (`street,postal_code,locality,municipality_bfs_id,municipality,canton`).
-      const records = parse(raw, { skip_empty_lines: true }) as string[][];
-      const rows: StreetRow[] = records.slice(1).map((r) => ({
-        street: r[0] ?? "",
-        postal_code: r[1] ?? "",
-        locality: r[2] ?? "",
-        municipality_bfs_id: r[3] ?? "",
-        municipality: r[4] ?? "",
-        canton: r[5] ?? "",
-      }));
+      const rows = readStreetsRows();
       // Un fichier SANS ligne de données (en-tête seul, ou fichier vide une fois décompressé)
       // est traité comme ABSENT, jamais comme un répertoire vide (même motif que
       // `getLocalities()`, relecture finale du 06.10.2026, point 5).
@@ -336,15 +344,44 @@ export function getStreets(): { rows: readonly StreetRow[]; byMunicipality: Read
         _streetsLoadFailed = true;
         return null;
       }
-      _streets = rows;
       _streetsByMunicipality = index;
+      _streetsMunicipalityInfo = buildStreetsMunicipalityInfo(rows);
       _streetsEdition = readStreetsEdition(rows.length);
     } catch {
       _streetsLoadFailed = true;
       return null;
     }
   }
-  return { rows: _streets, byMunicipality: _streetsByMunicipality, edition: _streetsEdition };
+  return { byMunicipality: _streetsByMunicipality, municipalityInfo: _streetsMunicipalityInfo, edition: _streetsEdition };
+}
+
+/** Lecture + décompression + analyse du fichier réel ; jamais mémorisée (voir le commentaire de
+ *  `getStreets()` ci-dessus). Factorisée pour que `getStreets()` et `_streetsRowsForTest()`
+ *  partagent exactement la même lecture, sans jamais diverger. */
+function readStreetsRows(): StreetRow[] {
+  const raw = gunzipSync(readFileSync(join(DATA_DIR, "streets.csv.gz"))).toString("utf8");
+  // Mode tableau (`columns: false`) puis correspondance manuelle, PAS `columns: true` :
+  // mesuré le 06.10.2026, le mode objet de `csv-parse` est environ 5,6× plus lent sur les
+  // ~220 000 lignes de ce fichier (2,4 s contre 0,4 s) — un répertoire aussi volumineux
+  // doit rester bien en-deçà du délai des tests qui déclenchent `companyCheck()` par
+  // défaut. L'ordre des colonnes est fixe et contrôlé par `scripts/sync-streets.ts`
+  // (`street,postal_code,locality,municipality_bfs_id,municipality,canton`).
+  const records = parse(raw, { skip_empty_lines: true }) as string[][];
+  return records.slice(1).map((r) => ({
+    street: r[0] ?? "",
+    postal_code: r[1] ?? "",
+    locality: r[2] ?? "",
+    municipality_bfs_id: r[3] ?? "",
+    municipality: r[4] ?? "",
+    canton: r[5] ?? "",
+  }));
+}
+
+/** Test helper SEUL (relecture du 06.10.2026, point 5) : recharge le tableau complet des rues à
+ *  la demande, pour les tests qui ont vraiment besoin des lignes brutes. Jamais appelée par le
+ *  service ; jamais mémorisée elle non plus (relit le fichier à chaque appel). */
+export function _streetsRowsForTest(): StreetRow[] {
+  return readStreetsRows();
 }
 
 /** Date d'édition du répertoire des rues (`streets.meta.json`, posé par
@@ -440,8 +477,8 @@ export function _resetDataLoaderCache(): void {
   _localitiesByPostalCode = null;
   _localitiesLoadFailed = false;
   _localitiesEdition = null;
-  _streets = null;
   _streetsByMunicipality = null;
+  _streetsMunicipalityInfo = null;
   _streetsLoadFailed = false;
   _streetsEdition = null;
   _classificationLinks = null;
