@@ -10,20 +10,14 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
 import { SOURCES } from "../etl/shared/sources/registry.js";
+import type { CanaryMode } from "../etl/shared/sources/types.js";
 import XLSX from "../etl/shared/xlsx.js";
 
 export interface SourceCanary {
   id: string;
   url: string;
-  // `raw` hashes bytes — use for files published in discrete versions (e.g. XLSX
-  // releases). `json-shape` hashes only structural keys/types — use for JSON APIs.
-  // `csv-shape` hashes only the header row + separator — use for CSVs that update
-  // continuously (rows added/removed daily) where only schema changes matter.
-  // `document` hashes the bytes of a non-XLSX document (RDF, TXT, PDF) published
-  // in discrete versions : même adresse que la publication, pour voir un blocage avant elle.
-  // `xlsx-shape` : nom de la feuille et ligne d'en-tête d'un classeur régénéré
-  // chaque jour (listes FINMA) ; les lignes ajoutées ou retirées ne comptent pas.
-  mode: "raw" | "json-shape" | "csv-shape" | "document" | "xlsx-shape";
+  // Modes documentés une seule fois, au-dessus de `CanaryMode` (etl/shared/sources/types.ts) — tâche osd.socle.
+  mode: CanaryMode;
   description: string;
 }
 

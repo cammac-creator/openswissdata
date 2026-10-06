@@ -162,7 +162,10 @@ export function generateProvenance(args: GenerateProvenanceArgs): ProvenanceMani
     files: [...args.files].sort((a, b) => a.name.localeCompare(b.name)),
   };
   if (args.sources) {
-    manifest.sources = [...args.sources].sort((a, b) => a.id.localeCompare(b.id));
+    // Tri par code de caractère (binaire), pas `localeCompare` : un ordre stable et
+    // indépendant de la locale d'exécution. Ne touche QUE `sources` ; `files` garde
+    // `localeCompare` dont dépendent les archives 1.0 (tâche osd.socle).
+    manifest.sources = [...args.sources].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   }
   return manifest;
 }

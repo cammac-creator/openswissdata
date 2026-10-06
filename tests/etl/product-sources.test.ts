@@ -107,6 +107,10 @@ describe("assembleur par produit", () => {
       const ids = manifest.sources.map((s: { id: string }) => s.id);
       expect(ids).toContain("census.naics_isic");
       expect(manifest.sources.length).toBe(10);
+      const census = manifest.sources.find((s: { id: string }) => s.id === "census.naics_isic");
+      expect(census.permission_reference).toBe("PUBLIC-OFFICIAL-SOURCE-US-CENSUS-PUBLIC-DOMAIN");
+      expect(census.permission_authority).toBe("U.S. Census Bureau (Public Domain, US Government Work)");
+      expect(census.jurisdiction).toBe("United States (public domain)");
     } finally {
       rmSync(workDir, { recursive: true, force: true });
     }

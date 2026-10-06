@@ -4,6 +4,7 @@ import { withTestSignature } from "../helpers/signature.js";
 const buildBundle = withTestSignature(buildProductionBundle);
 import { ingestOneSource } from "../../etl/finma/ingest.js";
 import { FINMA_SOURCES } from "../../etl/finma/sources.js";
+import type { ZefixData } from "../../etl/finma/ingest-zefix.js";
 import { mkdtempSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -52,5 +53,24 @@ describe("finma buildBundle", () => {
       recentChanges: [{ kind: "added", entity_type: "bank", name: "New AG", source_list: "finma-banks", after: { name: "New AG" } }],
     }, "2026.04.17", workDir);
     expect(result.changeCount).toBe(1);
+  });
+
+  // Garde-fou du 06.10.2026 (tâche osd.socle) : une archive qui contient des
+  // données Zefix sans source Zefix déclarée au registre doit être refusée.
+  it("refuse de construire l'archive quand des données Zefix sont présentes sans source Zefix au registre", async () => {
+    const banks = ingestOneSource(join(fixtureDir, "finma-banks-sample.xlsx"), FINMA_SOURCES.find(s => s.entity_type === "bank")!);
+    const zefixByUid = new Map<string, ZefixData>([
+      ["CHE-999.999.999", { uid: "CHE-999.999.999", status: "active", legal_form: "AG/SA" }],
+    ]);
+    await expect(
+      buildBundle({ entities: banks, zefixByUid }, "2026.04.17", workDir)
+    ).rejects.toThrow(/provenance FINMA : données Zefix présentes mais aucune source Zefix au registre/);
+  });
+
+  it("sans données Zefix : la construction reste inchangée (pas de garde-fou déclenché)", async () => {
+    const banks = ingestOneSource(join(fixtureDir, "finma-banks-sample.xlsx"), FINMA_SOURCES.find(s => s.entity_type === "bank")!);
+    const result = await buildBundle({ entities: banks }, "2026.04.17", workDir);
+    expect(result.zefixEnrichedCount).toBe(0);
+    expect(existsSync(result.zipPath)).toBe(true);
   });
 });

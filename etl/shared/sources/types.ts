@@ -1,5 +1,13 @@
 /** Une source publique lue par OpenSwissData (registre unique : canari, produits, provenance). Tâche osd.socle. */
 export type Institution = "BAZG" | "FINMA" | "BFS" | "Eurostat" | "UNSD" | "GLEIF" | "US Census";
+// `raw` hashes bytes — use for files published in discrete versions (e.g. XLSX
+// releases). `json-shape` hashes only structural keys/types — use for JSON APIs.
+// `csv-shape` hashes only the header row + separator — use for CSVs that update
+// continuously (rows added/removed daily) where only schema changes matter.
+// `document` hashes the bytes of a non-XLSX document (RDF, TXT, PDF) published
+// in discrete versions : même adresse que la publication, pour voir un blocage avant elle.
+// `xlsx-shape` : nom de la feuille et ligne d'en-tête d'un classeur régénéré
+// chaque jour (listes FINMA) ; les lignes ajoutées ou retirées ne comptent pas.
 export type CanaryMode = "raw" | "json-shape" | "csv-shape" | "document" | "xlsx-shape";
 export interface SourceLicence {
   reference: string;   // référence de permission ou « PUBLIC-OFFICIAL-SOURCE-… »

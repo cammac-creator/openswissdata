@@ -30,6 +30,12 @@ export const NACE_2_1_RDF_URL =
 const NOGA_2025_CONCEPT_ID = "001bfaa8-fa57-4d66-acfd-c795d67fcf80"; // identifier=nogaCode v2.0.1
 const NOGA_2008_CONCEPT_ID = "08dc481b-2add-1232-b5fe-b1fae7a1ac02"; // identifier=nogaCode v1.0.0
 const I14Y_API = "https://api.i14y.admin.ch/api/public/v1";
+// Adresses exactes lues par la collecte (fetchI14yConcept, noga() dans
+// ingestRealClassifications ci-dessous) : exportées pour que le registre unique
+// des sources (etl/shared/sources/registry.ts, tâche osd.socle) les dérive au
+// lieu de les recopier en dur.
+export const NOGA_2025_URL = `${I14Y_API}/concepts/${NOGA_2025_CONCEPT_ID}?includeCodeListEntries=true`;
+export const NOGA_2008_URL = `${I14Y_API}/concepts/${NOGA_2008_CONCEPT_ID}?includeCodeListEntries=true`;
 
 function levelFromCode(code: string, level?: number): NomenclatureLevel {
   if (level !== undefined) {
@@ -326,14 +332,14 @@ export async function ingestRealClassifications(opts: { cacheDir: string; maxAge
   };
   const nace20 = parseOfficialNace2(await source("eurostat-nace2", NACE2_URL, "nace2-structure.json"));
   const nace21Result = parseNace21Rdf(await source("eurostat-nace21", NACE_2_1_RDF_URL, "ESTAT-NACE2.1.rdf"));
-  const noga = async (id: string, sourceId: string, scheme: NomenclatureScheme) => {
-    const path = await source(sourceId, `${I14Y_API}/concepts/${id}?includeCodeListEntries=true`, `${sourceId}.json`);
+  const noga = async (url: string, sourceId: string, scheme: NomenclatureScheme) => {
+    const path = await source(sourceId, url, `${sourceId}.json`);
     const data = JSON.parse(readFileSync(path, "utf8"));
     if (!Array.isArray(data.data?.codeListEntries) || !data.data.codeListEntries.length) throw new Error("NOGA i14y vide ou invalide");
     return i14yToNomenclatureRows(data.data.codeListEntries, scheme);
   };
-  const noga2008 = await noga(NOGA_2008_CONCEPT_ID, "ofs-noga2008", "NOGA_2008");
-  const noga2025 = await noga(NOGA_2025_CONCEPT_ID, "ofs-noga2025", "NOGA_2025");
+  const noga2008 = await noga(NOGA_2008_URL, "ofs-noga2008", "NOGA_2008");
+  const noga2025 = await noga(NOGA_2025_URL, "ofs-noga2025", "NOGA_2025");
   const methodology = await source("ofs-methodologie", OFS_METHODOLOGY_URL, "ofs-methodologie.pdf");
   if (readFileSync(methodology).subarray(0, 5).toString() !== "%PDF-") throw new Error("Méthodologie OFS non PDF");
 

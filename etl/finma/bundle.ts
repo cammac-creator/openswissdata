@@ -7,7 +7,8 @@ import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
 import { buildSignedProvenance, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
-import { provenanceFieldsFor } from "../shared/sources/products.js";
+import { PRODUCT_SOURCES, provenanceFieldsFor } from "../shared/sources/products.js";
+import { SOURCES } from "../shared/sources/registry.js";
 import type { FinmaEntity, FinmaEntityType, FinmaReferenceOrganisation, FinmaSourceFileMeta, FinmaWarning } from "./types.js";
 import type { SupervisionMatchStats } from "./ingest-supervision.js";
 import { FINMA_BUNDLE_ENTITY_TYPES } from "./types.js";
@@ -260,6 +261,21 @@ export async function buildBundle(
     }
     if (supervisoryOrganisationRowCount === 0) {
       throw new Error("Aucun organisme de surveillance rattaché au registre : publication annulée");
+    }
+  }
+
+  // Garde-fou (resserre, tâche osd.socle) : des données Zefix dans l'archive sans
+  // source Zefix déclarée au registre ET dans la liste du produit FINMA signifierait
+  // un manifeste de provenance qui tait une source réellement assemblée. Aucun
+  // workflow n'active aujourd'hui ce tier (FINMA_TIER=zefix) : ce garde-fou ne change
+  // rien à la production actuelle, il bloque seulement une future activation non préparée.
+  if (input.zefixByUid && input.zefixByUid.size > 0) {
+    const sourceAuRegistre = SOURCES.some(s => /zefix/i.test(s.id));
+    const sourceAuProduit = PRODUCT_SOURCES.finma.some(id => /zefix/i.test(id));
+    if (!sourceAuRegistre || !sourceAuProduit) {
+      throw new Error(
+        "provenance FINMA : données Zefix présentes mais aucune source Zefix au registre ; déclarer la source et sa licence avant de publier"
+      );
     }
   }
 

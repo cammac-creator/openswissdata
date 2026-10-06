@@ -57,8 +57,51 @@ describe("manifeste de provenance à plusieurs sources", () => {
     const altere = { ...signed, sources: signed.sources!.map((s, i) => i === 1 ? { ...s, url: "https://exemple.invalid/" } : s) };
     expect(recettePublique(altere)).toBe(false);
   });
+  it("source modifiée + empreinte recalculée : encore refusé, par Ed25519 cette fois", () => {
+    // Le cas précédent échoue dès le contrôle d'empreinte (`signed_payload_hash`),
+    // qui n'est pas signé et se recalcule par quiconque : il n'atteint jamais la
+    // vérification Ed25519. Ici on recalcule l'empreinte sur le contenu altéré
+    // (comme le ferait un faussaire qui sait reproduire ce calcul public) pour
+    // prouver que c'est bien la signature, et non l'empreinte, qui arrête l'altération.
+    const m = generateProvenance({ ...base, sources });
+    const signed = { ...m, signature: signProvenance(m, signing).signature };
+    const alteredSources = signed.sources!.map((s, i) => i === 1 ? { ...s, url: "https://exemple.invalid/" } : s);
+    const { signature: ancienneSignature, ...sansSignature } = { ...signed, sources: alteredSources } as typeof signed;
+    const canon = canonicalize(sansSignature);
+    const empreinteRecalculee = createHash("sha256").update(canon).digest("hex");
+    const altere = { ...sansSignature, signature: { ...ancienneSignature, signed_payload_hash: empreinteRecalculee } };
+    // Rejoue exactement le premier contrôle de `recettePublique` : il passerait
+    // désormais, puisque l'empreinte a été recalculée sur le contenu altéré.
+    const { signature: sigVerif, ...payloadVerif } = altere;
+    expect(createHash("sha256").update(canonicalize(payloadVerif)).digest("hex")).toBe(sigVerif.signed_payload_hash);
+    // Seule la signature Ed25519, calculée sur l'ancien contenu, détecte encore l'altération.
+    expect(recettePublique(altere)).toBe(false);
+  });
   it("sources vide : refusé (une liste vide n'a pas de sens)", () => {
     expect(() => generateProvenance({ ...base, sources: [] })).toThrow(/au moins une source/);
+  });
+  it("tri binaire de sources (ordre par code de caractère, pas localeCompare)", () => {
+    // `[...].sort()` JS par défaut est binaire : ici il diverge de `localeCompare`,
+    // qui classerait eurostat.nace2_isic4_sparql et eurostat.nace2_sparql avant
+    // eurostat.nace21_rdf.
+    const ref = (id: string): ProvenanceSourceRef => ({
+      id, institution: "Eurostat", url: "https://example.invalid/",
+      permission_reference: "PUBLIC-OFFICIAL-SOURCE-BFS-EUROSTAT-UNSD", permission_authority: "Eurostat", jurisdiction: "Switzerland",
+    });
+    const unsorted = [
+      ref("eurostat.nace2_sparql"),
+      ref("eurostat.nace21_rdf"),
+      ref("eurostat.nace2_isic4_sparql"),
+    ];
+    const m = generateProvenance({ ...base, sources: unsorted });
+    expect(m.sources?.map(s => s.id)).toEqual([
+      "eurostat.nace21_rdf",
+      "eurostat.nace2_isic4_sparql",
+      "eurostat.nace2_sparql",
+    ]);
+    // Preuve que c'est bien l'ordre binaire par défaut, et qu'il diverge de localeCompare.
+    expect(m.sources?.map(s => s.id)).toEqual([...unsorted.map(s => s.id)].sort());
+    expect(m.sources?.map(s => s.id)).not.toEqual([...unsorted.map(s => s.id)].sort((a, b) => a.localeCompare(b)));
   });
 });
 
@@ -126,6 +169,43 @@ describe("archive de bout en bout avec buildSignedProvenance et verifyProvenance
         "finma.uid_csv",
         "gleif.lei_api",
       ]);
+    } finally {
+      rmSync(workDir, { recursive: true, force: true });
+    }
+  });
+
+  it("archive 1.1 altérée + empreinte recalculée : verifyProvenanceZip refuse, par Ed25519", async () => {
+    workDir = mkdtempSync(join(tmpdir(), "osd-prov-sources-"));
+    testPublicKeyPath = join(workDir, "cle-test.pem");
+    writeFileSync(testPublicKeyPath, signing.publicKeyPem);
+    try {
+      const dataFileContent = "id,valeur\n1,finma\n2,gleif\n";
+      const tmpDataPath = join(workDir, "a.csv");
+      writeFileSync(tmpDataPath, dataFileContent, "utf8");
+      const manifest = await buildSignedProvenance({
+        ...base,
+        files: [{ name: "a.csv", size: statSync(tmpDataPath).size, sha256: sha256OfFile(tmpDataPath) }],
+        sources,
+        signing,
+        withTimestamp: false,
+      });
+      // Falsification : une source changée, puis l'empreinte `signed_payload_hash`
+      // recalculée sur le contenu altéré (ce que peut faire quiconque, la formule
+      // est publique) — pour prouver que c'est la signature Ed25519, et non ce
+      // premier contrôle d'empreinte, qui arrête l'archive altérée.
+      const alteredSources = manifest.sources!.map((s, i) => (i === 1 ? { ...s, url: "https://exemple.invalid/" } : s));
+      const { signature: ancienneSignature, timestamp_authority, ...sansSignature } = { ...manifest, sources: alteredSources };
+      const empreinteRecalculee = createHash("sha256").update(canonicalize(sansSignature)).digest("hex");
+      const manifestAltere = {
+        ...sansSignature,
+        timestamp_authority,
+        signature: { ...ancienneSignature, signed_payload_hash: empreinteRecalculee },
+      };
+      const zipPath = zipperArchive(manifestAltere, dataFileContent);
+      const verification = await verifyProvenanceZip(zipPath, testPublicKeyPath);
+      expect(verification.signatureValid).toBe(false);
+      expect(verification.ok).toBe(false);
+      expect(verification.errors.some((e) => /Ed25519 signature INVALID/.test(e))).toBe(true);
     } finally {
       rmSync(workDir, { recursive: true, force: true });
     }

@@ -8,10 +8,13 @@ import type { Institution, SourceDescriptor, SourceLicence } from "./types.js";
 import { PERMISSION_PROFILES } from "../provenance.js";
 import { FINMA_UID_CSV_URL, FINMA_VVTR_XLSX_URL, FINMA_SRO_XLSX_URL, FINMA_AO_XLSX_URL } from "../../finma/sources.js";
 import { FINMA_WARNINGS_API_URL } from "../../finma/ingest-warnings.js";
-import { NACE_2_1_RDF_URL, ISIC_CSV_BY_LANG } from "../../classifications/ingest-real.js";
+import { NACE_2_1_RDF_URL, ISIC_CSV_BY_LANG, NOGA_2025_URL, NOGA_2008_URL } from "../../classifications/ingest-real.js";
 import { NACE2_URL } from "../../classifications/nace-official.js";
 import { NACE_ISIC_URL, OFS_METHODOLOGY_URL } from "../../classifications/links.js";
 import { CENSUS_NAICS_ISIC_URL } from "../../classifications/naics-crosswalk.js";
+// Adresses BAZG : dérivées de la même déclaration que la collecte (etl/tares/sources.ts,
+// BAZG_SOURCES), jamais recopiées en dur ici (tâche osd.socle).
+import { BAZG_SOURCES } from "../../tares/sources.js";
 
 const BAZG: SourceLicence = {
   reference: PERMISSION_PROFILES.tares.permissionReference,   // jamais recopiée en clair (osd.T05)
@@ -34,23 +37,30 @@ const GLEIF: SourceLicence = {
   authority: "GLEIF (Global Legal Entity Identifier Foundation), CC0 1.0",
   jurisdiction: "Switzerland (re-publication of GLEIF open data)",
 };
+// Licence propre, distincte de CLASSIF (BFS/Eurostat/UNSD) : le Census est un
+// domaine public américain, cohérent avec le README de l'archive (osd.socle).
+const CENSUS: SourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-US-CENSUS-PUBLIC-DOMAIN",
+  authority: "U.S. Census Bureau (Public Domain, US Government Work)",
+  jurisdiction: "United States (public domain)",
+};
 
 export const SOURCES: readonly SourceDescriptor[] = [
-  { id: "tares.tariff_8_digit", institution: "BAZG", url: "https://www.bazg.admin.ch/dam/de/sd-web/F1BV6N4GlA4l/tariff_8_digit.xlsx", canary: "raw", licence: BAZG, description: "BAZG — Liste des numéros tarifaires HS8" },
-  { id: "tares.tarifstruktur", institution: "BAZG", url: "https://www.bazg.admin.ch/dam/de/sd-web/x0cFz-OgqaF2/Tarifstruktur.xlsx", canary: "raw", licence: BAZG, description: "BAZG — Structure tarifaire hiérarchique multilingue" },
-  { id: "tares.duty_rates_01_30", institution: "BAZG", url: "https://www.bazg.admin.ch/dam/de/sd-web/suXEbuatJI1d/duty%20rates%20chapter%2001%20to%2030.xlsx", canary: "raw", licence: BAZG, description: "BAZG — Droits MFN chapitres 01-30" },
-  { id: "tares.duty_rates_31_63", institution: "BAZG", url: "https://www.bazg.admin.ch/dam/de/sd-web/8HOWtwQe30-s/duty_rates_chapter_31_to_63.xlsx", canary: "raw", licence: BAZG, description: "BAZG — Droits MFN chapitres 31-63" },
-  { id: "tares.duty_rates_64_83", institution: "BAZG", url: "https://www.bazg.admin.ch/dam/de/sd-web/dxAKUBpiFgx2/duty_rates_chapter_64_to_83.xlsx", canary: "raw", licence: BAZG, description: "BAZG — Droits MFN chapitres 64-83" },
-  { id: "tares.duty_rates_84_97", institution: "BAZG", url: "https://www.bazg.admin.ch/dam/de/sd-web/vCLXp0mDCgBz/duty_rates_chapter_84_to_97.xlsx", canary: "raw", licence: BAZG, description: "BAZG — Droits MFN chapitres 84-97" },
-  { id: "tares.customs_facilities", institution: "BAZG", url: "https://www.bazg.admin.ch/dam/de/sd-web/CAEsoXoBTdJY/customs_facilities.xlsx", canary: "raw", licence: BAZG, description: "BAZG — Codes ZCO d'allègement douanier" },
+  { id: "tares.tariff_8_digit", institution: "BAZG", url: BAZG_SOURCES.tariff_8_digit.url, canary: "raw", licence: BAZG, description: "BAZG — Liste des numéros tarifaires HS8" },
+  { id: "tares.tarifstruktur", institution: "BAZG", url: BAZG_SOURCES.tarifstruktur.url, canary: "raw", licence: BAZG, description: "BAZG — Structure tarifaire hiérarchique multilingue" },
+  { id: "tares.duty_rates_01_30", institution: "BAZG", url: BAZG_SOURCES.duty_rates_01_30.url, canary: "raw", licence: BAZG, description: "BAZG — Droits MFN chapitres 01-30" },
+  { id: "tares.duty_rates_31_63", institution: "BAZG", url: BAZG_SOURCES.duty_rates_31_63.url, canary: "raw", licence: BAZG, description: "BAZG — Droits MFN chapitres 31-63" },
+  { id: "tares.duty_rates_64_83", institution: "BAZG", url: BAZG_SOURCES.duty_rates_64_83.url, canary: "raw", licence: BAZG, description: "BAZG — Droits MFN chapitres 64-83" },
+  { id: "tares.duty_rates_84_97", institution: "BAZG", url: BAZG_SOURCES.duty_rates_84_97.url, canary: "raw", licence: BAZG, description: "BAZG — Droits MFN chapitres 84-97" },
+  { id: "tares.customs_facilities", institution: "BAZG", url: BAZG_SOURCES.customs_facilities.url, canary: "raw", licence: BAZG, description: "BAZG — Codes ZCO d'allègement douanier" },
   // FINMA — single consolidated CSV. Updated daily as institutions are
   // added/removed → use csv-shape (headers only) to avoid daily false positives.
   { id: "finma.uid_csv", institution: "FINMA", url: FINMA_UID_CSV_URL, canary: "csv-shape", licence: FINMA, description: "FINMA — CSV consolidé des institutions autorisées (UID)" },
   { id: "finma.vvtr_xlsx", institution: "FINMA", url: FINMA_VVTR_XLSX_URL, canary: "xlsx-shape", licence: FINMA, description: "FINMA — gestionnaires de fortune et trustees et leur organisme de surveillance (LEFin)" },
   { id: "finma.sro_xlsx", institution: "FINMA", url: FINMA_SRO_XLSX_URL, canary: "xlsx-shape", licence: FINMA, description: "FINMA — organismes d'autorégulation (OAR) reconnus" },
   { id: "finma.ao_xlsx", institution: "FINMA", url: FINMA_AO_XLSX_URL, canary: "xlsx-shape", licence: FINMA, description: "FINMA — organismes de surveillance (OS) autorisés" },
-  { id: "bfs.noga_2025", institution: "BFS", url: "https://api.i14y.admin.ch/api/public/v1/concepts/001bfaa8-fa57-4d66-acfd-c795d67fcf80?includeCodeListEntries=true", canary: "json-shape", licence: CLASSIF, description: "BFS — NOGA 2025 (concept i14y)" },
-  { id: "bfs.noga_2008", institution: "BFS", url: "https://api.i14y.admin.ch/api/public/v1/concepts/08dc481b-2add-1232-b5fe-b1fae7a1ac02?includeCodeListEntries=true", canary: "json-shape", licence: CLASSIF, description: "BFS — NOGA 2008 (concept i14y)" },
+  { id: "bfs.noga_2025", institution: "BFS", url: NOGA_2025_URL, canary: "json-shape", licence: CLASSIF, description: "BFS — NOGA 2025 (concept i14y)" },
+  { id: "bfs.noga_2008", institution: "BFS", url: NOGA_2008_URL, canary: "json-shape", licence: CLASSIF, description: "BFS — NOGA 2008 (concept i14y)" },
   // Classifications — mêmes adresses que la publication (etl/classifications).
   // Le 28.09.2026, op.europa.eu bloquait NACE 2.1 : seule la publication l'avait vu.
   { id: "eurostat.nace21_rdf", institution: "Eurostat", url: NACE_2_1_RDF_URL, canary: "document", licence: CLASSIF, description: "Eurostat — NACE Rév. 2.1, RDF officiel (document cellar)" },
@@ -65,7 +75,7 @@ export const SOURCES: readonly SourceDescriptor[] = [
     description: "Liste d'alerte FINMA (API de recherche du site FINMA), lue par la collecte quotidienne." },
   { id: "gleif.lei_api", institution: "GLEIF", url: "https://api.gleif.org/api/v1/lei-records", licence: GLEIF,
     description: "Registre LEI de GLEIF (API publique), pour rattacher un LEI aux entités FINMA par UID." },
-  { id: "census.naics_isic", institution: "US Census", url: CENSUS_NAICS_ISIC_URL, licence: CLASSIF,
+  { id: "census.naics_isic", institution: "US Census", url: CENSUS_NAICS_ISIC_URL, licence: CENSUS,
     description: "Correspondance NAICS–ISIC du US Census Bureau, utilisée par les classifications." },
 ];
 
