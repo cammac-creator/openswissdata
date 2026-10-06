@@ -47,7 +47,7 @@
     "/api/v1/communes/{bfs_id}": {
       "get": {
         "summary": "Commune profile (combined dataset)",
-        "description": "Name, canton, postal codes and localities (official localities directory), number of official streets (official streets directory) and FINMA-authorised entities exactly attached to this commune (same city and canton, matching a single commune — see `finma.matching`), each with its sources and directory editions. `finma.national_matching` gives the same rattachement counted nationally (matched/unmatched/ambiguous, numbers only) — most FINMA rows currently have no known canton, so a commune's own count reads against this national total. No score, no ranking between communes.",
+        "description": "Name, canton, postal codes and localities (official localities directory), number of official streets (official streets directory) and `finma.entities_with_city_named_like_commune`: FINMA register rows whose city (a postal locality name) equals this commune's name, or an exact and unique locality name of it (see `finma.matching`). A postal locality can extend into a neighbouring commune (Zürich, Genève and Zug are also postal locality names of neighbouring communes), so this is not proof of the registered seat. `finma.national_matching` gives the same counts nationally (matched/unmatched/ambiguous), plus `names_also_postal_locality_elsewhere` (matches made by commune name whose name is also a postal locality of another commune), each with its sources and directory editions. No score, no ranking between communes.",
         "parameters": [
           { "name": "bfs_id", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^\\d+$" }, "description": "Official BFS municipality number, e.g. 230" }
         ],
@@ -62,7 +62,7 @@
     "/api/v1/sources": {
       "get": {
         "summary": "Public registry of sources served by the API and the MCP server",
-        "description": "Id, publishing institution, licence and URL of each public source, with the directory edition or data version when known. The TARES permission reference is never shown here (it names a person): TARES entries carry `licence: \"see the provenance file of the archive\"` instead.",
+        "description": "Id, publishing institution, licence and URL of each public source, with the directory edition or data version when known, except the two Eurostat SPARQL queries used only at classification-collection time. The TARES permission reference is never shown here (it names a person): TARES entries carry `licence: \"see the provenance file of the archive\"` instead.",
         "responses": {
           "200": { "description": "Source registry", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "public, max-age=3600" } } },
           "429": { "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities and /communes)" }

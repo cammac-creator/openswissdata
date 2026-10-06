@@ -146,7 +146,7 @@ describe("communeProfile : rattachement FINMA — priorité 1 commune (canton fi
       finmaRow({ uid: "CHE-100.000.003", city: "Winterthur", canton: "ZH", licence_type: "Bank" }),
     ];
     const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => "2026.10.06" }));
-    expect(profile.finma.authorised_entities).toBe(3);
+    expect(profile.finma.entities_with_city_named_like_commune).toBe(3);
     expect(profile.finma.by_licence_type).toEqual({ Bank: 2, Insurance: 1 });
     expect(profile.finma.matching).toBe(FINMA_MATCHING_RULE);
     expect(profile.editions.finma).toBe("2026.10.06");
@@ -157,11 +157,14 @@ describe("communeProfile : rattachement FINMA — priorité 1 commune (canton fi
     const rows = [WINTERTHUR, SCHLATT_WINTERTHUR_LOCALITY];
     const finma = [finmaRow({ city: "Winterthur", canton: "ZH" })];
     const winterthur = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
-    expect(winterthur.finma.authorised_entities).toBe(1);
+    expect(winterthur.finma.entities_with_city_named_like_commune).toBe(1);
     const schlatt = communeProfile("226", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
-    expect(schlatt.finma.authorised_entities).toBe(0); // "Winterthur" n'est PAS le nom de la commune de Schlatt
+    expect(schlatt.finma.entities_with_city_named_like_commune).toBe(0); // "Winterthur" n'est PAS le nom de la commune de Schlatt
     const stats = nationalFinmaMatchingStats({ getLocalities: () => ({ rows, edition: null }), getFinmaRegistry: () => finma });
-    expect(stats).toEqual({ matched: 1, unmatched: 0, ambiguous: 0, total: 1 }); // jamais ambiguë : priorité 1 tranche avant la priorité 2
+    // jamais ambiguë : priorité 1 tranche avant la priorité 2. Mais le nom qui a tranché
+    // ("Winterthur") est AUSSI une localité postale de Schlatt (226) : vérité des mots, ce
+    // rattachement compte dans `names_also_postal_locality_elsewhere` (relecture, 2e passe).
+    expect(stats).toEqual({ matched: 1, unmatched: 0, ambiguous: 0, total: 1, names_also_postal_locality_elsewhere: 1 });
   });
 
   it("priorité 2 (localité) seulement quand AUCUNE commune ne porte ce nom : rattachée via la localité", () => {
@@ -171,14 +174,14 @@ describe("communeProfile : rattachement FINMA — priorité 1 commune (canton fi
     const rows = [WINTERTHUR, rickenbachSulz];
     const finma = [finmaRow({ city: "Rickenbach Sulz", canton: "ZH" })];
     const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
-    expect(profile.finma.authorised_entities).toBe(1);
+    expect(profile.finma.entities_with_city_named_like_commune).toBe(1);
   });
 
   it("canton FINMA inconnu : priorité 1 cherche tout le pays ; rattachée si un seul nom de commune au pays porte ce nom", () => {
     const rows = [WINTERTHUR, SCHLATT_WINTERTHUR_LOCALITY];
     const finma = [finmaRow({ city: "Winterthur", canton: "" })]; // canton vide : recherche nationale
     const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
-    expect(profile.finma.authorised_entities).toBe(1); // "Winterthur" reste un nom de COMMUNE unique au pays, même sans filtrer par canton
+    expect(profile.finma.entities_with_city_named_like_commune).toBe(1); // "Winterthur" reste un nom de COMMUNE unique au pays, même sans filtrer par canton
   });
 
   it("canton FINMA inconnu ET nom de commune ambigu au niveau national : ambiguë, jamais devinée", () => {
@@ -188,10 +191,10 @@ describe("communeProfile : rattachement FINMA — priorité 1 commune (canton fi
     const finma = [finmaRow({ city: "Homonyme", canton: "" })];
     const profileA = communeProfile("501", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
     const profileB = communeProfile("777", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
-    expect(profileA.finma.authorised_entities).toBe(0);
-    expect(profileB.finma.authorised_entities).toBe(0);
+    expect(profileA.finma.entities_with_city_named_like_commune).toBe(0);
+    expect(profileB.finma.entities_with_city_named_like_commune).toBe(0);
     const stats = nationalFinmaMatchingStats({ getLocalities: () => ({ rows, edition: null }), getFinmaRegistry: () => finma });
-    expect(stats).toEqual({ matched: 0, unmatched: 0, ambiguous: 1, total: 1 });
+    expect(stats).toEqual({ matched: 0, unmatched: 0, ambiguous: 1, total: 1, names_also_postal_locality_elsewhere: 0 });
   });
 
   it("cite GLEIF comme source du rattachement : le canton FINMA utilisé ici vient de l'enrichissement GLEIF, jamais directement de la FINMA", () => {
@@ -204,14 +207,14 @@ describe("communeProfile : rattachement FINMA — priorité 1 commune (canton fi
     const finma = [finmaRow({ city: "Winterthur", canton: "ZH" }), finmaRow({ city: "Ville Inconnue", canton: "ZH" })];
     const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
     expect(profile.finma.national_matching).toEqual(nationalFinmaMatchingStats({ getLocalities: () => ({ rows, edition: null }), getFinmaRegistry: () => finma }));
-    expect(profile.finma.national_matching).toEqual({ matched: 1, unmatched: 1, ambiguous: 0, total: 2 });
+    expect(profile.finma.national_matching).toEqual({ matched: 1, unmatched: 1, ambiguous: 0, total: 2, names_also_postal_locality_elsewhere: 0 });
   });
 
   it("casse et espaces ignorés (NFC, casse, espaces — jamais le trait d'union ≡ espace réservé aux rues)", () => {
     const rows = [WINTERTHUR];
     const finma = [finmaRow({ city: "  WINTERTHUR  ", canton: "ZH" })];
     const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
-    expect(profile.finma.authorised_entities).toBe(1);
+    expect(profile.finma.entities_with_city_named_like_commune).toBe(1);
   });
 
   it("homonymes dans deux cantons différents : rattachement non ambigu (le canton distingue les deux communes)", () => {
@@ -220,9 +223,9 @@ describe("communeProfile : rattachement FINMA — priorité 1 commune (canton fi
     const rows = [buchsSG, buchsAG];
     const finmaSG = [finmaRow({ city: "Buchs", canton: "SG" })];
     const profileSG = communeProfile("3301", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finmaSG, getFinmaVersion: () => null }));
-    expect(profileSG.finma.authorised_entities).toBe(1);
+    expect(profileSG.finma.entities_with_city_named_like_commune).toBe(1);
     const profileAG = communeProfile("4001", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finmaSG, getFinmaVersion: () => null }));
-    expect(profileAG.finma.authorised_entities).toBe(0); // canton différent : pas de confusion
+    expect(profileAG.finma.entities_with_city_named_like_commune).toBe(0); // canton différent : pas de confusion
   });
 
   it("ville ambiguë dans le MÊME canton, aucune commune ne porte ce nom (priorité 2 ambiguë) : non rattachée pour les deux, jamais devinée", () => {
@@ -232,8 +235,8 @@ describe("communeProfile : rattachement FINMA — priorité 1 commune (canton fi
     const finma = [finmaRow({ city: "Ambigue", canton: "VD" })];
     const profileA = communeProfile("501", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
     const profileB = communeProfile("502", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
-    expect(profileA.finma.authorised_entities).toBe(0);
-    expect(profileB.finma.authorised_entities).toBe(0);
+    expect(profileA.finma.entities_with_city_named_like_commune).toBe(0);
+    expect(profileB.finma.entities_with_city_named_like_commune).toBe(0);
   });
 
   it("localité avec suffixe (« Lausanne 25 ») : rattachée seulement si le texte FINMA est identique, suffixe compris", () => {
@@ -241,28 +244,28 @@ describe("communeProfile : rattachement FINMA — priorité 1 commune (canton fi
     const lausanne25 = locality({ postal_code: "1025", locality: "Lausanne 25", municipality: "Lausanne", municipality_bfs_id: "5586", canton: "VD" });
     const rows = [lausanne, lausanne25];
     const sansSuffixe = communeProfile("5586", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => [finmaRow({ city: "Lausanne", canton: "VD" })], getFinmaVersion: () => null }));
-    expect(sansSuffixe.finma.authorised_entities).toBe(1); // correspond au nom de commune "Lausanne" (priorité 1)
+    expect(sansSuffixe.finma.entities_with_city_named_like_commune).toBe(1); // correspond au nom de commune "Lausanne" (priorité 1)
     const avecSuffixe = communeProfile("5586", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => [finmaRow({ city: "Lausanne 25", canton: "VD" })], getFinmaVersion: () => null }));
-    expect(avecSuffixe.finma.authorised_entities).toBe(1); // aucune commune "Lausanne 25" : rattachée via la localité (priorité 2)
+    expect(avecSuffixe.finma.entities_with_city_named_like_commune).toBe(1); // aucune commune "Lausanne 25" : rattachée via la localité (priorité 2)
     const suffixeInconnu = communeProfile("5586", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => [finmaRow({ city: "Lausanne 99", canton: "VD" })], getFinmaVersion: () => null }));
-    expect(suffixeInconnu.finma.authorised_entities).toBe(0); // "Lausanne 99" n'existe nulle part : jamais un retrait de suffixe
+    expect(suffixeInconnu.finma.entities_with_city_named_like_commune).toBe(0); // "Lausanne 99" n'existe nulle part : jamais un retrait de suffixe
   });
 
   it("ligne FINMA sans ville : ignorée, jamais une exception", () => {
     const rows = [WINTERTHUR];
     const finma = [finmaRow({ city: "", canton: "ZH" })];
     const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
-    expect(profile.finma.authorised_entities).toBe(0);
+    expect(profile.finma.entities_with_city_named_like_commune).toBe(0);
   });
 
-  it("registre FINMA illisible (getFinmaRegistry qui lève) : authorised_entities à 0, source FINMA absente, jamais une exception propagée", () => {
+  it("registre FINMA illisible (getFinmaRegistry qui lève) : entities_with_city_named_like_commune à 0, source FINMA absente, jamais une exception propagée", () => {
     const profile = communeProfile("230", deps({
       getLocalities: () => ({ rows: [WINTERTHUR], edition: null }),
       getStreets: () => null,
       getFinmaRegistry: () => { throw new Error("FINMA registry could not be read"); },
       getFinmaVersion: () => null,
     }));
-    expect(profile.finma.authorised_entities).toBe(0);
+    expect(profile.finma.entities_with_city_named_like_commune).toBe(0);
     expect(profile.finma.by_licence_type).toEqual({});
     expect(profile.sources).not.toContain("finma.uid_csv");
     expect(profile.sources).not.toContain("gleif.lei_api");
@@ -289,12 +292,37 @@ describe("nationalFinmaMatchingStats : rattachées / non rattachées / ambiguës
       finmaRow({ city: "", canton: "ZH" }), // non rattachée (ville vide)
     ];
     const stats = nationalFinmaMatchingStats({ getLocalities: () => ({ rows, edition: null }), getFinmaRegistry: () => finma });
-    expect(stats).toEqual({ matched: 1, unmatched: 2, ambiguous: 1, total: 4 });
+    expect(stats).toEqual({ matched: 1, unmatched: 2, ambiguous: 1, total: 4, names_also_postal_locality_elsewhere: 0 });
   });
 
   it("registre FINMA vide : tous les compteurs à zéro", () => {
     const stats = nationalFinmaMatchingStats({ getLocalities: () => ({ rows: [WINTERTHUR], edition: null }), getFinmaRegistry: () => [] });
-    expect(stats).toEqual({ matched: 0, unmatched: 0, ambiguous: 0, total: 0 });
+    expect(stats).toEqual({ matched: 0, unmatched: 0, ambiguous: 0, total: 0, names_also_postal_locality_elsewhere: 0 });
+  });
+
+  it("names_also_postal_locality_elsewhere : compte les rattachements par nom de commune dont le nom est AUSSI une localité postale d'une autre commune (cas « Zürich »/« Genève »/« Zug »)", () => {
+    // Même situation que le test AXA/Winterthur ci-dessus, isolée ici pour le champ lui-même :
+    // "Winterthur" est à la fois le nom de la commune 230 ET une localité postale de Schlatt (226).
+    const rows = [WINTERTHUR, SCHLATT_WINTERTHUR_LOCALITY];
+    const finma = [finmaRow({ city: "Winterthur", canton: "ZH" })];
+    const stats = nationalFinmaMatchingStats({ getLocalities: () => ({ rows, edition: null }), getFinmaRegistry: () => finma });
+    expect(stats.matched).toBe(1);
+    expect(stats.names_also_postal_locality_elsewhere).toBe(1);
+  });
+
+  it("names_also_postal_locality_elsewhere : reste à 0 quand le nom qui rattache n'est nulle part ailleurs une localité postale", () => {
+    const rows = [WINTERTHUR];
+    const stats = nationalFinmaMatchingStats({ getLocalities: () => ({ rows, edition: null }), getFinmaRegistry: () => [finmaRow({ city: "Winterthur", canton: "ZH" })] });
+    expect(stats.matched).toBe(1);
+    expect(stats.names_also_postal_locality_elsewhere).toBe(0);
+  });
+
+  it("names_also_postal_locality_elsewhere : jamais compté pour un rattachement par PRIORITÉ 2 (localité, pas commune)", () => {
+    const rickenbachSulz = locality({ postal_code: "8352", locality: "Rickenbach Sulz", municipality: "Winterthur", municipality_bfs_id: "230", canton: "ZH" });
+    const rows = [WINTERTHUR, rickenbachSulz];
+    const stats = nationalFinmaMatchingStats({ getLocalities: () => ({ rows, edition: null }), getFinmaRegistry: () => [finmaRow({ city: "Rickenbach Sulz", canton: "ZH" })] });
+    expect(stats.matched).toBe(1); // rattaché via la localité (priorité 2)
+    expect(stats.names_also_postal_locality_elsewhere).toBe(0); // le champ ne regarde que les rattachements par nom de COMMUNE
   });
 });
 

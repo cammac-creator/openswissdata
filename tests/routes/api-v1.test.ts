@@ -39,6 +39,9 @@ afterEach(() => {
   closeDb();
   rmSync(tmp, { recursive: true, force: true });
   vi.unstubAllEnvs();
+  // Relecture finale : un seul endroit pour défaire un `fetch` simulé, jamais répété dans
+  // chaque test qui en stub un (sans effet sur un test qui n'en a stubé aucun).
+  vi.unstubAllGlobals();
 });
 
 describe("GET /api/v1/company/:uid", () => {
@@ -62,7 +65,6 @@ describe("GET /api/v1/company/:uid", () => {
       expect(row.name).not.toContain("CHE-103.137.179");
       if (row.name.startsWith("/api/v1/company")) expect(row.name).toBe("/api/v1/company/:uid");
     }
-    vi.unstubAllGlobals();
   });
 
   it("IDE valide, fiche réelle (LINDAS/GLEIF simulés, FINMA et répertoires embarqués) : même forme que structuredContent du MCP", async () => {
@@ -92,7 +94,6 @@ describe("GET /api/v1/company/:uid", () => {
       expect(s).toHaveProperty("url");
       expect(s).toHaveProperty("licence");
     }
-    vi.unstubAllGlobals();
   });
 
   it("limite 60 par heure et par réseau : la 61e requête rend 429 avec Retry-After, les 60 premières sont servies", async () => {
@@ -168,11 +169,15 @@ describe("GET /api/v1/communes/:bfs_id", () => {
     expect(typeof body.streets_count).toBe("number");
     expect(body.streets_count).toBeGreaterThan(0);
     expect(body.finma.matching).toBe(FINMA_MATCHING_RULE);
-    expect(typeof body.finma.authorised_entities).toBe("number");
-    // Rattachement national (même registre, même index) : présent sur chaque commune, pour
-    // comprendre un `authorised_entities` bas (la majorité des lignes FINMA n'a aujourd'hui
-    // aucun canton connu — voir le rapport de la tâche).
+    expect(typeof body.finma.entities_with_city_named_like_commune).toBe("number");
+    // Vérité des mots (relecture du 06.10.2026, seconde passe) : ce chiffre compte les lignes
+    // FINMA dont la ville (une localité postale) porte le même nom que CETTE commune — jamais
+    // une preuve que le siège enregistré y est réellement (voir `finma.matching`).
+    // `national_matching` porte les mêmes nombres pour tout le pays, plus
+    // `names_also_postal_locality_elsewhere` (rattachements par nom de commune dont le nom est
+    // aussi une localité postale d'une autre commune, ex. « Zürich »/« Genève »/« Zug »).
     expect(body.finma.national_matching).toEqual(nationalFinmaMatchingStats());
+    expect(typeof body.finma.national_matching.names_also_postal_locality_elsewhere).toBe("number");
     expect(Array.isArray(body.sources)).toBe(true);
     for (const s of body.sources) {
       expect(s).toHaveProperty("id");

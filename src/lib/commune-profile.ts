@@ -54,22 +54,34 @@ export interface CommuneProfileDeps {
   getFinmaVersion: () => string | null;
 }
 
-/** Règle de rattachement, en toutes lettres (décision du 06.10.2026, relecture du même jour) :
- *  documentée ici ET dans le commentaire d'en-tête du fichier, jamais seulement dans le code. */
+/** Règle de rattachement, EN VÉRITÉ DES MOTS (relecture du 06.10.2026, seconde passe) :
+ *  documentée ici ET dans le commentaire d'en-tête du fichier, jamais seulement dans le code.
+ *  Le rattachement compare le `city` du registre FINMA — une LOCALITÉ POSTALE, pas une commune —
+ *  au nom d'une commune ou d'une localité du répertoire officiel. Une localité postale peut
+ *  s'étendre sur une commune voisine (« Zürich », « Genève » ou « Zug » sont aussi le nom d'une
+ *  localité postale de communes voisines, ex. le NPA 8041 à Adliswil) : le chiffre ne prouve donc
+ *  PAS que l'établissement a son siège enregistré dans cette commune précise — seulement que sa
+ *  ville FINMA porte ce nom. Voir `national_matching.names_also_postal_locality_elsewhere`. */
 export const FINMA_MATCHING_RULE =
-  "exact municipality name match, restricted to the FINMA canton when known (ambiguous if several communes share that name); " +
-  "only when no municipality matches: exact and unique locality name match in the same scope (canton if known, else national); " +
-  "otherwise unrattached.";
+  "FINMA register city (a postal locality name) equal to this commune's name, or to a locality unique to it; " +
+  "the postal locality can extend into neighbouring communes, so this is not proof of the registered seat.";
 
 export interface CommuneFinmaProfile {
-  authorised_entities: number;
+  /** RENOMMÉ depuis `authorised_entities` (relecture du 06.10.2026, seconde passe — vérité des
+   *  mots) : ce chiffre compte les lignes FINMA dont la VILLE (une localité postale) porte le
+   *  même nom que CETTE commune, ou une localité qui lui est propre — jamais une preuve que le
+   *  siège enregistré y est réellement. Voir `matching` et le commentaire d'en-tête du fichier. */
+  entities_with_city_named_like_commune: number;
   by_licence_type: Record<string, number>;
-  /** Règle de rattachement appliquée, en toutes lettres : jamais une approximation. */
+  /** Règle de rattachement appliquée, en toutes lettres : jamais une approximation, mais jamais
+   *  non plus présentée comme une preuve du siège (voir `FINMA_MATCHING_RULE` ci-dessus). */
   matching: typeof FINMA_MATCHING_RULE;
-  /** Rattachement national (même registre, mêmes index) : pour comprendre un `authorised_entities`
-   *  bas — la grande majorité des lignes FINMA n'a aujourd'hui aucun canton connu (voir
-   *  `sources` : `gleif.lei_api`), donc « 0 » ici ne veut pas dire « aucune institution dans
-   *  cette commune », mais « aucune ligne rattachée ici par la règle ci-dessus ». */
+  /** Rattachement national (même registre, mêmes index) : les mêmes nombres, pour tout le pays —
+   *  pour comparer le compte d'une commune au total national, et pour lire
+   *  `names_also_postal_locality_elsewhere`, qui dit combien de rattachements par nom de commune
+   *  portent un nom qui est AUSSI une localité postale d'une AUTRE commune (le cas « Zürich »,
+   *  « Genève », « Zug » décrit ci-dessus) : ces rattachements-là sont les moins fiables comme
+   *  preuve du siège, même comptés comme « rattachés ». */
   national_matching: NationalFinmaMatchingStats;
 }
 
@@ -95,6 +107,12 @@ export interface NationalFinmaMatchingStats {
   unmatched: number;
   ambiguous: number;
   total: number;
+  /** Relecture du 06.10.2026, seconde passe (vérité des mots) : parmi les lignes `matched` par
+   *  PRIORITÉ 1 (nom de commune), combien portent un nom qui est AUSSI le nom d'une localité
+   *  postale d'une AUTRE commune (ex. « Zürich », « Genève », « Zug ») — ces rattachements
+   *  restent comptés comme « rattachés », mais sont les moins fiables comme preuve du siège :
+   *  la localité postale peut s'étendre sur la commune voisine. */
+  names_also_postal_locality_elsewhere: number;
 }
 
 const NOTICE =
@@ -172,7 +190,10 @@ export function _resetFinmaMatchIndexCache(): void {
   _indexCache = null;
 }
 
-type Match = { kind: "none" } | { kind: "unique"; bfsId: string } | { kind: "ambiguous" };
+type Match =
+  | { kind: "none" }
+  | { kind: "unique"; bfsId: string; via: "municipality" | "locality" }
+  | { kind: "ambiguous" };
 
 /** Candidats pour un nom donné, restreints au canton FINMA quand il est connu (décision du
  *  06.10.2026, relecture du même jour) : `canton` vide/absent → recherche nationale. */
@@ -183,7 +204,7 @@ function candidatesForName(nameIndex: ReadonlyMap<string, ReadonlySet<string>>, 
   return new Set([...all].filter((bfsId) => cantonByBfsId.get(bfsId) === wanted));
 }
 
-function matchFromCandidates(candidates: ReadonlySet<string>): Match {
+function matchFromCandidates(candidates: ReadonlySet<string>): { kind: "none" } | { kind: "unique"; bfsId: string } | { kind: "ambiguous" } {
   if (candidates.size === 0) return { kind: "none" };
   if (candidates.size > 1) return { kind: "ambiguous" };
   const [bfsId] = candidates;
@@ -192,12 +213,31 @@ function matchFromCandidates(candidates: ReadonlySet<string>): Match {
 
 /** Applique les deux priorités dans l'ordre (voir le commentaire d'en-tête du fichier) : la
  *  priorité 2 (localité) n'est JAMAIS essayée si la priorité 1 (commune) a trouvé au moins un
- *  candidat, même ambigu — une ambiguïté au niveau commune ne se résout jamais par la localité. */
+ *  candidat, même ambigu — une ambiguïté au niveau commune ne se résout jamais par la localité.
+ *  `via` (relecture du 06.10.2026, seconde passe) dit laquelle des deux priorités a tranché :
+ *  sert à `names_also_postal_locality_elsewhere`, qui ne regarde que les rattachements
+ *  `via: "municipality"` (une commune, dont le nom peut AUSSI être une localité postale
+ *  ailleurs). */
 function matchFinmaRow(row: FinmaRegistryRow, indexes: FinmaMatchIndexes): Match {
   if (!row.city) return { kind: "none" };
   const municipalityMatch = matchFromCandidates(candidatesForName(indexes.municipalityByName, row.city, row.canton, indexes.cantonByBfsId));
-  if (municipalityMatch.kind !== "none") return municipalityMatch;
-  return matchFromCandidates(candidatesForName(indexes.localityByName, row.city, row.canton, indexes.cantonByBfsId));
+  if (municipalityMatch.kind === "unique") return { kind: "unique", bfsId: municipalityMatch.bfsId, via: "municipality" };
+  if (municipalityMatch.kind === "ambiguous") return { kind: "ambiguous" };
+  const localityMatch = matchFromCandidates(candidatesForName(indexes.localityByName, row.city, row.canton, indexes.cantonByBfsId));
+  if (localityMatch.kind === "unique") return { kind: "unique", bfsId: localityMatch.bfsId, via: "locality" };
+  if (localityMatch.kind === "ambiguous") return { kind: "ambiguous" };
+  return { kind: "none" };
+}
+
+/** `true` si `name` (déjà rattaché par PRIORITÉ 1 à `matchedBfsId`) est AUSSI le nom d'une
+ *  localité postale d'une AUTRE commune que `matchedBfsId` — recherche NATIONALE (jamais
+ *  restreinte au canton FINMA) : l'avertissement porte sur le nom lui-même, pas sur le canton de
+ *  cette ligne précise (relecture du 06.10.2026, seconde passe, cas « Zürich »/« Genève »/« Zug »). */
+function nameAlsoPostalLocalityElsewhere(name: string, matchedBfsId: string, indexes: FinmaMatchIndexes): boolean {
+  const localityBfsIds = indexes.localityByName.get(normalizeName(name));
+  if (!localityBfsIds) return false;
+  for (const bfsId of localityBfsIds) if (bfsId !== matchedBfsId) return true;
+  return false;
 }
 
 export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> = {}): CommuneProfile {
@@ -249,12 +289,12 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
   }
 
   const indexes = buildFinmaMatchIndexes(localitiesLoaded?.rows ?? []);
-  let authorisedEntities = 0;
+  let entitiesWithCityNamedLikeCommune = 0;
   const byLicenceType = new Map<string, number>();
   for (const row of finmaRows) {
     const match = matchFinmaRow(row, indexes);
     if (match.kind !== "unique" || match.bfsId !== bfsId) continue;
-    authorisedEntities += 1;
+    entitiesWithCityNamedLikeCommune += 1;
     const type = row.licence_type || "unknown";
     byLicenceType.set(type, (byLicenceType.get(type) ?? 0) + 1);
   }
@@ -277,7 +317,7 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
     localities: [...localityNames].sort(),
     streets_count: streetsCount,
     finma: {
-      authorised_entities: authorisedEntities,
+      entities_with_city_named_like_commune: entitiesWithCityNamedLikeCommune,
       by_licence_type: Object.fromEntries([...byLicenceType.entries()].sort(([a], [b]) => a.localeCompare(b))),
       matching: FINMA_MATCHING_RULE,
       national_matching: nationalMatching,
@@ -312,11 +352,16 @@ export function nationalFinmaMatchingStats(
   let matched = 0;
   let unmatched = 0;
   let ambiguous = 0;
+  let namesAlsoPostalLocalityElsewhere = 0;
   for (const row of finmaRows) {
     const match = matchFinmaRow(row, indexes);
-    if (match.kind === "unique") matched += 1;
-    else if (match.kind === "ambiguous") ambiguous += 1;
+    if (match.kind === "unique") {
+      matched += 1;
+      if (match.via === "municipality" && nameAlsoPostalLocalityElsewhere(row.city, match.bfsId, indexes)) {
+        namesAlsoPostalLocalityElsewhere += 1;
+      }
+    } else if (match.kind === "ambiguous") ambiguous += 1;
     else unmatched += 1;
   }
-  return { matched, unmatched, ambiguous, total: finmaRows.length };
+  return { matched, unmatched, ambiguous, total: finmaRows.length, names_also_postal_locality_elsewhere: namesAlsoPostalLocalityElsewhere };
 }
