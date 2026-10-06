@@ -71,7 +71,7 @@ import { parseUid } from "../src/mcp/company/uid.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_REGISTRY_PATH = join(__dirname, "..", "src", "mcp", "data", "finma_registry.csv");
 const DEFAULT_OUTPUT_PATH = join(__dirname, "..", "src", "mcp", "data", "finma_seats.csv");
-const DEFAULT_MIN_ROWS = 800; // 1 013 sièges au 07.10.2026 : marge pour les variations normales, la baisse ≤ 5 % reste le vrai garde-fou
+const DEFAULT_MIN_ROWS = 800; // 2 533 sièges au 07.10.2026 (toutes catégories FINMA) : marge large ; la baisse ≤ 5 % reste le vrai garde-fou
 const DEFAULT_MAX_DROP_RATIO = 0.05;
 const DEFAULT_BATCH_SIZE = 500;
 const DEFAULT_MAX_BATCHES = 10;
