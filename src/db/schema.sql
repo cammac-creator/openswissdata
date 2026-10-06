@@ -446,3 +446,34 @@ CREATE TABLE IF NOT EXISTS checkout_request_limits (
   expires_at INTEGER NOT NULL CHECK(typeof(expires_at)='integer' AND expires_at=accepted_at+6000)
 );
 CREATE INDEX IF NOT EXISTS idx_checkout_request_limits_expiry ON checkout_request_limits(expires_at);
+
+-- Lettres institutionnelles (décision du 06.10.2026, plan « correspondance automatique »,
+-- tâche 1) : demandes de données ou d'autorisation déposées par l'exploitant vers des
+-- domaines institutionnels fermés (voir src/lib/letters.ts), planifiées en heures de
+-- bureau suisses. Aucun corps de réponse ici (reply_extract est un extrait de 400
+-- caractères, comme la veille courrier) ; aucun worker démarré par cette table seule.
+CREATE TABLE IF NOT EXISTS institutional_letters (
+  id TEXT PRIMARY KEY,
+  kind TEXT NOT NULL CHECK(kind IN ('letter','reminder')),
+  parent_id TEXT NULL REFERENCES institutional_letters(id),
+  to_address TEXT NOT NULL,
+  cc TEXT NULL,
+  subject TEXT NOT NULL,
+  body TEXT NOT NULL,
+  purpose TEXT NOT NULL,
+  status TEXT NOT NULL CHECK(status IN ('queued','sending','sent','failed','cancelled')),
+  scheduled_at INTEGER NOT NULL,
+  lease_until INTEGER NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  resend_id TEXT NULL,
+  sent_at INTEGER NULL,
+  reply_at INTEGER NULL,
+  reply_from TEXT NULL,
+  reply_subject TEXT NULL,
+  reply_extract TEXT NULL,
+  reply_kind TEXT NULL CHECK(reply_kind IS NULL OR reply_kind IN ('human','auto')),
+  reply_processed_at INTEGER NULL,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_institutional_letters_status_scheduled ON institutional_letters(status, scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_institutional_letters_parent ON institutional_letters(parent_id);

@@ -14,6 +14,7 @@ import { healthRoute } from "./routes/health.js";
 import { catalogRoute } from "./routes/catalog.js";
 import { adminRoute } from "./routes/admin.js";
 import { adminStatsRoute } from "./routes/admin-stats.js";
+import { adminLettersRoute } from "./routes/admin-letters.js";
 import { crmRoute } from "./routes/crm.js";
 import { checkoutRoute } from "./routes/checkout.js";
 import { stripeWebhookRoute } from "./routes/stripe-webhook.js";
@@ -248,6 +249,7 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   app.route("/api/catalog", catalogRoute);
   app.route("/api/admin", adminRoute);
   app.route("/api/admin/stats", adminStatsRoute);
+  app.route("/api/admin/letters", adminLettersRoute);
   app.route("/api/admin/crm", crmRoute);
   app.route("/api/checkout", checkoutRoute);
   app.route("/api/webhook/stripe", stripeWebhookRoute);
