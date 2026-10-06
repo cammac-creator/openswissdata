@@ -1,5 +1,5 @@
 /** Une source publique lue par OpenSwissData (registre unique : canari, produits, provenance). Tâche osd.socle. */
-export type Institution = "BAZG" | "FINMA" | "BFS" | "Eurostat" | "UNSD" | "GLEIF" | "US Census";
+export type Institution = "BAZG" | "FINMA" | "BFS" | "Eurostat" | "UNSD" | "GLEIF" | "US Census" | "OFRC";
 // `raw` hashes bytes — use for files published in discrete versions (e.g. XLSX
 // releases). `json-shape` hashes only structural keys/types — use for JSON APIs.
 // `csv-shape` hashes only the header row + separator — use for CSVs that update

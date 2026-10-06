@@ -12,6 +12,7 @@ import { NACE_2_1_RDF_URL, ISIC_CSV_BY_LANG, NOGA_2025_URL, NOGA_2008_URL } from
 import { NACE2_URL } from "../../classifications/nace-official.js";
 import { NACE_ISIC_URL, OFS_METHODOLOGY_URL } from "../../classifications/links.js";
 import { CENSUS_NAICS_ISIC_URL } from "../../classifications/naics-crosswalk.js";
+import { LINDAS_SPARQL_ENDPOINT } from "../../finma/ingest-zefix.js";
 // Adresses BAZG : dérivées de la même déclaration que la collecte (etl/tares/sources.ts,
 // BAZG_SOURCES), jamais recopiées en dur ici (tâche osd.socle).
 import { BAZG_SOURCES } from "../../tares/sources.js";
@@ -43,6 +44,15 @@ const CENSUS: SourceLicence = {
   reference: "PUBLIC-OFFICIAL-SOURCE-US-CENSUS-PUBLIC-DOMAIN",
   authority: "U.S. Census Bureau (Public Domain, US Government Work)",
   jurisdiction: "United States (public domain)",
+};
+
+// Registre du commerce en données liées (LINDAS, graphe Zefix de l'OFRC). Preuve de licence :
+// catalogue opendata.swiss « zefix-zentraler-firmenindex », ressource « Zefix Linked Data Query »,
+// rights = terms_open (usage commercial autorisé, source recommandée), relu le 06.10.2026 (osd.fiche).
+const OFRC_OPEN: SourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-OFRC-OPEN-USE",
+  authority: "Federal Office of the Commercial Register (FOCR), opendata.swiss open use (terms_open)",
+  jurisdiction: "Switzerland",
 };
 
 export const SOURCES: readonly SourceDescriptor[] = [
@@ -77,6 +87,10 @@ export const SOURCES: readonly SourceDescriptor[] = [
     description: "Registre LEI de GLEIF (API publique), pour rattacher un LEI aux entités FINMA par UID." },
   { id: "census.naics_isic", institution: "US Census", url: CENSUS_NAICS_ISIC_URL, licence: CENSUS,
     description: "Correspondance NAICS–ISIC du US Census Bureau, utilisée par les classifications." },
+  // Hors de toute archive vendue : lue en direct par la fiche société (osd.fiche). Ne pas l'ajouter à
+  // PRODUCT_SOURCES.finma : le garde-fou Zefix de etl/finma/bundle.ts doit rester actif.
+  { id: "ofrc.zefix_lindas", institution: "OFRC", url: LINDAS_SPARQL_ENDPOINT, licence: OFRC_OPEN,
+    description: "Registre du commerce en données liées (LINDAS, graphe Zefix), point SPARQL public." },
 ];
 
 const PAR_ID = new Map(SOURCES.map(s => [s.id, s]));
