@@ -80,6 +80,15 @@ describe("kyc_check : la ligne d'alerte FINMA ne sort que sur un nom identique",
     expect(text).toContain("rank:");
   });
 
+  it("noms identiques qui remplissent top_k : les noms proches sont comptés, sans titre vide", () => {
+    setFinmaWarnings([warning("Alerta Fiduciaire SA"), warning("Alerta Fiduciaire SA Holding")]);
+    const out = kycCheckHandler({ name: "alerta fiduciaire sa", top_k: 1 });
+    const text = out.content[0].text;
+    expect(text).toContain("WARNING: 1 FINMA warning entry/entries match");
+    expect(text).toContain("Similar name(s) on the FINMA warnings list, to verify: 1 not shown (raise top_k to list them).");
+    expect(text).not.toContain("(closest 0 shown)");
+  });
+
   it("nom absent de la liste d'alerte : ni WARNING, ni nom proche", () => {
     const out = kycCheckHandler({ name: "Introuvable Sàrl", top_k: 10 });
     expect(out.structured?.warning_total).toBe(0);
