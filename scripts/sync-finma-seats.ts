@@ -40,7 +40,7 @@
  * `src/mcp/data-loader.ts` (`getFinmaSeats()`). Écriture ATOMIQUE pour les deux fichiers,
  * SEULEMENT après la réussite complète de tous les contrôles (jamais un fichier partiel).
  *
- * Contrôles avant toute écriture : au moins `minRows` lignes retenues (1000 par défaut), baisse
+ * Contrôles avant toute écriture : au moins `minRows` lignes retenues (800 par défaut), baisse
  * de plus de `maxDropRatio` (5 % par défaut) par rapport au fichier précédent, numéro OFS de
  * commune entier (`^\d+$`).
  *
@@ -65,7 +65,7 @@ import { parseUid } from "../src/mcp/company/uid.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_REGISTRY_PATH = join(__dirname, "..", "src", "mcp", "data", "finma_registry.csv");
 const DEFAULT_OUTPUT_PATH = join(__dirname, "..", "src", "mcp", "data", "finma_seats.csv");
-const DEFAULT_MIN_ROWS = 1000;
+const DEFAULT_MIN_ROWS = 800; // 1 013 sièges au 07.10.2026 : marge pour les variations normales, la baisse ≤ 5 % reste le vrai garde-fou
 const DEFAULT_MAX_DROP_RATIO = 0.05;
 const DEFAULT_BATCH_SIZE = 500;
 const DEFAULT_MAX_BATCHES = 10;
@@ -115,7 +115,7 @@ export interface SyncFinmaSeatsOptions {
   sleep?: (ms: number) => Promise<void>;
   /** Défaut : `Date.now`. Horloge pour l'édition en mode réseau (Global Constraint « horloges »). */
   now?: () => number;
-  /** Défaut : 1000. */
+  /** Défaut : 800. */
   minRows?: number;
   /** Défaut : 0.05 (5 %). */
   maxDropRatio?: number;
