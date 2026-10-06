@@ -175,7 +175,7 @@ export async function companyCheckHandler(
 export const companyCheckTool = {
   name: "company_check",
   description:
-    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and retrieval time, plus exact cross-checks between sources. No score. Registration status, FOSC publications and SECO sanctions are not covered.",
+    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and retrieval time, plus exact cross-checks between sources. No score. Commercial register status (active or deleted), FOSC publications, SECO sanctions and officers are not covered.",
   inputSchema: companyCheckSchema,
   handler: companyCheckHandler,
 } as const;
