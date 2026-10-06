@@ -269,7 +269,9 @@ export async function buildBundle(
   // un manifeste de provenance qui tait une source réellement assemblée. Aucun
   // workflow n'active aujourd'hui ce tier (FINMA_TIER=zefix) : ce garde-fou ne change
   // rien à la production actuelle, il bloque seulement une future activation non préparée.
-  if (input.zefixByUid && input.zefixByUid.size > 0) {
+  // Même condition que `includeZefix` plus bas : dès que `zefixByUid` est fourni, les colonnes
+  // zefix_* entrent dans le schéma de l'archive, même vides.
+  if (input.zefixByUid !== undefined) {
     const sourceAuRegistre = SOURCES.some(s => /zefix/i.test(s.id));
     const sourceAuProduit = PRODUCT_SOURCES.finma.some(id => /zefix/i.test(id));
     if (!sourceAuRegistre || !sourceAuProduit) {
