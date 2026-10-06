@@ -110,12 +110,22 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     expect(fiche.commercial_register.found).toBe(true);
   });
 
-  it("correction 1 : legal_form_code null (forme inconnue) → aucune adresse (fermé par défaut), mais purpose reste (pas confirmé 0101)", () => {
+  // Liste blanche des formes juridiques (relecture finale du 06.10.2026, remplace l'ancienne
+  // règle « fermé si 0101 ou code inconnu ») : SEULES les formes de
+  // `ADDRESS_AND_PURPOSE_FORM_CODES` ouvrent adresse ET but. "0101", "0103", "0118", "0151"
+  // et un code absent (null) ferment les deux, pas seulement l'adresse.
+  it.each([
+    ["0101", "entreprise individuelle"],
+    ["0103", "société en nom collectif"],
+    ["0118", "hors liste blanche"],
+    ["0151", "hors liste blanche"],
+    [null, "code absent"],
+  ] as const)("forme fermée (%s, %s) : aucune adresse NI but, commune et canton restent", (code) => {
     const lindas: Part<LindasCompany> = {
       available: true,
       found: true,
       retrieved_at: new Date(DEBUT).toISOString(),
-      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: null },
+      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: code },
     };
     const fiche = buildCompanyFiche(INDIVIDUAL_ENTERPRISE_UID, {
       lindas,
@@ -127,13 +137,32 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     expect(fields).not.toContain("street_address");
     expect(fields).not.toContain("postal_code");
     expect(fields).not.toContain("locality");
-    expect(fields).not.toContain("legal_form_code"); // champ nul : simplement pas de fait
-    expect(fields).toContain("purpose"); // pas confirmé 0101 : purpose n'est pas retiré
+    expect(fields).not.toContain("purpose"); // fermé aussi, contrairement à l'ancienne règle
     expect(fields).toContain("municipality");
     expect(fields).toContain("canton");
   });
 
-  it("correction 1 : legal_form_code \"\" (chaîne vide, pas null) → aucune adresse non plus (pas « présent » au sens de la porte fermée)", () => {
+  it("forme ouverte (0107, Sàrl, de la liste blanche) : adresse ET but présents", () => {
+    const lindas: Part<LindasCompany> = {
+      available: true,
+      found: true,
+      retrieved_at: new Date(DEBUT).toISOString(),
+      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: "0107" },
+    };
+    const fiche = buildCompanyFiche(INDIVIDUAL_ENTERPRISE_UID, {
+      lindas,
+      gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
+      finma: { available: true, rows: [] },
+      now,
+    });
+    const fields = fiche.commercial_register.facts.map((f) => f.field);
+    expect(fields).toContain("street_address");
+    expect(fields).toContain("postal_code");
+    expect(fields).toContain("locality");
+    expect(fields).toContain("purpose");
+  });
+
+  it("correction 1 : legal_form_code \"\" (chaîne vide, pas null) → aucune adresse ni but (chaîne vide n'est pas une clé de la liste blanche)", () => {
     const lindas: Part<LindasCompany> = {
       available: true,
       found: true,
@@ -150,7 +179,7 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     expect(fields).not.toContain("street_address");
     expect(fields).not.toContain("postal_code");
     expect(fields).not.toContain("locality");
-    expect(fields).toContain("purpose"); // "" n'est pas "0101" confirmé : purpose reste
+    expect(fields).not.toContain("purpose");
   });
 
   it("correction 1 (item 2) : faits GLEIF renommés gleif_entity_status/lei_registration_status, jamais entity_status/registration_status", () => {
@@ -207,8 +236,9 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     expect(fiche.finma.available).toBe(true);
     expect(fiche.finma.found).toBe(true);
     // LINDAS absent : aucun recoupement qui l'implique (nom LINDAS/GLEIF, nom FINMA/LINDAS).
-    // Le LEI FINMA/GLEIF ne dépend pas de LINDAS et reste calculé.
-    expect(fiche.cross_checks.map((c) => c.check)).toEqual(["finma_lei_vs_gleif_lei"]);
+    // Plus de recoupement finma_lei_vs_gleif_lei depuis sa suppression (relecture finale du
+    // 06.10.2026) : cross_checks reste donc entièrement vide ici.
+    expect(fiche.cross_checks).toEqual([]);
     expect(fiche.not_covered).toEqual(["commercial_register_status", "fosc_publications", "seco_sanctions", "officers"]);
     expect(fiche.notice).toMatch(/zefix\.admin\.ch/);
   });
@@ -227,7 +257,7 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     expect(fiche.cross_checks.map((c) => c.check)).toEqual(["legal_name_lindas_vs_gleif"]);
   });
 
-  it("finmaVersion connue (ex. \"2026.10.06\") : data_note la cite, retrieved_at des faits FINMA reste generated_at (pas une date ISO)", () => {
+  it("finmaVersion connue (ex. \"2026.10.06\") : data_note la cite, retrieved_at des faits FINMA est la date ISO de cette version (relecture finale du 06.10.2026)", () => {
     const lindas: Part<LindasCompany> = {
       available: true,
       found: true,
@@ -244,17 +274,34 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     expect(fiche.finma.data_note).toBe(
       "Facts from the FINMA copy currently loaded by this service (version 2026.10.06), not a live FINMA lookup.",
     );
+    // Jamais `generated_at` (relecture finale du 06.10.2026) : la version connue devient une
+    // date ISO sans heure, distincte de l'heure de fabrication de la fiche.
     const generatedAt = new Date(DEBUT).toISOString();
-    expect(fiche.finma.facts.every((f) => f.retrieved_at === generatedAt)).toBe(true);
+    expect(fiche.finma.facts.every((f) => f.retrieved_at === "2026-10-06")).toBe(true);
+    expect(fiche.finma.facts.every((f) => f.retrieved_at !== generatedAt)).toBe(true);
   });
 
-  it("finmaVersion absente (undefined) : data_note générique, aucune date de version inventée", () => {
+  it("finmaVersion dans un format inattendu (pas AAAA.MM.JJ) : retrieved_at reste null, jamais une date devinée", () => {
+    const fiche = buildCompanyFiche(INDIVIDUAL_ENTERPRISE_UID, {
+      lindas: { available: false, reason: "LINDAS request failed or timed out" },
+      gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
+      finma: { available: true, rows: [finmaRow({ uid: INDIVIDUAL_ENTERPRISE_UID })] },
+      finmaVersion: "pas une version",
+      now,
+    });
+    expect(fiche.finma.facts.length).toBeGreaterThan(0);
+    expect(fiche.finma.facts.every((f) => f.retrieved_at === null)).toBe(true);
+  });
+
+  it("finmaVersion absente (undefined) : data_note générique, retrieved_at des faits FINMA est null (pas de date inventée)", () => {
     const fiche = buildCompanyFiche(INDIVIDUAL_ENTERPRISE_UID, {
       lindas: { available: false, reason: "LINDAS request failed or timed out" },
       gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
       finma: { available: true, rows: [finmaRow({ uid: INDIVIDUAL_ENTERPRISE_UID })] },
       now,
     });
+    expect(fiche.finma.facts.length).toBeGreaterThan(0);
+    expect(fiche.finma.facts.every((f) => f.retrieved_at === null)).toBe(true);
     expect(fiche.finma.data_note).toBe(
       "Facts from the FINMA copy currently loaded by this service, not a live FINMA lookup.",
     );
@@ -280,7 +327,6 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     expect(fiche.finma.facts).toEqual([
       expect.objectContaining({ field: "licence_type", value: "Life insurance company" }),
     ]);
-    expect(fiche.cross_checks.map((c) => c.check)).not.toContain("finma_lei_vs_gleif_lei");
     // Le nom FINMA (non vide) reste comparé au nom légal LINDAS, même sans LEI.
     expect(fiche.cross_checks.map((c) => c.check)).toContain("finma_name_vs_lindas_legal_name");
   });
@@ -325,11 +371,11 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     const licenceTypes = fiche.finma.facts.filter((f) => f.field === "licence_type").map((f) => f.value);
     expect(licenceTypes).toEqual(["Life insurance company", "Portfolio manager"]);
     expect(fiche.finma.facts.some((f) => f.value === "Ne doit jamais apparaître")).toBe(false);
-    // Les deux lignes partagent le même `lei` et le même `name` : un seul recoupement de
-    // chaque sorte, jamais un par ligne (voir le commentaire dans check.ts).
-    const leiChecks = fiche.cross_checks.filter((c) => c.check === "finma_lei_vs_gleif_lei");
+    // Les deux lignes partagent le même `name` : un seul recoupement de nom, jamais un par
+    // ligne (voir le commentaire dans check.ts). Plus de recoupement LEI FINMA/GLEIF depuis
+    // sa suppression (relecture finale du 06.10.2026).
     const nameChecks = fiche.cross_checks.filter((c) => c.check === "finma_name_vs_lindas_legal_name");
-    expect(leiChecks).toHaveLength(1);
+    expect(fiche.cross_checks.map((c) => c.check)).not.toContain("finma_lei_vs_gleif_lei");
     expect(nameChecks).toHaveLength(1);
   });
 
@@ -402,11 +448,14 @@ describe("companyCheck (bout en bout, fetch injecté, sans réseau)", () => {
     expect(fiche.cross_checks).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ check: "legal_name_lindas_vs_gleif", result: true }),
-        expect.objectContaining({ check: "finma_lei_vs_gleif_lei", result: true }),
         expect.objectContaining({ check: "finma_name_vs_lindas_legal_name", result: true }),
       ]),
     );
-    expect(fiche.cross_checks).toHaveLength(3);
+    // Plus de recoupement finma_lei_vs_gleif_lei (retiré en relecture finale du 06.10.2026) :
+    // deux recoupements seulement, et aucun fait `lei` dans le groupe FINMA.
+    expect(fiche.cross_checks).toHaveLength(2);
+    expect(fiche.cross_checks.map((c) => c.check)).not.toContain("finma_lei_vs_gleif_lei");
+    expect(fiche.finma.facts.map((f) => f.field)).not.toContain("lei");
     for (const check of fiche.cross_checks) {
       expect(typeof check.detail).toBe("string");
       expect(check.detail.length).toBeGreaterThan(0);
@@ -429,13 +478,15 @@ describe("companyCheck (bout en bout, fetch injecté, sans réseau)", () => {
     expect(fiche.cross_checks).toEqual([]);
   });
 
-  it("4. divergences : nom GLEIF différent et LEI FINMA différent du LEI GLEIF → result false, détail présent", async () => {
+  it("4. divergence : nom GLEIF différent du nom légal LINDAS → result false, détail présent", async () => {
     const gleifAutreNom = JSON.parse(JSON.stringify(GLEIF_AXA)) as { data: Array<{ attributes: { entity: { legalName: { name: string } } } }> };
     gleifAutreNom.data[0].attributes.entity.legalName.name = "Une Autre Société Complètement Différente SA";
     const fetchMock = async (url: string | URL) => {
       const href = typeof url === "string" ? url : url.toString();
       return href.startsWith(LINDAS_ENDPOINT) ? jsonResponse(LINDAS_AXA) : jsonResponse(gleifAutreNom);
     };
+    // Plus de recoupement LEI FINMA/GLEIF (retiré en relecture finale du 06.10.2026) : un LEI
+    // FINMA différent du LEI GLEIF ne produit donc plus aucun recoupement sur ce point.
     const result = await companyCheck(
       "CHE-103.137.179",
       deps(fetchMock, () => [finmaRow({ lei: "UNEAUTRELEI000000000" })]),
@@ -443,11 +494,9 @@ describe("companyCheck (bout en bout, fetch injecté, sans réseau)", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     const nameCheck = result.fiche.cross_checks.find((c) => c.check === "legal_name_lindas_vs_gleif");
-    const leiCheck = result.fiche.cross_checks.find((c) => c.check === "finma_lei_vs_gleif_lei");
     expect(nameCheck).toMatchObject({ result: false });
-    expect(leiCheck).toMatchObject({ result: false });
     expect(nameCheck?.detail).toContain("Une Autre Société Complètement Différente SA");
-    expect(leiCheck?.detail).toContain("UNEAUTRELEI000000000");
+    expect(result.fiche.cross_checks.map((c) => c.check)).not.toContain("finma_lei_vs_gleif_lei");
   });
 
   it("5. LINDAS en panne : commercial_register.available false, le reste de la fiche présent", async () => {

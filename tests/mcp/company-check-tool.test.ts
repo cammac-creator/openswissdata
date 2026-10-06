@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { companyCheckHandler, companyCheckSchema, companyCheckTool } from "../../src/mcp/tools/company-check.js";
 import { resetLindasCache } from "../../src/mcp/company/lindas.js";
 import { resetGleifCache } from "../../src/mcp/company/gleif.js";
-import type { FinmaRegistryRow } from "../../src/mcp/data-loader.js";
+import { _resetDataLoaderCache, setFinmaVersion, type FinmaRegistryRow } from "../../src/mcp/data-loader.js";
 
 const fixture = (name: string): unknown =>
   JSON.parse(readFileSync(new URL(`../fixtures/company/${name}`, import.meta.url), "utf8"));
@@ -86,6 +86,11 @@ describe("companyCheckTool (module seul, non branché)", () => {
   it("expose le nom company_check", () => {
     expect(companyCheckTool.name).toBe("company_check");
     expect(companyCheckTool.inputSchema).toBe(companyCheckSchema);
+  });
+
+  // Relecture finale du 06.10.2026, point 5(a) : le schéma JSON refuse tout champ en plus de `uid`.
+  it("le schéma JSON refuse tout champ en plus de `uid`", () => {
+    expect(companyCheckSchema.additionalProperties).toBe(false);
   });
 
   it("n'est importé par aucun chemin dans src/mcp/server.ts (outil éteint)", () => {
@@ -173,10 +178,35 @@ describe("companyCheckTool (module seul, non branché)", () => {
     expect(text).toContain("FINMA");
     expect(text).toContain("GLEIF");
     expect(text).toContain("identical");
-    expect(text).toContain("commercial_register_status");
+    // Phrase claire plutôt que la liste de jetons `not_covered` (relecture finale du
+    // 06.10.2026) : ni "commercial_register_status" ni les autres noms de champs internes
+    // n'apparaissent, mais le sens reste présent en clair.
+    expect(text).toContain("still registered");
+    expect(text).toContain("FOSC");
+    expect(text).toContain("SECO");
+    expect(text).toContain("officers");
+    expect(text).not.toContain("commercial_register_status");
     expect(text).toContain(fiche.notice);
     expect(text.length).toBeLessThan(2500); // résumé court : le `but` long reste coupé ici, entier dans `structured`
     assertNoVerdictWords(text);
+  });
+
+  // Relecture finale du 06.10.2026, point 3 : le texte cite la date de lecture FINMA
+  // SEULEMENT quand la version FINMA servie est connue (registre PAR DÉFAUT, jamais un
+  // registre injecté par les tests).
+  it("version FINMA connue (registre par défaut) : le texte dit 'read 2026-10-06'", async () => {
+    setFinmaVersion("2026.10.06");
+    try {
+      const res = await companyCheckHandler({ uid: AXA_UID }, { fetch: fetchStub, now }); // pas de deps.finma : registre par défaut
+      expect(res.isError).toBeUndefined();
+      const fiche = res.structured!;
+      expect(fiche.finma.found).toBe(true); // AXA Leben AG figure dans le CSV réel
+      expect(fiche.finma.facts.every((f) => f.retrieved_at === "2026-10-06")).toBe(true);
+      const text = res.content[0]?.text ?? "";
+      expect(text).toContain("read 2026-10-06");
+    } finally {
+      _resetDataLoaderCache();
+    }
   });
 
   it("fiche avec divergence (nom FINMA différent de LINDAS) : le texte dit 'different', sans mot de verdict", async () => {

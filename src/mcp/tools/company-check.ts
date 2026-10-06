@@ -30,6 +30,7 @@ export const companyCheckSchema = {
     },
   },
   required: ["uid"],
+  additionalProperties: false,
 } as const;
 
 const InputZ = z
@@ -80,15 +81,18 @@ function renderCommercialRegister(fiche: CompanyFiche): string[] {
 function renderFinma(fiche: CompanyFiche): string[] {
   const f = fiche.finma;
   const lines: string[] = [];
-  // Jamais "read <heure>" ici : `check.ts` pose toujours `retrieved_at` = `generated_at`
-  // sur chaque fait FINMA, car ce n'est jamais une lecture en direct (voir `finmaDataNote`
-  // dans `check.ts`) — la phrase ne doit pas laisser croire le contraire.
+  // `retrieved_at` des faits FINMA (relecture finale du 06.10.2026) : la date ISO de la
+  // version FINMA servie quand elle est connue, sinon `null` — jamais `generated_at`, qui
+  // daterait la fabrication de la fiche, pas une lecture (voir `finmaRetrievedAt` dans
+  // `check.ts`). La phrase mentionne cette date SEULEMENT quand elle est connue.
   if (!f.available) {
     lines.push(`FINMA copy: not available (${f.reason ?? "unknown reason"}). ${f.data_note}`);
   } else if (!f.found) {
     lines.push(`FINMA copy (as loaded by this service, fiche generated ${fiche.generated_at}): no authorisation entry found for this UID. ${f.data_note}`);
   } else {
-    lines.push(`FINMA copy (as loaded by this service, fiche generated ${fiche.generated_at}): ${f.data_note}`);
+    const readAt = f.facts[0]?.retrieved_at;
+    const readClause = readAt ? `, read ${readAt}` : "";
+    lines.push(`FINMA copy (as loaded by this service${readClause}, fiche generated ${fiche.generated_at}): ${f.data_note}`);
     lines.push(...renderFacts(f.facts));
   }
   lines.push("FINMA warning list: not checkable by UID.");
@@ -137,7 +141,11 @@ function renderSummary(fiche: CompanyFiche): string {
   lines.push("");
   lines.push(...renderCrossChecks(fiche));
   lines.push("");
-  lines.push(`Not covered by this fiche: ${fiche.not_covered.join(", ")}.`);
+  // Phrase claire plutôt qu'une liste de jetons (relecture finale du 06.10.2026) : les
+  // lecteurs de ce résumé ne connaissent pas les noms de champs internes de `not_covered`.
+  lines.push(
+    "This fiche does not say whether the company is still registered (active or deleted), and does not cover FOSC publications, SECO sanctions or officers.",
+  );
   lines.push(fiche.notice);
   return lines.join("\n");
 }
@@ -175,7 +183,7 @@ export async function companyCheckHandler(
 export const companyCheckTool = {
   name: "company_check",
   description:
-    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and retrieval time, plus exact cross-checks between sources. No score. Commercial register status (active or deleted), FOSC publications, SECO sanctions and officers are not covered.",
+    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources. No score. Commercial register status (active or deleted), FOSC publications, SECO sanctions and officers are not covered.",
   inputSchema: companyCheckSchema,
   handler: companyCheckHandler,
 } as const;

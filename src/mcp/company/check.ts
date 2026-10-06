@@ -4,8 +4,8 @@
  * Combine en mémoire trois sources déjà lues ailleurs — registre du commerce en données
  * liées (`lindas.ts`), registre FINMA (`../data-loader.ts`, copie embarquée au déploiement
  * ou rafraîchie par `r2-refresh.ts`) et GLEIF (`gleif.ts`) — en une fiche de FAITS datés et
- * sourcés. Les `cross_checks` sont des recoupements EXACTS (égalité après normalisation du
- * nom, appartenance pour un LEI) : jamais une note, un score ou un verdict. `companyCheck`
+ * sourcés. Les `cross_checks` sont des recoupements EXACTS de nom (égalité après
+ * normalisation) entre ces sources : jamais une note, un score ou un verdict. `companyCheck`
  * est le seul point d'entrée réseau ; `buildCompanyFiche` est un assemblage pur, sans
  * aucun accès réseau ni disque, pour rester facile à tester et à faire évoluer séparément.
  */
@@ -22,7 +22,11 @@ export interface Fact {
   value: string | boolean | null;
   source_id: string;
   source_url: string;
-  retrieved_at: string;
+  // `string | null` depuis la correction du 06.10.2026 (relecture finale) : un fait FINMA
+  // ne porte plus jamais `generated_at` (l'heure de fabrication de la fiche, pas une lecture).
+  // `null` quand la version FINMA chargée n'est pas connue ; sinon la date ISO (sans heure)
+  // tirée de cette version (voir `finmaRetrievedAt` plus bas).
+  retrieved_at: string | null;
 }
 
 export interface CrossCheck {
@@ -40,9 +44,10 @@ export interface CompanyFiche {
   // n'a pas pu être lu (`deps.finma` qui lève) — `found`/`facts` restent alors vides, sans
   // jamais faire échouer toute la fiche. `data_note` (tâche osd.fiche, tâche 4) : les faits
   // FINMA viennent de la dernière collecte du service, jamais d'une lecture en direct.
-  // `retrieved_at` de chaque Fact FINMA reste toujours `generated_at` (la version FINMA,
-  // ex. "2026.10.06", n'est pas une date ISO : on ne la met jamais dans un champ daté) ;
-  // `data_note` la mentionne quand elle est connue.
+  // `retrieved_at` de chaque Fact FINMA (relecture finale du 06.10.2026) : la date ISO tirée
+  // de la version FINMA quand elle est connue (voir `finmaRetrievedAt`), sinon `null` —
+  // jamais `generated_at`, qui serait l'heure de fabrication de la fiche, pas une lecture.
+  // `data_note` mentionne la version elle-même (format "AAAA.MM.JJ") quand elle est connue.
   finma: { available: boolean; found: boolean; facts: Fact[]; warning_list: "not_checkable_by_uid"; data_note: string; reason?: string };
   lei: { available: boolean; found: boolean; reason?: string; facts: Fact[] };
   cross_checks: CrossCheck[];
@@ -59,10 +64,30 @@ const NOT_COVERED = ["commercial_register_status", "fosc_publications", "seco_sa
 const NOTICE =
   "Unofficial copy assembled from public sources. Check the official registers before any decision: zefix.admin.ch, finma.ch, search.gleif.org.";
 
-// Entreprise individuelle (Zefix eCH-0097) : forme juridique "0101". L'adresse privée du
-// titulaire n'est jamais reprise dans la fiche ; commune et canton restent (décision du
-// 06.10.2026, tâche osd.fiche).
-const INDIVIDUAL_ENTERPRISE_FORM_CODE = "0101";
+// Liste BLANCHE des formes juridiques eCH-0097 de personnes morales, relevée le 06.10.2026
+// dans le vocabulaire officiel de LINDAS (relecture finale, tâche osd.fiche). SEULES ces
+// formes ouvrent l'adresse postale (rue, NPA, localité) ET le but (`purpose`) : une raison
+// sociale de personne morale ne porte normalement pas le nom d'une personne physique,
+// contrairement à une entreprise individuelle ("0101"), une société en nom collectif
+// ("0103"), une société en commandite ("0104") ou une société en commandite par actions
+// ("0105"), dont la raison sociale PEUT légalement contenir un nom de famille. Tout autre
+// code (dont "0111", "0113", "0118", "0119", "0151", "0571") ou code absent/inconnu ferme
+// aussi l'adresse et le but : une forme non reconnue n'écarte jamais la possibilité d'une
+// entreprise individuelle ou assimilée.
+const ADDRESS_AND_PURPOSE_FORM_CODES = new Set<string>([
+  "0106", // société anonyme (SA)
+  "0107", // société à responsabilité limitée (Sàrl)
+  "0108", // société coopérative
+  "0109", // association
+  "0110", // fondation
+  "0114", // société en commandite de placements collectifs
+  "0115", // société d'investissement à capital variable (SICAV)
+  "0116", // société d'investissement à capital fixe (SICAF)
+  "0117", // institut de droit public
+  "0220", "0221", "0222", "0223", "0224", // administrations publiques
+  "0230", "0231", "0232", "0233", "0234", // entreprises publiques
+  "0329", // organisation internationale
+]);
 
 /** NFC, espaces consécutifs réduits à un, bords rognés ; casse et ponctuation conservées. */
 function normalizeName(value: string): string {
@@ -73,7 +98,7 @@ function namesMatch(a: string, b: string): boolean {
   return normalizeName(a) === normalizeName(b);
 }
 
-function pushIfPresent(facts: Fact[], field: string, value: string | null | undefined, sourceId: string, sourceUrl: string, retrievedAt: string): void {
+function pushIfPresent(facts: Fact[], field: string, value: string | null | undefined, sourceId: string, sourceUrl: string, retrievedAt: string | null): void {
   if (value !== null && value !== undefined && value !== "") {
     facts.push({ field, value, source_id: sourceId, source_url: sourceUrl, retrieved_at: retrievedAt });
   }
@@ -82,21 +107,17 @@ function pushIfPresent(facts: Fact[], field: string, value: string | null | unde
 /** Un `Fact` par champ non nul de `LindasCompany` ; `other_names` (tableau) est joint en une
  *  seule chaîne pour rester compatible avec `Fact.value`.
  *
- *  Adresse FERMÉE PAR DÉFAUT (correction 1 du 06.10.2026) : `street_address`, `postal_code`
- *  et `locality` ne sortent QUE si `legal_form_code` est CONNU (non nul) ET différent de
- *  "0101" — une forme juridique inconnue n'écarte jamais la possibilité d'une entreprise
- *  individuelle, donc pas d'adresse tant qu'on ne sait pas.
- *
- *  Entreprise individuelle CONFIRMÉE (legal_form_code === "0101") : `purpose` est en plus
- *  retiré (le plan ne garde que nom, forme, commune ; canton et other_names restent) — ce
- *  retrait-là ne s'applique PAS au cas "forme inconnue", seulement au cas confirmé. */
+ *  Liste blanche des formes juridiques (relecture finale du 06.10.2026, remplace l'ancienne
+ *  règle "fermé si 0101 ou code inconnu") : `street_address`, `postal_code`, `locality` ET
+ *  `purpose` ne sortent QUE si `legal_form_code` figure dans `ADDRESS_AND_PURPOSE_FORM_CODES`
+ *  — jamais pour "0101" (entreprise individuelle), ni pour une forme hors liste, ni pour un
+ *  code absent ou vide. */
 function lindasFacts(data: LindasCompany, retrievedAt: string): Fact[] {
   const sourceId = "ofrc.zefix_lindas";
   const sourceUrl = COMPANY_SOURCES[sourceId].url;
-  const isConfirmedIndividualEnterprise = data.legal_form_code === INDIVIDUAL_ENTERPRISE_FORM_CODE;
-  // `!!data.legal_form_code` (pas `!== null`) : une chaîne vide compte aussi comme "pas
-  // connue", jamais comme "présente" (corrigé en revue, correction 1 du 06.10.2026).
-  const addressAllowed = !!data.legal_form_code && !isConfirmedIndividualEnterprise;
+  // `data.legal_form_code !== null` (pas `!!data.legal_form_code`) suffit ici : une chaîne
+  // vide n'est de toute façon jamais une clé de `ADDRESS_AND_PURPOSE_FORM_CODES`.
+  const addressAndPurposeAllowed = data.legal_form_code !== null && ADDRESS_AND_PURPOSE_FORM_CODES.has(data.legal_form_code);
   const facts: Fact[] = [];
   const add = (field: string, value: string | null) => pushIfPresent(facts, field, value, sourceId, sourceUrl, retrievedAt);
 
@@ -108,12 +129,12 @@ function lindasFacts(data: LindasCompany, retrievedAt: string): Fact[] {
   add("municipality", data.municipality);
   add("municipality_bfs_id", data.municipality_bfs_id);
   add("canton", data.canton);
-  if (addressAllowed) {
+  if (addressAndPurposeAllowed) {
     add("street_address", data.street_address);
     add("postal_code", data.postal_code);
     add("locality", data.locality);
   }
-  if (!isConfirmedIndividualEnterprise) add("purpose", data.purpose);
+  if (addressAndPurposeAllowed) add("purpose", data.purpose);
   add("ch_id", data.ch_id);
   add("register_uri", data.register_uri);
   return facts;
@@ -140,10 +161,17 @@ function gleifFacts(records: readonly GleifRecord[], retrievedAt: string): Fact[
   return facts;
 }
 
-/** `licence_type`, `status`, `licence_date`, `lei` (si non vide) pour chaque ligne FINMA
- *  dont l'IDE est exactement celui demandé (plusieurs lignes possibles, une par
- *  autorisation). `source_url` vient de la ligne elle-même, jamais de la table locale. */
-function finmaFacts(rows: readonly FinmaRegistryRow[], retrievedAt: string): Fact[] {
+/** `licence_type`, `status`, `licence_date` pour chaque ligne FINMA dont l'IDE est exactement
+ *  celui demandé (plusieurs lignes possibles, une par autorisation). `source_url` vient de la
+ *  ligne elle-même, jamais de la table locale.
+ *
+ *  PAS de fait `lei` (retiré en relecture finale du 06.10.2026, tâche osd.fiche) : la colonne
+ *  `lei` de `finma_registry.csv` est posée par la collecte depuis GLEIF
+ *  (`etl/finma/ingest-gleif.ts`, `enrichWithGleif`), jamais lue sur le site de la FINMA — la
+ *  présenter comme un fait FINMA aurait fait croire à une seconde source indépendante du LEI,
+ *  qui n'existe pas. Le recoupement `finma_lei_vs_gleif_lei` est retiré pour la même raison
+ *  (comparer un LEI à lui-même ne recoupe rien) ; le recoupement de nom FINMA ↔ LINDAS reste. */
+function finmaFacts(rows: readonly FinmaRegistryRow[], retrievedAt: string | null): Fact[] {
   const sourceId = "finma.uid_csv";
   const fallbackUrl = COMPANY_SOURCES[sourceId].url;
   const facts: Fact[] = [];
@@ -153,9 +181,19 @@ function finmaFacts(rows: readonly FinmaRegistryRow[], retrievedAt: string): Fac
     add("licence_type", row.licence_type);
     add("status", row.status);
     add("licence_date", row.licence_date);
-    add("lei", row.lei);
   }
   return facts;
+}
+
+/** `retrieved_at` des faits FINMA (correction finale du 06.10.2026) : jamais `generated_at`
+ *  (l'heure de fabrication de la fiche n'est pas une lecture). Quand la version FINMA
+ *  actuellement servie est connue (format `AAAA.MM.JJ`, ex. "2026.10.06", posé par
+ *  `release-finma.ts`), elle devient une date ISO sans heure ("2026-10-06") ; sinon `null`,
+ *  jamais une date inventée. */
+function finmaRetrievedAt(version: string | null | undefined): string | null {
+  if (!version) return null;
+  const m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec(version);
+  return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
 }
 
 /**
@@ -204,9 +242,9 @@ export function buildCompanyFiche(
   const finmaRows = parts.finma.available ? parts.finma.rows.filter((row) => row.uid === uid) : [];
 
   // La date de collecte des lignes FINMA chargées en mémoire n'est pas connue ici (pas de
-  // lecture en direct) : chaque Fact FINMA porte toujours `generated_at` comme
-  // `retrieved_at`. `parts.finmaVersion` (ex. "2026.10.06", pas une date ISO) n'est
-  // mentionnée que dans `data_note`, jamais posée dans un champ daté.
+  // lecture en direct) : `finmaRetrievedAt` tire la date ISO de `parts.finmaVersion`
+  // (ex. "2026.10.06") quand elle est connue, sinon `null` — jamais `generated_at`, qui
+  // daterait la fabrication de la fiche, pas une lecture (relecture finale du 06.10.2026).
   const finmaDataNote = parts.finmaVersion
     ? `Facts from the FINMA copy currently loaded by this service (version ${parts.finmaVersion}), not a live FINMA lookup.`
     : "Facts from the FINMA copy currently loaded by this service, not a live FINMA lookup.";
@@ -215,7 +253,7 @@ export function buildCompanyFiche(
     ? {
         available: true,
         found: finmaRows.length > 0,
-        facts: finmaFacts(finmaRows, generatedAt),
+        facts: finmaFacts(finmaRows, finmaRetrievedAt(parts.finmaVersion)),
         warning_list: "not_checkable_by_uid",
         data_note: finmaDataNote,
       }
@@ -246,25 +284,11 @@ export function buildCompanyFiche(
     }
   }
 
-  // Plusieurs lignes FINMA pour le même IDE (une par autorisation) répètent souvent le
-  // même `lei` ou le même `name` : un recoupement par VALEUR DISTINCTE, jamais un par
-  // ligne, pour ne pas dupliquer un même fait de comparaison.
-  if (gleifRecords.length > 0) {
-    const gleifLeis = gleifRecords.map((r) => r.lei);
-    const seenLeis = new Set<string>();
-    for (const row of finmaRows) {
-      if (row.lei !== "" && !seenLeis.has(row.lei)) {
-        seenLeis.add(row.lei);
-        cross_checks.push({
-          check: "finma_lei_vs_gleif_lei",
-          sources: ["finma.uid_csv", "gleif.lei_api"],
-          result: gleifLeis.includes(row.lei),
-          detail: `FINMA lei "${row.lei}" vs GLEIF lei(s) "${gleifLeis.join(", ")}"`,
-        });
-      }
-    }
-  }
-
+  // Pas de recoupement `finma_lei_vs_gleif_lei` (retiré en relecture finale du 06.10.2026,
+  // tâche osd.fiche) : le `lei` d'une ligne FINMA est lui-même posé par la collecte depuis
+  // GLEIF (`etl/finma/ingest-gleif.ts`), jamais lu sur le site de la FINMA — comparer ce LEI
+  // au LEI GLEIF revient à comparer une valeur à sa propre source, jamais un recoupement
+  // entre deux sources indépendantes. Le recoupement de nom FINMA ↔ LINDAS reste ci-dessous.
   if (lindasData) {
     const seenNames = new Set<string>();
     for (const row of finmaRows) {
