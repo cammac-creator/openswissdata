@@ -4,7 +4,7 @@
     "cammac-creator"
   ],
   "name": "OpenSwissData",
-  "description": "Swiss federal reference data for AI agents: Swiss customs tariff lines (TARES, 8-digit tariff numbers) with MFN duty and preferential regimes, the FINMA register of supervised institutions and the FINMA warnings list, and NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4 correspondences. Three tools work without a key or sign-up (100 calls per hour per IP address); five more need an existing access grant, and new subscriptions are closed. Unofficial copy of public sources; full datasets are sold as signed files.",
+  "description": "Swiss federal reference data for AI agents: Swiss customs tariff lines (TARES, 8-digit tariff numbers) with MFN duty and preferential regimes, the FINMA register of supervised institutions and the FINMA warnings list, Swiss company data by UID (commercial register, FINMA, LEI), and NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4 correspondences. Four tools work without a key or sign-up (100 calls per hour per IP address); five more need an existing access grant, and new subscriptions are closed. Unofficial copy of public sources; full datasets are sold as signed files.",
   "homepage": "https://www.openswissdata.com/en/mcp",
   "repository": "https://github.com/cammac-creator/openswissdata",
   "documentation": "https://www.openswissdata.com/llms.txt",
@@ -37,6 +37,10 @@
     {
       "name": "kyc_check",
       "description": "Search the FINMA register and the FINMA warnings list by name, closest matches first, with total counts (no key)"
+    },
+    {
+      "name": "company_check",
+      "description": "Swiss company lookup by UID (CHE-xxx.xxx.xxx): commercial register (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source. Does not say whether the company is still registered (no key)"
     },
     {
       "name": "cross_walk",

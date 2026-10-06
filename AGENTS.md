@@ -74,7 +74,7 @@ Les cas « ça dépend » sont ceux de la ligne BOUTON. Hors de cette ligne, l'a
 
 ## Promesses publiques et droits des sources
 - Les versions de l'accueil viennent du catalogue distribué à la consultation ; une panne affiche l'impossibilité de vérifier, jamais une ancienne date présentée comme actuelle. Les FAQ FR/DE/EN partagent les mêmes règles : paiement confirmé, collecte FINMA quotidienne planifiée, TARES hebdomadaire, classifications après contrôle.
-- Le bundle livre les trois fichiers. Aucun accès MCP payant n'est créé par l'achat de fichiers : ne pas l'annoncer comme inclus. Les outils anonymes sont `tariff_lookup`, `kyc_check` et `cross_walk`, plus les trois outils de recherche dans la limite de l'essai ; l'historique demande des droits. Les souscriptions payantes restent fermées.
+- Le bundle livre les trois fichiers. Aucun accès MCP payant n'est créé par l'achat de fichiers : ne pas l'annoncer comme inclus. Les outils anonymes sont `tariff_lookup`, `kyc_check`, `company_check` et `cross_walk`, plus les trois outils de recherche dans la limite de l'essai ; l'historique demande des droits. Les souscriptions payantes restent fermées.
 - `statent_lookup` et son CSV ont été retirés du service le 25.09.2026 faute de preuve de droits de redistribution dans le dossier. Les scopes historiques restent lisibles pour compatibilité, mais ne donnent accès à aucun outil STATENT. Ne pas remettre la source au seul motif qu'un client possède ce scope. Voir `docs/droits-des-sources.md` pour les preuves et vérifications restantes.
 
 ## Environnement et tests isolés — 26.09.2026

@@ -2,7 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const mcpConfigJson = "claude mcp add --transport http openswissdata https://mcp.openswissdata.com/mcp/jsonrpc";
-const freeTools = ["tariff_lookup", "kyc_check", "cross_walk"];
+const freeTools = ["tariff_lookup", "kyc_check", "company_check", "cross_walk"];
 // Essai sans clé des outils de recherche (29.09.2026) : 20 appels par jour et par réseau au total.
 const trialTools = ["tariff_semantic_search", "classify_text", "finma_search"];
 
@@ -51,6 +51,13 @@ const tools = [
   },
   {
     pack: "FINMA",
+    name: "company_check",
+    desc: "Auskunft zu einer Schweizer Gesellschaft nach UID: Handelsregister (LINDAS), FINMA-Bewilligungen und LEI (GLEIF), jede Tatsache mit ihrer Quelle. Sagt nicht, ob die Gesellschaft noch im Register eingetragen ist.",
+    args: { uid: "CHE-103.137.179" },
+    scope: "finma:read",
+  },
+  {
+    pack: "FINMA",
     name: "finma_search",
     desc: "Ungefähre Namenssuche im FINMA-Register; Warnungen bleiben getrennt.",
     args: { name: "Vontobel", top_k: 5, include_warnings: true },
@@ -67,7 +74,7 @@ const tools = [
 ---
 <BaseLayout
   title="MCP Server openswissdata — Schweizer Bundes-Datasets für Claude Code & Cursor"
-  description="TARES, NOGA und FINMA über JSON-RPC. Drei Tools ohne Konto, 100 Anfragen pro Stunde und IP, dazu drei Suchwerkzeuge zum Testen. Weitere Tools benötigen bestehende Rechte."
+  description="TARES, NOGA und FINMA über JSON-RPC. Vier Tools ohne Konto, 100 Anfragen pro Stunde und IP, dazu drei Suchwerkzeuge zum Testen. Weitere Tools benötigen bestehende Rechte."
 >
 
 <div class="bg-grid"></div>
@@ -79,7 +86,7 @@ const tools = [
       <div class="v4-eyebrow">
         <span>Model Context Protocol</span>
         <span style="opacity:.4">·</span>
-        <span class="check">3 Tools ohne Konto · 100 Anfragen/Stunde/IP</span>
+        <span class="check">4 Tools ohne Konto · 100 Anfragen/Stunde/IP</span>
       </div>
 
       <h1 class="v4-h1" style="max-width:24ch;">
@@ -93,7 +100,7 @@ const tools = [
       <div class="v4-spec-row">
         <div class="v4-spec">
           <div class="v4-spec-label">Endpoints</div>
-          <div class="v4-spec-value">8 Tools</div>
+          <div class="v4-spec-value">9 Tools</div>
         </div>
         <div class="v4-spec">
           <div class="v4-spec-label">URL</div>
@@ -139,7 +146,7 @@ const tools = [
       <pre style="background:#0A0A0C;color:#fafafa;padding:18px 22px;border-radius:8px;font-family:var(--font-mono);font-size:13px;line-height:1.6;overflow-x:auto;margin-bottom:24px;">{mcpConfigJson}</pre>
 
       <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Schritt 2 · Claude Code neu starten</p>
-      <p style="margin-bottom:14px;">Prüfen Sie die Verbindung mit <code>/mcp</code>. Drei Tools sind ohne Konto zugänglich, dazu drei Suchwerkzeuge im Testzugang (20 Aufrufe pro Tag); die übrigen benötigen bestehende Zugriffsrechte.</p>
+      <p style="margin-bottom:14px;">Prüfen Sie die Verbindung mit <code>/mcp</code>. Vier Tools sind ohne Konto zugänglich, dazu drei Suchwerkzeuge im Testzugang (20 Aufrufe pro Tag); die übrigen benötigen bestehende Zugriffsrechte.</p>
 
       <p style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Schritt 3 · Testen</p>
       <p>Fragen Sie zum Beispiel: <em>„Rufe den TARES-Tarif 09011100 mit tariff_lookup ab“</em>. Prüfen Sie danach die Einheit und Bedingungen.</p>
@@ -159,7 +166,7 @@ const tools = [
       <span class="sep">/</span>
       <span>Spec 2025-11-25</span>
     </div>
-    <h2 class="v4-section-h2">Drei Datenpakete. Acht Tools.</h2>
+    <h2 class="v4-section-h2">Drei Datenpakete. Neun Tools.</h2>
 
     {["TARES", "Classifications", "FINMA"].map(packName => (
       <div style="margin-bottom:32px;">
@@ -194,7 +201,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
 </section>
 
 <!-- ========== PLAYGROUND ========== -->
-<div class="container-v4"><p class="mcp-availability" style="padding:20px;border:1px solid var(--line);border-radius:12px;line-height:1.8;margin:24px 0;">Ohne Konto verfügbar: tariff_lookup, kyc_check und cross_walk (100 Anfragen/Stunde je IP). Testzugang ohne Konto für tariff_semantic_search, classify_text und finma_search: zusammen 20 Aufrufe pro Tag und IP; jede Antwort nennt die verbleibenden Aufrufe und die amtliche Quelle, an der das Ergebnis zu prüfen ist (xtares.admin.ch, FINMA-Register, NOGA-Publikationen des BFS). Andere Werkzeuge benötigen entsprechende Rechte; neue kostenpflichtige Abonnements sind geschlossen. STATENT ist bis zum Nachweis der Weiterverbreitungsrechte ausgesetzt. Vektorindizes werden nicht durch Dateierhebungen aktualisiert.</p></div>
+<div class="container-v4"><p class="mcp-availability" style="padding:20px;border:1px solid var(--line);border-radius:12px;line-height:1.8;margin:24px 0;">Ohne Konto verfügbar: tariff_lookup, kyc_check, company_check und cross_walk (100 Anfragen/Stunde je IP). Testzugang ohne Konto für tariff_semantic_search, classify_text und finma_search: zusammen 20 Aufrufe pro Tag und IP; jede Antwort nennt die verbleibenden Aufrufe und die amtliche Quelle, an der das Ergebnis zu prüfen ist (xtares.admin.ch, FINMA-Register, NOGA-Publikationen des BFS). Andere Werkzeuge benötigen entsprechende Rechte; neue kostenpflichtige Abonnements sind geschlossen. STATENT ist bis zum Nachweis der Weiterverbreitungsrechte ausgesetzt. Vektorindizes werden nicht durch Dateierhebungen aktualisiert.</p></div>
 <section class="v4-personas" id="playground">
   <div class="container-v4">
     <div class="v4-section-eyebrow">
@@ -361,6 +368,7 @@ ${authHeader}  -d '${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call
     "cross_walk": { code: "62.10", source: "NOGA_2025", target: "NACE_2.1" },
     "classify_text": { text: "Verkauf von Kaffeebohnen und Rösterei", top_k: 3 },
     "kyc_check": { name: "UBS Switzerland AG" },
+    "company_check": { uid: "CHE-103.137.179" },
     "finma_search": { name: "Vontobel", top_k: 5 },
     "entity_history": { uid: "CHE-101.329.561" },
   };
