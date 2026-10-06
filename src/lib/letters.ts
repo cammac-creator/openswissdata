@@ -288,8 +288,9 @@ export function isSendableNow(utcMs: number): boolean {
  * suivant.
  *
  * `existingScheduled` : les `scheduled_at` (epoch ms) des lettres à compter
- * pour le plafond et l'écart (lettres `queued`/`sending`/`sent`, jamais
- * `cancelled`/`failed` — à la charge de l'appelant). `rng` : générateur
+ * pour le plafond et l'écart (lettres `queued`/`sending`/`sent`, plus les
+ * tentatives `failed` du jour par leur `attempted_at` ; jamais `cancelled` —
+ * à la charge de l'appelant). `rng` : générateur
  * injecté, `() => number` dans [0, 1), pour des tests déterministes.
  */
 export function scheduleSlot(

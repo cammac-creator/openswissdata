@@ -588,6 +588,19 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       expect(sentTexts(fetcher)[0].text).toContain("issue incertaine");
     });
 
+    it.each(["HTTP 502", "HTTP 504"])("%s vient d'une passerelle : issue incertaine, jamais renvoyée", async (details) => {
+      const id = insertLetter({ scheduled_at: NOW - 1_000 });
+      const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: false, reason: "resend_error", details }));
+      const fetcher = telegramOk();
+
+      await run({ send, fetch: fetcher });
+
+      const row = getLetter(id);
+      expect(row.status).toBe("failed");
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(sentTexts(fetcher)[0].text).toContain("issue incertaine");
+    });
+
     it("I4c : un 429 (taux limité) reste retentable comme un 5xx — Resend n'a pas accepté", async () => {
       const id = insertLetter({ scheduled_at: NOW - 1_000 });
       const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: false, reason: "resend_error", details: "HTTP 429" }));

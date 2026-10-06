@@ -189,7 +189,7 @@ function uncertainText(letter: Pick<InstitutionalLetter, "to_address">): string 
  * Classe un échec d'envoi renvoyé par `sendPreparedEmail` :
  * - `"unknown"` — on ne sait pas si Resend a accepté (erreur réseau, forme inattendue) : jamais de
  *   retentative automatique (I4a).
- * - `"retryable"` — Resend a explicitement refusé par 5xx ou 429 (jamais accepté, sûr de
+ * - `"retryable"` — Resend a explicitement refusé par 5xx (sauf 502 et 504, « unknown ») ou 429 (jamais accepté, sûr de
  *   retenter) : repasse en `queued`, `attempts+1`, `failed` au troisième essai (I4c), comme avant.
  * - `"definite"` — Resend a explicitement refusé par un autre 4xx (400, 401, 403, 409, 422, et tout
  *   autre code 4xx non énuméré) : la requête elle-même est rejetée, retenter ne changerait rien ;
@@ -200,6 +200,10 @@ function classifySendFailure(result: EmailSendResult): "unknown" | "retryable" |
   const httpMatch = /^HTTP (\d{3})$/.exec(result.details ?? "");
   if (!httpMatch) return "unknown"; // ex. "network_error" : Resend a pu recevoir la requête malgré tout
   const status = Number(httpMatch[1]);
+  // 502 et 504 viennent d'une passerelle : Resend a pu accepter la lettre derrière elle. Issue
+  // incertaine, jamais renvoyée (une remise en file pourrait repartir après l'expiration de la clé
+  // d'idempotence de Resend, par exemple un vendredi soir reporté au lundi).
+  if (status === 502 || status === 504) return "unknown";
   return status >= 500 || status === 429 ? "retryable" : "definite";
 }
 
@@ -345,7 +349,7 @@ function occupiedSlots(db: Database.Database, excludeId?: string): number[] {
  *
  * Sinon, en retard d'au moins dix minutes → replanifiée par `scheduleSlot` (aucun envoi en retard).
  * Sinon → deux garde-fous avant d'envoyer MAINTENANT (corrections I2b et I3, 06.10) : un envoi
- * `sent` trop récent (moins de douze minutes réelles, l'écart que `scheduleSlot` garantit sur
+ * tentée trop récemment (`attempted_at` de n'importe quelle autre lettre, moins de douze minutes réelles, l'écart que `scheduleSlot` garantit sur
  * `scheduled_at` mais qu'un passage en retard qui rattrape plusieurs lettres pourrait comprimer
  * dans le temps réel) bloque tout envoi ce passage-ci ; et `now` ET `now + 60 s` doivent rester dans
  * le créneau d'envoi (un envoi qui prendrait jusqu'à une minute ne doit, lui non plus, jamais finir
@@ -557,7 +561,7 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
         }
         if (result?.sent) {
           // Lu APRÈS la réponse de Resend (I2d), jamais avant l'envoi : un passage qui prend du
-          // temps (retentatives internes à `sendPreparedEmail`, par exemple) ne doit pas enregistrer
+          // temps (jusqu'au délai maximal de l'unique tentative) ne doit pas enregistrer
           // une heure d'envoi antérieure à l'acceptation réelle. Écrit avant toute notification
           // Telegram : un échec Telegram ne doit jamais faire rejouer un envoi déjà accepté.
           const sentAt = deps.now();
