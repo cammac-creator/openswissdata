@@ -22,6 +22,7 @@
 
 import { parseUid } from "./uid.js";
 import { TtlCache } from "./cache.js";
+import { RequestCoalescer, retryAfterMs, SourceBreaker } from "./outbound-guard.js";
 import type { GleifRecord, LiveDeps, Part } from "./types.js";
 
 export const GLEIF_LEI_API_URL = "https://api.gleif.org/api/v1/lei-records";
@@ -116,7 +117,17 @@ function extractItem(raw: unknown): ItemResult {
 let cache = new TtlCache<Part<GleifRecord[]>>({ max: CACHE_MAX, ttlMs: CACHE_TTL_MS, now: () => Date.now() });
 export function resetGleifCache(now: () => number = () => Date.now()): void {
   cache = new TtlCache<Part<GleifRecord[]>>({ max: CACHE_MAX, ttlMs: CACHE_TTL_MS, now });
+  // Remettre le client à zéro remet aussi son disjoncteur (même horloge).
+  breaker = new SourceBreaker({ now });
 }
+
+// Disjoncteur par source (garde-fou de charge sortante, avant l'ouverture sans clé) et
+// regroupement des appels concurrents pour le même IDE ; symétrique à `lindas.ts`.
+let breaker = new SourceBreaker({ now: () => Date.now() });
+export function resetGleifBreaker(now: () => number = () => Date.now()): void {
+  breaker = new SourceBreaker({ now });
+}
+const coalescer = new RequestCoalescer<Part<GleifRecord[]>>();
 
 export async function lookupGleif(uid: string, deps: LiveDeps): Promise<Part<GleifRecord[]>> {
   if (!CANONICAL_UID_RE.test(uid)) {
@@ -130,6 +141,19 @@ export async function lookupGleif(uid: string, deps: LiveDeps): Promise<Part<Gle
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
+  if (breaker.isPaused()) {
+    return { available: false, reason: "source temporarily paused after errors" };
+  }
+
+  return coalescer.run(cacheKey, () => fetchGleif(uid, parsedRequested.compact, cacheKey, deps));
+}
+
+async function fetchGleif(
+  uid: string,
+  requestedCompact: string,
+  cacheKey: string,
+  deps: LiveDeps,
+): Promise<Part<GleifRecord[]>> {
   const timeoutMs = deps.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const url = new URL(GLEIF_LEI_API_URL);
   url.searchParams.set("filter[entity.registeredAs]", uid);
@@ -142,9 +166,11 @@ export async function lookupGleif(uid: string, deps: LiveDeps): Promise<Part<Gle
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch {
+    breaker.recordFailure();
     return { available: false, reason: "GLEIF request failed or timed out" };
   }
   if (res.status !== 200) {
+    if (res.status === 429 || res.status >= 500) breaker.recordFailure(res.status === 429 ? retryAfterMs(res) : undefined, res.status === 429);
     // Le corps d'une réponse non-200 n'est jamais lu : l'annuler libère la connexion sans
     // attendre son téléchargement complet (relecture finale du 06.10.2026). Seule l'erreur
     // de CETTE annulation est réduite au silence, jamais une erreur de la requête elle-même.
@@ -161,10 +187,12 @@ export async function lookupGleif(uid: string, deps: LiveDeps): Promise<Part<Gle
   } catch (err) {
     const name = err instanceof Error ? err.name : "";
     if (name === "TimeoutError" || name === "AbortError") {
+      breaker.recordFailure();
       return { available: false, reason: "GLEIF request timed out while reading the response" };
     }
     return { available: false, reason: "GLEIF response is not valid JSON" };
   }
+  breaker.recordSuccess();
   if (!isGleifResponse(body)) {
     return { available: false, reason: "unexpected GLEIF response shape" };
   }
@@ -197,7 +225,7 @@ export async function lookupGleif(uid: string, deps: LiveDeps): Promise<Part<Gle
   const records = wellFormed.filter((r) => {
     if (!r.registered_as) return false;
     const parsedRegistered = parseUid(r.registered_as);
-    return parsedRegistered.ok && parsedRegistered.compact === parsedRequested.compact;
+    return parsedRegistered.ok && parsedRegistered.compact === requestedCompact;
   });
 
   const result: Part<GleifRecord[]> = records.length === 0

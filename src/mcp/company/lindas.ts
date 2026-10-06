@@ -30,6 +30,7 @@
  */
 
 import { TtlCache } from "./cache.js";
+import { RequestCoalescer, retryAfterMs, SourceBreaker } from "./outbound-guard.js";
 import type { LindasCompany, LiveDeps, Part } from "./types.js";
 
 export const LINDAS_ENDPOINT = "https://register.ld.admin.ch/query";
@@ -216,7 +217,19 @@ function mergeRows(companyUri: string, rows: Record<string, unknown>[]): LindasC
 let cache = new TtlCache<Part<LindasCompany>>({ max: CACHE_MAX, ttlMs: CACHE_TTL_MS, now: () => Date.now() });
 export function resetLindasCache(now: () => number = () => Date.now()): void {
   cache = new TtlCache<Part<LindasCompany>>({ max: CACHE_MAX, ttlMs: CACHE_TTL_MS, now });
+  // Remettre le client à zéro remet aussi son disjoncteur (même horloge).
+  breaker = new SourceBreaker({ now });
 }
+
+// Disjoncteur par source (garde-fou de charge sortante, avant l'ouverture sans clé) et
+// regroupement des appels concurrents pour le même IDE. `resetLindasBreaker` suit la même
+// discipline que `resetLindasCache` : un test fige le temps, le fait avancer, puis vérifie
+// la levée de la pause sans dépendre de l'horloge réelle.
+let breaker = new SourceBreaker({ now: () => Date.now() });
+export function resetLindasBreaker(now: () => number = () => Date.now()): void {
+  breaker = new SourceBreaker({ now });
+}
+const coalescer = new RequestCoalescer<Part<LindasCompany>>();
 
 export async function lookupLindas(compactUid: string, deps: LiveDeps): Promise<Part<LindasCompany>> {
   if (!COMPACT_UID_RE.test(compactUid)) {
@@ -226,6 +239,16 @@ export async function lookupLindas(compactUid: string, deps: LiveDeps): Promise<
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
+  // Disjoncteur ouvert : aucun appel réseau, le motif reste lisible pour l'appelant.
+  if (breaker.isPaused()) {
+    return { available: false, reason: "source temporarily paused after errors" };
+  }
+
+  // Un seul appel réseau en vol par IDE : un second appelant simultané reçoit la même promesse.
+  return coalescer.run(cacheKey, () => fetchLindas(compactUid, cacheKey, deps));
+}
+
+async function fetchLindas(compactUid: string, cacheKey: string, deps: LiveDeps): Promise<Part<LindasCompany>> {
   const timeoutMs = deps.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   let res: Response;
   try {
@@ -240,9 +263,11 @@ export async function lookupLindas(compactUid: string, deps: LiveDeps): Promise<
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch {
+    breaker.recordFailure(); // délai dépassé ou requête non envoyée : échec du disjoncteur
     return { available: false, reason: "LINDAS request failed or timed out" };
   }
   if (res.status !== 200) {
+    if (res.status === 429 || res.status >= 500) breaker.recordFailure(res.status === 429 ? retryAfterMs(res) : undefined, res.status === 429);
     // Le corps d'une réponse non-200 n'est jamais lu : l'annuler libère la connexion sans
     // attendre son téléchargement complet (relecture finale du 06.10.2026). Seule l'erreur
     // de CETTE annulation est réduite au silence, jamais une erreur de la requête elle-même.
@@ -259,10 +284,13 @@ export async function lookupLindas(compactUid: string, deps: LiveDeps): Promise<
   } catch (err) {
     const name = err instanceof Error ? err.name : "";
     if (name === "TimeoutError" || name === "AbortError") {
+      breaker.recordFailure(); // délai dépassé pendant la lecture du corps
       return { available: false, reason: "LINDAS request timed out while reading the response" };
     }
     return { available: false, reason: "LINDAS response is not valid JSON" };
   }
+  // Statut 200 et corps lisible : la source a répondu, le disjoncteur se referme.
+  breaker.recordSuccess();
   if (!isSparqlResponse(body)) {
     return { available: false, reason: "unexpected LINDAS response shape" };
   }
