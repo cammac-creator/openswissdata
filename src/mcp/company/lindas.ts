@@ -39,6 +39,14 @@ const COMPACT_UID_RE = /^CHE\d{9}$/;
 const DEFAULT_TIMEOUT_MS = 6000;
 const CACHE_MAX = 2000;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+// Un IDE "non trouvé" (valide mais absent de LINDAS) est gardé en cache une heure seulement
+// (relecture finale du 06.10.2026) : une entreprise peut être inscrite entre deux lectures,
+// alors qu'un résultat trouvé change rarement assez vite pour justifier moins de 24 h.
+const NOT_FOUND_CACHE_TTL_MS = 60 * 60 * 1000;
+// Identifie ce client auprès de LINDAS (relecture finale du 06.10.2026) : les sources
+// publiques distinguent plus facilement un usage abusif d'un en-tête `user-agent` nommé que
+// d'un agent HTTP générique anonyme.
+const USER_AGENT = "OpenSwissData company_check (+https://www.openswissdata.com)";
 
 function toCanonical(compactUid: string): string {
   const digits = compactUid.slice(3);
@@ -155,7 +163,17 @@ function validLegalFormCode(code: string | null): string | null {
  *  Rend `null` si aucune des lignes n'a un `legalName` valide : ce champ est obligatoire dans
  *  `LindasCompany`, son absence totale indique une réponse malformée, pas une société sans nom.
  *  Suppose que `requiredField(r, "legalName")` n'a jamais rendu "invalid" sur `rows` (vérifié
- *  par l'appelant avant le regroupement, sur TOUTES les lignes de la réponse). */
+ *  par l'appelant avant le regroupement, sur TOUTES les lignes de la réponse).
+ *
+ *  Choix déterministe des champs (relecture finale du 06.10.2026) : un produit cartésien
+ *  d'OPTIONAL peut livrer plusieurs lignes pour la même société, chacune une combinaison
+ *  différente de valeurs. `street_address`, `postal_code`, `locality` et `canton` viennent
+ *  TOUJOURS de la MÊME ligne (jamais composés champ par champ depuis des lignes différentes,
+ *  ce qui pourrait associer la rue d'une ligne au NPA d'une autre) : la première ligne, par
+ *  ordre stable, qui porte une rue. `purpose` et `municipality` (les deux autres champs
+ *  simples qui pourraient varier d'une ligne à l'autre) sont choisis par tri des valeurs
+ *  rencontrées, qui rend le résultat indépendant de l'ordre d'arrivée des lignes SPARQL
+ *  (non garanti stable d'un appel à l'autre par le serveur LINDAS). */
 function mergeRows(companyUri: string, rows: Record<string, unknown>[]): LindasCompany | null {
   const legalName = rows.map((r) => optionalField(r, "legalName")).find((v): v is string => v !== undefined);
   if (legalName === undefined) return null;
@@ -164,6 +182,14 @@ function mergeRows(companyUri: string, rows: Record<string, unknown>[]): LindasC
   )].sort();
   const first = (field: string): string | null =>
     rows.map((r) => optionalField(r, field)).find((v): v is string => v !== undefined) ?? null;
+  /** Valeur la plus petite (tri lexical) parmi toutes les valeurs présentes de `field`. */
+  const sortedFirst = (field: string): string | null => {
+    const valeurs = rows.map((r) => optionalField(r, field)).filter((v): v is string => v !== undefined);
+    return valeurs.length > 0 ? [...valeurs].sort()[0] : null;
+  };
+  // Même ligne pour les quatre champs d'adresse : celle, par ordre stable, qui a une rue.
+  const ligneAdresse = rows.find((r) => optionalField(r, "street") !== undefined);
+  const champAdresse = (field: string): string | null => (ligneAdresse ? optionalField(ligneAdresse, field) ?? null : null);
   return {
     legal_name: legalName,
     other_names: otherNames,
@@ -173,13 +199,13 @@ function mergeRows(companyUri: string, rows: Record<string, unknown>[]): LindasC
     legal_form_code: validLegalFormCode(first("legalFormCode")) ?? legalFormCodeFromUri(first("legalForm")),
     legal_form_label_fr: first("legalFormLabelFr"),
     legal_form_label_de: first("legalFormLabelDe"),
-    municipality: first("municipalityName"),
+    municipality: sortedFirst("municipalityName"),
     municipality_bfs_id: first("municipalityId"),
-    canton: first("region"),
-    street_address: first("street"),
-    postal_code: first("postalCode"),
-    locality: first("locality"),
-    purpose: first("desc"),
+    canton: champAdresse("region"),
+    street_address: champAdresse("street"),
+    postal_code: champAdresse("postalCode"),
+    locality: champAdresse("locality"),
+    purpose: sortedFirst("desc"),
     ch_id: first("chid"),
     register_uri: companyUri,
   };
@@ -208,6 +234,7 @@ export async function lookupLindas(compactUid: string, deps: LiveDeps): Promise<
       headers: {
         "content-type": "application/sparql-query",
         accept: "application/sparql-results+json",
+        "user-agent": USER_AGENT,
       },
       body: buildQuery(compactUid),
       signal: AbortSignal.timeout(timeoutMs),
@@ -216,6 +243,14 @@ export async function lookupLindas(compactUid: string, deps: LiveDeps): Promise<
     return { available: false, reason: "LINDAS request failed or timed out" };
   }
   if (res.status !== 200) {
+    // Le corps d'une réponse non-200 n'est jamais lu : l'annuler libère la connexion sans
+    // attendre son téléchargement complet (relecture finale du 06.10.2026). Seule l'erreur
+    // de CETTE annulation est réduite au silence, jamais une erreur de la requête elle-même.
+    try {
+      await res.body?.cancel();
+    } catch {
+      // volontairement muet : l'annulation du corps peut échouer sans conséquence.
+    }
     return { available: false, reason: `LINDAS responded with HTTP ${res.status}` };
   }
   let body: unknown;
@@ -236,7 +271,7 @@ export async function lookupLindas(compactUid: string, deps: LiveDeps): Promise<
   const rawRows = body.results.bindings;
   if (rawRows.length === 0) {
     const result: Part<LindasCompany> = { available: true, retrieved_at, found: false, data: null };
-    cache.set(cacheKey, result);
+    cache.set(cacheKey, result, NOT_FOUND_CACHE_TTL_MS); // "non trouvé" : 1h, pas 24h
     return cache.get(cacheKey)!; // toujours la valeur figée, y compris au tout premier appel
   }
 

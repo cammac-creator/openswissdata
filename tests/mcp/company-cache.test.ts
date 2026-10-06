@@ -41,4 +41,18 @@ describe("TtlCache", () => {
     original.legal_name = "modifié avant écriture";
     expect(cache.get("CHE-103.137.179")!.legal_name).toBe("AXA Leben AG");
   });
+
+  it("`set` accepte un `ttlMs` par entrée, distinct de la durée par défaut du cache", () => {
+    let horloge = 0;
+    const cache = new TtlCache<string>({ max: 10, ttlMs: 24 * 60 * 60 * 1000, now: () => horloge });
+    cache.set("court", "A", 60 * 60 * 1000); // 1h, pour cette entrée seulement
+    cache.set("long", "B"); // ttl par défaut (24h)
+
+    horloge = 60 * 60 * 1000 + 1;
+    expect(cache.get("court")).toBeUndefined(); // expirée après 1h
+    expect(cache.get("long")).toBe("B"); // toujours là, bien avant les 24h par défaut
+
+    horloge = 24 * 60 * 60 * 1000 + 1;
+    expect(cache.get("long")).toBeUndefined(); // expirée après 24h
+  });
 });

@@ -77,10 +77,37 @@ describe("lookupLindas (registre du commerce en données liées, LINDAS)", () =>
     expect(result).toEqual({ available: false, reason: expect.any(String) });
   });
 
+  // Relecture finale du 06.10.2026, point (a) : le corps d'une réponse non-200 n'est jamais
+  // lu ; il doit être annulé pour libérer la connexion.
+  it("statut HTTP non-200 : le corps de la réponse est annulé", async () => {
+    const cancel = vi.fn().mockResolvedValue(undefined);
+    const reponse503 = { status: 503, body: { cancel } } as unknown as Response;
+    const fetchMock = vi.fn().mockResolvedValueOnce(reponse503);
+    const result = await lookupLindas("CHE103137179", deps(fetchMock));
+    expect(result.available).toBe(false);
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("statut HTTP non-200 : une erreur d'annulation du corps reste sans conséquence", async () => {
+    const cancel = vi.fn().mockRejectedValue(new Error("annulation impossible"));
+    const reponse503 = { status: 503, body: { cancel } } as unknown as Response;
+    const fetchMock = vi.fn().mockResolvedValueOnce(reponse503);
+    const result = await lookupLindas("CHE103137179", deps(fetchMock));
+    expect(result).toEqual({ available: false, reason: expect.any(String) }); // pas d'exception non attrapée
+  });
+
   it("JSON invalide : available false", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(brokenJsonResponse());
     const result = await lookupLindas("CHE103137179", deps(fetchMock));
     expect(result).toEqual({ available: false, reason: expect.any(String) });
+  });
+
+  // Relecture finale du 06.10.2026, point (b) : en-tête user-agent nommé sur la requête LINDAS.
+  it("la requête porte l'en-tête user-agent du service", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(LINDAS_AXA));
+    await lookupLindas("CHE103137179", deps(fetchMock));
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(init.headers).toMatchObject({ "user-agent": "OpenSwissData company_check (+https://www.openswissdata.com)" });
   });
 
   it("une entrée qui n'est pas la forme compacte validée est refusée sans appel réseau", async () => {
@@ -284,6 +311,93 @@ describe("lookupLindas (registre du commerce en données liées, LINDAS)", () =>
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(apres24h.available).toBe(true);
   });
+
+  // Relecture finale du 06.10.2026, point (c) : un "non trouvé" expire après 1h, pas 24h ;
+  // un "trouvé" reste en cache après cette même heure.
+  it("un IDE non trouvé expire après 1h ; un IDE trouvé reste en cache à ce moment-là", async () => {
+    const UNE_HEURE_MS = 60 * 60 * 1000;
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(LINDAS_VIDE))
+      .mockResolvedValueOnce(jsonResponse(LINDAS_AXA))
+      .mockResolvedValueOnce(jsonResponse(LINDAS_VIDE)); // redemandé après 1h : nouveau fetch
+
+    const nonTrouve1 = await lookupLindas("CHE123456009", deps(fetchMock));
+    expect(nonTrouve1.available).toBe(true);
+    const trouve1 = await lookupLindas("CHE103137179", deps(fetchMock));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    horloge += UNE_HEURE_MS + 1;
+    await lookupLindas("CHE123456009", deps(fetchMock)); // non trouvé : expiré, nouveau fetch
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const trouve2 = await lookupLindas("CHE103137179", deps(fetchMock)); // trouvé : encore en cache
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(trouve2).toEqual(trouve1);
+  });
+
+  // Relecture finale du 06.10.2026, point (d) : les champs d'adresse viennent tous de la
+  // même ligne, choisie de façon déterministe ; purpose et commune sont choisis par tri des
+  // valeurs, indépendamment de l'ordre d'arrivée des lignes SPARQL.
+  describe("choix déterministe des champs sur plusieurs lignes (point d, 06.10.2026)", () => {
+    it("rue, NPA, localité et canton viennent tous de la même ligne (jamais composés depuis des lignes différentes)", async () => {
+      const fetchMock = vi.fn(async () => jsonResponse({
+        results: {
+          bindings: [
+            {
+              company: { value: "https://register.ld.admin.ch/zefix/company/9" },
+              legalName: { value: "Société Multi-Lignes SA" },
+              // Ligne SANS rue : si les champs d'adresse étaient composés indépendamment,
+              // cette ligne pourrait quand même fournir une valeur si elle en portait une.
+            },
+            {
+              company: { value: "https://register.ld.admin.ch/zefix/company/9" },
+              legalName: { value: "Société Multi-Lignes SA" },
+              street: { value: "Rue A 1" },
+              postalCode: { value: "1000" },
+              locality: { value: "Ville A" },
+              region: { value: "VD" },
+            },
+          ],
+        },
+      }));
+      const result = await lookupLindas("CHE103137179", deps(fetchMock));
+      expect(result).toMatchObject({
+        available: true,
+        found: true,
+        data: { street_address: "Rue A 1", postal_code: "1000", locality: "Ville A", canton: "VD" },
+      });
+    });
+
+    it("purpose et commune sont choisis par tri des valeurs, pas par ordre d'arrivée", async () => {
+      const bindingsOrdreA = [
+        {
+          company: { value: "https://register.ld.admin.ch/zefix/company/10" },
+          legalName: { value: "Société Triée SA" },
+          desc: { value: "Z but en second par ordre d'arrivée" },
+          municipalityName: { value: "Zurich" },
+        },
+        {
+          company: { value: "https://register.ld.admin.ch/zefix/company/10" },
+          legalName: { value: "Société Triée SA" },
+          desc: { value: "A but en premier par tri" },
+          municipalityName: { value: "Berne" },
+        },
+      ];
+      const bindingsOrdreB = [...bindingsOrdreA].reverse(); // même lignes, ordre inverse
+
+      const fetchMockA = vi.fn(async () => jsonResponse({ results: { bindings: bindingsOrdreA } }));
+      const resultA = await lookupLindas("CHE103137179", deps(fetchMockA));
+
+      resetLindasCache(now);
+      const fetchMockB = vi.fn(async () => jsonResponse({ results: { bindings: bindingsOrdreB } }));
+      const resultB = await lookupLindas("CHE103137179", deps(fetchMockB));
+
+      expect(resultA).toEqual(resultB); // même résultat quel que soit l'ordre d'arrivée
+      expect(resultA).toMatchObject({
+        data: { purpose: "A but en premier par tri", municipality: "Berne" },
+      });
+    });
+  });
 });
 
 describe("lookupGleif (registre LEI public de GLEIF)", () => {
@@ -355,10 +469,37 @@ describe("lookupGleif (registre LEI public de GLEIF)", () => {
     expect(result).toEqual({ available: false, reason: expect.any(String) });
   });
 
+  // Relecture finale du 06.10.2026, point (a) : le corps d'une réponse non-200 n'est jamais
+  // lu ; il doit être annulé pour libérer la connexion.
+  it("statut HTTP non-200 : le corps de la réponse est annulé", async () => {
+    const cancel = vi.fn().mockResolvedValue(undefined);
+    const reponse503 = { status: 503, body: { cancel } } as unknown as Response;
+    const fetchMock = vi.fn().mockResolvedValueOnce(reponse503);
+    const result = await lookupGleif("CHE-103.137.179", deps(fetchMock));
+    expect(result.available).toBe(false);
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("statut HTTP non-200 : une erreur d'annulation du corps reste sans conséquence", async () => {
+    const cancel = vi.fn().mockRejectedValue(new Error("annulation impossible"));
+    const reponse503 = { status: 503, body: { cancel } } as unknown as Response;
+    const fetchMock = vi.fn().mockResolvedValueOnce(reponse503);
+    const result = await lookupGleif("CHE-103.137.179", deps(fetchMock));
+    expect(result).toEqual({ available: false, reason: expect.any(String) }); // pas d'exception non attrapée
+  });
+
   it("JSON invalide : available false", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(brokenJsonResponse());
     const result = await lookupGleif("CHE-103.137.179", deps(fetchMock));
     expect(result).toEqual({ available: false, reason: expect.any(String) });
+  });
+
+  // Relecture finale du 06.10.2026, point (b) : en-tête user-agent nommé sur la requête GLEIF.
+  it("la requête porte l'en-tête user-agent du service", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(GLEIF_AXA));
+    await lookupGleif("CHE-103.137.179", deps(fetchMock));
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(init.headers).toMatchObject({ "user-agent": "OpenSwissData company_check (+https://www.openswissdata.com)" });
   });
 
   it("une entrée qui n'est pas la forme canonique est refusée sans appel réseau", async () => {
@@ -519,5 +660,28 @@ describe("lookupGleif (registre LEI public de GLEIF)", () => {
     const apres24h = await lookupGleif("CHE-103.137.179", deps(fetchMock));
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(apres24h.available).toBe(true);
+  });
+
+  // Relecture finale du 06.10.2026, point (c) : un "non trouvé" expire après 1h, pas 24h ;
+  // un "trouvé" reste en cache après cette même heure.
+  it("un IDE non trouvé expire après 1h ; un IDE trouvé reste en cache à ce moment-là", async () => {
+    const UNE_HEURE_MS = 60 * 60 * 1000;
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(GLEIF_VIDE))
+      .mockResolvedValueOnce(jsonResponse(GLEIF_AXA))
+      .mockResolvedValueOnce(jsonResponse(GLEIF_VIDE)); // redemandé après 1h : nouveau fetch
+
+    const nonTrouve1 = await lookupGleif("CHE-123.456.009", deps(fetchMock));
+    expect(nonTrouve1.available).toBe(true);
+    const trouve1 = await lookupGleif("CHE-103.137.179", deps(fetchMock));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    horloge += UNE_HEURE_MS + 1;
+    const trouve2 = await lookupGleif("CHE-103.137.179", deps(fetchMock)); // trouvé : encore en cache
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(trouve2).toEqual(trouve1);
+    await lookupGleif("CHE-123.456.009", deps(fetchMock)); // non trouvé : expiré, nouveau fetch
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });

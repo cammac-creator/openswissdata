@@ -30,6 +30,14 @@ const CANONICAL_UID_RE = /^CHE-\d{3}\.\d{3}\.\d{3}$/;
 const DEFAULT_TIMEOUT_MS = 6000;
 const CACHE_MAX = 2000;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+// Un IDE "non trouvé" (valide mais absent de GLEIF) est gardé en cache une heure seulement
+// (relecture finale du 06.10.2026), par symétrie avec `lindas.ts` : un LEI peut être délivré
+// entre deux lectures, alors qu'un résultat trouvé change rarement assez vite pour justifier
+// moins de 24 h.
+const NOT_FOUND_CACHE_TTL_MS = 60 * 60 * 1000;
+// Identifie ce client auprès de GLEIF (relecture finale du 06.10.2026), par symétrie avec
+// `lindas.ts`.
+const USER_AGENT = "OpenSwissData company_check (+https://www.openswissdata.com)";
 
 // Envelope JSON:API : seule la forme de haut niveau (tableau `data`) est vérifiée ici.
 // Chaque élément peut être n'importe quoi (null, un objet sans `attributes`, des champs
@@ -130,13 +138,21 @@ export async function lookupGleif(uid: string, deps: LiveDeps): Promise<Part<Gle
   try {
     res = await deps.fetch(url.toString(), {
       method: "GET",
-      headers: { accept: "application/vnd.api+json" },
+      headers: { accept: "application/vnd.api+json", "user-agent": USER_AGENT },
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch {
     return { available: false, reason: "GLEIF request failed or timed out" };
   }
   if (res.status !== 200) {
+    // Le corps d'une réponse non-200 n'est jamais lu : l'annuler libère la connexion sans
+    // attendre son téléchargement complet (relecture finale du 06.10.2026). Seule l'erreur
+    // de CETTE annulation est réduite au silence, jamais une erreur de la requête elle-même.
+    try {
+      await res.body?.cancel();
+    } catch {
+      // volontairement muet : l'annulation du corps peut échouer sans conséquence.
+    }
     return { available: false, reason: `GLEIF responded with HTTP ${res.status}` };
   }
   let body: unknown;
@@ -157,7 +173,7 @@ export async function lookupGleif(uid: string, deps: LiveDeps): Promise<Part<Gle
   const rawItems = body.data;
   if (rawItems.length === 0) {
     const result: Part<GleifRecord[]> = { available: true, retrieved_at, found: false, data: null };
-    cache.set(cacheKey, result);
+    cache.set(cacheKey, result, NOT_FOUND_CACHE_TTL_MS); // "non trouvé" : 1h, pas 24h
     return cache.get(cacheKey)!; // toujours la valeur figée, y compris au tout premier appel
   }
 
@@ -187,6 +203,7 @@ export async function lookupGleif(uid: string, deps: LiveDeps): Promise<Part<Gle
   const result: Part<GleifRecord[]> = records.length === 0
     ? { available: true, retrieved_at, found: false, data: null }
     : { available: true, retrieved_at, found: true, data: records };
-  cache.set(cacheKey, result);
+  // "non trouvé" (après filtrage sur l'IDE demandé) : 1h, pas 24h, même règle que ci-dessus.
+  cache.set(cacheKey, result, records.length === 0 ? NOT_FOUND_CACHE_TTL_MS : undefined);
   return cache.get(cacheKey)!; // toujours la valeur figée, y compris au tout premier appel
 }

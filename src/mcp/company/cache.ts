@@ -9,6 +9,11 @@
  * récursif) avant de la stocker : `get` rend ensuite cette même valeur figée à tous les
  * appelants. Un appelant qui tente de la modifier échoue (ou ne modifie qu'une copie hors
  * du cache en mode non strict) ; la mutation ne peut jamais atteindre l'entrée interne.
+ *
+ * `set` accepte une durée de vie PAR ENTRÉE (relecture finale du 06.10.2026) : un appelant
+ * qui veut garder un résultat « non trouvé » moins longtemps qu'un résultat trouvé (LINDAS,
+ * GLEIF) passe un `ttlMs` plus court pour cette seule entrée, sans changer la durée par
+ * défaut du cache ni créer un second cache.
  */
 
 interface Entry<V> {
@@ -48,7 +53,8 @@ export class TtlCache<V> {
     return entry.value;
   }
 
-  set(k: string, v: V): void {
+  /** `ttlMs` : durée de vie de CETTE entrée seulement ; par défaut la durée du cache entier. */
+  set(k: string, v: V, ttlMs: number = this.ttlMs): void {
     // Borne le nombre d'entrées : au-delà de `max`, la plus ancienne (ordre d'insertion
     // du Map) part en premier. Une mise à jour d'une clé déjà présente ne compte pas comme
     // un ajout.
@@ -56,6 +62,6 @@ export class TtlCache<V> {
       const plusAncienne = this.store.keys().next().value;
       if (plusAncienne !== undefined) this.store.delete(plusAncienne);
     }
-    this.store.set(k, { value: deepFreeze(structuredClone(v)), expiresAt: this.now() + this.ttlMs });
+    this.store.set(k, { value: deepFreeze(structuredClone(v)), expiresAt: this.now() + ttlMs });
   }
 }
