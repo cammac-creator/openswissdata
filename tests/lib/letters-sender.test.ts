@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getDb, closeDb } from "../../src/lib/db.js";
-import { runLettersSender, readLettersSenderStatus, startLettersSender } from "../../src/lib/letters-sender.js";
+import { runLettersSender, readLettersSenderStatus, startLettersSender, readLettersPause, writeLettersPause } from "../../src/lib/letters-sender.js";
 import { scheduleSlot, toZurichParts } from "../../src/lib/letters.js";
 import type { EmailSendResult, PreparedEmail } from "../../src/lib/email.js";
 
@@ -73,6 +73,40 @@ function countReminders(parentId: string): number {
       n: number;
     }
   ).n;
+}
+
+/**
+ * Correction finale du 06.10.2026 (item 1) : une relance n'est créée NI réclamée sans un témoin
+ * `mail_watch` frais (`status==='ok'`, `last_success_at` à moins de 30 min de `at`). Les tests de
+ * relance d'avant cette correction posent ce témoin juste avant le passage qui en a besoin — jamais
+ * avant un passage qui ne fait qu'ANNULER une relance (l'annulation, elle, ne dépend pas de la veille).
+ */
+function seedFreshMailWatch(at: number): void {
+  getDb()
+    .prepare(
+      "INSERT INTO operation_checks(name,checked_at,details_json) VALUES('mail_watch',?,?) " +
+        "ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json",
+    )
+    .run(
+      at,
+      JSON.stringify({
+        version: 1,
+        checked_at: at,
+        status: "ok",
+        code: null,
+        http_status: null,
+        last_success_at: at,
+        last_alert_at: null,
+        matched: 0,
+        alerted: 0,
+        pending: 0,
+        total_alerted: 0,
+        domains: 0,
+        total_attached: 0,
+        seen: [],
+        headerFailures: {},
+      }),
+    );
 }
 
 type Overrides = {
@@ -400,6 +434,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       });
       const send = vi.fn();
 
+      seedFreshMailWatch(DUE_NOW);
       const status = await run({ send, now: () => DUE_NOW });
 
       expect(send).not.toHaveBeenCalled(); // la relance est créée `queued`, pas envoyée ce passage-ci
@@ -425,6 +460,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
         cc: "autre-boite@admin.ch",
         purpose: "Clarification des conditions",
       });
+      seedFreshMailWatch(DUE_NOW);
       await run({ send: vi.fn(), now: () => DUE_NOW });
       const reminder = getDb()
         .prepare("SELECT * FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
@@ -447,6 +483,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
 
     it("une réponse automatique n'arrête pas la relance", async () => {
       const id = insertLetter({ status: "sent", sent_at: SENT_AT, reply_at: SENT_AT + 1000, reply_kind: "auto" });
+      seedFreshMailWatch(DUE_NOW);
       await run({ send: vi.fn(), now: () => DUE_NOW });
       expect(countReminders(id)).toBe(1);
     });
@@ -468,6 +505,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
 
     it("une relance n'est jamais créée deux fois, même si la première est ensuite annulée", async () => {
       const id = insertLetter({ status: "sent", sent_at: SENT_AT });
+      seedFreshMailWatch(DUE_NOW);
       await run({ send: vi.fn(), now: () => DUE_NOW });
       expect(countReminders(id)).toBe(1);
 
@@ -487,6 +525,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       const parentId = insertLetter({ status: "sent", sent_at: SENT_AT });
 
       // La relance est créée, encore `queued` : aucun envoi à ce stade.
+      seedFreshMailWatch(DUE_NOW);
       await run({ send: vi.fn(), now: () => DUE_NOW });
       const reminder = getDb()
         .prepare("SELECT id, scheduled_at FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
@@ -508,6 +547,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
 
     it("une réponse automatique (pas humaine) sur la lettre d'origine n'annule pas la relance", async () => {
       const parentId = insertLetter({ status: "sent", sent_at: SENT_AT });
+      seedFreshMailWatch(DUE_NOW);
       await run({ send: vi.fn(), now: () => DUE_NOW });
       const reminder = getDb()
         .prepare("SELECT id, scheduled_at FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
@@ -516,6 +556,8 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       getDb().prepare("UPDATE institutional_letters SET reply_kind='auto', reply_at=? WHERE id=?").run(reminder.scheduled_at - 60_000, parentId);
 
       const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
+      // La RÉCLAMATION (envoi) de la relance exige aussi une veille fraîche au moment de l'envoi.
+      seedFreshMailWatch(reminder.scheduled_at + 30_000);
       await run({ send, now: () => reminder.scheduled_at + 30_000 });
 
       expect(send).toHaveBeenCalledTimes(1);
@@ -725,6 +767,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       insertLetter({ id: "occ-failed", status: "failed", scheduled_at: DAY_NOON - 30 * 86_400_000, attempted_at: DAY_NOON });
       const parentId = insertLetter({ id: "parent", status: "sent", sent_at: SENT_AT });
 
+      seedFreshMailWatch(DAY_NOON);
       await run({ send: vi.fn(), now: () => DAY_NOON });
 
       const reminder = getDb().prepare("SELECT scheduled_at FROM institutional_letters WHERE parent_id=?").get(parentId) as {
@@ -770,6 +813,123 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       expect(status?.failed).toBe(1);
       expect(status?.queued).toBe(0);
       expect(JSON.stringify(status)).not.toMatch(/@/); // jamais une adresse
+    });
+  });
+
+  describe("Correction finale du 06.10.2026 (item 1) : Telegram, pause manuelle, fraîcheur de la veille courrier", () => {
+    const SENT_AT = Date.UTC(2026, 9, 5, 12, 0);
+    const DUE_NOW = Date.UTC(2026, 9, 26, 12, 0); // 15 jours ouvrés après SENT_AT, comme plus haut.
+
+    it("Telegram absent : aucun envoi (lettre ou relance), témoin `not_configured`", async () => {
+      const queuedId = insertLetter({ scheduled_at: NOW - 1_000 });
+      const dueForReminder = insertLetter({ status: "sent", sent_at: SENT_AT });
+      seedFreshMailWatch(DUE_NOW);
+      // Le `beforeEach` du fichier pose un jeton Telegram valide par défaut : on le retire ici pour
+      // simuler précisément son absence.
+      delete process.env.OSD_VEILLE_TELEGRAM_TOKEN;
+      delete process.env.OSD_VEILLE_TELEGRAM_CHAT;
+      const send = vi.fn();
+      const status = await runLettersSender({
+        now: () => DUE_NOW,
+        rng: () => 0,
+        send,
+        fetch: telegramOk(),
+        hasApiKey: () => true,
+      });
+      expect(status.status).toBe("not_configured");
+      expect(status.code).toBe("telegram_not_configured");
+      expect(send).not.toHaveBeenCalled();
+      expect(getLetter(queuedId).status).toBe("queued"); // la lettre d'origine n'est pas non plus partie.
+      expect(countReminders(dueForReminder)).toBe(0);
+    });
+
+    it("Telegram invalide (format inattendu) : même garde, témoin `telegram_config_invalid`", async () => {
+      // `telegramConfig()` (mail-watch.js) exige un format précis ; une valeur mal formée vaut absence.
+      process.env.OSD_VEILLE_TELEGRAM_TOKEN = "pas-un-jeton-valide";
+      process.env.OSD_VEILLE_TELEGRAM_CHAT = "424242";
+      const send = vi.fn();
+      try {
+        const status = await runLettersSender({ now: () => NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+        expect(status.status).toBe("not_configured");
+        expect(status.code).toBe("telegram_config_invalid");
+        expect(send).not.toHaveBeenCalled();
+      } finally {
+        delete process.env.OSD_VEILLE_TELEGRAM_TOKEN;
+        delete process.env.OSD_VEILLE_TELEGRAM_CHAT;
+      }
+    });
+
+    it("pause manuelle : aucun envoi ni création de relance, témoin `paused` ; sans effet une fois levée", async () => {
+      const queuedId = insertLetter({ scheduled_at: NOW - 1_000 });
+      const dueForReminder = insertLetter({ status: "sent", sent_at: SENT_AT });
+      seedFreshMailWatch(DUE_NOW);
+      writeLettersPause(true, NOW);
+      expect(readLettersPause(getDb())).toMatchObject({ paused: true });
+
+      const send = vi.fn();
+      const status = await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(status.status).toBe("paused");
+      expect(send).not.toHaveBeenCalled();
+      expect(getLetter(queuedId).status).toBe("queued");
+      expect(countReminders(dueForReminder)).toBe(0);
+
+      writeLettersPause(false, DUE_NOW);
+      expect(readLettersPause(getDb())).toMatchObject({ paused: false });
+      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(countReminders(dueForReminder)).toBe(1); // la pause levée, le passage suivant crée bien la relance.
+    });
+
+    it("sans témoin `mail_watch` du tout, une relance n'est ni créée ni réclamée (elle attend)", async () => {
+      const dueForReminder = insertLetter({ status: "sent", sent_at: SENT_AT });
+      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: telegramOk(), hasApiKey: () => true });
+      expect(countReminders(dueForReminder)).toBe(0); // aucun témoin mail_watch : la relance attend.
+    });
+
+    it("une LETTRE D'ORIGINE part sans jamais dépendre de la veille courrier (aucun témoin posé)", async () => {
+      const originalId = insertLetter({ scheduled_at: NOW - 1_000 }); // lettre `letter`, jamais une relance
+      const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
+      await runLettersSender({ now: () => NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(getLetter(originalId).status).toBe("sent");
+    });
+
+    it("une relance créée alors que la veille était fraîche attend si la veille est redevenue périmée au moment de sa réclamation", async () => {
+      const parentId = insertLetter({ status: "sent", sent_at: SENT_AT });
+      seedFreshMailWatch(DUE_NOW);
+      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: telegramOk(), hasApiKey: () => true });
+      const reminder = getDb()
+        .prepare("SELECT id, scheduled_at FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
+        .get(parentId) as { id: string; scheduled_at: number };
+      expect(reminder).toBeDefined();
+
+      // 40 minutes plus tard (veille posée à DUE_NOW, fenêtre de fraîcheur 30 min), mais SANS retard
+      // sur son propre créneau (reprogrammée juste avant ce passage, cinq minutes d'écart réel) :
+      // seule la fraîcheur de la veille doit bloquer la réclamation, pas la lateness.
+      const claimAt = DUE_NOW + 43 * 60_000;
+      getDb().prepare("UPDATE institutional_letters SET scheduled_at=? WHERE id=?").run(claimAt - 5 * 60_000, reminder.id);
+      const send = vi.fn();
+      await runLettersSender({ now: () => claimAt, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(send).not.toHaveBeenCalled();
+      expect(getLetter(reminder.id).status).toBe("queued"); // elle attend, jamais annulée ni perdue pour autant.
+    });
+
+    it("une relance non réclamable (veille périmée) ne bloque jamais une AUTRE lettre due derrière elle dans la file", async () => {
+      const parentId = insertLetter({ id: "parent-stale", status: "sent", sent_at: SENT_AT });
+      seedFreshMailWatch(DUE_NOW);
+      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: telegramOk(), hasApiKey: () => true });
+      const reminder = getDb()
+        .prepare("SELECT id FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
+        .get(parentId) as { id: string };
+
+      const claimAt = DUE_NOW + 43 * 60_000; // veille (posée à DUE_NOW) périmée à cette heure-ci (>30 min).
+      getDb().prepare("UPDATE institutional_letters SET scheduled_at=? WHERE id=?").run(claimAt - 5 * 60_000, reminder.id);
+      // Une lettre D'ORIGINE, due un peu plus tard que la relance (toujours avant `claimAt`) : sans la
+      // correction, la relance bloquée (veille périmée) aurait empêché cette lettre de partir.
+      const laterOriginalId = insertLetter({ scheduled_at: claimAt - 2 * 60_000 });
+      const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
+      await runLettersSender({ now: () => claimAt, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(getLetter(laterOriginalId).status).toBe("sent");
     });
   });
 });

@@ -50,7 +50,10 @@ export function getDb(path?: string, options: { fileMustExist?: boolean } = {}):
   // Une trace ancienne ne reçoit pas rétroactivement une origine serveur supposée.
   ensureColumn(db, "events", "origin", "TEXT NOT NULL DEFAULT 'legacy' CHECK (origin IN ('legacy','server','client'))");
   ensureColumn(db, "download_tokens", "activity_id", "INTEGER REFERENCES download_activity(id) ON DELETE SET NULL");
-  // institutional_letters a déjà été livrée (tâche 1, 06.10) sans cette colonne (correction I3/B).
+  // Garde-fou idempotent seulement : `attempted_at` fait déjà partie du CREATE TABLE ci-dessus
+  // (schema.sql) depuis l'origine de cette table, jamais encore en production. Cet appel ne joue
+  // un rôle que pour une base créée avec une version plus ancienne de schema.sql ; sans effet sur
+  // un schéma neuf, qui a déjà la colonne.
   ensureColumn(db, "institutional_letters", "attempted_at", "INTEGER");
   db.exec("CREATE INDEX IF NOT EXISTS idx_download_tokens_activity ON download_tokens(activity_id)");
   migrateOrderRights(db);

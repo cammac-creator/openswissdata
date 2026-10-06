@@ -450,8 +450,10 @@ CREATE INDEX IF NOT EXISTS idx_checkout_request_limits_expiry ON checkout_reques
 -- Lettres institutionnelles (décision du 06.10.2026, plan « correspondance automatique »,
 -- tâche 1) : demandes de données ou d'autorisation déposées par l'exploitant vers des
 -- domaines institutionnels fermés (voir src/lib/letters.ts), planifiées en heures de
--- bureau suisses. Aucun corps de réponse ici (reply_extract est un extrait de 400
--- caractères, comme la veille courrier) ; aucun worker démarré par cette table seule.
+-- bureau suisses. `reply_extract` reste TOUJOURS NULL (décision du 06.10, tâche 3) :
+-- jamais d'extrait d'une réponse d'autorité, contrairement à la veille courrier
+-- (mail-watch.ts) qui en garde un pour les trois organismes officiels. Aucun worker
+-- démarré par cette table seule.
 CREATE TABLE IF NOT EXISTS institutional_letters (
   id TEXT PRIMARY KEY,
   kind TEXT NOT NULL CHECK(kind IN ('letter','reminder')),
@@ -475,8 +477,11 @@ CREATE TABLE IF NOT EXISTS institutional_letters (
   reply_at INTEGER NULL,
   reply_from TEXT NULL,
   reply_subject TEXT NULL,
+  -- Toujours NULL : jamais d'extrait d'une réponse d'autorité (décision du 06.10, tâche 3).
   reply_extract TEXT NULL,
-  reply_kind TEXT NULL CHECK(reply_kind IS NULL OR reply_kind IN ('human','auto')),
+  -- `unverified` ajouté par la correction finale du 06.10.2026 : domaine et objet correspondent,
+  -- mais ni DKIM ni DMARC alignés n'ont pu être vérifiés (voir mail-watch.ts, classifyReplyKind).
+  reply_kind TEXT NULL CHECK(reply_kind IS NULL OR reply_kind IN ('human','auto','unverified')),
   reply_processed_at INTEGER NULL,
   created_at INTEGER NOT NULL
 );

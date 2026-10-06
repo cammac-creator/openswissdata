@@ -230,6 +230,16 @@ describe("routes des lettres institutionnelles (/api/admin/letters)", () => {
       expect(injected.status).toBe(400);
     });
 
+    it("refuse un objet trop court (< 15 caractères, correction finale du 06.10)", async () => {
+      const app = buildApp();
+      const res = await app.request("/", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ ...VALID_BODY, subject: "Trop court" }), // 10 caractères
+      });
+      expect(res.status).toBe(400);
+    });
+
     it("refuse un JSON invalide", async () => {
       const app = buildApp();
       const res = await app.request("/", {
@@ -385,6 +395,138 @@ describe("routes des lettres institutionnelles (/api/admin/letters)", () => {
       const app = buildApp();
       const res = await app.request("/does-not-exist/processed", { method: "POST", headers: { "x-admin-secret": SECRET } });
       expect(res.status).toBe(404);
+    });
+  });
+
+  describe("POST /:id/reply (correction finale du 06.10.2026, item 4 : marquage manuel)", () => {
+    it("marque human, calcule le domaine du destinataire, arrête la relance, et réinitialise reply_processed_at", async () => {
+      const id = insertLetter({
+        status: "sent",
+        to_address: "sanctions@seco.admin.ch",
+        reply_kind: "auto",
+        reply_processed_at: Date.now(),
+      });
+      const t0 = Date.now() + 1000;
+      const app = buildApp({ now: () => t0 });
+      const res = await app.request(`/${id}/reply`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ kind: "human" }),
+      });
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ ok: true, reply_kind: "human" });
+      const row = getDb().prepare("SELECT reply_kind, reply_at, reply_from, reply_subject, reply_processed_at FROM institutional_letters WHERE id=?").get(id) as Record<string, unknown>;
+      expect(row.reply_kind).toBe("human");
+      expect(row.reply_at).toBe(t0);
+      expect(row.reply_from).toBe("seco.admin.ch");
+      expect(row.reply_subject).toBe("marqué manuellement");
+      expect(row.reply_processed_at).toBeNull(); // auto→human : à revoir, même marqué à la main.
+    });
+
+    it("accepte aussi une lettre `failed` (envoi incertain, mais une vraie réponse a pu arriver)", async () => {
+      const id = insertLetter({ status: "failed", to_address: "x@bj.admin.ch" });
+      const app = buildApp();
+      const res = await app.request(`/${id}/reply`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ kind: "human" }),
+      });
+      expect(res.status).toBe(200);
+    });
+
+    it("déjà `human` : 200 sans rien changer (ne jamais écraser une vraie réponse par le texte générique)", async () => {
+      const id = insertLetter({ status: "sent", reply_kind: "human", reply_at: 12345, reply_processed_at: 12345 });
+      getDb().prepare("UPDATE institutional_letters SET reply_subject='Vraie réponse de l’autorité', reply_from='seco.admin.ch' WHERE id=?").run(id);
+      const app = buildApp({ now: () => 999_999 });
+      const res = await app.request(`/${id}/reply`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ kind: "human" }),
+      });
+      expect(res.status).toBe(200);
+      const row = getDb().prepare("SELECT reply_at, reply_subject, reply_processed_at FROM institutional_letters WHERE id=?").get(id) as Record<string, unknown>;
+      expect(row.reply_at).toBe(12345);
+      expect(row.reply_subject).toBe("Vraie réponse de l’autorité");
+      expect(row.reply_processed_at).toBe(12345);
+    });
+
+    it("409 sur une lettre encore `queued` (jamais tentée) ; 404 sur un identifiant inconnu", async () => {
+      const id = insertLetter({ status: "queued" });
+      const app = buildApp();
+      const res = await app.request(`/${id}/reply`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ kind: "human" }),
+      });
+      expect(res.status).toBe(409);
+
+      const res404 = await app.request("/does-not-exist/reply", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ kind: "human" }),
+      });
+      expect(res404.status).toBe(404);
+    });
+
+    it("refuse un corps invalide (kind absent, ou différent de human)", async () => {
+      const id = insertLetter({ status: "sent" });
+      const app = buildApp();
+      const bad1 = await app.request(`/${id}/reply`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({}),
+      });
+      expect(bad1.status).toBe(400);
+      const bad2 = await app.request(`/${id}/reply`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ kind: "auto" }),
+      });
+      expect(bad2.status).toBe(400);
+    });
+
+    it("401 sans le secret d'administration", async () => {
+      const id = insertLetter({ status: "sent" });
+      const app = buildApp();
+      const res = await app.request(`/${id}/reply`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ kind: "human" }),
+      });
+      expect(res.status).toBe(401);
+    });
+  });
+
+  describe("POST/GET /pause (correction finale du 06.10.2026, item 4)", () => {
+    it("inactive par défaut ; se pose et se lit", async () => {
+      const app = buildApp();
+      const initial = await app.request("/pause", { headers: { "x-admin-secret": SECRET } });
+      expect(await initial.json()).toMatchObject({ paused: false });
+
+      const t0 = 1_700_000_000_000;
+      const appAt = buildApp({ now: () => t0 });
+      const set = await appAt.request("/pause", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ paused: true }),
+      });
+      expect(set.status).toBe(200);
+      expect(await set.json()).toEqual({ ok: true, paused: true });
+
+      const get = await app.request("/pause", { headers: { "x-admin-secret": SECRET } });
+      expect(await get.json()).toEqual({ paused: true, updated_at: t0 });
+    });
+
+    it("401 sans le secret ; 400 sur un corps invalide", async () => {
+      const app = buildApp();
+      const noAuth = await app.request("/pause", { headers: { "content-type": "application/json" } });
+      expect(noAuth.status).toBe(401);
+      const badBody = await app.request("/pause", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ paused: "oui" }),
+      });
+      expect(badBody.status).toBe(400);
     });
   });
 });

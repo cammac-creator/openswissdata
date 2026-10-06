@@ -29,9 +29,15 @@ import {
 // même qu'ils soient appelés. L'accès en propriété, résolu à l'appel, n'a pas ce problème.
 import * as emailLib from "./email.js";
 import type { PreparedEmail, EmailSendResult } from "./email.js";
-import { telegramConfig, sendTelegram } from "./mail-watch.js";
+import { telegramConfig, sendTelegram, readMailWatchStatus } from "./mail-watch.js";
 
 const CHECK = "letters";
+const PAUSE_CHECK = "letters_pause";
+// Correction finale du 06.10.2026 (relecture Opus, item 1) : une relance ne peut être CRÉÉE ni
+// RÉCLAMÉE (envoyée) que si la veille courrier (mail_watch) est fraîche — sinon elle pourrait partir
+// (ou être créée inutilement) alors qu'une réponse humaine est déjà arrivée mais pas encore lue par
+// la veille. N'affecte jamais une lettre `letter` d'origine, seulement les relances.
+const MAIL_WATCH_FRESHNESS_MS = 30 * 60_000;
 const START_DELAY = 90_000;
 const INTERVAL = 60_000;
 // Délai maximal que `stopLettersSender()` attend la fin d'un passage en cours (correction I4e).
@@ -54,7 +60,7 @@ const FALLBACK_SIGNATURE = "Meilleures salutations\n\nClaude-Alain Martin\nOpenS
 
 export type LettersSenderStatus = {
   checked_at: number;
-  status: "ok" | "not_configured" | "error";
+  status: "ok" | "not_configured" | "paused" | "error";
   code: string | null;
   /** Lettres encore en file au moment de ce passage (snapshot, pas cumulé). */
   queued: number;
@@ -110,7 +116,8 @@ function readState(db: Database.Database): State | null {
     return null;
   }
   if (!raw || typeof raw !== "object") return null;
-  const status = raw.status === "ok" || raw.status === "not_configured" || raw.status === "error" ? raw.status : "error";
+  const status =
+    raw.status === "ok" || raw.status === "not_configured" || raw.status === "paused" || raw.status === "error" ? raw.status : "error";
   const num = (v: unknown) => (Number.isSafeInteger(v) && (v as number) >= 0 ? (v as number) : 0);
   const stamp = (v: unknown) => (Number.isSafeInteger(v) && (v as number) > 0 ? (v as number) : null);
   return {
@@ -150,6 +157,45 @@ export function readLettersSenderStatus(db: Database.Database = getDb()): Letter
 function countStatus(db: Database.Database, status: LetterStatus): number {
   const row = db.prepare("SELECT COUNT(*) AS n FROM institutional_letters WHERE status=?").get(status) as { n: number };
   return row.n;
+}
+
+// --- Pause manuelle (correction finale du 06.10.2026, item 4) ----------------
+// Stockée dans `operation_checks` (jamais une nouvelle table) : lue par l'expéditeur à CHAQUE
+// passage. En pause, rien n'est réclamé ni créé (même garde-fou qu'une clé Resend absente).
+
+export type LettersPause = { paused: boolean; updated_at: number | null };
+
+/** Lue par `POST/GET /api/admin/letters/pause` (admin-letters.ts) et par l'expéditeur lui-même. */
+export function readLettersPause(db: Database.Database = getDb()): LettersPause {
+  const row = db.prepare("SELECT checked_at, details_json FROM operation_checks WHERE name=?").get(PAUSE_CHECK) as
+    | { checked_at: number; details_json: string }
+    | undefined;
+  if (!row) return { paused: false, updated_at: null };
+  try {
+    const raw = JSON.parse(row.details_json) as { paused?: unknown };
+    return { paused: raw.paused === true, updated_at: row.checked_at };
+  } catch {
+    return { paused: false, updated_at: null };
+  }
+}
+
+/** Écrite seulement par `POST /api/admin/letters/pause` (admin-letters.ts), jamais par l'expéditeur. */
+export function writeLettersPause(paused: boolean, now: number, db: Database.Database = getDb()): void {
+  db.prepare(
+    "INSERT INTO operation_checks(name,checked_at,details_json) VALUES(?,?,?) " +
+      "ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json",
+  ).run(PAUSE_CHECK, now, JSON.stringify({ paused }));
+}
+
+/**
+ * Veille courrier « fraîche » : dernier passage réussi (`status==='ok'`) il y a moins de 30 minutes.
+ * Sans elle, une réponse humaine pourrait être arrivée sans que la veille l'ait encore lue — une
+ * relance ne doit alors ni être créée, ni être réclamée (envoyée). N'affecte jamais une lettre
+ * `letter` d'origine, seulement les relances (voir `claimOrReschedule`, `findReminderCandidates`).
+ */
+function isMailWatchFresh(db: Database.Database, now: number): boolean {
+  const status = readMailWatchStatus(db);
+  return !!status && status.status === "ok" && status.last_success_at !== null && now - status.last_success_at < MAIL_WATCH_FRESHNESS_MS;
 }
 
 // --- Domaine (pour les messages Telegram, jamais l'adresse) ----------------
@@ -341,70 +387,82 @@ function occupiedSlots(db: Database.Database, excludeId?: string): number[] {
 }
 
 /**
- * Prend la plus ancienne lettre `queued` dont `scheduled_at <= now`.
+ * Parcourt les lettres `queued` dont `scheduled_at <= now`, de la plus ancienne à la plus récente,
+ * et agit sur la PREMIÈRE pour laquelle une action s'applique (au plus une lettre touchée par
+ * passage, comme avant) :
  *
- * Une relance (`kind='reminder'`) dont la lettre d'origine a depuis reçu une réponse humaine est
- * annulée sans jamais être envoyée (correction I1, 06.10) : une relance restée en file peut devenir
- * obsolète entre sa création et sa réclamation.
- *
- * Sinon, en retard d'au moins dix minutes → replanifiée par `scheduleSlot` (aucun envoi en retard).
- * Sinon → deux garde-fous avant d'envoyer MAINTENANT (corrections I2b et I3, 06.10) : un envoi
- * tentée trop récemment (`attempted_at` de n'importe quelle autre lettre, moins de douze minutes réelles, l'écart que `scheduleSlot` garantit sur
- * `scheduled_at` mais qu'un passage en retard qui rattrape plusieurs lettres pourrait comprimer
- * dans le temps réel) bloque tout envoi ce passage-ci ; et `now` ET `now + 60 s` doivent rester dans
- * le créneau d'envoi (un envoi qui prendrait jusqu'à une minute ne doit, lui non plus, jamais finir
- * hors créneau). Si aucun des deux ne bloque → passage atomique en `sending` avec bail de dix
- * minutes.
+ * - Une relance (`kind='reminder'`) dont la lettre d'origine a depuis reçu une réponse `human` OU
+ *   `unverified` est annulée sans jamais être envoyée (correction I1, 06.10, étendue à `unverified`
+ *   le 06.10 final) — que la veille courrier soit fraîche ou non : annuler n'est pas réclamer.
+ * - Sinon, en retard d'au moins dix minutes → replanifiée par `scheduleSlot` (aucun envoi en retard),
+ *   là aussi sans condition de fraîcheur (ce n'est pas un envoi).
+ * - Sinon, pour une RELANCE seulement : si la veille courrier n'est pas fraîche (`mailWatchFresh`
+ *   faux), elle ATTEND — on passe à la lettre suivante dans la file SANS la bloquer (correction
+ *   finale du 06.10, item 1) : sinon une relance non réclamable bloquerait indéfiniment toute AUTRE
+ *   lettre derrière elle dans la file.
+ * - Sinon → deux garde-fous avant d'envoyer MAINTENANT (corrections I2b et I3, 06.10) : un envoi
+ *   tenté trop récemment (`attempted_at` de n'importe quelle autre lettre, moins de douze minutes
+ *   réelles) bloque tout envoi ce passage-ci ; et `now` ET `now + 60 s` doivent rester dans le
+ *   créneau d'envoi. Si aucun des deux ne bloque → passage atomique en `sending` avec bail de dix
+ *   minutes.
  *
  * Transaction IMMEDIATE : deux passages concurrents ne peuvent jamais agir sur la même lettre (le
- * second trouve `changes !== 1` et ne fait rien).
+ * second trouve `changes !== 1` et abandonne cette ligne, sans jamais répéter une action déjà faite).
  */
-function claimOrReschedule(db: Database.Database, now: number, rng: () => number): ClaimResult {
+function claimOrReschedule(db: Database.Database, now: number, rng: () => number, mailWatchFresh: boolean): ClaimResult {
   const txn = db.transaction((): ClaimResult => {
-    const candidate = db
+    const candidates = db
       .prepare(
         "SELECT * FROM institutional_letters WHERE status='queued' AND scheduled_at<=? " +
-          "ORDER BY scheduled_at ASC, created_at ASC, id ASC LIMIT 1",
+          "ORDER BY scheduled_at ASC, created_at ASC, id ASC",
       )
-      .get(now) as InstitutionalLetter | undefined;
-    if (!candidate) return { action: "none" };
+      .all(now) as InstitutionalLetter[];
 
-    if (candidate.kind === "reminder" && candidate.parent_id) {
-      const parent = db.prepare("SELECT reply_kind FROM institutional_letters WHERE id=?").get(candidate.parent_id) as
-        | { reply_kind: string | null }
-        | undefined;
-      if (parent?.reply_kind === "human") {
-        const result = db
-          .prepare("UPDATE institutional_letters SET status='cancelled' WHERE id=? AND status='queued'")
-          .run(candidate.id);
-        if (result.changes !== 1) return { action: "none" }; // concurrence : déjà traitée ailleurs
-        return { action: "cancelled" };
+    for (const candidate of candidates) {
+      if (candidate.kind === "reminder" && candidate.parent_id) {
+        const parent = db.prepare("SELECT reply_kind FROM institutional_letters WHERE id=?").get(candidate.parent_id) as
+          | { reply_kind: string | null }
+          | undefined;
+        if (parent?.reply_kind === "human" || parent?.reply_kind === "unverified") {
+          const result = db
+            .prepare("UPDATE institutional_letters SET status='cancelled' WHERE id=? AND status='queued'")
+            .run(candidate.id);
+          if (result.changes === 1) return { action: "cancelled" };
+          continue; // concurrence : déjà traitée ailleurs, regarder la lettre suivante
+        }
       }
-    }
 
-    const lateMs = now - candidate.scheduled_at;
-    if (lateMs >= LATE_THRESHOLD_MS) {
-      const existing = occupiedSlots(db, candidate.id);
-      const newScheduledAt = scheduleSlot(now, existing, rng);
+      const lateMs = now - candidate.scheduled_at;
+      if (lateMs >= LATE_THRESHOLD_MS) {
+        const existing = occupiedSlots(db, candidate.id);
+        const newScheduledAt = scheduleSlot(now, existing, rng);
+        const result = db
+          .prepare("UPDATE institutional_letters SET scheduled_at=? WHERE id=? AND status='queued'")
+          .run(newScheduledAt, candidate.id);
+        if (result.changes !== 1) return { action: "none" }; // concurrence : déjà traitée ailleurs
+        return { action: "rescheduled" };
+      }
+
+      // Une relance n'est RÉCLAMÉE (envoyée) que si la veille courrier est fraîche : sinon elle
+      // attend, sans jamais bloquer une AUTRE lettre plus bas dans la file.
+      if (candidate.kind === "reminder" && !mailWatchFresh) continue;
+
+      // Pas encore en retard : deux garde-fous avant d'envoyer maintenant (I2b, I3) — globaux (ne
+      // dépendent pas de la lettre), donc un échec ici vaut pour tout le passage, pas seulement
+      // cette ligne.
+      if (recentlyAttemptedWithin(db, now, MIN_REAL_GAP_MS, candidate.id)) return { action: "none" };
+      if (!(isSendableNow(now) && isSendableNow(now + 60_000))) return { action: "none" };
+
+      const leaseUntil = now + LEASE_MS;
       const result = db
-        .prepare("UPDATE institutional_letters SET scheduled_at=? WHERE id=? AND status='queued'")
-        .run(newScheduledAt, candidate.id);
-      if (result.changes !== 1) return { action: "none" }; // concurrence : déjà traitée ailleurs
-      return { action: "rescheduled" };
+        .prepare(
+          "UPDATE institutional_letters SET status='sending', lease_until=?, attempted_at=? WHERE id=? AND status='queued'",
+        )
+        .run(leaseUntil, now, candidate.id);
+      if (result.changes !== 1) return { action: "none" }; // concurrence : déjà réclamée ailleurs
+      return { action: "claimed", letter: { ...candidate, status: "sending", lease_until: leaseUntil, attempted_at: now } };
     }
-
-    // Pas encore en retard : deux garde-fous avant d'envoyer maintenant (I2b, I3).
-    if (recentlyAttemptedWithin(db, now, MIN_REAL_GAP_MS, candidate.id)) return { action: "none" };
-    if (!(isSendableNow(now) && isSendableNow(now + 60_000))) return { action: "none" };
-
-    const leaseUntil = now + LEASE_MS;
-    const result = db
-      .prepare(
-        "UPDATE institutional_letters SET status='sending', lease_until=?, attempted_at=? WHERE id=? AND status='queued'",
-      )
-      .run(leaseUntil, now, candidate.id);
-    if (result.changes !== 1) return { action: "none" }; // concurrence : déjà réclamée ailleurs
-    return { action: "claimed", letter: { ...candidate, status: "sending", lease_until: leaseUntil, attempted_at: now } };
+    return { action: "none" };
   });
   return txn.immediate();
 }
@@ -438,16 +496,18 @@ function markRetryQueued(db: Database.Database, id: string, attempts: number): v
 // --- Relance automatique -----------------------------------------------------
 
 /**
- * Lettres `letter` envoyées, sans réponse humaine rattachée et sans relance déjà créée (quel que
- * soit son statut, y compris `cancelled` : jamais de seconde relance). Jamais de relance d'une
- * relance (`kind='letter'` seulement).
+ * Lettres `letter` envoyées, sans réponse `human` NI `unverified` rattachée (correction finale du
+ * 06.10 : une réponse `unverified` arrête la relance comme une `human`, puisqu'elle a déjà le bon
+ * domaine et le bon objet — seule son authenticité reste à vérifier, pas sa pertinence), et sans
+ * relance déjà créée (quel que soit son statut, y compris `cancelled` : jamais de seconde relance).
+ * Jamais de relance d'une relance (`kind='letter'` seulement).
  */
 function findReminderCandidates(db: Database.Database): InstitutionalLetter[] {
   return db
     .prepare(
       `SELECT l.* FROM institutional_letters l
        WHERE l.kind='letter' AND l.status='sent' AND l.sent_at IS NOT NULL
-         AND (l.reply_kind IS NULL OR l.reply_kind != 'human')
+         AND (l.reply_kind IS NULL OR l.reply_kind NOT IN ('human','unverified'))
          AND NOT EXISTS (SELECT 1 FROM institutional_letters r WHERE r.parent_id = l.id AND r.kind='reminder')
        ORDER BY l.sent_at ASC`,
     )
@@ -520,6 +580,23 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
     return finish("not_configured", "no_api_key", previous?.last_run_at ?? null);
   }
 
+  // Telegram absent ou invalide : aucun envoi, ni lettre ni relance (correction finale du 06.10,
+  // item 1) — avant la moindre écriture, comme pour la clé Resend ci-dessus. Claude-Alain doit être
+  // prévenu de chaque envoi ; sans Telegram opérationnel, rien ne part.
+  const telegramState = telegramConfig();
+  if (telegramState === "missing") {
+    return finish("not_configured", "telegram_not_configured", previous?.last_run_at ?? null);
+  }
+  if (telegramState === "invalid") {
+    return finish("not_configured", "telegram_config_invalid", previous?.last_run_at ?? null);
+  }
+
+  // Pause manuelle (`POST /api/admin/letters/pause`) : rien n'est réclamé ni créé, comme les deux
+  // gardes ci-dessus, avant la moindre écriture.
+  if (readLettersPause(db).paused) {
+    return finish("paused", "paused", previous?.last_run_at ?? null);
+  }
+
   try {
     // 1) Baux `sending` expirés : toujours `failed` directement (issue incertaine, correction I4b).
     //    Synchrone, aucun `await` avant la sélection suivante : pas de course avec le reste de ce
@@ -533,7 +610,7 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
     //    une lettre par passage, jamais la même lettre deux fois sous deux passages concurrents.
     //    Horloge relue ici (I2a), pas celle du début du passage.
     const claimNow = deps.now();
-    const claim = claimOrReschedule(db, claimNow, deps.rng);
+    const claim = claimOrReschedule(db, claimNow, deps.rng, isMailWatchFresh(db, claimNow));
     if (claim.action === "rescheduled") totalRescheduled++;
 
     if (claim.action === "claimed") {
@@ -595,11 +672,15 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
       }
     }
 
-    // 3) Relance automatique unique, 15 jours ouvrés après un envoi resté sans réponse humaine.
+    // 3) Relance automatique unique, 15 jours ouvrés après un envoi resté sans réponse humaine ni
+    //    unverified — seulement si la veille courrier est fraîche (correction finale du 06.10,
+    //    item 1) : sinon, une relance attend plutôt que de se créer sur une réponse pas encore lue.
     const reminderNow = deps.now();
-    for (const candidate of findReminderCandidates(db)) {
-      if (businessDaysSince(candidate.sent_at as number, reminderNow) < REMINDER_BUSINESS_DAYS) continue;
-      if (createReminder(db, candidate, reminderNow, deps.rng)) totalReminders++;
+    if (isMailWatchFresh(db, reminderNow)) {
+      for (const candidate of findReminderCandidates(db)) {
+        if (businessDaysSince(candidate.sent_at as number, reminderNow) < REMINDER_BUSINESS_DAYS) continue;
+        if (createReminder(db, candidate, reminderNow, deps.rng)) totalReminders++;
+      }
     }
 
     return finish("ok", null, passStartedAt);

@@ -10,6 +10,7 @@ import type Database from "better-sqlite3";
 import { getDb } from "../lib/db.js";
 import { constantTimeEqual } from "../lib/tokens.js";
 import { isAllowedRecipient, scheduleSlot, LETTER_STATUSES } from "../lib/letters.js";
+import { readLettersPause, writeLettersPause } from "../lib/letters-sender.js";
 
 // Pas de caractère de contrôle (ni retour à la ligne) : l'objet et le motif
 // deviendront un en-tête de mail (tâche 2) — bloque une injection d'en-tête.
@@ -19,11 +20,18 @@ const CreateLetterSchema = z
   .object({
     to: z.string().trim().min(3).max(320),
     cc: z.string().trim().min(3).max(320).optional(),
-    subject: z.string().trim().min(1).max(200).regex(NO_CONTROL_CHARS_RE),
+    // `min(15)` (correction finale du 06.10.2026, mineur) : un objet de moins de 15 caractères est
+    // presque toujours un gabarit oublié ou un essai, jamais une vraie demande à une autorité.
+    subject: z.string().trim().min(15).max(200).regex(NO_CONTROL_CHARS_RE),
     body: z.string().trim().min(1).max(8000),
     purpose: z.string().trim().min(1).max(200).regex(NO_CONTROL_CHARS_RE),
   })
   .strict();
+
+/** `POST /:id/reply` (correction finale du 06.10.2026, item 4) : marquage manuel d'une réponse humaine. */
+const ReplySchema = z.object({ kind: z.literal("human") }).strict();
+/** `POST /pause` (correction finale du 06.10.2026, item 4). */
+const PauseSchema = z.object({ paused: z.boolean() }).strict();
 
 const ListQuerySchema = z
   .object({
@@ -220,7 +228,66 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
     return c.json({ ok: true, reply_processed_at: row.reply_processed_at });
   });
 
+  /**
+   * POST /:id/reply `{ kind: "human" }` — marquage manuel d'une réponse humaine reçue hors de la
+   * boîte surveillée (ex. par téléphone), ou confirmation d'une réponse déjà vue ailleurs
+   * (correction finale du 06.10.2026, item 4). Arrête la relance comme un rattachement automatique
+   * (même `reply_kind`). 404 lettre inconnue ; 409 lettre pas encore `sent`/`failed` (jamais réclamée
+   * ou jamais tentée) ; déjà `human` : 200 sans rien changer — ne jamais écraser l'objet et la date
+   * d'une vraie réponse déjà rattachée par la veille courrier avec le texte générique ci-dessous.
+   */
+  route.post("/:id/reply", async (c) => {
+    const parsed = ReplySchema.safeParse(
+      await c.req.json().catch((error) => {
+        if (error instanceof SyntaxError) return null;
+        throw error;
+      }),
+    );
+    if (!parsed.success) return c.json({ error: "invalid_body" }, 400);
+
+    const id = c.req.param("id");
+    const database = db();
+    const letter = database
+      .prepare("SELECT status, to_address, reply_kind FROM institutional_letters WHERE id = ?")
+      .get(id) as { status: string; to_address: string; reply_kind: string | null } | undefined;
+    if (!letter) return c.json({ error: "not_found" }, 404);
+    if (letter.status !== "sent" && letter.status !== "failed") {
+      return c.json({ error: "not_sent", status: letter.status }, 409);
+    }
+    if (letter.reply_kind === "human") return c.json({ ok: true, reply_kind: "human" });
+
+    database
+      .prepare(
+        "UPDATE institutional_letters SET reply_at = ?, reply_from = ?, reply_subject = 'marqué manuellement', " +
+          "reply_kind = 'human', reply_processed_at = NULL WHERE id = ?",
+      )
+      .run(now(), domainOf(letter.to_address), id);
+    return c.json({ ok: true, reply_kind: "human" });
+  });
+
+  /**
+   * POST /pause `{ paused: boolean }` et GET /pause (correction finale du 06.10.2026, item 4) : lue
+   * par `letters-sender.ts` à chaque passage — en pause, rien n'est réclamé ni créé.
+   */
+  route.post("/pause", async (c) => {
+    const parsed = PauseSchema.safeParse(
+      await c.req.json().catch((error) => {
+        if (error instanceof SyntaxError) return null;
+        throw error;
+      }),
+    );
+    if (!parsed.success) return c.json({ error: "invalid_body" }, 400);
+    writeLettersPause(parsed.data.paused, now(), db());
+    return c.json({ ok: true, paused: parsed.data.paused });
+  });
+  route.get("/pause", (c) => c.json(readLettersPause(db())));
+
   return route;
+}
+
+/** Domaine (pour `reply_from`, jamais l'adresse), même convention que `mail-watch.ts`/`letters-sender.ts`. */
+function domainOf(address: string): string {
+  return address.slice(address.lastIndexOf("@") + 1).trim().toLowerCase();
 }
 
 export const adminLettersRoute = createAdminLettersRoute();

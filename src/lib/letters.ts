@@ -17,7 +17,11 @@ export type LetterKind = (typeof LETTER_KINDS)[number];
 export const LETTER_STATUSES = ["queued", "sending", "sent", "failed", "cancelled"] as const;
 export type LetterStatus = (typeof LETTER_STATUSES)[number];
 
-export const REPLY_KINDS = ["human", "auto"] as const;
+// `unverified` ajouté par la correction finale du 06.10.2026 : une réponse dont le domaine et l'objet
+// correspondent mais dont l'authenticité (DKIM/DMARC) n'a pas pu être vérifiée. Elle arrête la relance
+// comme `human`, mais n'écrase jamais une `human` déjà enregistrée (ordre de confiance dans
+// `mail-watch.ts` : auto < unverified < human).
+export const REPLY_KINDS = ["human", "auto", "unverified"] as const;
 export type ReplyKind = (typeof REPLY_KINDS)[number];
 
 export interface InstitutionalLetter {
