@@ -224,6 +224,23 @@ describe("lookupLindas (registre du commerce en données liées, LINDAS)", () =>
       expect(result).toMatchObject({ available: true, found: true, data: { legal_form_code: null } });
     });
 
+    it.each([
+      [" 0106", "https://ld.admin.ch/ech/97/legalforms/0101", "0101"],
+      ["106", undefined, null],
+      ["01060", undefined, null],
+      ["AG", "https://ld.admin.ch/ech/97/legalforms/0106", "0106"],
+    ])("code de forme lu directement %j mal formé : ignoré, repli sur l'URI (%s) → %j", async (code, uri, attendu) => {
+      const binding: Record<string, { value: string }> = {
+        company: { value: "https://register.ld.admin.ch/zefix/company/1" },
+        legalName: { value: "Société Code Atypique SA" },
+        legalFormCode: { value: code },
+      };
+      if (uri) binding.legalForm = { value: uri };
+      const fetchMock = vi.fn(async () => jsonResponse({ results: { bindings: [binding] } }));
+      const result = await lookupLindas("CHE103137179", deps(fetchMock));
+      expect(result).toMatchObject({ available: true, found: true, data: { legal_form_code: attendu } });
+    });
+
     it("une ligne sans URI mêlée à une ligne valide est simplement écartée, pas groupée en tête du tri", async () => {
       const fetchMock = vi.fn(async () => jsonResponse({
         results: {

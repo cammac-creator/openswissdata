@@ -224,7 +224,7 @@ export function buildCompanyFiche(
         found: false,
         facts: [],
         warning_list: "not_checkable_by_uid",
-        data_note: finmaDataNote,
+        data_note: "The FINMA copy of this service could not be read; no FINMA fact is given.",
         reason: parts.finma.reason,
       };
 
@@ -310,12 +310,14 @@ export async function companyCheck(
   let finma: FinmaAccess;
   let finmaVersion: string | null = null;
   try {
-    const rows = (deps.finma ?? getFinmaRegistry)();
-    finma = { available: true, rows };
-    finmaVersion = usingDefaultFinmaRegistry ? getFinmaVersion() : null;
-  } catch {
+    finma = { available: true, rows: (deps.finma ?? getFinmaRegistry)() };
+  } catch (err) {
+    // Trace pour l'exploitant (jamais renvoyée à l'appelant) : un registre FINMA illisible
+    // ne doit pas passer inaperçu, même si la fiche reste servie.
+    console.error("company_check: FINMA registry could not be read", err instanceof Error ? err.message : String(err));
     finma = { available: false, reason: "FINMA registry could not be read" };
   }
+  if (finma.available && usingDefaultFinmaRegistry) finmaVersion = getFinmaVersion();
   const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, now: deps.now });
   return { ok: true, fiche };
 }

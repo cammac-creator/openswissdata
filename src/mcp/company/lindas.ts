@@ -143,6 +143,14 @@ function legalFormCodeFromUri(uri: string | null): string | null {
   return LEGAL_FORM_URI_CODE_RE.exec(uri)?.[1] ?? null;
 }
 
+// Le code lu directement (`schema:identifier`) passe la même porte que celui de l'URI :
+// exactement quatre chiffres, sinon il est ignoré. Le filtre d'adresse de l'entreprise
+// individuelle reste ainsi fermé par défaut quelle que soit la forme reçue (relecture du 06.10).
+const LEGAL_FORM_CODE_RE = /^\d{4}$/;
+function validLegalFormCode(code: string | null): string | null {
+  return code !== null && LEGAL_FORM_CODE_RE.test(code) ? code : null;
+}
+
 /** Fusionne les lignes d'une même société (une ligne par combinaison d'OPTIONAL) en un seul objet.
  *  Rend `null` si aucune des lignes n'a un `legalName` valide : ce champ est obligatoire dans
  *  `LindasCompany`, son absence totale indique une réponse malformée, pas une société sans nom.
@@ -162,7 +170,7 @@ function mergeRows(companyUri: string, rows: Record<string, unknown>[]): LindasC
     // `||`, pas `??` : un `legalFormCode` présent mais vide ("") n'est pas exploitable non
     // plus, et doit aussi retomber sur le suffixe de l'URI (corrigé en revue, correction 1
     // du 06.10.2026).
-    legal_form_code: first("legalFormCode") || legalFormCodeFromUri(first("legalForm")),
+    legal_form_code: validLegalFormCode(first("legalFormCode")) ?? legalFormCodeFromUri(first("legalForm")),
     legal_form_label_fr: first("legalFormLabelFr"),
     legal_form_label_de: first("legalFormLabelDe"),
     municipality: first("municipalityName"),
