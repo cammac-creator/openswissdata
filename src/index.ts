@@ -23,6 +23,7 @@ import { accountRoute } from "./routes/account.js";
 import { downloadRoute, publicDownload } from "./routes/download.js";
 import { eventsRoute } from "./routes/events.js";
 import { mcpRoute } from "./routes/mcp/index.js";
+import { apiV1Route } from "./routes/api-v1.js";
 import { trackApiRequest, trackPageView } from "./lib/track.js";
 import { startMcpDataRefresh } from "./mcp/r2-refresh.js";
 import { loadEnv } from "./env.js";
@@ -248,6 +249,8 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   // --- API routes ---
   app.route("/api/health", healthRoute);
   app.route("/api/catalog", catalogRoute);
+  // Lecture seule, limitée par réseau, sans jeton (tâche osd.donnees, tâche B3).
+  app.route("/api/v1", apiV1Route);
   app.route("/api/admin", adminRoute);
   app.route("/api/admin/stats", adminStatsRoute);
   app.route("/api/admin/letters", adminLettersRoute);

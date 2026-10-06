@@ -1,0 +1,73 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenSwissData — public read-only API",
+    "version": "1.0.0",
+    "description": "Read-only JSON endpoints over the official localities and streets directories (swisstopo), the combined commune profile, the Swiss company fiche (company_check) and the public source registry. Free, no key, limited per network address. The same data is also available over MCP (see /mcp) without a key. Unofficial copies: binding decisions belong to the official sources named in each `sources` entry.",
+    "contact": { "url": "https://www.openswissdata.com/en/" }
+  },
+  "servers": [{ "url": "https://www.openswissdata.com" }],
+  "paths": {
+    "/api/v1/company/{uid}": {
+      "get": {
+        "summary": "Swiss company fiche by UID",
+        "description": "Same fiche as the MCP tool `company_check`: commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources and checks of the registered address against the official localities and streets directories. A `sources` array (id, publishing institution, licence, URL) is added next to the fiche. No score, no verdict. Does not say whether the company is still registered, and does not cover FOSC publications, SECO sanctions or officers.",
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^CHE-?\\d{3}\\.?\\d{3}\\.?\\d{3}$" },
+            "description": "Swiss UID (CHE-xxx.xxx.xxx)"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Company fiche", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "no-store" } } },
+          "400": { "description": "Invalid UID (bad format or invalid check digit)" },
+          "429": { "description": "Rate limit exceeded for this network address (60 requests/hour)", "headers": { "Retry-After": { "schema": { "type": "integer" } } } }
+        }
+      }
+    },
+    "/api/v1/localities": {
+      "get": {
+        "summary": "Official localities directory (swisstopo)",
+        "description": "Rows of the official swisstopo directory of localities (postal code, locality, municipality, canton), exactly one of the two query parameters required.",
+        "parameters": [
+          { "name": "postal_code", "in": "query", "schema": { "type": "string" }, "description": "4-digit Swiss postal code, e.g. 8400" },
+          { "name": "municipality_bfs_id", "in": "query", "schema": { "type": "string" }, "description": "Official BFS municipality number, e.g. 230" }
+        ],
+        "responses": {
+          "200": { "description": "Matching rows, directory edition and source", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "public, max-age=3600" } } },
+          "400": { "description": "Neither or both query parameters given" },
+          "503": { "description": "Directory not currently available on this service" },
+          "429": { "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /communes and /sources)" }
+        }
+      }
+    },
+    "/api/v1/communes/{bfs_id}": {
+      "get": {
+        "summary": "Commune profile (combined dataset)",
+        "description": "Name, canton, postal codes and localities (official localities directory), number of official streets (official streets directory) and FINMA-authorised entities exactly attached to this commune (same city and canton, matching a single commune — see `finma.matching`), each with its sources and directory editions. `finma.national_matching` gives the same rattachement counted nationally (matched/unmatched/ambiguous, numbers only) — most FINMA rows currently have no known canton, so a commune's own count reads against this national total. No score, no ranking between communes.",
+        "parameters": [
+          { "name": "bfs_id", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^\\d+$" }, "description": "Official BFS municipality number, e.g. 230" }
+        ],
+        "responses": {
+          "200": { "description": "Commune profile", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "public, max-age=3600" } } },
+          "400": { "description": "bfs_id is not a number" },
+          "404": { "description": "Commune not found in any loaded directory" },
+          "429": { "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities and /sources)" }
+        }
+      }
+    },
+    "/api/v1/sources": {
+      "get": {
+        "summary": "Public registry of sources served by the API and the MCP server",
+        "description": "Id, publishing institution, licence and URL of each public source, with the directory edition or data version when known. The TARES permission reference is never shown here (it names a person): TARES entries carry `licence: \"see the provenance file of the archive\"` instead.",
+        "responses": {
+          "200": { "description": "Source registry", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "public, max-age=3600" } } },
+          "429": { "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities and /communes)" }
+        }
+      }
+    }
+  }
+}
