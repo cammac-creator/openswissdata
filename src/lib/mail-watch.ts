@@ -73,10 +73,12 @@ const MAX_HEADER_RETRY_ENTRIES = 200;
 // Infomaniak (voir `operation_checks/mail_watch_auth`, `last_authserv_id_seen`). Tant qu'elle est
 // vide, AUCUNE réponse n'est jamais `human` par authenticité (toujours `unverified`) : c'est le choix
 // sûr — n'importe qui peut écrire n'importe quel `Authentication-Results` dans un message.
-// NE PAS REMPLIR avant d'avoir durci l'analyse de l'en-tête (relecture ciblée du 06.10 : guillemets
-// échappés, `header.d=` dans une valeur entre guillemets ou un commentaire) et d'avoir vérifié sur une
-// vraie réponse qu'Infomaniak place son propre en-tête en tête. Le test
-// tests/lib/mail-watch-authserv.test.ts verrouille cette liste vide.
+// L'analyse de l'en-tête a été durcie le 06.10.2026 (grammaire RFC 8601 : guillemets échappés,
+// commentaires imbriqués, `header.d` lu seulement comme propriété de sa clause ; voir
+// `readAuthenticationResults` et tests/lib/mail-watch-authresults.test.ts, qui l'éprouvent avec une
+// liste INJECTÉE). NE PAS REMPLIR pour autant avant d'avoir vérifié sur une vraie réponse reçue
+// qu'Infomaniak place son propre en-tête en tête et relevé son identifiant exact. Le test
+// tests/lib/mail-watch-authserv.test.ts verrouille cette liste vide (à réécrire à ce moment-là).
 export const TRUSTED_AUTHSERV_IDS: ReadonlySet<string> = new Set<string>([]);
 const AUTH_WITNESS_CHECK = 'mail_watch_auth';
 
@@ -85,7 +87,7 @@ type State = MailWatchStatus & { version: 1; seen: string[]; total_attached: num
 export type TelegramConfig = { token: string; chat: string };
 export type Sent = { ok: true } | { ok: false; code: MailWatchCode; http_status?: number };
 /** En-têtes supplémentaires du message, lus seulement pour un domaine qui a une lettre en attente. */
-type ReplyHeaders = {
+export type ReplyHeaders = {
   references: string | null;
   autoSubmitted: string | null;
   autoreplyFlag: boolean;
@@ -123,6 +125,9 @@ type Dependencies = {
   connection: () => { user: string; pass: string } | null;
   withImap: typeof imap;
   fetch: typeof fetch;
+  /** Serveurs d'authentification de confiance. En production, toujours `TRUSTED_AUTHSERV_IDS` (vide) ;
+   * injectable SEULEMENT par les tests, pour éprouver l'analyse durcie sans remplir la constante. */
+  trustedAuthservIds: ReadonlySet<string>;
 };
 const defaults: Dependencies = {
   database: getDb,
@@ -131,6 +136,7 @@ const defaults: Dependencies = {
   connection: () => connection('support'),
   withImap: imap,
   fetch: (input, init) => fetch(input, init),
+  trustedAuthservIds: TRUSTED_AUTHSERV_IDS,
 };
 
 /** Domaines surveillés : `OSD_MAIL_WATCH_DOMAINS` (liste séparée par des virgules) remplace la liste par défaut. */
@@ -275,62 +281,208 @@ function parseHeaderBlock(buf: Buffer): ReplyHeaders {
     authenticationResults: map.get('authentication-results') ?? null,
   };
 }
-/** Découpe un en-tête `Authentication-Results` en clauses séparées par « ; », HORS des portions entre
- * guillemets (`"..."`, ex. une valeur `smtp.mailfrom` arbitraire) et HORS des commentaires RFC 5322
- * entre parenthèses (correction finale 2, 06.10, item 2a) : un « ; » ou un texte qui ressemblerait à
- * une clause à l'intérieur de ces portions ne doit jamais couper ou fabriquer une clause. Pas de
- * gestion de l'échappement `\"` : suffisant pour ce format, jamais arbitrairement long. */
-export function splitAuthClauses(raw: string): string[] {
-  const clauses: string[] = [];
-  let depth = 0;
-  let inQuotes = false;
-  let current = '';
-  for (const ch of raw) {
-    if (inQuotes) { current += ch; if (ch === '"') inQuotes = false; continue; }
-    if (ch === '"') { inQuotes = true; current += ch; continue; }
-    if (ch === '(') { depth++; current += ch; continue; }
-    if (ch === ')') { depth = Math.max(0, depth - 1); current += ch; continue; }
-    if (ch === ';' && depth === 0) { clauses.push(current); current = ''; continue; }
-    current += ch;
+// ─── Analyse d'`Authentication-Results` selon la grammaire RFC 8601 (durcie le 06.10.2026) ───────────
+// Relecture adverse du 06.10 : l'ancienne analyse par expressions se contournait (guillemet échappé
+// `\"` dans `smtp.mailfrom`, `header.d=` caché dans la partie locale entre guillemets de `header.i`,
+// `header.d=` dans un commentaire). Les valeurs `smtp.mailfrom` et `header.i` sont choisies par
+// l'EXPÉDITEUR : rien de ce qui se trouve entre guillemets ou entre parenthèses n'est jamais lu comme
+// une propriété. L'analyse procède en deux temps :
+//  1. un analyseur lexical (`scanAuthResults`) découpe l'en-tête en éléments : texte nu, chaîne entre
+//     guillemets (échappements `\"` et `\\` décodés), séparateur (espaces OU commentaire RFC 5322,
+//     imbriqué, avec échappements) et « ; » de premier niveau. Toute forme douteuse (guillemet ou
+//     parenthèse non fermés, « ) » orpheline, « \ » final, en-tête démesuré) rejette l'en-tête ENTIER :
+//     une réponse reste alors `unverified`, jamais l'inverse ;
+//  2. chaque clause (`resinfo`) est lue SEULEMENT dans sa forme `méthode=résultat` suivie de propriétés
+//     `ptype.property=valeur` ; `header.d` (DKIM) et `header.from` (DMARC) ne sont lus que comme
+//     propriétés de leur clause, valeur nue ou entièrement entre guillemets, nom d'hôte strict.
+const AUTH_RESULTS_MAX_LENGTH = 16_384;
+const HOSTNAME_RE = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/;
+const METHODSPEC_RE = /^([a-z0-9][a-z0-9_-]*)(?:\/[0-9]+)?=([a-z0-9][a-z0-9_-]*)$/i;
+const PROPERTY_KEY_RE = /^[a-z0-9][a-z0-9_-]*(?:\.[a-z0-9][a-z0-9_-]*)?$/i;
+type AuthPart = { kind: 'atom' | 'quoted'; text: string };
+/** Un « mot » : suite d'éléments collés (texte nu et chaînes entre guillemets), sans séparateur entre eux
+ * — ex. `header.i="a b"@exemple.ch` est UN seul mot de trois parties. */
+type AuthWord = AuthPart[];
+type AuthScan = { segments: AuthWord[][]; semicolons: number[] };
+/** Analyseur lexical. `null` si l'en-tête est malformé (rejet de l'en-tête entier, sûr par défaut). */
+function scanAuthResults(raw: string): AuthScan | null {
+  if (raw.length > AUTH_RESULTS_MAX_LENGTH) return null;
+  const segments: AuthWord[][] = [[]];
+  const semicolons: number[] = [];
+  let word: AuthWord | null = null;
+  const endWord = () => { if (word) { segments[segments.length - 1].push(word); word = null; } };
+  const push = (part: AuthPart) => {
+    if (!word) word = [];
+    const last = word[word.length - 1];
+    if (last && last.kind === 'atom' && part.kind === 'atom') last.text += part.text;
+    else word.push(part);
+  };
+  let i = 0;
+  while (i < raw.length) {
+    const ch = raw[i];
+    if (ch === '"') {
+      // Chaîne entre guillemets (RFC 5322 quoted-string) : `\x` donne `x` ; « ; », « ( » et « ) » y
+      // sont du texte ordinaire.
+      let text = '';
+      let j = i + 1;
+      let closed = false;
+      while (j < raw.length) {
+        const c = raw[j];
+        if (c === '\\') { if (j + 1 >= raw.length) return null; text += raw[j + 1]; j += 2; continue; }
+        if (c === '"') { closed = true; j++; break; }
+        text += c; j++;
+      }
+      if (!closed) return null;
+      push({ kind: 'quoted', text });
+      i = j;
+      continue;
+    }
+    if (ch === '(') {
+      // Commentaire RFC 5322 : imbriqué, `\x` échappe un caractère (y compris « ) »), « " » y est un
+      // caractère ordinaire. Un commentaire sépare comme une espace : jamais de mot collé au travers.
+      let depth = 1;
+      let j = i + 1;
+      while (j < raw.length && depth > 0) {
+        const c = raw[j];
+        if (c === '\\') { if (j + 1 >= raw.length) return null; j += 2; continue; }
+        if (c === '(') depth++;
+        else if (c === ')') depth--;
+        j++;
+      }
+      if (depth > 0) return null;
+      endWord();
+      i = j;
+      continue;
+    }
+    if (ch === ')') return null;
+    if (ch === ';') { endWord(); semicolons.push(i); segments.push([]); i++; continue; }
+    if (/\s/.test(ch)) { endWord(); i++; continue; }
+    push({ kind: 'atom', text: ch });
+    i++;
   }
-  clauses.push(current);
-  return clauses.map(c => c.trim()).filter(c => c.length > 0);
+  endWord();
+  return { segments, semicolons };
 }
-/** Identifiant du serveur d'authentification (premier élément, avant le premier « ; ») d'un en-tête
- * `Authentication-Results` — un nom d'hôte, jamais une adresse. `null` si l'en-tête est vide ou
- * manifestement trop long pour être un nom d'hôte. */
-export function extractAuthservId(raw: string): string | null {
-  const clauses = splitAuthClauses(raw);
-  const id = clauses[0]?.split(/\s+/)[0]?.trim().toLowerCase();
+/** Identifiant du serveur lu dans le premier segment (avant le premier « ; » de premier niveau) : un nom
+ * d'hôte nu, suivi éventuellement d'un numéro de version (`authres-version`), et RIEN d'autre. */
+function authservIdOf(scan: AuthScan): string | null {
+  const head = scan.segments[0] ?? [];
+  if (head.length < 1 || head.length > 2) return null;
+  if (!head.every(w => w.length === 1 && w[0].kind === 'atom')) return null;
+  if (head.length === 2 && !/^[0-9]+$/.test(head[1][0].text)) return null;
   // Forme stricte d'un nom d'hôte : si le premier en-tête vient de l'expéditeur (inconnu tant
   // qu'aucune vraie réponse n'a été observée), rien d'autre qu'un nom d'hôte n'est jamais conservé.
-  return id && id.length <= 253 && /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(id) ? id : null;
+  const id = head[0][0].text.toLowerCase();
+  return id.length <= 253 && HOSTNAME_RE.test(id) ? id : null;
 }
-/** DKIM/DMARC alignés dans `Authentication-Results` (premier en-tête seulement, cf. `parseHeaderBlock`) :
- * chaque clause doit COMMENCER par `dkim=pass`/`dmarc=pass` (item 2b — une contrefaçon nichée dans une
- * AUTRE clause, ex. une valeur `smtp.mailfrom` entre guillemets, ne compte jamais) ; l'identifiant de
- * serveur (premier élément) doit figurer dans `TRUSTED_AUTHSERV_IDS` (item 2c — VIDE pour l'instant,
- * donc toujours rejeté ici tant qu'il n'est pas rempli) ; un `header.d`/`header.from` sans point (ex.
- * « ch » seul) est toujours rejeté. Heuristique texte, volontairement tolérante (guillemets, espaces) :
- * un faux négatif se contente de rester `unverified`, jamais l'inverse. */
-export function parseAuthenticationResults(raw: string | null): { dkimDomain: string | null; dmarcFromDomain: string | null } {
-  if (!raw) return { dkimDomain: null, dmarcFromDomain: null };
-  const clauses = splitAuthClauses(raw);
-  if (!clauses.length) return { dkimDomain: null, dmarcFromDomain: null };
-  const authservId = extractAuthservId(raw);
-  if (!authservId || !TRUSTED_AUTHSERV_IDS.has(authservId)) return { dkimDomain: null, dmarcFromDomain: null };
-  const withDot = (d: string | undefined) => (d && d.includes('.') ? d.toLowerCase() : null);
-  let dkimDomain: string | null = null;
-  let dmarcFromDomain: string | null = null;
-  for (const clause of clauses.slice(1)) {
-    if (!dkimDomain && /^dkim\s*=\s*pass\b/i.test(clause)) {
-      dkimDomain = withDot(/\bheader\.d\s*=\s*["']?([a-z0-9.-]+)/i.exec(clause)?.[1]);
-    }
-    if (!dmarcFromDomain && /^dmarc\s*=\s*pass\b/i.test(clause)) {
-      dmarcFromDomain = withDot(/\bheader\.from\s*=\s*["']?([a-z0-9.-]+)/i.exec(clause)?.[1]);
+/** Domaine lu dans la valeur d'une propriété : entièrement nue OU entièrement entre guillemets (jamais un
+ * mélange comme `"x"@y`), nom d'hôte strict (au moins un point), sinon `null`. */
+function domainValue(parts: AuthPart[]): string | null {
+  if (parts.length !== 1) return null;
+  const value = parts[0].text.trim().toLowerCase();
+  return value.length <= 253 && HOSTNAME_RE.test(value) ? value : null;
+}
+type ResInfo = { method: string; result: string; properties: Array<{ key: string; value: AuthPart[] }> };
+/** Une clause `resinfo` : `méthode=résultat` (un seul mot nu), puis des propriétés `clé=valeur` dont la
+ * clé est nue et précède le premier « = » nu du mot. Toute autre forme rend la clause nulle. */
+function parseResInfo(words: AuthWord[]): ResInfo | null {
+  const [first, ...rest] = words;
+  if (!first || first.length !== 1 || first[0].kind !== 'atom') return null;
+  const spec = METHODSPEC_RE.exec(first[0].text);
+  if (!spec) return null;
+  const properties: ResInfo['properties'] = [];
+  for (const word of rest) {
+    const head = word[0];
+    if (head.kind !== 'atom') return null;
+    const eq = head.text.indexOf('=');
+    if (eq <= 0) return null;
+    const key = head.text.slice(0, eq);
+    if (!PROPERTY_KEY_RE.test(key)) return null;
+    const remainder = head.text.slice(eq + 1);
+    const value: AuthPart[] = [...(remainder ? [{ kind: 'atom' as const, text: remainder }] : []), ...word.slice(1)];
+    properties.push({ key: key.toLowerCase(), value });
+  }
+  return { method: spec[1].toLowerCase(), result: spec[2].toLowerCase(), properties };
+}
+/** Domaine de la propriété `key` d'une clause : exactement UNE occurrence (deux `header.d` dans la même
+ * clause la rendent ambiguë, donc nulle), valeur de domaine stricte. */
+function singleDomainProperty(info: ResInfo, key: string): string | null {
+  const found = info.properties.filter(p => p.key === key);
+  return found.length === 1 ? domainValue(found[0].value) : null;
+}
+export type AuthenticationResultsReading = {
+  /** Identifiant du serveur qui a écrit l'en-tête (nom d'hôte strict), `null` si absent ou malformé. */
+  authservId: string | null;
+  /** `header.d` de TOUTES les clauses `dkim=pass` lisibles (une clause tierce ne masque pas la suivante). */
+  dkimPassDomains: string[];
+  /** `header.from` de TOUTES les clauses `dmarc=pass` lisibles. */
+  dmarcPassFromDomains: string[];
+};
+/** Lecture structurée d'un en-tête `Authentication-Results`, SANS juger la confiance du serveur.
+ * `null` si l'en-tête est absent ou malformé. */
+export function readAuthenticationResults(raw: string | null): AuthenticationResultsReading | null {
+  if (!raw) return null;
+  const scan = scanAuthResults(raw);
+  if (!scan) return null;
+  const dkimPassDomains: string[] = [];
+  const dmarcPassFromDomains: string[] = [];
+  for (const words of scan.segments.slice(1)) {
+    const info = parseResInfo(words);
+    if (!info || info.result !== 'pass') continue;
+    if (info.method === 'dkim') {
+      const d = singleDomainProperty(info, 'header.d');
+      if (d) dkimPassDomains.push(d);
+    } else if (info.method === 'dmarc') {
+      const d = singleDomainProperty(info, 'header.from');
+      if (d) dmarcPassFromDomains.push(d);
     }
   }
-  return { dkimDomain, dmarcFromDomain };
+  return { authservId: authservIdOf(scan), dkimPassDomains, dmarcPassFromDomains };
+}
+/** L'en-tête montre-t-il une authentification ALIGNÉE de l'expéditeur, posée par un serveur de la liste
+ * de confiance ? Liste vide (cas de production tant que `TRUSTED_AUTHSERV_IDS` n'est pas rempli) :
+ * toujours `false`, avant même toute lecture. Une seule clause `dkim=pass` (ou `dmarc=pass`) alignée
+ * suffit — égal ou PARENT du domaine de l'expéditeur, jamais un enfant (`signingDomainAligned`). */
+export function hasAlignedAuthentication(raw: string | null, senderHost: string, trusted: ReadonlySet<string>): boolean {
+  if (trusted.size === 0) return false;
+  const reading = readAuthenticationResults(raw);
+  if (!reading?.authservId) return false;
+  const id = reading.authservId;
+  if (![...trusted].some(t => t.toLowerCase() === id)) return false;
+  const host = senderHost.trim().toLowerCase();
+  return reading.dkimPassDomains.some(d => signingDomainAligned(host, d))
+    || reading.dmarcPassFromDomains.some(d => signingDomainAligned(host, d));
+}
+/** Découpe un en-tête `Authentication-Results` en clauses (texte brut de chacune, commentaires et
+ * guillemets compris) aux seuls « ; » de premier niveau repérés par l'analyseur lexical : jamais dans
+ * une chaîne entre guillemets (échappements compris) ni dans un commentaire (imbriqué). Diagnostic
+ * seulement ; `[]` si l'en-tête est malformé. */
+export function splitAuthClauses(raw: string): string[] {
+  const scan = scanAuthResults(raw);
+  if (!scan) return [];
+  const clauses: string[] = [];
+  let from = 0;
+  for (const at of scan.semicolons) { clauses.push(raw.slice(from, at)); from = at + 1; }
+  clauses.push(raw.slice(from));
+  return clauses.map(c => c.trim()).filter(c => c.length > 0);
+}
+/** Identifiant du serveur d'authentification (avant le premier « ; » de premier niveau, éventuellement
+ * suivi d'une version) d'un en-tête `Authentication-Results` — un nom d'hôte, jamais une adresse.
+ * `null` si l'en-tête est vide, malformé ou si ce premier élément n'est pas un nom d'hôte strict. */
+export function extractAuthservId(raw: string): string | null {
+  const scan = scanAuthResults(raw);
+  return scan ? authservIdOf(scan) : null;
+}
+/** Compatibilité (diagnostic, tests existants) : PREMIER domaine `dkim=pass` et PREMIER `dmarc=pass`
+ * lus, seulement si le serveur figure dans `trusted`. La décision `human` n'utilise JAMAIS cette
+ * fonction (elle ignorerait une seconde clause alignée) : voir `hasAlignedAuthentication`. */
+export function parseAuthenticationResults(raw: string | null, trusted: ReadonlySet<string> = TRUSTED_AUTHSERV_IDS): { dkimDomain: string | null; dmarcFromDomain: string | null } {
+  const empty = { dkimDomain: null, dmarcFromDomain: null };
+  if (trusted.size === 0) return empty;
+  const reading = readAuthenticationResults(raw);
+  const id = reading?.authservId;
+  if (!reading || !id || ![...trusted].some(t => t.toLowerCase() === id)) return empty;
+  return { dkimDomain: reading.dkimPassDomains[0] ?? null, dmarcFromDomain: reading.dmarcPassFromDomains[0] ?? null };
 }
 /**
  * `auto` d'abord (en-têtes, ou objet — débarrassé du texte de la lettre rattachée — portant un motif
@@ -339,9 +491,11 @@ export function parseAuthenticationResults(raw: string | null): { dkimDomain: st
  * jamais un enfant — `signingDomainAligned`, item 5) ; sinon `unverified`. `letterSubject` est l'objet
  * de la lettre (ou relance) qui a servi au rattachement — on le retire d'abord de l'objet reçu, sinon
  * un mot de la lettre elle-même (ex. une lettre dont l'objet contient « réponse automatique ») ferait
- * passer une vraie réponse humaine pour un accusé automatique.
+ * passer une vraie réponse humaine pour un accusé automatique. `trusted` : serveurs d'authentification
+ * de confiance — en production toujours `TRUSTED_AUTHSERV_IDS` (vide, donc jamais `human` par
+ * authenticité) ; une autre liste n'est passée que par les tests.
  */
-function classifyReplyKind(receivedSubject: string, letterSubject: string, headers: ReplyHeaders, senderHost: string): ReplyKind {
+export function classifyReplyKind(receivedSubject: string, letterSubject: string, headers: ReplyHeaders, senderHost: string, trusted: ReadonlySet<string> = TRUSTED_AUTHSERV_IDS): ReplyKind {
   const submitted = headers.autoSubmitted?.trim().toLowerCase();
   if (submitted && submitted !== 'no') return 'auto';
   if (headers.autoreplyFlag) return 'auto';
@@ -350,10 +504,7 @@ function classifyReplyKind(receivedSubject: string, letterSubject: string, heade
   const normalizedReceived = normalizeText(receivedSubject);
   const remainder = strippedLetter ? normalizedReceived.split(strippedLetter).join(' ') : normalizedReceived;
   if (AUTO_SUBJECT_MARKERS.some(marker => remainder.includes(marker))) return 'auto';
-  const auth = parseAuthenticationResults(headers.authenticationResults);
-  if (auth.dkimDomain && signingDomainAligned(senderHost, auth.dkimDomain)) return 'human';
-  if (auth.dmarcFromDomain && signingDomainAligned(senderHost, auth.dmarcFromDomain)) return 'human';
-  return 'unverified';
+  return hasAlignedAuthentication(headers.authenticationResults, senderHost, trusted) ? 'human' : 'unverified';
 }
 /** Lettres `sent`, ou `failed` avec un essai réel — quel que soit l'état de leur réponse (correction
  * finale du 06.10) : sert à la fois à élargir la veille (domaines <120 jours) et à trouver le bon
@@ -433,7 +584,7 @@ export function attachReply(db: Database.Database, targetId: string, at: number,
   return result.changes === 1;
 }
 
-async function collect(client: ImapFlow, baseDomains: readonly string[], extraDomains: readonly string[], now: number, seen: ReadonlySet<string>, letterTargets: readonly LetterMatchTarget[], headerRetryCounts: Readonly<Record<string, number>>) {
+async function collect(client: ImapFlow, baseDomains: readonly string[], extraDomains: readonly string[], now: number, seen: ReadonlySet<string>, letterTargets: readonly LetterMatchTarget[], headerRetryCounts: Readonly<Record<string, number>>, trusted: ReadonlySet<string>) {
   const since = now - WINDOW;
   const searchDomains = [...new Set([...baseDomains, ...extraDomains])];
   // Boîte de réception et indésirables : une réponse attendue peut être classée en spam par erreur.
@@ -530,7 +681,7 @@ async function collect(client: ImapFlow, baseDomains: readonly string[], extraDo
         const target = resolveLetterTarget(matched, letterTargets);
         // L'objet seul suffit à reconnaître un accusé d'absence : `auto` par l'objet, sinon `unverified`
         // (relecture ciblée du 06.10 : un « Out of office » ne doit pas arrêter la relance en silence).
-        const kindFromSubject = classifyReplyKind(candidate.subject, matched.subject, EMPTY_REPLY_HEADERS, senderHost);
+        const kindFromSubject = classifyReplyKind(candidate.subject, matched.subject, EMPTY_REPLY_HEADERS, senderHost, trusted);
         candidate.letterMatch = { targetId: target.id, subject: target.subject, sentAt: target.sentAt, replyKind: kindFromSubject === 'auto' ? 'auto' : 'unverified' };
       }
       continue;
@@ -544,7 +695,7 @@ async function collect(client: ImapFlow, baseDomains: readonly string[], extraDo
     const target = resolveLetterTarget(matched, letterTargets);
     candidate.letterMatch = {
       targetId: target.id, subject: target.subject, sentAt: target.sentAt,
-      replyKind: classifyReplyKind(candidate.subject, matched.subject, candidate.headers ?? EMPTY_REPLY_HEADERS, senderHost),
+      replyKind: classifyReplyKind(candidate.subject, matched.subject, candidate.headers ?? EMPTY_REPLY_HEADERS, senderHost, trusted),
     };
   }
   return { matched: keys.size, fresh: fresh.length, selected, lastAuthservId };
@@ -664,7 +815,7 @@ export async function runMailWatch(overrides: Partial<Dependencies> = {}): Promi
   if (!auth) return finish({ status: 'inactive', code: 'mailbox_not_connected' });
   let found: Awaited<ReturnType<typeof collect>>;
   const seen = new Set(state.seen);
-  try { found = await deps.withImap(auth, client => collect(client, baseDomains, extraDomains, now, seen, letterTargets, state.headerFailures)); }
+  try { found = await deps.withImap(auth, client => collect(client, baseDomains, extraDomains, now, seen, letterTargets, state.headerFailures, deps.trustedAuthservIds)); }
   catch { return finish({ status: 'error', code: 'imap_failed' }); }
   if (found.lastAuthservId) recordAuthservIdSeen(db, found.lastAuthservId, now);
   state = { ...state, matched: found.matched, pending: found.fresh };
