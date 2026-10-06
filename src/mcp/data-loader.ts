@@ -12,6 +12,7 @@
  *   - crosswalks.csv                         (NOGA/NACE/ISIC translations, ~2.2k rows)
  *   - localities.csv                         (répertoire officiel des localités swisstopo, ~5.7k rows)
  *   - streets.csv.gz                         (répertoire officiel des rues swisstopo, compressé, ~220k rows)
+ *   - finma_seats.csv                        (siège exact FINMA × registre du commerce, personnes morales, tâche B4)
  *   - embeddings/tares_index.{json,bin}      (TARES, 7 511 lignes × 4 langues, chemin officiel ; search-index.ts)
  *   - embeddings/noga_2025_index.{json,bin}  (NOGA 2025, 798 genres × 4 langues ; search-index.ts)
  *
@@ -104,6 +105,14 @@ export interface LocalityRow {
   language: string;
 }
 
+/** Une ligne du fichier combiné FINMA × registre du commerce (tâche osd.donnees, tâche B4) :
+ *  siège exact (numéro OFS de commune) par IDE, personnes morales seulement. Voir
+ *  `scripts/sync-finma-seats.ts`. */
+export interface FinmaSeatRow {
+  uid: string;
+  municipality_bfs_id: string;
+}
+
 /** Une ligne du répertoire officiel des rues (swisstopo, tâche osd.localites, tâche B1) : les
  *  colonnes `postal_code`/`locality` ne portent que le PREMIER couple NPA/localité d'une rue
  *  à cheval sur plusieurs secteurs postaux (voir `scripts/sync-streets.ts`) ; seul
@@ -134,6 +143,9 @@ let _streetsByMunicipality: Map<string, Set<string>> | null = null;
 let _streetsMunicipalityInfo: Map<string, { municipality: string; canton: string }> | null = null;
 let _streetsLoadFailed = false;
 let _streetsEdition: string | null = null;
+let _finmaSeatsByUid: Map<string, string> | null = null;
+let _finmaSeatsLoadFailed = false;
+let _finmaSeatsEdition: string | null = null;
 let _classificationLinks: ClassificationLink[] | null = null;
 let _classificationSources: ClassificationSource[] | null = null;
 let _taresEmbeddingsPromise: Promise<SearchIndex> | null = null;
@@ -424,6 +436,69 @@ export function parseStreetsEdition(raw: string, loadedRows: number): string | n
   }
 }
 
+/**
+ * Fichier combiné FINMA × registre du commerce (tâche osd.donnees, tâche B4), indexé par IDE
+ * canonique (`CHE-xxx.xxx.xxx`) → numéro OFS de la commune du SIÈGE enregistré (personnes
+ * morales seulement — voir `scripts/sync-finma-seats.ts`). Tolérant à l'absence ou à une
+ * lecture illisible : `null`, JAMAIS une exception — même motif que `getLocalities()`/
+ * `getStreets()` ci-dessus : `src/lib/commune-profile.ts` sert alors le profil de commune sans
+ * le compte `entities_with_seat_in_commune` qui en dépend.
+ */
+export function getFinmaSeats(): { byUid: ReadonlyMap<string, string>; edition: string | null } | null {
+  if (_finmaSeatsLoadFailed) return null;
+  if (!_finmaSeatsByUid) {
+    try {
+      const rows = loadCsv<FinmaSeatRow>("finma_seats.csv");
+      // Même règle que `getLocalities()`/`getStreets()` : un fichier SANS ligne de données
+      // (en-tête seul, ou fichier vide) est traité comme ABSENT, jamais comme un répertoire vide.
+      const index = indexFinmaSeats(rows);
+      if (!index) {
+        _finmaSeatsLoadFailed = true;
+        return null;
+      }
+      _finmaSeatsByUid = index;
+      _finmaSeatsEdition = readFinmaSeatsEdition(rows.length);
+    } catch {
+      _finmaSeatsLoadFailed = true;
+      return null;
+    }
+  }
+  return { byUid: _finmaSeatsByUid, edition: _finmaSeatsEdition };
+}
+
+/** Index par IDE canonique ; `null` pour un fichier sans ligne (traité comme absent). Fonction
+ *  pure, testée sans fichier. */
+export function indexFinmaSeats(rows: readonly FinmaSeatRow[]): Map<string, string> | null {
+  if (rows.length === 0) return null;
+  const index = new Map<string, string>();
+  for (const row of rows) {
+    if (!row.uid || !row.municipality_bfs_id) continue;
+    index.set(row.uid, row.municipality_bfs_id);
+  }
+  return index.size > 0 ? index : null;
+}
+
+/** Date d'édition du fichier combiné (`finma_seats.meta.json`, posé par
+ *  `scripts/sync-finma-seats.ts`) : `null` quand le fichier est absent, illisible ou mal formé,
+ *  jamais une exception ni une date devinée. Même forme que `parseStreetsEdition` ci-dessus. */
+function readFinmaSeatsEdition(loadedRows: number): string | null {
+  try {
+    return parseFinmaSeatsEdition(readFileSync(join(DATA_DIR, "finma_seats.meta.json"), "utf8"), loadedRows);
+  } catch {
+    return null;
+  }
+}
+
+export function parseFinmaSeatsEdition(raw: string, loadedRows: number): string | null {
+  try {
+    const meta = JSON.parse(raw) as { edition?: unknown; rows?: unknown };
+    if (meta.rows !== loadedRows) return null;
+    return typeof meta.edition === "string" && /^\d{4}-\d{2}-\d{2}$/.test(meta.edition) ? meta.edition : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Révision et sources du référentiel effectivement embarqué dans le service. */
 export function getClassificationLinks(): { links: readonly ClassificationLink[]; sources: readonly ClassificationSource[]; version: string } {
   _classificationLinks ??= loadCsv<ClassificationLink>("classification_links.csv");
@@ -481,6 +556,9 @@ export function _resetDataLoaderCache(): void {
   _streetsMunicipalityInfo = null;
   _streetsLoadFailed = false;
   _streetsEdition = null;
+  _finmaSeatsByUid = null;
+  _finmaSeatsLoadFailed = false;
+  _finmaSeatsEdition = null;
   _classificationLinks = null;
   _classificationSources = null;
   _taresEmbeddingsPromise = null;

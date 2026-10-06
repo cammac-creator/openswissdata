@@ -115,7 +115,10 @@ const NOTICE =
 // code (dont "0111", "0113", "0118", "0119", "0151", "0571") ou code absent/inconnu ferme
 // aussi l'adresse et le but : une forme non reconnue n'écarte jamais la possibilité d'une
 // entreprise individuelle ou assimilée.
-const ADDRESS_AND_PURPOSE_FORM_CODES = new Set<string>([
+// Exportée (tâche osd.donnees, tâche B4) : `scripts/sync-finma-seats.ts` réutilise cette MÊME
+// liste blanche pour ne garder, dans `finma_seats.csv`, que les sièges de personnes morales —
+// jamais une copie, pour ne jamais diverger de la porte appliquée ici.
+export const ADDRESS_AND_PURPOSE_FORM_CODES = new Set<string>([
   "0106", // société anonyme (SA)
   "0107", // société à responsabilité limitée (Sàrl)
   "0108", // société coopérative

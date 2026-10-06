@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "node scripts/clean-build.mjs && tsc -p tsconfig.json && mkdir -p dist/db dist/mcp/data && cp src/db/schema.sql dist/db/schema.sql && cp -r src/db/migrations dist/db/migrations && cp src/mcp/data/*.csv dist/mcp/data/ && cp src/mcp/data/localities.meta.json dist/mcp/data/ && cp src/mcp/data/streets.csv.gz dist/mcp/data/ && cp src/mcp/data/streets.meta.json dist/mcp/data/ && cp -r src/mcp/data/embeddings dist/mcp/data/embeddings && node dist/scripts/prepare-translation.js && node dist/scripts/prepare-embedding.js && npm run web:build",
+    "build": "node scripts/clean-build.mjs && tsc -p tsconfig.json && mkdir -p dist/db dist/mcp/data && cp src/db/schema.sql dist/db/schema.sql && cp -r src/db/migrations dist/db/migrations && cp src/mcp/data/*.csv dist/mcp/data/ && cp src/mcp/data/localities.meta.json dist/mcp/data/ && cp src/mcp/data/streets.csv.gz dist/mcp/data/ && cp src/mcp/data/streets.meta.json dist/mcp/data/ && cp src/mcp/data/finma_seats.meta.json dist/mcp/data/ && cp -r src/mcp/data/embeddings dist/mcp/data/embeddings && node dist/scripts/prepare-translation.js && node dist/scripts/prepare-embedding.js && npm run web:build",
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -25,6 +25,7 @@
     "sync:versions": "tsx scripts/sync-dataset-versions.ts",
     "sync:localities": "tsx scripts/sync-localities.ts",
     "sync:streets": "tsx scripts/sync-streets.ts",
+    "sync:finma-seats": "tsx scripts/sync-finma-seats.ts",
     "web:dev": "cd web && npx astro dev",
     "web:build": "npm --prefix web ci && npm --prefix web run build && npm run seo:check && npm run fonts:check && npm run admin:csp:check",
     "models:prepare:embedding": "tsx src/scripts/prepare-embedding.ts",

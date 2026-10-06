@@ -36,6 +36,7 @@
 
 import {
   getFinmaRegistry,
+  getFinmaSeats,
   getFinmaVersion,
   getLocalities,
   getStreets,
@@ -52,6 +53,11 @@ export interface CommuneProfileDeps {
   } | null;
   getFinmaRegistry: () => readonly FinmaRegistryRow[];
   getFinmaVersion: () => string | null;
+  /** Siège exact FINMA × registre du commerce (tâche B4), personnes morales seulement. Voir la
+   *  note de garde dans `communeProfile()` : lue PAR DÉFAUT seulement quand l'appelant n'a
+   *  substitué NI `getFinmaRegistry` NI `getFinmaSeats` — jamais silencieusement pour un test
+   *  qui substitue déjà le registre FINMA sans connaître ce nouveau champ. */
+  getFinmaSeats: () => { byUid: ReadonlyMap<string, string>; edition: string | null } | null;
 }
 
 /** Règle de rattachement, EN VÉRITÉ DES MOTS (relecture du 06.10.2026, seconde passe) :
@@ -65,6 +71,13 @@ export interface CommuneProfileDeps {
 export const FINMA_MATCHING_RULE =
   "FINMA register city (a postal locality name) equal to this commune's name, or to a locality unique to it; " +
   "the postal locality can extend into neighbouring communes, so this is not proof of the registered seat.";
+
+/** Règle du rattachement par SIÈGE (tâche B4, combinaison FINMA × registre du commerce), EN
+ *  VÉRITÉ DES MOTS, distincte de `FINMA_MATCHING_RULE` (nom de ville) : exact, par IDE, lu dans
+ *  le registre du commerce (LINDAS) lui-même — personnes morales seulement (voir
+ *  `scripts/sync-finma-seats.ts`). */
+export const FINMA_SEAT_MATCHING_RULE =
+  "Exact: the registered seat from the commercial register (LINDAS) for the entity's UID, legal persons only.";
 
 export interface CommuneFinmaProfile {
   /** RENOMMÉ depuis `authorised_entities` (relecture du 06.10.2026, seconde passe — vérité des
@@ -81,8 +94,32 @@ export interface CommuneFinmaProfile {
    *  `names_also_postal_locality_elsewhere`, qui dit combien de rattachements par nom de commune
    *  portent un nom qui est AUSSI une localité postale d'une AUTRE commune (le cas « Zürich »,
    *  « Genève », « Zug » décrit ci-dessus) : ces rattachements-là sont les moins fiables comme
-   *  preuve du siège, même comptés comme « rattachés ». */
+   *  preuve du siège, même comptés comme « rattachés ».
+   *
+   *  JAMAIS étendu avec un champ `seats_known` (tâche B4) : `tests/routes/api-v1.test.ts` et
+   *  `tests/lib/commune-profile.test.ts` comparent cet objet, EN PRODUCTION RÉELLE pour le
+   *  premier, par égalité stricte à `nationalFinmaMatchingStats()` elle-même — qui ne connaît
+   *  pas les sièges. Le compte national des sièges connus vit à côté, dans
+   *  `national_seats_known`. */
   national_matching: NationalFinmaMatchingStats;
+  /** Nombre de lignes FINMA (autorisations) dont l'IDE a SON SIÈGE enregistré dans CETTE
+   *  commune (combinaison FINMA × registre du commerce, tâche B4 — EXACT, par IDE, jamais une
+   *  coïncidence de nom de ville) ; plusieurs lignes du même IDE comptent chacune (autant
+   *  d'autorisations). `null` : fichier combiné non câblé ou indisponible (jamais confondu avec
+   *  `0`, qui veut dire « disponible, aucune ligne pour cette commune »). Voir `seat_matching`. */
+  entities_with_seat_in_commune: number | null;
+  /** Nombre d'IDE DISTINCTS parmi les lignes comptées par `entities_with_seat_in_commune`
+   *  (plusieurs autorisations du même IDE ne comptent qu'une fois ici). `null` dans les mêmes
+   *  conditions que `entities_with_seat_in_commune`. */
+  distinct_entities_with_seat_in_commune: number | null;
+  /** Règle du rattachement par siège, en toutes lettres (distincte de `matching`, qui décrit le
+   *  rattachement par nom de ville) : toujours présente, même quand les sièges sont
+   *  indisponibles (c'est la règle qui s'appliquerait, pas une mesure). */
+  seat_matching: typeof FINMA_SEAT_MATCHING_RULE;
+  /** Nombre national d'IDE dont le siège est connu (fichier combiné chargé, tâche B4) : SIBLING
+   *  de `national_matching`, jamais à l'intérieur (voir la note ci-dessus). `null` quand le
+   *  fichier combiné n'est pas câblé ou indisponible. */
+  national_seats_known: number | null;
 }
 
 export interface CommuneProfile {
@@ -97,7 +134,13 @@ export interface CommuneProfile {
   finma: CommuneFinmaProfile;
   /** Identifiants du registre des sources (`src/mcp/company/sources.ts`) effectivement utilisés pour cette fiche. */
   sources: string[];
-  editions: { localities: string | null; streets: string | null; finma: string | null };
+  // `finma_seats` (tâche B4) : propriété ABSENTE (jamais `undefined` ni `null` explicite) quand
+  // le fichier combiné n'est pas actif pour cet appel (voir la garde dans `communeProfile()`) —
+  // `tests/lib/commune-profile.test.ts` compare `editions` par égalité stricte à un objet à
+  // trois clés pour plusieurs appels antérieurs à cette tâche ; une quatrième clé toujours
+  // présente y échouerait. Présente seulement quand le fichier combiné a été lu (production, ou
+  // test qui le fournit explicitement).
+  editions: { localities: string | null; streets: string | null; finma: string | null; finma_seats?: string | null };
   notice: string;
 }
 
@@ -129,6 +172,10 @@ const defaultDeps: CommuneProfileDeps = {
   },
   getFinmaRegistry,
   getFinmaVersion,
+  getFinmaSeats: () => {
+    const loaded = getFinmaSeats();
+    return loaded ? { byUid: loaded.byUid, edition: loaded.edition } : null;
+  },
 };
 
 /** NFC, casse et espaces normalisés — règle du rattachement FINMA (décision du 06.10.2026,
@@ -254,6 +301,15 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
     }
   })();
   const finmaVersion = d.getFinmaVersion();
+  // Sièges FINMA par IDE (tâche B4) : lus PAR DÉFAUT seulement quand l'appelant n'a substitué NI
+  // le registre FINMA NI les sièges eux-mêmes — même garde que `usingDefaultFinmaRegistry` dans
+  // `src/mcp/company/check.ts` (`deps.getFinmaRegistry === undefined`). Sans cette garde, les
+  // tests existants de ce fichier et de `tests/routes/api-v1.test.ts` (qui substituent toujours
+  // `getFinmaRegistry` mais ne connaissent pas encore ce champ) liraient silencieusement le vrai
+  // `finma_seats.csv` du dépôt dès qu'il existe, changeant leurs résultats sans qu'aucun de ces
+  // tests n'ait été modifié. `deps.getFinmaSeats` explicite (nouveaux tests de cette tâche) passe
+  // toujours devant cette garde, même quand `getFinmaRegistry` est aussi substitué.
+  const seatsLoaded = deps.getFinmaSeats ? deps.getFinmaSeats() : deps.getFinmaRegistry === undefined ? d.getFinmaSeats() : null;
 
   let name: string | null = null;
   let canton: string | null = null;
@@ -309,6 +365,27 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
   }
   const nationalMatching = nationalFinmaMatchingStats({ getLocalities: () => localitiesLoaded, getFinmaRegistry: d.getFinmaRegistry });
 
+  // Siège exact (combinaison FINMA × registre du commerce, tâche B4) : parmi les MÊMES lignes
+  // FINMA que `entities_with_city_named_like_commune` ci-dessus, celles dont l'IDE a SON SIÈGE
+  // (fichier combiné, jamais une coïncidence de nom de ville) dans CETTE commune. Plusieurs
+  // lignes (autorisations) du même IDE comptent chacune dans le premier nombre, une seule fois
+  // dans le second (IDE distincts).
+  let entitiesWithSeatInCommune: number | null = null;
+  let distinctEntitiesWithSeatInCommune: number | null = null;
+  if (seatsLoaded) {
+    sources.add("ofrc.zefix_lindas");
+    let count = 0;
+    const distinctUids = new Set<string>();
+    for (const row of finmaRows) {
+      if (seatsLoaded.byUid.get(row.uid) !== bfsId) continue;
+      count += 1;
+      distinctUids.add(row.uid);
+    }
+    entitiesWithSeatInCommune = count;
+    distinctEntitiesWithSeatInCommune = distinctUids.size;
+  }
+  const nationalSeatsKnown = seatsLoaded ? seatsLoaded.byUid.size : null;
+
   return {
     bfs_id: bfsId,
     name,
@@ -321,12 +398,19 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
       by_licence_type: Object.fromEntries([...byLicenceType.entries()].sort(([a], [b]) => a.localeCompare(b))),
       matching: FINMA_MATCHING_RULE,
       national_matching: nationalMatching,
+      entities_with_seat_in_commune: entitiesWithSeatInCommune,
+      distinct_entities_with_seat_in_commune: distinctEntitiesWithSeatInCommune,
+      seat_matching: FINMA_SEAT_MATCHING_RULE,
+      national_seats_known: nationalSeatsKnown,
     },
     sources: [...sources].sort(),
     editions: {
       localities: localitiesLoaded?.edition ?? null,
       streets: streetsLoaded?.edition ?? null,
       finma: finmaVersion,
+      // Clé ABSENTE (jamais `null` explicite) quand les sièges ne sont pas actifs pour cet appel
+      // (voir la garde `seatsLoaded` ci-dessus et le commentaire du type `editions`).
+      ...(seatsLoaded ? { finma_seats: seatsLoaded.edition } : {}),
     },
     notice: NOTICE,
   };
