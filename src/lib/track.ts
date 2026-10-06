@@ -82,8 +82,13 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
   track({
     kind: "api_request",
     origin: 'server',
-    // Un lien de livraison porte un droit d'accès ; seul le type de route est mesuré.
-    name: path.replace(/^\/api\/(download|delivery)\/.*/, "/api/$1/:token"),
+    // Un lien de livraison porte un droit d'accès ; seul le type de route est mesuré. Un IDE
+    // d'entreprise individuelle (`/api/v1/company/:uid`, tâche osd.donnees, tâche B3) désigne
+    // une personne physique (même motif que l'entreprise individuelle 0101 dans
+    // `src/mcp/company/check.ts`) : jamais l'IDE brut dans une mesure.
+    name: path
+      .replace(/^\/api\/(download|delivery)\/.*/, "/api/$1/:token")
+      .replace(/^\/api\/v1\/company\/.*/, "/api/v1/company/:uid"),
     status: c.res.status,
     duration_ms,
     customer_id,

@@ -49,6 +49,22 @@ describe("GET /api/v1/company/:uid", () => {
     expect(res.headers.get("cache-control")).toBe("no-store");
   });
 
+  it("jamais l'IDE brut dans les mesures (trackApiRequest) : une entreprise individuelle désigne une personne physique", async () => {
+    // Fetch simulé (jamais de réseau réel en test) : peu importe ici que LINDAS/GLEIF répondent,
+    // seul le nom enregistré par la mesure est vérifié.
+    vi.stubGlobal("fetch", async () => { throw new Error("réseau indisponible en test"); });
+    const res = await get("/api/v1/company/CHE-103.137.179", "192.0.2.14");
+    expect(res.status).toBe(200); // IDE valide : fiche servie, sources marquées indisponibles
+    await new Promise((r) => setImmediate(r));
+    const rows = getDb().prepare("SELECT name FROM events WHERE kind='api_request'").all() as { name: string }[];
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      expect(row.name).not.toContain("CHE-103.137.179");
+      if (row.name.startsWith("/api/v1/company")) expect(row.name).toBe("/api/v1/company/:uid");
+    }
+    vi.unstubAllGlobals();
+  });
+
   it("IDE valide, fiche réelle (LINDAS/GLEIF simulés, FINMA et répertoires embarqués) : même forme que structuredContent du MCP", async () => {
     const lindas = JSON.parse(readFileSync(new URL("../fixtures/company/lindas-axa-leben.json", import.meta.url), "utf8"));
     const gleif = JSON.parse(readFileSync(new URL("../fixtures/company/gleif-axa-leben.json", import.meta.url), "utf8"));
