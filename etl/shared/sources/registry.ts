@@ -13,6 +13,7 @@ import { NACE2_URL } from "../../classifications/nace-official.js";
 import { NACE_ISIC_URL, OFS_METHODOLOGY_URL } from "../../classifications/links.js";
 import { CENSUS_NAICS_ISIC_URL } from "../../classifications/naics-crosswalk.js";
 import { LINDAS_SPARQL_ENDPOINT } from "../../finma/ingest-zefix.js";
+import { SWISSTOPO_LOCALITIES_STAC_ITEMS_URL } from "../../localities/sources.js";
 // Adresses BAZG : dérivées de la même déclaration que la collecte (etl/tares/sources.ts,
 // BAZG_SOURCES), jamais recopiées en dur ici (tâche osd.socle).
 import { BAZG_SOURCES } from "../../tares/sources.js";
@@ -55,6 +56,15 @@ const OFRC_OPEN: SourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// Répertoire officiel des localités (NPA, commune, canton). Preuve de licence : catalogue
+// opendata.swiss « amtliches-ortschaftenverzeichnis-mit-postleitzahl-und-perimeter »,
+// ressources `rights = terms_open`, éditeur swisstopo, relu le 06.10.2026 (osd.localites).
+const SWISSTOPO_OPEN: SourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-SWISSTOPO-OPEN-USE",
+  authority: "Federal Office of Topography swisstopo, opendata.swiss open use (terms_open)",
+  jurisdiction: "Switzerland",
+};
+
 export const SOURCES: readonly SourceDescriptor[] = [
   { id: "tares.tariff_8_digit", institution: "BAZG", url: BAZG_SOURCES.tariff_8_digit.url, canary: "raw", licence: BAZG, description: "BAZG — Liste des numéros tarifaires HS8" },
   { id: "tares.tarifstruktur", institution: "BAZG", url: BAZG_SOURCES.tarifstruktur.url, canary: "raw", licence: BAZG, description: "BAZG — Structure tarifaire hiérarchique multilingue" },
@@ -91,6 +101,11 @@ export const SOURCES: readonly SourceDescriptor[] = [
   // PRODUCT_SOURCES.finma : le garde-fou Zefix de etl/finma/bundle.ts doit rester actif.
   { id: "ofrc.zefix_lindas", institution: "OFRC", url: LINDAS_SPARQL_ENDPOINT, licence: OFRC_OPEN,
     description: "Registre du commerce en données liées (LINDAS, graphe Zefix), point SPARQL public." },
+  // Sans canari (osd.localites) : la collecte mensuelle (`scripts/sync-localities.ts`)
+  // contrôle elle-même la forme du fichier officiel et échoue visiblement si elle change,
+  // au lieu d'un canari séparé qui referait le même constat.
+  { id: "swisstopo.localities", institution: "swisstopo", url: SWISSTOPO_LOCALITIES_STAC_ITEMS_URL, licence: SWISSTOPO_OPEN,
+    description: "swisstopo — répertoire officiel des localités (NPA, commune, canton), catalogue STAC, collecte mensuelle." },
 ];
 
 const PAR_ID = new Map(SOURCES.map(s => [s.id, s]));
