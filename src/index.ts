@@ -31,6 +31,7 @@ import { startFinancialWorker } from "./lib/stripe-financial.js";
 import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
 import { startMailWatch } from "./lib/mail-watch.js";
+import { startLettersSender } from "./lib/letters-sender.js";
 import { startWorkflowWatch } from "./lib/workflow-watch.js";
 import { checkAdminEmailsAtStartup } from "./lib/controle-demarrage.js";
 import { getDb } from "./lib/db.js";
@@ -347,6 +348,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const stopIncidents = startDeliveryIncidentWorker();
   // Veille des réponses dans la boîte de support (lecture seule, alerte Telegram) ; inactive sans ses variables.
   const stopMailWatch = startMailWatch();
+  // Expéditeur périodique des lettres institutionnelles (Resend) et relance automatique unique ; inactif sans clé Resend.
+  const stopLettersSender = startLettersSender();
   // Veille des tâches planifiées GitHub et de la page FINMA des membres OAR (lecture seule, alerte Telegram).
   const stopWorkflowWatch = startWorkflowWatch();
   // ADMIN_EMAILS vide en production = plus de compte autorisé pour le bureau (tâche osd.T08). Après serve() :
@@ -361,6 +364,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     stopCleanup();
     stopIncidents();
     stopMailWatch();
+    stopLettersSender();
     stopWorkflowWatch();
     console.log(`[shutdown] received ${sig}, flushing Sentry…`);
     await flushSentry(2000);

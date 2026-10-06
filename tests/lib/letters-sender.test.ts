@@ -1,0 +1,490 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { getDb, closeDb } from "../../src/lib/db.js";
+import { runLettersSender, readLettersSenderStatus } from "../../src/lib/letters-sender.js";
+import type { EmailSendResult, PreparedEmail } from "../../src/lib/email.js";
+
+// Mercredi ouvrable, dans la fenêtre 09:05-17:30 Zurich, sur une minute qui n'est PAS un multiple de
+// 5 (10:00 UTC = 12:00 Zurich en était un : `isSendableNow` l'aurait refusée, cf. Review Focus #4).
+// On ne teste jamais ici le calcul précis de `scheduleSlot`, déjà couvert par letters.test.ts.
+const NOW = Date.UTC(2026, 5, 10, 10, 1); // 10 juin 2026, 10:01 UTC = 12:01 Zurich (CEST, UTC+2)
+// Même mercredi, heure d'été (UTC+2) : raccourci pour écrire des horaires Zurich lisibles dans le
+// groupe de tests « Review Focus #4 » ci-dessous, sans reconstruire le calcul général de fuseau.
+const zurichSummer = (hour: number, minute: number) => Date.UTC(2026, 5, 10, hour - 2, minute);
+const TOKEN = "123456789:jeton-fictif-TELEGRAM-abcdefghij";
+const CHAT = "424242";
+
+const telegramOk = () => vi.fn(async () => Response.json({ ok: true, result: { message_id: 1 } }));
+const sentTexts = (fetcher: ReturnType<typeof telegramOk>) =>
+  fetcher.mock.calls.map(([, init]) => JSON.parse(String((init as RequestInit | undefined)?.body)) as { chat_id: string; text: string });
+
+function insertLetter(overrides: Record<string, unknown> = {}): string {
+  const db = getDb();
+  const id = (overrides.id as string) ?? `id-${Math.random().toString(36).slice(2)}`;
+  const row = {
+    id,
+    kind: "letter",
+    parent_id: null,
+    to_address: "boite-fictive@admin.ch",
+    cc: null,
+    subject: "Demande de données",
+    body: "Texte de la lettre.\n\nMeilleures salutations\n\nClaude-Alain Martin\nOpenSwissData\ncontact@openswissdata.com",
+    purpose: "Clarification de réutilisation",
+    status: "queued",
+    scheduled_at: NOW,
+    lease_until: null,
+    attempts: 0,
+    resend_id: null,
+    sent_at: null,
+    reply_at: null,
+    reply_from: null,
+    reply_subject: null,
+    reply_extract: null,
+    reply_kind: null,
+    reply_processed_at: null,
+    created_at: NOW,
+    ...overrides,
+    id,
+  };
+  db.prepare(
+    `INSERT INTO institutional_letters
+      (id, kind, parent_id, to_address, cc, subject, body, purpose, status, scheduled_at,
+       lease_until, attempts, resend_id, sent_at, reply_at, reply_from, reply_subject,
+       reply_extract, reply_kind, reply_processed_at, created_at)
+     VALUES
+      (@id, @kind, @parent_id, @to_address, @cc, @subject, @body, @purpose, @status, @scheduled_at,
+       @lease_until, @attempts, @resend_id, @sent_at, @reply_at, @reply_from, @reply_subject,
+       @reply_extract, @reply_kind, @reply_processed_at, @created_at)`,
+  ).run(row);
+  return id;
+}
+
+function getLetter(id: string): Record<string, unknown> {
+  return getDb().prepare("SELECT * FROM institutional_letters WHERE id=?").get(id) as Record<string, unknown>;
+}
+
+function countReminders(parentId: string): number {
+  return (
+    getDb().prepare("SELECT COUNT(*) AS n FROM institutional_letters WHERE parent_id=? AND kind='reminder'").get(parentId) as {
+      n: number;
+    }
+  ).n;
+}
+
+type Overrides = {
+  now?: () => number;
+  rng?: () => number;
+  send?: (payload: PreparedEmail, idempotencyKey?: string) => Promise<EmailSendResult>;
+  fetch?: typeof fetch;
+  hasApiKey?: () => boolean;
+};
+
+/** Un passage, déterministe et sans réseau : clé Resend « présente » par défaut (surchargeable). */
+function run(overrides: Overrides = {}) {
+  return runLettersSender({
+    now: () => NOW,
+    rng: () => 0,
+    send: async () => ({ sent: true }),
+    fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch,
+    hasApiKey: () => true,
+    ...overrides,
+  });
+}
+
+describe("Expéditeur périodique des lettres institutionnelles", () => {
+  let tmp: string;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "osd-lettres-"));
+    process.env.DATABASE_PATH = join(tmp, "t.sqlite");
+    process.env.OSD_VEILLE_TELEGRAM_TOKEN = TOKEN;
+    process.env.OSD_VEILLE_TELEGRAM_CHAT = CHAT;
+    getDb(); // ouvre la base fictive, migrations comprises
+  });
+
+  afterEach(() => {
+    closeDb();
+    rmSync(tmp, { recursive: true, force: true });
+    delete process.env.DATABASE_PATH;
+    delete process.env.OSD_VEILLE_TELEGRAM_TOKEN;
+    delete process.env.OSD_VEILLE_TELEGRAM_CHAT;
+  });
+
+  it("envoie la lettre dont le créneau est atteint, marque `sent` et prévient Telegram (domaine seulement)", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 1_000 });
+    const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true, providerId: "abc12345-1111-2222-3333-444444444444" }));
+    const fetcher = telegramOk();
+
+    const status = await run({ send, fetch: fetcher });
+
+    expect(send).toHaveBeenCalledTimes(1);
+    const [payload, idempotencyKey] = send.mock.calls[0];
+    expect(idempotencyKey).toBe(`letter-${id}`);
+    expect(payload.to).toEqual(["boite-fictive@admin.ch"]);
+    expect(payload.bcc).toEqual(["contact@openswissdata.com"]);
+    expect(payload.reply_to).toBe("contact@openswissdata.com");
+    expect(payload.cc).toBeUndefined();
+
+    const row = getLetter(id);
+    expect(row.status).toBe("sent");
+    expect(row.resend_id).toBe("abc12345-1111-2222-3333-444444444444");
+    expect(row.sent_at).toBe(NOW);
+    expect(row.lease_until).toBeNull();
+    expect(status.sent).toBe(1);
+
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    const text = sentTexts(fetcher)[0].text;
+    expect(text).toContain("admin.ch");
+    expect(text).not.toContain("boite-fictive@admin.ch");
+  });
+
+  it("transmet aussi le cc à Resend quand il est présent", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 1_000, cc: "autre-boite@admin.ch" });
+    const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
+    await run({ send });
+    expect(send.mock.calls[0][0].cc).toEqual(["autre-boite@admin.ch"]);
+    expect(getLetter(id).status).toBe("sent");
+  });
+
+  it("marque `sent` même quand Resend ne renvoie pas d'identifiant (décision du 06.10, divergence avec le plan)", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 1_000 });
+    await run({ send: async () => ({ sent: true }) });
+    const row = getLetter(id);
+    expect(row.status).toBe("sent");
+    expect(row.resend_id).toBeNull();
+  });
+
+  it("une lettre en retard de dix minutes ou plus est replanifiée, jamais envoyée en retard", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 11 * 60_000 });
+    const send = vi.fn();
+    const status = await run({ send });
+
+    expect(send).not.toHaveBeenCalled();
+    const row = getLetter(id);
+    expect(row.status).toBe("queued");
+    expect(row.scheduled_at).not.toBe(NOW - 11 * 60_000);
+    expect(row.scheduled_at as number).toBeGreaterThan(NOW);
+    expect(status.total_rescheduled).toBe(1);
+  });
+
+  it("une lettre en retard de moins de dix minutes part normalement", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 9 * 60_000 });
+    const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
+    await run({ send });
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(getLetter(id).status).toBe("sent");
+  });
+
+  it("deux passages concurrents sur la même lettre due n'envoient qu'une seule fois", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 1_000 });
+    let resolveSend: ((v: EmailSendResult) => void) | null = null;
+    const send = vi.fn(
+      () =>
+        new Promise<EmailSendResult>((resolve) => {
+          resolveSend = resolve;
+        }),
+    );
+    const fetcher = telegramOk();
+
+    // La réclamation (SELECT+UPDATE conditionnel) est synchrone, sans `await` avant elle : le second
+    // passage, lancé juste après, s'exécute déjà après que le premier a marqué la lettre `sending`.
+    const p1 = run({ send, fetch: fetcher });
+    const p2 = run({ send, fetch: fetcher });
+    expect(send).toHaveBeenCalledTimes(1); // le second passage n'a rien trouvé à réclamer
+    resolveSend?.({ sent: true });
+    await Promise.all([p1, p2]);
+
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(getLetter(id).status).toBe("sent");
+  });
+
+  it("un bail `sending` expiré repasse en `queued` sans envoi, `attempts+1`", async () => {
+    const id = insertLetter({ status: "sending", lease_until: NOW - 1_000, attempts: 0, scheduled_at: NOW - 20 * 60_000 });
+    const send = vi.fn();
+    await run({ send });
+    expect(send).not.toHaveBeenCalled();
+    const row = getLetter(id);
+    expect(row.status).toBe("queued");
+    expect(row.attempts).toBe(1);
+    expect(row.lease_until).toBeNull();
+  });
+
+  it("un bail expiré à son troisième essai passe `failed` et alerte Telegram", async () => {
+    const id = insertLetter({ status: "sending", lease_until: NOW - 1_000, attempts: 2, scheduled_at: NOW - 20 * 60_000 });
+    const fetcher = telegramOk();
+    await run({ fetch: fetcher });
+    const row = getLetter(id);
+    expect(row.status).toBe("failed");
+    expect(row.attempts).toBe(3);
+    const text = sentTexts(fetcher)[0].text;
+    expect(text).toContain("échec");
+    expect(text).toContain("admin.ch");
+  });
+
+  it("un échec transitoire retourne en `queued` (`attempts+1`), le passage suivant réussit", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 1_000 });
+    const send = vi
+      .fn<(payload: PreparedEmail, key?: string) => Promise<EmailSendResult>>()
+      .mockResolvedValueOnce({ sent: false, reason: "resend_error", details: "HTTP 500" })
+      .mockResolvedValueOnce({ sent: true, providerId: "abc12345-1111-2222-3333-444444444444" });
+    const fetcher = telegramOk();
+
+    await run({ send, fetch: fetcher, now: () => NOW });
+    let row = getLetter(id);
+    expect(row.status).toBe("queued");
+    expect(row.attempts).toBe(1);
+    expect(fetcher).not.toHaveBeenCalled(); // pas encore un échec définitif : pas d'alerte
+
+    await run({ send, fetch: fetcher, now: () => NOW + 60_000 });
+    row = getLetter(id);
+    expect(row.status).toBe("sent");
+    expect(row.resend_id).toBe("abc12345-1111-2222-3333-444444444444");
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it("trois échecs consécutifs marquent `failed` et alertent Telegram ; jamais avant", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 1_000 });
+    const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: false, reason: "resend_error", details: "HTTP 500" }));
+    const fetcher = telegramOk();
+
+    await run({ send, fetch: fetcher, now: () => NOW });
+    expect(getLetter(id).status).toBe("queued");
+    expect(fetcher).not.toHaveBeenCalled();
+
+    await run({ send, fetch: fetcher, now: () => NOW + 60_000 });
+    expect(getLetter(id).status).toBe("queued");
+    expect(fetcher).not.toHaveBeenCalled();
+
+    await run({ send, fetch: fetcher, now: () => NOW + 120_000 });
+    const row = getLetter(id);
+    expect(row.status).toBe("failed");
+    expect(row.attempts).toBe(3);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("un destinataire devenu interdit échoue sans envoi, Telegram ne cite jamais l'adresse complète", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 1_000, to_address: "boite@example.com" });
+    const send = vi.fn();
+    const fetcher = telegramOk();
+
+    await run({ send, fetch: fetcher });
+
+    expect(send).not.toHaveBeenCalled();
+    const row = getLetter(id);
+    expect(row.status).toBe("failed");
+    const text = sentTexts(fetcher)[0].text;
+    expect(text).toContain("non autorisé");
+    expect(text).not.toContain("boite@example.com");
+  });
+
+  it("un cc devenu interdit échoue aussi, sans envoi", async () => {
+    const id = insertLetter({ scheduled_at: NOW - 1_000, cc: "boite@example.com" });
+    const send = vi.fn();
+    await run({ send });
+    expect(send).not.toHaveBeenCalled();
+    expect(getLetter(id).status).toBe("failed");
+  });
+
+  it("sans clé Resend configurée : rien n'est envoyé, rien n'est modifié en base", async () => {
+    const dueId = insertLetter({ scheduled_at: NOW - 1_000 });
+    const leasedId = insertLetter({ status: "sending", lease_until: NOW - 1_000, attempts: 1, scheduled_at: NOW - 500_000 });
+    const send = vi.fn();
+    const fetcher = telegramOk();
+
+    const status = await run({ send, fetch: fetcher, hasApiKey: () => false });
+
+    expect(send).not.toHaveBeenCalled();
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(status.status).toBe("not_configured");
+    expect(status.code).toBe("no_api_key");
+
+    const due = getLetter(dueId);
+    expect(due.status).toBe("queued");
+    expect(due.attempts).toBe(0);
+    expect(due.scheduled_at).toBe(NOW - 1_000);
+
+    const leased = getLetter(leasedId);
+    expect(leased.status).toBe("sending");
+    expect(leased.attempts).toBe(1);
+    expect(leased.lease_until).toBe(NOW - 1_000);
+  });
+
+  it("échappe le html du corps (&, <, >, \") et pose des <br> pour les retours à la ligne, tout en gardant le texte brut intact", async () => {
+    const body = 'Bonjour <FINMA> & "vous",\nDeuxième ligne.';
+    const id = insertLetter({ scheduled_at: NOW - 1_000, body });
+    const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
+
+    await run({ send });
+
+    const payload = send.mock.calls[0][0];
+    expect(payload.text).toBe(body);
+    expect(payload.html).toContain("&lt;FINMA&gt;");
+    expect(payload.html).toContain("&amp;");
+    expect(payload.html).toContain("&quot;vous&quot;");
+    expect(payload.html).toContain("<br>");
+    expect(payload.html).not.toContain("<FINMA>");
+    expect(getLetter(id).status).toBe("sent");
+  });
+
+  describe("jamais hors créneau même si un passage glisse (Review Focus #4)", () => {
+    it("un passage qui glisse sur une minute multiple de 5 attend plutôt que d'envoyer, puis part au passage suivant", async () => {
+      const id = insertLetter({ scheduled_at: zurichSummer(12, 14) });
+      const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
+
+      // Le passage prévu glisse à 12:15 (minute multiple de 5, hors créneau) : seulement 1 min de
+      // retard, bien avant le seuil des dix minutes qui déclenche la replanification.
+      await run({ send, now: () => zurichSummer(12, 15) });
+      expect(send).not.toHaveBeenCalled();
+      let row = getLetter(id);
+      expect(row.status).toBe("queued");
+      expect(row.scheduled_at).toBe(zurichSummer(12, 14)); // pas touchée : ni envoyée, ni replanifiée
+
+      await run({ send, now: () => zurichSummer(12, 16) });
+      expect(send).toHaveBeenCalledTimes(1);
+      row = getLetter(id);
+      expect(row.status).toBe("sent");
+    });
+
+    it("après 17:30, une lettre pas encore en retard de dix minutes attend plutôt que de partir hors créneau", async () => {
+      const id = insertLetter({ scheduled_at: zurichSummer(17, 29) });
+      const send = vi.fn();
+
+      // 17:35 : six minutes de retard sur 17:29, donc pas « en retard » au sens des dix minutes —
+      // mais 17:35 est après la fermeture de la fenêtre (17:30). Sans ce garde-fou, elle partirait
+      // hors créneau ; avec lui, elle attend simplement un prochain passage dans la fenêtre.
+      const status = await run({ send, now: () => zurichSummer(17, 35) });
+
+      expect(send).not.toHaveBeenCalled();
+      const row = getLetter(id);
+      expect(row.status).toBe("queued");
+      expect(row.scheduled_at).toBe(zurichSummer(17, 29));
+      expect(status.total_rescheduled).toBe(0);
+    });
+
+    it("la même lettre, encore en attente dix minutes après son créneau, est replanifiée au jour ouvré suivant", async () => {
+      const id = insertLetter({ scheduled_at: zurichSummer(17, 29) });
+      const send = vi.fn();
+
+      const status = await run({ send, now: () => zurichSummer(17, 39) }); // dix minutes de retard
+
+      expect(send).not.toHaveBeenCalled();
+      const row = getLetter(id);
+      expect(row.status).toBe("queued");
+      expect(row.scheduled_at as number).toBeGreaterThan(zurichSummer(17, 29));
+      expect(status.total_rescheduled).toBe(1);
+    });
+  });
+
+  describe("relance automatique unique", () => {
+    // Lundi 5 octobre 2026 → lundi 26 octobre 2026 : exactement trois semaines, aucun jour férié
+    // fédéral en octobre → exactement 15 jours ouvrés (voir tests/lib/letters.test.ts).
+    const SENT_AT = Date.UTC(2026, 9, 5, 12, 0);
+    const DUE_NOW = Date.UTC(2026, 9, 26, 12, 0);
+    const NOT_YET_NOW = Date.UTC(2026, 9, 23, 12, 0); // 14 jours ouvrés seulement
+
+    it("crée une relance après 15 jours ouvrés sans réponse, planifiée par scheduleSlot", async () => {
+      const id = insertLetter({
+        status: "sent",
+        sent_at: SENT_AT,
+        scheduled_at: SENT_AT - 60_000,
+        subject: "Autorisation de reprise",
+        body: "Texte original.\n\nMeilleures salutations\n\nClaude-Alain Martin\nOpenSwissData\ncontact@openswissdata.com",
+      });
+      const send = vi.fn();
+
+      const status = await run({ send, now: () => DUE_NOW });
+
+      expect(send).not.toHaveBeenCalled(); // la relance est créée `queued`, pas envoyée ce passage-ci
+      expect(countReminders(id)).toBe(1);
+      expect(status.total_reminders_created).toBe(1);
+
+      const reminder = getDb()
+        .prepare("SELECT * FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
+        .get(id) as Record<string, unknown>;
+      expect(reminder.subject).toBe("Relance : Autorisation de reprise");
+      expect(reminder.to_address).toBe("boite-fictive@admin.ch");
+      expect(reminder.status).toBe("queued");
+      expect(reminder.scheduled_at as number).toBeGreaterThan(DUE_NOW);
+      expect(reminder.body as string).toContain("05.10.2026");
+      expect(reminder.body as string).toContain("Meilleures salutations");
+      expect(reminder.body as string).toContain("Claude-Alain Martin");
+    });
+
+    it("reprend le destinataire (cc compris) et le motif de la lettre d'origine", async () => {
+      const id = insertLetter({
+        status: "sent",
+        sent_at: SENT_AT,
+        cc: "autre-boite@admin.ch",
+        purpose: "Clarification des conditions",
+      });
+      await run({ send: vi.fn(), now: () => DUE_NOW });
+      const reminder = getDb()
+        .prepare("SELECT * FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
+        .get(id) as Record<string, unknown>;
+      expect(reminder.cc).toBe("autre-boite@admin.ch");
+      expect(reminder.purpose).toBe("Clarification des conditions");
+    });
+
+    it("pas encore 15 jours ouvrés : aucune relance", async () => {
+      const id = insertLetter({ status: "sent", sent_at: SENT_AT });
+      await run({ send: vi.fn(), now: () => NOT_YET_NOW });
+      expect(countReminders(id)).toBe(0);
+    });
+
+    it("jamais de relance après une réponse humaine", async () => {
+      const id = insertLetter({ status: "sent", sent_at: SENT_AT, reply_at: SENT_AT + 1000, reply_kind: "human" });
+      await run({ send: vi.fn(), now: () => DUE_NOW });
+      expect(countReminders(id)).toBe(0);
+    });
+
+    it("une réponse automatique n'arrête pas la relance", async () => {
+      const id = insertLetter({ status: "sent", sent_at: SENT_AT, reply_at: SENT_AT + 1000, reply_kind: "auto" });
+      await run({ send: vi.fn(), now: () => DUE_NOW });
+      expect(countReminders(id)).toBe(1);
+    });
+
+    it("jamais de relance d'une relance", async () => {
+      const parentId = insertLetter({ status: "sent", sent_at: SENT_AT });
+      insertLetter({
+        kind: "reminder",
+        parent_id: parentId,
+        status: "sent",
+        sent_at: SENT_AT, // la relance elle-même est due depuis 15 jours ouvrés
+        subject: "Relance : Demande de données",
+      });
+      await run({ send: vi.fn(), now: () => DUE_NOW });
+      // Une seule relance au total : celle insérée à la main, jamais une seconde pour la relance elle-même.
+      const total = getDb().prepare("SELECT COUNT(*) AS n FROM institutional_letters WHERE kind='reminder'").get() as { n: number };
+      expect(total.n).toBe(1);
+    });
+
+    it("une relance n'est jamais créée deux fois, même si la première est ensuite annulée", async () => {
+      const id = insertLetter({ status: "sent", sent_at: SENT_AT });
+      await run({ send: vi.fn(), now: () => DUE_NOW });
+      expect(countReminders(id)).toBe(1);
+
+      getDb().prepare("UPDATE institutional_letters SET status='cancelled' WHERE parent_id=?").run(id);
+
+      await run({ send: vi.fn(), now: () => DUE_NOW + 86_400_000 });
+      expect(countReminders(id)).toBe(1); // toujours une seule, malgré l'annulation
+    });
+  });
+
+  describe("témoin operation_checks/letters", () => {
+    it("expose des compteurs sans adresse ni objet, lisible par `readLettersSenderStatus`", async () => {
+      insertLetter({ scheduled_at: NOW - 1_000 });
+      insertLetter({ status: "failed", scheduled_at: NOW - 1_000 });
+      await run({ send: async () => ({ sent: true }) });
+
+      const status = readLettersSenderStatus(getDb());
+      expect(status).not.toBeNull();
+      expect(status?.status).toBe("ok");
+      expect(status?.sent).toBe(1);
+      expect(status?.failed).toBe(1);
+      expect(status?.queued).toBe(0);
+      expect(JSON.stringify(status)).not.toMatch(/@/); // jamais une adresse
+    });
+  });
+});

@@ -10,6 +10,7 @@ import { readBackupChecks } from "../lib/backup-state.js";
 import { readCleanupProof } from "../lib/cleanup.js";
 import { readErasureReplay } from "../lib/erasure-registry.js";
 import { readMailWatchStatus } from "../lib/mail-watch.js";
+import { readLettersSenderStatus } from "../lib/letters-sender.js";
 import { orderService, accountDownloadHistory } from "../lib/customer-service.js";
 import { orderLegalSummary } from "../lib/order-legal.js";
 import { Hono } from "hono";
@@ -238,6 +239,6 @@ crmRoute.get("/operations", async c => {
   try {
     workflows = await cached("workflows", 600_000, readCrmWorkflows);
   } catch { /* L'indisponibilité reste visible, aucun succès n'est inventé. */ }
-  return c.json({ checked_at: Date.now(), datasets, checks, cleanup: readCleanupProof(db), erasure_replay: readErasureReplay(db), mail_watch: (() => { try { return readMailWatchStatus(db); } catch { return null; } })(), incidents:(()=>{try{return readDeliveryIncidentPage(db,'open',1,Date.now(),c.get('customer_id'))}catch{return null}})(), workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
+  return c.json({ checked_at: Date.now(), datasets, checks, cleanup: readCleanupProof(db), erasure_replay: readErasureReplay(db), mail_watch: (() => { try { return readMailWatchStatus(db); } catch { return null; } })(), letters: (() => { try { return readLettersSenderStatus(db); } catch { return null; } })(), incidents:(()=>{try{return readDeliveryIncidentPage(db,'open',1,Date.now(),c.get('customer_id'))}catch{return null}})(), workflows, deliveries: deliveryStatus(), financial:financialStatus(), revision: process.env.RAILWAY_GIT_COMMIT_SHA ?? "local" });
 });
 crmRoute.route("/mail", crmMailRoute);

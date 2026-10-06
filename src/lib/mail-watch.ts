@@ -30,8 +30,9 @@ export const DEFAULT_WATCH_DOMAINS: readonly string[] = Object.keys(INSTITUTIONS
 const CODES: ReadonlySet<string> = new Set<MailWatchCode>(['not_configured', 'telegram_config_invalid', 'mailbox_not_connected', 'mailbox_unreadable', 'imap_failed', 'telegram_http', 'telegram_timeout', 'telegram_network', 'telegram_not_ok']);
 
 type State = MailWatchStatus & { version: 1; seen: string[] };
-type TelegramConfig = { token: string; chat: string };
-type Sent = { ok: true } | { ok: false; code: MailWatchCode; http_status?: number };
+// Exportés pour `letters-sender.ts` (tâche 2), qui réutilise `telegramConfig`/`sendTelegram` tels quels.
+export type TelegramConfig = { token: string; chat: string };
+export type Sent = { ok: true } | { ok: false; code: MailWatchCode; http_status?: number };
 export type MailWatchCandidate = { key: string; folder: string; uid: number; validity: string; domain: string; fromName: string; fromAddress: string; subject: string; receivedAt: number; extract: string | null };
 type Dependencies = {
   database: () => Database.Database;
@@ -97,7 +98,8 @@ export function alertText(message: Pick<MailWatchCandidate, 'domain' | 'fromName
   return clip(lines.join('\n'), TELEGRAM_LIMIT);
 }
 
-function telegramConfig(): TelegramConfig | 'missing' | 'invalid' {
+/** Exportée pour `letters-sender.ts` (tâche 2) : même configuration Telegram, jamais dupliquée. */
+export function telegramConfig(): TelegramConfig | 'missing' | 'invalid' {
   const token = process.env.OSD_VEILLE_TELEGRAM_TOKEN?.trim() ?? '';
   const chat = process.env.OSD_VEILLE_TELEGRAM_CHAT?.trim() ?? '';
   if (!token || !chat) return 'missing';
@@ -106,7 +108,8 @@ function telegramConfig(): TelegramConfig | 'missing' | 'invalid' {
   return { token, chat };
 }
 
-async function sendTelegram(config: TelegramConfig, text: string, fetcher: typeof fetch): Promise<Sent> {
+/** Exportée pour `letters-sender.ts` (tâche 2) : même fonction d'envoi Telegram, jamais dupliquée. */
+export async function sendTelegram(config: TelegramConfig, text: string, fetcher: typeof fetch): Promise<Sent> {
   let response: Response;
   try {
     response = await fetcher(`https://api.telegram.org/bot${config.token}/sendMessage`, {

@@ -11,9 +11,15 @@ export interface EmailSendResult {
 export interface PreparedEmail {
   from: string;
   to: string[];
+  /** Copie visible (Resend l'accepte nativement) — ADDITIF, les envois existants ne la posent jamais. */
+  cc?: string[];
+  /** Copie cachée — ADDITIF, voir ci-dessus. */
+  bcc?: string[];
   reply_to: string;
   subject: string;
   html: string;
+  /** Corps en texte brut, en plus du HTML — ADDITIF, voir ci-dessus. */
+  text?: string;
   attachments?: Array<{ filename: string; content: string }>;
 }
 
@@ -38,7 +44,16 @@ function resendApiKey(): string | null {
   return key.trim();
 }
 
-function fromAddress(): string {
+/**
+ * Une clé Resend exploitable est configurée, sans l'exposer. Pour un appelant
+ * (ex. `letters-sender.ts`) qui doit court-circuiter tout un passage AVANT la
+ * moindre écriture si l'envoi est de toute façon impossible.
+ */
+export function hasResendApiKey(): boolean {
+  return resendApiKey() !== null;
+}
+
+export function fromAddress(): string {
   return process.env.RESEND_FROM_EMAIL || "noreply@openswissdata.com";
 }
 

@@ -7,6 +7,8 @@ import {
   isSwissBusinessDay,
   scheduleSlot,
   toZurichParts,
+  businessDaysSince,
+  isSendableNow,
 } from "../../src/lib/letters.js";
 
 // --- Horloge Zurich indépendante de l'implémentation, pour construire les
@@ -103,6 +105,9 @@ describe("easterSunday (Meeus/Jones/Butcher)", () => {
   });
   it("2027 : 28 mars", () => {
     expect(easterSunday(2027)).toEqual({ month: 3, day: 28 });
+  });
+  it("2028 : 16 avril", () => {
+    expect(easterSunday(2028)).toEqual({ month: 4, day: 16 });
   });
 });
 
@@ -255,5 +260,58 @@ describe("scheduleSlot", () => {
       if (i === 5) expect(dayKey > firstDayKey).toBe(true);
       scheduled = [...scheduled, slot];
     }
+  });
+});
+
+describe("isSendableNow", () => {
+  it("accepte une minute ordinaire de la fenêtre, un jour ouvrable", () => {
+    expect(isSendableNow(zurichEpoch(2026, 6, 10, 12, 1))).toBe(true); // mercredi, 12:01
+  });
+
+  it("refuse une minute multiple de 5, même dans la fenêtre", () => {
+    expect(isSendableNow(zurichEpoch(2026, 6, 10, 12, 0))).toBe(false); // 12:00
+    expect(isSendableNow(zurichEpoch(2026, 6, 10, 12, 15))).toBe(false); // 12:15
+  });
+
+  it("refuse avant 09:05 et à 09:05 pile (multiple de 5), accepte 09:06", () => {
+    expect(isSendableNow(zurichEpoch(2026, 6, 10, 9, 4))).toBe(false);
+    expect(isSendableNow(zurichEpoch(2026, 6, 10, 9, 5))).toBe(false);
+    expect(isSendableNow(zurichEpoch(2026, 6, 10, 9, 6))).toBe(true);
+  });
+
+  it("refuse à 17:30 pile (multiple de 5) et après, accepte 17:29", () => {
+    expect(isSendableNow(zurichEpoch(2026, 6, 10, 17, 29))).toBe(true);
+    expect(isSendableNow(zurichEpoch(2026, 6, 10, 17, 30))).toBe(false);
+    expect(isSendableNow(zurichEpoch(2026, 6, 10, 17, 31))).toBe(false);
+  });
+
+  it("refuse un week-end et un jour férié, même à une bonne minute", () => {
+    expect(isSendableNow(zurichEpoch(2026, 6, 13, 12, 1))).toBe(false); // samedi
+    expect(isSendableNow(zurichEpoch(2026, 8, 1, 12, 1))).toBe(false); // 1er août, férié
+  });
+});
+
+describe("businessDaysSince", () => {
+  it("un jour férié dans l'intervalle n'est pas compté (jeudi 2 avril → vendredi 10 avril 2026, Pâques entre les deux)", () => {
+    // Pâques 2026 = 5 avril (dimanche) : Vendredi saint le 3, lundi de Pâques le 6 — deux jours
+    // fériés en semaine à exclure, en plus du week-end du 4-5. Jours ouvrés après le 2 : 7, 8, 9, 10 = 4.
+    const from = zurichEpoch(2026, 4, 2, 10, 0); // jeudi
+    const to = zurichEpoch(2026, 4, 10, 10, 0); // vendredi suivant
+    expect(businessDaysSince(from, to)).toBe(4);
+  });
+
+  it("une semaine ordinaire sans férié compte les cinq jours ouvrés", () => {
+    const from = zurichEpoch(2026, 6, 10, 10, 0); // mercredi
+    const to = zurichEpoch(2026, 6, 17, 10, 0); // mercredi suivant
+    // Jours ouvrés après le 10 : 11,12 (jeu,ven), 15,16,17 (lun,mar,mer) = 5 (13-14 = week-end).
+    expect(businessDaysSince(from, to)).toBe(5);
+  });
+
+  it("même journée ou ordre inversé → 0", () => {
+    const a = zurichEpoch(2026, 6, 10, 9, 0);
+    const b = zurichEpoch(2026, 6, 10, 17, 0);
+    expect(businessDaysSince(a, b)).toBe(0); // même date Zurich
+    expect(businessDaysSince(b, a)).toBe(0); // b après a dans l'horloge, mais même date → 0
+    expect(businessDaysSince(zurichEpoch(2026, 6, 17, 9, 0), zurichEpoch(2026, 6, 10, 9, 0))).toBe(0); // ordre inversé
   });
 });

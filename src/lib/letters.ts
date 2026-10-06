@@ -244,6 +244,20 @@ function validMinutesOfDay(earliestMinute: number, sameDayMinutes: readonly numb
 }
 
 /**
+ * Vrai seulement un jour ouvré, dans la fenêtre 09:05–17:30 (Zurich), à une minute qui n'est
+ * jamais un multiple de 5 — exactement la contrainte que `scheduleSlot` impose à `scheduled_at`.
+ * Sert à l'expéditeur périodique (tâche 2) : si un passage glisse (retraite Resend, Telegram), il
+ * ne doit jamais envoyer hors de ce créneau même pour une lettre qui n'est pas encore « en retard »
+ * au sens des dix minutes (Review Focus #4 : jamais après 17:30, jamais sur une minute ronde).
+ */
+export function isSendableNow(utcMs: number): boolean {
+  const p = toZurichParts(utcMs);
+  if (!isSwissBusinessDay(p.year, p.month, p.day)) return false;
+  if (p.minuteOfDay < WINDOW_START_MINUTE || p.minuteOfDay > WINDOW_END_MINUTE) return false;
+  return p.minuteOfDay % 5 !== 0;
+}
+
+/**
  * Premier créneau d'envoi valide à partir de `now` : jour ouvré (aujourd'hui
  * si l'heure le permet encore), moins de 5 lettres déjà planifiées ce jour,
  * minute tirée au hasard dans 09:05–17:30 heure de Zurich, jamais multiple de
@@ -291,4 +305,31 @@ export function scheduleSlot(
     cursor = addCalendarDays(cursor.year, cursor.month, cursor.day, 1);
   }
   throw new Error("letters_schedule_saturated");
+}
+
+// --- Jours ouvrés écoulés (relance) -----------------------------------------
+
+/** Index entier du jour calendaire (fuseau Europe/Zurich), pour comparer deux dates sans heure. */
+function calendarDayIndex(year: number, month: number, day: number): number {
+  return Math.round(Date.UTC(year, month - 1, day) / 86_400_000);
+}
+
+/**
+ * Nombre de jours ouvrés strictement après la date (Zurich) de `fromMs`
+ * jusqu'à la date (Zurich) de `toMs` incluse — mêmes jours fériés que
+ * `scheduleSlot`. Sert à la relance : « 15 jours ouvrés après l'envoi sans
+ * réponse » (tâche 2). `fromMs`/`toMs` dans le désordre ou le même jour → 0.
+ */
+export function businessDaysSince(fromMs: number, toMs: number): number {
+  const from = toZurichParts(fromMs);
+  const to = toZurichParts(toMs);
+  const fromIndex = calendarDayIndex(from.year, from.month, from.day);
+  const toIndex = calendarDayIndex(to.year, to.month, to.day);
+  if (toIndex <= fromIndex) return 0;
+  let count = 0;
+  for (let index = fromIndex + 1; index <= toIndex; index++) {
+    const d = new Date(index * 86_400_000);
+    if (isSwissBusinessDay(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate())) count++;
+  }
+  return count;
 }
