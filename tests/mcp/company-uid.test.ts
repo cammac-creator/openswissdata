@@ -20,4 +20,18 @@ describe("numéro IDE", () => {
     // 0,0,0,0,0,0,0,0 : somme 0, 11 − 0 = 11 → 0.
     expect(parseUid("CHE-000.000.000").ok).toBe(true);
   });
+
+  // Suffixe TVA (relecture finale du 06.10.2026) : accepté et retiré, avec ou sans espace,
+  // dans les trois langues nationales utilisées pour ce suffixe.
+  it.each([
+    "CHE-103.137.179 MWST",
+    "CHE-103.137.179MWST",
+    "CHE-103.137.179 TVA",
+    "CHE-103.137.179TVA",
+    "CHE-103.137.179 IVA",
+    "CHE-103.137.179IVA",
+    "che 103 137 179 mwst",
+  ])("accepte le suffixe TVA %s", (raw) => {
+    expect(parseUid(raw)).toEqual({ ok: true, uid: "CHE-103.137.179", compact: "CHE103137179" });
+  });
 });

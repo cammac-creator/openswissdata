@@ -4,14 +4,20 @@
  * Forme canonique `CHE-xxx.xxx.xxx`. Le neuvième chiffre est un contrôle modulo 11 : poids
  * 5,4,3,2,7,6,5,4 sur les huit premiers chiffres, contrôle = 11 − (somme mod 11) ; 11 donne 0 et
  * 10 rend le numéro invalide. Un numéro refusé ici ne part jamais vers une source (tâche osd.fiche).
+ *
+ * Suffixe TVA toléré (relecture finale du 06.10.2026) : un IDE suisse publié avec son numéro
+ * de TVA s'écrit souvent `CHE-xxx.xxx.xxx MWST/TVA/IVA` (une langue par région). Ce suffixe,
+ * avec ou sans espace avant lui, est retiré avant lecture des neuf chiffres ; il ne fait
+ * jamais partie du numéro lui-même et n'entre donc jamais dans le calcul du contrôle.
  */
 
 export type ParsedUid = { ok: true; uid: string; compact: string } | { ok: false; reason: string };
 
 const POIDS = [5, 4, 3, 2, 7, 6, 5, 4] as const;
+const SUFFIXE_TVA_RE = /(MWST|TVA|IVA)$/;
 
 export function parseUid(raw: string): ParsedUid {
-  const sansSeparateurs = raw.trim().toUpperCase().replace(/[\s.\-]/g, "");
+  const sansSeparateurs = raw.trim().toUpperCase().replace(/[\s.\-]/g, "").replace(SUFFIXE_TVA_RE, "");
   const chiffres = sansSeparateurs.startsWith("CHE") ? sansSeparateurs.slice(3) : sansSeparateurs;
   if (!/^\d{9}$/.test(chiffres)) {
     return { ok: false, reason: "a Swiss UID has the form CHE-xxx.xxx.xxx (nine digits)" };
