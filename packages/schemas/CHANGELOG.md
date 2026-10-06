@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-06: provenance.json 1.1
+
+`provenance.json` 1.1 adds the field `sources`: every public source assembled in the archive, sorted by `id`. The
+change is additive; 1.0 manifests are unchanged and still verify with the same recipe.
+
 ## 2026-09-30: supervisory organisation of portfolio managers and trustees
 
 `finma.schema.json` gains three optional properties:

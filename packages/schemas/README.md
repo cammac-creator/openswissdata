@@ -18,6 +18,18 @@ These schemas are the canonical structural contract for each dataset. They are v
 
 Schemas follow semantic versioning. A breaking change bumps major; new optional fields bump minor.
 
+## provenance.json
+
+Every archive ships a signed `provenance.json` manifest. The Ed25519 signature covers the canonical JSON of the whole
+manifest without `signature` and `timestamp_authority` (keys sorted, `undefined` values dropped).
+
+### Version 1.1 (archives published from October 2026)
+
+The manifest keeps every version 1.0 field and adds `sources`: the list of all public sources assembled in the
+archive, sorted by `id`. Each entry carries `id`, `institution`, `url`, `permission_reference`,
+`permission_authority`, `permission_date` (optional) and `jurisdiction`. Verification does not change: the signature
+covers the whole manifest, so `sources` too. A version 1.0 archive verifies exactly as before.
+
 ## Linking from code
 
 ### TypeScript / Node
