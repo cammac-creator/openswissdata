@@ -5,7 +5,8 @@ import archiver from "archiver";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeSqlInsertsChunked, writeParquet } from "../shared/formats.js";
-import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
+import { buildSignedProvenance, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
+import { provenanceFieldsFor } from "../shared/sources/products.js";
 import type { NomenclatureRow, CrossWalkRow, NomenclatureScheme } from "./types.js";
 import type { ClassificationLink, ClassificationSource } from "../../src/lib/classification-links.js";
 import type { IngestStatentResult } from "./ingest-statent.js";
@@ -792,15 +793,11 @@ ${hasEmbeddings ? "- **Embeddings model** — Xenova/paraphrase-multilingual-mpn
     const buf = readFileSync(p);
     return { name: f, size: buf.length, sha256: createHash("sha256").update(buf).digest("hex") };
   });
-  const profile = PERMISSION_PROFILES.classifications;
   const provenance = await buildSignedProvenance({
+    ...provenanceFieldsFor("classifications"),
     dataset: "classifications",
     version,
-    sourceUrl: profile.sourceUrl,
     files: manifestFiles,
-    permissionReference: profile.permissionReference,
-    permissionAuthority: profile.permissionAuthority,
-    jurisdiction: profile.jurisdiction,
     withTimestamp: opts.withTimestamp,
     signing: opts.signing,
   });

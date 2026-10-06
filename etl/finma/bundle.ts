@@ -6,7 +6,8 @@ import XLSX from "../shared/xlsx.js";
 import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
-import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
+import { buildSignedProvenance, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
+import { provenanceFieldsFor } from "../shared/sources/products.js";
 import type { FinmaEntity, FinmaEntityType, FinmaReferenceOrganisation, FinmaSourceFileMeta, FinmaWarning } from "./types.js";
 import type { SupervisionMatchStats } from "./ingest-supervision.js";
 import { FINMA_BUNDLE_ENTITY_TYPES } from "./types.js";
@@ -774,15 +775,11 @@ ${zefixSection}
     const buf = readFileSync(p);
     return { name: f, size: buf.length, sha256: createHash("sha256").update(buf).digest("hex") };
   });
-  const profile = PERMISSION_PROFILES.finma;
   const provenance = await buildSignedProvenance({
+    ...provenanceFieldsFor("finma"),
     dataset: "finma",
     version,
-    sourceUrl: profile.sourceUrl,
     files: manifestFiles,
-    permissionReference: profile.permissionReference,
-    permissionAuthority: profile.permissionAuthority,
-    jurisdiction: profile.jurisdiction,
     withTimestamp: opts.withTimestamp,
     signing: opts.signing,
   });

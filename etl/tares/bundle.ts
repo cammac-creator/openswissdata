@@ -9,6 +9,7 @@ import { stringify as csvStream } from "csv-stringify";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeParquet } from "../shared/formats.js";
 import { buildSignedProvenance, PERMISSION_PROFILES, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
+import { provenanceFieldsFor } from "../shared/sources/products.js";
 import type { DutyRateRow } from "./parse-bazg-xlsx.js";
 import type { TaresRow } from "./types.js";
 import {
@@ -325,14 +326,10 @@ https://www.bazg.admin.ch/
     return { name: f, size: buf.length, sha256: createHash("sha256").update(buf).digest("hex") };
   });
   const provenance = await buildSignedProvenance({
+    ...provenanceFieldsFor("tares"),
     dataset: "tares",
     version,
-    sourceUrl: profile.sourceUrl,
     files: manifestFiles,
-    permissionReference: profile.permissionReference,
-    permissionAuthority: profile.permissionAuthority,
-    permissionDate: profile.permissionDate,
-    jurisdiction: profile.jurisdiction,
     withTimestamp: opts.withTimestamp,
     signing: opts.signing,
   });
