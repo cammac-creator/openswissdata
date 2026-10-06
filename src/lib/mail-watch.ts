@@ -1,7 +1,10 @@
 // Veille des réponses attendues dans la boîte de support contact@ (FINMA, OFS, ONU et domaines configurés).
 // Lecture seule : dossiers ouverts en EXAMINE (readOnly), enveloppes et corps lus en BODY.PEEK ; aucun drapeau,
-// déplacement ni effacement. Alerte Telegram en texte brut. Aucun contenu n'est conservé : le témoin
-// `operation_checks/mail_watch` garde des compteurs, des dates, un code fermé et des empreintes des messages signalés.
+// déplacement ni effacement. Alerte Telegram en texte brut. Aucun contenu n'est conservé pour les messages
+// simplement alertés : le témoin `operation_checks/mail_watch` garde des compteurs, des dates, un code fermé et
+// des empreintes des messages signalés. Exception : une réponse rattachée à une lettre institutionnelle (tâche 3
+// du plan du 06.10.2026) écrit sur `institutional_letters` sa date, le DOMAINE de l'expéditeur (jamais l'adresse),
+// son objet tronqué à 200 caractères et son type (humaine/automatique) — ces quatre champs, jamais un extrait.
 import { createHash } from 'node:crypto';
 import type Database from 'better-sqlite3';
 import type { ImapFlow } from 'imapflow';
@@ -10,6 +13,7 @@ import { getDb } from './db.js';
 import { currentMessage } from './crm-language.js';
 import { connection, imap } from '../routes/crm-mail.js';
 import type { MailWatchCode, MailWatchStatus } from './mail-watch-types.js';
+import { toZurichParts, type LetterKind, type ReplyKind } from './letters.js';
 
 const CHECK = 'mail_watch';
 const START_DELAY = 60_000;
@@ -28,12 +32,41 @@ const OWN_DOMAIN = 'openswissdata.com';
 const INSTITUTIONS: Readonly<Record<string, string>> = { 'finma.ch': 'FINMA', 'bfs.admin.ch': 'OFS', 'un.org': 'ONU' };
 export const DEFAULT_WATCH_DOMAINS: readonly string[] = Object.keys(INSTITUTIONS);
 const CODES: ReadonlySet<string> = new Set<MailWatchCode>(['not_configured', 'telegram_config_invalid', 'mailbox_not_connected', 'mailbox_unreadable', 'imap_failed', 'telegram_http', 'telegram_timeout', 'telegram_network', 'telegram_not_ok']);
+// Rattachement aux lettres (tâche 3) : une lettre `sent` envoyée il y a moins de 120 jours, sans réponse
+// humaine rattachée, élargit la veille à son domaine (en plus de la liste ci-dessus, inchangée).
+const PENDING_LETTER_WINDOW_MS = 120 * 86_400_000;
+// En-têtes supplémentaires lus par BODY.PEEK[HEADER.FIELDS (...)], seulement quand un domaine surveillé a une
+// lettre en attente de réponse : `In-Reply-To` est déjà dans l'enveloppe (`envelope.inReplyTo`), gratuite.
+const REPLY_HEADER_FIELDS = ['references', 'auto-submitted', 'x-autoreply', 'x-autorespond'];
+// Préfixe de réponse ou de transfert, français/allemand/anglais, avec ou sans espace avant le « : ».
+const REPLY_PREFIX_RE = /^\s*(?:re|aw|antw|tr|wg|fwd)\s*:\s*/i;
+const AUTO_SUBJECT_MARKERS: readonly string[] = [
+  'accusé de réception', 'eingangsbestätigung', 'automatic reply', 'réponse automatique',
+  'automatische antwort', 'abwesenheit', 'out of office', 'absence',
+].map(m => m.normalize('NFC').toLowerCase());
 
-type State = MailWatchStatus & { version: 1; seen: string[] };
+type State = MailWatchStatus & { version: 1; seen: string[]; total_attached: number };
 // Exportés pour `letters-sender.ts` (tâche 2), qui réutilise `telegramConfig`/`sendTelegram` tels quels.
 export type TelegramConfig = { token: string; chat: string };
 export type Sent = { ok: true } | { ok: false; code: MailWatchCode; http_status?: number };
-export type MailWatchCandidate = { key: string; folder: string; uid: number; validity: string; domain: string; fromName: string; fromAddress: string; subject: string; receivedAt: number; extract: string | null };
+/** En-têtes supplémentaires du message, lus seulement pour un domaine qui a une lettre en attente. */
+type ReplyHeaders = { references: string | null; autoSubmitted: string | null; autoreplyFlag: boolean };
+/** Lettre `sent` sans réponse humaine, candidate à un rattachement (tâche 3). */
+type LetterMatchTarget = { id: string; kind: LetterKind; parentId: string | null; domains: string[]; subject: string; resendId: string | null; sentAt: number };
+/** Rattachement trouvé pour un message : la lettre D'ORIGINE (jamais une relance) à mettre à jour. */
+type LetterMatch = { targetId: string; subject: string; sentAt: number; replyKind: ReplyKind };
+export type MailWatchCandidate = {
+  key: string; folder: string; uid: number; validity: string; domain: string; fromName: string; fromAddress: string;
+  subject: string; receivedAt: number; extract: string | null;
+  /** `envelope.inReplyTo`, gratuite (fait partie de l'ENVELOPE IMAP standard). */
+  inReplyTo: string | null;
+  /** `null` si jamais demandés (aucune lettre en attente sur ce domaine) ou si la lecture a échoué. */
+  headers: ReplyHeaders | null;
+  /** Lecture des en-têtes requise mais pas encore obtenue de façon fiable : le message reste `pending`,
+   * jamais classé « humaine » par défaut, retenté au passage suivant (jamais marqué `seen`). */
+  headersPending: boolean;
+  letterMatch: LetterMatch | null;
+};
 type Dependencies = {
   database: () => Database.Database;
   now: () => number;
@@ -131,8 +164,117 @@ export async function sendTelegram(config: TelegramConfig, text: string, fetcher
   return typeof body === 'object' && body !== null && (body as { ok?: unknown }).ok === true ? { ok: true } : { ok: false, code: 'telegram_not_ok' };
 }
 
-async function collect(client: ImapFlow, domains: readonly string[], now: number, seen: ReadonlySet<string>) {
+/** Domaine exact (`a===b`) ou sous-domaine dans l'un ou l'autre sens (jamais une sous-chaîne, jamais
+ * un domaine frère : `xyz.admin.ch` et `seco.admin.ch` ne se rattachent jamais l'un à l'autre). */
+function domainsRelated(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  return a === b || a.endsWith(`.${b}`) || b.endsWith(`.${a}`);
+}
+// NFC : un client de messagerie peut envoyer un accent décomposé (NFD), qui ne contiendrait jamais
+// la forme composée des motifs ci-dessous sans cette normalisation.
+const normalizeText = (s: string) => compact(s.normalize('NFC')).toLowerCase();
+function stripReplyPrefixes(subject: string): string {
+  let s = subject;
+  for (;;) {
+    const next = s.replace(REPLY_PREFIX_RE, '');
+    if (next === s) return s;
+    s = next;
+  }
+}
+/** Objet de la lettre (débarrassé de ses préfixes de réponse éventuels) contenu dans l'objet reçu,
+ * comparaison NFC insensible à la casse et aux espaces multiples. Un objet de lettre vide après
+ * dépouillement ne correspond jamais (il serait sinon « contenu » dans n'importe quel message). */
+function subjectMatches(letterSubject: string, receivedSubject: string): boolean {
+  const stripped = normalizeText(stripReplyPrefixes(letterSubject));
+  return stripped.length > 0 && normalizeText(receivedSubject).includes(stripped);
+}
+/** En-têtes demandés par `REPLY_HEADER_FIELDS` : repli des lignes pliées (RFC 5322) avant lecture. */
+function parseHeaderBlock(buf: Buffer): ReplyHeaders {
+  const unfolded = buf.toString('utf8').replace(/\r?\n[ \t]+/g, ' ');
+  const map = new Map<string, string>();
+  for (const line of unfolded.split(/\r?\n/)) {
+    const idx = line.indexOf(':');
+    if (idx < 0) continue;
+    const name = line.slice(0, idx).trim().toLowerCase();
+    if (!map.has(name)) map.set(name, line.slice(idx + 1).trim());
+  }
+  return {
+    references: map.get('references') ?? null,
+    autoSubmitted: map.get('auto-submitted') ?? null,
+    autoreplyFlag: map.has('x-autoreply') || map.has('x-autorespond'),
+  };
+}
+/** `auto` si l'en-tête l'indique explicitement ou si l'objet porte un motif d'accusé/absence connu ; sinon `human`. */
+function classifyReplyKind(subject: string, headers: ReplyHeaders): ReplyKind {
+  const submitted = headers.autoSubmitted?.trim().toLowerCase();
+  if (submitted && submitted !== 'no') return 'auto';
+  if (headers.autoreplyFlag) return 'auto';
+  const normalized = normalizeText(subject);
+  return AUTO_SUBJECT_MARKERS.some(marker => normalized.includes(marker)) ? 'auto' : 'human';
+}
+/** Lettres `sent` encore sans réponse humaine (une réponse automatique n'arrête jamais le rattachement
+ * d'une réponse humaine ultérieure). Sert à la fois à élargir la veille et à trouver le bon rattachement. */
+function pendingLetters(db: Database.Database): LetterMatchTarget[] {
+  const rows = db.prepare(
+    `SELECT id, kind, parent_id, to_address, cc, subject, resend_id, sent_at FROM institutional_letters
+     WHERE status='sent' AND sent_at IS NOT NULL AND (reply_kind IS NULL OR reply_kind='auto')`,
+  ).all() as Array<{ id: string; kind: string; parent_id: string | null; to_address: string; cc: string | null; subject: string; resend_id: string | null; sent_at: number }>;
+  return rows.map(r => ({
+    id: r.id, kind: r.kind as LetterKind, parentId: r.parent_id,
+    domains: [...new Set([domainOf(r.to_address), ...(r.cc ? [domainOf(r.cc)] : [])])],
+    subject: r.subject, resendId: r.resend_id, sentAt: r.sent_at,
+  }));
+}
+/** Domaines des lettres en attente envoyées il y a moins de 120 jours (en plus des domaines par défaut,
+ * inchangés) : même règle de rattachement « domaine exact ou sous-domaine » que la veille elle-même. */
+function pendingLetterDomains(targets: readonly LetterMatchTarget[], now: number): string[] {
+  const cutoff = now - PENDING_LETTER_WINDOW_MS;
+  return [...new Set(targets.filter(t => t.sentAt >= cutoff).flatMap(t => t.domains))];
+}
+/** Lettre (ou relance) dont le domaine ET (l'objet ou l'identifiant Resend dans l'en-tête) correspondent ;
+ * la plus récemment envoyée si plusieurs conviennent. */
+function findLetterMatch(senderHost: string, subject: string, inReplyTo: string | null, references: string | null, targets: readonly LetterMatchTarget[]): LetterMatchTarget | null {
+  const sameDomain = targets.filter(t => t.domains.some(d => domainsRelated(senderHost, d)));
+  if (!sameDomain.length) return null;
+  const headerBlob = `${inReplyTo ?? ''} ${references ?? ''}`.toLowerCase();
+  const matched = sameDomain.filter(t => subjectMatches(t.subject, subject) || (!!t.resendId && headerBlob.includes(t.resendId.toLowerCase())));
+  return matched.length ? matched.reduce((best, cur) => (cur.sentAt > best.sentAt ? cur : best)) : null;
+}
+/** Une relance pointe toujours vers la lettre D'ORIGINE : c'est elle que `letters-sender.ts` consulte
+ * (`reply_kind`) pour arrêter une relance ou en annuler une déjà en file. */
+function resolveLetterTarget(matched: LetterMatchTarget, targets: readonly LetterMatchTarget[]): LetterMatchTarget {
+  if (matched.kind === 'reminder' && matched.parentId) {
+    const parent = targets.find(t => t.id === matched.parentId);
+    if (parent) return parent;
+  }
+  return matched;
+}
+const pad2 = (n: number) => String(n).padStart(2, '0');
+/** Date Zurich au format JJ.MM.AAAA, pour le texte Telegram de rattachement. */
+function zurichDayMonthYear(ms: number): string {
+  const p = toZurichParts(ms);
+  return `${pad2(p.day)}.${pad2(p.month)}.${p.year}`;
+}
+/** Texte Telegram « à la place » de l'alerte habituelle pour un message rattaché (jamais les deux). */
+function letterReplyText(match: LetterMatch, senderDomain: string): string {
+  const subject = clip(compact(match.subject), 300) || '(sans objet)';
+  const label = match.replyKind === 'human' ? 'humaine' : 'accusé automatique';
+  return clip(`Réponse à la lettre du ${zurichDayMonthYear(match.sentAt)} (${subject}) : ${label} de ${senderDomain}`, TELEGRAM_LIMIT);
+}
+/** Écrit le rattachement sur la lettre D'ORIGINE, jamais l'adresse ni un extrait. Une réponse `auto`
+ * n'écrase jamais une réponse `human` déjà enregistrée ; une `human` remplace une `auto`. Renvoie `true`
+ * seulement si l'écriture a eu lieu (sert au compteur interne, jamais exposé au bureau). */
+function attachReply(db: Database.Database, targetId: string, at: number, fromDomain: string, subject: string, kind: ReplyKind): boolean {
+  const result = db.prepare(
+    `UPDATE institutional_letters SET reply_at=?, reply_from=?, reply_subject=?, reply_kind=?
+     WHERE id=? AND (reply_kind IS NULL OR (reply_kind='auto' AND ?='human'))`,
+  ).run(at, fromDomain, clip(compact(subject), 200), kind, targetId, kind);
+  return result.changes === 1;
+}
+
+async function collect(client: ImapFlow, baseDomains: readonly string[], extraDomains: readonly string[], now: number, seen: ReadonlySet<string>, letterTargets: readonly LetterMatchTarget[]) {
   const since = now - WINDOW;
+  const searchDomains = [...new Set([...baseDomains, ...extraDomains])];
   // Boîte de réception et indésirables : une réponse attendue peut être classée en spam par erreur.
   const folders = (await client.list()).filter(f => f.path === 'INBOX' || f.specialUse === '\\Junk').slice(0, 2);
   const keys = new Set<string>();
@@ -140,7 +282,7 @@ async function collect(client: ImapFlow, domains: readonly string[], now: number
   for (const folder of folders) {
     const mailbox = await client.mailboxOpen(folder.path, { readOnly: true });
     const validity = mailbox.uidValidity.toString();
-    const uids = await client.search({ since: new Date(since), or: domains.map(from => ({ from })) }, { uid: true });
+    const uids = await client.search({ since: new Date(since), or: searchDomains.map(from => ({ from })) }, { uid: true });
     if (!Array.isArray(uids) || !uids.length) continue;
     // Enveloppe seulement ; aucune autre commande IMAP n'est lancée pendant la lecture du flux.
     for await (const m of client.fetch(uids.slice(-MAX_FETCH), { envelope: true, uid: true, internalDate: true }, { uid: true })) {
@@ -151,7 +293,10 @@ async function collect(client: ImapFlow, domains: readonly string[], now: number
       const host = domainOf(address);
       // Copies de nos propres envois (contact@ en copie cachée) : jamais une réponse.
       if (host === OWN_DOMAIN || host.endsWith(`.${OWN_DOMAIN}`)) continue;
-      const domain = watchedDomainFor(address, domains);
+      // Le domaine « officiel » (alerte complète, extrait compris) vient toujours de la liste de base ;
+      // un domaine ajouté seulement parce qu'une lettre l'attend (`extraDomains`) ne doit jamais faire
+      // passer un message non rattaché pour un organisme officiel ni changer son alerte habituelle.
+      const domain = watchedDomainFor(address, baseDomains) ?? watchedDomainFor(address, extraDomains);
       if (!domain) continue;
       const receivedAt = new Date(m.internalDate ?? envelope.date ?? Number.NaN).getTime();
       if (!Number.isFinite(receivedAt) || receivedAt < since) continue;
@@ -161,7 +306,11 @@ async function collect(client: ImapFlow, domains: readonly string[], now: number
       if (keys.has(key)) continue;
       keys.add(key);
       if (seen.has(key)) continue;
-      fresh.push({ key, folder: folder.path, uid: m.uid, validity, domain, fromName: sender?.name ?? '', fromAddress: address, subject: envelope.subject ?? '', receivedAt, extract: null });
+      fresh.push({
+        key, folder: folder.path, uid: m.uid, validity, domain, fromName: sender?.name ?? '', fromAddress: address,
+        subject: envelope.subject ?? '', receivedAt, extract: null,
+        inReplyTo: envelope.inReplyTo?.trim() || null, headers: null, headersPending: false, letterMatch: null,
+      });
     }
   }
   fresh.sort((a, b) => a.receivedAt - b.receivedAt);
@@ -178,6 +327,32 @@ async function collect(client: ImapFlow, domains: readonly string[], now: number
         } catch { /* Alerte sans extrait. */ }
       }
     } catch { /* Alerte sans extrait. */ }
+  }
+  // En-têtes de rattachement : seulement si une lettre en attente partage le domaine de l'expéditeur
+  // (sinon aucun appel IMAP de plus). Une lecture manquante ou incertaine (bail non ouvert, UIDVALIDITY
+  // changée, exception) laisse le message `headersPending` : jamais classé sans ces en-têtes, jamais
+  // marqué `seen`, retenté au passage suivant — une réponse humaine mal lue ne doit jamais passer pour
+  // une réponse automatique, ni l'inverse.
+  const needsHeaders = (c: MailWatchCandidate) => letterTargets.some(t => t.domains.some(d => domainsRelated(domainOf(c.fromAddress), d)));
+  for (const folder of new Set(selected.filter(needsHeaders).map(c => c.folder))) {
+    let mailbox: { uidValidity: bigint } | undefined;
+    try { mailbox = await client.mailboxOpen(folder, { readOnly: true }); }
+    catch { for (const c of selected.filter(c => c.folder === folder && needsHeaders(c))) c.headersPending = true; continue; }
+    for (const candidate of selected.filter(c => c.folder === folder && needsHeaders(c))) {
+      if (mailbox.uidValidity.toString() !== candidate.validity) { candidate.headersPending = true; continue; }
+      try {
+        const m = await client.fetchOne(String(candidate.uid), { headers: REPLY_HEADER_FIELDS }, { uid: true });
+        if (m && m.headers !== undefined) candidate.headers = parseHeaderBlock(m.headers);
+        else candidate.headersPending = true;
+      } catch { candidate.headersPending = true; }
+    }
+  }
+  for (const candidate of selected) {
+    if (candidate.headersPending) continue;
+    const matched = findLetterMatch(domainOf(candidate.fromAddress), candidate.subject, candidate.inReplyTo, candidate.headers?.references ?? null, letterTargets);
+    if (!matched) continue;
+    const target = resolveLetterTarget(matched, letterTargets);
+    candidate.letterMatch = { targetId: target.id, subject: target.subject, sentAt: target.sentAt, replyKind: classifyReplyKind(candidate.subject, candidate.headers ?? { references: null, autoSubmitted: null, autoreplyFlag: false }) };
   }
   return { matched: keys.size, fresh: fresh.length, selected };
 }
@@ -204,6 +379,9 @@ function readState(db: Database.Database): State | null {
     pending: count(raw.pending),
     total_alerted: count(raw.total_alerted),
     domains: count(raw.domains),
+    // Compteur interne, jamais exposé par `publicView` (voir `readMailWatchStatus`) : réponses rattachées
+    // à une lettre institutionnelle depuis la création du témoin.
+    total_attached: count(raw.total_attached),
     seen: Array.isArray(raw.seen) ? raw.seen.filter((k): k is string => typeof k === 'string' && /^[0-9a-f]{32}$/.test(k)).slice(-MAX_SEEN) : [],
   };
 }
@@ -232,27 +410,43 @@ export async function runMailWatch(overrides: Partial<Dependencies> = {}): Promi
   let state: State = {
     version: 1, checked_at: now, status: 'ok', code: null, http_status: null,
     last_success_at: previous?.last_success_at ?? null, last_alert_at: previous?.last_alert_at ?? null,
-    matched: 0, alerted: 0, pending: 0, total_alerted: previous?.total_alerted ?? 0, domains: 0, seen: previous?.seen ?? [],
+    matched: 0, alerted: 0, pending: 0, total_alerted: previous?.total_alerted ?? 0,
+    total_attached: previous?.total_attached ?? 0, domains: 0, seen: previous?.seen ?? [],
   };
   const finish = (patch: Partial<State>) => publicView(save(db, { ...state, ...patch }));
   const telegram = telegramConfig();
   if (telegram === 'missing') return finish({ status: 'inactive', code: 'not_configured' });
   if (telegram === 'invalid') return finish({ status: 'inactive', code: 'telegram_config_invalid' });
-  const domains = watchedDomains();
-  state.domains = domains.length;
+  const baseDomains = watchedDomains();
+  // Lettres `sent` encore sans réponse humaine : élargissent la veille (domaines envoyés il y a moins de
+  // 120 jours) et servent de candidates au rattachement (sans limite d'âge pour le rattachement lui-même :
+  // une liste de domaines par défaut comme `finma.ch` reste surveillée indéfiniment).
+  const letterTargets = pendingLetters(db);
+  const extraDomains = pendingLetterDomains(letterTargets, now);
+  state.domains = [...new Set([...baseDomains, ...extraDomains])].length;
   let auth: { user: string; pass: string } | null;
   try { auth = deps.connection(); } catch { return finish({ status: 'error', code: 'mailbox_unreadable' }); }
   if (!auth) return finish({ status: 'inactive', code: 'mailbox_not_connected' });
   let found: Awaited<ReturnType<typeof collect>>;
   const seen = new Set(state.seen);
-  try { found = await deps.withImap(auth, client => collect(client, domains, now, seen)); }
+  try { found = await deps.withImap(auth, client => collect(client, baseDomains, extraDomains, now, seen, letterTargets)); }
   catch { return finish({ status: 'error', code: 'imap_failed' }); }
   state = { ...state, matched: found.matched, pending: found.fresh };
   for (const candidate of found.selected) {
-    const sent = await sendTelegram(telegram, alertText(candidate), deps.fetch);
+    // En-têtes de rattachement pas encore obtenus de façon fiable : ni alerte ni marquage `seen` ce
+    // passage-ci, le message reste `pending` et sera relu au passage suivant (jamais classé à la légère).
+    if (candidate.headersPending) continue;
+    const text = candidate.letterMatch ? letterReplyText(candidate.letterMatch, domainOf(candidate.fromAddress)) : alertText(candidate);
+    const sent = await sendTelegram(telegram, text, deps.fetch);
     if (!sent.ok) return finish({ status: 'error', code: sent.code, http_status: sent.http_status ?? null });
+    // Rattachement écrit seulement après l'accusé Telegram, comme le marquage `seen` ci-dessous : un
+    // arrêt en cours de passage ne doit jamais perdre un rattachement ni le rejouer à double.
+    const attached = candidate.letterMatch
+      ? attachReply(db, candidate.letterMatch.targetId, candidate.receivedAt, domainOf(candidate.fromAddress), candidate.subject, candidate.letterMatch.replyKind)
+      : false;
     state = {
-      ...state, alerted: state.alerted + 1, pending: state.pending - 1, total_alerted: state.total_alerted + 1, last_alert_at: deps.now(),
+      ...state, alerted: state.alerted + 1, pending: state.pending - 1, total_alerted: state.total_alerted + 1,
+      total_attached: state.total_attached + (attached ? 1 : 0), last_alert_at: deps.now(),
       seen: [...state.seen.filter(k => k !== candidate.key), candidate.key].slice(-MAX_SEEN),
     };
     // Marqué aussitôt : un arrêt en cours de passage ne renverra pas cette alerte.

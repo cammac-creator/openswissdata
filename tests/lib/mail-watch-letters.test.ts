@@ -1,0 +1,361 @@
+// Tâche 3 du plan du 06.10.2026 : rattachement d'une réponse d'autorité à la lettre institutionnelle
+// qu'elle concerne. Même boîte IMAP simulée que `tests/lib/mail-watch.test.ts` (aucune connexion
+// réelle, commandes d'écriture interdites), étendue pour répondre aussi à `fetchOne({ headers })`.
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+type Message = {
+  folder: string;
+  uid: number;
+  envelope: Record<string, unknown>;
+  internalDate: Date;
+  source: string;
+  headers?: Record<string, string>;
+};
+const imap = vi.hoisted(() => ({
+  messages: [] as Message[],
+  calls: [] as Array<{ name: string; args: unknown[] }>,
+  forbidden: [] as string[],
+  folders: [{ path: 'INBOX' }, { path: 'Spam', specialUse: '\\Junk' }] as Array<{ path: string; specialUse?: string }>,
+  failConnect: false,
+  failHeadersForUid: null as number | null,
+}));
+vi.mock('imapflow', () => {
+  const forbid = (name: string) => async () => { imap.forbidden.push(name); throw new Error(`commande interdite : ${name}`); };
+  class ImapFlow {
+    current = '';
+    constructor(options: { host: string }) { imap.calls.push({ name: 'constructor', args: [options.host] }); }
+    on() {}
+    async connect() { if (imap.failConnect) throw new Error('imap indisponible'); }
+    close() {}
+    async list() { imap.calls.push({ name: 'list', args: [] }); return imap.folders; }
+    async mailboxOpen(path: string, options: unknown) { imap.calls.push({ name: 'mailboxOpen', args: [path, options] }); this.current = path; return { path, uidValidity: 7n }; }
+    async search(query: unknown, options: unknown) { imap.calls.push({ name: 'search', args: [query, options] }); return imap.messages.filter(m => m.folder === this.current).map(m => m.uid); }
+    async *fetch(range: number[], query: unknown, options: unknown) {
+      imap.calls.push({ name: 'fetch', args: [range, query, options] });
+      for (const m of imap.messages.filter(x => x.folder === this.current && range.includes(x.uid))) yield { uid: m.uid, envelope: m.envelope, internalDate: m.internalDate };
+    }
+    async fetchOne(uid: string, query: { source?: { maxLength: number }; headers?: string[] }, options: unknown) {
+      imap.calls.push({ name: 'fetchOne', args: [uid, query, options] });
+      const m = imap.messages.find(x => x.folder === this.current && String(x.uid) === uid);
+      if (!m) return false;
+      if (query.headers) {
+        if (imap.failHeadersForUid === m.uid) throw new Error('lecture des en-têtes impossible');
+        const wanted = new Set(query.headers.map(h => h.toLowerCase()));
+        const lines = Object.entries(m.headers ?? {}).filter(([k]) => wanted.has(k.toLowerCase())).map(([k, v]) => `${k}: ${v}`);
+        return { uid: m.uid, headers: Buffer.from(lines.length ? `${lines.join('\r\n')}\r\n` : '') };
+      }
+      return { uid: m.uid, source: Buffer.from(m.source) };
+    }
+    messageFlagsAdd = forbid('messageFlagsAdd'); messageFlagsSet = forbid('messageFlagsSet'); messageFlagsRemove = forbid('messageFlagsRemove');
+    setFlagColor = forbid('setFlagColor'); messageDelete = forbid('messageDelete'); messageMove = forbid('messageMove'); messageCopy = forbid('messageCopy');
+    append = forbid('append'); mailboxCreate = forbid('mailboxCreate'); mailboxRename = forbid('mailboxRename'); mailboxDelete = forbid('mailboxDelete');
+  }
+  return { ImapFlow };
+});
+
+import { getDb, closeDb } from '../../src/lib/db.js';
+import { seal, clearCrmCache } from '../../src/lib/crm-source.js';
+import { runMailWatch } from '../../src/lib/mail-watch.js';
+import { runLettersSender } from '../../src/lib/letters-sender.js';
+
+const HOUR = 3_600_000;
+const TOKEN = '123456789:jeton-fictif-TELEGRAM-abcdefghij';
+
+const telegramOk = () => vi.fn(async () => Response.json({ ok: true, result: { message_id: 1 } }));
+const sentTexts = (fetcher: ReturnType<typeof telegramOk>) => fetcher.mock.calls.map(([, init]) => JSON.parse(String((init as RequestInit | undefined)?.body)) as { chat_id: string; text: string });
+const witness = () => JSON.parse((getDb().prepare("SELECT details_json FROM operation_checks WHERE name='mail_watch'").get() as { details_json: string }).details_json);
+const run = (fetcher: typeof fetch, now: number) => runMailWatch({ fetch: fetcher, now: () => now });
+
+function insertLetter(overrides: Record<string, unknown> = {}): string {
+  const db = getDb();
+  const id = (overrides.id as string) ?? `id-${Math.random().toString(36).slice(2)}`;
+  const row = {
+    id, kind: 'letter', parent_id: null, to_address: 'sanctions@seco.admin.ch', cc: null,
+    subject: 'Autorisation de reprise', body: 'Texte de la lettre.\n\nMeilleures salutations\n\nClaude-Alain Martin\nOpenSwissData\ncontact@openswissdata.com',
+    purpose: 'Clarification', status: 'sent', scheduled_at: 0, lease_until: null, attempted_at: null, attempts: 0,
+    resend_id: null, sent_at: 0, reply_at: null, reply_from: null, reply_subject: null, reply_extract: null,
+    reply_kind: null, reply_processed_at: null, created_at: 0,
+    ...overrides, id,
+  };
+  db.prepare(
+    `INSERT INTO institutional_letters
+      (id, kind, parent_id, to_address, cc, subject, body, purpose, status, scheduled_at,
+       lease_until, attempted_at, attempts, resend_id, sent_at, reply_at, reply_from, reply_subject,
+       reply_extract, reply_kind, reply_processed_at, created_at)
+     VALUES
+      (@id, @kind, @parent_id, @to_address, @cc, @subject, @body, @purpose, @status, @scheduled_at,
+       @lease_until, @attempted_at, @attempts, @resend_id, @sent_at, @reply_at, @reply_from, @reply_subject,
+       @reply_extract, @reply_kind, @reply_processed_at, @created_at)`,
+  ).run(row);
+  return id;
+}
+function getLetter(id: string): Record<string, unknown> {
+  return getDb().prepare('SELECT * FROM institutional_letters WHERE id=?').get(id) as Record<string, unknown>;
+}
+
+const msg = (over: Partial<Message> & { uid: number; address: string; subject: string; receivedAt: number }): Message => ({
+  folder: 'INBOX', uid: over.uid, internalDate: new Date(over.receivedAt), source: 'From: x\r\nSubject: y\r\n\r\nCorps.',
+  envelope: { messageId: `<m-${over.uid}@x.test>`, from: [{ name: 'Service', address: over.address }], subject: over.subject, date: new Date(over.receivedAt) },
+  ...over,
+});
+
+describe('Rattachement des réponses aux lettres institutionnelles (tâche 3)', () => {
+  let temp: string;
+  beforeEach(() => {
+    temp = mkdtempSync(join(tmpdir(), 'osd-veille-lettres-'));
+    process.env.DATABASE_PATH = join(temp, 'fictive.sqlite');
+    process.env.OSD_BACKUP_KEY = 'c'.repeat(64);
+    process.env.OSD_VEILLE_TELEGRAM_TOKEN = TOKEN;
+    process.env.OSD_VEILLE_TELEGRAM_CHAT = '424242';
+    imap.messages = []; imap.calls = []; imap.forbidden = []; imap.failConnect = false; imap.failHeadersForUid = null;
+    clearCrmCache();
+    getDb().prepare('INSERT INTO crm_connections(name,secret_encrypted,updated_at) VALUES(?,?,?)').run('support', seal(JSON.stringify({ user: 'contact@openswissdata.com', pass: 'fictif' })), 0);
+  });
+  afterEach(() => {
+    closeDb(); rmSync(temp, { recursive: true, force: true });
+    for (const name of ['DATABASE_PATH', 'OSD_BACKUP_KEY', 'OSD_VEILLE_TELEGRAM_TOKEN', 'OSD_VEILLE_TELEGRAM_CHAT', 'OSD_MAIL_WATCH_DOMAINS']) delete process.env[name];
+  });
+
+  it('rattache par objet (Re:), écrit date/domaine/objet tronqué/type, et son Telegram remplace l’alerte habituelle', async () => {
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    const id = insertLetter({ sent_at: now - 5 * 86_400_000, subject: 'Autorisation de reprise' });
+    imap.messages = [msg({ uid: 1, address: 'juriste@seco.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: now - HOUR })];
+    const fetcher = telegramOk();
+    const result = await run(fetcher, now);
+    expect(fetcher).toHaveBeenCalledOnce();
+    const [sent] = sentTexts(fetcher);
+    expect(sent.text).toBe('Réponse à la lettre du 05.10.2026 (Autorisation de reprise) : humaine de seco.admin.ch');
+    expect(sent.text).not.toMatch(/juriste|@/);
+    const letter = getLetter(id);
+    expect(letter.reply_from).toBe('seco.admin.ch');
+    expect(letter.reply_subject).toBe('Re: Autorisation de reprise');
+    expect(letter.reply_kind).toBe('human');
+    expect(letter.reply_at).toBe(now - HOUR);
+    expect(letter.reply_extract).toBeNull();
+    expect(result.alerted).toBe(1);
+  });
+
+  it('rattache par l’identifiant Resend dans References, sans correspondance d’objet', async () => {
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    const id = insertLetter({ sent_at: now - 2 * 86_400_000, subject: 'Autorisation de reprise', resend_id: 'abc12345-1111-2222-3333-444444444444' });
+    imap.messages = [msg({
+      uid: 2, address: 'juriste@seco.admin.ch', subject: 'Sans rapport apparent', receivedAt: now - HOUR,
+      headers: { References: '<abc12345-1111-2222-3333-444444444444@resend.dev>' },
+    })];
+    const result = await run(telegramOk(), now);
+    expect(getLetter(id).reply_kind).toBe('human');
+    expect(result.alerted).toBe(1);
+  });
+
+  it('classe « auto » par l’en-tête Auto-Submitted, par X-Autoreply, ou par l’objet (chaque motif)', async () => {
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    const cases: Array<{ headers?: Record<string, string>; subject: string }> = [
+      { headers: { 'Auto-Submitted': 'auto-replied' }, subject: 'Re: Autorisation de reprise' },
+      { headers: { 'X-Autoreply': 'yes' }, subject: 'Re: Autorisation de reprise' },
+      { headers: { 'X-Autorespond': 'yes' }, subject: 'Re: Autorisation de reprise' },
+      { subject: 'Accusé de réception : Autorisation de reprise' },
+      { subject: 'Eingangsbestätigung : Autorisation de reprise' },
+      { subject: 'Automatic reply: Autorisation de reprise' },
+      { subject: 'Réponse automatique : Autorisation de reprise' },
+      { subject: 'Automatische Antwort: Autorisation de reprise' },
+      { subject: 'Abwesenheit: Autorisation de reprise' },
+      { subject: 'Out of office: Autorisation de reprise' },
+      { subject: 'Absence : Autorisation de reprise' },
+    ];
+    for (const [i, c] of cases.entries()) {
+      // Objet de lettre unique par cas, à deux chiffres (« 00 », « 01 », … jamais préfixe l'un de
+      // l'autre comme « 1 »/« 10 ») : les objets des autres cas ne doivent jamais correspondre
+      // (sinon le message pourrait se rattacher à une lettre déjà classée par un cas précédent).
+      const tag = String(i).padStart(2, '0');
+      const id = insertLetter({ sent_at: now - HOUR, subject: `Autorisation de reprise cas-${tag}` });
+      const subject = c.subject.replace('Autorisation de reprise', `Autorisation de reprise cas-${tag}`);
+      imap.messages = [msg({ uid: 100 + i, address: 'juriste@seco.admin.ch', subject, receivedAt: now - 10 * 60_000, headers: c.headers })];
+      await run(telegramOk(), now);
+      expect(getLetter(id).reply_kind, `cas #${i} (${subject})`).toBe('auto');
+    }
+  });
+
+  it('une auto n’écrase jamais une humaine déjà enregistrée ; une humaine remplace une auto (deux passages)', async () => {
+    const id = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Autorisation de reprise' });
+    // 1) une humaine arrive d'abord.
+    const t1 = Date.UTC(2026, 9, 10, 12, 0);
+    imap.messages = [msg({ uid: 1, address: 'juriste@seco.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: t1 - HOUR })];
+    await run(telegramOk(), t1);
+    expect(getLetter(id).reply_kind).toBe('human');
+    const humanSubject = getLetter(id).reply_subject;
+    // 2) une auto arrive ensuite (autre message, autre clé) : ne doit rien changer.
+    const t2 = t1 + HOUR;
+    imap.messages.push(msg({ uid: 2, address: 'juriste@seco.admin.ch', subject: 'Out of office: Autorisation de reprise', receivedAt: t2 - HOUR }));
+    await run(telegramOk(), t2);
+    const after = getLetter(id);
+    expect(after.reply_kind).toBe('human');
+    expect(after.reply_subject).toBe(humanSubject); // pas écrasé
+
+    // 3) sur une seconde lettre, l'ordre inverse : auto d'abord, puis humaine qui remplace.
+    const id2 = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Conditions d’accès' });
+    imap.messages.push(msg({ uid: 3, address: 'juriste@seco.admin.ch', subject: 'Abwesenheit: Conditions d’accès', receivedAt: t2 - 30 * 60_000 }));
+    await run(telegramOk(), t2 + HOUR);
+    expect(getLetter(id2).reply_kind).toBe('auto');
+    imap.messages.push(msg({ uid: 4, address: 'juriste@seco.admin.ch', subject: 'Re: Conditions d’accès', receivedAt: t2 + 30 * 60_000 }));
+    await run(telegramOk(), t2 + 2 * HOUR);
+    expect(getLetter(id2).reply_kind).toBe('human');
+  });
+
+  it('humaine puis auto dans le MÊME passage (deux lettres) : chacune garde son résultat propre', async () => {
+    const idHuman = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Sujet humain' });
+    const idAuto = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Sujet auto' });
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    imap.messages = [
+      msg({ uid: 1, address: 'juriste@seco.admin.ch', subject: 'Re: Sujet humain', receivedAt: now - 2 * HOUR }),
+      msg({ uid: 2, address: 'juriste@seco.admin.ch', subject: 'Out of office: Sujet auto', receivedAt: now - HOUR }),
+    ];
+    await run(telegramOk(), now);
+    expect(getLetter(idHuman).reply_kind).toBe('human');
+    expect(getLetter(idAuto).reply_kind).toBe('auto');
+  });
+
+  it('auto puis humaine dans le MÊME passage, sur la MÊME lettre : la seconde (humaine) gagne', async () => {
+    const id = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Autorisation de reprise' });
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    // L'auto est reçue avant (receivedAt plus ancien = traité en premier par le tri du passage).
+    imap.messages = [
+      msg({ uid: 1, address: 'juriste@seco.admin.ch', subject: 'Out of office: Autorisation de reprise', receivedAt: now - 2 * HOUR }),
+      msg({ uid: 2, address: 'juriste@seco.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: now - HOUR }),
+    ];
+    await run(telegramOk(), now);
+    expect(getLetter(id).reply_kind).toBe('human');
+  });
+
+  it('refuse un domaine qui imite (domaine frère sous le même parent, jamais un sous-domaine)', async () => {
+    process.env.OSD_MAIL_WATCH_DOMAINS = 'admin.ch';
+    const id = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Autorisation de reprise', to_address: 'sanctions@seco.admin.ch' });
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    // xyz.admin.ch est bien surveillé (admin.ch de base), mais n'est ni seco.admin.ch ni un sous-domaine.
+    imap.messages = [msg({ uid: 1, address: 'quelqu-un@xyz.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: now - HOUR })];
+    const fetcher = telegramOk();
+    const result = await run(fetcher, now);
+    expect(fetcher).toHaveBeenCalledOnce(); // le message est bien collecté et alerté normalement (domaine de base « admin.ch »)...
+    expect(sentTexts(fetcher)[0].text.split('\n')[0]).toBe('📬 OpenSwissData : réponse reçue de admin.ch');
+    expect(getLetter(id).reply_kind).toBeNull(); // ...mais xyz.admin.ch n'est ni seco.admin.ch ni un sous-domaine : jamais rattaché.
+    expect(result.alerted).toBe(1);
+  });
+
+  it('rattache dans le sens inverse : lettre envoyée à un sous-domaine, réponse du domaine parent déjà surveillé par défaut', async () => {
+    process.env.OSD_MAIL_WATCH_DOMAINS = 'seco.admin.ch';
+    const id = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Autorisation de reprise', to_address: 'x@guichet.seco.admin.ch' });
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    imap.messages = [msg({ uid: 1, address: 'juriste@seco.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: now - HOUR })];
+    await run(telegramOk(), now);
+    expect(getLetter(id).reply_kind).toBe('human');
+    expect(getLetter(id).reply_from).toBe('seco.admin.ch');
+  });
+
+  it('une lettre récente (<120 jours) élargit la veille à son domaine ; une lettre ancienne (>120 jours) ne l’élargit pas', async () => {
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    insertLetter({ sent_at: now - 200 * 86_400_000, subject: 'Vieille demande', to_address: 'x@vieux-domaine.admin.ch' });
+    imap.messages = [msg({ uid: 1, address: 'x@vieux-domaine.admin.ch', subject: 'Re: Vieille demande', receivedAt: now - HOUR })];
+    const fetcher = telegramOk();
+    const result = await run(fetcher, now);
+    expect(fetcher).not.toHaveBeenCalled(); // domaine jamais ajouté à la veille : le message n'est même pas vu
+    expect(result.matched).toBe(0);
+  });
+
+  it('une réponse « Re: Relance : X » (réponse à la relance) se rattache à la lettre D’ORIGINE, jamais à la relance', async () => {
+    const now = Date.UTC(2026, 9, 26, 12, 0);
+    const parentId = insertLetter({ sent_at: Date.UTC(2026, 9, 5, 12, 0), subject: 'Autorisation de reprise' });
+    insertLetter({ kind: 'reminder', parent_id: parentId, status: 'sent', sent_at: now - HOUR, subject: 'Relance : Autorisation de reprise', to_address: 'sanctions@seco.admin.ch' });
+    imap.messages = [msg({ uid: 1, address: 'juriste@seco.admin.ch', subject: 'Re: Relance : Autorisation de reprise', receivedAt: now - 30 * 60_000 })];
+    await run(telegramOk(), now);
+    const parent = getLetter(parentId);
+    expect(parent.reply_kind).toBe('human');
+    expect(parent.reply_subject).toBe('Re: Relance : Autorisation de reprise');
+  });
+
+  it('une lecture d’en-têtes impossible laisse le message en attente (jamais classé « humaine » par défaut), retenté au passage suivant', async () => {
+    const id = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Autorisation de reprise' });
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    imap.messages = [msg({ uid: 1, address: 'juriste@seco.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: now - HOUR })];
+    imap.failHeadersForUid = 1;
+    const fetcher = telegramOk();
+    const first = await run(fetcher, now);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(first).toMatchObject({ status: 'ok', matched: 1, alerted: 0, pending: 1 });
+    expect(getLetter(id).reply_kind).toBeNull();
+
+    imap.failHeadersForUid = null;
+    const second = telegramOk();
+    const result = await run(second, now + 60_000);
+    expect(second).toHaveBeenCalledOnce();
+    expect(result).toMatchObject({ alerted: 1, pending: 0 });
+    expect(getLetter(id).reply_kind).toBe('human');
+  });
+
+  it('n’interroge les en-têtes que pour un domaine qui a une lettre en attente ; un organisme officiel sans lettre n’en a pas besoin', async () => {
+    insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Autorisation de reprise', to_address: 'sanctions@seco.admin.ch' });
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    imap.messages = [
+      msg({ uid: 1, address: 'juridique@finma.ch', subject: 'Sans rapport', receivedAt: now - 2 * HOUR }), // FINMA : officiel, aucune lettre en attente
+      msg({ uid: 2, address: 'juriste@seco.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: now - HOUR }),
+    ];
+    await run(telegramOk(), now);
+    const headerCalls = imap.calls.filter(c => c.name === 'fetchOne' && (c.args[1] as { headers?: unknown }).headers);
+    const sourceCalls = imap.calls.filter(c => c.name === 'fetchOne' && (c.args[1] as { source?: unknown }).source);
+    expect(headerCalls.map(c => c.args[0])).toEqual(['2']);
+    expect(sourceCalls.map(c => c.args[0])).toEqual(['1']); // FINMA garde son extrait habituel, jamais d'en-têtes
+  });
+
+  it('un message déjà rattaché (et marqué signalé) n’est jamais rejoué au passage suivant', async () => {
+    const id = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Autorisation de reprise' });
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    imap.messages = [msg({ uid: 1, address: 'juriste@seco.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: now - HOUR })];
+    await run(telegramOk(), now);
+    expect(getLetter(id).reply_kind).toBe('human');
+    expect(witness().total_attached).toBe(1);
+    const second = telegramOk();
+    await run(second, now + HOUR);
+    expect(second).not.toHaveBeenCalled();
+    expect(witness().total_attached).toBe(1); // jamais une seconde fois pour le même message
+  });
+
+  it('le texte Telegram d’une réponse rattachée ne contient jamais d’adresse, et sans adresse en base', async () => {
+    const id = insertLetter({ sent_at: Date.UTC(2026, 9, 1, 12, 0), subject: 'Autorisation de reprise' });
+    const now = Date.UTC(2026, 9, 10, 12, 0);
+    imap.messages = [msg({ uid: 1, address: 'juriste.nominatif@seco.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: now - HOUR })];
+    const fetcher = telegramOk();
+    await run(fetcher, now);
+    const text = sentTexts(fetcher)[0].text;
+    expect(text).not.toContain('juriste.nominatif');
+    expect(text).not.toContain('@');
+    const letter = getLetter(id);
+    expect(String(letter.reply_from)).not.toContain('@');
+    expect(JSON.stringify(letter)).not.toContain('juriste.nominatif');
+  });
+
+  it('réponse humaine → la relance en file est annulée au passage suivant de l’expéditeur (intégration avec runLettersSender)', async () => {
+    const SENT_AT = Date.UTC(2026, 9, 5, 12, 0);
+    const DUE_NOW = Date.UTC(2026, 9, 26, 12, 0); // 15 jours ouvrés après SENT_AT (voir tests/lib/letters-sender.test.ts)
+    const parentId = insertLetter({ sent_at: SENT_AT, subject: 'Autorisation de reprise' });
+
+    // 1) la relance est créée (encore `queued`), 15 jours ouvrés après l'envoi, sans réponse.
+    await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch, hasApiKey: () => true });
+    const reminder = getDb().prepare("SELECT id, scheduled_at FROM institutional_letters WHERE parent_id=? AND kind='reminder'").get(parentId) as { id: string; scheduled_at: number };
+    expect(reminder).toBeDefined();
+    expect(getLetter(reminder.id).status).toBe('queued');
+
+    // 2) une réponse humaine de SECO arrive, rattachée par la veille courrier à la lettre d'ORIGINE.
+    const mailNow = DUE_NOW + HOUR;
+    imap.messages = [msg({ uid: 1, address: 'juriste@seco.admin.ch', subject: 'Re: Autorisation de reprise', receivedAt: mailNow - HOUR })];
+    await run(telegramOk(), mailNow);
+    expect(getLetter(parentId).reply_kind).toBe('human');
+    expect(getLetter(reminder.id).status).toBe('queued'); // pas encore réclamée
+
+    // 3) au passage suivant de l'expéditeur, la relance en file est annulée, jamais envoyée.
+    const send = vi.fn();
+    await runLettersSender({ now: () => reminder.scheduled_at + 30_000, rng: () => 0, send, fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch, hasApiKey: () => true });
+    expect(send).not.toHaveBeenCalled();
+    expect(getLetter(reminder.id).status).toBe('cancelled');
+  });
+});
