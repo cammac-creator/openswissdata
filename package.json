@@ -23,6 +23,7 @@
     "backup:db:dry": "tsx scripts/backup-db.ts --dry-run",
     "cleanup:expired": "tsx scripts/cleanup-expired.ts",
     "sync:versions": "tsx scripts/sync-dataset-versions.ts",
+    "sync:localities": "tsx scripts/sync-localities.ts",
     "web:dev": "cd web && npx astro dev",
     "web:build": "npm --prefix web ci && npm --prefix web run build && npm run seo:check && npm run fonts:check && npm run admin:csp:check",
     "models:prepare:embedding": "tsx src/scripts/prepare-embedding.ts",
