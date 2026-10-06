@@ -235,7 +235,7 @@ describe("address_checks_edition (relecture finale du 06.10.2026, point 4) : tou
 });
 
 describe("rendu texte (company-check.ts) : \"yes\"/\"no\", en-tête avec édition, détails raccourcis (relecture finale, point 3)", () => {
-  it("AXA-like, édition connue : en-tête \"edition 2026-10-01\", résultats en yes/no (jamais identical/different pour address_checks)", async () => {
+  it("AXA-like, édition connue : en-tête avec l'édition du fichier embarqué, résultats en yes/no (jamais identical/different pour address_checks)", async () => {
     const lindas = JSON.stringify({
       results: {
         bindings: [
@@ -267,7 +267,9 @@ describe("rendu texte (company-check.ts) : \"yes\"/\"no\", en-tête avec éditio
     );
     expect(res.isError).toBeUndefined();
     const text = res.content[0]?.text ?? "";
-    expect(text).toContain("Address checks (official locality directory, swisstopo, edition 2026-10-01):");
+    // Édition du fichier réel embarqué, lue au moment du test (jamais figée : la collecte mensuelle la change).
+    const { edition } = JSON.parse(readFileSync(new URL("../../src/mcp/data/localities.meta.json", import.meta.url), "utf8")) as { edition: string };
+    expect(text).toContain(`Address checks (official locality directory, swisstopo, edition ${edition}):`);
     expect(text).not.toMatch(/address_checks[\s\S]{0,80}identical/);
     // Les trois address_checks rendent "yes" (fichier réel embarqué, adresse Winterthur 8400/230/ZH).
     const addressSection = text.split("Address checks")[1] ?? "";
@@ -322,7 +324,10 @@ describe("companyCheck (bout en bout) : localities câblé PAR DÉFAUT, réperto
     // tests/mcp/company-check.test.ts, "1. AXA Leben AG" : toHaveLength(2)) : jamais mélangé.
     expect(result.fiche.cross_checks).toHaveLength(2);
     expect(result.fiche.not_covered).not.toContain("official_locality_directory_checks");
-    // Édition réelle de src/mcp/data/localities.meta.json (relecture finale, point 4).
-    expect(result.fiche.address_checks_edition).toBe("2026-10-01");
+    // Édition réelle de src/mcp/data/localities.meta.json, lue au moment du test : la collecte
+    // mensuelle change cette date, le test ne doit jamais la figer (sinon le workflow ne publie plus).
+    const meta = JSON.parse(readFileSync(new URL("../../src/mcp/data/localities.meta.json", import.meta.url), "utf8")) as { edition: string };
+    expect(meta.edition).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(result.fiche.address_checks_edition).toBe(meta.edition);
   });
 });

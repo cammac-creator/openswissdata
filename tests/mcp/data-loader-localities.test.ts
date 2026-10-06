@@ -6,6 +6,7 @@
  * `parseLocalitiesEdition` : aucun test n'écrit dans le dépôt (des écritures temporaires
  * faisaient échouer au hasard les autres fichiers de tests lancés en parallèle).
  */
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { _resetDataLoaderCache, getLocalities, indexLocalities, parseLocalitiesEdition } from "../../src/mcp/data-loader.js";
 
@@ -21,7 +22,10 @@ describe("getLocalities() : fichier réel embarqué", () => {
     if (!loaded) return;
     expect(loaded.rows.length).toBeGreaterThan(5000);
     expect(loaded.byPostalCode.get("8400")?.some((r) => r.municipality === "Winterthur")).toBe(true);
-    expect(loaded.edition).toBe("2026-10-01"); // édition réelle de localities.meta.json
+    // Édition lue au moment du test (la collecte mensuelle la change : jamais une date figée).
+    const meta = JSON.parse(readFileSync(new URL("../../src/mcp/data/localities.meta.json", import.meta.url), "utf8")) as { edition: string };
+    expect(meta.edition).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(loaded.edition).toBe(meta.edition);
   });
 });
 
