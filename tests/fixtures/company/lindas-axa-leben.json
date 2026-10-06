@@ -1,0 +1,249 @@
+{
+  "head" : {
+    "vars" : [
+      "company",
+      "legalName",
+      "name",
+      "legalForm",
+      "legalFormCode",
+      "legalFormLabelFr",
+      "legalFormLabelDe",
+      "desc",
+      "chid",
+      "municipality",
+      "municipalityName",
+      "municipalityId",
+      "address",
+      "street",
+      "postalCode",
+      "locality",
+      "region"
+    ]
+  },
+  "results" : {
+    "bindings" : [
+      {
+        "company" : {
+          "type" : "uri",
+          "value" : "https://register.ld.admin.ch/zefix/company/431354"
+        },
+        "legalName" : {
+          "type" : "literal",
+          "value" : "AXA Leben AG"
+        },
+        "name" : {
+          "xml:lang" : "fr",
+          "type" : "literal",
+          "value" : "AXA Vie SA"
+        },
+        "legalForm" : {
+          "type" : "uri",
+          "value" : "https://ld.admin.ch/ech/97/legalforms/0106"
+        },
+        "legalFormCode" : {
+          "type" : "literal",
+          "value" : "0106"
+        },
+        "legalFormLabelFr" : {
+          "xml:lang" : "fr",
+          "type" : "literal",
+          "value" : "Société anonyme"
+        },
+        "legalFormLabelDe" : {
+          "xml:lang" : "de",
+          "type" : "literal",
+          "value" : "Aktiengesellschaft"
+        },
+        "desc" : {
+          "type" : "literal",
+          "value" : "Die Gesellschaft bezweckt, jede Art von Lebensversicherung (einschliesslich Kranken- und Unfallversicherung) zu betreiben und Lösungen in den Bereichen Vorsorge, Sicherheit und Vermögensbildung anzubieten. Sie kann alle übrigen Dienstleistungen erbringen sowie alle Geschäfte tätigen und alle Massnahmen ergreifen, die geeignet erscheinen, den Zweck der Gesellschaft zu fördern oder die mit ihrem Zweck direkt oder indirekt zusammenhängen, soweit sie mit der Rechtsordnung und namentlich der Aufsichtsgesetzgebung im Einklang stehen. Die Gesellschaft kann Tochtergesellschaften und Zweigniederlassungen im In- und Ausland errichten und sich an anderen Unternehmen im ln- und Ausland beteiligen. Die Gesellschaft kann Grundstücke und Immaterialgüterrechte im In- und Ausland erwerben, halten, verwalten, belasten, verwerten und veräussern. Die Gesellschaft kann Finanzierungs-, Sanierungs- und lnterzessionsmassnahmen zu Gunsten von direkten oder indirekten Aktionären oder anderen Konzerngesellschaften vornehmen oder für deren Verpflichtungen gegenüber Dritten Sicherheiten aller Art bestellen. Sie kann ihren direkten oder indirekten Aktionären oder anderen Konzerngesellschaften Darlehen gewähren und mit ihnen Cash-Pooling-Verträge abschliessen."
+        },
+        "chid" : {
+          "type" : "literal",
+          "value" : "CH02039287958"
+        },
+        "municipality" : {
+          "type" : "uri",
+          "value" : "https://ld.admin.ch/municipality/230"
+        },
+        "municipalityName" : {
+          "type" : "literal",
+          "value" : "Winterthur"
+        },
+        "municipalityId" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "230"
+        },
+        "address" : {
+          "type" : "uri",
+          "value" : "https://register.ld.admin.ch/zefix/company/431354/address"
+        },
+        "street" : {
+          "type" : "literal",
+          "value" : "General Guisan-Strasse 40"
+        },
+        "postalCode" : {
+          "type" : "literal",
+          "value" : "8400"
+        },
+        "locality" : {
+          "type" : "literal",
+          "value" : "Winterthur"
+        },
+        "region" : {
+          "type" : "literal",
+          "value" : "ZH"
+        }
+      },
+      {
+        "company" : {
+          "type" : "uri",
+          "value" : "https://register.ld.admin.ch/zefix/company/431354"
+        },
+        "legalName" : {
+          "type" : "literal",
+          "value" : "AXA Leben AG"
+        },
+        "name" : {
+          "xml:lang" : "it",
+          "type" : "literal",
+          "value" : "AXA Vita SA"
+        },
+        "legalForm" : {
+          "type" : "uri",
+          "value" : "https://ld.admin.ch/ech/97/legalforms/0106"
+        },
+        "legalFormCode" : {
+          "type" : "literal",
+          "value" : "0106"
+        },
+        "legalFormLabelFr" : {
+          "xml:lang" : "fr",
+          "type" : "literal",
+          "value" : "Société anonyme"
+        },
+        "legalFormLabelDe" : {
+          "xml:lang" : "de",
+          "type" : "literal",
+          "value" : "Aktiengesellschaft"
+        },
+        "desc" : {
+          "type" : "literal",
+          "value" : "Die Gesellschaft bezweckt, jede Art von Lebensversicherung (einschliesslich Kranken- und Unfallversicherung) zu betreiben und Lösungen in den Bereichen Vorsorge, Sicherheit und Vermögensbildung anzubieten. Sie kann alle übrigen Dienstleistungen erbringen sowie alle Geschäfte tätigen und alle Massnahmen ergreifen, die geeignet erscheinen, den Zweck der Gesellschaft zu fördern oder die mit ihrem Zweck direkt oder indirekt zusammenhängen, soweit sie mit der Rechtsordnung und namentlich der Aufsichtsgesetzgebung im Einklang stehen. Die Gesellschaft kann Tochtergesellschaften und Zweigniederlassungen im In- und Ausland errichten und sich an anderen Unternehmen im ln- und Ausland beteiligen. Die Gesellschaft kann Grundstücke und Immaterialgüterrechte im In- und Ausland erwerben, halten, verwalten, belasten, verwerten und veräussern. Die Gesellschaft kann Finanzierungs-, Sanierungs- und lnterzessionsmassnahmen zu Gunsten von direkten oder indirekten Aktionären oder anderen Konzerngesellschaften vornehmen oder für deren Verpflichtungen gegenüber Dritten Sicherheiten aller Art bestellen. Sie kann ihren direkten oder indirekten Aktionären oder anderen Konzerngesellschaften Darlehen gewähren und mit ihnen Cash-Pooling-Verträge abschliessen."
+        },
+        "chid" : {
+          "type" : "literal",
+          "value" : "CH02039287958"
+        },
+        "municipality" : {
+          "type" : "uri",
+          "value" : "https://ld.admin.ch/municipality/230"
+        },
+        "municipalityName" : {
+          "type" : "literal",
+          "value" : "Winterthur"
+        },
+        "municipalityId" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "230"
+        },
+        "address" : {
+          "type" : "uri",
+          "value" : "https://register.ld.admin.ch/zefix/company/431354/address"
+        },
+        "street" : {
+          "type" : "literal",
+          "value" : "General Guisan-Strasse 40"
+        },
+        "postalCode" : {
+          "type" : "literal",
+          "value" : "8400"
+        },
+        "locality" : {
+          "type" : "literal",
+          "value" : "Winterthur"
+        },
+        "region" : {
+          "type" : "literal",
+          "value" : "ZH"
+        }
+      },
+      {
+        "company" : {
+          "type" : "uri",
+          "value" : "https://register.ld.admin.ch/zefix/company/431354"
+        },
+        "legalName" : {
+          "type" : "literal",
+          "value" : "AXA Leben AG"
+        },
+        "name" : {
+          "xml:lang" : "en",
+          "type" : "literal",
+          "value" : "AXA Life Ltd"
+        },
+        "legalForm" : {
+          "type" : "uri",
+          "value" : "https://ld.admin.ch/ech/97/legalforms/0106"
+        },
+        "legalFormCode" : {
+          "type" : "literal",
+          "value" : "0106"
+        },
+        "legalFormLabelFr" : {
+          "xml:lang" : "fr",
+          "type" : "literal",
+          "value" : "Société anonyme"
+        },
+        "legalFormLabelDe" : {
+          "xml:lang" : "de",
+          "type" : "literal",
+          "value" : "Aktiengesellschaft"
+        },
+        "desc" : {
+          "type" : "literal",
+          "value" : "Die Gesellschaft bezweckt, jede Art von Lebensversicherung (einschliesslich Kranken- und Unfallversicherung) zu betreiben und Lösungen in den Bereichen Vorsorge, Sicherheit und Vermögensbildung anzubieten. Sie kann alle übrigen Dienstleistungen erbringen sowie alle Geschäfte tätigen und alle Massnahmen ergreifen, die geeignet erscheinen, den Zweck der Gesellschaft zu fördern oder die mit ihrem Zweck direkt oder indirekt zusammenhängen, soweit sie mit der Rechtsordnung und namentlich der Aufsichtsgesetzgebung im Einklang stehen. Die Gesellschaft kann Tochtergesellschaften und Zweigniederlassungen im In- und Ausland errichten und sich an anderen Unternehmen im ln- und Ausland beteiligen. Die Gesellschaft kann Grundstücke und Immaterialgüterrechte im In- und Ausland erwerben, halten, verwalten, belasten, verwerten und veräussern. Die Gesellschaft kann Finanzierungs-, Sanierungs- und lnterzessionsmassnahmen zu Gunsten von direkten oder indirekten Aktionären oder anderen Konzerngesellschaften vornehmen oder für deren Verpflichtungen gegenüber Dritten Sicherheiten aller Art bestellen. Sie kann ihren direkten oder indirekten Aktionären oder anderen Konzerngesellschaften Darlehen gewähren und mit ihnen Cash-Pooling-Verträge abschliessen."
+        },
+        "chid" : {
+          "type" : "literal",
+          "value" : "CH02039287958"
+        },
+        "municipality" : {
+          "type" : "uri",
+          "value" : "https://ld.admin.ch/municipality/230"
+        },
+        "municipalityName" : {
+          "type" : "literal",
+          "value" : "Winterthur"
+        },
+        "municipalityId" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "230"
+        },
+        "address" : {
+          "type" : "uri",
+          "value" : "https://register.ld.admin.ch/zefix/company/431354/address"
+        },
+        "street" : {
+          "type" : "literal",
+          "value" : "General Guisan-Strasse 40"
+        },
+        "postalCode" : {
+          "type" : "literal",
+          "value" : "8400"
+        },
+        "locality" : {
+          "type" : "literal",
+          "value" : "Winterthur"
+        },
+        "region" : {
+          "type" : "literal",
+          "value" : "ZH"
+        }
+      }
+    ]
+  }
+}

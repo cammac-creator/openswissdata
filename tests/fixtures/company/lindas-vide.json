@@ -1,0 +1,26 @@
+{
+  "head" : {
+    "vars" : [
+      "company",
+      "legalName",
+      "name",
+      "legalForm",
+      "legalFormCode",
+      "legalFormLabelFr",
+      "legalFormLabelDe",
+      "desc",
+      "chid",
+      "municipality",
+      "municipalityName",
+      "municipalityId",
+      "address",
+      "street",
+      "postalCode",
+      "locality",
+      "region"
+    ]
+  },
+  "results" : {
+    "bindings" : [ ]
+  }
+}
