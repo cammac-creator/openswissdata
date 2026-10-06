@@ -4,11 +4,26 @@
  *
  * Horloge injectée (`now`), jamais `Date.now` lu directement : un test fige le temps, le
  * fait avancer, puis vérifie l'expiration sans dépendre de l'horloge réelle.
+ *
+ * `set` clone la valeur (`structuredClone`) et la fige entièrement (`Object.freeze`
+ * récursif) avant de la stocker : `get` rend ensuite cette même valeur figée à tous les
+ * appelants. Un appelant qui tente de la modifier échoue (ou ne modifie qu'une copie hors
+ * du cache en mode non strict) ; la mutation ne peut jamais atteindre l'entrée interne.
  */
 
 interface Entry<V> {
   value: V;
   expiresAt: number;
+}
+
+function deepFreeze<T>(value: T): T {
+  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const key of Object.getOwnPropertyNames(value)) {
+      deepFreeze((value as Record<string, unknown>)[key]);
+    }
+  }
+  return value;
 }
 
 export class TtlCache<V> {
@@ -41,6 +56,6 @@ export class TtlCache<V> {
       const plusAncienne = this.store.keys().next().value;
       if (plusAncienne !== undefined) this.store.delete(plusAncienne);
     }
-    this.store.set(k, { value: v, expiresAt: this.now() + this.ttlMs });
+    this.store.set(k, { value: deepFreeze(structuredClone(v)), expiresAt: this.now() + this.ttlMs });
   }
 }

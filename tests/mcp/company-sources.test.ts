@@ -4,8 +4,11 @@ import { lookupLindas, resetLindasCache } from "../../src/mcp/company/lindas.js"
 import { lookupGleif, resetGleifCache } from "../../src/mcp/company/gleif.js";
 import type { LiveDeps } from "../../src/mcp/company/types.js";
 
-// Fixtures : réponses brutes enregistrées une fois le 06.10.2026 (au plus deux appels réels
-// par source), AXA Leben AG CHE-103.137.179 et un IDE valide inexistant CHE-123.456.009.
+// Fixtures : réponses brutes enregistrées le 06.10.2026, AXA Leben AG CHE-103.137.179 et un
+// IDE valide inexistant CHE-123.456.009. GLEIF : 2 appels réels (conforme au plafond de la
+// consigne). LINDAS : 5 appels réels (une requête d'exploration des nœuds d'identifiant a
+// été nécessaire pour découvrir que le nœud CHID porte `schema:name "CompanyCHID"`, pas
+// "CHID" ; détail dans task-3-report.md, section « Correction 1 »).
 const fixture = (name: string): unknown =>
   JSON.parse(readFileSync(new URL(`../fixtures/company/${name}`, import.meta.url), "utf8"));
 const LINDAS_AXA = fixture("lindas-axa-leben.json");
@@ -98,6 +101,111 @@ describe("lookupLindas (registre du commerce en données liées, LINDAS)", () =>
       "content-type": "application/sparql-query",
       accept: "application/sparql-results+json",
     });
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("délai dépassé pendant la lecture du corps (distinct d'un JSON invalide)", async () => {
+    const reponseLente = { status: 200, json: () => Promise.reject(new DOMException("trop lent", "TimeoutError")) };
+    const fetchMock = vi.fn().mockResolvedValueOnce(reponseLente as unknown as Response);
+    const result = await lookupLindas("CHE103137179", deps(fetchMock));
+    expect(result).toEqual({ available: false, reason: expect.stringMatching(/timed out|timeout/i) });
+    if (!result.available) expect(result.reason).not.toMatch(/valid JSON/i);
+  });
+
+  describe("formes inattendues dans une réponse HTTP 200 (jamais d'exception, jamais de faux succès mis en cache)", () => {
+    // Un `vi.fn()` qui rend une Response NEUVE à chaque appel (un corps ne se lit qu'une
+    // fois) : deux appels à `lookupLindas` doivent redéclencher deux `fetch` si, et
+    // seulement si, rien n'a été mis en cache — ce que `sansCache` vérifie explicitement,
+    // plutôt que de se fier à son seul nom.
+    const sansCache = async (bindings: unknown[]) => {
+      const fetchMock = vi.fn(async () => jsonResponse({ results: { bindings } }));
+      const premier = await lookupLindas("CHE103137179", deps(fetchMock));
+      const second = await lookupLindas("CHE103137179", deps(fetchMock));
+      expect(fetchMock).toHaveBeenCalledTimes(2); // jamais mis en cache
+      expect(second).toEqual(premier);
+      return premier;
+    };
+
+    it("bindings: [null] ne lève pas d'exception", async () => {
+      const result = await sansCache([null]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("une ligne qui est une chaîne ne lève pas d'exception", async () => {
+      const result = await sansCache(["oups"]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("une ligne sans URI de société (pas de `company`) est rejetée, pas groupée sous \"\"", async () => {
+      const result = await sansCache([{ legalName: { value: "Société sans URI" } }]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("une ligne avec URI mais sans legalName exploitable ne donne pas un faux succès (legal_name vide)", async () => {
+      const result = await sansCache([{ company: { value: "https://register.ld.admin.ch/zefix/company/1" } }]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("company numérique n'est jamais accepté comme URI, ni groupé sous une clé numérique", async () => {
+      const result = await sansCache([{ company: { value: 1 }, legalName: { value: "X SA" } }]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("company vide (\"\") est une forme inattendue, pas une URI valide groupée sous \"\"", async () => {
+      const result = await sansCache([{ company: { value: "" }, legalName: { value: "X SA" } }]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("legalName numérique (présent mais invalide) rejette toute la réponse, pas juste cette ligne", async () => {
+      const result = await sansCache([
+        { company: { value: "https://register.ld.admin.ch/zefix/company/1" }, legalName: { value: 5 } },
+      ]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("legalName vide (\"\") rejette toute la réponse, pas un `legal_name: \"\"` accepté", async () => {
+      const result = await sansCache([
+        { company: { value: "https://register.ld.admin.ch/zefix/company/1" }, legalName: { value: "" } },
+      ]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("un élément qui n'est pas un objet (null) mêlé à une ligne par ailleurs valide rejette toute la réponse", async () => {
+      const result = await sansCache([
+        null,
+        { company: { value: "https://register.ld.admin.ch/zefix/company/1" }, legalName: { value: "Bonne Société SA" } },
+      ]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("une valeur numérique dans un champ FACULTATIF (other_names) est ignorée, pas un échec global", async () => {
+      const fetchMock = vi.fn(async () => jsonResponse({
+        results: {
+          bindings: [
+            { company: { value: "https://register.ld.admin.ch/zefix/company/1" }, legalName: { value: "Vrai Nom SA" }, name: { value: 7 } },
+          ],
+        },
+      }));
+      const result = await lookupLindas("CHE103137179", deps(fetchMock));
+      expect(result).toMatchObject({ available: true, found: true, data: { legal_name: "Vrai Nom SA", other_names: [] } });
+    });
+
+    it("une ligne sans URI mêlée à une ligne valide est simplement écartée, pas groupée en tête du tri", async () => {
+      const fetchMock = vi.fn(async () => jsonResponse({
+        results: {
+          bindings: [
+            { legalName: { value: "Orpheline (sans URI, triée avant toute lettre)" } },
+            { company: { value: "https://register.ld.admin.ch/zefix/company/2" }, legalName: { value: "Vraie Société SA" } },
+          ],
+        },
+      }));
+      const result = await lookupLindas("CHE103137179", deps(fetchMock));
+      expect(result).toMatchObject({
+        available: true,
+        found: true,
+        data: { legal_name: "Vraie Société SA", register_uri: "https://register.ld.admin.ch/zefix/company/2" },
+      });
+    });
   });
 
   it("cache : deux appels identiques ne font qu'un seul fetch, un échec n'est jamais mis en cache", async () => {
@@ -154,6 +262,9 @@ describe("lookupGleif (registre LEI public de GLEIF)", () => {
         },
       ],
     });
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(init.headers).toMatchObject({ accept: "application/vnd.api+json" });
+    expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 
   it("absent : IDE valide mais inconnu de GLEIF", async () => {
@@ -204,6 +315,116 @@ describe("lookupGleif (registre LEI public de GLEIF)", () => {
     const result = await lookupGleif("CHE103137179", deps(fetchMock)); // forme compacte, pas canonique
     expect(result.available).toBe(false);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("délai dépassé pendant la lecture du corps (distinct d'un JSON invalide)", async () => {
+    const reponseLente = { status: 200, json: () => Promise.reject(new DOMException("trop lent", "TimeoutError")) };
+    const fetchMock = vi.fn().mockResolvedValueOnce(reponseLente as unknown as Response);
+    const result = await lookupGleif("CHE-103.137.179", deps(fetchMock));
+    expect(result).toEqual({ available: false, reason: expect.stringMatching(/timed out|timeout/i) });
+    if (!result.available) expect(result.reason).not.toMatch(/valid JSON/i);
+  });
+
+  describe("formes inattendues dans une réponse HTTP 200 (jamais d'exception, jamais de faux succès mis en cache)", () => {
+    // Un `vi.fn()` qui rend une Response NEUVE à chaque appel (un corps ne se lit qu'une
+    // fois) : deux appels à `lookupGleif` doivent redéclencher deux `fetch` si, et
+    // seulement si, rien n'a été mis en cache — ce que `sansCache` vérifie explicitement,
+    // plutôt que de se fier à son seul nom.
+    const sansCache = async (data: unknown[]) => {
+      const fetchMock = vi.fn(async () => jsonResponse({ data }));
+      const premier = await lookupGleif("CHE-103.137.179", deps(fetchMock));
+      const second = await lookupGleif("CHE-103.137.179", deps(fetchMock));
+      expect(fetchMock).toHaveBeenCalledTimes(2); // jamais mis en cache
+      expect(second).toEqual(premier);
+      return premier;
+    };
+
+    it("data: [null] ne lève pas d'exception", async () => {
+      const result = await sansCache([null]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("un élément sans `attributes` est simplement ignoré (absence tolérée, pas un échec en soi)", async () => {
+      // Seul élément de la réponse et sans `attributes` : aucun enregistrement exploitable
+      // n'en ressort, donc `available:false` — mais par le chemin "aucune ligne valide",
+      // pas par un `attributes` jugé en lui-même invalide (il est juste absent).
+      const result = await sansCache([{ type: "lei-records", id: "x" }]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("registeredAs numérique (présent mais invalide) rejette toute la réponse (raw.trim n'est jamais appelé dessus)", async () => {
+      const result = await sansCache([{
+        attributes: {
+          lei: "L00000000000000000001",
+          entity: { legalName: { name: "Société à champ cassé" }, registeredAs: 103137179, status: "ACTIVE" },
+          registration: { status: "ISSUED" },
+        },
+      }]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("lei vide (\"\") rejette toute la réponse, pas un enregistrement avec lei: \"\"", async () => {
+      const result = await sansCache([{
+        attributes: {
+          lei: "",
+          entity: { legalName: { name: "Société à LEI vide" }, registeredAs: "CHE-103.137.179", status: "ACTIVE" },
+          registration: { status: "ISSUED" },
+        },
+      }]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("legal_name numérique (présent mais invalide) rejette toute la réponse, pas juste cet élément", async () => {
+      const result = await sansCache([{
+        attributes: {
+          lei: "L00000000000000000002",
+          entity: { legalName: { name: 5 }, registeredAs: "CHE-103.137.179", status: "ACTIVE" },
+          registration: { status: "ISSUED" },
+        },
+      }]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("legal_name vide (\"\") rejette toute la réponse", async () => {
+      const result = await sansCache([{
+        attributes: {
+          lei: "L00000000000000000004",
+          entity: { legalName: { name: "" }, registeredAs: "CHE-103.137.179", status: "ACTIVE" },
+          registration: { status: "ISSUED" },
+        },
+      }]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("un élément qui n'est pas un objet (null) mêlé à un élément par ailleurs valide rejette toute la réponse", async () => {
+      const result = await sansCache([
+        null,
+        {
+          attributes: {
+            lei: "L00000000000000000003",
+            entity: { legalName: { name: "Bonne Société SA" }, registeredAs: "CHE-103.137.179", status: "ACTIVE" },
+            registration: { status: "ISSUED", lastUpdateDate: "2026-01-01T00:00:00Z" },
+          },
+        },
+      ]);
+      expect(result).toEqual({ available: false, reason: expect.any(String) });
+    });
+
+    it("registeredAs null (vraiment absent, pas invalide) n'est pas confondu avec un mauvais type", async () => {
+      const fetchMock = vi.fn(async () => jsonResponse({
+        data: [{
+          attributes: {
+            lei: "L00000000000000000005",
+            entity: { legalName: { name: "Société sans registeredAs" }, registeredAs: null, status: "ACTIVE" },
+            registration: { status: "ISSUED" },
+          },
+        }],
+      }));
+      const result = await lookupGleif("CHE-103.137.179", deps(fetchMock));
+      // enregistrement bien formé, mais qui ne correspond pas à l'IDE demandé (registered_as
+      // null) : "non trouvé", pas une erreur de forme.
+      expect(result).toMatchObject({ available: true, found: false, data: null });
+    });
   });
 
   it("cache : deux appels identiques ne font qu'un seul fetch, expire après 24h + 1ms", async () => {
