@@ -37,7 +37,7 @@ import { abuseIp, trustedRequestIp } from "../../lib/request-ip.js";
 import { trackMcpRateLimited } from "../track-mcp.js";
 
 /** Outils appelables sans jeton, dans l'ordre présenté aux agents. */
-export const ANONYMOUS_TOOL_NAMES = ["tariff_lookup", "kyc_check", "cross_walk"] as const;
+export const ANONYMOUS_TOOL_NAMES = ["tariff_lookup", "kyc_check", "company_check", "cross_walk"] as const;
 const ANONYMOUS_TOOLS: ReadonlySet<string> = new Set(ANONYMOUS_TOOL_NAMES);
 
 /**

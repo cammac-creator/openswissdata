@@ -1,18 +1,22 @@
 /**
  * Tests du module d'outil MCP `company_check` (tâche osd.fiche, tâche 5).
  *
- * Module seul, PAS branché sur le serveur (`src/mcp/server.ts` ne doit jamais l'importer).
- * Aucun appel réseau : `deps.fetch` est une maquette qui rend les fixtures de la tâche 3/4,
- * et le UID invalide est rejeté par `companyCheck` AVANT tout appel réseau (voir
- * `src/mcp/company/uid.ts`), ce qui permet aussi de tester l'appel SANS `deps` (valeurs par
- * défaut) sans jamais toucher le réseau réel.
+ * Branché sur le serveur et ouvert aux agents sans clé depuis le « go fiche » de
+ * Claude-Alain du 06.10.2026 (DECISIONS.md du projet) : gratuit comme `kyc_check`, même
+ * portée `finma:read`. Aucun appel réseau dans ces tests : `deps.fetch` est une maquette qui
+ * rend les fixtures de la tâche 3/4, et le UID invalide est rejeté par `companyCheck` AVANT
+ * tout appel réseau (voir `src/mcp/company/uid.ts`), ce qui permet aussi de tester l'appel
+ * SANS `deps` (valeurs par défaut) sans jamais toucher le réseau réel.
  */
 
 import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { companyCheckHandler, companyCheckSchema, companyCheckTool } from "../../src/mcp/tools/company-check.js";
-import { resetLindasCache } from "../../src/mcp/company/lindas.js";
-import { resetGleifCache } from "../../src/mcp/company/gleif.js";
+import { callableBy, listTools } from "../../src/mcp/server.js";
+import { ANONYMOUS_TOOL_NAMES } from "../../src/mcp/oauth/verify.js";
+import { TOOL_SCOPE } from "../../src/mcp/oauth/scopes.js";
+import { resetLindasBreaker, resetLindasCache } from "../../src/mcp/company/lindas.js";
+import { resetGleifBreaker, resetGleifCache } from "../../src/mcp/company/gleif.js";
 import { _resetDataLoaderCache, setFinmaVersion, type FinmaRegistryRow } from "../../src/mcp/data-loader.js";
 
 const fixture = (name: string): unknown =>
@@ -75,7 +79,9 @@ function assertNoVerdictWords(text: string): void {
 
 beforeEach(() => {
   resetLindasCache(now);
+  resetLindasBreaker(now);
   resetGleifCache(now);
+  resetGleifBreaker(now);
 });
 
 afterEach(() => {
@@ -93,10 +99,14 @@ describe("companyCheckTool (module seul, non branché)", () => {
     expect(companyCheckSchema.additionalProperties).toBe(false);
   });
 
-  it("n'est importé par aucun chemin dans src/mcp/server.ts (outil éteint)", () => {
-    const serverSource = readFileSync(new URL("../../src/mcp/server.ts", import.meta.url), "utf8");
-    expect(serverSource).not.toContain("company-check");
-    expect(serverSource).not.toContain("company_check");
+  // Avant le 06.10.2026, ce cas vérifiait l'ABSENCE de l'outil (éteint). Inversé après le
+  // « go fiche » de Claude-Alain (DECISIONS.md, 06.10.2026 16h27) : l'outil doit désormais
+  // être présent, gratuit sans clé, comme `kyc_check` (même portée `finma:read`).
+  it("est présent dans tools/list anonyme, gratuit sans clé comme kyc_check (go fiche, 06.10.2026)", () => {
+    expect(ANONYMOUS_TOOL_NAMES).toContain("company_check");
+    expect(TOOL_SCOPE.company_check).toBe("finma:read");
+    const anonyme = listTools(callableBy(null));
+    expect(anonyme.tools.map((t) => t.name)).toContain("company_check");
   });
 
   it("entrée invalide (zod) : uid absent → isError avec un message lisible", async () => {

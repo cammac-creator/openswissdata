@@ -19,6 +19,7 @@
 
 import { tariffLookupTool } from "./tools/tariff-lookup.js";
 import { kycCheckTool } from "./tools/kyc-check.js";
+import { companyCheckTool } from "./tools/company-check.js";
 import { crossWalkTool } from "./tools/cross-walk.js";
 import { tariffSemanticSearchTool } from "./tools/tariff-semantic-search.js";
 import { classifyTextTool } from "./tools/classify-text.js";
@@ -89,6 +90,7 @@ export const SERVER_INSTRUCTIONS = [
   `Free without any key or sign-up (${ANONYMOUS_LIMIT_TEXT}):`,
   "- tariff_lookup: an 8-digit Swiss tariff number (dots allowed, e.g. 8471.3000) returns the full TARES line; a 2- to 7-digit HS prefix (e.g. the international HS6 code 847130) lists the Swiss 8-digit lines under it. Set lang to en, de, it or fr (default fr).",
   "- kyc_check: search the FINMA register and the FINMA warnings list by entity name.",
+  "- company_check: a Swiss UID (CHE-xxx.xxx.xxx) returns commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source, plus exact cross-checks. It does not say whether the company is still registered.",
   "- cross_walk: map a code between NOGA 2008, NOGA 2025, NACE 2.0, NACE 2.1 and ISIC 4, with the relation type and its source.",
   `Free trial without a key, limited to ${TRIAL_LIMIT_TEXT} in total: ${TRIAL_TOOLS_TEXT} (search TARES lines by goods description, NOGA 2025 codes by activity description, the FINMA register with typo tolerance); each trial answer states the calls left and the official source on which to check the result before use.`,
   "The change history tools (tariff_changelog, entity_history) belong to the Pro plan, which is closed to new subscribers at the moment.",
@@ -140,6 +142,7 @@ interface Tool {
 const TOOLS: readonly Tool[] = [
   tariffLookupTool,
   kycCheckTool,
+  companyCheckTool,
   crossWalkTool,
   tariffSemanticSearchTool,
   classifyTextTool,
@@ -153,6 +156,7 @@ const TOOLS_BY_NAME = new Map<string, Tool>(TOOLS.map((t) => [t.name, t]));
 const TOOL_TITLES = new Map<string, string>([
   ["tariff_lookup", "Swiss customs tariff line (TARES)"],
   ["kyc_check", "FINMA register and warnings list check"],
+  ["company_check", "Swiss company check by UID"],
   ["cross_walk", "NOGA / NACE / ISIC code correspondence"],
   ["tariff_semantic_search", "TARES search by goods description (FR/DE/IT/EN)"],
   ["classify_text", "NOGA 2025 classification of a business description"],
@@ -161,6 +165,13 @@ const TOOL_TITLES = new Map<string, string>([
   ["entity_history", "FINMA entity change history"],
 ]);
 const READ_ONLY_ANNOTATIONS = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
+// `company_check` interroge en direct deux sources tierces (LINDAS, GLEIF) à chaque appel non
+// mis en cache : seul outil dont l'annotation `openWorldHint` vaut `true` (tous les autres
+// lisent une copie locale, jamais le monde extérieur en direct).
+const OPEN_WORLD_ANNOTATIONS = { ...READ_ONLY_ANNOTATIONS, openWorldHint: true } as const;
+function annotationsFor(name: string): Record<string, unknown> {
+  return name === "company_check" ? OPEN_WORLD_ANNOTATIONS : READ_ONLY_ANNOTATIONS;
+}
 
 // Piste gratuite proposée quand un appel anonyme vise un outil qui exige des droits, ou quand
 // l'essai des outils de recherche est épuisé pour ce réseau.
@@ -232,7 +243,7 @@ export function listTools(canCall: (name: string) => boolean = () => true, opts:
         title,
         description,
         inputSchema: t.inputSchema,
-        annotations: { title, ...READ_ONLY_ANNOTATIONS },
+        annotations: { title, ...annotationsFor(t.name) },
       };
     }),
   };

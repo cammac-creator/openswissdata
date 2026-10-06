@@ -45,6 +45,7 @@ export const TOOL_SCOPE: Readonly<Record<string, Scope>> = {
   // V1 tools (shipped)
   tariff_lookup: "tariff:read",
   kyc_check: "finma:read",
+  company_check: "finma:read",
   cross_walk: "classifications:read",
 
   // V2 tools (planned — registered here so /oauth/authorize can include them

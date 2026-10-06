@@ -171,21 +171,23 @@ describe("Accès des agents au serveur MCP", () => {
   });
 
   describe("outils présentés et refus", () => {
-    it("un appelant anonyme ne voit que les trois outils gratuits et les trois de l'essai, annotés en lecture seule", async () => {
+    it("un appelant anonyme ne voit que les quatre outils gratuits et les trois de l'essai, annotés en lecture seule (sauf company_check, qui interroge le monde extérieur en direct)", async () => {
       const res = await post(createApp(), "/mcp/jsonrpc", { jsonrpc: "2.0", id: 1, method: "tools/list" });
       const tools = (await res.json()).result.tools as Array<{ name: string; title: string; annotations: Record<string, unknown> }>;
       // Essai des outils de recherche (29.09.2026) ; l'historique reste réservé aux jetons.
-      expect(tools.map((t) => t.name)).toEqual(["tariff_lookup", "kyc_check", "cross_walk", "tariff_semantic_search", "classify_text", "finma_search"]);
+      // company_check ouvert sans clé le 06.10.2026 (« go fiche », DECISIONS.md).
+      expect(tools.map((t) => t.name)).toEqual(["tariff_lookup", "kyc_check", "company_check", "cross_walk", "tariff_semantic_search", "classify_text", "finma_search"]);
       for (const t of tools) {
         expect(t.title.length).toBeGreaterThan(5);
-        expect(t.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false, openWorldHint: false });
+        const openWorldHint = t.name === "company_check"; // seul outil à lire deux sources tierces en direct
+        expect(t.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false, openWorldHint });
       }
     });
 
     it("la découverte anonyme annonce l'accès gratuit et la documentation", async () => {
       const body = await (await createApp().request("/mcp/discovery")).json();
-      expect(body.tools).toEqual(["tariff_lookup", "kyc_check", "cross_walk", "tariff_semantic_search", "classify_text", "finma_search"]);
-      expect(body.anonymous_access.tools).toEqual(["tariff_lookup", "kyc_check", "cross_walk"]);
+      expect(body.tools).toEqual(["tariff_lookup", "kyc_check", "company_check", "cross_walk", "tariff_semantic_search", "classify_text", "finma_search"]);
+      expect(body.anonymous_access.tools).toEqual(["tariff_lookup", "kyc_check", "company_check", "cross_walk"]);
       expect(body.anonymous_access.limit).toBe("100 calls per hour per IP address");
       expect(body.supported_protocol_versions).toContain("2025-06-18");
       expect(body.documentation).toMatch(/\/llms\.txt$/);
@@ -305,7 +307,8 @@ describe("Accès des agents au serveur MCP", () => {
       insertToken({ client_id: clientId, access_token_plain: token, refresh_token_plain: null, scope: serializeScopes(TIER_DEFAULT_SCOPES.free) });
       const res = await post(createApp(), "/mcp/jsonrpc", { jsonrpc: "2.0", id: 1, method: "tools/list" }, { authorization: `Bearer ${token}` });
       const names = ((await res.json()).result.tools as { name: string }[]).map((t) => t.name).sort();
-      expect(names).toEqual(["cross_walk", "finma_search", "kyc_check", "tariff_lookup"]);
+      // company_check partage la portée finma:read de kyc_check (go fiche, 06.10.2026).
+      expect(names).toEqual(["company_check", "cross_walk", "finma_search", "kyc_check", "tariff_lookup"]);
     });
   });
 
