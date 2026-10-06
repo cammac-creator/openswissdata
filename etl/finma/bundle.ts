@@ -275,8 +275,14 @@ export async function buildBundle(
     const sourceAuRegistre = SOURCES.some(s => /zefix/i.test(s.id));
     const sourceAuProduit = PRODUCT_SOURCES.finma.some(id => /zefix/i.test(id));
     if (!sourceAuRegistre || !sourceAuProduit) {
+      // Message corrigé le 06.10.2026 (relecture finale, tâche osd.fiche) : l'ancien texte
+      // disait « aucune source Zefix au registre », ce qui n'est plus exact depuis que le
+      // registre PEUT porter une source Zefix sans qu'elle soit déclarée dans la liste du
+      // produit FINMA — c'est cette dernière déclaration qui manque réellement ici. La
+      // sous-chaîne « données Zefix présentes mais aucune source Zefix au registre » reste
+      // intacte : `tests/etl/finma-zefix-guard.test.ts` (sur main, jamais modifié) la vérifie.
       throw new Error(
-        "provenance FINMA : données Zefix présentes mais aucune source Zefix au registre ; déclarer la source et sa licence avant de publier"
+        "provenance FINMA : données Zefix présentes mais aucune source Zefix au registre des sources de l'archive FINMA ; déclarer la source dans PRODUCT_SOURCES.finma avec sa licence avant de publier"
       );
     }
   }
