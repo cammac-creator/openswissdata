@@ -17,6 +17,7 @@
 import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildCompanyFiche, companyCheck, type LocalitiesAccess } from "../../src/mcp/company/check.js";
+import { companyCheckHandler } from "../../src/mcp/tools/company-check.js";
 import { LINDAS_ENDPOINT, resetLindasCache } from "../../src/mcp/company/lindas.js";
 import { resetGleifCache } from "../../src/mcp/company/gleif.js";
 import { _resetDataLoaderCache, type LocalityRow } from "../../src/mcp/data-loader.js";
@@ -57,8 +58,8 @@ function byPostalCode(rows: LocalityRow[]): ReadonlyMap<string, readonly Localit
   return index;
 }
 
-function directory(rows: LocalityRow[]): LocalitiesAccess {
-  return { available: true, byPostalCode: byPostalCode(rows) };
+function directory(rows: LocalityRow[], edition: string | null = null): LocalitiesAccess {
+  return { available: true, byPostalCode: byPostalCode(rows), edition };
 }
 
 /** Société fictive de forme ouverte (0106, SA), adresse AXA-like (8400 Winterthur 230 ZH). */
@@ -130,12 +131,19 @@ describe("buildCompanyFiche : address_checks (répertoire officiel des localité
     expect(fiche.not_covered).not.toContain("official_locality_directory_checks");
   });
 
-  it("NPA absent du répertoire : les trois address_checks sont false (jamais une exception)", () => {
+  it("NPA absent du répertoire (cases postales / grands clients, ex. 1211, 8021, 8070, 3003) : SEUL postal_code_in_official_directory est émis (relecture finale du 06.10.2026, point 2), jamais les deux autres", () => {
     const fiche = ficheWith(OPEN_FORM_COMPANY, directory([GENEVE_1201])); // 8400 absent de ce répertoire-ci
-    const checks = Object.fromEntries(fiche.address_checks.map((c) => [c.check, c]));
-    expect(checks.postal_code_in_official_directory.result).toBe(false);
-    expect(checks.locality_matches_postal_code.result).toBe(false);
-    expect(checks.seat_municipality_matches_postal_code.result).toBe(false);
+    expect(fiche.address_checks).toHaveLength(1);
+    expect(fiche.address_checks[0]).toMatchObject({ check: "postal_code_in_official_directory", result: false });
+    expect(fiche.address_checks.map((c) => c.check)).not.toContain("locality_matches_postal_code");
+    expect(fiche.address_checks.map((c) => c.check)).not.toContain("seat_municipality_matches_postal_code");
+    expect(fiche.address_checks[0].detail).toMatch(/PO box|large client/i);
+  });
+
+  it("NPA vide (chaîne vide) : AUCUN address_check, même si municipality_bfs_id est publié (relecture finale, point 2 : seat_municipality_matches_postal_code ne s'évalue jamais sans NPA)", () => {
+    const company: LindasCompany = { ...OPEN_FORM_COMPANY, postal_code: "" };
+    const fiche = ficheWith(company, directory([WINTERTHUR_8400]));
+    expect(fiche.address_checks).toEqual([]);
   });
 
   it("NPA partagé par plusieurs communes (8310 Kemptthal : Lindau 176 ET Winterthur 230) : le siège à Lindau (176) est trouvé parmi les communes du NPA", () => {
@@ -199,6 +207,78 @@ describe("buildCompanyFiche : address_checks (répertoire officiel des localité
   });
 });
 
+describe("address_checks_edition (relecture finale du 06.10.2026, point 4) : toujours présent, jamais une date devinée", () => {
+  it("`localities` absent (undefined) : null", () => {
+    const fiche = ficheWith(OPEN_FORM_COMPANY, undefined);
+    expect(fiche.address_checks_edition).toBeNull();
+  });
+
+  it("répertoire indisponible (`{ available: false }`) : null", () => {
+    const fiche = ficheWith(OPEN_FORM_COMPANY, { available: false });
+    expect(fiche.address_checks_edition).toBeNull();
+  });
+
+  it("répertoire disponible SANS édition connue (edition: null) : null", () => {
+    const fiche = ficheWith(OPEN_FORM_COMPANY, directory([WINTERTHUR_8400], null));
+    expect(fiche.address_checks_edition).toBeNull();
+  });
+
+  it("répertoire disponible AVEC édition connue : reportée telle quelle, même pour une forme fermée (adresse non publiée)", () => {
+    const fiche = ficheWith(OPEN_FORM_COMPANY, directory([WINTERTHUR_8400], "2026-10-01"));
+    expect(fiche.address_checks_edition).toBe("2026-10-01");
+
+    const individuelle: LindasCompany = { ...OPEN_FORM_COMPANY, legal_form_code: "0101" };
+    const ficheFermee = ficheWith(individuelle, directory([WINTERTHUR_8400], "2026-10-01"));
+    expect(ficheFermee.address_checks).toEqual([]); // adresse non publiée : pas de vérification
+    expect(ficheFermee.address_checks_edition).toBe("2026-10-01"); // l'édition reste connue indépendamment
+  });
+});
+
+describe("rendu texte (company-check.ts) : \"yes\"/\"no\", en-tête avec édition, détails raccourcis (relecture finale, point 3)", () => {
+  it("AXA-like, édition connue : en-tête \"edition 2026-10-01\", résultats en yes/no (jamais identical/different pour address_checks)", async () => {
+    const lindas = JSON.stringify({
+      results: {
+        bindings: [
+          {
+            company: { value: "https://register.ld.admin.ch/zefix/company/431354" },
+            legalName: { value: "Société Fictive SA" },
+            legalFormCode: { value: "0106" },
+            legalFormLabelFr: { value: "Société anonyme" },
+            legalFormLabelDe: { value: "Aktiengesellschaft" },
+            municipalityName: { value: "Winterthur" },
+            municipalityId: { value: "230" },
+            region: { value: "ZH" },
+            street: { value: "Rue Fictive 1" },
+            postalCode: { value: "8400" },
+            locality: { value: "Winterthur" },
+            chid: { value: "CH00000000001" },
+          },
+        ],
+      },
+    });
+    const fetchStub = async (_url: string | URL, init?: RequestInit) =>
+      init?.method === "POST"
+        ? new Response(lindas, { status: 200, headers: { "content-type": "application/json" } })
+        : new Response(JSON.stringify({ data: [] }), { status: 200, headers: { "content-type": "application/json" } });
+
+    const res = await companyCheckHandler(
+      { uid: "CHE-103.137.179" },
+      { fetch: fetchStub, now, finma: () => [] },
+    );
+    expect(res.isError).toBeUndefined();
+    const text = res.content[0]?.text ?? "";
+    expect(text).toContain("Address checks (official locality directory, swisstopo, edition 2026-10-01):");
+    expect(text).not.toMatch(/address_checks[\s\S]{0,80}identical/);
+    // Les trois address_checks rendent "yes" (fichier réel embarqué, adresse Winterthur 8400/230/ZH).
+    const addressSection = text.split("Address checks")[1] ?? "";
+    expect(addressSection).toMatch(/postal_code_in_official_directory: yes/);
+    expect(addressSection).toMatch(/locality_matches_postal_code: yes/);
+    expect(addressSection).toMatch(/seat_municipality_matches_postal_code: yes/);
+    expect(addressSection).not.toContain("identical");
+    expect(addressSection).not.toContain("different");
+  });
+});
+
 describe("companyCheck (bout en bout) : localities câblé PAR DÉFAUT, répertoire réel embarqué", () => {
   const fixture = (name: string): unknown =>
     JSON.parse(readFileSync(new URL(`../fixtures/company/${name}`, import.meta.url), "utf8"));
@@ -242,5 +322,7 @@ describe("companyCheck (bout en bout) : localities câblé PAR DÉFAUT, réperto
     // tests/mcp/company-check.test.ts, "1. AXA Leben AG" : toHaveLength(2)) : jamais mélangé.
     expect(result.fiche.cross_checks).toHaveLength(2);
     expect(result.fiche.not_covered).not.toContain("official_locality_directory_checks");
+    // Édition réelle de src/mcp/data/localities.meta.json (relecture finale, point 4).
+    expect(result.fiche.address_checks_edition).toBe("2026-10-01");
   });
 });

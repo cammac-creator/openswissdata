@@ -1,0 +1,5 @@
+{
+  "edition": "2026-10-01",
+  "source": "https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo-vd.ortschaftenverzeichnis_plz/items",
+  "rows": 5696
+}

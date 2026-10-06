@@ -2,23 +2,31 @@
 /**
  * Collecte mensuelle du répertoire officiel des localités suisses (NPA, localité, commune,
  * numéro OFS de commune, canton), depuis le catalogue STAC de swisstopo (tâche osd.localites,
- * tâche 1 du plan `2026-10-06-localites-officielles.md`).
+ * tâche 1 du plan `2026-10-06-localites-officielles.md`, relecture finale du 06.10.2026).
  *
  * Produit `src/mcp/data/localities.csv` : colonnes réduites (postal_code,
  * postal_code_suffix, locality, municipality, municipality_bfs_id, canton, language), triées
  * par NPA puis suffixe puis localité (puis numéro OFS de commune, en départage déterministe —
  * un même NPA/suffixe/localité peut couvrir deux communes, ex. Genève 1202 chevauche aussi
- * Pregny-Chambésy). Écriture ATOMIQUE (fichier temporaire dans le même dossier, puis
- * renommage) : un contrôle en échec laisse le fichier précédent intact, jamais d'écrasement
- * silencieux.
+ * Pregny-Chambésy) ; et `src/mcp/data/localities.meta.json` : `{ edition, source, rows }`
+ * (point 4 de la relecture finale), lu par `src/mcp/data-loader.ts`. Écriture ATOMIQUE
+ * (fichier temporaire dans le même dossier, puis renommage) pour les DEUX fichiers : un
+ * contrôle en échec laisse les fichiers précédents intacts, jamais d'écrasement silencieux.
  *
  * Usage :
- *   tsx scripts/sync-localities.ts                   — téléchargement réel par le STAC
- *   tsx scripts/sync-localities.ts --fixture <zip>    — ZIP local, sans réseau (tests, seed)
+ *   tsx scripts/sync-localities.ts                                    — téléchargement réel par le STAC
+ *   tsx scripts/sync-localities.ts --fixture <zip> --edition AAAA-MM-JJ — ZIP local, sans réseau (tests, seed)
  *
- * Contrôles stricts avant toute écriture (décision du 06.10.2026) :
+ * `--edition` est OBLIGATOIRE en mode `--fixture` : sans appel STAC, rien ne permet de
+ * déduire la date d'édition du ZIP fourni — jamais une date devinée ou celle du jour.
+ *
+ * Contrôles stricts avant toute écriture (décision du 06.10.2026, affinés le même jour en
+ * relecture finale) :
  *   - en-tête EXACT (douze colonnes, même ordre, même séparateur `;`) — sinon échec visible,
  *     jamais interprété comme des données.
+ *   - encodage : aucun caractère de remplacement U+FFFD (signe de corruption d'encodage), et
+ *     la ligne « Genève » du NPA 1204 doit exister telle quelle (canari interne : si cette
+ *     commune UTF-8 à accents n'est plus lisible, le reste du fichier ne l'est pas non plus).
  *   - communes du Liechtenstein (numéro OFS 7001 à 7011, `Kantonskürzel` vide dans le fichier
  *     officiel : elles partagent le système postal suisse sans appartenir à un canton
  *     suisse — vérifié sur le fichier du 06.10.2026, 20 lignes, communes Vaduz/Triesen/
@@ -32,10 +40,12 @@
  *   - baisse de plus de `maxDropRatio` (2 % par défaut) du nombre de lignes par rapport au
  *     fichier précédent, quand il existe : échec, jamais un remplacement par un fichier
  *     tronqué.
+ *   - ZIP téléchargé de plus de 20 Mo : échec (le fichier officiel pèse ~560 Ko au
+ *     06.10.2026 ; un dépassement massif signale une réponse inattendue, jamais traitée).
  */
 import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { randomUUID } from "node:crypto";
 import yauzl from "yauzl";
 import { parse } from "csv-parse/sync";
@@ -50,6 +60,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_OUTPUT_PATH = join(__dirname, "..", "src", "mcp", "data", "localities.csv");
 const DEFAULT_MIN_ROWS = 5000;
 const DEFAULT_MAX_DROP_RATIO = 0.02;
+const MAX_ZIP_BYTES = 20_000_000; // relecture finale du 06.10.2026, point 7
 
 const EXPECTED_HEADER =
   "Ortschaftsname;PLZ4;Zusatzziffer;ZIP_ID;Gemeindename;BFS-Nr;Kantonskürzel;Adressenanteil;E;N;Sprache;Validity";
@@ -65,6 +76,8 @@ const LIECHTENSTEIN_BFS_IDS = new Set(["7001", "7002", "7003", "7004", "7005", "
 
 const OUTPUT_COLUMNS = ["postal_code", "postal_code_suffix", "locality", "municipality", "municipality_bfs_id", "canton", "language"] as const;
 
+const EDITION_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 export interface LocalityRow {
   postal_code: string;
   postal_code_suffix: string;
@@ -75,11 +88,22 @@ export interface LocalityRow {
   language: string;
 }
 
+export interface LocalitiesMeta {
+  edition: string;
+  source: string;
+  rows: number;
+}
+
 export interface SyncLocalitiesOptions {
   /** Chemin local d'un ZIP (tests, seed initial) : aucun appel réseau si présent. */
   fixturePath?: string;
+  /** OBLIGATOIRE quand `fixturePath` est fourni (format "AAAA-MM-JJ") : aucun appel STAC pour
+   *  la déduire. Ignoré en mode réseau (déduit de la réponse STAC). */
+  edition?: string;
   /** Défaut : `src/mcp/data/localities.csv`. */
   outputPath?: string;
+  /** Défaut : dossier de `outputPath` + `localities.meta.json`. */
+  metaPath?: string;
   /** Défaut : `globalThis.fetch`. Lu seulement quand `fixturePath` est absent. */
   fetchImpl?: typeof fetch;
   /** Défaut : 5000. Paramétrable pour les tests (une fixture réduite n'atteint jamais ce seuil). */
@@ -93,16 +117,27 @@ export interface SyncLocalitiesResult {
   excludedLiechtenstein: number;
   previousRowCount: number | null;
   outputPath: string;
+  metaPath: string;
+  edition: string;
   changed: boolean;
 }
 
-/** Un seul argument reconnu : `--fixture <chemin>`. */
-export function parseArgs(argv: string[]): { fixturePath?: string } {
-  const idx = argv.indexOf("--fixture");
-  if (idx === -1) return {};
-  const value = argv[idx + 1];
-  if (!value) throw new Error("--fixture nécessite un chemin de ZIP");
-  return { fixturePath: value };
+/** Deux arguments reconnus : `--fixture <chemin>` et `--edition <AAAA-MM-JJ>`. */
+export function parseArgs(argv: string[]): { fixturePath?: string; edition?: string } {
+  const out: { fixturePath?: string; edition?: string } = {};
+  const fixtureIdx = argv.indexOf("--fixture");
+  if (fixtureIdx !== -1) {
+    const value = argv[fixtureIdx + 1];
+    if (!value) throw new Error("--fixture nécessite un chemin de ZIP");
+    out.fixturePath = value;
+  }
+  const editionIdx = argv.indexOf("--edition");
+  if (editionIdx !== -1) {
+    const value = argv[editionIdx + 1];
+    if (!value) throw new Error("--edition nécessite une date AAAA-MM-JJ");
+    out.edition = value;
+  }
+  return out;
 }
 
 /** Extrait un fichier d'un ZIP en mémoire par son nom seul (pas son chemin) : un changement
@@ -152,6 +187,22 @@ export function parseOfficialCsv(buf: Buffer): Record<string, string>[] {
     throw new Error(`En-tête du fichier officiel inattendu (fichier swisstopo modifié) : attendu "${EXPECTED_HEADER}", lu "${headerLine}"`);
   }
   return parse(text, { columns: true, delimiter: ";", skip_empty_lines: true, relax_quotes: true }) as Record<string, string>[];
+}
+
+/** Contrôle d'encodage (relecture finale du 06.10.2026, point 6) : AUCUN caractère de
+ *  remplacement U+FFFD dans le texte décodé (signe d'un octet mal interprété), et la ligne
+ *  « Genève » du NPA 1204 doit exister EXACTEMENT ainsi (canari interne — si cette commune à
+ *  accents n'est plus lisible telle quelle, l'ensemble du fichier a un problème d'encodage,
+ *  même quand aucun U+FFFD n'apparaît, ex. une transcodification silencieuse ISO-8859-1). */
+export function validateEncoding(buf: Buffer, rows: Record<string, string>[]): void {
+  const text = stripBom(buf.toString("utf8"));
+  if (text.includes("�")) {
+    throw new Error("Encodage corrompu : caractère de remplacement U+FFFD détecté dans le fichier officiel");
+  }
+  const geneve1204 = rows.some((row) => row["PLZ4"] === "1204" && row["Ortschaftsname"] === "Genève");
+  if (!geneve1204) {
+    throw new Error('Contrôle d\'encodage : la ligne "Genève" (NPA 1204) est absente ou altérée');
+  }
 }
 
 /** Écarte UNIQUEMENT les onze communes du Liechtenstein (canton vide ET numéro OFS parmi
@@ -241,18 +292,31 @@ function writeAtomic(path: string, content: string): void {
   }
 }
 
-async function resolveAssetUrl(fetchImpl: typeof fetch): Promise<string> {
+/** Résout l'actif CSV réel ET la date d'édition (propriété STAC `datetime` de l'item,
+ *  tronquée au jour) depuis le catalogue — relecture finale du 06.10.2026, point 4. */
+async function resolveAsset(fetchImpl: typeof fetch): Promise<{ href: string; edition: string }> {
   const res = await fetchImpl(SWISSTOPO_LOCALITIES_STAC_ITEMS_URL, { signal: AbortSignal.timeout(30_000) });
   if (!res.ok) throw new Error(`Catalogue STAC swisstopo indisponible : HTTP ${res.status}`);
-  const body = (await res.json()) as { features?: Array<{ assets?: Record<string, { href?: string }> }> };
-  const href = body.features?.[0]?.assets?.[SWISSTOPO_LOCALITIES_ASSET_NAME]?.href;
+  const body = (await res.json()) as {
+    features?: Array<{ properties?: { datetime?: string }; assets?: Record<string, { href?: string }> }>;
+  };
+  const feature = body.features?.[0];
+  const href = feature?.assets?.[SWISSTOPO_LOCALITIES_ASSET_NAME]?.href;
   if (!href) throw new Error(`Actif STAC introuvable dans la réponse : ${SWISSTOPO_LOCALITIES_ASSET_NAME}`);
-  return href;
+  const datetime = feature?.properties?.datetime;
+  if (!datetime) throw new Error("Date d'édition STAC absente de la réponse (propriété datetime)");
+  const edition = datetime.slice(0, 10);
+  if (!EDITION_RE.test(edition)) throw new Error(`Date d'édition STAC invalide : "${datetime}"`);
+  return { href, edition };
 }
 
 async function downloadZip(fetchImpl: typeof fetch, url: string): Promise<Buffer> {
   const res = await fetchImpl(url, { signal: AbortSignal.timeout(60_000) });
   if (!res.ok) throw new Error(`Téléchargement du ZIP impossible : HTTP ${res.status}`);
+  const declared = res.headers.get("content-length");
+  if (declared && Number(declared) > MAX_ZIP_BYTES) {
+    throw new Error(`ZIP officiel trop volumineux (Content-Length ${declared} octets > ${MAX_ZIP_BYTES})`);
+  }
   const buf = Buffer.from(await res.arrayBuffer());
   if (buf.length === 0) throw new Error("ZIP officiel vide");
   return buf;
@@ -260,23 +324,37 @@ async function downloadZip(fetchImpl: typeof fetch, url: string): Promise<Buffer
 
 export async function syncLocalities(opts: SyncLocalitiesOptions = {}): Promise<SyncLocalitiesResult> {
   const outputPath = opts.outputPath ?? DEFAULT_OUTPUT_PATH;
+  const metaPath = opts.metaPath ?? join(dirname(outputPath), "localities.meta.json");
   const minRows = opts.minRows ?? DEFAULT_MIN_ROWS;
   const maxDropRatio = opts.maxDropRatio ?? DEFAULT_MAX_DROP_RATIO;
 
   let zipBuf: Buffer;
+  let edition: string;
   if (opts.fixturePath) {
-    console.log(`[sync:localities] mode fixture : ${opts.fixturePath} (aucun réseau)`);
+    if (!opts.edition) throw new Error("--edition est requis en mode --fixture (aucun appel STAC pour déduire la date d'édition)");
+    if (!EDITION_RE.test(opts.edition)) throw new Error(`--edition invalide : "${opts.edition}" (attendu AAAA-MM-JJ)`);
+    edition = opts.edition;
+    console.log(`[sync:localities] mode fixture : ${opts.fixturePath} (aucun réseau, édition ${edition})`);
     zipBuf = readFileSync(opts.fixturePath);
   } else {
     const fetchImpl = opts.fetchImpl ?? globalThis.fetch;
     console.log("[sync:localities] résolution de l'actif via le catalogue STAC swisstopo...");
-    const assetUrl = await resolveAssetUrl(fetchImpl);
-    console.log(`[sync:localities] téléchargement : ${assetUrl}`);
-    zipBuf = await downloadZip(fetchImpl, assetUrl);
+    const asset = await resolveAsset(fetchImpl);
+    edition = asset.edition;
+    console.log(`[sync:localities] téléchargement (édition ${edition}) : ${asset.href}`);
+    zipBuf = await downloadZip(fetchImpl, asset.href);
+  }
+
+  // Relecture finale du 06.10.2026, point 7 : plafond unique, quelle que soit la source
+  // (réseau ou fixture) — défense en profondeur, même si une fixture de test ne l'atteint
+  // jamais en pratique.
+  if (zipBuf.length > MAX_ZIP_BYTES) {
+    throw new Error(`ZIP trop volumineux (${zipBuf.length} octets > ${MAX_ZIP_BYTES})`);
   }
 
   const csvBuf = await extractCsvFromZip(zipBuf, SWISSTOPO_LOCALITIES_CSV_BASENAME);
   const rawRows = parseOfficialCsv(csvBuf);
+  validateEncoding(csvBuf, rawRows);
   const { rows: swissRows, excluded } = partitionLiechtenstein(rawRows);
   validateRows(swissRows, minRows);
   const rows = sortRows(reduceRows(swissRows));
@@ -290,26 +368,35 @@ export async function syncLocalities(opts: SyncLocalitiesOptions = {}): Promise<
   }
 
   const csv = toCsv(rows);
-  const previousContent = existsSync(outputPath) ? readFileSync(outputPath, "utf8") : null;
-  const changed = previousContent !== csv;
+  const meta: LocalitiesMeta = { edition, source: SWISSTOPO_LOCALITIES_STAC_ITEMS_URL, rows: rows.length };
+  const metaJson = JSON.stringify(meta, null, 2) + "\n";
+
+  const previousCsv = existsSync(outputPath) ? readFileSync(outputPath, "utf8") : null;
+  const previousMeta = existsSync(metaPath) ? readFileSync(metaPath, "utf8") : null;
+  const changed = previousCsv !== csv || previousMeta !== metaJson;
+
   if (changed) {
     writeAtomic(outputPath, csv);
+    writeAtomic(metaPath, metaJson);
     const note = excluded > 0 ? ` (${excluded} commune(s) du Liechtenstein exclues)` : "";
-    console.log(`[sync:localities] écrit ${rows.length} lignes → ${outputPath}${note}`);
+    console.log(`[sync:localities] écrit ${rows.length} lignes (édition ${edition}) → ${outputPath}${note}`);
   } else {
-    console.log(`[sync:localities] aucun changement (${rows.length} lignes, fichier déjà à jour)`);
+    console.log(`[sync:localities] aucun changement (${rows.length} lignes, édition ${edition}, fichiers déjà à jour)`);
   }
 
-  return { rowCount: rows.length, excludedLiechtenstein: excluded, previousRowCount, outputPath, changed };
+  return { rowCount: rows.length, excludedLiechtenstein: excluded, previousRowCount, outputPath, metaPath, edition, changed };
 }
 
 async function main(): Promise<void> {
-  const { fixturePath } = parseArgs(process.argv.slice(2));
-  const result = await syncLocalities({ fixturePath });
+  const { fixturePath, edition } = parseArgs(process.argv.slice(2));
+  const result = await syncLocalities({ fixturePath, edition });
   console.log(`[sync:localities] terminé : ${JSON.stringify(result)}`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Relecture finale du 06.10.2026, point 7 : détection robuste du module principal (chemins
+// avec espaces ou caractères spéciaux, Windows), au lieu de la comparaison littérale
+// `file://${process.argv[1]}` qui échoue sur ces cas.
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   main().catch((err) => {
     console.error("[sync:localities] ERREUR :", err instanceof Error ? err.message : String(err));
     process.exitCode = 1;

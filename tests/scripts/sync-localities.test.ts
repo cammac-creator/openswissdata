@@ -1,18 +1,23 @@
 /**
- * Tests de `scripts/sync-localities.ts` (tâche osd.localites, tâche 1).
+ * Tests de `scripts/sync-localities.ts` (tâche osd.localites, tâche 1 ; relecture finale du
+ * 06.10.2026, points 4/6/7).
  *
  * Aucun appel réseau : les ZIP sont construits en mémoire (`archiver`, même motif que
- * `tests/mcp/r2-refresh.test.ts`) et le mode `--fixture` / `fixturePath` évite tout appel au
- * catalogue STAC. Les lignes de localités réelles utilisées ci-dessous (Winterthur 8400,
- * Kemptthal 8310, Genève 1201/1202, Vaduz 9490) sont des copies littérales du fichier
- * officiel `AMTOVZ_CSV_WGS84.csv` téléchargé le 06.10.2026 (empreinte SHA-256 commençant par
- * 39249c4a469101ff), jamais inventées.
+ * `tests/mcp/r2-refresh.test.ts`), le mode `--fixture` / `fixturePath` évite tout appel au
+ * catalogue STAC, et les quelques tests du chemin réseau injectent `fetchImpl` (maquette pure,
+ * jamais `fetch` global). Les lignes de localités réelles utilisées ci-dessous (Winterthur
+ * 8400, Kemptthal 8310, Genève 1201/1202/1204, Vaduz 9490) sont des copies littérales du
+ * fichier officiel `AMTOVZ_CSV_WGS84.csv` téléchargé le 06.10.2026 (empreinte SHA-256
+ * commençant par 39249c4a469101ff), jamais inventées. `L_GENEVE_1204` est ajoutée à TOUTE
+ * fixture passée à `syncLocalities()` (contrairement aux tests unitaires de fonctions pures
+ * ci-dessous) : le contrôle d'encodage (point 6) l'exige désormais sur chaque collecte.
  */
 import { afterEach, describe, expect, it } from "vitest";
 import archiver from "archiver";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { SWISSTOPO_LOCALITIES_ASSET_NAME, SWISSTOPO_LOCALITIES_STAC_ITEMS_URL } from "../../etl/localities/sources.js";
 import {
   type LocalityRow,
   extractCsvFromZip,
@@ -23,6 +28,7 @@ import {
   sortRows,
   syncLocalities,
   toCsv,
+  validateEncoding,
   validateRows,
 } from "../../scripts/sync-localities.js";
 
@@ -51,6 +57,7 @@ const L_GRAFSTAL = "Grafstal;8310;01;8834;Lindau;176;ZH;100 %;8.699506124400182;
 const L_GENEVE_1201 = "Genève;1201;00;367;Genève;6621;GE;100 %;6.143913585005156;46.209796675319325;fr;2008-07-01";
 const L_GENEVE_1202 = "Genève;1202;00;368;Genève;6621;GE;99.2 %;6.136809927924694;46.21638160383738;fr;2008-07-01";
 const L_GENEVE_1202_PREGNY = "Genève;1202;00;368;Pregny-Chambésy;6634;GE;0.8 %;6.134273744574574;46.23242070242084;fr;2008-07-01";
+const L_GENEVE_1204 = "Genève;1204;00;370;Genève;6621;GE;100 %;6.146544876041146;46.20213455236521;fr;2008-07-01";
 const L_VADUZ = "Vaduz;9490;00;5393;Vaduz;7001;;100 %;9.517532561031839;47.14313943072252;de;2008-07-01";
 
 const REAL_LINES = [
@@ -61,6 +68,7 @@ const REAL_LINES = [
   L_GENEVE_1201,
   L_GENEVE_1202,
   L_GENEVE_1202_PREGNY,
+  L_GENEVE_1204, // contrôle d'encodage (point 6) : exigée dans toute collecte de bout en bout
   L_VADUZ,
 ];
 
@@ -69,6 +77,7 @@ function csvText(lines: string[], header = EXPECTED_HEADER): string {
 }
 
 const CSV_ENTRY = "AMTOVZ_CSV_WGS84/AMTOVZ_CSV_WGS84.csv";
+const EDITION = "2026-10-01"; // édition réelle du fichier du 06.10.2026, d'après le STAC
 
 const tmpDirs: string[] = [];
 function tmpDir(): string {
@@ -116,6 +125,34 @@ describe("parseOfficialCsv", () => {
     const rows = parseOfficialCsv(Buffer.from(csvText([L_GENEVE_1201]), "utf8"));
     expect(rows[0].Ortschaftsname).toBe("Genève");
     expect(rows[0].Ortschaftsname).not.toBe("Geneve");
+  });
+});
+
+describe("validateEncoding (relecture finale du 06.10.2026, point 6)", () => {
+  it("accepte un fichier réel qui contient la ligne Genève du NPA 1204", () => {
+    const buf = Buffer.from(csvText([L_WINTERTHUR, L_GENEVE_1204]), "utf8");
+    const rows = parseOfficialCsv(buf);
+    expect(() => validateEncoding(buf, rows)).not.toThrow();
+  });
+
+  it("caractère de remplacement U+FFFD dans le texte : échec, même si la ligne Genève 1204 est présente", () => {
+    const corrompu = csvText([L_WINTERTHUR, L_GENEVE_1204]).replace("Winterthur;8400", "Winterth�r;8400");
+    const buf = Buffer.from(corrompu, "utf8");
+    const rows = parseOfficialCsv(buf);
+    expect(() => validateEncoding(buf, rows)).toThrow(/U\+FFFD|encodage/i);
+  });
+
+  it("ligne Genève du NPA 1204 absente : échec (canari d'encodage), même sans U+FFFD visible", () => {
+    const buf = Buffer.from(csvText([L_WINTERTHUR]), "utf8"); // pas de 1204 ici
+    const rows = parseOfficialCsv(buf);
+    expect(() => validateEncoding(buf, rows)).toThrow(/genève|1204|encodage/i);
+  });
+
+  it("ligne Genève du NPA 1204 altérée (accent perdu, \"Geneve\") : échec", () => {
+    const altere = csvText([L_WINTERTHUR, L_GENEVE_1204.replace("Genève", "Geneve")]);
+    const buf = Buffer.from(altere, "utf8");
+    const rows = parseOfficialCsv(buf);
+    expect(() => validateEncoding(buf, rows)).toThrow(/genève|1204|encodage/i);
   });
 });
 
@@ -220,7 +257,7 @@ describe("reduceRows / sortRows / toCsv", () => {
 });
 
 describe("parseArgs", () => {
-  it("sans argument : pas de fixture", () => {
+  it("sans argument : rien", () => {
     expect(parseArgs([])).toEqual({});
   });
   it("--fixture <chemin> : chemin lu", () => {
@@ -228,6 +265,18 @@ describe("parseArgs", () => {
   });
   it("--fixture sans valeur : erreur explicite", () => {
     expect(() => parseArgs(["--fixture"])).toThrow(/--fixture/);
+  });
+  it("--edition <date> : date lue", () => {
+    expect(parseArgs(["--edition", "2026-10-01"])).toEqual({ edition: "2026-10-01" });
+  });
+  it("--fixture et --edition ensemble", () => {
+    expect(parseArgs(["--fixture", "/tmp/x.zip", "--edition", "2026-10-01"])).toEqual({
+      fixturePath: "/tmp/x.zip",
+      edition: "2026-10-01",
+    });
+  });
+  it("--edition sans valeur : erreur explicite", () => {
+    expect(() => parseArgs(["--edition"])).toThrow(/--edition/);
   });
 });
 
@@ -244,14 +293,33 @@ describe("syncLocalities (bout en bout, ZIP en mémoire, aucun réseau)", () => 
     }) as typeof fetch;
 
     const outputPath = join(dir, "localities.csv");
-    const result = await syncLocalities({ fixturePath: zipPath, outputPath, fetchImpl, minRows: 1 });
+    const result = await syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, fetchImpl, minRows: 1 });
     expect(appele).toBe(false);
     expect(result.rowCount).toBeGreaterThan(0);
     expect(result.excludedLiechtenstein).toBe(0);
     expect(result.changed).toBe(true);
+    expect(result.edition).toBe(EDITION);
     const written = readFileSync(outputPath, "utf8");
     expect(written).toContain("Genève");
     expect(written).toContain("Winterthur");
+  });
+
+  it("--edition absent en mode fixture : erreur explicite, aucune écriture", async () => {
+    const dir = tmpDir();
+    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR, L_GENEVE_1204]) });
+    const zipPath = join(dir, "ovz.zip");
+    writeFileSync(zipPath, zip);
+    const outputPath = join(dir, "localities.csv");
+    await expect(syncLocalities({ fixturePath: zipPath, outputPath, minRows: 1 })).rejects.toThrow(/--edition/);
+  });
+
+  it("--edition mal formée en mode fixture : erreur explicite", async () => {
+    const dir = tmpDir();
+    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR, L_GENEVE_1204]) });
+    const zipPath = join(dir, "ovz.zip");
+    writeFileSync(zipPath, zip);
+    const outputPath = join(dir, "localities.csv");
+    await expect(syncLocalities({ fixturePath: zipPath, edition: "01.10.2026", outputPath, minRows: 1 })).rejects.toThrow(/--edition/);
   });
 
   it("exclut les communes du Liechtenstein du fichier écrit, et compte l'exclusion", async () => {
@@ -260,7 +328,7 @@ describe("syncLocalities (bout en bout, ZIP en mémoire, aucun réseau)", () => 
     const zipPath = join(dir, "ovz.zip");
     writeFileSync(zipPath, zip);
     const outputPath = join(dir, "localities.csv");
-    const result = await syncLocalities({ fixturePath: zipPath, outputPath, minRows: 1 });
+    const result = await syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 });
     expect(result.excludedLiechtenstein).toBe(1);
     const written = readFileSync(outputPath, "utf8");
     expect(written).not.toContain("Vaduz");
@@ -268,13 +336,13 @@ describe("syncLocalities (bout en bout, ZIP en mémoire, aucun réseau)", () => 
 
   it("fichier précédent absent (premier run) : aucun contrôle de baisse, écrit même avec peu de lignes", async () => {
     const dir = tmpDir();
-    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR]) });
+    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR, L_GENEVE_1204]) });
     const zipPath = join(dir, "ovz.zip");
     writeFileSync(zipPath, zip);
     const outputPath = join(dir, "localities.csv");
-    const result = await syncLocalities({ fixturePath: zipPath, outputPath, minRows: 1 });
+    const result = await syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 });
     expect(result.previousRowCount).toBeNull();
-    expect(result.rowCount).toBe(1);
+    expect(result.rowCount).toBe(2); // Winterthur + Genève 1204
   });
 
   it("baisse de plus de 2% par rapport au fichier précédent : échec, fichier précédent INCHANGÉ", async () => {
@@ -286,14 +354,18 @@ describe("syncLocalities (bout en bout, ZIP en mémoire, aucun réseau)", () => 
     const previousContent = [header, ...previousLines].join("\n") + "\n";
     writeFileSync(outputPath, previousContent, "utf8");
 
-    // Nouveau fichier : seulement 90 lignes (baisse de 10 %, largement > 2 %).
+    // Nouveau fichier : 90 lignes synthétiques + Genève 1204 (contrôle d'encodage) = 91,
+    // toujours une baisse de 9 %, largement > 2 %.
     const zip = await makeZip({
-      [CSV_ENTRY]: csvText(Array.from({ length: 90 }, (_, i) => `Loc${i};8001;00;${100 + i};Mun${i};${100 + i};ZH;100 %;0;0;de;2008-07-01`)),
+      [CSV_ENTRY]: csvText([
+        ...Array.from({ length: 90 }, (_, i) => `Loc${i};8001;00;${100 + i};Mun${i};${100 + i};ZH;100 %;0;0;de;2008-07-01`),
+        L_GENEVE_1204,
+      ]),
     });
     const zipPath = join(dir, "ovz.zip");
     writeFileSync(zipPath, zip);
 
-    await expect(syncLocalities({ fixturePath: zipPath, outputPath, minRows: 1 })).rejects.toThrow(/baisse/i);
+    await expect(syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 })).rejects.toThrow(/baisse/i);
     expect(readFileSync(outputPath, "utf8")).toBe(previousContent); // jamais touché
   });
 
@@ -304,14 +376,17 @@ describe("syncLocalities (bout en bout, ZIP en mémoire, aucun réseau)", () => 
     const previousLines = Array.from({ length: 100 }, (_, i) => `800${i % 10},00,Loc${i},Mun${i},${100 + i},ZH,de`);
     writeFileSync(outputPath, [header, ...previousLines].join("\n") + "\n", "utf8");
 
-    // 99 lignes : baisse de 1 %, sous le seuil de 2 %.
+    // 98 lignes synthétiques + Genève 1204 = 99 : baisse de 1 %, sous le seuil de 2 %.
     const zip = await makeZip({
-      [CSV_ENTRY]: csvText(Array.from({ length: 99 }, (_, i) => `Loc${i};8001;00;${100 + i};Mun${i};${100 + i};ZH;100 %;0;0;de;2008-07-01`)),
+      [CSV_ENTRY]: csvText([
+        ...Array.from({ length: 98 }, (_, i) => `Loc${i};8001;00;${100 + i};Mun${i};${100 + i};ZH;100 %;0;0;de;2008-07-01`),
+        L_GENEVE_1204,
+      ]),
     });
     const zipPath = join(dir, "ovz.zip");
     writeFileSync(zipPath, zip);
 
-    const result = await syncLocalities({ fixturePath: zipPath, outputPath, minRows: 1 });
+    const result = await syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 });
     expect(result.rowCount).toBe(99);
     expect(result.changed).toBe(true);
   });
@@ -328,22 +403,143 @@ describe("syncLocalities (bout en bout, ZIP en mémoire, aucun réseau)", () => 
     const zipPath = join(dir, "ovz.zip");
     writeFileSync(zipPath, zip);
 
-    await expect(syncLocalities({ fixturePath: zipPath, outputPath, minRows: 1 })).rejects.toThrow(/en-tête/i);
+    await expect(syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 })).rejects.toThrow(/en-tête/i);
     expect(readFileSync(outputPath, "utf8")).toBe(previousContent);
   });
 
-  it("même contenu reconduit (aucun changement) : changed=false", async () => {
+  it("ligne Genève du NPA 1204 absente : échec avant toute écriture (contrôle d'encodage, point 6)", async () => {
     const dir = tmpDir();
     const outputPath = join(dir, "localities.csv");
-    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR]) });
+    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR]) }); // pas de 1204
     const zipPath = join(dir, "ovz.zip");
     writeFileSync(zipPath, zip);
 
-    const first = await syncLocalities({ fixturePath: zipPath, outputPath, minRows: 1 });
+    await expect(syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 })).rejects.toThrow(/genève|1204|encodage/i);
+    expect(existsSync(outputPath)).toBe(false); // jamais écrit
+  });
+
+  it("même contenu reconduit (aucun changement) : changed=false, même édition", async () => {
+    const dir = tmpDir();
+    const outputPath = join(dir, "localities.csv");
+    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR, L_GENEVE_1204]) });
+    const zipPath = join(dir, "ovz.zip");
+    writeFileSync(zipPath, zip);
+
+    const first = await syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 });
     expect(first.changed).toBe(true);
-    const second = await syncLocalities({ fixturePath: zipPath, outputPath, minRows: 1 });
+    const second = await syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 });
     expect(second.changed).toBe(false);
     expect(second.rowCount).toBe(first.rowCount);
+  });
+
+  it("même CSV mais ÉDITION différente : changed=true (le fichier de métadonnées a changé)", async () => {
+    const dir = tmpDir();
+    const outputPath = join(dir, "localities.csv");
+    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR, L_GENEVE_1204]) });
+    const zipPath = join(dir, "ovz.zip");
+    writeFileSync(zipPath, zip);
+
+    const first = await syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 });
+    expect(first.changed).toBe(true);
+    const second = await syncLocalities({ fixturePath: zipPath, edition: "2026-11-03", outputPath, minRows: 1 });
+    expect(second.changed).toBe(true); // CSV identique, mais l'édition a changé
+    expect(second.rowCount).toBe(first.rowCount);
+  });
+});
+
+describe("localities.meta.json (relecture finale du 06.10.2026, point 4)", () => {
+  it("écrit { edition, source, rows } à côté du CSV, par défaut", async () => {
+    const dir = tmpDir();
+    const outputPath = join(dir, "localities.csv");
+    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR, L_GENEVE_1204]) });
+    const zipPath = join(dir, "ovz.zip");
+    writeFileSync(zipPath, zip);
+
+    const result = await syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, minRows: 1 });
+    expect(result.metaPath).toBe(join(dir, "localities.meta.json"));
+    const meta = JSON.parse(readFileSync(result.metaPath, "utf8"));
+    expect(meta).toEqual({ edition: EDITION, source: SWISSTOPO_LOCALITIES_STAC_ITEMS_URL, rows: result.rowCount });
+  });
+
+  it("chemin personnalisé (`metaPath`) respecté", async () => {
+    const dir = tmpDir();
+    const outputPath = join(dir, "localities.csv");
+    const metaPath = join(dir, "sous-dossier", "meta-personnalise.json");
+    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR, L_GENEVE_1204]) });
+    const zipPath = join(dir, "ovz.zip");
+    writeFileSync(zipPath, zip);
+
+    const result = await syncLocalities({ fixturePath: zipPath, edition: EDITION, outputPath, metaPath, minRows: 1 });
+    expect(result.metaPath).toBe(metaPath);
+    expect(JSON.parse(readFileSync(metaPath, "utf8")).edition).toBe(EDITION);
+  });
+});
+
+describe("syncLocalities (mode réseau, fetchImpl injecté — aucun fetch global touché)", () => {
+  function stacResponse(datetime: string, href = "https://example.test/ovz.zip"): Response {
+    const body = {
+      features: [
+        {
+          properties: { datetime },
+          assets: { [SWISSTOPO_LOCALITIES_ASSET_NAME]: { href } },
+        },
+      ],
+    };
+    return new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
+  }
+
+  it("édition dérivée de la propriété STAC `datetime` (tronquée au jour)", async () => {
+    const dir = tmpDir();
+    const outputPath = join(dir, "localities.csv");
+    const zip = await makeZip({ [CSV_ENTRY]: csvText([L_WINTERTHUR, L_GENEVE_1204]) });
+
+    const fetchImpl = (async (url: string | URL) => {
+      const href = typeof url === "string" ? url : url.toString();
+      if (href === SWISSTOPO_LOCALITIES_STAC_ITEMS_URL) return stacResponse("2026-11-03T05:12:00Z");
+      return new Response(zip, { status: 200 });
+    }) as typeof fetch;
+
+    const result = await syncLocalities({ outputPath, minRows: 1, fetchImpl });
+    expect(result.edition).toBe("2026-11-03");
+  });
+
+  it("Content-Length déclaré au-delà de 20 Mo : échec avant de lire le corps", async () => {
+    const dir = tmpDir();
+    const outputPath = join(dir, "localities.csv");
+    const fetchImpl = (async (url: string | URL) => {
+      const href = typeof url === "string" ? url : url.toString();
+      if (href === SWISSTOPO_LOCALITIES_STAC_ITEMS_URL) return stacResponse("2026-10-01T00:00:00Z");
+      return new Response(new Uint8Array(10), { status: 200, headers: { "content-length": "25000000" } });
+    }) as typeof fetch;
+
+    await expect(syncLocalities({ outputPath, minRows: 1, fetchImpl })).rejects.toThrow(/volumineux/i);
+  });
+
+  it("ZIP réellement reçu de plus de 20 Mo (sans dépendre du Content-Length déclaré) : échec", async () => {
+    const dir = tmpDir();
+    const outputPath = join(dir, "localities.csv");
+    const enorme = new Uint8Array(20_000_001);
+    const fetchImpl = (async (url: string | URL) => {
+      const href = typeof url === "string" ? url : url.toString();
+      if (href === SWISSTOPO_LOCALITIES_STAC_ITEMS_URL) return stacResponse("2026-10-01T00:00:00Z");
+      return new Response(enorme, { status: 200 });
+    }) as typeof fetch;
+
+    await expect(syncLocalities({ outputPath, minRows: 1, fetchImpl })).rejects.toThrow(/volumineux/i);
+  });
+
+  it("date d'édition STAC absente : échec explicite", async () => {
+    const dir = tmpDir();
+    const outputPath = join(dir, "localities.csv");
+    const fetchImpl = (async (url: string | URL) => {
+      const href = typeof url === "string" ? url : url.toString();
+      if (href === SWISSTOPO_LOCALITIES_STAC_ITEMS_URL) {
+        return new Response(JSON.stringify({ features: [{ properties: {}, assets: { [SWISSTOPO_LOCALITIES_ASSET_NAME]: { href: "https://example.test/ovz.zip" } } }] }), { status: 200 });
+      }
+      return new Response(new Uint8Array(10), { status: 200 });
+    }) as typeof fetch;
+
+    await expect(syncLocalities({ outputPath, minRows: 1, fetchImpl })).rejects.toThrow(/édition|datetime/i);
   });
 });
 

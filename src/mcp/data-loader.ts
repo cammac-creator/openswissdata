@@ -112,6 +112,7 @@ let _crosswalks: CrosswalkRow[] | null = null;
 let _localities: LocalityRow[] | null = null;
 let _localitiesByPostalCode: Map<string, LocalityRow[]> | null = null;
 let _localitiesLoadFailed = false;
+let _localitiesEdition: string | null = null;
 let _classificationLinks: ClassificationLink[] | null = null;
 let _classificationSources: ClassificationSource[] | null = null;
 let _taresEmbeddingsPromise: Promise<SearchIndex> | null = null;
@@ -204,11 +205,18 @@ export function getCrosswalks(): readonly CrosswalkRow[] {
  * `src/mcp/company/check.ts`). L'échec de lecture est mémorisé pour ne pas retenter le
  * disque à chaque appel (le fichier n'apparaît pas en cours d'exécution en production).
  */
-export function getLocalities(): { rows: readonly LocalityRow[]; byPostalCode: ReadonlyMap<string, readonly LocalityRow[]> } | null {
+export function getLocalities(): { rows: readonly LocalityRow[]; byPostalCode: ReadonlyMap<string, readonly LocalityRow[]>; edition: string | null } | null {
   if (_localitiesLoadFailed) return null;
   if (!_localities || !_localitiesByPostalCode) {
     try {
       const rows = loadCsv<LocalityRow>("localities.csv");
+      // Relecture finale du 06.10.2026, point 5 : un fichier SANS ligne de données (en-tête
+      // seul, ou fichier vide) est traité comme ABSENT, jamais comme un répertoire vide qui
+      // ferait silencieusement échouer `postal_code_in_official_directory` pour tout NPA.
+      if (rows.length === 0) {
+        _localitiesLoadFailed = true;
+        return null;
+      }
       const index = new Map<string, LocalityRow[]>();
       for (const row of rows) {
         const list = index.get(row.postal_code);
@@ -217,12 +225,26 @@ export function getLocalities(): { rows: readonly LocalityRow[]; byPostalCode: R
       }
       _localities = rows;
       _localitiesByPostalCode = index;
+      _localitiesEdition = readLocalitiesEdition();
     } catch {
       _localitiesLoadFailed = true;
       return null;
     }
   }
-  return { rows: _localities, byPostalCode: _localitiesByPostalCode };
+  return { rows: _localities, byPostalCode: _localitiesByPostalCode, edition: _localitiesEdition };
+}
+
+/** Date d'édition du répertoire (`localities.meta.json`, posé par `scripts/sync-localities.ts`
+ *  — relecture finale du 06.10.2026, point 4) : `null` quand le fichier est absent, illisible
+ *  ou mal formé, jamais une exception ni une date devinée. */
+function readLocalitiesEdition(): string | null {
+  try {
+    const raw = readFileSync(join(DATA_DIR, "localities.meta.json"), "utf8");
+    const meta = JSON.parse(raw) as { edition?: unknown };
+    return typeof meta.edition === "string" && /^\d{4}-\d{2}-\d{2}$/.test(meta.edition) ? meta.edition : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Révision et sources du référentiel effectivement embarqué dans le service. */
@@ -277,6 +299,7 @@ export function _resetDataLoaderCache(): void {
   _localities = null;
   _localitiesByPostalCode = null;
   _localitiesLoadFailed = false;
+  _localitiesEdition = null;
   _classificationLinks = null;
   _classificationSources = null;
   _taresEmbeddingsPromise = null;

@@ -130,15 +130,22 @@ function renderCrossChecks(fiche: CompanyFiche): string[] {
  * officielle, pas un recoupement entre deux sources qui se corroborent. `fiche.address_checks`
  * est TOUJOURS présent (jamais absent) : vide quand il n'y a pas d'adresse publiée ou que le
  * répertoire n'est pas disponible, affiché ici en clair sans mot de verdict.
+ *
+ * Relecture finale du 06.10.2026, point 3 : rendu en "yes"/"no" (pas "identical"/"different",
+ * réservé à `cross_checks`, un recoupement entre deux sources qui se corroborent — ici, une
+ * vérification contre UNE référence officielle). L'édition du répertoire, quand connue,
+ * s'ajoute à l'en-tête ; les `detail` restent courts (le NPA et la localité exacts sont déjà
+ * visibles dans « Commercial register » ci-dessus, pas la peine de les répéter ici).
  */
 function renderAddressChecks(fiche: CompanyFiche): string[] {
-  const lines: string[] = ["Address checks (official locality directory, swisstopo):"];
+  const edition = fiche.address_checks_edition ? `, edition ${fiche.address_checks_edition}` : "";
+  const lines: string[] = [`Address checks (official locality directory, swisstopo${edition}):`];
   if (fiche.address_checks.length === 0) {
     lines.push("  (none: no published commercial register address to check, or the directory is not available)");
     return lines;
   }
   for (const c of fiche.address_checks) {
-    lines.push(`  - ${c.check}: ${c.result ? "identical" : "different"} — ${c.detail}`);
+    lines.push(`  - ${c.check}: ${c.result ? "yes" : "no"} — ${c.detail}`);
   }
   return lines;
 }
@@ -205,7 +212,7 @@ export async function companyCheckHandler(
 export const companyCheckTool = {
   name: "company_check",
   description:
-    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources. No score. Commercial register status (active or deleted), FOSC publications, SECO sanctions and officers are not covered.",
+    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources and checks of the registered address against the official localities directory (swisstopo, when published). No score. Commercial register status (active or deleted), FOSC publications, SECO sanctions and officers are not covered.",
   inputSchema: companyCheckSchema,
   handler: companyCheckHandler,
 } as const;

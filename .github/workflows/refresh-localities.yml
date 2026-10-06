@@ -1,4 +1,16 @@
 name: Collecte mensuelle du répertoire officiel des localités
+#
+# Relecture finale du 06.10.2026, point 1 : un push fait avec le `GITHUB_TOKEN` par défaut
+# (étape « Committer… » ci-dessous) NE déclenche PAS `ci.yml` (règle GitHub : les événements
+# créés par `GITHUB_TOKEN` ne relancent pas d'autres workflows, pour éviter les boucles).
+# Sans garde propre à CE workflow, un commit mensuel partirait donc en production sans être
+# jamais rejoué par la CI. L'étape « Vérifier avant de publier » reproduit donc ICI, après la
+# collecte et AVANT tout commit/push, le sous-ensemble de `ci.yml` qui couvre ce changement
+# (typecheck + les quatre fichiers de test qui exercent `sync-localities.ts` et les champs
+# `address_checks`/`address_checks_edition` qu'il alimente). Un échec de cette étape arrête
+# le job AVANT l'étape de commit (comportement par défaut de GitHub Actions, steps
+# séquentielles) : aucun commit ne part, et l'étape d'alerte mail (`if: !cancelled()`) envoie
+# quand même son message, puisqu'un échec n'est pas une annulation.
 on:
   schedule:
     # Le 3 de chaque mois, minute non ronde (décision du 06.10.2026) : laisse passer les
@@ -24,11 +36,15 @@ jobs:
       - run: npm ci
       - name: Collecter et contrôler le répertoire officiel des localités (swisstopo)
         run: npm run sync:localities
-      - name: Committer le fichier s'il a changé
+      - name: Vérifier avant de publier (jamais de commit sans ces contrôles verts — point 1)
+        run: |
+          npm run typecheck
+          npx vitest run tests/mcp/company-localities.test.ts tests/mcp/company-check-tool.test.ts tests/mcp/company-check.test.ts tests/scripts/sync-localities.test.ts
+      - name: Committer les fichiers s'ils ont changé
         run: |
           git config user.name "OpenSwissData"
           git config user.email "actions@users.noreply.github.com"
-          git add src/mcp/data/localities.csv
+          git add src/mcp/data/localities.csv src/mcp/data/localities.meta.json
           if ! git diff --cached --quiet; then
             git commit -m "données : actualiser le répertoire officiel des localités (swisstopo)"
             git pull --rebase origin main
