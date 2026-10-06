@@ -50,6 +50,8 @@ export function getDb(path?: string, options: { fileMustExist?: boolean } = {}):
   // Une trace ancienne ne reçoit pas rétroactivement une origine serveur supposée.
   ensureColumn(db, "events", "origin", "TEXT NOT NULL DEFAULT 'legacy' CHECK (origin IN ('legacy','server','client'))");
   ensureColumn(db, "download_tokens", "activity_id", "INTEGER REFERENCES download_activity(id) ON DELETE SET NULL");
+  // institutional_letters a déjà été livrée (tâche 1, 06.10) sans cette colonne (correction I3/B).
+  ensureColumn(db, "institutional_letters", "attempted_at", "INTEGER");
   db.exec("CREATE INDEX IF NOT EXISTS idx_download_tokens_activity ON download_tokens(activity_id)");
   migrateOrderRights(db);
   // UNIQUE (partial) so a given Stripe subscription can back at most one client.

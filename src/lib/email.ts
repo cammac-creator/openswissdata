@@ -79,14 +79,27 @@ async function resendSend(to: string, subject: string, html: string): Promise<Em
   return sendPreparedEmail({ from: fromAddress(), to: [to], reply_to: replyToAddress(), subject, html });
 }
 
-export async function sendPreparedEmail(payload: PreparedEmail, idempotencyKey?: string): Promise<EmailSendResult> {
+/**
+ * `options.attempts` : nombre d'essais RÉELS auprès de Resend (défaut 3, délais 0/1 s/3 s comme
+ * avant — comportement des appelants existants STRICTEMENT inchangé, voir leurs tests). Ajouté le
+ * 06.10 (correction I, requête A) pour l'expéditeur des lettres, qui appelle avec `{ attempts: 1 }`
+ * : un seul essai réel, pour que l'issue (connue ou incertaine) revienne à l'appelant en quelques
+ * secondes au lieu d'enchaîner jusqu'à trois tentatives internes (jusqu'à ~49 s avec les délais
+ * d'attente) avant qu'il puisse lui-même décider retentative ou échec, à son propre rythme (entre
+ * deux passages, en respectant le créneau d'envoi).
+ */
+export async function sendPreparedEmail(
+  payload: PreparedEmail,
+  idempotencyKey?: string,
+  options?: { attempts?: number },
+): Promise<EmailSendResult> {
   const key = resendApiKey();
   if (!key) {
     return { sent: false, reason: "no_api_key" };
   }
 
-  const MAX_ATTEMPTS = 3;
-  const DELAYS_MS = [0, 1000, 3000];
+  const MAX_ATTEMPTS = options?.attempts ?? 3;
+  const DELAYS_MS = [0, 1000, 3000].slice(0, MAX_ATTEMPTS);
   let lastError: { reason: "resend_error"; details: string } = {
     reason: "resend_error",
     details: "no_attempts",

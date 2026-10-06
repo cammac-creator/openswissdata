@@ -464,6 +464,11 @@ CREATE TABLE IF NOT EXISTS institutional_letters (
   status TEXT NOT NULL CHECK(status IN ('queued','sending','sent','failed','cancelled')),
   scheduled_at INTEGER NOT NULL,
   lease_until INTEGER NULL,
+  -- Posée à CHAQUE réclamation (correction du 06.10, I3/B) : moment du dernier essai réel, quel
+  -- que soit son statut ensuite. Sert à mesurer l'écart réel entre deux envois (12 min, tous
+  -- statuts confondus, pas seulement `sent`) et à compter les lettres tentées d'un jour Zurich
+  -- pour le plafond de 5/jour, même si cette tentative a fini en `failed`.
+  attempted_at INTEGER NULL,
   attempts INTEGER NOT NULL DEFAULT 0,
   resend_id TEXT NULL,
   sent_at INTEGER NULL,

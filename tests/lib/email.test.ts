@@ -133,6 +133,18 @@ describe("lib/email graceful degradation", () => {
     expect(JSON.parse(opts.body).from).toBe('avant@example.test');
     expect(opts.signal).toBeInstanceOf(AbortSignal);
   });
+
+  it("`options.attempts:1` (correction du 06.10, I/A) : un délai dépassé est une issue inconnue, jamais un second appel à fetch", async () => {
+    process.env.RESEND_API_KEY = "re_real_abc";
+    fetchMock.mockRejectedValue(new Error("timeout"));
+    const r = await sendPreparedEmail(
+      { from: "support@example.test", to: ["client@example.test"], reply_to: "support@example.test", subject: "Fictif", html: "Test" },
+      undefined,
+      { attempts: 1 },
+    );
+    expect(r).toEqual({ sent: false, reason: "resend_error", details: "network_error" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("lib/email renderers (content + i18n)", () => {

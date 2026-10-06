@@ -71,7 +71,11 @@ export type LettersSenderStatus = {
 
 type State = LettersSenderStatus & { version: 1 };
 
-type SendFn = (payload: PreparedEmail, idempotencyKey?: string) => Promise<EmailSendResult>;
+type SendFn = (
+  payload: PreparedEmail,
+  idempotencyKey?: string,
+  options?: { attempts?: number },
+) => Promise<EmailSendResult>;
 
 type Dependencies = {
   database: () => Database.Database;
@@ -87,7 +91,7 @@ const defaults: Dependencies = {
   // Lue à chaque appel, pas au chargement : une horloge simulée (tests) doit être vue.
   now: () => Date.now(),
   rng: () => Math.random(),
-  send: (payload, idempotencyKey) => emailLib.sendPreparedEmail(payload, idempotencyKey),
+  send: (payload, idempotencyKey, options) => emailLib.sendPreparedEmail(payload, idempotencyKey, options),
   fetch: (input, init) => fetch(input, init),
   hasApiKey: () => emailLib.hasResendApiKey(),
 };
@@ -294,10 +298,42 @@ type ClaimResult =
   | { action: "cancelled" }
   | { action: "claimed"; letter: InstitutionalLetter };
 
-/** Un envoi `sent` dans les douze dernières minutes au moins (correction I3, 06.10). */
-function recentlySentWithin(db: Database.Database, now: number, windowMs: number): boolean {
-  const row = db.prepare("SELECT 1 FROM institutional_letters WHERE status='sent' AND sent_at > ? LIMIT 1").get(now - windowMs);
+/**
+ * Un essai réel sur une AUTRE lettre (quel que soit son statut ensuite — `sent`, `failed`, ou
+ * encore `queued`/`sending` après une retentative) dans les douze dernières minutes au moins
+ * (corrections I3 puis B, 06.10) : `attempted_at`, posée à chaque réclamation, pas seulement
+ * `sent_at` d'un envoi confirmé — un essai resté sans réponse connue (I4) occupe tout autant
+ * l'écart réel entre deux lettres DIFFÉRENTES. `excludeId` exclut la lettre candidate elle-même :
+ * sa propre retentative (I4c, jusqu'à trois passages) ne doit jamais attendre douze minutes
+ * derrière son propre essai précédent — seul l'écart entre deux lettres distinctes compte ici.
+ */
+function recentlyAttemptedWithin(db: Database.Database, now: number, windowMs: number, excludeId: string): boolean {
+  const row = db
+    .prepare("SELECT 1 FROM institutional_letters WHERE attempted_at > ? AND id != ? LIMIT 1")
+    .get(now - windowMs, excludeId);
   return !!row;
+}
+
+/**
+ * Créneaux à respecter pour `scheduleSlot` : `scheduled_at` des lettres qui occupent encore un
+ * créneau, PLUS `attempted_at` des lettres `failed` (correction B, 06.10) — une lettre tentée puis
+ * échouée n'occupe plus de créneau par son `scheduled_at` (elle n'est plus `queued`/`sending`/`sent`)
+ * mais a bien consommé une des cinq places du jour où elle a été tentée. `excludeId`, le cas échéant,
+ * exclut la lettre qu'on réplanifie elle-même (jamais sa propre ancienne valeur).
+ */
+function occupiedSlots(db: Database.Database, excludeId?: string): number[] {
+  const exclusion = excludeId ? " AND id != ?" : "";
+  const rows = db
+    .prepare(
+      // UNION ALL, jamais UNION seul : une lettre `sent` et une lettre `failed` peuvent
+      // coïncider exactement sur la même minute (voire la même milliseconde en test) — `UNION`
+      // les dédoublonnerait silencieusement en une seule occupation, sous-comptant le jour.
+      `SELECT scheduled_at FROM institutional_letters WHERE status IN ${OCCUPYING_STATUSES}${exclusion}
+       UNION ALL
+       SELECT attempted_at FROM institutional_letters WHERE status='failed' AND attempted_at IS NOT NULL${exclusion}`,
+    )
+    .all(...(excludeId ? [excludeId, excludeId] : [])) as Array<{ scheduled_at: number }>;
+  return rows.map((r) => r.scheduled_at);
 }
 
 /**
@@ -344,10 +380,8 @@ function claimOrReschedule(db: Database.Database, now: number, rng: () => number
 
     const lateMs = now - candidate.scheduled_at;
     if (lateMs >= LATE_THRESHOLD_MS) {
-      const existing = db
-        .prepare(`SELECT scheduled_at FROM institutional_letters WHERE status IN ${OCCUPYING_STATUSES} AND id != ?`)
-        .all(candidate.id) as Array<{ scheduled_at: number }>;
-      const newScheduledAt = scheduleSlot(now, existing.map((r) => r.scheduled_at), rng);
+      const existing = occupiedSlots(db, candidate.id);
+      const newScheduledAt = scheduleSlot(now, existing, rng);
       const result = db
         .prepare("UPDATE institutional_letters SET scheduled_at=? WHERE id=? AND status='queued'")
         .run(newScheduledAt, candidate.id);
@@ -356,15 +390,17 @@ function claimOrReschedule(db: Database.Database, now: number, rng: () => number
     }
 
     // Pas encore en retard : deux garde-fous avant d'envoyer maintenant (I2b, I3).
-    if (recentlySentWithin(db, now, MIN_REAL_GAP_MS)) return { action: "none" };
+    if (recentlyAttemptedWithin(db, now, MIN_REAL_GAP_MS, candidate.id)) return { action: "none" };
     if (!(isSendableNow(now) && isSendableNow(now + 60_000))) return { action: "none" };
 
     const leaseUntil = now + LEASE_MS;
     const result = db
-      .prepare("UPDATE institutional_letters SET status='sending', lease_until=? WHERE id=? AND status='queued'")
-      .run(leaseUntil, candidate.id);
+      .prepare(
+        "UPDATE institutional_letters SET status='sending', lease_until=?, attempted_at=? WHERE id=? AND status='queued'",
+      )
+      .run(leaseUntil, now, candidate.id);
     if (result.changes !== 1) return { action: "none" }; // concurrence : déjà réclamée ailleurs
-    return { action: "claimed", letter: { ...candidate, status: "sending", lease_until: leaseUntil } };
+    return { action: "claimed", letter: { ...candidate, status: "sending", lease_until: leaseUntil, attempted_at: now } };
   });
   return txn.immediate();
 }
@@ -421,10 +457,7 @@ function createReminder(db: Database.Database, letter: InstitutionalLetter, now:
       .prepare("SELECT 1 FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
       .get(letter.id);
     if (already) return false;
-    const existing = db
-      .prepare(`SELECT scheduled_at FROM institutional_letters WHERE status IN ${OCCUPYING_STATUSES}`)
-      .all() as Array<{ scheduled_at: number }>;
-    const scheduledAt = scheduleSlot(now, existing.map((r) => r.scheduled_at), rng);
+    const scheduledAt = scheduleSlot(now, occupiedSlots(db), rng);
     db.prepare(
       `INSERT INTO institutional_letters
         (id, kind, parent_id, to_address, cc, subject, body, purpose, status, scheduled_at,
@@ -511,7 +544,10 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
         // `catch` (I4a), rien de plus à faire pour cette lettre ce passage-ci.
         let result: EmailSendResult | null;
         try {
-          result = await deps.send(prepared, `letter-${letter.id}`);
+          // Un seul essai réel ici (correction I/A, 06.10) : l'expéditeur décide lui-même,
+          // d'un passage à l'autre et dans le créneau d'envoi, s'il retente — jamais `sendPreparedEmail`
+          // en interne, qui pourrait prendre jusqu'à ~49 s (trois essais, délais d'attente compris).
+          result = await deps.send(prepared, `letter-${letter.id}`, { attempts: 1 });
         } catch {
           // Toute exception pendant l'envoi (I4a) : on ne sait pas si Resend a reçu la requête —
           // jamais de retentative automatique.
@@ -571,7 +607,6 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
 
 // --- Minuterie du point d'entrée réel ----------------------------------------
 
-/** Minuterie du point d'entrée réel (jamais dans `createApp`) : premier passage après 90 s, puis toutes les 60 s. */
 /**
  * Minuterie du point d'entrée réel (jamais dans `createApp`) : premier passage après 90 s, puis
  * toutes les 60 s. La fonction d'arrêt renvoyée est asynchrone (correction I4e, 06.10) : elle
@@ -594,9 +629,14 @@ export function startLettersSender(
   };
   const tick = async () => {
     if (stopped) return;
-    const p = run();
-    inFlight = p;
     try {
+      // `run()` À L'INTÉRIEUR du `try` (correction C, 06.10) : un `run` qui jette de façon
+      // SYNCHRONE (avant même de renvoyer une promesse) ne doit jamais faire sortir l'exception de
+      // `tick()` sans passer par le `catch`/`finally` — sinon la minuterie ne se réarme jamais
+      // (plus aucun passage, pour toujours) et la rejection devient non gérée (`void tick()` dans
+      // `schedule`, personne ne l'attend).
+      const p = run();
+      inFlight = p;
       const result = await p;
       // Codes fermés et nombres seulement : jamais d'adresse, d'objet ni de message d'erreur brut.
       if (result.status === "error") console.error(`[lettres] passage en échec (${result.code ?? "inconnu"})`);
@@ -614,9 +654,14 @@ export function startLettersSender(
     stopped = true;
     clearTimeout(timer);
     if (!inFlight) return;
-    await Promise.race([
-      inFlight.catch(() => undefined),
-      new Promise<void>((resolve) => setTimeout(resolve, SHUTDOWN_GRACE_MS)),
-    ]);
+    // Le délai de grâce est annulé dès que le passage en cours finit avant lui (correction C,
+    // 06.10) : sans `clearTimeout`, cette minuterie resterait armée jusqu'à `SHUTDOWN_GRACE_MS`
+    // même après que `stop()` a déjà résolu.
+    let graceTimer!: ReturnType<typeof setTimeout>;
+    const grace = new Promise<void>((resolve) => {
+      graceTimer = setTimeout(resolve, SHUTDOWN_GRACE_MS);
+    });
+    await Promise.race([inFlight.catch(() => undefined), grace]);
+    clearTimeout(graceTimer);
   };
 }

@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getDb, closeDb } from "../../src/lib/db.js";
 import { runLettersSender, readLettersSenderStatus, startLettersSender } from "../../src/lib/letters-sender.js";
+import { scheduleSlot, toZurichParts } from "../../src/lib/letters.js";
 import type { EmailSendResult, PreparedEmail } from "../../src/lib/email.js";
 
 // Mercredi ouvrable, dans la fenêtre 09:05-17:30 Zurich, sur une minute qui n'est PAS un multiple de
@@ -35,6 +36,7 @@ function insertLetter(overrides: Record<string, unknown> = {}): string {
     status: "queued",
     scheduled_at: NOW,
     lease_until: null,
+    attempted_at: null,
     attempts: 0,
     resend_id: null,
     sent_at: null,
@@ -51,11 +53,11 @@ function insertLetter(overrides: Record<string, unknown> = {}): string {
   db.prepare(
     `INSERT INTO institutional_letters
       (id, kind, parent_id, to_address, cc, subject, body, purpose, status, scheduled_at,
-       lease_until, attempts, resend_id, sent_at, reply_at, reply_from, reply_subject,
+       lease_until, attempted_at, attempts, resend_id, sent_at, reply_at, reply_from, reply_subject,
        reply_extract, reply_kind, reply_processed_at, created_at)
      VALUES
       (@id, @kind, @parent_id, @to_address, @cc, @subject, @body, @purpose, @status, @scheduled_at,
-       @lease_until, @attempts, @resend_id, @sent_at, @reply_at, @reply_from, @reply_subject,
+       @lease_until, @attempted_at, @attempts, @resend_id, @sent_at, @reply_at, @reply_from, @reply_subject,
        @reply_extract, @reply_kind, @reply_processed_at, @created_at)`,
   ).run(row);
   return id;
@@ -649,6 +651,93 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
         resolveRun?.();
         await stopPromise;
         expect(settled).toBe(true);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
+  describe("Correction 2 (06.10) : écart réel par attempted_at (B) et robustesse de la minuterie (C)", () => {
+    it("sonde p1 réaliste : B ne part pas 4,4 min après une tentative incertaine sur A (créneaux tirés par scheduleSlot)", async () => {
+      // Mêmes données que la sonde : A à 10:12 (créneau valide), B au premier créneau que
+      // `scheduleSlot` aurait tiré après A (10:26, ≥12 min d'écart THÉORIQUE sur `scheduled_at`).
+      const aAt = zurichSummer(10, 12);
+      const bAt = scheduleSlot(zurichSummer(10, 0), [aAt], () => 0);
+      insertLetter({ id: "A", scheduled_at: aAt });
+      insertLetter({ id: "B", scheduled_at: bAt });
+
+      // Le serveur était arrêté ; il rattrape à 10:21:05 — A est en retard de 9 min 5 s, pas encore
+      // « en retard » (seuil 10 min). L'envoi jette (délai dépassé) : issue incertaine, `failed`.
+      let clock = zurichSummer(10, 21) + 5_000;
+      const send = vi
+        .fn()
+        .mockImplementationOnce(async () => {
+          throw new Error("timeout");
+        })
+        .mockResolvedValue({ sent: true } satisfies EmailSendResult);
+      await runLettersSender({ now: () => clock, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(getLetter("A").status).toBe("failed");
+      const aAttemptedAt = getLetter("A").attempted_at as number;
+
+      // B est déjà dû à son propre créneau (bAt + 20 s), mais A n'a été TENTÉE (pas forcément
+      // envoyée : issue incertaine) que depuis moins de douze minutes réelles : B attend.
+      clock = bAt + 20_000;
+      expect((clock - aAttemptedAt) / 60_000).toBeLessThan(12); // l'écart réel, pas celui de `scheduled_at`
+      await runLettersSender({ now: () => clock, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(send).toHaveBeenCalledTimes(1); // toujours un seul appel réel (celui, incertain, de A)
+      expect(getLetter("B").status).toBe("queued");
+    });
+
+    it("sonde bords P1 : un écart artificiel de 4,4 min entre A et B — B attend malgré son propre créneau déjà dû", async () => {
+      insertLetter({ id: "A", scheduled_at: zurichSummer(10, 11) });
+      insertLetter({ id: "B", scheduled_at: zurichSummer(10, 16) }); // écart artificiel de 5 min
+      const send = vi.fn().mockRejectedValueOnce(new Error("timeout")).mockResolvedValue({ sent: true } satisfies EmailSendResult);
+
+      await runLettersSender({ now: () => zurichSummer(10, 12), rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(getLetter("A").status).toBe("failed");
+
+      await runLettersSender({ now: () => zurichSummer(10, 16) + 10_000, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(send).toHaveBeenCalledTimes(1); // B n'a pas été tentée : moins de 12 min depuis A (≈4,4 min)
+      expect(getLetter("B").status).toBe("queued");
+    });
+
+    it("une lettre `failed` tentée aujourd'hui occupe une des cinq places du jour pour une nouvelle relance", async () => {
+      const SENT_AT = Date.UTC(2026, 9, 5, 12, 0); // lundi 5 octobre 2026
+      const DAY_NOON = Date.UTC(2026, 9, 26, 12, 0); // lundi 26 octobre 2026 — exactement 15 jours ouvrés, sans férié
+      for (let i = 0; i < 4; i++) {
+        insertLetter({ id: `occ-${i}`, status: "sent", sent_at: DAY_NOON, scheduled_at: DAY_NOON + i * 3_600_000 });
+      }
+      // Tentée aujourd'hui (`attempted_at`) mais `failed` : son ancien `scheduled_at` ne compte plus
+      // par son statut, mais la tentative d'aujourd'hui doit tout de même occuper une des 5 places.
+      insertLetter({ id: "occ-failed", status: "failed", scheduled_at: DAY_NOON - 30 * 86_400_000, attempted_at: DAY_NOON });
+      const parentId = insertLetter({ id: "parent", status: "sent", sent_at: SENT_AT });
+
+      await run({ send: vi.fn(), now: () => DAY_NOON });
+
+      const reminder = getDb().prepare("SELECT scheduled_at FROM institutional_letters WHERE parent_id=?").get(parentId) as {
+        scheduled_at: number;
+      };
+      const z = toZurichParts(reminder.scheduled_at);
+      expect(`${z.year}-${z.month}-${z.day}`).not.toBe("2026-10-26"); // le jour est déjà plein (4 sent + 1 failed = 5/5)
+    });
+
+    it("un `run` qui jette de façon synchrone ne tue jamais la minuterie (sonde bords P3)", async () => {
+      vi.useFakeTimers();
+      try {
+        let calls = 0;
+        const stop = startLettersSender({
+          run: (() => {
+            calls++;
+            throw new Error("rejet synchrone");
+          }) as never,
+        });
+        await vi.advanceTimersByTimeAsync(90_000);
+        expect(calls).toBe(1);
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(calls).toBe(2); // la minuterie s'est bien réarmée malgré le rejet synchrone du premier passage
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(calls).toBe(3);
+        await stop();
       } finally {
         vi.useRealTimers();
       }

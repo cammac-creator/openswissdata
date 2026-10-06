@@ -32,6 +32,9 @@ export interface InstitutionalLetter {
   status: LetterStatus;
   scheduled_at: number;
   lease_until: number | null;
+  /** Moment du dernier essai réel, posé à chaque réclamation (correction du 06.10, I3/B) ; `null`
+   * si la lettre n'a encore jamais été réclamée pour l'envoi. */
+  attempted_at: number | null;
   attempts: number;
   resend_id: string | null;
   sent_at: number | null;

@@ -103,8 +103,19 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
     // seule transaction IMMEDIATE : deux dépôts concurrents ne peuvent pas
     // choisir le même créneau (pas d'`await` entre lecture et écriture).
     const depose = database.transaction(() => {
+      // `scheduled_at` des lettres qui occupent encore un créneau, PLUS `attempted_at` des lettres
+      // `failed` (correction B, 06.10, cf. letters-sender.ts) : une lettre tentée puis échouée a
+      // consommé une des cinq places du jour où elle a été tentée, même si elle n'occupe plus de
+      // créneau par son statut.
+      // UNION ALL, jamais UNION seul : deux lettres distinctes dont les valeurs coïncident
+      // exactement (même minute, voire même ms) ne doivent jamais être dédoublonnées en une
+      // seule occupation — cela sous-compterait le plafond du jour.
       const existing = database
-        .prepare(`SELECT scheduled_at FROM institutional_letters WHERE status IN ${OCCUPYING_STATUSES}`)
+        .prepare(
+          `SELECT scheduled_at FROM institutional_letters WHERE status IN ${OCCUPYING_STATUSES}
+           UNION ALL
+           SELECT attempted_at FROM institutional_letters WHERE status='failed' AND attempted_at IS NOT NULL`,
+        )
         .all() as Array<{ scheduled_at: number }>;
       const scheduledAt = scheduleSlot(now(), existing.map((r) => r.scheduled_at), rng);
       database
