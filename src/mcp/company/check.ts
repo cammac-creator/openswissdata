@@ -14,7 +14,7 @@ import { parseUid } from "./uid.js";
 import { lookupLindas } from "./lindas.js";
 import { lookupGleif } from "./gleif.js";
 import { COMPANY_SOURCES } from "./sources.js";
-import { getFinmaRegistry, getFinmaVersion, type FinmaRegistryRow } from "../data-loader.js";
+import { getFinmaRegistry, getFinmaVersion, type FinmaRegistryRow, type LocalityRow } from "../data-loader.js";
 import type { GleifRecord, LindasCompany, LiveDeps, Part } from "./types.js";
 
 export interface Fact {
@@ -59,6 +59,13 @@ export interface CompanyFiche {
 
 // "commercial_register_status" (pas "registration_status", qui désignerait à tort le champ
 // GLEIF `lei_registration_status` : renommé en correction 1 du 06.10.2026).
+//
+// Liste FERMÉE, gardée par un test existant (`toEqual([...])` sur plusieurs scénarios de
+// `tests/mcp/company-check.test.ts`) : ne JAMAIS y ajouter une entrée ici. Le recoupement
+// d'adresse officielle (tâche osd.localites, tâche 2) ajoute sa propre entrée
+// ("official_locality_directory") SEULEMENT quand `parts.localities` est explicitement
+// fourni et indisponible — jamais dans cette constante, qui reste la base commune à tous
+// les appels, y compris ceux qui ne connaissent pas encore `localities` (voir plus bas).
 const NOT_COVERED = ["commercial_register_status", "fosc_publications", "seco_sanctions", "officers"] as const;
 
 const NOTICE =
@@ -98,6 +105,96 @@ function namesMatch(a: string, b: string): boolean {
   return normalizeName(a) === normalizeName(b);
 }
 
+/** `true` seulement pour les formes juridiques de la liste blanche (voir
+ *  `ADDRESS_AND_PURPOSE_FORM_CODES` ci-dessus) : adresse postale ET but publiés. Factorisé
+ *  hors de `lindasFacts` (tâche osd.localites, tâche 2) pour que le recoupement d'adresse
+ *  officielle applique EXACTEMENT la même porte que les faits `street_address`/
+ *  `postal_code`/`locality` — jamais une règle dupliquée qui pourrait diverger. */
+function hasPublishedAddress(data: LindasCompany): boolean {
+  return data.legal_form_code !== null && ADDRESS_AND_PURPOSE_FORM_CODES.has(data.legal_form_code);
+}
+
+/**
+ * Accès au répertoire officiel des localités (swisstopo), PAS un `Part<T>` : comme pour
+ * `FinmaAccess`, ce n'est jamais une lecture en direct, seulement des lignes déjà chargées
+ * qui peuvent être absentes (tâche osd.localites, tâche 2).
+ *
+ * ⚠️ Ce paramètre reste OPTIONNEL (`parts.localities?`) dans `buildCompanyFiche` et n'est
+ * PAS encore branché par défaut dans `companyCheck` (décision en attente de Claude-Alain,
+ * 06.10.2026 — voir le rapport de tâche) : `undefined` signifie « fonctionnalité non
+ * câblée », strictement différent de `{ available: false }` (« répertoire câblé mais
+ * illisible »). Seul ce second cas ajoute l'entrée `not_covered` ci-dessous ; le premier ne
+ * change RIEN à la fiche (aucun recoupement, `not_covered` inchangé), pour ne jamais faire
+ * varier le comportement des appelants qui ne connaissent pas encore ce paramètre.
+ */
+export type LocalitiesAccess =
+  | { available: true; byPostalCode: ReadonlyMap<string, readonly LocalityRow[]> }
+  | { available: false };
+
+/** NFC, casse ET espaces normalisés, SANS retirer d'accent (décision du 06.10.2026, revue
+ *  point 3) : "Geneve" (sans accent) et "Genève" doivent rester "different", jamais
+ *  "identical" — seul un accent retiré est une vraie divergence factuelle, une majuscule ou
+ *  un espace de trop n'en est pas une. Distincte de `normalizeName` ci-dessus (noms de
+ *  personnes morales, casse conservée) : ce recoupement compare une localité du registre du
+ *  commerce à une localité officielle swisstopo, dont les conventions de casse peuvent
+ *  différer sans qu'il y ait là un fait à signaler. */
+function normalizeLocality(value: string): string {
+  return value.normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+/**
+ * Les trois recoupements d'adresse officielle (tâche osd.localites, tâche 2), SEULEMENT
+ * quand l'adresse LINDAS est publiée (`hasPublishedAddress`, appelé par `buildCompanyFiche`
+ * avant d'invoquer cette fonction) : republier un recoupement sur un NPA ou une localité
+ * jamais exposés dans les faits (formes fermées) fuiterait une donnée volontairement
+ * retenue. `seat_municipality_matches_postal_code` compare la commune du SIÈGE
+ * (`municipality_bfs_id`, toujours publiée) aux communes du NPA POSTAL : un siège peut
+ * légitimement différer de l'adresse postale, le `detail` le rappelle toujours (revue point
+ * 5 : jamais un verdict).
+ */
+function localitiesCrossChecks(lindasData: LindasCompany, localities: LocalitiesAccess): CrossCheck[] {
+  if (!localities.available) return [];
+  const sources = ["ofrc.zefix_lindas", "swisstopo.localities"];
+  const checks: CrossCheck[] = [];
+  const postalCode = lindasData.postal_code;
+  const rowsForPostalCode = postalCode ? localities.byPostalCode.get(postalCode) ?? [] : [];
+
+  if (postalCode) {
+    const found = rowsForPostalCode.length > 0;
+    checks.push({
+      check: "postal_code_in_official_directory",
+      sources,
+      result: found,
+      detail: `Postal code "${postalCode}" (commercial register address) ${found ? "is" : "is not"} listed in the official localities directory (swisstopo).`,
+    });
+
+    if (lindasData.locality) {
+      const wanted = normalizeLocality(lindasData.locality);
+      const match = rowsForPostalCode.some((row) => normalizeLocality(row.locality) === wanted);
+      checks.push({
+        check: "locality_matches_postal_code",
+        sources,
+        result: match,
+        detail: `Locality "${lindasData.locality}" for postal code "${postalCode}" (commercial register address) ${match ? "matches" : "does not match"} an entry of the official localities directory (swisstopo) for that postal code (case/space-insensitive, accents not stripped).`,
+      });
+    }
+  }
+
+  if (lindasData.municipality_bfs_id) {
+    const bfsId = lindasData.municipality_bfs_id;
+    const municipalityIds = new Set(rowsForPostalCode.map((row) => row.municipality_bfs_id));
+    const match = municipalityIds.has(bfsId);
+    checks.push({
+      check: "seat_municipality_matches_postal_code",
+      sources,
+      result: match,
+      detail: `Registered seat municipality (OFS ${bfsId}) ${match ? "is" : "is not"} among the municipalities of postal code "${postalCode ?? ""}" in the official localities directory (swisstopo). A registered seat can differ from the postal address.`,
+    });
+  }
+
+  return checks;
+}
+
 function pushIfPresent(facts: Fact[], field: string, value: string | null | undefined, sourceId: string, sourceUrl: string, retrievedAt: string | null): void {
   if (value !== null && value !== undefined && value !== "") {
     facts.push({ field, value, source_id: sourceId, source_url: sourceUrl, retrieved_at: retrievedAt });
@@ -115,9 +212,7 @@ function pushIfPresent(facts: Fact[], field: string, value: string | null | unde
 function lindasFacts(data: LindasCompany, retrievedAt: string): Fact[] {
   const sourceId = "ofrc.zefix_lindas";
   const sourceUrl = COMPANY_SOURCES[sourceId].url;
-  // `data.legal_form_code !== null` (pas `!!data.legal_form_code`) suffit ici : une chaîne
-  // vide n'est de toute façon jamais une clé de `ADDRESS_AND_PURPOSE_FORM_CODES`.
-  const addressAndPurposeAllowed = data.legal_form_code !== null && ADDRESS_AND_PURPOSE_FORM_CODES.has(data.legal_form_code);
+  const addressAndPurposeAllowed = hasPublishedAddress(data);
   const facts: Fact[] = [];
   const add = (field: string, value: string | null) => pushIfPresent(facts, field, value, sourceId, sourceUrl, retrievedAt);
 
@@ -218,6 +313,9 @@ export function buildCompanyFiche(
      * `finma.data_note` via le texte par défaut.
      */
     finmaVersion?: string | null;
+    /** Optionnel (tâche osd.localites, tâche 2) : voir le commentaire de `LocalitiesAccess`
+     *  ci-dessus. Absent = fonctionnalité non câblée, fiche strictement identique à avant. */
+    localities?: LocalitiesAccess;
     now: () => number;
   },
 ): CompanyFiche {
@@ -304,6 +402,21 @@ export function buildCompanyFiche(
     }
   }
 
+  // Recoupements d'adresse officielle (tâche osd.localites, tâche 2) : SEULEMENT quand
+  // `parts.localities` est explicitement fourni (sinon comportement strictement inchangé,
+  // voir le commentaire de `LocalitiesAccess`) ET l'adresse LINDAS est publiée (sinon on
+  // fuiterait un NPA/localité volontairement retenu des faits).
+  if (parts.localities && lindasData && hasPublishedAddress(lindasData)) {
+    cross_checks.push(...localitiesCrossChecks(lindasData, parts.localities));
+  }
+
+  const not_covered: string[] = [...NOT_COVERED];
+  // Répertoire câblé mais illisible : signalé, jamais une exception (revue point 5). Un
+  // appelant qui ne connaît pas encore `localities` (`undefined`) ne voit AUCUN changement.
+  if (parts.localities && !parts.localities.available) {
+    not_covered.push("official_locality_directory_checks");
+  }
+
   return {
     uid,
     generated_at: generatedAt,
@@ -311,7 +424,7 @@ export function buildCompanyFiche(
     finma,
     lei,
     cross_checks,
-    not_covered: [...NOT_COVERED],
+    not_covered,
     notice: NOTICE,
   };
 }
@@ -342,6 +455,9 @@ export async function companyCheck(
     finma = { available: false, reason: "FINMA registry could not be read" };
   }
   if (finma.available && usingDefaultFinmaRegistry) finmaVersion = getFinmaVersion();
+  // `localities` n'est PAS câblé par défaut ici (décision en attente de Claude-Alain, voir
+  // le rapport de la tâche osd.localites) : `buildCompanyFiche` reçoit donc `localities`
+  // absent (`undefined`), qui ne change rien à la fiche (voir `LocalitiesAccess`).
   const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, now: deps.now });
   return { ok: true, fiche };
 }

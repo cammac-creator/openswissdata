@@ -10,6 +10,7 @@
  *   - finma_registry.csv                     (FINMA-supervised entities, ~2.9k rows)
  *   - finma_warnings.csv                     (FINMA warnings list, ~2.2k rows)
  *   - crosswalks.csv                         (NOGA/NACE/ISIC translations, ~2.2k rows)
+ *   - localities.csv                         (répertoire officiel des localités swisstopo, ~5.7k rows)
  *   - embeddings/tares_index.{json,bin}      (TARES, 7 511 lignes × 4 langues, chemin officiel ; search-index.ts)
  *   - embeddings/noga_2025_index.{json,bin}  (NOGA 2025, 798 genres × 4 langues ; search-index.ts)
  *
@@ -88,6 +89,19 @@ export interface CrosswalkRow {
   notes: string;
 }
 
+/** Une ligne du répertoire officiel des localités (swisstopo, tâche osd.localites) : un
+ *  même (postal_code, postal_code_suffix, locality) peut apparaître plusieurs fois, une
+ *  ligne par commune couverte (ex. NPA 8310 Kemptthal : Lindau ET Winterthur). */
+export interface LocalityRow {
+  postal_code: string;
+  postal_code_suffix: string;
+  locality: string;
+  municipality: string;
+  municipality_bfs_id: string;
+  canton: string;
+  language: string;
+}
+
 let _taresVersion: string | null = null;
 let _tares: TaresRow[] | null = null;
 let _taresByHs8: Map<string, TaresRow> | null = null;
@@ -95,6 +109,9 @@ let _finmaRegistry: FinmaRegistryRow[] | null = null;
 let _finmaWarnings: FinmaWarningRow[] | null = null;
 let _finmaVersion: string | null = null;
 let _crosswalks: CrosswalkRow[] | null = null;
+let _localities: LocalityRow[] | null = null;
+let _localitiesByPostalCode: Map<string, LocalityRow[]> | null = null;
+let _localitiesLoadFailed = false;
 let _classificationLinks: ClassificationLink[] | null = null;
 let _classificationSources: ClassificationSource[] | null = null;
 let _taresEmbeddingsPromise: Promise<SearchIndex> | null = null;
@@ -180,6 +197,34 @@ export function getCrosswalks(): readonly CrosswalkRow[] {
   return _crosswalks;
 }
 
+/**
+ * Répertoire officiel des localités (tâche osd.localites, tâche 2), indexé par NPA. Tolérant
+ * à l'absence ou à une lecture illisible : `null`, JAMAIS une exception — `company_check`
+ * sert alors la fiche sans les recoupements d'adresse qui en dépendent (voir
+ * `src/mcp/company/check.ts`). L'échec de lecture est mémorisé pour ne pas retenter le
+ * disque à chaque appel (le fichier n'apparaît pas en cours d'exécution en production).
+ */
+export function getLocalities(): { rows: readonly LocalityRow[]; byPostalCode: ReadonlyMap<string, readonly LocalityRow[]> } | null {
+  if (_localitiesLoadFailed) return null;
+  if (!_localities || !_localitiesByPostalCode) {
+    try {
+      const rows = loadCsv<LocalityRow>("localities.csv");
+      const index = new Map<string, LocalityRow[]>();
+      for (const row of rows) {
+        const list = index.get(row.postal_code);
+        if (list) list.push(row);
+        else index.set(row.postal_code, [row]);
+      }
+      _localities = rows;
+      _localitiesByPostalCode = index;
+    } catch {
+      _localitiesLoadFailed = true;
+      return null;
+    }
+  }
+  return { rows: _localities, byPostalCode: _localitiesByPostalCode };
+}
+
 /** Révision et sources du référentiel effectivement embarqué dans le service. */
 export function getClassificationLinks(): { links: readonly ClassificationLink[]; sources: readonly ClassificationSource[]; version: string } {
   _classificationLinks ??= loadCsv<ClassificationLink>("classification_links.csv");
@@ -229,6 +274,9 @@ export function _resetDataLoaderCache(): void {
   _finmaWarnings = null;
   _finmaVersion = null;
   _crosswalks = null;
+  _localities = null;
+  _localitiesByPostalCode = null;
+  _localitiesLoadFailed = false;
   _classificationLinks = null;
   _classificationSources = null;
   _taresEmbeddingsPromise = null;
