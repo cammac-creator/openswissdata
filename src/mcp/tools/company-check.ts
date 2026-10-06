@@ -48,8 +48,11 @@ function defaultFetch(...args: Parameters<typeof fetch>): ReturnType<typeof fetc
 
 // Longueur maximale d'une valeur dans le résumé texte (le `but` d'une société peut faire
 // plusieurs centaines de caractères) : le résumé reste court, `structured` garde la fiche
-// entière avec chaque valeur intacte (correction après relecture, 06.10.2026).
-const MAX_VALUE_LENGTH = 160;
+// entière avec chaque valeur intacte (correction après relecture, 06.10.2026). Abaissée de
+// 160 à 130 lors de la tâche B1 (répertoire des rues, 06.10.2026) pour garder le résumé AXA
+// sous 2 400 caractères malgré la nouvelle ligne `street_in_municipality` dans « Address
+// checks » — `structured` garde toujours le texte entier, cette seule valeur est raccourcie.
+const MAX_VALUE_LENGTH = 130;
 
 function truncateValue(value: string): string {
   return value.length > MAX_VALUE_LENGTH ? `${value.slice(0, MAX_VALUE_LENGTH)}… (full text in structured)` : value;
@@ -212,7 +215,7 @@ export async function companyCheckHandler(
 export const companyCheckTool = {
   name: "company_check",
   description:
-    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources and checks of the registered address against the official localities directory (swisstopo, when published). No score. Commercial register status (active or deleted), FOSC publications, SECO sanctions and officers are not covered.",
+    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources and checks of the registered address against the official localities and streets directories (swisstopo, when published). No score. Commercial register status (active or deleted), FOSC publications, SECO sanctions and officers are not covered.",
   inputSchema: companyCheckSchema,
   handler: companyCheckHandler,
 } as const;

@@ -14,6 +14,7 @@ import { NACE_ISIC_URL, OFS_METHODOLOGY_URL } from "../../classifications/links.
 import { CENSUS_NAICS_ISIC_URL } from "../../classifications/naics-crosswalk.js";
 import { LINDAS_SPARQL_ENDPOINT } from "../../finma/ingest-zefix.js";
 import { SWISSTOPO_LOCALITIES_STAC_ITEMS_URL } from "../../localities/sources.js";
+import { SWISSTOPO_STREETS_STAC_ITEMS_URL } from "../../streets/sources.js";
 // Adresses BAZG : dérivées de la même déclaration que la collecte (etl/tares/sources.ts,
 // BAZG_SOURCES), jamais recopiées en dur ici (tâche osd.socle).
 import { BAZG_SOURCES } from "../../tares/sources.js";
@@ -106,6 +107,11 @@ export const SOURCES: readonly SourceDescriptor[] = [
   // au lieu d'un canari séparé qui referait le même constat.
   { id: "swisstopo.localities", institution: "swisstopo", url: SWISSTOPO_LOCALITIES_STAC_ITEMS_URL, licence: SWISSTOPO_OPEN,
     description: "swisstopo — répertoire officiel des localités (NPA, commune, canton), catalogue STAC, collecte mensuelle." },
+  // Même raisonnement que swisstopo.localities (osd.localites, tâche B1) : pas de canari
+  // séparé, `scripts/sync-streets.ts` contrôle lui-même la forme du fichier officiel. Même
+  // licence `terms_open` que le répertoire des localités (même éditeur, même catalogue).
+  { id: "swisstopo.streets", institution: "swisstopo", url: SWISSTOPO_STREETS_STAC_ITEMS_URL, licence: SWISSTOPO_OPEN,
+    description: "swisstopo — répertoire officiel des rues (nom de rue, NPA, commune, canton), catalogue STAC, collecte mensuelle." },
 ];
 
 const PAR_ID = new Map(SOURCES.map(s => [s.id, s]));

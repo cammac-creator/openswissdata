@@ -1,0 +1,5 @@
+{
+  "edition": "2026-10-06",
+  "source": "https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo.amtliches-strassenverzeichnis/items",
+  "rows": 221189
+}

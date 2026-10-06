@@ -11,6 +11,7 @@
  *   - finma_warnings.csv                     (FINMA warnings list, ~2.2k rows)
  *   - crosswalks.csv                         (NOGA/NACE/ISIC translations, ~2.2k rows)
  *   - localities.csv                         (répertoire officiel des localités swisstopo, ~5.7k rows)
+ *   - streets.csv.gz                         (répertoire officiel des rues swisstopo, compressé, ~220k rows)
  *   - embeddings/tares_index.{json,bin}      (TARES, 7 511 lignes × 4 langues, chemin officiel ; search-index.ts)
  *   - embeddings/noga_2025_index.{json,bin}  (NOGA 2025, 798 genres × 4 langues ; search-index.ts)
  *
@@ -21,6 +22,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 import { parse } from "csv-parse/sync";
 import type { ClassificationLink, ClassificationSource } from "../lib/classification-links.js";
 import { loadSearchIndex, type SearchIndex } from "./search-index.js";
@@ -102,6 +104,19 @@ export interface LocalityRow {
   language: string;
 }
 
+/** Une ligne du répertoire officiel des rues (swisstopo, tâche osd.localites, tâche B1) : les
+ *  colonnes `postal_code`/`locality` ne portent que le PREMIER couple NPA/localité d'une rue
+ *  à cheval sur plusieurs secteurs postaux (voir `scripts/sync-streets.ts`) ; seul
+ *  `municipality_bfs_id` est garanti unique par ligne et sert d'index (`getStreets()`). */
+export interface StreetRow {
+  street: string;
+  postal_code: string;
+  locality: string;
+  municipality_bfs_id: string;
+  municipality: string;
+  canton: string;
+}
+
 let _taresVersion: string | null = null;
 let _tares: TaresRow[] | null = null;
 let _taresByHs8: Map<string, TaresRow> | null = null;
@@ -113,6 +128,10 @@ let _localities: LocalityRow[] | null = null;
 let _localitiesByPostalCode: Map<string, LocalityRow[]> | null = null;
 let _localitiesLoadFailed = false;
 let _localitiesEdition: string | null = null;
+let _streets: StreetRow[] | null = null;
+let _streetsByMunicipality: Map<string, Set<string>> | null = null;
+let _streetsLoadFailed = false;
+let _streetsEdition: string | null = null;
 let _classificationLinks: ClassificationLink[] | null = null;
 let _classificationSources: ClassificationSource[] | null = null;
 let _taresEmbeddingsPromise: Promise<SearchIndex> | null = null;
@@ -265,6 +284,109 @@ export function parseLocalitiesEdition(raw: string, loadedRows: number): string 
   }
 }
 
+/** NFC, casse ET espaces normalisés, apostrophes unifiées, trait d'union ≡ espace (règle
+ *  réservée aux noms de rue — décision de Claude-Alain du 06.10.2026, tâche osd.localites,
+ *  tâche B1 : "General Guisan-Strasse" et "General-Guisan-Strasse" doivent correspondre).
+ *  Utilisée à la fois pour construire l'index (`indexStreets`) et pour normaliser le nom de
+ *  rue dérivé de l'adresse LINDAS (`src/mcp/company/check.ts`) : la MÊME fonction des deux
+ *  côtés, pour ne jamais diverger. */
+export function normalizeStreetName(value: string): string {
+  return value
+    .normalize("NFC")
+    .toLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/-/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Répertoire officiel des rues (tâche osd.localites, tâche B1), indexé par numéro OFS de
+ * commune → ensemble des noms de rue normalisés. Fichier compressé (`streets.csv.gz`, lu par
+ * `zlib.gunzipSync`) : plus volumineux que les autres fichiers de `src/mcp/data/`. Tolérant à
+ * l'absence ou à une lecture illisible : `null`, JAMAIS une exception — `company_check` sert
+ * alors la fiche sans la vérification `street_in_municipality` qui en dépend (voir
+ * `src/mcp/company/check.ts`). Même motif que `getLocalities()` ci-dessus.
+ */
+export function getStreets(): { rows: readonly StreetRow[]; byMunicipality: ReadonlyMap<string, ReadonlySet<string>>; edition: string | null } | null {
+  if (_streetsLoadFailed) return null;
+  if (!_streets || !_streetsByMunicipality) {
+    try {
+      const raw = gunzipSync(readFileSync(join(DATA_DIR, "streets.csv.gz"))).toString("utf8");
+      // Mode tableau (`columns: false`) puis correspondance manuelle, PAS `columns: true` :
+      // mesuré le 06.10.2026, le mode objet de `csv-parse` est environ 5,6× plus lent sur les
+      // ~220 000 lignes de ce fichier (2,4 s contre 0,4 s) — un répertoire aussi volumineux
+      // doit rester bien en-deçà du délai des tests qui déclenchent `companyCheck()` par
+      // défaut. L'ordre des colonnes est fixe et contrôlé par `scripts/sync-streets.ts`
+      // (`street,postal_code,locality,municipality_bfs_id,municipality,canton`).
+      const records = parse(raw, { skip_empty_lines: true }) as string[][];
+      const rows: StreetRow[] = records.slice(1).map((r) => ({
+        street: r[0] ?? "",
+        postal_code: r[1] ?? "",
+        locality: r[2] ?? "",
+        municipality_bfs_id: r[3] ?? "",
+        municipality: r[4] ?? "",
+        canton: r[5] ?? "",
+      }));
+      // Un fichier SANS ligne de données (en-tête seul, ou fichier vide une fois décompressé)
+      // est traité comme ABSENT, jamais comme un répertoire vide (même motif que
+      // `getLocalities()`, relecture finale du 06.10.2026, point 5).
+      const index = indexStreets(rows);
+      if (!index) {
+        _streetsLoadFailed = true;
+        return null;
+      }
+      _streets = rows;
+      _streetsByMunicipality = index;
+      _streetsEdition = readStreetsEdition(rows.length);
+    } catch {
+      _streetsLoadFailed = true;
+      return null;
+    }
+  }
+  return { rows: _streets, byMunicipality: _streetsByMunicipality, edition: _streetsEdition };
+}
+
+/** Date d'édition du répertoire des rues (`streets.meta.json`, posé par
+ *  `scripts/sync-streets.ts`) : `null` quand le fichier est absent, illisible ou mal formé,
+ *  jamais une exception ni une date devinée. */
+function readStreetsEdition(loadedRows: number): string | null {
+  try {
+    return parseStreetsEdition(readFileSync(join(DATA_DIR, "streets.meta.json"), "utf8"), loadedRows);
+  } catch {
+    return null;
+  }
+}
+
+/** Index par numéro OFS de commune ; `null` pour un répertoire sans ligne (traité comme
+ *  absent). Fonction pure, testée sans fichier. */
+export function indexStreets(rows: readonly StreetRow[]): Map<string, Set<string>> | null {
+  if (rows.length === 0) return null;
+  const index = new Map<string, Set<string>>();
+  for (const row of rows) {
+    const key = row.municipality_bfs_id;
+    const name = normalizeStreetName(row.street);
+    const set = index.get(key);
+    if (set) set.add(name);
+    else index.set(key, new Set([name]));
+  }
+  return index;
+}
+
+/** Édition lue dans le contenu de `streets.meta.json` : `null` si illisible, mal formée, ou si
+ *  la fiche ne compte pas le même nombre de lignes que le répertoire chargé (les deux fichiers
+ *  sont écrits l'un après l'autre : jamais une date fausse). Fonction pure, testée sans
+ *  fichier. Même forme que `parseLocalitiesEdition` ci-dessus. */
+export function parseStreetsEdition(raw: string, loadedRows: number): string | null {
+  try {
+    const meta = JSON.parse(raw) as { edition?: unknown; rows?: unknown };
+    if (meta.rows !== loadedRows) return null;
+    return typeof meta.edition === "string" && /^\d{4}-\d{2}-\d{2}$/.test(meta.edition) ? meta.edition : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Révision et sources du référentiel effectivement embarqué dans le service. */
 export function getClassificationLinks(): { links: readonly ClassificationLink[]; sources: readonly ClassificationSource[]; version: string } {
   _classificationLinks ??= loadCsv<ClassificationLink>("classification_links.csv");
@@ -318,6 +440,10 @@ export function _resetDataLoaderCache(): void {
   _localitiesByPostalCode = null;
   _localitiesLoadFailed = false;
   _localitiesEdition = null;
+  _streets = null;
+  _streetsByMunicipality = null;
+  _streetsLoadFailed = false;
+  _streetsEdition = null;
   _classificationLinks = null;
   _classificationSources = null;
   _taresEmbeddingsPromise = null;
