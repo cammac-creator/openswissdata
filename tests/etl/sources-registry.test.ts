@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { SOURCES, getSource, sourcesByInstitution } from "../../etl/shared/sources/registry.js";
-import { CANARIES } from "../../scripts/monitor-sources.js";
+
+// Liste figée avant que CANARIES (scripts/monitor-sources.ts) ne soit dérivé de SOURCES (tâche osd.socle,
+// task 2) : comparer à CANARIES serait devenu tautologique puisque CANARIES vient maintenant de SOURCES.
+const CANARIES_FIGEES: { id: string; url: string }[] = JSON.parse(
+  readFileSync(new URL("../fixtures/canaries-2026-10-06.json", import.meta.url), "utf8"),
+);
 
 describe("registre des sources", () => {
   it("chaque identifiant est unique et chaque adresse est en https", () => {
@@ -17,8 +23,8 @@ describe("registre des sources", () => {
       expect(s.description.length, s.id).toBeGreaterThan(10);
     }
   });
-  it("chaque source du canari actuel est dans le registre, même adresse", () => {
-    for (const c of CANARIES) expect(getSource(c.id).url, c.id).toBe(c.url);
+  it("chaque source du canari figé le 06.10 est dans le registre, même adresse", () => {
+    for (const c of CANARIES_FIGEES) expect(getSource(c.id).url, c.id).toBe(c.url);
   });
   it("getSource refuse un identifiant inconnu", () => {
     expect(() => getSource("inconnu.source")).toThrow(/source inconnue/);
