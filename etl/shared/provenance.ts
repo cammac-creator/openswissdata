@@ -51,8 +51,19 @@ export interface ProvenanceTimestamp {
   error?: string;
 }
 
+/** Une source officielle parmi celles assemblées dans une archive (tâche osd.socle). */
+export interface ProvenanceSourceRef {
+  id: string;
+  institution: string;
+  url: string;
+  permission_reference: string;
+  permission_authority: string;
+  permission_date?: string;
+  jurisdiction: string;
+}
+
 export interface ProvenanceManifest {
-  manifest_version: "1.0";
+  manifest_version: "1.0" | "1.1";
   issued_at: string;
   issued_by: "openswissdata.com";
   permission_reference: string;
@@ -63,6 +74,8 @@ export interface ProvenanceManifest {
   dataset_version: string;
   source_url: string;
   files: ProvenanceFile[];
+  /** Version 1.1 : toutes les sources assemblées dans l'archive (tâche osd.socle). Absent en 1.0. */
+  sources?: ProvenanceSourceRef[];
 }
 
 export interface SignedProvenanceManifest extends ProvenanceManifest {
@@ -79,6 +92,8 @@ export interface GenerateProvenanceArgs {
   permissionAuthority: string;
   permissionDate?: string;
   jurisdiction?: string;
+  /** Version 1.1 : toutes les sources assemblées dans l'archive (tâche osd.socle). */
+  sources?: ProvenanceSourceRef[];
 }
 
 // ---------------------------------------------------------------------------
@@ -129,9 +144,12 @@ export function sha256OfBuffer(buf: Buffer | string): string {
 // ---------------------------------------------------------------------------
 
 export function generateProvenance(args: GenerateProvenanceArgs): ProvenanceManifest {
+  if (args.sources && args.sources.length === 0) {
+    throw new Error("provenance : au moins une source quand sources est fourni");
+  }
   const issued_at = new Date().toISOString();
-  return {
-    manifest_version: "1.0",
+  const manifest: ProvenanceManifest = {
+    manifest_version: args.sources ? "1.1" : "1.0",
     issued_at,
     issued_by: "openswissdata.com",
     permission_reference: args.permissionReference,
@@ -143,6 +161,10 @@ export function generateProvenance(args: GenerateProvenanceArgs): ProvenanceMani
     source_url: args.sourceUrl,
     files: [...args.files].sort((a, b) => a.name.localeCompare(b.name)),
   };
+  if (args.sources) {
+    manifest.sources = [...args.sources].sort((a, b) => a.id.localeCompare(b.id));
+  }
+  return manifest;
 }
 
 // ---------------------------------------------------------------------------
