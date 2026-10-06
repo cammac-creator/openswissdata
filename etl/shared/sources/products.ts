@@ -10,7 +10,13 @@
  *   bfs.noga_2008 (API i14y), eurostat.nace2_sparql (NACE2_URL), eurostat.nace21_rdf (NACE_2_1_RDF_URL),
  *   eurostat.nace2_isic4_sparql (NACE_ISIC_URL), bfs.noga_methodologie (OFS_METHODOLOGY_URL),
  *   unsd.isic4_en / unsd.isic4_fr / unsd.isic4_es (ISIC_CSV_BY_LANG ne connaît que ces trois langues),
- *   census.naics_isic (CENSUS_NAICS_ISIC_URL, naics-crosswalk.ts).
+ *   census.naics_isic (CENSUS_NAICS_ISIC_URL, naics-crosswalk.ts) — **source conditionnelle** (correction
+ *   du 06.10.2026, relecture) : `ingestNaicsCrosswalk` n'a aucun appelant hors des tests et
+ *   `etl/classifications/bundle.ts` n'écrit `naics_nace_crosswalk.*` que si `input.naics` est fourni
+ *   (variable `hasNaics`, ligne ~372). `census.naics_isic` reste dans `PRODUCT_SOURCES.classifications`
+ *   (ce que le produit PEUT assembler) mais `bundle.ts` la retire de la liste passée à
+ *   `provenanceFieldsFor` quand `hasNaics` est faux, pour qu'un manifeste signé ne cite jamais une
+ *   source dont l'archive ne contient aucun fichier.
  * - FINMA, collecte de production (etl/finma/release.ts, chemin `!useFixture`, pas de FINMA_TIER=zefix) :
  *   ingestFromFinmaCsv (finma.uid_csv), ingestFinmaWarnings (finma.warnings_api), ingestGleif
  *   (gleif.lei_api), ingestFinmaSupervision (finma.vvtr_xlsx, finma.sro_xlsx, finma.ao_xlsx).

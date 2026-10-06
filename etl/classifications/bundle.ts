@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 import parquet from "parquetjs-lite";
 import { writeCsv, writeJson, writeSqlInserts, writeSqlInsertsChunked, writeParquet } from "../shared/formats.js";
 import { buildSignedProvenance, type ProvenanceFile, type SignProvenanceOptions } from "../shared/provenance.js";
-import { provenanceFieldsFor } from "../shared/sources/products.js";
+import { PRODUCT_SOURCES, provenanceFieldsFor } from "../shared/sources/products.js";
 import type { NomenclatureRow, CrossWalkRow, NomenclatureScheme } from "./types.js";
 import type { ClassificationLink, ClassificationSource } from "../../src/lib/classification-links.js";
 import type { IngestStatentResult } from "./ingest-statent.js";
@@ -793,8 +793,13 @@ ${hasEmbeddings ? "- **Embeddings model** — Xenova/paraphrase-multilingual-mpn
     const buf = readFileSync(p);
     return { name: f, size: buf.length, sha256: createHash("sha256").update(buf).digest("hex") };
   });
+  // census.naics_isic ne figure dans le manifeste que si cette archive contient
+  // réellement les fichiers NAICS (même condition que plus haut pour les écrire).
+  const classificationSourceIds = PRODUCT_SOURCES.classifications.filter(
+    (id) => hasNaics || id !== "census.naics_isic",
+  );
   const provenance = await buildSignedProvenance({
-    ...provenanceFieldsFor("classifications"),
+    ...provenanceFieldsFor("classifications", classificationSourceIds),
     dataset: "classifications",
     version,
     files: manifestFiles,
