@@ -42,21 +42,39 @@ const PENDING_LETTER_WINDOW_MS = 120 * 86_400_000;
 const REPLY_HEADER_FIELDS = ['references', 'auto-submitted', 'x-autoreply', 'x-autorespond', 'precedence', 'authentication-results'];
 // Préfixe de réponse ou de transfert, français/allemand/anglais, avec ou sans espace avant le « : ».
 const REPLY_PREFIX_RE = /^\s*(?:re|aw|antw|tr|wg|fwd)\s*:\s*/i;
+// Apostrophes ramenées à une seule forme (ASCII), AVANT la normalisation NFC (correction finale 2,
+// 06.10, item 4) : « d’absence » (U+2019), « d‘absence » (U+2018) et « d'absence » (ASCII) doivent se
+// comparer identiquement, qu'elles viennent d'un motif écrit dans ce fichier ou d'un objet reçu.
+// Définie ICI (avant `AUTO_SUBJECT_MARKERS`, qui l'utilise dès le chargement du module) : une
+// `const` n'est pas hissée comme une fonction, l'ordre du fichier compte.
+const APOSTROPHE_RE = /[‘’ʼ´`]/g;
+const normalizeApostrophes = (s: string) => s.replace(APOSTROPHE_RE, "'");
 // Motifs resserrés par la correction finale du 06.10.2026 : « absence » seule retirée (trop de faux
 // positifs, ex. « absence de base légale » dans un refus humain) ; motifs plus précis ajoutés à la place.
 const AUTO_SUBJECT_MARKERS: readonly string[] = [
   'accusé de réception', 'eingangsbestätigung', 'automatic reply', 'réponse automatique',
   'automatische antwort', 'abwesenheit', 'out of office', 'message d’absence', 'absent du bureau',
   'absente du bureau', 'risposta automatica',
-].map(m => m.normalize('NFC').toLowerCase());
+  // La normalisation ci-dessous (apostrophe ASCII + NFC) rend cette liste insensible à la forme de
+  // l'apostrophe écrite ici : elle n'a donc plus besoin d'être ASCII elle-même.
+].map(m => normalizeApostrophes(m).normalize('NFC').toLowerCase());
 // `Precedence` reconnus comme automatiques ; jamais `list` (une liste de diffusion n'est pas un accusé).
 const AUTO_PRECEDENCE: ReadonlySet<string> = new Set(['auto_reply', 'bulk', 'junk']);
 // Après trois lectures d'en-têtes ratées pour le même message (bail non ouvert, UIDVALIDITY changée,
-// exception), abandon : alerte de secours habituelle, SANS tentative de rattachement, message marqué
-// signalé comme les autres (jamais bloqué indéfiniment). Compteur borné, fingerprints seuls (jamais un
-// domaine ni un objet dans le témoin).
+// exception), jamais d'abandon pur (correction finale 2, 06.10) : rattachement par la seule enveloppe
+// (objet, In-Reply-To — déjà lus gratuitement) en `unverified`, sinon alerte de secours habituelle si
+// l'objet ne correspond à rien. Compteur de tentatives borné, fingerprints seuls (jamais un domaine ni
+// un objet dans le témoin).
 const HEADER_RETRY_LIMIT = 3;
 const MAX_HEADER_RETRY_ENTRIES = 200;
+// Identifiants de serveur d'authentification (premier champ d'`Authentication-Results`, avant le
+// premier « ; ») considérés fiables pour juger DKIM/DMARC. VIDE pour l'instant (correction finale 2,
+// 06.10) : à remplir par Claude-Alain avec l'identifiant relevé sur une vraie réponse reçue via
+// Infomaniak (voir `operation_checks/mail_watch_auth`, `last_authserv_id_seen`). Tant qu'elle est
+// vide, AUCUNE réponse n'est jamais `human` par authenticité (toujours `unverified`) : c'est le choix
+// sûr — n'importe qui peut écrire n'importe quel `Authentication-Results` dans un message.
+const TRUSTED_AUTHSERV_IDS: ReadonlySet<string> = new Set<string>([]);
+const AUTH_WITNESS_CHECK = 'mail_watch_auth';
 
 type State = MailWatchStatus & { version: 1; seen: string[]; total_attached: number; headerFailures: Record<string, number> };
 // Exportés pour `letters-sender.ts` (tâche 2), qui réutilise `telegramConfig`/`sendTelegram` tels quels.
@@ -202,9 +220,21 @@ function domainsRelated(a: string, b: string): boolean {
   if (!a || !b) return false;
   return a === b || a.endsWith(`.${b}`) || b.endsWith(`.${a}`);
 }
+/** Alignement d'un domaine de signature (DKIM `header.d`, DMARC `header.from`) sur le domaine de
+ * l'expéditeur (correction finale 2, 06.10, item 5) : `signingDomain` doit être égal au domaine de
+ * l'expéditeur OU un PARENT de celui-ci — JAMAIS un enfant. `admin.ch` peut légitimement signer pour
+ * `seco.admin.ch` (même zone DNS) ; l'inverse (`seco.admin.ch` signant soi-disant pour `admin.ch`, ou
+ * pour un domaine frère) ne prouve rien et doit toujours être rejeté. Asymétrique à dessein, contrairement
+ * à `domainsRelated` (bidirectionnel, utilisé lui pour le rattachement objet/domaine d'une lettre).
+ */
+export function signingDomainAligned(senderHost: string, signingDomain: string): boolean {
+  if (!senderHost || !signingDomain) return false;
+  return senderHost === signingDomain || senderHost.endsWith(`.${signingDomain}`);
+}
 // NFC : un client de messagerie peut envoyer un accent décomposé (NFD), qui ne contiendrait jamais
-// la forme composée des motifs ci-dessous sans cette normalisation.
-const normalizeText = (s: string) => compact(s.normalize('NFC')).toLowerCase();
+// la forme composée des motifs ci-dessous sans cette normalisation. `normalizeApostrophes` définie
+// plus haut (avant `AUTO_SUBJECT_MARKERS`, qui en a besoin dès le chargement du module).
+const normalizeText = (s: string) => compact(normalizeApostrophes(s).normalize('NFC')).toLowerCase();
 function stripReplyPrefixes(subject: string): string {
   let s = subject;
   for (;;) {
@@ -241,23 +271,69 @@ function parseHeaderBlock(buf: Buffer): ReplyHeaders {
     authenticationResults: map.get('authentication-results') ?? null,
   };
 }
-/** DKIM/DMARC alignés dans `Authentication-Results` (premier en-tête seulement, cf. `parseHeaderBlock`).
- * Un `header.d`/`header.from` sans point (ex. « ch » seul) est toujours rejeté. Heuristique texte,
- * volontairement tolérante (guillemets, espaces) : un faux négatif se contente de rester `unverified`. */
-function parseAuthenticationResults(raw: string | null): { dkimDomain: string | null; dmarcFromDomain: string | null } {
+/** Découpe un en-tête `Authentication-Results` en clauses séparées par « ; », HORS des portions entre
+ * guillemets (`"..."`, ex. une valeur `smtp.mailfrom` arbitraire) et HORS des commentaires RFC 5322
+ * entre parenthèses (correction finale 2, 06.10, item 2a) : un « ; » ou un texte qui ressemblerait à
+ * une clause à l'intérieur de ces portions ne doit jamais couper ou fabriquer une clause. Pas de
+ * gestion de l'échappement `\"` : suffisant pour ce format, jamais arbitrairement long. */
+export function splitAuthClauses(raw: string): string[] {
+  const clauses: string[] = [];
+  let depth = 0;
+  let inQuotes = false;
+  let current = '';
+  for (const ch of raw) {
+    if (inQuotes) { current += ch; if (ch === '"') inQuotes = false; continue; }
+    if (ch === '"') { inQuotes = true; current += ch; continue; }
+    if (ch === '(') { depth++; current += ch; continue; }
+    if (ch === ')') { depth = Math.max(0, depth - 1); current += ch; continue; }
+    if (ch === ';' && depth === 0) { clauses.push(current); current = ''; continue; }
+    current += ch;
+  }
+  clauses.push(current);
+  return clauses.map(c => c.trim()).filter(c => c.length > 0);
+}
+/** Identifiant du serveur d'authentification (premier élément, avant le premier « ; ») d'un en-tête
+ * `Authentication-Results` — un nom d'hôte, jamais une adresse. `null` si l'en-tête est vide ou
+ * manifestement trop long pour être un nom d'hôte. */
+export function extractAuthservId(raw: string): string | null {
+  const clauses = splitAuthClauses(raw);
+  const id = clauses[0]?.split(/\s+/)[0]?.trim().toLowerCase();
+  return id && id.length > 0 && id.length <= 253 ? id : null;
+}
+/** DKIM/DMARC alignés dans `Authentication-Results` (premier en-tête seulement, cf. `parseHeaderBlock`) :
+ * chaque clause doit COMMENCER par `dkim=pass`/`dmarc=pass` (item 2b — une contrefaçon nichée dans une
+ * AUTRE clause, ex. une valeur `smtp.mailfrom` entre guillemets, ne compte jamais) ; l'identifiant de
+ * serveur (premier élément) doit figurer dans `TRUSTED_AUTHSERV_IDS` (item 2c — VIDE pour l'instant,
+ * donc toujours rejeté ici tant qu'il n'est pas rempli) ; un `header.d`/`header.from` sans point (ex.
+ * « ch » seul) est toujours rejeté. Heuristique texte, volontairement tolérante (guillemets, espaces) :
+ * un faux négatif se contente de rester `unverified`, jamais l'inverse. */
+export function parseAuthenticationResults(raw: string | null): { dkimDomain: string | null; dmarcFromDomain: string | null } {
   if (!raw) return { dkimDomain: null, dmarcFromDomain: null };
-  const dkim = /dkim=pass[^;]*\bheader\.d=["']?([a-z0-9.-]+)/i.exec(raw);
-  const dmarc = /dmarc=pass[^;]*\bheader\.from=["']?([a-z0-9.-]+)/i.exec(raw);
+  const clauses = splitAuthClauses(raw);
+  if (!clauses.length) return { dkimDomain: null, dmarcFromDomain: null };
+  const authservId = extractAuthservId(raw);
+  if (!authservId || !TRUSTED_AUTHSERV_IDS.has(authservId)) return { dkimDomain: null, dmarcFromDomain: null };
   const withDot = (d: string | undefined) => (d && d.includes('.') ? d.toLowerCase() : null);
-  return { dkimDomain: withDot(dkim?.[1]), dmarcFromDomain: withDot(dmarc?.[1]) };
+  let dkimDomain: string | null = null;
+  let dmarcFromDomain: string | null = null;
+  for (const clause of clauses.slice(1)) {
+    if (!dkimDomain && /^dkim\s*=\s*pass\b/i.test(clause)) {
+      dkimDomain = withDot(/\bheader\.d\s*=\s*["']?([a-z0-9.-]+)/i.exec(clause)?.[1]);
+    }
+    if (!dmarcFromDomain && /^dmarc\s*=\s*pass\b/i.test(clause)) {
+      dmarcFromDomain = withDot(/\bheader\.from\s*=\s*["']?([a-z0-9.-]+)/i.exec(clause)?.[1]);
+    }
+  }
+  return { dkimDomain, dmarcFromDomain };
 }
 /**
  * `auto` d'abord (en-têtes, ou objet — débarrassé du texte de la lettre rattachée — portant un motif
  * d'accusé/absence connu) : une réponse automatique n'a jamais besoin d'authentification. Sinon
- * `human` si DKIM ou DMARC est aligné sur le domaine de l'expéditeur (égal ou parent) ; sinon
- * `unverified`. `letterSubject` est l'objet de la lettre (ou relance) qui a servi au rattachement — on
- * le retire d'abord de l'objet reçu, sinon un mot de la lettre elle-même (ex. une lettre dont l'objet
- * contient « réponse automatique ») ferait passer une vraie réponse humaine pour un accusé automatique.
+ * `human` si DKIM ou DMARC est aligné sur le domaine de l'expéditeur (égal ou PARENT de celui-ci,
+ * jamais un enfant — `signingDomainAligned`, item 5) ; sinon `unverified`. `letterSubject` est l'objet
+ * de la lettre (ou relance) qui a servi au rattachement — on le retire d'abord de l'objet reçu, sinon
+ * un mot de la lettre elle-même (ex. une lettre dont l'objet contient « réponse automatique ») ferait
+ * passer une vraie réponse humaine pour un accusé automatique.
  */
 function classifyReplyKind(receivedSubject: string, letterSubject: string, headers: ReplyHeaders, senderHost: string): ReplyKind {
   const submitted = headers.autoSubmitted?.trim().toLowerCase();
@@ -269,8 +345,8 @@ function classifyReplyKind(receivedSubject: string, letterSubject: string, heade
   const remainder = strippedLetter ? normalizedReceived.split(strippedLetter).join(' ') : normalizedReceived;
   if (AUTO_SUBJECT_MARKERS.some(marker => remainder.includes(marker))) return 'auto';
   const auth = parseAuthenticationResults(headers.authenticationResults);
-  if (auth.dkimDomain && domainsRelated(senderHost, auth.dkimDomain)) return 'human';
-  if (auth.dmarcFromDomain && domainsRelated(senderHost, auth.dmarcFromDomain)) return 'human';
+  if (auth.dkimDomain && signingDomainAligned(senderHost, auth.dkimDomain)) return 'human';
+  if (auth.dmarcFromDomain && signingDomainAligned(senderHost, auth.dmarcFromDomain)) return 'human';
   return 'unverified';
 }
 /** Lettres `sent`, ou `failed` avec un essai réel — quel que soit l'état de leur réponse (correction
@@ -337,7 +413,7 @@ function letterReplyText(match: LetterMatch, senderDomain: string): string {
  * unverified→human) doit être revue, même si l'ancienne avait déjà été traitée ; un même rang (rafraîchi)
  * ou un départ de zéro (`reply_kind` NULL) n'avaient de toute façon jamais pu être traités encore.
  * Renvoie `true` seulement si l'écriture a eu lieu (sert au compteur interne, jamais exposé au bureau). */
-function attachReply(db: Database.Database, targetId: string, at: number, fromDomain: string, subject: string, kind: ReplyKind): boolean {
+export function attachReply(db: Database.Database, targetId: string, at: number, fromDomain: string, subject: string, kind: ReplyKind): boolean {
   const result = db.prepare(
     `UPDATE institutional_letters SET reply_at=@at, reply_from=@from_domain, reply_subject=@subject,
        reply_kind=@kind, reply_processed_at=NULL
@@ -433,17 +509,36 @@ async function collect(client: ImapFlow, baseDomains: readonly string[], extraDo
       } catch { giveUpOrDefer(candidate); }
     }
   }
+  let lastAuthservId: string | null = null;
   for (const candidate of selected) {
-    if (candidate.headersPending || candidate.headerGivenUp) continue;
-    const matched = findLetterMatch(domainOf(candidate.fromAddress), candidate.subject, candidate.inReplyTo, candidate.headers?.references ?? null, letterTargets);
+    if (candidate.headersPending) continue;
+    const senderHost = domainOf(candidate.fromAddress);
+    // Abandon de la lecture des en-têtes (3e échec) : jamais un pur abandon (correction finale 2,
+    // 06.10, item 1) — on rattache quand même par la seule enveloppe (objet, In-Reply-To, déjà lus
+    // gratuitement, sans `References` ni en-têtes d'auto-détection) ; une correspondance devient
+    // directement `unverified` (on ne peut juger ni l'authenticité ni l'automaticité sans en-têtes),
+    // jamais `classifyReplyKind`. Sans correspondance, alerte de secours habituelle (boucle plus bas).
+    if (candidate.headerGivenUp) {
+      const matched = findLetterMatch(senderHost, candidate.subject, candidate.inReplyTo, null, letterTargets);
+      if (matched) {
+        const target = resolveLetterTarget(matched, letterTargets);
+        candidate.letterMatch = { targetId: target.id, subject: target.subject, sentAt: target.sentAt, replyKind: 'unverified' };
+      }
+      continue;
+    }
+    if (candidate.headers?.authenticationResults) {
+      const id = extractAuthservId(candidate.headers.authenticationResults);
+      if (id) lastAuthservId = id;
+    }
+    const matched = findLetterMatch(senderHost, candidate.subject, candidate.inReplyTo, candidate.headers?.references ?? null, letterTargets);
     if (!matched) continue;
     const target = resolveLetterTarget(matched, letterTargets);
     candidate.letterMatch = {
       targetId: target.id, subject: target.subject, sentAt: target.sentAt,
-      replyKind: classifyReplyKind(candidate.subject, matched.subject, candidate.headers ?? EMPTY_REPLY_HEADERS, domainOf(candidate.fromAddress)),
+      replyKind: classifyReplyKind(candidate.subject, matched.subject, candidate.headers ?? EMPTY_REPLY_HEADERS, senderHost),
     };
   }
-  return { matched: keys.size, fresh: fresh.length, selected };
+  return { matched: keys.size, fresh: fresh.length, selected, lastAuthservId };
 }
 
 const count = (value: unknown) => (Number.isSafeInteger(value) && (value as number) >= 0 ? (value as number) : 0);
@@ -509,6 +604,27 @@ export function readMailWatchStatus(db: Database.Database = getDb()): MailWatchS
   return state ? publicView(state) : null;
 }
 
+/**
+ * Témoin SÉPARÉ (jamais mélangé à `operation_checks/mail_watch`, dont la forme exacte est figée par
+ * un test existant) : dernier identifiant de serveur d'authentification vu dans un `Authentication-
+ * Results` d'un domaine surveillé (correction finale 2, 06.10, item 2d) — un nom d'hôte, jamais une
+ * adresse. Sert à Claude-Alain pour remplir `TRUSTED_AUTHSERV_IDS` avec l'identifiant réel observé
+ * via Infomaniak.
+ */
+function recordAuthservIdSeen(db: Database.Database, authservId: string, now: number): void {
+  db.prepare('INSERT INTO operation_checks(name,checked_at,details_json) VALUES(?,?,?) ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json')
+    .run(AUTH_WITNESS_CHECK, now, JSON.stringify({ last_authserv_id_seen: authservId }));
+}
+/** Lecture privée (jamais exposée au bureau) : pour relever l'identifiant à ajouter à `TRUSTED_AUTHSERV_IDS`. */
+export function readLastAuthservIdSeen(db: Database.Database = getDb()): string | null {
+  const row = db.prepare('SELECT details_json FROM operation_checks WHERE name=?').get(AUTH_WITNESS_CHECK) as { details_json: string } | undefined;
+  if (!row) return null;
+  try {
+    const raw = JSON.parse(row.details_json) as { last_authserv_id_seen?: unknown };
+    return typeof raw.last_authserv_id_seen === 'string' ? raw.last_authserv_id_seen : null;
+  } catch { return null; }
+}
+
 /** Un passage complet. Ne marque un message signalé qu'après `ok:true` de Telegram. */
 export async function runMailWatch(overrides: Partial<Dependencies> = {}): Promise<MailWatchStatus> {
   const deps: Dependencies = { ...defaults, ...overrides };
@@ -541,6 +657,7 @@ export async function runMailWatch(overrides: Partial<Dependencies> = {}): Promi
   const seen = new Set(state.seen);
   try { found = await deps.withImap(auth, client => collect(client, baseDomains, extraDomains, now, seen, letterTargets, state.headerFailures)); }
   catch { return finish({ status: 'error', code: 'imap_failed' }); }
+  if (found.lastAuthservId) recordAuthservIdSeen(db, found.lastAuthservId, now);
   state = { ...state, matched: found.matched, pending: found.fresh };
   for (const candidate of found.selected) {
     if (candidate.headersPending) {

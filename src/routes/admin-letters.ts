@@ -231,10 +231,15 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
   /**
    * POST /:id/reply `{ kind: "human" }` — marquage manuel d'une réponse humaine reçue hors de la
    * boîte surveillée (ex. par téléphone), ou confirmation d'une réponse déjà vue ailleurs
-   * (correction finale du 06.10.2026, item 4). Arrête la relance comme un rattachement automatique
-   * (même `reply_kind`). 404 lettre inconnue ; 409 lettre pas encore `sent`/`failed` (jamais réclamée
-   * ou jamais tentée) ; déjà `human` : 200 sans rien changer — ne jamais écraser l'objet et la date
-   * d'une vraie réponse déjà rattachée par la veille courrier avec le texte générique ci-dessous.
+   * (correction finale du 06.10.2026, item 4 ; affinée par la correction finale 2, item 6). Arrête la
+   * relance comme un rattachement automatique (même `reply_kind`). `:id` peut être l'identifiant
+   * d'une RELANCE : on écrit alors sur la lettre D'ORIGINE (`parent_id`), jamais sur la relance
+   * elle-même — c'est elle que `letters-sender.ts` consulte. 404 lettre (ou lettre d'origine)
+   * inconnue ; 409 lettre pas encore `sent`/`failed` (jamais réclamée ou jamais tentée) ; déjà
+   * `human` : 200 sans rien changer. Déjà `unverified` (domaine/objet/date déjà rattachés par la
+   * veille courrier, authenticité seule en cause) : on se contente de confirmer `human` sans toucher
+   * à `reply_at`/`reply_from`/`reply_subject` — ne jamais écraser une vraie correspondance déjà
+   * connue par le texte générique ci-dessous, qui ne sert qu'au tout premier rattachement.
    */
   route.post("/:id/reply", async (c) => {
     const parsed = ReplySchema.safeParse(
@@ -247,21 +252,37 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
 
     const id = c.req.param("id");
     const database = db();
-    const letter = database
-      .prepare("SELECT status, to_address, reply_kind FROM institutional_letters WHERE id = ?")
-      .get(id) as { status: string; to_address: string; reply_kind: string | null } | undefined;
-    if (!letter) return c.json({ error: "not_found" }, 404);
+    const row = database
+      .prepare("SELECT id, kind, parent_id, status, to_address, reply_kind FROM institutional_letters WHERE id = ?")
+      .get(id) as { id: string; kind: string; parent_id: string | null; status: string; to_address: string; reply_kind: string | null } | undefined;
+    if (!row) return c.json({ error: "not_found" }, 404);
+
+    // Une relance pointe toujours vers la lettre D'ORIGINE (comme `mail-watch.ts`/`letters-sender.ts`).
+    const letter =
+      row.kind === "reminder" && row.parent_id
+        ? ((database
+            .prepare("SELECT id, status, to_address, reply_kind FROM institutional_letters WHERE id = ?")
+            .get(row.parent_id) as { id: string; status: string; to_address: string; reply_kind: string | null } | undefined) ?? null)
+        : row;
+    if (!letter) return c.json({ error: "not_found" }, 404); // défensif : clé étrangère, ne devrait jamais arriver
+
     if (letter.status !== "sent" && letter.status !== "failed") {
       return c.json({ error: "not_sent", status: letter.status }, 409);
     }
     if (letter.reply_kind === "human") return c.json({ ok: true, reply_kind: "human" });
+    if (letter.reply_kind === "unverified") {
+      database
+        .prepare("UPDATE institutional_letters SET reply_kind = 'human', reply_processed_at = NULL WHERE id = ?")
+        .run(letter.id);
+      return c.json({ ok: true, reply_kind: "human" });
+    }
 
     database
       .prepare(
         "UPDATE institutional_letters SET reply_at = ?, reply_from = ?, reply_subject = 'marqué manuellement', " +
           "reply_kind = 'human', reply_processed_at = NULL WHERE id = ?",
       )
-      .run(now(), domainOf(letter.to_address), id);
+      .run(now(), domainOf(letter.to_address), letter.id);
     return c.json({ ok: true, reply_kind: "human" });
   });
 

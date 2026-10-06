@@ -30,6 +30,8 @@ function insertLetter(overrides: Record<string, unknown> = {}): string {
   const id = (overrides.id as string) ?? `id-${Math.random().toString(36).slice(2)}`;
   const row = {
     id,
+    kind: "letter",
+    parent_id: null,
     to_address: "boite-fictive@admin.ch",
     subject: "sujet",
     body: "corps secret",
@@ -49,7 +51,7 @@ function insertLetter(overrides: Record<string, unknown> = {}): string {
        lease_until, attempts, resend_id, sent_at, reply_at, reply_from, reply_subject,
        reply_extract, reply_kind, reply_processed_at, created_at)
      VALUES
-      (@id, 'letter', NULL, @to_address, NULL, @subject, @body, @purpose, @status, @scheduled_at,
+      (@id, @kind, @parent_id, @to_address, NULL, @subject, @body, @purpose, @status, @scheduled_at,
        NULL, 0, NULL, NULL, @reply_at, NULL, NULL,
        NULL, @reply_kind, @reply_processed_at, @created_at)`,
   ).run(row);
@@ -318,6 +320,15 @@ describe("routes des lettres institutionnelles (/api/admin/letters)", () => {
       expect(unprocessedBody.letters.map((l: { id: string }) => l.id)).toEqual(["replied-human"]);
     });
 
+    it("replied=1&unprocessed=1 renvoie aussi une lettre `unverified` (aucun filtre sur reply_kind)", async () => {
+      const t0 = Date.now();
+      insertLetter({ id: "replied-unverified", status: "sent", reply_at: t0, reply_kind: "unverified" });
+      const app = buildApp();
+      const res = await app.request("/?replied=1&unprocessed=1", { headers: { "x-admin-secret": SECRET } });
+      const body = await res.json();
+      expect(body.letters.map((l: { id: string }) => l.id)).toEqual(["replied-unverified"]);
+    });
+
     it("rejette un paramètre de requête invalide", async () => {
       insertLetter({ id: "z1" });
       const app = buildApp();
@@ -448,6 +459,43 @@ describe("routes des lettres institutionnelles (/api/admin/letters)", () => {
       expect(row.reply_at).toBe(12345);
       expect(row.reply_subject).toBe("Vraie réponse de l’autorité");
       expect(row.reply_processed_at).toBe(12345);
+    });
+
+    it("déjà `unverified` (correction finale 2, item 6) : passe à human SANS écraser reply_subject/reply_at/reply_from, et réinitialise reply_processed_at", async () => {
+      const id = insertLetter({ status: "sent", reply_kind: "unverified", reply_at: 777, reply_processed_at: 777 });
+      getDb().prepare("UPDATE institutional_letters SET reply_subject='Re: déjà rattachée', reply_from='seco.admin.ch' WHERE id=?").run(id);
+      const app = buildApp();
+      const res = await app.request(`/${id}/reply`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ kind: "human" }),
+      });
+      expect(res.status).toBe(200);
+      const row = getDb().prepare("SELECT reply_kind, reply_at, reply_subject, reply_from, reply_processed_at FROM institutional_letters WHERE id=?").get(id) as Record<string, unknown>;
+      expect(row.reply_kind).toBe("human");
+      expect(row.reply_at).toBe(777); // jamais écrasé
+      expect(row.reply_subject).toBe("Re: déjà rattachée"); // jamais écrasé
+      expect(row.reply_from).toBe("seco.admin.ch"); // jamais écrasé
+      expect(row.reply_processed_at).toBeNull(); // remis à NULL malgré tout
+    });
+
+    it("appelé sur l'identifiant d'une RELANCE : écrit sur la lettre D'ORIGINE, jamais sur la relance", async () => {
+      const parentId = insertLetter({ status: "sent", to_address: "sanctions@seco.admin.ch" });
+      const reminderId = insertLetter({ kind: "reminder", parent_id: parentId, status: "sent", subject: "Relance : sujet" });
+      const t0 = Date.now() + 2000;
+      const app = buildApp({ now: () => t0 });
+      const res = await app.request(`/${reminderId}/reply`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-admin-secret": SECRET },
+        body: JSON.stringify({ kind: "human" }),
+      });
+      expect(res.status).toBe(200);
+      const parent = getDb().prepare("SELECT reply_kind, reply_at, reply_from FROM institutional_letters WHERE id=?").get(parentId) as Record<string, unknown>;
+      expect(parent.reply_kind).toBe("human");
+      expect(parent.reply_at).toBe(t0);
+      expect(parent.reply_from).toBe("seco.admin.ch");
+      const reminder = getDb().prepare("SELECT reply_kind FROM institutional_letters WHERE id=?").get(reminderId) as Record<string, unknown>;
+      expect(reminder.reply_kind).toBeNull(); // la relance elle-même reste inchangée
     });
 
     it("409 sur une lettre encore `queued` (jamais tentée) ; 404 sur un identifiant inconnu", async () => {

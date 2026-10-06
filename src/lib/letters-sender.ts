@@ -447,6 +447,11 @@ function claimOrReschedule(db: Database.Database, now: number, rng: () => number
       // attend, sans jamais bloquer une AUTRE lettre plus bas dans la file.
       if (candidate.kind === "reminder" && !mailWatchFresh) continue;
 
+      // Pause relue ICI MÊME, dans la transaction de réclamation (correction finale 2, 06.10) : une
+      // pause posée juste avant ce passage ne doit jamais laisser passer une réclamation. Lecture
+      // synchrone, dans la même transaction IMMEDIATE que l'écriture qui suit — aucune course.
+      if (readLettersPause(db).paused) return { action: "none" };
+
       // Pas encore en retard : deux garde-fous avant d'envoyer maintenant (I2b, I3) — globaux (ne
       // dépendent pas de la lettre), donc un échec ici vaut pour tout le passage, pas seulement
       // cette ligne.
@@ -619,6 +624,15 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
       if (!recipientOk) {
         markFailed(db, letter.id, letter.attempts);
         await notifyTelegram(failedText(letter, "destinataire non autorisé"), deps.fetch);
+      } else if (readLettersPause(db).paused) {
+        // Pause relue UNE DERNIÈRE FOIS juste avant l'envoi réel (correction finale 2, 06.10) : elle
+        // a pu être posée PENDANT ce même passage, par exemple pendant l'attente Telegram d'un bail
+        // récupéré plus haut (étape 1). Remise en file sans pénalité (`revertClaim`, `attempts`
+        // inchangé) — rien n'est encore parti, donc rien à rappeler. Un envoi déjà transmis à Resend,
+        // lui, ne pourrait plus être rappelé : c'est pourquoi cette vérification vient juste AVANT
+        // `deps.send`, jamais après.
+        revertClaim(db, letter.id);
+        return finish("paused", "paused", previous?.last_run_at ?? null);
       } else {
         const prepared = buildPreparedEmail(letter);
         // `null` seulement si l'envoi a jeté une exception : déjà entièrement traité dans le

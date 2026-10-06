@@ -932,4 +932,39 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       expect(getLetter(laterOriginalId).status).toBe("sent");
     });
   });
+
+  describe("Correction finale 2 (06.10.2026) : pause relue en pleine réclamation ET juste avant l'envoi", () => {
+    it("sonde 5 : une pause posée PENDANT l'attente Telegram d'un bail expiré récupéré annule la réclamation suivante, sans rien envoyer", async () => {
+      // Reproduit tel quel le scénario de la sonde finale : un bail `sending` déjà expiré (P0) doit
+      // être récupéré (`failed`, Telegram « issue incertaine ») AVANT que P1 (due maintenant) ne soit
+      // réclamée. Le mock Telegram pose la pause comme effet de bord de CETTE notification — exactement
+      // la fenêtre que l'ancien code ne relisait jamais.
+      const T5 = Date.UTC(2026, 9, 7, 8, 31); // mercredi 07.10.2026, 10:31 Zurich (CEST)
+      insertLetter({ id: "P0", status: "sending", sent_at: null, attempted_at: T5 - 40 * 60_000, lease_until: T5 - 30 * 60_000 });
+      insertLetter({ id: "P1", status: "queued", sent_at: null, scheduled_at: T5 - 60_000, to_address: "boite-fictive@bfs.admin.ch", subject: "Demande urgente de la pause" });
+      const sends: string[] = [];
+      const status = await runLettersSender({
+        now: () => T5,
+        rng: () => 0,
+        hasApiKey: () => true,
+        fetch: (async () => { writeLettersPause(true, T5, getDb()); return Response.json({ ok: true }); }) as unknown as typeof fetch,
+        send: async (p: { subject: string }) => { sends.push(p.subject); return { sent: true, providerId: "r" }; },
+      });
+      expect(sends).toEqual([]); // jamais envoyée.
+      expect(getLetter("P1").status).toBe("queued"); // remise en file, pas « sending » ni « failed ».
+      expect(getLetter("P1").attempts).toBe(0); // sans pénalité (pas un échec d'envoi).
+      expect(getLetter("P0").status).toBe("failed"); // le bail expiré, lui, est bien récupéré malgré tout.
+      expect(status.status).toBe("ok"); // ce passage-ci n'a pas réclamé : rien à annoncer en « paused ».
+    });
+
+    it("pause déjà posée avant le passage : la garde du tout début (not_configured-like) s'applique, rien n'est réclamé", async () => {
+      const id = insertLetter({ scheduled_at: NOW - 1_000 });
+      writeLettersPause(true, NOW - 1, getDb());
+      const send = vi.fn();
+      const status = await runLettersSender({ now: () => NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      expect(status.status).toBe("paused");
+      expect(send).not.toHaveBeenCalled();
+      expect(getLetter(id).status).toBe("queued");
+    });
+  });
 });
