@@ -1,8 +1,8 @@
 /**
  * Tool: company_check (tâche osd.fiche, tâche 5)
  *
- * Module seul, PAS branché sur le serveur : `src/mcp/server.ts` ne l'importe jamais
- * (`tests/mcp/company-check-tool.test.ts` le vérifie littéralement). Produit une entrée MCP
+ * Ouvert aux agents sans clé depuis l'accord de Claude-Alain du 06.10.2026 (« go fiche ») :
+ * enregistré dans `src/mcp/server.ts`, portée `finma:read`. Produit une entrée MCP
  * sur le modèle exact de `kyc-check.ts`, qui enveloppe `companyCheck` (`../company/check.ts`,
  * tâche 4) : une seule entrée — un IDE suisse — zéro score, zéro verdict, uniquement des
  * faits datés et sourcés, plus des recoupements EXACTS entre sources.

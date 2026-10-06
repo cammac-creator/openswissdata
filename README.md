@@ -2,7 +2,7 @@
 
 **Swiss federal reference data for AI agents and developers:** the Swiss customs tariff (TARES, 8-digit tariff numbers with MFN duty and preferential regimes), the FINMA register of supervised institutions and the FINMA warnings list, and NOGA / NACE / ISIC activity-code correspondences.
 
-- **Free MCP endpoint, no key or sign-up:** `https://mcp.openswissdata.com/jsonrpc`, three tools (`tariff_lookup`, `kyc_check`, `cross_walk`), 100 calls per hour per IP address, plus a free trial of the three search tools (`tariff_semantic_search`, `classify_text`, `finma_search`): 20 calls per day per IP address in total. Claude Code: `claude mcp add --transport http openswissdata https://mcp.openswissdata.com/jsonrpc`. Local-process clients: `npx -y @openswissdata/mcp`.
+- **Free MCP endpoint, no key or sign-up:** `https://mcp.openswissdata.com/jsonrpc`, four tools (`tariff_lookup`, `kyc_check`, `company_check`, `cross_walk`), 100 calls per hour per IP address, plus a free trial of the three search tools (`tariff_semantic_search`, `classify_text`, `finma_search`): 20 calls per day per IP address in total. Claude Code: `claude mcp add --transport http openswissdata https://mcp.openswissdata.com/jsonrpc`. Local-process clients: `npx -y @openswissdata/mcp`.
 - **Full datasets as signed files:** [openswissdata.com](https://www.openswissdata.com/en/). Summary for AI agents: [llms.txt](https://www.openswissdata.com/llms.txt).
 - Unofficial copies: binding decisions belong to the official sources (xtares.admin.ch, finma.ch, the Swiss Federal Statistical Office).
 
