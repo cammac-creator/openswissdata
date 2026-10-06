@@ -15,7 +15,7 @@ import { createApp } from "../../src/index.js";
 import { getDb, closeDb } from "../../src/lib/db.js";
 import { _resetApiRateLimit } from "../../src/lib/api-rate-limit.js";
 import { getLocalities, getStreets, getFinmaVersion } from "../../src/mcp/data-loader.js";
-import { nationalFinmaMatchingStats } from "../../src/lib/commune-profile.js";
+import { nationalFinmaMatchingStats, FINMA_MATCHING_RULE } from "../../src/lib/commune-profile.js";
 import { PUBLIC_SOURCES } from "../../src/lib/public-sources.js";
 import { getSource } from "../../etl/shared/sources/registry.js";
 
@@ -78,7 +78,7 @@ describe("GET /api/v1/company/:uid", () => {
     const body = await res.json();
     expect(body.uid).toBe("CHE-103.137.179");
     expect(Object.keys(body).sort()).toEqual(
-      ["uid", "generated_at", "commercial_register", "finma", "lei", "cross_checks", "address_checks", "address_checks_edition", "not_covered", "notice", "sources"].sort(),
+      ["uid", "generated_at", "commercial_register", "finma", "lei", "cross_checks", "address_checks", "address_checks_edition", "street_checks", "street_checks_edition", "not_covered", "notice", "sources"].sort(),
     );
     // La fiche elle-même reste identique à `structuredContent` du MCP : chaque fait garde son
     // propre `source_id`/`source_url` ; `sources` n'est ajoutée qu'À CÔTÉ, jamais à l'intérieur.
@@ -167,7 +167,7 @@ describe("GET /api/v1/communes/:bfs_id", () => {
     expect(body.postal_codes).toContain("8400");
     expect(typeof body.streets_count).toBe("number");
     expect(body.streets_count).toBeGreaterThan(0);
-    expect(body.finma.matching).toBe("exact city+canton, unique");
+    expect(body.finma.matching).toBe(FINMA_MATCHING_RULE);
     expect(typeof body.finma.authorised_entities).toBe("number");
     // Rattachement national (même registre, même index) : présent sur chaque commune, pour
     // comprendre un `authorised_entities` bas (la majorité des lignes FINMA n'a aujourd'hui

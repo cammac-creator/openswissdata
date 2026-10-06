@@ -1,18 +1,21 @@
 /**
- * Profil de commune (tâche osd.donnees, tâche B2 du plan `2026-10-06-prospection-et-api.md`).
+ * Profil de commune (tâche osd.donnees, tâche B2 du plan `2026-10-06-prospection-et-api.md`,
+ * RÈGLE DE RATTACHEMENT REVUE le 06.10.2026 : priorité 1 au nom de COMMUNE — canton-filtré quand
+ * connu —, priorité 2 (seulement si aucune commune ne porte ce nom) au nom de LOCALITÉ).
  *
  * Tout en mémoire : aucune lecture disque, aucun appel réseau. Les dépendances par défaut
  * (`../mcp/data-loader.js`) ne sont jamais exercées ici — chaque test injecte ses propres lignes.
  */
 import { describe, expect, it } from "vitest";
 import {
-  buildFinmaMatchIndex,
+  buildFinmaMatchIndexes,
   communeProfile,
   nationalFinmaMatchingStats,
   _resetFinmaMatchIndexCache,
+  FINMA_MATCHING_RULE,
   type CommuneProfileDeps,
 } from "../../src/lib/commune-profile.js";
-import type { FinmaRegistryRow, LocalityRow, StreetRow } from "../../src/mcp/data-loader.js";
+import type { FinmaRegistryRow, LocalityRow } from "../../src/mcp/data-loader.js";
 
 function locality(partial: Partial<LocalityRow>): LocalityRow {
   return {
@@ -49,12 +52,21 @@ function finmaRow(partial: Partial<FinmaRegistryRow>): FinmaRegistryRow {
   };
 }
 
+function streets(byMunicipality: ReadonlyMap<string, ReadonlySet<string>>, municipalityInfo: ReadonlyMap<string, { municipality: string; canton: string }>, edition: string | null) {
+  return { byMunicipality, municipalityInfo, edition };
+}
+
 // Winterthur (230) : une seule localité/commune, un NPA, utilisée dans plusieurs tests ci-dessous.
 const WINTERTHUR = locality({ postal_code: "8400", locality: "Winterthur", municipality: "Winterthur", municipality_bfs_id: "230", canton: "ZH" });
 // 8310 Kemptthal : NPA partagé par Lindau (176) ET Winterthur (230), même structure que les
 // fixtures réelles de `tests/mcp/company-localities.test.ts` (tâche osd.localites).
 const KEMPTTHAL_LINDAU = locality({ postal_code: "8310", locality: "Kemptthal", municipality: "Lindau", municipality_bfs_id: "176", canton: "ZH" });
 const KEMPTTHAL_WINTERTHUR = locality({ postal_code: "8310", locality: "Kemptthal", municipality: "Winterthur", municipality_bfs_id: "230", canton: "ZH" });
+// Situation réelle au 06.10.2026, repérée en production (rapport de la tâche B2) : un secteur
+// postal de la commune de Schlatt (ZH, 226) porte la LOCALITÉ « Winterthur » (NPA 8405), bien que
+// son nom de COMMUNE soit « Schlatt (ZH) » — jamais « Winterthur ». C'est ce qui rendait
+// l'ancienne règle (localité OU commune, sans priorité) ambiguë pour AXA Leben AG.
+const SCHLATT_WINTERTHUR_LOCALITY = locality({ postal_code: "8405", locality: "Winterthur", municipality: "Schlatt (ZH)", municipality_bfs_id: "226", canton: "ZH" });
 
 function deps(overrides: Partial<CommuneProfileDeps> = {}): Partial<CommuneProfileDeps> {
   return overrides;
@@ -91,11 +103,11 @@ describe("communeProfile : identité de la commune (nom, canton, NPA, localités
     expect(lindau.localities).toEqual(["Kemptthal"]);
   });
 
-  it("répertoire des localités absent : nom/canton repris du répertoire des rues (repli), postal_codes/localities vides", () => {
-    const streetRow: StreetRow = { street: "Bahnhofplatz", postal_code: "8400", locality: "Winterthur", municipality_bfs_id: "230", municipality: "Winterthur", canton: "ZH" };
+  it("répertoire des localités absent : nom/canton repris du petit répertoire nom/canton des rues (repli, point 5), postal_codes/localities vides", () => {
+    const municipalityInfo = new Map([["230", { municipality: "Winterthur", canton: "ZH" }]]);
     const profile = communeProfile("230", deps({
       getLocalities: () => null,
-      getStreets: () => ({ rows: [streetRow], byMunicipality: new Map([["230", new Set(["bahnhofplatz"])]]), edition: "2026-10-06" }),
+      getStreets: () => streets(new Map([["230", new Set(["bahnhofplatz"])]]), municipalityInfo, "2026-10-06"),
       getFinmaRegistry: () => [],
       getFinmaVersion: () => null,
     }));
@@ -114,7 +126,7 @@ describe("communeProfile : identité de la commune (nom, canton, NPA, localités
   it("commune inconnue des deux répertoires chargés : name/canton null, streets_count 0, jamais une exception", () => {
     const profile = communeProfile("999999", deps({
       getLocalities: () => ({ rows: [WINTERTHUR], edition: "2026-10-01" }),
-      getStreets: () => ({ rows: [], byMunicipality: new Map(), edition: "2026-10-06" }),
+      getStreets: () => streets(new Map(), new Map(), "2026-10-06"),
       getFinmaRegistry: () => [],
       getFinmaVersion: () => null,
     }));
@@ -125,7 +137,7 @@ describe("communeProfile : identité de la commune (nom, canton, NPA, localités
   });
 });
 
-describe("communeProfile : rattachement FINMA exact city+canton, unique (décision du 06.10.2026)", () => {
+describe("communeProfile : rattachement FINMA — priorité 1 commune (canton filtré si connu), priorité 2 localité (décision du 06.10.2026, relecture du même jour)", () => {
   it("ville trouvée une seule fois dans le canton : rattachée, comptée par type d'autorisation", () => {
     const rows = [WINTERTHUR];
     const finma = [
@@ -136,9 +148,50 @@ describe("communeProfile : rattachement FINMA exact city+canton, unique (décisi
     const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => "2026.10.06" }));
     expect(profile.finma.authorised_entities).toBe(3);
     expect(profile.finma.by_licence_type).toEqual({ Bank: 2, Insurance: 1 });
-    expect(profile.finma.matching).toBe("exact city+canton, unique");
+    expect(profile.finma.matching).toBe(FINMA_MATCHING_RULE);
     expect(profile.editions.finma).toBe("2026.10.06");
     expect(profile.sources).toContain("finma.uid_csv");
+  });
+
+  it("RELECTURE DU 06.10.2026 — AXA Leben AG (ville « Winterthur », canton ZH) se rattache à la commune 230, malgré l'homonymie avec la LOCALITÉ « Winterthur » du secteur postal de Schlatt (ZH, 226) : le nom de COMMUNE gagne toujours sur une coïncidence de nom de localité ailleurs", () => {
+    const rows = [WINTERTHUR, SCHLATT_WINTERTHUR_LOCALITY];
+    const finma = [finmaRow({ city: "Winterthur", canton: "ZH" })];
+    const winterthur = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
+    expect(winterthur.finma.authorised_entities).toBe(1);
+    const schlatt = communeProfile("226", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
+    expect(schlatt.finma.authorised_entities).toBe(0); // "Winterthur" n'est PAS le nom de la commune de Schlatt
+    const stats = nationalFinmaMatchingStats({ getLocalities: () => ({ rows, edition: null }), getFinmaRegistry: () => finma });
+    expect(stats).toEqual({ matched: 1, unmatched: 0, ambiguous: 0, total: 1 }); // jamais ambiguë : priorité 1 tranche avant la priorité 2
+  });
+
+  it("priorité 2 (localité) seulement quand AUCUNE commune ne porte ce nom : rattachée via la localité", () => {
+    // "Rickenbach Sulz" est une LOCALITÉ réelle (secteur de Winterthur) qui n'est le nom
+    // d'AUCUNE commune suisse : la priorité 1 ne trouve rien, la priorité 2 doit rattacher.
+    const rickenbachSulz = locality({ postal_code: "8352", locality: "Rickenbach Sulz", municipality: "Winterthur", municipality_bfs_id: "230", canton: "ZH" });
+    const rows = [WINTERTHUR, rickenbachSulz];
+    const finma = [finmaRow({ city: "Rickenbach Sulz", canton: "ZH" })];
+    const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
+    expect(profile.finma.authorised_entities).toBe(1);
+  });
+
+  it("canton FINMA inconnu : priorité 1 cherche tout le pays ; rattachée si un seul nom de commune au pays porte ce nom", () => {
+    const rows = [WINTERTHUR, SCHLATT_WINTERTHUR_LOCALITY];
+    const finma = [finmaRow({ city: "Winterthur", canton: "" })]; // canton vide : recherche nationale
+    const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
+    expect(profile.finma.authorised_entities).toBe(1); // "Winterthur" reste un nom de COMMUNE unique au pays, même sans filtrer par canton
+  });
+
+  it("canton FINMA inconnu ET nom de commune ambigu au niveau national : ambiguë, jamais devinée", () => {
+    const communeA = locality({ postal_code: "1000", locality: "Homonyme", municipality: "Homonyme", municipality_bfs_id: "501", canton: "VD" });
+    const communeB = locality({ postal_code: "9999", locality: "Homonyme", municipality: "Homonyme", municipality_bfs_id: "777", canton: "GR" });
+    const rows = [communeA, communeB];
+    const finma = [finmaRow({ city: "Homonyme", canton: "" })];
+    const profileA = communeProfile("501", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
+    const profileB = communeProfile("777", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
+    expect(profileA.finma.authorised_entities).toBe(0);
+    expect(profileB.finma.authorised_entities).toBe(0);
+    const stats = nationalFinmaMatchingStats({ getLocalities: () => ({ rows, edition: null }), getFinmaRegistry: () => finma });
+    expect(stats).toEqual({ matched: 0, unmatched: 0, ambiguous: 1, total: 1 });
   });
 
   it("cite GLEIF comme source du rattachement : le canton FINMA utilisé ici vient de l'enrichissement GLEIF, jamais directement de la FINMA", () => {
@@ -172,7 +225,7 @@ describe("communeProfile : rattachement FINMA exact city+canton, unique (décisi
     expect(profileAG.finma.authorised_entities).toBe(0); // canton différent : pas de confusion
   });
 
-  it("ville ambiguë dans le MÊME canton (deux communes portent le même nom de localité) : non rattachée pour les deux, jamais devinée", () => {
+  it("ville ambiguë dans le MÊME canton, aucune commune ne porte ce nom (priorité 2 ambiguë) : non rattachée pour les deux, jamais devinée", () => {
     const communeA = locality({ postal_code: "1000", locality: "Ambigue", municipality: "Commune A", municipality_bfs_id: "501", canton: "VD" });
     const communeB = locality({ postal_code: "1001", locality: "Ambigue", municipality: "Commune B", municipality_bfs_id: "502", canton: "VD" });
     const rows = [communeA, communeB];
@@ -188,16 +241,16 @@ describe("communeProfile : rattachement FINMA exact city+canton, unique (décisi
     const lausanne25 = locality({ postal_code: "1025", locality: "Lausanne 25", municipality: "Lausanne", municipality_bfs_id: "5586", canton: "VD" });
     const rows = [lausanne, lausanne25];
     const sansSuffixe = communeProfile("5586", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => [finmaRow({ city: "Lausanne", canton: "VD" })], getFinmaVersion: () => null }));
-    expect(sansSuffixe.finma.authorised_entities).toBe(1); // correspond à la localité "Lausanne" telle quelle
+    expect(sansSuffixe.finma.authorised_entities).toBe(1); // correspond au nom de commune "Lausanne" (priorité 1)
     const avecSuffixe = communeProfile("5586", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => [finmaRow({ city: "Lausanne 25", canton: "VD" })], getFinmaVersion: () => null }));
-    expect(avecSuffixe.finma.authorised_entities).toBe(1); // correspond à la localité "Lausanne 25" telle quelle
+    expect(avecSuffixe.finma.authorised_entities).toBe(1); // aucune commune "Lausanne 25" : rattachée via la localité (priorité 2)
     const suffixeInconnu = communeProfile("5586", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => [finmaRow({ city: "Lausanne 99", canton: "VD" })], getFinmaVersion: () => null }));
-    expect(suffixeInconnu.finma.authorised_entities).toBe(0); // "Lausanne 99" n'existe pas au répertoire : jamais un retrait de suffixe
+    expect(suffixeInconnu.finma.authorised_entities).toBe(0); // "Lausanne 99" n'existe nulle part : jamais un retrait de suffixe
   });
 
-  it("ligne FINMA sans ville ou sans canton : ignorée, jamais une exception", () => {
+  it("ligne FINMA sans ville : ignorée, jamais une exception", () => {
     const rows = [WINTERTHUR];
-    const finma = [finmaRow({ city: "", canton: "ZH" }), finmaRow({ city: "Winterthur", canton: "" })];
+    const finma = [finmaRow({ city: "", canton: "ZH" })];
     const profile = communeProfile("230", deps({ getLocalities: () => ({ rows, edition: null }), getStreets: () => null, getFinmaRegistry: () => finma, getFinmaVersion: () => null }));
     expect(profile.finma.authorised_entities).toBe(0);
   });
@@ -245,25 +298,30 @@ describe("nationalFinmaMatchingStats : rattachées / non rattachées / ambiguës
   });
 });
 
-describe("buildFinmaMatchIndex : index pur, mémoïsable par référence de tableau", () => {
-  it("même référence de tableau : le même index est rendu (mémoïsation)", () => {
+describe("buildFinmaMatchIndexes : index purs, mémoïsables par référence de tableau", () => {
+  it("même référence de tableau : les mêmes index sont rendus (mémoïsation)", () => {
     _resetFinmaMatchIndexCache();
     const rows = [WINTERTHUR];
-    const first = buildFinmaMatchIndex(rows);
-    const second = buildFinmaMatchIndex(rows);
+    const first = buildFinmaMatchIndexes(rows);
+    const second = buildFinmaMatchIndexes(rows);
     expect(second).toBe(first);
   });
 
-  it("référence différente : un nouvel index est reconstruit", () => {
+  it("référence différente : de nouveaux index sont reconstruits", () => {
     _resetFinmaMatchIndexCache();
-    const first = buildFinmaMatchIndex([WINTERTHUR]);
-    const second = buildFinmaMatchIndex([WINTERTHUR]);
+    const first = buildFinmaMatchIndexes([WINTERTHUR]);
+    const second = buildFinmaMatchIndexes([WINTERTHUR]);
     expect(second).not.toBe(first);
   });
 
-  it("indexe à la fois la localité et le nom de commune, mêmes numéro OFS", () => {
+  it("indexe séparément les noms de commune et de localité, canton par numéro OFS", () => {
     _resetFinmaMatchIndexCache();
-    const index = buildFinmaMatchIndex([WINTERTHUR]);
-    expect(index.get("ZH||winterthur")?.has("230")).toBe(true);
+    const indexes = buildFinmaMatchIndexes([WINTERTHUR, SCHLATT_WINTERTHUR_LOCALITY]);
+    expect(indexes.municipalityByName.get("winterthur")?.has("230")).toBe(true);
+    expect(indexes.municipalityByName.get("winterthur")?.has("226")).toBe(false); // "Schlatt (ZH)" est le nom de commune, pas "Winterthur"
+    expect(indexes.localityByName.get("winterthur")?.has("230")).toBe(true);
+    expect(indexes.localityByName.get("winterthur")?.has("226")).toBe(true); // "Winterthur" EST une localité de Schlatt
+    expect(indexes.cantonByBfsId.get("230")).toBe("ZH");
+    expect(indexes.cantonByBfsId.get("226")).toBe("ZH");
   });
 });

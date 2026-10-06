@@ -8,15 +8,26 @@
  * viennent de `../mcp/data-loader.js`, mais `deps` permet de les remplacer en test, sans lecture
  * disque ni réseau.
  *
- * Rattachement FINMA — décision de Claude-Alain du 06.10.2026 : une ligne du registre FINMA
- * (`city` + `canton`) est rattachée à une commune seulement si, dans le MÊME canton, `city`
- * égale EXACTEMENT (après NFC, casse et espaces — jamais de trait d'union ≡ espace, règle
- * réservée aux noms de rue dans `normalizeStreetName`) une localité ou le nom d'une commune du
- * répertoire officiel des localités, ET que ce rattachement désigne une seule commune. Sinon :
- * « non rattachée ». Les localités avec suffixe (« Lausanne 25 ») ne sont JAMAIS réduites à la
- * localité sans suffixe : le texte FINMA doit être identique au texte du répertoire, suffixe
- * compris — aucun retrait n'est fait ici, la correspondance reste donc déjà exacte par
- * construction (on compare les deux chaînes telles quelles, seulement normalisées).
+ * Rattachement FINMA — RÈGLE REVUE le 06.10.2026 (relecture de la décision du même jour) : une
+ * ligne du registre FINMA (`city` + `canton`, `canton` posé par l'enrichissement GLEIF, voir
+ * `sources`) est rattachée à une commune en DEUX priorités, jamais mélangées :
+ *
+ *   1. `city` (normalisé NFC/casse/espaces) égale EXACTEMENT le nom d'une COMMUNE
+ *      (`municipality` du répertoire officiel des localités). Si le canton FINMA est connu, SEULES
+ *      les communes de CE canton comptent (une commune du même nom dans un autre canton n'entre
+ *      jamais en ligne de compte) ; si canton inconnu, la recherche porte sur tout le pays.
+ *      Plusieurs communes satisfont encore ce critère (homonymes) → « ambiguë », SANS jamais
+ *      essayer la priorité 2.
+ *   2. SEULEMENT si aucune commune ne porte ce nom (priorité 1 à zéro résultat) : `city` égale
+ *      EXACTEMENT le nom d'une LOCALITÉ, dans le même périmètre (canton si connu, sinon national).
+ *      Une seule commune correspond → rattachée ; plusieurs → « ambiguë ».
+ *
+ * Sinon : « non rattachée ». Les localités avec suffixe (« Lausanne 25 ») ne sont JAMAIS réduites
+ * à la localité sans suffixe : le texte FINMA doit être identique au texte du répertoire, suffixe
+ * compris. Pourquoi cette priorité : un nom de ville connu (« Winterthur ») peut aussi être le
+ * nom d'une LOCALITÉ dans une commune voisine (ex. un secteur postal de Schlatt (ZH) s'appelle
+ * aussi « Winterthur ») ; sans priorité, cette coïncidence rendait « Winterthur » ambigu même pour
+ * des entités réellement sises dans la commune de Winterthur elle-même.
  *
  * Jamais de note, de score ou de classement entre communes : seulement des faits datés et
  * sourcés, comme le reste du service (voir `.claude/rules/collectes-et-recherche.md`,
@@ -30,25 +41,35 @@ import {
   getStreets,
   type FinmaRegistryRow,
   type LocalityRow,
-  type StreetRow,
 } from "../mcp/data-loader.js";
 
 export interface CommuneProfileDeps {
   getLocalities: () => { rows: readonly LocalityRow[]; edition: string | null } | null;
-  getStreets: () => { rows: readonly StreetRow[]; byMunicipality: ReadonlyMap<string, ReadonlySet<string>>; edition: string | null } | null;
+  getStreets: () => {
+    byMunicipality: ReadonlyMap<string, ReadonlySet<string>>;
+    municipalityInfo: ReadonlyMap<string, { municipality: string; canton: string }>;
+    edition: string | null;
+  } | null;
   getFinmaRegistry: () => readonly FinmaRegistryRow[];
   getFinmaVersion: () => string | null;
 }
+
+/** Règle de rattachement, en toutes lettres (décision du 06.10.2026, relecture du même jour) :
+ *  documentée ici ET dans le commentaire d'en-tête du fichier, jamais seulement dans le code. */
+export const FINMA_MATCHING_RULE =
+  "exact municipality name match, restricted to the FINMA canton when known (ambiguous if several communes share that name); " +
+  "only when no municipality matches: exact and unique locality name match in the same scope (canton if known, else national); " +
+  "otherwise unrattached.";
 
 export interface CommuneFinmaProfile {
   authorised_entities: number;
   by_licence_type: Record<string, number>;
   /** Règle de rattachement appliquée, en toutes lettres : jamais une approximation. */
-  matching: "exact city+canton, unique";
-  /** Rattachement national (même registre, même index) : pour comprendre un `authorised_entities`
+  matching: typeof FINMA_MATCHING_RULE;
+  /** Rattachement national (même registre, mêmes index) : pour comprendre un `authorised_entities`
    *  bas — la grande majorité des lignes FINMA n'a aujourd'hui aucun canton connu (voir
    *  `sources` : `gleif.lei_api`), donc « 0 » ici ne veut pas dire « aucune institution dans
-   *  cette commune », mais « aucune ligne dont le canton connu désigne cette commune ». */
+   *  cette commune », mais « aucune ligne rattachée ici par la règle ci-dessus ». */
   national_matching: NationalFinmaMatchingStats;
 }
 
@@ -86,7 +107,7 @@ const defaultDeps: CommuneProfileDeps = {
   },
   getStreets: () => {
     const loaded = getStreets();
-    return loaded ? { rows: loaded.rows, byMunicipality: loaded.byMunicipality, edition: loaded.edition } : null;
+    return loaded ? { byMunicipality: loaded.byMunicipality, municipalityInfo: loaded.municipalityInfo, edition: loaded.edition } : null;
   },
   getFinmaRegistry,
   getFinmaVersion,
@@ -99,50 +120,84 @@ function normalizeName(value: string): string {
   return value.normalize("NFC").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
-function matchKey(canton: string, name: string): string {
-  return `${canton.normalize("NFC").toUpperCase().trim()}||${normalizeName(name)}`;
+function normalizeCanton(value: string): string {
+  return value.normalize("NFC").toUpperCase().trim();
+}
+
+/** Les deux index (noms de commune, noms de localité) et le canton de chaque commune, construits
+ *  en UNE passe sur le répertoire des localités (relecture du 06.10.2026) : jamais de trait
+ *  d'union ≡ espace (règle réservée aux rues). */
+export interface FinmaMatchIndexes {
+  municipalityByName: ReadonlyMap<string, ReadonlySet<string>>;
+  localityByName: ReadonlyMap<string, ReadonlySet<string>>;
+  cantonByBfsId: ReadonlyMap<string, string>;
 }
 
 // Mémoïsé une seule fois par chargement (décision du 06.10.2026) : reconstruit seulement quand
 // le tableau de lignes du répertoire change de référence (nouveau chargement, ou
 // `_resetDataLoaderCache()` en test) — jamais à chaque appel de `communeProfile`.
-let _indexCache: { rowsRef: readonly LocalityRow[]; index: Map<string, Set<string>> } | null = null;
+let _indexCache: { rowsRef: readonly LocalityRow[]; indexes: FinmaMatchIndexes } | null = null;
 
-/** Index `canton|nom normalisé` → ensemble des numéros OFS de commune qui portent ce nom (comme
- *  localité OU comme nom de commune). Fonction pure, testée directement avec des lignes en
- *  mémoire. */
-export function buildFinmaMatchIndex(rows: readonly LocalityRow[]): Map<string, Set<string>> {
-  if (_indexCache && _indexCache.rowsRef === rows) return _indexCache.index;
-  const index = new Map<string, Set<string>>();
-  const add = (canton: string, name: string, bfsId: string) => {
-    if (!canton || !name || !bfsId) return;
-    const key = matchKey(canton, name);
-    const set = index.get(key);
-    if (set) set.add(bfsId);
-    else index.set(key, new Set([bfsId]));
-  };
-  for (const row of rows) {
-    add(row.canton, row.locality, row.municipality_bfs_id);
-    add(row.canton, row.municipality, row.municipality_bfs_id);
-  }
-  _indexCache = { rowsRef: rows, index };
-  return index;
+function addToIndex(index: Map<string, Set<string>>, name: string, bfsId: string): void {
+  if (!name || !bfsId) return;
+  const key = normalizeName(name);
+  const set = index.get(key);
+  if (set) set.add(bfsId);
+  else index.set(key, new Set([bfsId]));
 }
 
-/** Test helper : vide le cache de l'index (isolation entre suites qui construisent des lignes différentes). */
+/** Construit les deux index (noms de commune, noms de localité, chacun national — le filtrage
+ *  par canton se fait à la recherche, via `cantonByBfsId`) et le canton de chaque commune.
+ *  Fonction pure, testée directement avec des lignes en mémoire, mémoïsée par référence de
+ *  tableau comme `buildFinmaMatchIndex` avant cette relecture. */
+export function buildFinmaMatchIndexes(rows: readonly LocalityRow[]): FinmaMatchIndexes {
+  if (_indexCache && _indexCache.rowsRef === rows) return _indexCache.indexes;
+  const municipalityByName = new Map<string, Set<string>>();
+  const localityByName = new Map<string, Set<string>>();
+  const cantonByBfsId = new Map<string, string>();
+  for (const row of rows) {
+    if (row.municipality_bfs_id && row.canton && !cantonByBfsId.has(row.municipality_bfs_id)) {
+      cantonByBfsId.set(row.municipality_bfs_id, normalizeCanton(row.canton));
+    }
+    addToIndex(municipalityByName, row.municipality, row.municipality_bfs_id);
+    addToIndex(localityByName, row.locality, row.municipality_bfs_id);
+  }
+  const indexes: FinmaMatchIndexes = { municipalityByName, localityByName, cantonByBfsId };
+  _indexCache = { rowsRef: rows, indexes };
+  return indexes;
+}
+
+/** Test helper : vide le cache des index (isolation entre suites qui construisent des lignes différentes). */
 export function _resetFinmaMatchIndexCache(): void {
   _indexCache = null;
 }
 
 type Match = { kind: "none" } | { kind: "unique"; bfsId: string } | { kind: "ambiguous" };
 
-function matchFinmaRow(row: FinmaRegistryRow, index: Map<string, Set<string>>): Match {
-  if (!row.city || !row.canton) return { kind: "none" };
-  const set = index.get(matchKey(row.canton, row.city));
-  if (!set || set.size === 0) return { kind: "none" };
-  if (set.size > 1) return { kind: "ambiguous" };
-  const [bfsId] = set;
+/** Candidats pour un nom donné, restreints au canton FINMA quand il est connu (décision du
+ *  06.10.2026, relecture du même jour) : `canton` vide/absent → recherche nationale. */
+function candidatesForName(nameIndex: ReadonlyMap<string, ReadonlySet<string>>, name: string, canton: string, cantonByBfsId: ReadonlyMap<string, string>): Set<string> {
+  const all = nameIndex.get(normalizeName(name)) ?? new Set<string>();
+  if (!canton) return new Set(all);
+  const wanted = normalizeCanton(canton);
+  return new Set([...all].filter((bfsId) => cantonByBfsId.get(bfsId) === wanted));
+}
+
+function matchFromCandidates(candidates: ReadonlySet<string>): Match {
+  if (candidates.size === 0) return { kind: "none" };
+  if (candidates.size > 1) return { kind: "ambiguous" };
+  const [bfsId] = candidates;
   return { kind: "unique", bfsId };
+}
+
+/** Applique les deux priorités dans l'ordre (voir le commentaire d'en-tête du fichier) : la
+ *  priorité 2 (localité) n'est JAMAIS essayée si la priorité 1 (commune) a trouvé au moins un
+ *  candidat, même ambigu — une ambiguïté au niveau commune ne se résout jamais par la localité. */
+function matchFinmaRow(row: FinmaRegistryRow, indexes: FinmaMatchIndexes): Match {
+  if (!row.city) return { kind: "none" };
+  const municipalityMatch = matchFromCandidates(candidatesForName(indexes.municipalityByName, row.city, row.canton, indexes.cantonByBfsId));
+  if (municipalityMatch.kind !== "none") return municipalityMatch;
+  return matchFromCandidates(candidatesForName(indexes.localityByName, row.city, row.canton, indexes.cantonByBfsId));
 }
 
 export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> = {}): CommuneProfile {
@@ -181,11 +236,11 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
   if (streetsLoaded) {
     sources.add("swisstopo.streets");
     streetsCount = streetsLoaded.byMunicipality.get(bfsId)?.size ?? 0;
-    // Répertoire des localités absent ou commune non trouvée dedans : repli sur les rues, qui
-    // portent elles aussi commune et canton (tâche B1), pour ne pas laisser `name`/`canton`
-    // vides alors qu'une information existe déjà dans un autre répertoire chargé.
+    // Répertoire des localités absent ou commune non trouvée dedans : repli sur le petit
+    // répertoire nom/canton par commune du répertoire des rues (tâche B1, relecture du
+    // 06.10.2026, point 5 : jamais le tableau complet des rues, qui n'est plus gardé en mémoire).
     if (name === null || canton === null) {
-      const fallback = streetsLoaded.rows.find((row) => row.municipality_bfs_id === bfsId);
+      const fallback = streetsLoaded.municipalityInfo.get(bfsId);
       if (fallback) {
         if (name === null && fallback.municipality) name = fallback.municipality;
         if (canton === null && fallback.canton) canton = fallback.canton;
@@ -193,11 +248,11 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
     }
   }
 
-  const index = buildFinmaMatchIndex(localitiesLoaded?.rows ?? []);
+  const indexes = buildFinmaMatchIndexes(localitiesLoaded?.rows ?? []);
   let authorisedEntities = 0;
   const byLicenceType = new Map<string, number>();
   for (const row of finmaRows) {
-    const match = matchFinmaRow(row, index);
+    const match = matchFinmaRow(row, indexes);
     if (match.kind !== "unique" || match.bfsId !== bfsId) continue;
     authorisedEntities += 1;
     const type = row.licence_type || "unknown";
@@ -224,7 +279,7 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
     finma: {
       authorised_entities: authorisedEntities,
       by_licence_type: Object.fromEntries([...byLicenceType.entries()].sort(([a], [b]) => a.localeCompare(b))),
-      matching: "exact city+canton, unique",
+      matching: FINMA_MATCHING_RULE,
       national_matching: nationalMatching,
     },
     sources: [...sources].sort(),
@@ -238,7 +293,7 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
 }
 
 /** Rattachement FINMA au niveau national (tâche B2) : rattachées / non rattachées / ambiguës,
- *  nombres seulement — jamais une liste de noms. Même index que `communeProfile`, mémoïsé. */
+ *  nombres seulement — jamais une liste de noms. Mêmes index que `communeProfile`, mémoïsés. */
 export function nationalFinmaMatchingStats(
   deps: Partial<Pick<CommuneProfileDeps, "getLocalities" | "getFinmaRegistry">> = {},
 ): NationalFinmaMatchingStats {
@@ -252,13 +307,13 @@ export function nationalFinmaMatchingStats(
       return [];
     }
   })();
-  const index = buildFinmaMatchIndex(localitiesLoaded?.rows ?? []);
+  const indexes = buildFinmaMatchIndexes(localitiesLoaded?.rows ?? []);
 
   let matched = 0;
   let unmatched = 0;
   let ambiguous = 0;
   for (const row of finmaRows) {
-    const match = matchFinmaRow(row, index);
+    const match = matchFinmaRow(row, indexes);
     if (match.kind === "unique") matched += 1;
     else if (match.kind === "ambiguous") ambiguous += 1;
     else unmatched += 1;
