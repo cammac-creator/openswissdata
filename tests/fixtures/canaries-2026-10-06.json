@@ -1,0 +1,122 @@
+[
+ {
+  "id": "tares.tariff_8_digit",
+  "url": "https://www.bazg.admin.ch/dam/de/sd-web/F1BV6N4GlA4l/tariff_8_digit.xlsx",
+  "mode": "raw",
+  "description": "BAZG — Liste des numéros tarifaires HS8"
+ },
+ {
+  "id": "tares.tarifstruktur",
+  "url": "https://www.bazg.admin.ch/dam/de/sd-web/x0cFz-OgqaF2/Tarifstruktur.xlsx",
+  "mode": "raw",
+  "description": "BAZG — Structure tarifaire hiérarchique multilingue"
+ },
+ {
+  "id": "tares.duty_rates_01_30",
+  "url": "https://www.bazg.admin.ch/dam/de/sd-web/suXEbuatJI1d/duty%20rates%20chapter%2001%20to%2030.xlsx",
+  "mode": "raw",
+  "description": "BAZG — Droits MFN chapitres 01-30"
+ },
+ {
+  "id": "tares.duty_rates_31_63",
+  "url": "https://www.bazg.admin.ch/dam/de/sd-web/8HOWtwQe30-s/duty_rates_chapter_31_to_63.xlsx",
+  "mode": "raw",
+  "description": "BAZG — Droits MFN chapitres 31-63"
+ },
+ {
+  "id": "tares.duty_rates_64_83",
+  "url": "https://www.bazg.admin.ch/dam/de/sd-web/dxAKUBpiFgx2/duty_rates_chapter_64_to_83.xlsx",
+  "mode": "raw",
+  "description": "BAZG — Droits MFN chapitres 64-83"
+ },
+ {
+  "id": "tares.duty_rates_84_97",
+  "url": "https://www.bazg.admin.ch/dam/de/sd-web/vCLXp0mDCgBz/duty_rates_chapter_84_to_97.xlsx",
+  "mode": "raw",
+  "description": "BAZG — Droits MFN chapitres 84-97"
+ },
+ {
+  "id": "tares.customs_facilities",
+  "url": "https://www.bazg.admin.ch/dam/de/sd-web/CAEsoXoBTdJY/customs_facilities.xlsx",
+  "mode": "raw",
+  "description": "BAZG — Codes ZCO d'allègement douanier"
+ },
+ {
+  "id": "finma.uid_csv",
+  "url": "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/csv/uid.csv",
+  "mode": "csv-shape",
+  "description": "FINMA — CSV consolidé des institutions autorisées (UID)"
+ },
+ {
+  "id": "finma.vvtr_xlsx",
+  "url": "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/vvtr.xlsx",
+  "mode": "xlsx-shape",
+  "description": "FINMA — gestionnaires de fortune et trustees et leur organisme de surveillance (LEFin)"
+ },
+ {
+  "id": "finma.sro_xlsx",
+  "url": "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/sro.xlsx",
+  "mode": "xlsx-shape",
+  "description": "FINMA — organismes d'autorégulation (OAR) reconnus"
+ },
+ {
+  "id": "finma.ao_xlsx",
+  "url": "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/xlsx/ao.xlsx",
+  "mode": "xlsx-shape",
+  "description": "FINMA — organismes de surveillance (OS) autorisés"
+ },
+ {
+  "id": "bfs.noga_2025",
+  "url": "https://api.i14y.admin.ch/api/public/v1/concepts/001bfaa8-fa57-4d66-acfd-c795d67fcf80?includeCodeListEntries=true",
+  "mode": "json-shape",
+  "description": "BFS — NOGA 2025 (concept i14y)"
+ },
+ {
+  "id": "bfs.noga_2008",
+  "url": "https://api.i14y.admin.ch/api/public/v1/concepts/08dc481b-2add-1232-b5fe-b1fae7a1ac02?includeCodeListEntries=true",
+  "mode": "json-shape",
+  "description": "BFS — NOGA 2008 (concept i14y)"
+ },
+ {
+  "id": "eurostat.nace21_rdf",
+  "url": "https://publications.europa.eu/resource/cellar/beb2efec-da9a-11ed-a05c-01aa75ed71a1.0001.02/DOC_1",
+  "mode": "document",
+  "description": "Eurostat — NACE Rév. 2.1, RDF officiel (document cellar)"
+ },
+ {
+  "id": "eurostat.nace2_sparql",
+  "url": "https://publications.europa.eu/webapi/rdf/sparql?query=PREFIX+skos%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0ASELECT+%3Fs+%3Fparent+%3Fen+%3Ffr+%3Fde+%3Fit+WHERE+%7B%0A+%3Fs+skos%3AinScheme+%3Chttp%3A%2F%2Fdata.europa.eu%2Fux2%2Fnace2%2Fnace2%3E+.%0A+OPTIONAL+%7B+%3Fs+skos%3Abroader+%3Fparent+%7D%0A+OPTIONAL+%7B+%3Fs+skos%3AprefLabel+%3Fen+.+FILTER%28lang%28%3Fen%29%3D%22en%22%29+%7D%0A+OPTIONAL+%7B+%3Fs+skos%3AprefLabel+%3Ffr+.+FILTER%28lang%28%3Ffr%29%3D%22fr%22%29+%7D%0A+OPTIONAL+%7B+%3Fs+skos%3AprefLabel+%3Fde+.+FILTER%28lang%28%3Fde%29%3D%22de%22%29+%7D%0A+OPTIONAL+%7B+%3Fs+skos%3AprefLabel+%3Fit+.+FILTER%28lang%28%3Fit%29%3D%22it%22%29+%7D%0A%7D+ORDER+BY+%3Fs&format=application%2Fsparql-results%2Bjson",
+  "mode": "json-shape",
+  "description": "Eurostat — NACE Rév. 2 par le point SPARQL de l'Office des publications"
+ },
+ {
+  "id": "eurostat.nace2_isic4_sparql",
+  "url": "https://publications.europa.eu/webapi/rdf/sparql?query=PREFIX+xkos%3A+%3Chttp%3A%2F%2Frdf-vocabulary.ddialliance.org%2Fxkos%23%3E%0ASELECT+%3Fassociation+%3Fsource+%3Ftarget+%3Frelation+WHERE+%7B%0A+%3Chttp%3A%2F%2Fdata.europa.eu%2Fux2%2Fnace2%2FNACE2_ISIC4%3E+xkos%3AmadeOf+%3Fassociation+.%0A+%3Fassociation+xkos%3AsourceConcept+%3Fsource+%3B+xkos%3AtargetConcept+%3Ftarget+.%0A+OPTIONAL+%7B+VALUES+%3Frelation+%7B+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23exactMatch%3E+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23closeMatch%3E+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23broadMatch%3E+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23narrowMatch%3E+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23relatedMatch%3E+%7D+%3Fsource+%3Frelation+%3Ftarget+.+%7D%0A%7D+ORDER+BY+%3Fsource+%3Ftarget&format=application%2Fsparql-results%2Bjson",
+  "mode": "json-shape",
+  "description": "Eurostat — correspondances NACE Rév. 2 → ISIC Rév. 4 (SPARQL)"
+ },
+ {
+  "id": "unsd.isic4_en",
+  "url": "https://unstats.un.org/unsd/classifications/Econ/Download/In%20Text/ISIC_Rev_4_english_structure.Txt",
+  "mode": "document",
+  "description": "ONU (UNSD) — structure ISIC Rév. 4 (en)"
+ },
+ {
+  "id": "unsd.isic4_fr",
+  "url": "https://unstats.un.org/unsd/classifications/Econ/Download/In%20Text/ISIC_Rev_4_French_structure.Txt",
+  "mode": "document",
+  "description": "ONU (UNSD) — structure ISIC Rév. 4 (fr)"
+ },
+ {
+  "id": "unsd.isic4_es",
+  "url": "https://unstats.un.org/unsd/classifications/Econ/Download/In%20Text/ISIC_Rev_4_Spanish_structure.Txt",
+  "mode": "document",
+  "description": "ONU (UNSD) — structure ISIC Rév. 4 (es)"
+ },
+ {
+  "id": "bfs.noga_methodologie",
+  "url": "https://dam-api.bfs.admin.ch/hub/api/dam/assets/33787996/master",
+  "mode": "document",
+  "description": "OFS — méthodologie des correspondances NOGA"
+ }
+]

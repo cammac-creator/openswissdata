@@ -9,10 +9,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
-import { ISIC_CSV_BY_LANG, NACE_2_1_RDF_URL } from "../etl/classifications/ingest-real.js";
-import { NACE2_URL } from "../etl/classifications/nace-official.js";
-import { NACE_ISIC_URL, OFS_METHODOLOGY_URL } from "../etl/classifications/links.js";
-import { FINMA_AO_XLSX_URL, FINMA_SRO_XLSX_URL, FINMA_VVTR_XLSX_URL } from "../etl/finma/sources.js";
+import { SOURCES } from "../etl/shared/sources/registry.js";
 import XLSX from "../etl/shared/xlsx.js";
 
 export interface SourceCanary {
@@ -30,124 +27,10 @@ export interface SourceCanary {
   description: string;
 }
 
-export const CANARIES: SourceCanary[] = [
-  // TARES — 7 official BAZG XLSX downloads
-  {
-    id: "tares.tariff_8_digit",
-    url: "https://www.bazg.admin.ch/dam/de/sd-web/F1BV6N4GlA4l/tariff_8_digit.xlsx",
-    mode: "raw",
-    description: "BAZG — Liste des numéros tarifaires HS8",
-  },
-  {
-    id: "tares.tarifstruktur",
-    url: "https://www.bazg.admin.ch/dam/de/sd-web/x0cFz-OgqaF2/Tarifstruktur.xlsx",
-    mode: "raw",
-    description: "BAZG — Structure tarifaire hiérarchique multilingue",
-  },
-  {
-    id: "tares.duty_rates_01_30",
-    url: "https://www.bazg.admin.ch/dam/de/sd-web/suXEbuatJI1d/duty%20rates%20chapter%2001%20to%2030.xlsx",
-    mode: "raw",
-    description: "BAZG — Droits MFN chapitres 01-30",
-  },
-  {
-    id: "tares.duty_rates_31_63",
-    url: "https://www.bazg.admin.ch/dam/de/sd-web/8HOWtwQe30-s/duty_rates_chapter_31_to_63.xlsx",
-    mode: "raw",
-    description: "BAZG — Droits MFN chapitres 31-63",
-  },
-  {
-    id: "tares.duty_rates_64_83",
-    url: "https://www.bazg.admin.ch/dam/de/sd-web/dxAKUBpiFgx2/duty_rates_chapter_64_to_83.xlsx",
-    mode: "raw",
-    description: "BAZG — Droits MFN chapitres 64-83",
-  },
-  {
-    id: "tares.duty_rates_84_97",
-    url: "https://www.bazg.admin.ch/dam/de/sd-web/vCLXp0mDCgBz/duty_rates_chapter_84_to_97.xlsx",
-    mode: "raw",
-    description: "BAZG — Droits MFN chapitres 84-97",
-  },
-  {
-    id: "tares.customs_facilities",
-    url: "https://www.bazg.admin.ch/dam/de/sd-web/CAEsoXoBTdJY/customs_facilities.xlsx",
-    mode: "raw",
-    description: "BAZG — Codes ZCO d'allègement douanier",
-  },
-  // FINMA — single consolidated CSV. Updated daily as institutions are
-  // added/removed → use csv-shape (headers only) to avoid daily false positives.
-  {
-    id: "finma.uid_csv",
-    url: "https://www.finma.ch/en/~/media/finma/dokumente/bewilligungstraeger/csv/uid.csv",
-    mode: "csv-shape",
-    description: "FINMA — CSV consolidé des institutions autorisées (UID)",
-  },
-  // FINMA — trois classeurs lus par la collecte quotidienne depuis le 30.09.2026
-  // (etl/finma/ingest-supervision.ts), régénérés chaque nuit : forme seulement.
-  {
-    id: "finma.vvtr_xlsx",
-    url: FINMA_VVTR_XLSX_URL,
-    mode: "xlsx-shape",
-    description: "FINMA — gestionnaires de fortune et trustees et leur organisme de surveillance (LEFin)",
-  },
-  {
-    id: "finma.sro_xlsx",
-    url: FINMA_SRO_XLSX_URL,
-    mode: "xlsx-shape",
-    description: "FINMA — organismes d'autorégulation (OAR) reconnus",
-  },
-  {
-    id: "finma.ao_xlsx",
-    url: FINMA_AO_XLSX_URL,
-    mode: "xlsx-shape",
-    description: "FINMA — organismes de surveillance (OS) autorisés",
-  },
-  // BFS — NOGA via i14y JSON API
-  {
-    id: "bfs.noga_2025",
-    url: "https://api.i14y.admin.ch/api/public/v1/concepts/001bfaa8-fa57-4d66-acfd-c795d67fcf80?includeCodeListEntries=true",
-    mode: "json-shape",
-    description: "BFS — NOGA 2025 (concept i14y)",
-  },
-  {
-    id: "bfs.noga_2008",
-    url: "https://api.i14y.admin.ch/api/public/v1/concepts/08dc481b-2add-1232-b5fe-b1fae7a1ac02?includeCodeListEntries=true",
-    mode: "json-shape",
-    description: "BFS — NOGA 2008 (concept i14y)",
-  },
-  // Classifications — mêmes adresses que la publication (etl/classifications).
-  // Le 28.09.2026, op.europa.eu bloquait NACE 2.1 : seule la publication l'avait vu.
-  {
-    id: "eurostat.nace21_rdf",
-    url: NACE_2_1_RDF_URL,
-    mode: "document",
-    description: "Eurostat — NACE Rév. 2.1, RDF officiel (document cellar)",
-  },
-  {
-    id: "eurostat.nace2_sparql",
-    url: NACE2_URL,
-    mode: "json-shape",
-    description: "Eurostat — NACE Rév. 2 par le point SPARQL de l'Office des publications",
-  },
-  {
-    id: "eurostat.nace2_isic4_sparql",
-    url: NACE_ISIC_URL,
-    mode: "json-shape",
-    description: "Eurostat — correspondances NACE Rév. 2 → ISIC Rév. 4 (SPARQL)",
-  },
-  ...(["en", "fr", "es"] as const).map((lang): SourceCanary => ({
-    id: `unsd.isic4_${lang}`,
-    url: ISIC_CSV_BY_LANG[lang],
-    mode: "document",
-    description: `ONU (UNSD) — structure ISIC Rév. 4 (${lang})`,
-  })),
-  {
-    id: "bfs.noga_methodologie",
-    url: OFS_METHODOLOGY_URL,
-    mode: "document",
-    description: "OFS — méthodologie des correspondances NOGA",
-  },
-];
+// Une seule déclaration de chaque source : le registre (tâche osd.socle). Le canari en garde celles qui ont un mode.
+export const CANARIES: SourceCanary[] = SOURCES
+  .filter((s): s is typeof s & { canary: NonNullable<typeof s.canary> } => Boolean(s.canary))
+  .map(s => ({ id: s.id, url: s.url, mode: s.canary, description: s.description }));
 
 // Baseline lives in `etl/` because `data/` is gitignored — this is config, not data.
 const HASH_FILE = process.env.CANARY_BASELINE_FILE ?? "etl/canary-baseline.json";
