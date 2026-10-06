@@ -34,10 +34,16 @@ import { telegramConfig, sendTelegram } from "./mail-watch.js";
 const CHECK = "letters";
 const START_DELAY = 90_000;
 const INTERVAL = 60_000;
+// Délai maximal que `stopLettersSender()` attend la fin d'un passage en cours (correction I4e).
+const SHUTDOWN_GRACE_MS = 10_000;
 const LEASE_MS = 10 * 60_000;
 // Une lettre en retard d'au moins dix minutes sur son créneau n'est jamais envoyée en retard : elle
 // est replanifiée (nouvelle minute tirée, jamais une minute multiple de 5).
 const LATE_THRESHOLD_MS = 10 * 60_000;
+// Écart minimal réel entre deux envois (correction I3) : `scheduleSlot` le garantit déjà sur
+// `scheduled_at`, mais un passage en retard qui rattrape plusieurs lettres d'un coup pourrait
+// comprimer cet écart dans le temps réel. Même valeur que `MIN_GAP_MINUTES` de `letters.ts`.
+const MIN_REAL_GAP_MS = 12 * 60_000;
 const MAX_ATTEMPTS = 3;
 const REMINDER_BUSINESS_DAYS = 15;
 // Statuts qui occupent encore un créneau (même convention que `admin-letters.ts`).
@@ -166,6 +172,33 @@ function failedText(letter: Pick<InstitutionalLetter, "to_address" | "subject">,
   return `⚠️ Lettre en échec : ${domainOf(letter.to_address)} : ${letter.subject} (${reason})`;
 }
 
+/**
+ * Correction I4 (relecture Opus, 06.10) : quand on ne sait pas si Resend a déjà accepté l'envoi
+ * (délai réseau, exception, bail `sending` expiré), jamais de retentative automatique — un second
+ * envoi pourrait dupliquer une lettre déjà partie. Texte imposé par la décision.
+ */
+function uncertainText(letter: Pick<InstitutionalLetter, "to_address">): string {
+  return `⚠️ Lettre à ${domainOf(letter.to_address)} : issue incertaine, vérifier dans Resend avant tout renvoi`;
+}
+
+/**
+ * Classe un échec d'envoi renvoyé par `sendPreparedEmail` :
+ * - `"unknown"` — on ne sait pas si Resend a accepté (erreur réseau, forme inattendue) : jamais de
+ *   retentative automatique (I4a).
+ * - `"retryable"` — Resend a explicitement refusé par 5xx ou 429 (jamais accepté, sûr de
+ *   retenter) : repasse en `queued`, `attempts+1`, `failed` au troisième essai (I4c), comme avant.
+ * - `"definite"` — Resend a explicitement refusé par un autre 4xx (400, 401, 403, 409, 422, et tout
+ *   autre code 4xx non énuméré) : la requête elle-même est rejetée, retenter ne changerait rien ;
+ *   `failed` directement (I4d).
+ */
+function classifySendFailure(result: EmailSendResult): "unknown" | "retryable" | "definite" {
+  if (result.reason !== "resend_error") return "unknown"; // forme inattendue : jamais supposer un refus propre
+  const httpMatch = /^HTTP (\d{3})$/.exec(result.details ?? "");
+  if (!httpMatch) return "unknown"; // ex. "network_error" : Resend a pu recevoir la requête malgré tout
+  const status = Number(httpMatch[1]);
+  return status >= 500 || status === 429 ? "retryable" : "definite";
+}
+
 // --- Construction de l'email --------------------------------------------------
 
 function escapeHtmlBody(text: string): string {
@@ -175,10 +208,21 @@ function escapeHtmlBody(text: string): string {
   return escaped.split(/\r\n|\r|\n/).join("<br>");
 }
 
-/** `from` des autres envois s'il désigne déjà `contact@` ; sinon la forme fixée par le plan. */
+/** Adresse nue (sans `Nom <...>`), en minuscules, pour une comparaison exacte. */
+function bareAddress(value: string): string {
+  const match = /<([^>]+)>\s*$/.exec(value);
+  return (match ? match[1] : value).trim().toLowerCase();
+}
+
+/**
+ * `from` des autres envois s'il désigne exactement `contact@openswissdata.com` ; sinon la forme
+ * fixée par le plan. Comparaison EXACTE (corrigé le 06.10, relecture Opus) : un simple `includes`
+ * aurait accepté à tort une adresse qui contient seulement le mot « contact@ » ailleurs dans la
+ * chaîne (ex. un nom d'affichage trompeur).
+ */
 function lettersFromAddress(): string {
   const configured = emailLib.fromAddress();
-  return configured.toLowerCase().includes("contact@") ? configured : `OpenSwissData <${CONTACT_ADDRESS}>`;
+  return bareAddress(configured) === CONTACT_ADDRESS ? configured : `OpenSwissData <${CONTACT_ADDRESS}>`;
 }
 
 function buildPreparedEmail(letter: InstitutionalLetter): PreparedEmail {
@@ -219,39 +263,61 @@ function reminderBody(letter: InstitutionalLetter): string {
 
 // --- Récupération des baux expirés ------------------------------------------
 
-/** Un bail `sending` expiré repasse en `queued` (sans envoi), `attempts+1` ; à 3, `failed`. */
-function recoverExpiredLeases(db: Database.Database, now: number): Array<{ id: string; to_address: string; subject: string; failed: boolean }> {
+/**
+ * Un bail `sending` expiré signifie qu'on ne sait pas si l'envoi est parti (le serveur a pu tomber
+ * entre la requête à Resend et l'écriture de `sent_at`) : jamais de retour en `queued` (correction
+ * I4b, 06.10) — un second envoi pourrait dupliquer une lettre déjà réellement partie. Toujours
+ * `failed` directement, avec l'alerte « issue incertaine ».
+ */
+function recoverExpiredLeases(db: Database.Database, now: number): Array<{ to_address: string }> {
   const expired = db
-    .prepare("SELECT id, to_address, subject, attempts FROM institutional_letters WHERE status='sending' AND lease_until < ?")
-    .all(now) as Array<{ id: string; to_address: string; subject: string; attempts: number }>;
-  const results: Array<{ id: string; to_address: string; subject: string; failed: boolean }> = [];
+    .prepare("SELECT id, to_address, attempts FROM institutional_letters WHERE status='sending' AND lease_until < ?")
+    .all(now) as Array<{ id: string; to_address: string; attempts: number }>;
+  const results: Array<{ to_address: string }> = [];
   for (const row of expired) {
-    const attempts = row.attempts + 1;
-    const failed = attempts >= MAX_ATTEMPTS;
-    const newStatus: LetterStatus = failed ? "failed" : "queued";
     const result = db
       .prepare(
-        "UPDATE institutional_letters SET status=?, attempts=?, lease_until=NULL " +
+        "UPDATE institutional_letters SET status='failed', attempts=?, lease_until=NULL " +
           "WHERE id=? AND status='sending' AND lease_until < ?",
       )
-      .run(newStatus, attempts, row.id, now);
-    if (result.changes === 1) results.push({ id: row.id, to_address: row.to_address, subject: row.subject, failed });
+      .run(row.attempts + 1, row.id, now);
+    if (result.changes === 1) results.push({ to_address: row.to_address });
   }
   return results;
 }
 
-// --- Sélection : envoi ou replanification ------------------------------------
+// --- Sélection : envoi, replanification ou annulation ------------------------
 
 type ClaimResult =
   | { action: "none" }
   | { action: "rescheduled" }
+  | { action: "cancelled" }
   | { action: "claimed"; letter: InstitutionalLetter };
 
+/** Un envoi `sent` dans les douze dernières minutes au moins (correction I3, 06.10). */
+function recentlySentWithin(db: Database.Database, now: number, windowMs: number): boolean {
+  const row = db.prepare("SELECT 1 FROM institutional_letters WHERE status='sent' AND sent_at > ? LIMIT 1").get(now - windowMs);
+  return !!row;
+}
+
 /**
- * Prend la plus ancienne lettre `queued` dont `scheduled_at <= now`. En retard d'au moins dix
- * minutes → replanifiée par `scheduleSlot` (aucun envoi en retard). Sinon → passage atomique en
- * `sending` avec bail de dix minutes. Transaction IMMEDIATE : deux passages concurrents ne peuvent
- * jamais agir sur la même lettre (le second trouve `changes !== 1` et ne fait rien).
+ * Prend la plus ancienne lettre `queued` dont `scheduled_at <= now`.
+ *
+ * Une relance (`kind='reminder'`) dont la lettre d'origine a depuis reçu une réponse humaine est
+ * annulée sans jamais être envoyée (correction I1, 06.10) : une relance restée en file peut devenir
+ * obsolète entre sa création et sa réclamation.
+ *
+ * Sinon, en retard d'au moins dix minutes → replanifiée par `scheduleSlot` (aucun envoi en retard).
+ * Sinon → deux garde-fous avant d'envoyer MAINTENANT (corrections I2b et I3, 06.10) : un envoi
+ * `sent` trop récent (moins de douze minutes réelles, l'écart que `scheduleSlot` garantit sur
+ * `scheduled_at` mais qu'un passage en retard qui rattrape plusieurs lettres pourrait comprimer
+ * dans le temps réel) bloque tout envoi ce passage-ci ; et `now` ET `now + 60 s` doivent rester dans
+ * le créneau d'envoi (un envoi qui prendrait jusqu'à une minute ne doit, lui non plus, jamais finir
+ * hors créneau). Si aucun des deux ne bloque → passage atomique en `sending` avec bail de dix
+ * minutes.
+ *
+ * Transaction IMMEDIATE : deux passages concurrents ne peuvent jamais agir sur la même lettre (le
+ * second trouve `changes !== 1` et ne fait rien).
  */
 function claimOrReschedule(db: Database.Database, now: number, rng: () => number): ClaimResult {
   const txn = db.transaction((): ClaimResult => {
@@ -262,6 +328,19 @@ function claimOrReschedule(db: Database.Database, now: number, rng: () => number
       )
       .get(now) as InstitutionalLetter | undefined;
     if (!candidate) return { action: "none" };
+
+    if (candidate.kind === "reminder" && candidate.parent_id) {
+      const parent = db.prepare("SELECT reply_kind FROM institutional_letters WHERE id=?").get(candidate.parent_id) as
+        | { reply_kind: string | null }
+        | undefined;
+      if (parent?.reply_kind === "human") {
+        const result = db
+          .prepare("UPDATE institutional_letters SET status='cancelled' WHERE id=? AND status='queued'")
+          .run(candidate.id);
+        if (result.changes !== 1) return { action: "none" }; // concurrence : déjà traitée ailleurs
+        return { action: "cancelled" };
+      }
+    }
 
     const lateMs = now - candidate.scheduled_at;
     if (lateMs >= LATE_THRESHOLD_MS) {
@@ -276,11 +355,9 @@ function claimOrReschedule(db: Database.Database, now: number, rng: () => number
       return { action: "rescheduled" };
     }
 
-    // Pas encore en retard, mais un passage qui a glissé (retentative Resend, Telegram) peut tomber
-    // hors du créneau d'envoi (après 17:30, sur une minute multiple de 5) : la lettre attend le
-    // prochain passage plutôt que de partir hors créneau (Review Focus #4). Le bail de dix minutes
-    // la replanifiera si l'attente se prolonge.
-    if (!isSendableNow(now)) return { action: "none" };
+    // Pas encore en retard : deux garde-fous avant d'envoyer maintenant (I2b, I3).
+    if (recentlySentWithin(db, now, MIN_REAL_GAP_MS)) return { action: "none" };
+    if (!(isSendableNow(now) && isSendableNow(now + 60_000))) return { action: "none" };
 
     const leaseUntil = now + LEASE_MS;
     const result = db
@@ -377,7 +454,9 @@ function createReminder(db: Database.Database, letter: InstitutionalLetter, now:
 export async function runLettersSender(overrides: Partial<Dependencies> = {}): Promise<LettersSenderStatus> {
   const deps: Dependencies = { ...defaults, ...overrides };
   const db = deps.database();
-  const now = deps.now();
+  // Horodatage du témoin seulement (« quand ce passage a tourné ») : chaque décision sensible au
+  // temps relit `deps.now()` à son propre moment (voir plus bas, correction I2a).
+  const passStartedAt = deps.now();
   const previous = readState(db);
   let totalRescheduled = previous?.total_rescheduled ?? 0;
   let totalReminders = previous?.total_reminders_created ?? 0;
@@ -385,7 +464,7 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
   const finish = (status: LettersSenderStatus["status"], code: string | null, lastRunAt: number | null): LettersSenderStatus => {
     const state: State = {
       version: 1,
-      checked_at: now,
+      checked_at: passStartedAt,
       status,
       code,
       queued: countStatus(db, "queued"),
@@ -405,17 +484,19 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
   }
 
   try {
-    // 1) Baux `sending` expirés : repassent en `queued` (attempts+1) ou `failed` à trois essais —
-    //    jamais d'envoi ici, seulement de la comptabilité. Synchrone, aucun `await` avant la
-    //    sélection suivante : pas de course avec le reste de ce même passage.
-    const recovered = recoverExpiredLeases(db, now);
-    for (const r of recovered) {
-      if (r.failed) await notifyTelegram(failedText(r, "délai d'envoi dépassé, trois essais atteints"), deps.fetch);
-    }
+    // 1) Baux `sending` expirés : toujours `failed` directement (issue incertaine, correction I4b).
+    //    Synchrone, aucun `await` avant la sélection suivante : pas de course avec le reste de ce
+    //    même passage. Les alertes Telegram, elles, sont bien `await`ées ici — c'est précisément
+    //    pourquoi la réclamation ci-dessous relit l'horloge au lieu de réutiliser `passStartedAt`
+    //    (correction I2a : ce `await` peut faire avancer le temps réel de plusieurs secondes).
+    const recovered = recoverExpiredLeases(db, deps.now());
+    for (const r of recovered) await notifyTelegram(uncertainText(r), deps.fetch);
 
     // 2) Sélection atomique (toujours synchrone jusqu'à la claim, cf. `claimOrReschedule`) : au plus
     //    une lettre par passage, jamais la même lettre deux fois sous deux passages concurrents.
-    const claim = claimOrReschedule(db, now, deps.rng);
+    //    Horloge relue ici (I2a), pas celle du début du passage.
+    const claimNow = deps.now();
+    const claim = claimOrReschedule(db, claimNow, deps.rng);
     if (claim.action === "rescheduled") totalRescheduled++;
 
     if (claim.action === "claimed") {
@@ -426,36 +507,62 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
         await notifyTelegram(failedText(letter, "destinataire non autorisé"), deps.fetch);
       } else {
         const prepared = buildPreparedEmail(letter);
-        const result = await deps.send(prepared, `letter-${letter.id}`);
-        if (result.sent) {
-          // Écrit avant toute notification Telegram : un échec Telegram ne doit jamais faire
-          // rejouer un envoi déjà accepté par Resend.
-          markSent(db, letter.id, now, result.providerId ?? null);
+        // `null` seulement si l'envoi a jeté une exception : déjà entièrement traité dans le
+        // `catch` (I4a), rien de plus à faire pour cette lettre ce passage-ci.
+        let result: EmailSendResult | null;
+        try {
+          result = await deps.send(prepared, `letter-${letter.id}`);
+        } catch {
+          // Toute exception pendant l'envoi (I4a) : on ne sait pas si Resend a reçu la requête —
+          // jamais de retentative automatique.
+          markFailed(db, letter.id, letter.attempts + 1);
+          await notifyTelegram(uncertainText(letter), deps.fetch);
+          result = null;
+        }
+        if (result?.sent) {
+          // Lu APRÈS la réponse de Resend (I2d), jamais avant l'envoi : un passage qui prend du
+          // temps (retentatives internes à `sendPreparedEmail`, par exemple) ne doit pas enregistrer
+          // une heure d'envoi antérieure à l'acceptation réelle. Écrit avant toute notification
+          // Telegram : un échec Telegram ne doit jamais faire rejouer un envoi déjà accepté.
+          const sentAt = deps.now();
+          markSent(db, letter.id, sentAt, result.providerId ?? null);
           await notifyTelegram(sentText(letter), deps.fetch);
-        } else if (result.reason === "no_api_key") {
+        } else if (result?.reason === "no_api_key") {
           // Course très improbable (clé retirée entre le contrôle du début de passage et l'envoi) :
           // remise en file sans pénalité, rien d'autre ce passage-ci.
           revertClaim(db, letter.id);
           return finish("not_configured", "no_api_key", previous?.last_run_at ?? null);
-        } else {
-          const attempts = letter.attempts + 1;
-          if (attempts >= MAX_ATTEMPTS) {
-            markFailed(db, letter.id, attempts);
+        } else if (result !== null) {
+          // Résultat d'échec normal renvoyé par `sendPreparedEmail` (pas l'exception déjà traitée
+          // ci-dessus) : classer pour décider retentative ou échec définitif.
+          const category = classifySendFailure(result);
+          if (category === "unknown") {
+            markFailed(db, letter.id, letter.attempts + 1);
+            await notifyTelegram(uncertainText(letter), deps.fetch);
+          } else if (category === "definite") {
+            markFailed(db, letter.id, letter.attempts + 1);
             await notifyTelegram(failedText(letter, result.details ?? result.reason ?? "échec d'envoi"), deps.fetch);
           } else {
-            markRetryQueued(db, letter.id, attempts);
+            const attempts = letter.attempts + 1;
+            if (attempts >= MAX_ATTEMPTS) {
+              markFailed(db, letter.id, attempts);
+              await notifyTelegram(failedText(letter, result.details ?? result.reason ?? "échec d'envoi"), deps.fetch);
+            } else {
+              markRetryQueued(db, letter.id, attempts);
+            }
           }
         }
       }
     }
 
     // 3) Relance automatique unique, 15 jours ouvrés après un envoi resté sans réponse humaine.
+    const reminderNow = deps.now();
     for (const candidate of findReminderCandidates(db)) {
-      if (businessDaysSince(candidate.sent_at as number, now) < REMINDER_BUSINESS_DAYS) continue;
-      if (createReminder(db, candidate, now, deps.rng)) totalReminders++;
+      if (businessDaysSince(candidate.sent_at as number, reminderNow) < REMINDER_BUSINESS_DAYS) continue;
+      if (createReminder(db, candidate, reminderNow, deps.rng)) totalReminders++;
     }
 
-    return finish("ok", null, now);
+    return finish("ok", null, passStartedAt);
   } catch (error) {
     console.error("[lettres] passage interrompu :", error instanceof Error ? error.message : "erreur inconnue");
     return finish("error", "unexpected_error", previous?.last_run_at ?? null);
@@ -465,12 +572,21 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
 // --- Minuterie du point d'entrée réel ----------------------------------------
 
 /** Minuterie du point d'entrée réel (jamais dans `createApp`) : premier passage après 90 s, puis toutes les 60 s. */
+/**
+ * Minuterie du point d'entrée réel (jamais dans `createApp`) : premier passage après 90 s, puis
+ * toutes les 60 s. La fonction d'arrêt renvoyée est asynchrone (correction I4e, 06.10) : elle
+ * attend la fin d'un passage en cours (au plus `SHUTDOWN_GRACE_MS`) avant de résoudre, pour qu'un
+ * arrêt serveur n'interrompe jamais un envoi entre la requête à Resend et l'écriture de `sent_at`
+ * (ce qui laisserait un bail `sending` à récupérer comme « issue incertaine » au prochain démarrage
+ * — correct, mais évitable si on peut simplement attendre).
+ */
 export function startLettersSender(
   overrides: Partial<Dependencies> & { run?: () => Promise<LettersSenderStatus> } = {},
-): () => void {
+): () => Promise<void> {
   const { run = () => runLettersSender(overrides) } = overrides;
   let stopped = false;
   let timer: ReturnType<typeof setTimeout>;
+  let inFlight: Promise<LettersSenderStatus> | null = null;
   const schedule = (delay: number) => {
     if (stopped) return;
     timer = setTimeout(() => void tick(), delay);
@@ -478,21 +594,29 @@ export function startLettersSender(
   };
   const tick = async () => {
     if (stopped) return;
+    const p = run();
+    inFlight = p;
     try {
-      const result = await run();
+      const result = await p;
       // Codes fermés et nombres seulement : jamais d'adresse, d'objet ni de message d'erreur brut.
       if (result.status === "error") console.error(`[lettres] passage en échec (${result.code ?? "inconnu"})`);
     } catch {
       console.error("[lettres] passage interrompu ; nouvel essai à la prochaine minuterie");
     } finally {
+      inFlight = null;
       // Une seule minuterie, réarmée après la fin : aucun passage concurrent ni relance après arrêt.
       schedule(INTERVAL);
     }
   };
   schedule(START_DELAY);
   console.info("[lettres] minuterie active ; premier passage après 90 secondes");
-  return () => {
+  return async () => {
     stopped = true;
     clearTimeout(timer);
+    if (!inFlight) return;
+    await Promise.race([
+      inFlight.catch(() => undefined),
+      new Promise<void>((resolve) => setTimeout(resolve, SHUTDOWN_GRACE_MS)),
+    ]);
   };
 }

@@ -155,14 +155,14 @@ describe("isSwissFederalHoliday / isSwissBusinessDay", () => {
 });
 
 describe("scheduleSlot", () => {
-  it("retient un créneau dans la fenêtre, jamais multiple de 5, pour un balayage de rng", () => {
+  it("retient un créneau dans la fenêtre, dont le dernier chiffre est 1, 2, 6 ou 7, jamais après 17:27 (correction du 06.10, I2c)", () => {
     const now = zurichEpoch(2026, 6, 10, 9, 0); // mercredi, jour ouvrable, dans la fenêtre
     for (const r of [0, 0.25, 0.5, 0.75, 0.999999]) {
       const slot = scheduleSlot(now, [], () => r);
       const z = toZurichParts(slot);
-      expect(z.minuteOfDay % 5).not.toBe(0);
+      expect([1, 2, 6, 7]).toContain(z.minuteOfDay % 10);
       expect(z.minuteOfDay).toBeGreaterThanOrEqual(9 * 60 + 5);
-      expect(z.minuteOfDay).toBeLessThanOrEqual(17 * 60 + 30);
+      expect(z.minuteOfDay).toBeLessThanOrEqual(17 * 60 + 27);
       expect(slot).toBeGreaterThan(now);
     }
   });

@@ -224,19 +224,28 @@ function zurichToUtc(year: number, month: number, day: number, minuteOfDay: numb
 // --- Créneau d'envoi ---------------------------------------------------------
 
 const WINDOW_START_MINUTE = 9 * 60 + 5; // 09:05
-const WINDOW_END_MINUTE = 17 * 60 + 30; // 17:30
+const WINDOW_END_MINUTE = 17 * 60 + 30; // 17:30 — fenêtre générale, utilisée par `isSendableNow`.
+// Correction du 06.10.2026 (relecture Opus, I2c) : un multiple de 5 ne suffisait pas à écarter le
+// risque qu'un passage qui glisse (retentative Resend, Telegram) envoie une lettre hors créneau.
+// `scheduleSlot` ne tire donc plus désormais que des minutes dont le dernier chiffre est 1, 2, 6 ou
+// 7 (marge d'au moins 3 min avant tout multiple de 5) et jamais plus tard que 17:27 (marge de 3 min
+// avant la fermeture à 17:30). `isSendableNow` reste inchangée (fenêtre 09:05-17:30, non multiple de
+// 5) : c'est le filet de sécurité au moment réel de l'envoi, plus large que ce tirage par construction.
+const SCHEDULE_LATEST_MINUTE = 17 * 60 + 27; // 17:27
+const SCHEDULABLE_LAST_DIGITS: ReadonlySet<number> = new Set([1, 2, 6, 7]);
 const MIN_GAP_MINUTES = 12;
 const MAX_LETTERS_PER_DAY = 5;
 // Garde-fou : une file saturée pendant des mois ne doit jamais boucler sans fin.
 const MAX_DAYS_FORWARD = 400;
 
-/** Minutes valides d'un jour donné : dans la fenêtre, jamais multiple de 5, à
- * au moins MIN_GAP_MINUTES de toute autre lettre déjà planifiée ce jour-là. */
+/** Minutes valides d'un jour donné : dans la fenêtre (jusqu'à 17:27 au plus tard), le dernier
+ * chiffre dans {1,2,6,7}, à au moins MIN_GAP_MINUTES de toute autre lettre déjà planifiée ce
+ * jour-là. */
 function validMinutesOfDay(earliestMinute: number, sameDayMinutes: readonly number[]): number[] {
   const start = Math.max(WINDOW_START_MINUTE, earliestMinute);
   const minutes: number[] = [];
-  for (let minute = start; minute <= WINDOW_END_MINUTE; minute++) {
-    if (minute % 5 === 0) continue;
+  for (let minute = start; minute <= SCHEDULE_LATEST_MINUTE; minute++) {
+    if (!SCHEDULABLE_LAST_DIGITS.has(minute % 10)) continue;
     if (sameDayMinutes.some((m) => Math.abs(m - minute) < MIN_GAP_MINUTES)) continue;
     minutes.push(minute);
   }
@@ -245,10 +254,14 @@ function validMinutesOfDay(earliestMinute: number, sameDayMinutes: readonly numb
 
 /**
  * Vrai seulement un jour ouvré, dans la fenêtre 09:05–17:30 (Zurich), à une minute qui n'est
- * jamais un multiple de 5 — exactement la contrainte que `scheduleSlot` impose à `scheduled_at`.
- * Sert à l'expéditeur périodique (tâche 2) : si un passage glisse (retraite Resend, Telegram), il
- * ne doit jamais envoyer hors de ce créneau même pour une lettre qui n'est pas encore « en retard »
+ * jamais un multiple de 5. Plus large que la contrainte que `scheduleSlot` impose désormais au
+ * tirage (minute dont le dernier chiffre est 1, 2, 6 ou 7, jusqu'à 17:27 au plus tard) : c'est le
+ * filet de sécurité au moment réel de l'envoi, pas une seconde copie de ce tirage. Sert à
+ * l'expéditeur périodique (tâche 2) : si un passage glisse (retentative Resend, Telegram), il ne
+ * doit jamais envoyer hors de ce créneau même pour une lettre qui n'est pas encore « en retard »
  * au sens des dix minutes (Review Focus #4 : jamais après 17:30, jamais sur une minute ronde).
+ * L'expéditeur l'appelle deux fois (`t` et `t + 60 s`) avant de réclamer une lettre : un envoi qui
+ * prendrait jusqu'à une minute ne doit pas, lui non plus, finir hors créneau.
  */
 export function isSendableNow(utcMs: number): boolean {
   const p = toZurichParts(utcMs);

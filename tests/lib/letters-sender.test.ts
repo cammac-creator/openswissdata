@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getDb, closeDb } from "../../src/lib/db.js";
-import { runLettersSender, readLettersSenderStatus } from "../../src/lib/letters-sender.js";
+import { runLettersSender, readLettersSenderStatus, startLettersSender } from "../../src/lib/letters-sender.js";
 import type { EmailSendResult, PreparedEmail } from "../../src/lib/email.js";
 
 // Mercredi ouvrable, dans la fenêtre 09:05-17:30 Zurich, sur une minute qui n'est PAS un multiple de
@@ -200,27 +200,20 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
     expect(getLetter(id).status).toBe("sent");
   });
 
-  it("un bail `sending` expiré repasse en `queued` sans envoi, `attempts+1`", async () => {
+  it("un bail `sending` expiré passe directement `failed` (issue incertaine, correction I4b) : jamais de retour en `queued`", async () => {
     const id = insertLetter({ status: "sending", lease_until: NOW - 1_000, attempts: 0, scheduled_at: NOW - 20 * 60_000 });
     const send = vi.fn();
-    await run({ send });
-    expect(send).not.toHaveBeenCalled();
-    const row = getLetter(id);
-    expect(row.status).toBe("queued");
-    expect(row.attempts).toBe(1);
-    expect(row.lease_until).toBeNull();
-  });
-
-  it("un bail expiré à son troisième essai passe `failed` et alerte Telegram", async () => {
-    const id = insertLetter({ status: "sending", lease_until: NOW - 1_000, attempts: 2, scheduled_at: NOW - 20 * 60_000 });
     const fetcher = telegramOk();
-    await run({ fetch: fetcher });
+    await run({ send, fetch: fetcher });
+    expect(send).not.toHaveBeenCalled(); // jamais un second envoi quand on ne sait pas si le premier est parti
     const row = getLetter(id);
     expect(row.status).toBe("failed");
-    expect(row.attempts).toBe(3);
+    expect(row.attempts).toBe(1);
+    expect(row.lease_until).toBeNull();
     const text = sentTexts(fetcher)[0].text;
-    expect(text).toContain("échec");
+    expect(text).toContain("issue incertaine");
     expect(text).toContain("admin.ch");
+    expect(text).not.toContain("boite-fictive@admin.ch");
   });
 
   it("un échec transitoire retourne en `queued` (`attempts+1`), le passage suivant réussit", async () => {
@@ -375,6 +368,17 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       expect(row.scheduled_at as number).toBeGreaterThan(zurichSummer(17, 29));
       expect(status.total_rescheduled).toBe(1);
     });
+
+    it("I2b : à 17:29, le double contrôle (t et t+60s) attend — la minute suivante serait hors créneau même si celle-ci ne l'est pas", async () => {
+      // Sonde b (relecture Opus, 06.10) : un passage qui démarre juste avant la fermeture peut
+      // prendre jusqu'à une minute à répondre (retentatives Resend, Telegram). Le simple contrôle
+      // `isSendableNow(now)` aurait laissé partir cette lettre à 17:29 ; le double contrôle l'arrête.
+      const id = insertLetter({ scheduled_at: zurichSummer(17, 28) }); // due depuis 1 min, pas « en retard »
+      const send = vi.fn();
+      await run({ send, now: () => zurichSummer(17, 29) });
+      expect(send).not.toHaveBeenCalled();
+      expect(getLetter(id).status).toBe("queued");
+    });
   });
 
   describe("relance automatique unique", () => {
@@ -469,6 +473,185 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
 
       await run({ send: vi.fn(), now: () => DUE_NOW + 86_400_000 });
       expect(countReminders(id)).toBe(1); // toujours une seule, malgré l'annulation
+    });
+  });
+
+  describe("I1 : une relance déjà en file est annulée si une réponse humaine arrive après sa création", () => {
+    // Même calendrier que le groupe précédent (octobre 2026, sans férié).
+    const SENT_AT = Date.UTC(2026, 9, 5, 12, 0);
+    const DUE_NOW = Date.UTC(2026, 9, 26, 12, 0);
+
+    it("sonde d : la relance part malgré une réponse humaine rattachée ensuite — corrigé : elle est `cancelled`, jamais envoyée", async () => {
+      const parentId = insertLetter({ status: "sent", sent_at: SENT_AT });
+
+      // La relance est créée, encore `queued` : aucun envoi à ce stade.
+      await run({ send: vi.fn(), now: () => DUE_NOW });
+      const reminder = getDb()
+        .prepare("SELECT id, scheduled_at FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
+        .get(parentId) as { id: string; scheduled_at: number };
+      expect(reminder).toBeDefined();
+      expect(getLetter(reminder.id).status).toBe("queued");
+
+      // Une réponse humaine arrive sur la lettre d'ORIGINE, après coup, avant que la relance ne soit réclamée.
+      getDb()
+        .prepare("UPDATE institutional_letters SET reply_kind='human', reply_at=? WHERE id=?")
+        .run(reminder.scheduled_at - 60_000, parentId);
+
+      const send = vi.fn();
+      await run({ send, now: () => reminder.scheduled_at + 30_000 });
+
+      expect(send).not.toHaveBeenCalled();
+      expect(getLetter(reminder.id).status).toBe("cancelled");
+    });
+
+    it("une réponse automatique (pas humaine) sur la lettre d'origine n'annule pas la relance", async () => {
+      const parentId = insertLetter({ status: "sent", sent_at: SENT_AT });
+      await run({ send: vi.fn(), now: () => DUE_NOW });
+      const reminder = getDb()
+        .prepare("SELECT id, scheduled_at FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
+        .get(parentId) as { id: string; scheduled_at: number };
+
+      getDb().prepare("UPDATE institutional_letters SET reply_kind='auto', reply_at=? WHERE id=?").run(reminder.scheduled_at - 60_000, parentId);
+
+      const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
+      await run({ send, now: () => reminder.scheduled_at + 30_000 });
+
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(getLetter(reminder.id).status).toBe("sent");
+    });
+  });
+
+  describe("I3 : écart réel d'au moins douze minutes entre deux envois (sonde ecart, corrigée)", () => {
+    it("une seconde lettre due pendant que le serveur rattrape un retard attend que douze minutes réelles se soient écoulées depuis le dernier envoi", async () => {
+      const idA = insertLetter({ id: "A", scheduled_at: zurichSummer(10, 12) });
+      const idB = insertLetter({ id: "B", scheduled_at: zurichSummer(10, 20) });
+      const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
+
+      // Passage 1 : A est due (4 min de retard), rien ne l'empêche de partir.
+      await run({ send, now: () => zurichSummer(10, 16) });
+      expect(getLetter(idA).status).toBe("sent");
+      expect(getLetter(idA).sent_at).toBe(zurichSummer(10, 16));
+      expect(getLetter(idB).status).toBe("queued"); // B n'est même pas encore due à 10:16
+
+      // Passage 2 : B est due (10:20 ≤ 10:21), mais A n'a été envoyée que 5 min plus tôt — moins de
+      // douze minutes réelles : B attend, sans pour autant être « en retard » (1 min) ni replanifiée.
+      await run({ send, now: () => zurichSummer(10, 21) });
+      expect(send).toHaveBeenCalledTimes(1); // toujours un seul envoi réel
+      expect(getLetter(idB).status).toBe("queued");
+      expect(getLetter(idB).scheduled_at).toBe(zurichSummer(10, 20)); // pas replanifiée : pas encore 10 min de retard
+
+      // Passage 3 : exactement douze minutes réelles après l'envoi de A — plus de blocage, B part.
+      await run({ send, now: () => zurichSummer(10, 28) });
+      expect(send).toHaveBeenCalledTimes(2);
+      const rows = getDb().prepare("SELECT id,status,sent_at FROM institutional_letters ORDER BY id").all() as Array<{
+        id: string;
+        status: string;
+        sent_at: number;
+      }>;
+      expect(rows.map((r) => r.status)).toEqual(["sent", "sent"]);
+      const [a, b] = rows;
+      expect((b.sent_at - a.sent_at) / 60_000).toBeGreaterThanOrEqual(12); // l'écart réel garanti, pas seulement sur `scheduled_at`
+    });
+  });
+
+  describe("I4 : jamais de renvoi automatique quand l'issue d'un envoi est incertaine", () => {
+    it("I4a : une exception pendant l'envoi échoue directement (issue incertaine), jamais de retentative", async () => {
+      const id = insertLetter({ scheduled_at: NOW - 1_000 });
+      const send = vi.fn(async () => {
+        throw new Error("panne réseau simulée");
+      });
+      const fetcher = telegramOk();
+
+      await run({ send, fetch: fetcher });
+
+      expect(send).toHaveBeenCalledTimes(1);
+      const row = getLetter(id);
+      expect(row.status).toBe("failed");
+      expect(row.attempts).toBe(1);
+      const text = sentTexts(fetcher)[0].text;
+      expect(text).toContain("issue incertaine");
+      expect(text).toContain("admin.ch");
+    });
+
+    it("I4a : un `network_error` explicite de `sendPreparedEmail` échoue aussi directement", async () => {
+      const id = insertLetter({ scheduled_at: NOW - 1_000 });
+      const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: false, reason: "resend_error", details: "network_error" }));
+      const fetcher = telegramOk();
+
+      await run({ send, fetch: fetcher });
+
+      const row = getLetter(id);
+      expect(row.status).toBe("failed");
+      expect(row.attempts).toBe(1);
+      expect(sentTexts(fetcher)[0].text).toContain("issue incertaine");
+    });
+
+    it("I4c : un 429 (taux limité) reste retentable comme un 5xx — Resend n'a pas accepté", async () => {
+      const id = insertLetter({ scheduled_at: NOW - 1_000 });
+      const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: false, reason: "resend_error", details: "HTTP 429" }));
+      const fetcher = telegramOk();
+
+      await run({ send, fetch: fetcher });
+
+      const row = getLetter(id);
+      expect(row.status).toBe("queued"); // pas définitif : une retentative suit
+      expect(row.attempts).toBe(1);
+      expect(fetcher).not.toHaveBeenCalled(); // pas encore un échec définitif
+    });
+
+    it("I4d : un refus 4xx définitif (ex. 400) échoue directement, dès le premier essai, jamais retenté", async () => {
+      const id = insertLetter({ scheduled_at: NOW - 1_000 });
+      const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: false, reason: "resend_error", details: "HTTP 400" }));
+      const fetcher = telegramOk();
+
+      await run({ send, fetch: fetcher });
+
+      expect(send).toHaveBeenCalledTimes(1);
+      const row = getLetter(id);
+      expect(row.status).toBe("failed");
+      expect(row.attempts).toBe(1);
+      const text = sentTexts(fetcher)[0].text;
+      expect(text).toContain("HTTP 400");
+      expect(text).not.toContain("issue incertaine"); // refus clair, pas une issue inconnue
+    });
+
+    it("I4e : stopLettersSender() attend la fin d'un passage en cours avant de résoudre", async () => {
+      vi.useFakeTimers();
+      try {
+        let resolveRun: (() => void) | undefined;
+        const slowRun = () =>
+          new Promise<Awaited<ReturnType<typeof runLettersSender>>>((resolve) => {
+            resolveRun = () =>
+              resolve({
+                checked_at: 0,
+                status: "ok",
+                code: null,
+                queued: 0,
+                sent: 0,
+                failed: 0,
+                total_rescheduled: 0,
+                total_reminders_created: 0,
+                last_run_at: 0,
+              });
+          });
+
+        const stop = startLettersSender({ run: slowRun });
+        await vi.advanceTimersByTimeAsync(90_000); // déclenche le premier passage, jamais résolu
+        expect(resolveRun).toBeDefined(); // le passage est bien en cours (`inFlight` posé)
+
+        let settled = false;
+        const stopPromise = stop().then(() => {
+          settled = true;
+        });
+        await vi.advanceTimersByTimeAsync(0); // laisse `stop()` s'exécuter jusqu'à son `await`
+        expect(settled).toBe(false); // le passage n'est pas fini : stop() attend, ne résout pas tout de suite
+
+        resolveRun?.();
+        await stopPromise;
+        expect(settled).toBe(true);
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 

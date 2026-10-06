@@ -364,7 +364,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     stopCleanup();
     stopIncidents();
     stopMailWatch();
-    stopLettersSender();
+    // Asynchrone (correction I4e, 06.10) : attend la fin d'un envoi en cours (au plus 10 s) plutôt
+    // que de laisser SIGTERM l'interrompre entre la requête à Resend et l'écriture de `sent_at`.
+    await stopLettersSender();
     stopWorkflowWatch();
     console.log(`[shutdown] received ${sig}, flushing Sentry…`);
     await flushSentry(2000);
