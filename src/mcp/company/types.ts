@@ -42,12 +42,14 @@ export interface LindasCompany {
   register_uri: string;
 }
 
-/** Enregistrement LEI tel que lu dans l'API publique de GLEIF. */
+/** Enregistrement LEI tel que lu dans l'API publique de GLEIF. `entity_status` et
+ *  `registration_status` : `null` quand GLEIF ne rend pas le statut (jamais une valeur de
+ *  repli inventée comme "unknown" — correction 1 du 06.10.2026, tâche osd.fiche, tâche 4). */
 export interface GleifRecord {
   lei: string;
   legal_name: string;
-  entity_status: string;
-  registration_status: string;
+  entity_status: string | null;
+  registration_status: string | null;
   last_update: string | null;
   registered_as: string | null;
 }

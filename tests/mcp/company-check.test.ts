@@ -6,6 +6,7 @@ import { LINDAS_ENDPOINT, resetLindasCache } from "../../src/mcp/company/lindas.
 import { resetGleifCache } from "../../src/mcp/company/gleif.js";
 import { parseUid } from "../../src/mcp/company/uid.js";
 import { _resetDataLoaderCache, setFinmaVersion, type FinmaRegistryRow } from "../../src/mcp/data-loader.js";
+import { COMPANY_SOURCES } from "../../src/mcp/company/sources.js";
 import type { GleifRecord, LindasCompany, LiveDeps, Part } from "../../src/mcp/company/types.js";
 
 // Fixtures réelles de la tâche 3 : AXA Leben AG CHE-103.137.179, et un IDE valide mais
@@ -93,34 +94,137 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     const fiche = buildCompanyFiche(INDIVIDUAL_ENTERPRISE_UID, {
       lindas,
       gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
-      finma: [],
+      finma: { available: true, rows: [] },
       now,
     });
     const fields = fiche.commercial_register.facts.map((f) => f.field);
     expect(fields).not.toContain("street_address");
     expect(fields).not.toContain("postal_code");
     expect(fields).not.toContain("locality");
+    expect(fields).not.toContain("purpose"); // correction 1 : 0101 CONFIRMÉ retire aussi purpose
     expect(fields).toContain("municipality");
     expect(fields).toContain("canton");
+    // other_names reste autorisé pour 0101 (plan) : la fixture n'en a simplement aucun ici
+    // (`other_names: []`), donc aucun fait "other_names" n'est émis — comportement normal
+    // de `lindasFacts`, pas une exclusion liée à 0101.
     expect(fiche.commercial_register.found).toBe(true);
+  });
+
+  it("correction 1 : legal_form_code null (forme inconnue) → aucune adresse (fermé par défaut), mais purpose reste (pas confirmé 0101)", () => {
+    const lindas: Part<LindasCompany> = {
+      available: true,
+      found: true,
+      retrieved_at: new Date(DEBUT).toISOString(),
+      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: null },
+    };
+    const fiche = buildCompanyFiche(INDIVIDUAL_ENTERPRISE_UID, {
+      lindas,
+      gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
+      finma: { available: true, rows: [] },
+      now,
+    });
+    const fields = fiche.commercial_register.facts.map((f) => f.field);
+    expect(fields).not.toContain("street_address");
+    expect(fields).not.toContain("postal_code");
+    expect(fields).not.toContain("locality");
+    expect(fields).not.toContain("legal_form_code"); // champ nul : simplement pas de fait
+    expect(fields).toContain("purpose"); // pas confirmé 0101 : purpose n'est pas retiré
+    expect(fields).toContain("municipality");
+    expect(fields).toContain("canton");
+  });
+
+  it("correction 1 : legal_form_code \"\" (chaîne vide, pas null) → aucune adresse non plus (pas « présent » au sens de la porte fermée)", () => {
+    const lindas: Part<LindasCompany> = {
+      available: true,
+      found: true,
+      retrieved_at: new Date(DEBUT).toISOString(),
+      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: "" },
+    };
+    const fiche = buildCompanyFiche(INDIVIDUAL_ENTERPRISE_UID, {
+      lindas,
+      gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
+      finma: { available: true, rows: [] },
+      now,
+    });
+    const fields = fiche.commercial_register.facts.map((f) => f.field);
+    expect(fields).not.toContain("street_address");
+    expect(fields).not.toContain("postal_code");
+    expect(fields).not.toContain("locality");
+    expect(fields).toContain("purpose"); // "" n'est pas "0101" confirmé : purpose reste
+  });
+
+  it("correction 1 (item 2) : faits GLEIF renommés gleif_entity_status/lei_registration_status, jamais entity_status/registration_status", () => {
+    const lindas: Part<LindasCompany> = {
+      available: true,
+      found: true,
+      retrieved_at: new Date(DEBUT).toISOString(),
+      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: "0106", legal_name: "AXA Leben AG" },
+    };
+    const fiche = buildCompanyFiche("CHE-103.137.179", {
+      lindas,
+      gleif: { available: true, found: true, retrieved_at: new Date(DEBUT).toISOString(), data: [GLEIF_AXA_RECORD] },
+      finma: { available: true, rows: [] },
+      now,
+    });
+    const fields = fiche.lei.facts.map((f) => f.field);
+    expect(fields).toContain("gleif_entity_status");
+    expect(fields).toContain("lei_registration_status");
+    expect(fields).not.toContain("entity_status");
+    expect(fields).not.toContain("registration_status");
+  });
+
+  it("correction 1 (item 2) : statut GLEIF null (jamais \"unknown\") → aucun fait de statut émis", () => {
+    const lindas: Part<LindasCompany> = {
+      available: true,
+      found: true,
+      retrieved_at: new Date(DEBUT).toISOString(),
+      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: "0106", legal_name: "AXA Leben AG" },
+    };
+    const gleifSansStatut: GleifRecord = { ...GLEIF_AXA_RECORD, entity_status: null, registration_status: null };
+    const fiche = buildCompanyFiche("CHE-103.137.179", {
+      lindas,
+      gleif: { available: true, found: true, retrieved_at: new Date(DEBUT).toISOString(), data: [gleifSansStatut] },
+      finma: { available: true, rows: [] },
+      now,
+    });
+    const fields = fiche.lei.facts.map((f) => f.field);
+    expect(fields).not.toContain("gleif_entity_status");
+    expect(fields).not.toContain("lei_registration_status");
+    expect(fields.some((f) => f.includes("unknown"))).toBe(false);
+    expect(fiche.lei.facts.some((f) => f.value === "unknown")).toBe(false);
   });
 
   it("LINDAS en panne : commercial_register.available false, le reste de la fiche reste présent", () => {
     const fiche = buildCompanyFiche("CHE-103.137.179", {
       lindas: { available: false, reason: "LINDAS request failed or timed out" },
       gleif: { available: true, found: true, retrieved_at: new Date(DEBUT).toISOString(), data: [GLEIF_AXA_RECORD] },
-      finma: [finmaRow()],
+      finma: { available: true, rows: [finmaRow()] },
       now,
     });
     expect(fiche.commercial_register).toMatchObject({ available: false, found: false, reason: "LINDAS request failed or timed out", facts: [] });
     expect(fiche.lei.found).toBe(true);
     expect(fiche.lei.facts.length).toBeGreaterThan(0); // la panne LINDAS n'empêche pas les faits GLEIF
+    expect(fiche.finma.available).toBe(true);
     expect(fiche.finma.found).toBe(true);
     // LINDAS absent : aucun recoupement qui l'implique (nom LINDAS/GLEIF, nom FINMA/LINDAS).
     // Le LEI FINMA/GLEIF ne dépend pas de LINDAS et reste calculé.
     expect(fiche.cross_checks.map((c) => c.check)).toEqual(["finma_lei_vs_gleif_lei"]);
-    expect(fiche.not_covered).toEqual(["registration_status", "fosc_publications", "seco_sanctions", "officers"]);
+    expect(fiche.not_covered).toEqual(["commercial_register_status", "fosc_publications", "seco_sanctions", "officers"]);
     expect(fiche.notice).toMatch(/zefix\.admin\.ch/);
+  });
+
+  it("correction 1 : registre FINMA illisible → finma.available false, found false, facts vides, le reste de la fiche présent", () => {
+    const fiche = buildCompanyFiche("CHE-103.137.179", {
+      lindas: { available: true, found: true, retrieved_at: new Date(DEBUT).toISOString(), data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: "0106", legal_name: "AXA Leben AG" } },
+      gleif: { available: true, found: true, retrieved_at: new Date(DEBUT).toISOString(), data: [GLEIF_AXA_RECORD] },
+      finma: { available: false, reason: "FINMA registry could not be read" },
+      now,
+    });
+    expect(fiche.finma).toMatchObject({ available: false, found: false, facts: [], reason: "FINMA registry could not be read" });
+    expect(fiche.commercial_register.found).toBe(true); // le reste de la fiche reste présent
+    expect(fiche.lei.found).toBe(true);
+    // Aucun recoupement qui implique FINMA (registre illisible) ; LINDAS/GLEIF reste calculé.
+    expect(fiche.cross_checks.map((c) => c.check)).toEqual(["legal_name_lindas_vs_gleif"]);
   });
 
   it("finmaVersion connue (ex. \"2026.10.06\") : data_note la cite, retrieved_at des faits FINMA reste generated_at (pas une date ISO)", () => {
@@ -133,11 +237,13 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     const fiche = buildCompanyFiche(INDIVIDUAL_ENTERPRISE_UID, {
       lindas,
       gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
-      finma: [finmaRow({ uid: INDIVIDUAL_ENTERPRISE_UID })],
+      finma: { available: true, rows: [finmaRow({ uid: INDIVIDUAL_ENTERPRISE_UID })] },
       finmaVersion: "2026.10.06",
       now,
     });
-    expect(fiche.finma.data_note).toContain("2026.10.06");
+    expect(fiche.finma.data_note).toBe(
+      "Facts from the FINMA copy currently loaded by this service (version 2026.10.06), not a live FINMA lookup.",
+    );
     const generatedAt = new Date(DEBUT).toISOString();
     expect(fiche.finma.facts.every((f) => f.retrieved_at === generatedAt)).toBe(true);
   });
@@ -146,11 +252,56 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     const fiche = buildCompanyFiche(INDIVIDUAL_ENTERPRISE_UID, {
       lindas: { available: false, reason: "LINDAS request failed or timed out" },
       gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
-      finma: [finmaRow({ uid: INDIVIDUAL_ENTERPRISE_UID })],
+      finma: { available: true, rows: [finmaRow({ uid: INDIVIDUAL_ENTERPRISE_UID })] },
       now,
     });
+    expect(fiche.finma.data_note).toBe(
+      "Facts from the FINMA copy currently loaded by this service, not a live FINMA lookup.",
+    );
     expect(fiche.finma.data_note).not.toMatch(/\d{4}[.-]\d{2}[.-]\d{2}/);
-    expect(fiche.finma.data_note).toMatch(/last scheduled/i);
+  });
+
+  it("ligne FINMA réaliste (copie embarquée : status/licence_date/lei vides, seul licence_type rempli) → un seul fait FINMA, pas de recoupement LEI", () => {
+    const lindas: Part<LindasCompany> = {
+      available: true,
+      found: true,
+      retrieved_at: new Date(DEBUT).toISOString(),
+      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: "0106", legal_name: "AXA Leben AG" },
+    };
+    const fiche = buildCompanyFiche("CHE-103.137.179", {
+      lindas,
+      gleif: { available: true, found: true, retrieved_at: new Date(DEBUT).toISOString(), data: [GLEIF_AXA_RECORD] },
+      finma: {
+        available: true,
+        rows: [finmaRow({ status: "", licence_date: "", lei: "" })], // ligne réelle de finma_registry.csv (AXA Leben AG)
+      },
+      now,
+    });
+    expect(fiche.finma.facts).toEqual([
+      expect.objectContaining({ field: "licence_type", value: "Life insurance company" }),
+    ]);
+    expect(fiche.cross_checks.map((c) => c.check)).not.toContain("finma_lei_vs_gleif_lei");
+    // Le nom FINMA (non vide) reste comparé au nom légal LINDAS, même sans LEI.
+    expect(fiche.cross_checks.map((c) => c.check)).toContain("finma_name_vs_lindas_legal_name");
+  });
+
+  it("divergence : nom FINMA ≠ nom légal LINDAS → result false", () => {
+    const lindas: Part<LindasCompany> = {
+      available: true,
+      found: true,
+      retrieved_at: new Date(DEBUT).toISOString(),
+      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: "0106", legal_name: "Une Société Complètement Différente SA" },
+    };
+    const fiche = buildCompanyFiche("CHE-103.137.179", {
+      lindas,
+      gleif: AVAILABLE_NOT_FOUND<GleifRecord[]>(),
+      finma: { available: true, rows: [finmaRow({ name: "AXA Leben AG" })] },
+      now,
+    });
+    const nameCheck = fiche.cross_checks.find((c) => c.check === "finma_name_vs_lindas_legal_name");
+    expect(nameCheck).toMatchObject({ result: false });
+    expect(nameCheck?.detail).toContain("AXA Leben AG");
+    expect(nameCheck?.detail).toContain("Une Société Complètement Différente SA");
   });
 
   it("plusieurs lignes FINMA pour le même IDE (une par autorisation) : facts des deux lignes, ligne d'un autre IDE exclue, recoupements dédupliqués par valeur", () => {
@@ -160,7 +311,7 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
       retrieved_at: new Date(DEBUT).toISOString(),
       data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: "0106", legal_name: "AXA Leben AG" },
     };
-    const finma = [
+    const rows = [
       finmaRow({ uid: "CHE-103.137.179", licence_type: "Life insurance company", status: "authorised" }),
       finmaRow({ uid: "CHE-103.137.179", licence_type: "Portfolio manager", status: "authorised" }),
       finmaRow({ uid: "CHE-999.999.999", licence_type: "Ne doit jamais apparaître" }), // autre IDE, exclue
@@ -168,7 +319,7 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     const fiche = buildCompanyFiche("CHE-103.137.179", {
       lindas,
       gleif: { available: true, found: true, retrieved_at: new Date(DEBUT).toISOString(), data: [GLEIF_AXA_RECORD] },
-      finma,
+      finma: { available: true, rows },
       now,
     });
     const licenceTypes = fiche.finma.facts.filter((f) => f.field === "licence_type").map((f) => f.value);
@@ -180,6 +331,27 @@ describe("buildCompanyFiche (assemblage pur, sans réseau)", () => {
     const nameChecks = fiche.cross_checks.filter((c) => c.check === "finma_name_vs_lindas_legal_name");
     expect(leiChecks).toHaveLength(1);
     expect(nameChecks).toHaveLength(1);
+  });
+
+  it("correction 1 : chaque cross_checks[].sources contient des ids de COMPANY_SOURCES", () => {
+    const lindas: Part<LindasCompany> = {
+      available: true,
+      found: true,
+      retrieved_at: new Date(DEBUT).toISOString(),
+      data: { ...INDIVIDUAL_ENTERPRISE, legal_form_code: "0106", legal_name: "AXA Leben AG" },
+    };
+    const fiche = buildCompanyFiche("CHE-103.137.179", {
+      lindas,
+      gleif: { available: true, found: true, retrieved_at: new Date(DEBUT).toISOString(), data: [GLEIF_AXA_RECORD] },
+      finma: { available: true, rows: [finmaRow()] },
+      now,
+    });
+    expect(fiche.cross_checks.length).toBeGreaterThan(0);
+    const validIds = new Set(Object.keys(COMPANY_SOURCES));
+    for (const check of fiche.cross_checks) {
+      expect(check.sources.length).toBeGreaterThan(0);
+      for (const id of check.sources) expect(validIds.has(id)).toBe(true);
+    }
   });
 });
 
@@ -214,10 +386,18 @@ describe("companyCheck (bout en bout, fetch injecté, sans réseau)", () => {
     if (!result.ok) return;
     const { fiche } = result;
     expect(fiche.commercial_register.found).toBe(true);
+    // AXA Leben AG a une forme juridique connue (0106, pas 0101) : la porte fermée par
+    // défaut ne doit fermer l'adresse QUE pour une forme inconnue ou "0101", jamais pour
+    // une société ordinaire — testé du côté OUVERT, pas seulement du côté fermé.
+    const registerFields = fiche.commercial_register.facts.map((f) => f.field);
+    expect(registerFields).toContain("street_address");
+    expect(registerFields).toContain("postal_code");
+    expect(registerFields).toContain("locality");
     expect(fiche.lei.found).toBe(true);
+    expect(fiche.finma.available).toBe(true);
     expect(fiche.finma.found).toBe(true);
     expect(fiche.finma.warning_list).toBe("not_checkable_by_uid");
-    expect(fiche.finma.data_note).toMatch(/[Cc]ollection|snapshot|version/);
+    expect(fiche.finma.data_note).toMatch(/currently loaded by this service/i);
 
     expect(fiche.cross_checks).toEqual(
       expect.arrayContaining([
@@ -294,6 +474,26 @@ describe("companyCheck (bout en bout, fetch injecté, sans réseau)", () => {
     const result = await companyCheck("pas un IDE", deps(fetchMock, () => []));
     expect(result.ok).toBe(false);
     expect(appele).toBe(false);
+  });
+
+  it("correction 1 : deps.finma qui lève → ok true, finma.available false, reason présente, le reste de la fiche servi", async () => {
+    const fetchMock = async (url: string | URL) => {
+      const href = typeof url === "string" ? url : url.toString();
+      return href.startsWith(LINDAS_ENDPOINT) ? jsonResponse(LINDAS_AXA) : jsonResponse(GLEIF_AXA);
+    };
+    const finmaQuiLeve = (): readonly FinmaRegistryRow[] => {
+      throw new Error("lecture impossible (détail jamais exposé dans la fiche)");
+    };
+    const result = await companyCheck("CHE-103.137.179", deps(fetchMock, finmaQuiLeve));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.fiche.finma).toMatchObject({ available: false, found: false, facts: [] });
+    expect(typeof result.fiche.finma.reason).toBe("string");
+    expect(result.fiche.finma.reason?.length).toBeGreaterThan(0);
+    // Jamais le détail brut de l'erreur levée par l'appelant dans la fiche publique.
+    expect(result.fiche.finma.reason).not.toContain("lecture impossible");
+    expect(result.fiche.commercial_register.found).toBe(true); // le reste de la fiche reste servi
+    expect(result.fiche.lei.found).toBe(true);
   });
 
   it("le registre FINMA PAR DÉFAUT porte sa version dans data_note ; un registre injecté n'en hérite jamais", async () => {

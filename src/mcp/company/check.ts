@@ -36,12 +36,14 @@ export interface CompanyFiche {
   uid: string;
   generated_at: string;
   commercial_register: { available: boolean; found: boolean; reason?: string; facts: Fact[] };
-  // `data_note` (tâche osd.fiche, tâche 4) : les faits FINMA viennent de la dernière
-  // collecte du service, jamais d'une lecture en direct. `retrieved_at` de chaque Fact
-  // FINMA reste toujours `generated_at` (la version FINMA, ex. "2026.10.06", n'est pas une
-  // date ISO : on ne la met jamais dans un champ daté) ; `data_note` la mentionne quand
-  // elle est connue.
-  finma: { found: boolean; facts: Fact[]; warning_list: "not_checkable_by_uid"; data_note: string };
+  // `available` (correction 1 du 06.10.2026) : `false` quand le registre FINMA en mémoire
+  // n'a pas pu être lu (`deps.finma` qui lève) — `found`/`facts` restent alors vides, sans
+  // jamais faire échouer toute la fiche. `data_note` (tâche osd.fiche, tâche 4) : les faits
+  // FINMA viennent de la dernière collecte du service, jamais d'une lecture en direct.
+  // `retrieved_at` de chaque Fact FINMA reste toujours `generated_at` (la version FINMA,
+  // ex. "2026.10.06", n'est pas une date ISO : on ne la met jamais dans un champ daté) ;
+  // `data_note` la mentionne quand elle est connue.
+  finma: { available: boolean; found: boolean; facts: Fact[]; warning_list: "not_checkable_by_uid"; data_note: string; reason?: string };
   lei: { available: boolean; found: boolean; reason?: string; facts: Fact[] };
   cross_checks: CrossCheck[];
   // Ce que la fiche ne dit PAS : statut d'inscription au registre, publications FOSC,
@@ -50,7 +52,9 @@ export interface CompanyFiche {
   notice: string;
 }
 
-const NOT_COVERED = ["registration_status", "fosc_publications", "seco_sanctions", "officers"] as const;
+// "commercial_register_status" (pas "registration_status", qui désignerait à tort le champ
+// GLEIF `lei_registration_status` : renommé en correction 1 du 06.10.2026).
+const NOT_COVERED = ["commercial_register_status", "fosc_publications", "seco_sanctions", "officers"] as const;
 
 const NOTICE =
   "Unofficial copy assembled from public sources. Check the official registers before any decision: zefix.admin.ch, finma.ch, search.gleif.org.";
@@ -76,12 +80,23 @@ function pushIfPresent(facts: Fact[], field: string, value: string | null | unde
 }
 
 /** Un `Fact` par champ non nul de `LindasCompany` ; `other_names` (tableau) est joint en une
- *  seule chaîne pour rester compatible avec `Fact.value`. Entreprise individuelle (0101) :
- *  `street_address`, `postal_code` et `locality` sont retirés, commune et canton gardés. */
+ *  seule chaîne pour rester compatible avec `Fact.value`.
+ *
+ *  Adresse FERMÉE PAR DÉFAUT (correction 1 du 06.10.2026) : `street_address`, `postal_code`
+ *  et `locality` ne sortent QUE si `legal_form_code` est CONNU (non nul) ET différent de
+ *  "0101" — une forme juridique inconnue n'écarte jamais la possibilité d'une entreprise
+ *  individuelle, donc pas d'adresse tant qu'on ne sait pas.
+ *
+ *  Entreprise individuelle CONFIRMÉE (legal_form_code === "0101") : `purpose` est en plus
+ *  retiré (le plan ne garde que nom, forme, commune ; canton et other_names restent) — ce
+ *  retrait-là ne s'applique PAS au cas "forme inconnue", seulement au cas confirmé. */
 function lindasFacts(data: LindasCompany, retrievedAt: string): Fact[] {
   const sourceId = "ofrc.zefix_lindas";
   const sourceUrl = COMPANY_SOURCES[sourceId].url;
-  const isIndividualEnterprise = data.legal_form_code === INDIVIDUAL_ENTERPRISE_FORM_CODE;
+  const isConfirmedIndividualEnterprise = data.legal_form_code === INDIVIDUAL_ENTERPRISE_FORM_CODE;
+  // `!!data.legal_form_code` (pas `!== null`) : une chaîne vide compte aussi comme "pas
+  // connue", jamais comme "présente" (corrigé en revue, correction 1 du 06.10.2026).
+  const addressAllowed = !!data.legal_form_code && !isConfirmedIndividualEnterprise;
   const facts: Fact[] = [];
   const add = (field: string, value: string | null) => pushIfPresent(facts, field, value, sourceId, sourceUrl, retrievedAt);
 
@@ -93,18 +108,22 @@ function lindasFacts(data: LindasCompany, retrievedAt: string): Fact[] {
   add("municipality", data.municipality);
   add("municipality_bfs_id", data.municipality_bfs_id);
   add("canton", data.canton);
-  if (!isIndividualEnterprise) {
+  if (addressAllowed) {
     add("street_address", data.street_address);
     add("postal_code", data.postal_code);
     add("locality", data.locality);
   }
-  add("purpose", data.purpose);
+  if (!isConfirmedIndividualEnterprise) add("purpose", data.purpose);
   add("ch_id", data.ch_id);
   add("register_uri", data.register_uri);
   return facts;
 }
 
-/** Un groupe de faits par enregistrement GLEIF ; `source_url` propre à chaque LEI. */
+/** Un groupe de faits par enregistrement GLEIF ; `source_url` propre à chaque LEI.
+ *  `lei_registration_status`/`gleif_entity_status` (renommés en correction 1 du 06.10.2026
+ *  pour ne jamais se confondre avec `not_covered: "commercial_register_status"` ni avec les
+ *  autres statuts de la fiche) : `pushIfPresent` n'émet pas le fait quand `gleif.ts` a rendu
+ *  `null` (statut absent de GLEIF, jamais une valeur inventée comme "unknown"). */
 function gleifFacts(records: readonly GleifRecord[], retrievedAt: string): Fact[] {
   const sourceId = "gleif.lei_api";
   const facts: Fact[] = [];
@@ -113,8 +132,8 @@ function gleifFacts(records: readonly GleifRecord[], retrievedAt: string): Fact[
     const add = (field: string, value: string | null) => pushIfPresent(facts, field, value, sourceId, sourceUrl, retrievedAt);
     add("lei", record.lei);
     add("legal_name", record.legal_name);
-    add("entity_status", record.entity_status);
-    add("registration_status", record.registration_status);
+    add("gleif_entity_status", record.entity_status);
+    add("lei_registration_status", record.registration_status);
     add("last_update", record.last_update);
     add("registered_as", record.registered_as);
   }
@@ -139,12 +158,19 @@ function finmaFacts(rows: readonly FinmaRegistryRow[], retrievedAt: string): Fac
   return facts;
 }
 
+/**
+ * Accès au registre FINMA en mémoire, PAS un `Part<T>` : ce n'est jamais une lecture en
+ * direct (pas de `retrieved_at` propre), seulement un tableau déjà chargé qui peut échouer
+ * à être lu (`deps.finma` qui lève — correction 1 du 06.10.2026, tâche osd.fiche, tâche 4).
+ */
+export type FinmaAccess = { available: true; rows: readonly FinmaRegistryRow[] } | { available: false; reason: string };
+
 export function buildCompanyFiche(
   uid: string,
   parts: {
     lindas: Part<LindasCompany>;
     gleif: Part<GleifRecord[]>;
-    finma: readonly FinmaRegistryRow[];
+    finma: FinmaAccess;
     /**
      * Version des données FINMA actuellement servies (`getFinmaVersion()`), lue par
      * l'appelant SEULEMENT quand `parts.finma` vient du registre par défaut (voir
@@ -173,23 +199,34 @@ export function buildCompanyFiche(
 
   // Toutes les lignes FINMA dont l'IDE est EXACTEMENT celui demandé (égalité de chaîne sur
   // la forme canonique CHE-xxx.xxx.xxx : `uid` ici et dans la colonne du CSV sont déjà
-  // sous cette forme — 103 IDE portent 2 ou 3 lignes, une par autorisation).
-  const finmaRows = parts.finma.filter((row) => row.uid === uid);
+  // sous cette forme — 103 IDE portent 2 ou 3 lignes, une par autorisation). Tableau vide
+  // (jamais une exception) quand le registre lui-même n'a pas pu être lu.
+  const finmaRows = parts.finma.available ? parts.finma.rows.filter((row) => row.uid === uid) : [];
 
   // La date de collecte des lignes FINMA chargées en mémoire n'est pas connue ici (pas de
   // lecture en direct) : chaque Fact FINMA porte toujours `generated_at` comme
   // `retrieved_at`. `parts.finmaVersion` (ex. "2026.10.06", pas une date ISO) n'est
   // mentionnée que dans `data_note`, jamais posée dans un champ daté.
   const finmaDataNote = parts.finmaVersion
-    ? `FINMA facts reflect the data version "${parts.finmaVersion}" currently served by this service, not a live read of the FINMA register.`
-    : "FINMA facts reflect this service's last scheduled FINMA collection, not a live read of the FINMA register.";
+    ? `Facts from the FINMA copy currently loaded by this service (version ${parts.finmaVersion}), not a live FINMA lookup.`
+    : "Facts from the FINMA copy currently loaded by this service, not a live FINMA lookup.";
 
-  const finma: CompanyFiche["finma"] = {
-    found: finmaRows.length > 0,
-    facts: finmaFacts(finmaRows, generatedAt),
-    warning_list: "not_checkable_by_uid",
-    data_note: finmaDataNote,
-  };
+  const finma: CompanyFiche["finma"] = parts.finma.available
+    ? {
+        available: true,
+        found: finmaRows.length > 0,
+        facts: finmaFacts(finmaRows, generatedAt),
+        warning_list: "not_checkable_by_uid",
+        data_note: finmaDataNote,
+      }
+    : {
+        available: false,
+        found: false,
+        facts: [],
+        warning_list: "not_checkable_by_uid",
+        data_note: finmaDataNote,
+        reason: parts.finma.reason,
+      };
 
   const lindasData = commercial_register.found && parts.lindas.available ? parts.lindas.data : null;
   const gleifRecords = lei.found && parts.gleif.available && parts.gleif.data ? parts.gleif.data : [];
@@ -266,9 +303,19 @@ export async function companyCheck(
   // `getFinmaVersion()` n'est lue que lorsque le registre par défaut est utilisé : un
   // registre FINMA injecté (tests, ou tout autre appelant) n'a pas de version connue
   // correspondante (voir le commentaire sur `parts.finmaVersion` dans `buildCompanyFiche`).
+  // Registre illisible (`deps.finma` qui lève, ou le chargement paresseux du CSV par
+  // défaut) : jamais une exception qui ferait échouer toute la fiche — `finma.available`
+  // devient `false`, sans raison brute exposée (correction 1 du 06.10.2026).
   const usingDefaultFinmaRegistry = deps.finma === undefined;
-  const finmaRows = (deps.finma ?? getFinmaRegistry)();
-  const finmaVersion = usingDefaultFinmaRegistry ? getFinmaVersion() : null;
-  const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma: finmaRows, finmaVersion, now: deps.now });
+  let finma: FinmaAccess;
+  let finmaVersion: string | null = null;
+  try {
+    const rows = (deps.finma ?? getFinmaRegistry)();
+    finma = { available: true, rows };
+    finmaVersion = usingDefaultFinmaRegistry ? getFinmaVersion() : null;
+  } catch {
+    finma = { available: false, reason: "FINMA registry could not be read" };
+  }
+  const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, now: deps.now });
   return { ok: true, fiche };
 }

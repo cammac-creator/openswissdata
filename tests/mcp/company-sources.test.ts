@@ -190,6 +190,40 @@ describe("lookupLindas (registre du commerce en données liées, LINDAS)", () =>
       expect(result).toMatchObject({ available: true, found: true, data: { legal_name: "Vrai Nom SA", other_names: [] } });
     });
 
+    it("forme juridique sans schema:identifier : legal_form_code déduit du suffixe de l'URI eCH-0097 (correction 1 du 06.10.2026, tâche 4)", async () => {
+      const fetchMock = vi.fn(async () => jsonResponse({
+        results: {
+          bindings: [
+            {
+              company: { value: "https://register.ld.admin.ch/zefix/company/1" },
+              legalName: { value: "Société Sans Identifiant SA" },
+              legalForm: { value: "https://ld.admin.ch/ech/97/legalforms/0106" },
+              // Pas de `legalFormCode` ici : seul le triplet `?legalForm schema:identifier
+              // ?legalFormCode` manque, exactement le cas que `legalFormCodeFromUri` couvre.
+            },
+          ],
+        },
+      }));
+      const result = await lookupLindas("CHE103137179", deps(fetchMock));
+      expect(result).toMatchObject({ available: true, found: true, data: { legal_form_code: "0106" } });
+    });
+
+    it("forme juridique dont l'URI ne porte pas de suffixe numérique exploitable : legal_form_code reste null", async () => {
+      const fetchMock = vi.fn(async () => jsonResponse({
+        results: {
+          bindings: [
+            {
+              company: { value: "https://register.ld.admin.ch/zefix/company/1" },
+              legalName: { value: "Société Forme Atypique SA" },
+              legalForm: { value: "https://ld.admin.ch/ech/97/legalforms/sans-suffixe" },
+            },
+          ],
+        },
+      }));
+      const result = await lookupLindas("CHE103137179", deps(fetchMock));
+      expect(result).toMatchObject({ available: true, found: true, data: { legal_form_code: null } });
+    });
+
     it("une ligne sans URI mêlée à une ligne valide est simplement écartée, pas groupée en tête du tri", async () => {
       const fetchMock = vi.fn(async () => jsonResponse({
         results: {
@@ -424,6 +458,24 @@ describe("lookupGleif (registre LEI public de GLEIF)", () => {
       // enregistrement bien formé, mais qui ne correspond pas à l'IDE demandé (registered_as
       // null) : "non trouvé", pas une erreur de forme.
       expect(result).toMatchObject({ available: true, found: false, data: null });
+    });
+
+    it("statut absent (ni entity.status, ni registration.status) : null, jamais \"unknown\" (correction 1 du 06.10.2026, tâche 4)", async () => {
+      const fetchMock = vi.fn(async () => jsonResponse({
+        data: [{
+          attributes: {
+            lei: "L00000000000000000006",
+            entity: { legalName: { name: "Société sans statut connu" }, registeredAs: "CHE-103.137.179" },
+            registration: {},
+          },
+        }],
+      }));
+      const result = await lookupGleif("CHE-103.137.179", deps(fetchMock));
+      expect(result).toMatchObject({
+        available: true,
+        found: true,
+        data: [{ entity_status: null, registration_status: null }],
+      });
     });
   });
 

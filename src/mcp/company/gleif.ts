@@ -93,8 +93,10 @@ function extractItem(raw: unknown): ItemResult {
     record: {
       lei,
       legal_name: legalName,
-      entity_status: optionalString(entity?.status) ?? "unknown",
-      registration_status: optionalString(registration?.status) ?? "unknown",
+      // `null`, jamais une valeur de repli inventée comme "unknown" (correction 1 du
+      // 06.10.2026, tâche osd.fiche, tâche 4) : un statut absent de GLEIF reste absent ici.
+      entity_status: optionalString(entity?.status) ?? null,
+      registration_status: optionalString(registration?.status) ?? null,
       last_update: optionalString(registration?.lastUpdateDate) ?? null,
       registered_as: typeof registeredAsRaw === "string" ? registeredAsRaw : null,
     },

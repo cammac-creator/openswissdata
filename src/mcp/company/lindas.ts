@@ -131,6 +131,18 @@ function requiredField(row: Record<string, unknown>, field: string): "absent" | 
   return value;
 }
 
+// Repli quand le nœud de forme juridique n'a pas de triplet `schema:identifier` exploité
+// par la requête : l'URI eCH-0097 porte elle-même le code en suffixe
+// (`https://ld.admin.ch/ech/97/legalforms/<4 chiffres>`, vu en direct sur AXA Leben AG le
+// 06.10.2026, URI .../legalforms/0106). Rend `null` si l'URI est absente ou ne porte pas ce
+// suffixe numérique — jamais un code deviné autrement (correction 1 du 06.10.2026, tâche
+// osd.fiche, tâche 4).
+const LEGAL_FORM_URI_CODE_RE = /\/legalforms\/(\d{4})$/;
+function legalFormCodeFromUri(uri: string | null): string | null {
+  if (!uri) return null;
+  return LEGAL_FORM_URI_CODE_RE.exec(uri)?.[1] ?? null;
+}
+
 /** Fusionne les lignes d'une même société (une ligne par combinaison d'OPTIONAL) en un seul objet.
  *  Rend `null` si aucune des lignes n'a un `legalName` valide : ce champ est obligatoire dans
  *  `LindasCompany`, son absence totale indique une réponse malformée, pas une société sans nom.
@@ -147,7 +159,10 @@ function mergeRows(companyUri: string, rows: Record<string, unknown>[]): LindasC
   return {
     legal_name: legalName,
     other_names: otherNames,
-    legal_form_code: first("legalFormCode"),
+    // `||`, pas `??` : un `legalFormCode` présent mais vide ("") n'est pas exploitable non
+    // plus, et doit aussi retomber sur le suffixe de l'URI (corrigé en revue, correction 1
+    // du 06.10.2026).
+    legal_form_code: first("legalFormCode") || legalFormCodeFromUri(first("legalForm")),
     legal_form_label_fr: first("legalFormLabelFr"),
     legal_form_label_de: first("legalFormLabelDe"),
     municipality: first("municipalityName"),
