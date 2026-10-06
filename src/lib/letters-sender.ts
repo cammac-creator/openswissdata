@@ -690,7 +690,7 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
     //    unverified — seulement si la veille courrier est fraîche (correction finale du 06.10,
     //    item 1) : sinon, une relance attend plutôt que de se créer sur une réponse pas encore lue.
     const reminderNow = deps.now();
-    if (isMailWatchFresh(db, reminderNow)) {
+    if (isMailWatchFresh(db, reminderNow) && !readLettersPause(db).paused) {
       for (const candidate of findReminderCandidates(db)) {
         if (businessDaysSince(candidate.sent_at as number, reminderNow) < REMINDER_BUSINESS_DAYS) continue;
         if (createReminder(db, candidate, reminderNow, deps.rng)) totalReminders++;

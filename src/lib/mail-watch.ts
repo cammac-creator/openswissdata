@@ -73,7 +73,11 @@ const MAX_HEADER_RETRY_ENTRIES = 200;
 // Infomaniak (voir `operation_checks/mail_watch_auth`, `last_authserv_id_seen`). Tant qu'elle est
 // vide, AUCUNE réponse n'est jamais `human` par authenticité (toujours `unverified`) : c'est le choix
 // sûr — n'importe qui peut écrire n'importe quel `Authentication-Results` dans un message.
-const TRUSTED_AUTHSERV_IDS: ReadonlySet<string> = new Set<string>([]);
+// NE PAS REMPLIR avant d'avoir durci l'analyse de l'en-tête (relecture ciblée du 06.10 : guillemets
+// échappés, `header.d=` dans une valeur entre guillemets ou un commentaire) et d'avoir vérifié sur une
+// vraie réponse qu'Infomaniak place son propre en-tête en tête. Le test
+// tests/lib/mail-watch-authserv.test.ts verrouille cette liste vide.
+export const TRUSTED_AUTHSERV_IDS: ReadonlySet<string> = new Set<string>([]);
 const AUTH_WITNESS_CHECK = 'mail_watch_auth';
 
 type State = MailWatchStatus & { version: 1; seen: string[]; total_attached: number; headerFailures: Record<string, number> };
@@ -298,7 +302,9 @@ export function splitAuthClauses(raw: string): string[] {
 export function extractAuthservId(raw: string): string | null {
   const clauses = splitAuthClauses(raw);
   const id = clauses[0]?.split(/\s+/)[0]?.trim().toLowerCase();
-  return id && id.length > 0 && id.length <= 253 ? id : null;
+  // Forme stricte d'un nom d'hôte : si le premier en-tête vient de l'expéditeur (inconnu tant
+  // qu'aucune vraie réponse n'a été observée), rien d'autre qu'un nom d'hôte n'est jamais conservé.
+  return id && id.length <= 253 && /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(id) ? id : null;
 }
 /** DKIM/DMARC alignés dans `Authentication-Results` (premier en-tête seulement, cf. `parseHeaderBlock`) :
  * chaque clause doit COMMENCER par `dkim=pass`/`dmarc=pass` (item 2b — une contrefaçon nichée dans une
@@ -522,7 +528,10 @@ async function collect(client: ImapFlow, baseDomains: readonly string[], extraDo
       const matched = findLetterMatch(senderHost, candidate.subject, candidate.inReplyTo, null, letterTargets);
       if (matched) {
         const target = resolveLetterTarget(matched, letterTargets);
-        candidate.letterMatch = { targetId: target.id, subject: target.subject, sentAt: target.sentAt, replyKind: 'unverified' };
+        // L'objet seul suffit à reconnaître un accusé d'absence : `auto` par l'objet, sinon `unverified`
+        // (relecture ciblée du 06.10 : un « Out of office » ne doit pas arrêter la relance en silence).
+        const kindFromSubject = classifyReplyKind(candidate.subject, matched.subject, EMPTY_REPLY_HEADERS, senderHost);
+        candidate.letterMatch = { targetId: target.id, subject: target.subject, sentAt: target.sentAt, replyKind: kindFromSubject === 'auto' ? 'auto' : 'unverified' };
       }
       continue;
     }
