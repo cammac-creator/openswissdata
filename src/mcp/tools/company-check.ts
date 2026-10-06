@@ -124,6 +124,26 @@ function renderCrossChecks(fiche: CompanyFiche): string[] {
 }
 
 /**
+ * Vérifications de l'adresse LINDAS contre le répertoire officiel des localités
+ * (swisstopo) : section DISTINCTE de « Cross-checks » (décision de Claude-Alain du
+ * 06.10.2026, tâche osd.localites, tâche 2) — ce sont des comparaisons à une référence
+ * officielle, pas un recoupement entre deux sources qui se corroborent. `fiche.address_checks`
+ * est TOUJOURS présent (jamais absent) : vide quand il n'y a pas d'adresse publiée ou que le
+ * répertoire n'est pas disponible, affiché ici en clair sans mot de verdict.
+ */
+function renderAddressChecks(fiche: CompanyFiche): string[] {
+  const lines: string[] = ["Address checks (official locality directory, swisstopo):"];
+  if (fiche.address_checks.length === 0) {
+    lines.push("  (none: no published commercial register address to check, or the directory is not available)");
+    return lines;
+  }
+  for (const c of fiche.address_checks) {
+    lines.push(`  - ${c.check}: ${c.result ? "identical" : "different"} — ${c.detail}`);
+  }
+  return lines;
+}
+
+/**
  * Résumé lisible (`content[0].text`) : factuel, en anglais, qui cite pour chaque groupe sa
  * source et l'heure de lecture, liste les recoupements en "identical"/"different", et
  * rappelle ce qui n'est pas couvert ainsi que la notice. AUCUN mot de verdict — vérifié par
@@ -140,6 +160,8 @@ function renderSummary(fiche: CompanyFiche): string {
   lines.push(...renderLei(fiche));
   lines.push("");
   lines.push(...renderCrossChecks(fiche));
+  lines.push("");
+  lines.push(...renderAddressChecks(fiche));
   lines.push("");
   // Phrase claire plutôt qu'une liste de jetons (relecture finale du 06.10.2026) : les
   // lecteurs de ce résumé ne connaissent pas les noms de champs internes de `not_covered`.

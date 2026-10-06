@@ -14,7 +14,7 @@ import { parseUid } from "./uid.js";
 import { lookupLindas } from "./lindas.js";
 import { lookupGleif } from "./gleif.js";
 import { COMPANY_SOURCES } from "./sources.js";
-import { getFinmaRegistry, getFinmaVersion, type FinmaRegistryRow, type LocalityRow } from "../data-loader.js";
+import { getFinmaRegistry, getFinmaVersion, getLocalities, type FinmaRegistryRow, type LocalityRow } from "../data-loader.js";
 import type { GleifRecord, LindasCompany, LiveDeps, Part } from "./types.js";
 
 export interface Fact {
@@ -51,8 +51,17 @@ export interface CompanyFiche {
   finma: { available: boolean; found: boolean; facts: Fact[]; warning_list: "not_checkable_by_uid"; data_note: string; reason?: string };
   lei: { available: boolean; found: boolean; reason?: string; facts: Fact[] };
   cross_checks: CrossCheck[];
+  // Vérifications de l'adresse LINDAS contre le répertoire officiel des localités
+  // (swisstopo), DISTINCTES de `cross_checks` (décision de Claude-Alain du 06.10.2026,
+  // tâche osd.localites, tâche 2) : ce sont des comparaisons à une référence officielle,
+  // pas un recoupement entre deux sources indépendantes qui se corroborent. TOUJOURS
+  // présent (jamais absent du JSON) : tableau vide quand il n'y a pas d'adresse publiée
+  // (forme juridique hors liste blanche) ou que le répertoire n'est pas disponible.
+  address_checks: CrossCheck[];
   // Ce que la fiche ne dit PAS : statut d'inscription au registre, publications FOSC,
   // sanctions SECO, organes. Toujours ces quatre valeurs, dans cet ordre (tâche osd.fiche).
+  // Une 5e entrée ("official_locality_directory_checks") s'ajoute SEULEMENT quand le
+  // répertoire des localités est explicitement indisponible (tâche osd.localites).
   not_covered: string[];
   notice: string;
 }
@@ -119,13 +128,14 @@ function hasPublishedAddress(data: LindasCompany): boolean {
  * `FinmaAccess`, ce n'est jamais une lecture en direct, seulement des lignes déjà chargées
  * qui peuvent être absentes (tâche osd.localites, tâche 2).
  *
- * ⚠️ Ce paramètre reste OPTIONNEL (`parts.localities?`) dans `buildCompanyFiche` et n'est
- * PAS encore branché par défaut dans `companyCheck` (décision en attente de Claude-Alain,
- * 06.10.2026 — voir le rapport de tâche) : `undefined` signifie « fonctionnalité non
- * câblée », strictement différent de `{ available: false }` (« répertoire câblé mais
- * illisible »). Seul ce second cas ajoute l'entrée `not_covered` ci-dessous ; le premier ne
- * change RIEN à la fiche (aucun recoupement, `not_covered` inchangé), pour ne jamais faire
- * varier le comportement des appelants qui ne connaissent pas encore ce paramètre.
+ * Décision de Claude-Alain du 06.10.2026 : désormais câblé PAR DÉFAUT dans `companyCheck`
+ * (voir plus bas). Le paramètre `parts.localities` de `buildCompanyFiche` reste OPTIONNEL
+ * pour autant : `undefined` (jamais passé par un appelant, ex. les appels directs de
+ * `tests/mcp/company-check.test.ts` antérieurs à cette tâche) signifie « fonctionnalité non
+ * câblée pour cet appel » et ne change RIEN à la fiche (`address_checks` vide,
+ * `not_covered` inchangé) — strictement différent de `{ available: false }` (« répertoire
+ * câblé mais illisible »), qui ajoute l'entrée `not_covered` ci-dessous. Cette distinction
+ * protège les tests existants qui appellent `buildCompanyFiche` sans ce paramètre.
  */
 export type LocalitiesAccess =
   | { available: true; byPostalCode: ReadonlyMap<string, readonly LocalityRow[]> }
@@ -143,16 +153,18 @@ function normalizeLocality(value: string): string {
 }
 
 /**
- * Les trois recoupements d'adresse officielle (tâche osd.localites, tâche 2), SEULEMENT
- * quand l'adresse LINDAS est publiée (`hasPublishedAddress`, appelé par `buildCompanyFiche`
- * avant d'invoquer cette fonction) : republier un recoupement sur un NPA ou une localité
- * jamais exposés dans les faits (formes fermées) fuiterait une donnée volontairement
- * retenue. `seat_municipality_matches_postal_code` compare la commune du SIÈGE
- * (`municipality_bfs_id`, toujours publiée) aux communes du NPA POSTAL : un siège peut
- * légitimement différer de l'adresse postale, le `detail` le rappelle toujours (revue point
- * 5 : jamais un verdict).
+ * Les trois vérifications d'adresse officielle (tâche osd.localites, tâche 2 — décision du
+ * 06.10.2026 : champ `address_checks`, DISTINCT de `cross_checks`, puisque ce sont des
+ * comparaisons à une référence officielle et non un recoupement entre deux sources
+ * indépendantes qui se corroborent), SEULEMENT quand l'adresse LINDAS est publiée
+ * (`hasPublishedAddress`, appelé par `buildCompanyFiche` avant d'invoquer cette fonction) :
+ * republier une vérification sur un NPA ou une localité jamais exposés dans les faits
+ * (formes fermées) fuiterait une donnée volontairement retenue. `seat_municipality_matches_postal_code`
+ * compare la commune du SIÈGE (`municipality_bfs_id`, toujours publiée) aux communes du NPA
+ * POSTAL : un siège peut différer de l'adresse postale, le `detail` le rappelle toujours
+ * (revue point 5 : jamais un verdict).
  */
-function localitiesCrossChecks(lindasData: LindasCompany, localities: LocalitiesAccess): CrossCheck[] {
+function localityAddressChecks(lindasData: LindasCompany, localities: LocalitiesAccess): CrossCheck[] {
   if (!localities.available) return [];
   const sources = ["ofrc.zefix_lindas", "swisstopo.localities"];
   const checks: CrossCheck[] = [];
@@ -165,7 +177,7 @@ function localitiesCrossChecks(lindasData: LindasCompany, localities: Localities
       check: "postal_code_in_official_directory",
       sources,
       result: found,
-      detail: `Postal code "${postalCode}" (commercial register address) ${found ? "is" : "is not"} listed in the official localities directory (swisstopo).`,
+      detail: `Postal code "${postalCode}" ${found ? "is" : "is not"} in the official localities directory.`,
     });
 
     if (lindasData.locality) {
@@ -175,7 +187,7 @@ function localitiesCrossChecks(lindasData: LindasCompany, localities: Localities
         check: "locality_matches_postal_code",
         sources,
         result: match,
-        detail: `Locality "${lindasData.locality}" for postal code "${postalCode}" (commercial register address) ${match ? "matches" : "does not match"} an entry of the official localities directory (swisstopo) for that postal code (case/space-insensitive, accents not stripped).`,
+        detail: `Locality "${lindasData.locality}" ${match ? "matches" : "does not match"} the directory for postal code "${postalCode}" (case/space ignored, accents matter).`,
       });
     }
   }
@@ -188,7 +200,7 @@ function localitiesCrossChecks(lindasData: LindasCompany, localities: Localities
       check: "seat_municipality_matches_postal_code",
       sources,
       result: match,
-      detail: `Registered seat municipality (OFS ${bfsId}) ${match ? "is" : "is not"} among the municipalities of postal code "${postalCode ?? ""}" in the official localities directory (swisstopo). A registered seat can differ from the postal address.`,
+      detail: `Seat municipality (OFS ${bfsId}) ${match ? "is" : "is not"} linked to postal code "${postalCode ?? ""}". A registered seat can differ from the postal address.`,
     });
   }
 
@@ -402,13 +414,15 @@ export function buildCompanyFiche(
     }
   }
 
-  // Recoupements d'adresse officielle (tâche osd.localites, tâche 2) : SEULEMENT quand
-  // `parts.localities` est explicitement fourni (sinon comportement strictement inchangé,
-  // voir le commentaire de `LocalitiesAccess`) ET l'adresse LINDAS est publiée (sinon on
-  // fuiterait un NPA/localité volontairement retenu des faits).
-  if (parts.localities && lindasData && hasPublishedAddress(lindasData)) {
-    cross_checks.push(...localitiesCrossChecks(lindasData, parts.localities));
-  }
+  // Vérifications d'adresse officielle (tâche osd.localites, tâche 2 — décision du
+  // 06.10.2026) : champ SÉPARÉ `address_checks`, TOUJOURS présent (tableau vide par défaut),
+  // jamais mélangé à `cross_checks`. Rempli SEULEMENT quand `parts.localities` est
+  // explicitement fourni (sinon comportement strictement inchangé pour les appelants qui ne
+  // connaissent pas ce paramètre, voir le commentaire de `LocalitiesAccess`) ET l'adresse
+  // LINDAS est publiée (sinon on fuiterait un NPA/localité volontairement retenu des faits).
+  const address_checks: CrossCheck[] = parts.localities && lindasData && hasPublishedAddress(lindasData)
+    ? localityAddressChecks(lindasData, parts.localities)
+    : [];
 
   const not_covered: string[] = [...NOT_COVERED];
   // Répertoire câblé mais illisible : signalé, jamais une exception (revue point 5). Un
@@ -424,6 +438,7 @@ export function buildCompanyFiche(
     finma,
     lei,
     cross_checks,
+    address_checks,
     not_covered,
     notice: NOTICE,
   };
@@ -455,9 +470,14 @@ export async function companyCheck(
     finma = { available: false, reason: "FINMA registry could not be read" };
   }
   if (finma.available && usingDefaultFinmaRegistry) finmaVersion = getFinmaVersion();
-  // `localities` n'est PAS câblé par défaut ici (décision en attente de Claude-Alain, voir
-  // le rapport de la tâche osd.localites) : `buildCompanyFiche` reçoit donc `localities`
-  // absent (`undefined`), qui ne change rien à la fiche (voir `LocalitiesAccess`).
-  const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, now: deps.now });
+  // Répertoire des localités câblé PAR DÉFAUT (décision de Claude-Alain du 06.10.2026,
+  // tâche osd.localites) : jamais une exception quand le fichier est absent ou illisible
+  // (`getLocalities()` rend `null`, jamais ne lève) — `localities.available` devient
+  // `false`, et `buildCompanyFiche` ajoute l'entrée `not_covered` correspondante.
+  const localitiesLoaded = getLocalities();
+  const localities: LocalitiesAccess = localitiesLoaded
+    ? { available: true, byPostalCode: localitiesLoaded.byPostalCode }
+    : { available: false };
+  const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, localities, now: deps.now });
   return { ok: true, fiche };
 }
