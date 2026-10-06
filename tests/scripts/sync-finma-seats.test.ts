@@ -3,6 +3,13 @@
  * `2026-10-06-prospection-et-api.md`) : siège exact des établissements FINMA par IDE
  * (combinaison FINMA × registre du commerce).
  *
+ * Correction du 07.10.2026 (relecture de Claude-Alain, commit distinct) : TOUTES les catégories
+ * d'autorisation FINMA entrent dans la requête LINDAS, `entity_type` n'est JAMAIS un filtre —
+ * l'ancienne exclusion préalable de `asset_manager_individual` reposait sur une erreur (1 519
+ * des 1 585 lignes de cette catégorie sont des AG/SA/GmbH/Sàrl, pas des personnes physiques).
+ * SEULE porte contre une personne physique : la liste blanche des formes juridiques de
+ * personnes morales (`ADDRESS_AND_PURPOSE_FORM_CODES`), appliquée APRÈS la réponse LINDAS.
+ *
  * Aucun appel réseau : le mode `--fixture` lit un fichier JSON au format SPARQL (comme les
  * réponses réelles de LINDAS, voir `src/mcp/company/lindas.ts`) ; les tests du chemin réseau
  * injectent `fetchImpl` (maquette pure, jamais `fetch` global) et `sleep` (jamais un vrai délai).
@@ -32,28 +39,20 @@ afterEach(() => {
   for (const dir of tmpDirs.splice(0)) rmSync(dir, { recursive: true, force: true });
 });
 
-// IDE fictifs, chiffre de contrôle valide (calculé avec l'algorithme de `uid.ts`) — jamais de
-// personne physique : toutes des sociétés anonymes ou Sàrl, réelles ou fictives.
-const UID_SA_1 = "CHE-200.000.001"; // forme 0106 (SA), Winterthur (230)
-const UID_SA_2 = "CHE-200.000.018"; // forme 0106 (SA), Genève (6621)
-const UID_SARL_AMBIGUOUS = "CHE-200.000.024"; // deux communes différentes selon les lignes : ambiguë
-const UID_SOLE_PROP = "CHE-200.000.030"; // forme 0101 (entreprise individuelle) : hors liste blanche
+// IDE fictifs, chiffre de contrôle valide — jamais de personne physique : toutes des sociétés
+// anonymes ou Sàrl, réelles ou fictives, quelle que soit leur catégorie d'autorisation FINMA.
+const UID_SA_1 = "CHE-200.000.001"; // bank, forme LINDAS 0106 (SA), Winterthur (230)
+const UID_SA_2 = "CHE-200.000.018"; // bank, forme LINDAS 0106 (SA, via suffixe d'URI), Genève (6621)
+const UID_PORTFOLIO_MANAGER_SARL = "CHE-200.000.053"; // asset_manager_individual (Portfolio manager), forme LINDAS 0107 (Sàrl) : une personne MORALE malgré sa catégorie FINMA — doit être RETENU (correction du 07.10.2026)
+const UID_SOLE_PROP = "CHE-200.000.030"; // bank, forme LINDAS 0101 (entreprise individuelle) : hors liste blanche, exclu quelle que soit sa catégorie FINMA
 const UID_NOT_IN_LINDAS = "CHE-200.000.047"; // absent de la réponse LINDAS
-const UID_INDIVIDUAL_MANAGER = "CHE-200.000.053"; // entity_type asset_manager_individual : exclu avant requête
+const UID_SARL_AMBIGUOUS = "CHE-200.000.024"; // deux communes différentes selon les lignes : ambiguë
 const UID_INVALID = "CHE-999.999.999"; // chiffre de contrôle invalide
 
-const REGISTRY_HEADER = ["entity_type", "name", "uid", "lei", "licence_type", "licence_type_de", "licence_type_fr", "licence_type_it", "licence_date", "status", "canton", "city", "address", "source_list", "source_url", "is_warning_listed"];
-
 function registryCsv(rows: Array<{ entity_type: string; uid: string }>): string {
-  const lines = rows.map((r) => {
-    const fields: Record<string, string> = {
-      entity_type: r.entity_type, name: "Fictif", uid: r.uid, lei: "", licence_type: "Bank",
-      licence_type_de: "", licence_type_fr: "", licence_type_it: "", licence_date: "", status: "",
-      canton: "", city: "", address: "", source_list: "finma-uid-csv", source_url: "https://www.finma.ch/", is_warning_listed: "false",
-    };
-    return REGISTRY_HEADER.map((h) => fields[h]).join(",");
-  });
-  return [REGISTRY_HEADER.join(","), ...lines].join("\n") + "\n";
+  const header = "entity_type,name,uid,lei,licence_type,licence_type_de,licence_type_fr,licence_type_it,licence_date,status,canton,city,address,source_list,source_url,is_warning_listed";
+  const lines = rows.map((r) => [r.entity_type, "Fictif", r.uid, "", "Bank", "", "", "", "", "", "", "", "", "finma-uid-csv", "https://www.finma.ch/", "false"].join(","));
+  return [header, ...lines].join("\n") + "\n";
 }
 
 function writeRegistry(dir: string, rows: Array<{ entity_type: string; uid: string }>): string {
@@ -115,19 +114,18 @@ function validUid(n: number): string {
 
 const EDITION = "2026-10-07";
 
-describe("candidateUids : exclusion des personnes physiques et des IDE invalides", () => {
-  it("exclut entity_type=asset_manager_individual, les IDE invalides et vides ; garde le reste", () => {
+describe("candidateUids : TOUTES les lignes du registre sont candidates (entity_type n'est jamais un filtre)", () => {
+  it("exclut seulement les IDE invalides et vides ; une ligne asset_manager_individual reste candidate", () => {
     const rows = [
       { entity_type: "bank", uid: UID_SA_1 },
-      { entity_type: "asset_manager_individual", uid: UID_INDIVIDUAL_MANAGER },
+      { entity_type: "asset_manager_individual", uid: UID_PORTFOLIO_MANAGER_SARL },
       { entity_type: "bank", uid: UID_INVALID },
       { entity_type: "bank", uid: "" },
     ];
-    const { compactToCanonical, excludedPersonType, excludedInvalid } = candidateUids(rows);
-    expect(compactToCanonical.size).toBe(1);
-    expect(compactToCanonical.get(compact(UID_SA_1))).toBe(UID_SA_1);
-    expect(excludedPersonType).toBe(1);
-    expect(excludedInvalid).toBe(2); // IDE invalide + IDE vide
+    const { compactToCanonical, excludedInvalid } = candidateUids(rows);
+    expect(compactToCanonical.size).toBe(2); // SA_1 ET le Portfolio manager : jamais exclu par sa catégorie
+    expect(compactToCanonical.get(compact(UID_PORTFOLIO_MANAGER_SARL))).toBe(UID_PORTFOLIO_MANAGER_SARL);
+    expect(excludedInvalid).toBe(2); // IDE invalide + IDE vide, seules exclusions avant requête
   });
 
   it("un même IDE répété (plusieurs autorisations) n'est compté qu'une fois", () => {
@@ -160,12 +158,33 @@ describe("parseArgs", () => {
 });
 
 describe("syncFinmaSeats (mode fixture, aucun réseau)", () => {
-  it("garde les sièges de personnes morales trouvés, exclut le reste, trié par IDE", async () => {
+  it("un IDE « Portfolio manager » (asset_manager_individual) dont la forme LINDAS est une Sàrl (personne morale) est RETENU — correction du 07.10.2026", async () => {
+    const dir = tmpDir();
+    const registryPath = writeRegistry(dir, [{ entity_type: "asset_manager_individual", uid: UID_PORTFOLIO_MANAGER_SARL }]);
+    const fixturePath = writeFixture(dir, [{ uidValue: compact(UID_PORTFOLIO_MANAGER_SARL), legalFormCode: "0107", municipalityId: "230" }]);
+    const outputPath = join(dir, "finma_seats.csv");
+    const result = await syncFinmaSeats({ registryPath, fixturePath, edition: EDITION, outputPath, minRows: 1 });
+    expect(result.queriedUids).toBe(1); // jamais exclu avant requête, quelle que soit sa catégorie FINMA
+    expect(result.rowCount).toBe(1);
+    expect(readFileSync(outputPath, "utf8")).toContain(`${UID_PORTFOLIO_MANAGER_SARL},230`);
+  });
+
+  it("un IDE dont la forme LINDAS est hors liste blanche (0101, entreprise individuelle) reste exclu, quelle que soit sa catégorie FINMA d'origine", async () => {
+    const dir = tmpDir();
+    const registryPath = writeRegistry(dir, [{ entity_type: "bank", uid: UID_SOLE_PROP }]);
+    const fixturePath = writeFixture(dir, [{ uidValue: compact(UID_SOLE_PROP), legalFormCode: "0101", municipalityId: "230" }]);
+    const outputPath = join(dir, "finma_seats.csv");
+    const result = await syncFinmaSeats({ registryPath, fixturePath, edition: EDITION, outputPath, minRows: 0 });
+    expect(result.rowCount).toBe(0);
+    expect(result.excludedLegalForm).toBe(1);
+  });
+
+  it("garde les sièges de personnes morales trouvés (toutes catégories FINMA confondues), exclut le reste, trié par IDE", async () => {
     const dir = tmpDir();
     const registryPath = writeRegistry(dir, [
       { entity_type: "bank", uid: UID_SA_2 },
       { entity_type: "bank", uid: UID_SA_1 },
-      { entity_type: "asset_manager_individual", uid: UID_INDIVIDUAL_MANAGER },
+      { entity_type: "asset_manager_individual", uid: UID_PORTFOLIO_MANAGER_SARL },
       { entity_type: "bank", uid: UID_SOLE_PROP },
       { entity_type: "bank", uid: UID_NOT_IN_LINDAS },
       { entity_type: "bank", uid: UID_SARL_AMBIGUOUS },
@@ -173,6 +192,7 @@ describe("syncFinmaSeats (mode fixture, aucun réseau)", () => {
     const fixturePath = writeFixture(dir, [
       { uidValue: compact(UID_SA_1), legalFormCode: "0106", municipalityId: "230" },
       { uidValue: compact(UID_SA_2), legalForm: "https://ld.admin.ch/ech/97/legalforms/0106", municipalityId: "6621" },
+      { uidValue: compact(UID_PORTFOLIO_MANAGER_SARL), legalFormCode: "0107", municipalityId: "230" }, // Sàrl malgré sa catégorie FINMA : retenu
       { uidValue: compact(UID_SOLE_PROP), legalFormCode: "0101", municipalityId: "230" }, // hors liste blanche
       // UID_NOT_IN_LINDAS : aucune ligne dans la fixture (absent de LINDAS).
       { uidValue: compact(UID_SARL_AMBIGUOUS), legalFormCode: "0107", municipalityId: "230" },
@@ -181,13 +201,19 @@ describe("syncFinmaSeats (mode fixture, aucun réseau)", () => {
     const outputPath = join(dir, "finma_seats.csv");
     const result = await syncFinmaSeats({ registryPath, fixturePath, edition: EDITION, outputPath, minRows: 1 });
 
-    expect(result.queriedUids).toBe(5); // SA_1, SA_2, SOLE_PROP, NOT_IN_LINDAS, SARL_AMBIGUOUS
-    expect(result.excludedPersonType).toBe(1);
-    expect(result.rowCount).toBe(2);
+    expect(result.queriedUids).toBe(6); // TOUTES les lignes du registre, entity_type jamais un filtre
+    expect(result.rowCount).toBe(3); // SA_1, SA_2, PORTFOLIO_MANAGER_SARL
+    expect(result.excludedLegalForm).toBe(1); // SOLE_PROP
+    expect(result.notFoundOrIncomplete).toBe(1); // NOT_IN_LINDAS
+    expect(result.ambiguous).toBe(1); // SARL_AMBIGUOUS
     const csv = readFileSync(outputPath, "utf8");
     const lines = csv.trim().split("\n");
     expect(lines[0]).toBe("uid,municipality_bfs_id");
-    expect(lines.slice(1)).toEqual([`${UID_SA_1},230`, `${UID_SA_2},6621`]); // trié par IDE
+    expect(lines.slice(1)).toEqual([
+      `${UID_SA_1},230`,
+      `${UID_SA_2},6621`,
+      `${UID_PORTFOLIO_MANAGER_SARL},230`,
+    ]); // trié par IDE (CHE-200.000.001 < CHE-200.000.018 < CHE-200.000.053)
   });
 
   it("--edition absent en mode fixture : erreur explicite, aucune écriture", async () => {
@@ -197,16 +223,6 @@ describe("syncFinmaSeats (mode fixture, aucun réseau)", () => {
     const outputPath = join(dir, "finma_seats.csv");
     await expect(syncFinmaSeats({ registryPath, fixturePath, outputPath, minRows: 1 })).rejects.toThrow(/--edition/);
     expect(existsSync(outputPath)).toBe(false);
-  });
-
-  it("forme hors liste blanche (entreprise individuelle 0101) : jamais retenue, même si la commune est connue", async () => {
-    const dir = tmpDir();
-    const registryPath = writeRegistry(dir, [{ entity_type: "bank", uid: UID_SOLE_PROP }]);
-    const fixturePath = writeFixture(dir, [{ uidValue: compact(UID_SOLE_PROP), legalFormCode: "0101", municipalityId: "230" }]);
-    const outputPath = join(dir, "finma_seats.csv");
-    const result = await syncFinmaSeats({ registryPath, fixturePath, edition: EDITION, outputPath, minRows: 0 });
-    expect(result.rowCount).toBe(0);
-    expect(result.excludedLegalForm).toBe(1);
   });
 
   it("IDE sans aucune ligne LINDAS : compté comme non trouvé, jamais une exception", async () => {

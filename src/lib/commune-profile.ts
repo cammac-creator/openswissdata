@@ -74,10 +74,12 @@ export const FINMA_MATCHING_RULE =
 
 /** Règle du rattachement par SIÈGE (tâche B4, combinaison FINMA × registre du commerce), EN
  *  VÉRITÉ DES MOTS, distincte de `FINMA_MATCHING_RULE` (nom de ville) : exact, par IDE, lu dans
- *  le registre du commerce (LINDAS) lui-même — personnes morales seulement (voir
- *  `scripts/sync-finma-seats.ts`). */
+ *  le registre du commerce (LINDAS) lui-même — personnes morales seulement (formes juridiques de
+ *  la liste blanche, jamais la catégorie d'autorisation FINMA : toutes sont interrogées, voir
+ *  `scripts/sync-finma-seats.ts`, correction du 07.10.2026). */
 export const FINMA_SEAT_MATCHING_RULE =
-  "Exact: the registered seat from the commercial register (LINDAS) for the entity's UID, legal persons only.";
+  "Exact: the registered seat from the commercial register (LINDAS) for the entity's UID, legal persons only " +
+  "(whitelisted legal forms — all FINMA authorisation categories are queried, entity_type is never a filter).";
 
 export interface CommuneFinmaProfile {
   /** RENOMMÉ depuis `authorised_entities` (relecture du 06.10.2026, seconde passe — vérité des

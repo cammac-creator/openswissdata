@@ -9,15 +9,21 @@
  * commerce (LINDAS, graphe Zefix de l'OFRC) donne la commune du SIÈGE enregistré.
  *
  * 1. Lit les IDE candidats depuis le fichier EMBARQUÉ `src/mcp/data/finma_registry.csv`
- *    (colonnes `uid`, `entity_type`) — jamais le catalogue de production : plus simple,
- *    déterministe, aucun appel réseau supplémentaire pour cette seule liste. EXCLUT :
- *    - les types d'établissement qui désignent une personne physique (`PERSON_ENTITY_TYPES`
- *      ci-dessous ; voir `etl/finma/sources.ts`, `AUTH_TYPE_TO_ENTITY_TYPE`) — exclusion
- *      PRÉALABLE (volume : ne jamais interroger LINDAS pour une personne). Le filet de
- *      sécurité RÉEL est la liste blanche des formes juridiques de personnes morales
- *      (`ADDRESS_AND_PURPOSE_FORM_CODES`, `src/mcp/company/check.ts`), appliquée après la
- *      réponse LINDAS : elle écarterait de toute façon une entreprise individuelle qui se
- *      serait glissée ici.
+ *    (colonne `uid`) — jamais le catalogue de production : plus simple, déterministe, aucun
+ *    appel réseau supplémentaire pour cette seule liste. TOUTES les catégories d'autorisation
+ *    FINMA entrent dans la requête LINDAS, `entity_type` n'est JAMAIS un filtre ici : corrigé le
+ *    07.10.2026 après relecture de Claude-Alain — l'ancienne exclusion préalable de
+ *    `asset_manager_individual` (autorisations « Portfolio manager » et « Trustee ») reposait
+ *    sur une erreur de lecture du registre : 1 519 des 1 585 lignes de cette catégorie sont des
+ *    AG/SA/GmbH/Sàrl (personnes MORALES), pas des personnes physiques ; les exclure avant même
+ *    d'interroger LINDAS laissait plus de la moitié des lignes sans siège et faussait les
+ *    textes publics. SEULE porte contre une personne physique : la liste blanche des formes
+ *    juridiques de personnes morales (`ADDRESS_AND_PURPOSE_FORM_CODES`,
+ *    `src/mcp/company/check.ts`), appliquée APRÈS la réponse LINDAS (étape 3 ci-dessous) — une
+ *    entreprise individuelle (forme 0101), une société en nom collectif (0103), une société en
+ *    commandite (0104) ou toute forme hors liste reste exclue à cette étape, quelle que soit sa
+ *    catégorie d'autorisation FINMA.
+ *    Exclus seulement :
  *    - les IDE invalides ou vides (`parseUid`, chiffre de contrôle modulo 11).
  *    - les doublons (plusieurs lignes/autorisations pour le même IDE) : un seul candidat par IDE.
  * 2. Interroge LINDAS (`register.ld.admin.ch/query`, graphe Zefix, MÊME requête que
@@ -73,14 +79,6 @@ const DEFAULT_DELAY_MS = 2000;
 const DEFAULT_TIMEOUT_MS = 60_000;
 const USER_AGENT = "OpenSwissData finma-seats";
 
-// Types d'établissement qui désignent (au moins en partie) une personne physique dans le
-// registre FINMA embarqué (voir `etl/finma/sources.ts`, `AUTH_TYPE_TO_ENTITY_TYPE` : "Portfolio
-// manager"/"Trustee" → `asset_manager_individual`, historiquement des gestionnaires de fortune
-// individuels). Exclusion PRÉALABLE seulement : la liste blanche des formes juridiques
-// (`ADDRESS_AND_PURPOSE_FORM_CODES`), appliquée après la réponse LINDAS, reste le filet de
-// sécurité réel pour toute autre forme désignant une personne (entreprise individuelle, etc.).
-const PERSON_ENTITY_TYPES = new Set(["asset_manager_individual"]);
-
 const EDITION_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MUNICIPALITY_ID_RE = /^\d+$/;
 const LEGAL_FORM_CODE_RE = /^\d{4}$/;
@@ -132,7 +130,6 @@ export interface SyncFinmaSeatsOptions {
 export interface SyncFinmaSeatsResult {
   rowCount: number;
   queriedUids: number;
-  excludedPersonType: number;
   excludedInvalidUid: number;
   notFoundOrIncomplete: number;
   ambiguous: number;
@@ -164,22 +161,18 @@ export function parseArgs(argv: string[]): { fixturePath?: string; edition?: str
   return out;
 }
 
-/** IDE candidats : exclut les types d'établissement de personnes physiques, les IDE invalides
- *  ou vides, et dédoublonne (plusieurs autorisations pour le même IDE = un seul candidat). Rend
- *  une table IDE compact (VALUES SPARQL) → IDE canonique (sortie `finma_seats.csv`). */
-export function candidateUids(rows: ReadonlyArray<{ entity_type: string; uid: string }>): {
+/** IDE candidats : TOUTES les catégories d'autorisation FINMA (`entity_type` n'est jamais lu —
+ *  voir le commentaire d'en-tête du fichier, correction du 07.10.2026). Exclut seulement les IDE
+ *  invalides ou vides, et dédoublonne (plusieurs autorisations pour le même IDE = un seul
+ *  candidat). Rend une table IDE compact (VALUES SPARQL) → IDE canonique (sortie
+ *  `finma_seats.csv`). */
+export function candidateUids(rows: ReadonlyArray<{ uid: string }>): {
   compactToCanonical: Map<string, string>;
-  excludedPersonType: number;
   excludedInvalid: number;
 } {
   const compactToCanonical = new Map<string, string>();
-  let excludedPersonType = 0;
   let excludedInvalid = 0;
   for (const row of rows) {
-    if (PERSON_ENTITY_TYPES.has(row.entity_type)) {
-      excludedPersonType += 1;
-      continue;
-    }
     if (!row.uid) {
       excludedInvalid += 1;
       continue;
@@ -191,7 +184,7 @@ export function candidateUids(rows: ReadonlyArray<{ entity_type: string; uid: st
     }
     compactToCanonical.set(parsed.compact, parsed.uid);
   }
-  return { compactToCanonical, excludedPersonType, excludedInvalid };
+  return { compactToCanonical, excludedInvalid };
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
@@ -256,7 +249,10 @@ export function accumulateBindings(rawRows: readonly unknown[], wanted: Readonly
 }
 
 /** Résout chaque IDE candidat : gardé seulement avec EXACTEMENT une commune ET EXACTEMENT une
- *  forme juridique, cette forme figurant dans la liste blanche des personnes morales. */
+ *  forme juridique, cette forme figurant dans la liste blanche des personnes morales
+ *  (`ADDRESS_AND_PURPOSE_FORM_CODES`) — SEULE porte contre une personne physique (entreprise
+ *  individuelle 0101, société en nom collectif 0103, société en commandite 0104, ou toute forme
+ *  hors liste), quelle que soit la catégorie d'autorisation FINMA d'origine du candidat. */
 export function finalizeSeats(
   acc: ReadonlyMap<string, SeatCandidate>,
   compactToCanonical: ReadonlyMap<string, string>,
@@ -384,8 +380,8 @@ export async function syncFinmaSeats(opts: SyncFinmaSeatsOptions = {}): Promise<
   const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
 
   const registryRaw = readFileSync(registryPath, "utf8");
-  const registryRows = parse(registryRaw, { columns: true, skip_empty_lines: true, relax_quotes: true }) as Array<{ entity_type: string; uid: string }>;
-  const { compactToCanonical, excludedPersonType, excludedInvalid } = candidateUids(registryRows);
+  const registryRows = parse(registryRaw, { columns: true, skip_empty_lines: true, relax_quotes: true }) as Array<{ uid: string }>;
+  const { compactToCanonical, excludedInvalid } = candidateUids(registryRows);
   const wanted = new Set(compactToCanonical.keys());
   const acc = new Map<string, SeatCandidate>();
 
@@ -457,7 +453,6 @@ export async function syncFinmaSeats(opts: SyncFinmaSeatsOptions = {}): Promise<
   return {
     rowCount: sorted.length,
     queriedUids: wanted.size,
-    excludedPersonType,
     excludedInvalidUid: excludedInvalid,
     notFoundOrIncomplete,
     ambiguous,

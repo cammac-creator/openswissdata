@@ -4,10 +4,16 @@
  *
  * Même méthode que `tests/mcp/data-loader-streets.test.ts` : les cas limites passent par les
  * fonctions pures `indexFinmaSeats`/`parseFinmaSeatsEdition`, aucun test n'écrit dans le dépôt.
- * Le fichier réel embarqué (`finma_seats.csv`) n'est testé qu'au travers de `getFinmaSeats()`
- * directement, SANS fixer son nombre de lignes exact (la collecte mensuelle le change).
+ *
+ * Correction du 07.10.2026 (relecture de Claude-Alain) : le test du fichier réel embarqué
+ * n'ignore PLUS silencieusement une absence (`existsSync` retiré — un fichier absent fait
+ * échouer ce test, comme pour `tests/mcp/data-loader-streets.test.ts`) et ne fige PLUS « AXA →
+ * 230 » (ce fichier est rejoué chaque mois par `refresh-finma-seats.yml` avant tout commit : une
+ * valeur exacte s'y casserait à la première collecte réelle suivante). Contrôles de forme
+ * seulement : au moins 800 lignes (même seuil que `scripts/sync-finma-seats.ts`), IDE au format
+ * canonique `CHE-xxx.xxx.xxx`, numéro OFS entier, aucun doublon d'IDE.
  */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   _resetDataLoaderCache,
@@ -20,17 +26,19 @@ afterEach(() => {
   _resetDataLoaderCache();
 });
 
+const CANONICAL_UID_RE = /^CHE-\d{3}\.\d{3}\.\d{3}$/;
+const BFS_ID_RE = /^\d+$/;
+
 describe("getFinmaSeats() : fichier réel embarqué", () => {
-  it("se charge, indexé par IDE, avec l'édition lue dans finma_seats.meta.json (quand le fichier existe déjà)", () => {
-    const dataPath = new URL("../../src/mcp/data/finma_seats.csv", import.meta.url);
-    if (!existsSync(dataPath)) return; // produit par `npm run sync:finma-seats`, pas encore présent dans ce test isolé
+  it("se charge, indexé par IDE, avec l'édition lue dans finma_seats.meta.json — contrôles de forme seulement, aucune valeur figée", () => {
     const loaded = getFinmaSeats();
-    expect(loaded).not.toBeNull();
+    expect(loaded).not.toBeNull(); // produit par `npm run sync:finma-seats` : doit exister dans cette copie
     if (!loaded) return;
-    expect(loaded.byUid.size).toBeGreaterThan(0);
-    // AXA Leben AG (CHE-103.137.179) → commune de Winterthur (230), vérifié en direct le 06.10.2026
-    // (voir `src/mcp/company/lindas.ts`) ; décision de Claude-Alain du 06.10.2026 (tâche B4).
-    expect(loaded.byUid.get("CHE-103.137.179")).toBe("230");
+    expect(loaded.byUid.size).toBeGreaterThanOrEqual(800); // même seuil que DEFAULT_MIN_ROWS du script
+    const uids = [...loaded.byUid.keys()];
+    expect(new Set(uids).size).toBe(uids.length); // aucun doublon d'IDE (`Map` le garantit déjà, contrôle explicite)
+    for (const uid of uids) expect(uid).toMatch(CANONICAL_UID_RE);
+    for (const bfsId of loaded.byUid.values()) expect(bfsId).toMatch(BFS_ID_RE);
     const meta = JSON.parse(readFileSync(new URL("../../src/mcp/data/finma_seats.meta.json", import.meta.url), "utf8")) as { edition: string };
     expect(meta.edition).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(loaded.edition).toBe(meta.edition);

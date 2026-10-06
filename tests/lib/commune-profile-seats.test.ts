@@ -138,3 +138,17 @@ describe("communeProfile : siège exact FINMA × registre du commerce (tâche B4
     for (const word of banned) expect(lower).not.toContain(word);
   });
 });
+
+describe("communeProfile : chemin de PRODUCTION (tâche B4, point 3 de la relecture du 07.10.2026)", () => {
+  it("communeProfile(\"230\") SANS dépendance : les trois champs de siège sont des nombres (fichier combiné réel câblé), sans fixer de valeur exacte", () => {
+    // Appel sans deps() : lit le VRAI finma_seats.csv embarqué (même garde que `usingDefaultFinmaRegistry`
+    // dans `src/mcp/company/check.ts`). Si ce fichier est absent, `typeof null !== "number"` fait
+    // échouer ce test — jamais un `if (!existsSync) return` silencieux.
+    const profile = communeProfile("230");
+    expect(typeof profile.finma.entities_with_seat_in_commune).toBe("number");
+    expect(typeof profile.finma.distinct_entities_with_seat_in_commune).toBe("number");
+    expect(typeof profile.finma.national_seats_known).toBe("number");
+    expect(profile.sources).toContain("ofrc.zefix_lindas");
+    expect(typeof profile.editions.finma_seats).toBe("string");
+  });
+});
