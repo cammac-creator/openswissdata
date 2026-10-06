@@ -213,19 +213,14 @@ export function getLocalities(): { rows: readonly LocalityRow[]; byPostalCode: R
       // Relecture finale du 06.10.2026, point 5 : un fichier SANS ligne de données (en-tête
       // seul, ou fichier vide) est traité comme ABSENT, jamais comme un répertoire vide qui
       // ferait silencieusement échouer `postal_code_in_official_directory` pour tout NPA.
-      if (rows.length === 0) {
+      const index = indexLocalities(rows);
+      if (!index) {
         _localitiesLoadFailed = true;
         return null;
       }
-      const index = new Map<string, LocalityRow[]>();
-      for (const row of rows) {
-        const list = index.get(row.postal_code);
-        if (list) list.push(row);
-        else index.set(row.postal_code, [row]);
-      }
       _localities = rows;
       _localitiesByPostalCode = index;
-      _localitiesEdition = readLocalitiesEdition();
+      _localitiesEdition = readLocalitiesEdition(rows.length);
     } catch {
       _localitiesLoadFailed = true;
       return null;
@@ -237,10 +232,33 @@ export function getLocalities(): { rows: readonly LocalityRow[]; byPostalCode: R
 /** Date d'édition du répertoire (`localities.meta.json`, posé par `scripts/sync-localities.ts`
  *  — relecture finale du 06.10.2026, point 4) : `null` quand le fichier est absent, illisible
  *  ou mal formé, jamais une exception ni une date devinée. */
-function readLocalitiesEdition(): string | null {
+function readLocalitiesEdition(loadedRows: number): string | null {
   try {
-    const raw = readFileSync(join(DATA_DIR, "localities.meta.json"), "utf8");
-    const meta = JSON.parse(raw) as { edition?: unknown };
+    return parseLocalitiesEdition(readFileSync(join(DATA_DIR, "localities.meta.json"), "utf8"), loadedRows);
+  } catch {
+    return null;
+  }
+}
+
+/** Index par NPA ; `null` pour un répertoire sans ligne (traité comme absent). Fonction pure, testée sans fichier. */
+export function indexLocalities(rows: readonly LocalityRow[]): Map<string, LocalityRow[]> | null {
+  if (rows.length === 0) return null;
+  const index = new Map<string, LocalityRow[]>();
+  for (const row of rows) {
+    const list = index.get(row.postal_code);
+    if (list) list.push(row);
+    else index.set(row.postal_code, [row]);
+  }
+  return index;
+}
+
+/** Édition lue dans le contenu de `localities.meta.json` : `null` si illisible, mal formée, ou si la
+ *  fiche ne compte pas le même nombre de lignes que le répertoire chargé (les deux fichiers sont écrits
+ *  l'un après l'autre : jamais une date fausse). Fonction pure, testée sans fichier. */
+export function parseLocalitiesEdition(raw: string, loadedRows: number): string | null {
+  try {
+    const meta = JSON.parse(raw) as { edition?: unknown; rows?: unknown };
+    if (meta.rows !== loadedRows) return null;
     return typeof meta.edition === "string" && /^\d{4}-\d{2}-\d{2}$/.test(meta.edition) ? meta.edition : null;
   } catch {
     return null;

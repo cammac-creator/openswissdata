@@ -1,22 +1,14 @@
 /**
  * `getLocalities()` (tâche osd.localites, relecture finale du 06.10.2026, points 4 et 5).
  *
- * `getLocalities()` lit un chemin fixe (`src/mcp/data/localities.csv` et
- * `localities.meta.json`, à côté du module) : pas de point d'injection pour un chemin de
- * test. Les deux tests qui ont besoin d'un contenu différent du fichier RÉELLEMENT
- * embarqué sauvegardent son contenu, écrivent une fixture, restaurent l'original dans un
- * `finally` (même en cas d'échec de l'assertion) et réinitialisent le cache du module avant
- * et après — jamais de fichier du dépôt laissé modifié.
+ * Le fichier réel embarqué n'est que LU. Les cas limites (répertoire vide, fiche d'édition
+ * illisible, mal formée ou incohérente) passent par les fonctions pures `indexLocalities` et
+ * `parseLocalitiesEdition` : aucun test n'écrit dans le dépôt (des écritures temporaires
+ * faisaient échouer au hasard les autres fichiers de tests lancés en parallèle).
  */
-import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
-import { _resetDataLoaderCache, getLocalities } from "../../src/mcp/data-loader.js";
+import { _resetDataLoaderCache, getLocalities, indexLocalities, parseLocalitiesEdition } from "../../src/mcp/data-loader.js";
 
-const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "src", "mcp", "data");
-const CSV_PATH = join(DATA_DIR, "localities.csv");
-const META_PATH = join(DATA_DIR, "localities.meta.json");
 
 afterEach(() => {
   _resetDataLoaderCache();
@@ -33,66 +25,29 @@ describe("getLocalities() : fichier réel embarqué", () => {
   });
 });
 
-describe("getLocalities() : fichier SANS ligne de données = absent (relecture finale, point 5)", () => {
-  it("en-tête seul (aucune ligne de données) : null, jamais un répertoire vide", () => {
-    const originalCsv = readFileSync(CSV_PATH, "utf8");
-    try {
-      const header = originalCsv.split("\n")[0] + "\n"; // en-tête seul, aucune ligne de données
-      writeFileSync(CSV_PATH, header, "utf8");
-      _resetDataLoaderCache();
-      expect(getLocalities()).toBeNull();
-    } finally {
-      writeFileSync(CSV_PATH, originalCsv, "utf8");
-      _resetDataLoaderCache();
-    }
+describe("indexLocalities : répertoire sans ligne = absent", () => {
+  it("aucune ligne : null, jamais un index vide", () => {
+    expect(indexLocalities([])).toBeNull();
   });
-
-  it("fichier complètement vide : null", () => {
-    const originalCsv = readFileSync(CSV_PATH, "utf8");
-    try {
-      writeFileSync(CSV_PATH, "", "utf8");
-      _resetDataLoaderCache();
-      expect(getLocalities()).toBeNull();
-    } finally {
-      writeFileSync(CSV_PATH, originalCsv, "utf8");
-      _resetDataLoaderCache();
-    }
-  });
-
-  it("après restauration du fichier réel : getLocalities() fonctionne de nouveau normalement", () => {
-    // Vérifie que les deux tests ci-dessus ont bien restauré le fichier (pas de pollution
-    // entre tests ni de fichier du dépôt laissé modifié).
-    const loaded = getLocalities();
-    expect(loaded).not.toBeNull();
-    expect(loaded?.rows.length).toBeGreaterThan(5000);
+  it("index par NPA, plusieurs communes pour un même NPA", () => {
+    const row = (postal_code: string, municipality: string) => ({ postal_code, postal_code_suffix: "00", locality: "X", municipality, municipality_bfs_id: "1", canton: "ZH", language: "de" });
+    const index = indexLocalities([row("8310", "Winterthur"), row("8310", "Illnau-Effretikon"), row("8400", "Winterthur")]);
+    expect(index?.get("8310")?.length).toBe(2);
+    expect(index?.get("8400")?.length).toBe(1);
   });
 });
 
-describe("getLocalities() : localities.meta.json absent ou illisible → edition null, jamais une exception (relecture finale, point 4)", () => {
-  it("meta.json absent : rows chargées normalement, edition null", () => {
-    const originalMeta = readFileSync(META_PATH, "utf8");
-    try {
-      writeFileSync(META_PATH, "{ ceci n'est pas du JSON valide", "utf8"); // simule un fichier illisible
-      _resetDataLoaderCache();
-      const loaded = getLocalities();
-      expect(loaded).not.toBeNull();
-      expect(loaded?.edition).toBeNull();
-      expect(loaded?.rows.length).toBeGreaterThan(5000); // le CSV reste lisible indépendamment
-    } finally {
-      writeFileSync(META_PATH, originalMeta, "utf8");
-      _resetDataLoaderCache();
-    }
+describe("parseLocalitiesEdition : édition affichée seulement si la fiche est saine et cohérente", () => {
+  it("fiche saine et même nombre de lignes : édition rendue", () => {
+    expect(parseLocalitiesEdition(JSON.stringify({ edition: "2026-10-01", rows: 5696 }), 5696)).toBe("2026-10-01");
   });
-
-  it("meta.json avec une édition mal formée (pas AAAA-MM-JJ) : edition null, jamais une date devinée", () => {
-    const originalMeta = readFileSync(META_PATH, "utf8");
-    try {
-      writeFileSync(META_PATH, JSON.stringify({ edition: "01.10.2026", source: "x", rows: 1 }), "utf8");
-      _resetDataLoaderCache();
-      expect(getLocalities()?.edition).toBeNull();
-    } finally {
-      writeFileSync(META_PATH, originalMeta, "utf8");
-      _resetDataLoaderCache();
-    }
+  it("JSON illisible : null, jamais une exception", () => {
+    expect(parseLocalitiesEdition("{ ceci n'est pas du JSON valide", 5696)).toBeNull();
+  });
+  it("édition mal formée : null, jamais une date devinée", () => {
+    expect(parseLocalitiesEdition(JSON.stringify({ edition: "01.10.2026", rows: 5696 }), 5696)).toBeNull();
+  });
+  it("nombre de lignes différent du répertoire chargé : null", () => {
+    expect(parseLocalitiesEdition(JSON.stringify({ edition: "2026-10-01", rows: 5697 }), 5696)).toBeNull();
   });
 });
