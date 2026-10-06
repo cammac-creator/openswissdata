@@ -82,6 +82,13 @@ describe('Authentication-Results : les attaques de la sonde du 06.10 restent `un
     ['deux header.d dans la même clause (ambiguë)', 'mx.infomaniak.ch; dkim=pass header.d=seco.admin.ch header.d=evil.example'],
     ['valeur mêlée guillemets et texte nu', 'mx.infomaniak.ch; dkim=pass header.d="seco.admin.ch"x'],
     ['header.d sans point', 'mx.infomaniak.ch; dkim=pass header.d=ch'],
+    // Relecture adverse du 06.10 (soir) : séparateurs hors ASCII et guillemets dans un commentaire.
+    ['espace insécable qui découpe header.i', 'mx.infomaniak.ch; dkim=pass header.i=x\u00a0header.d=seco.admin.ch\u00a0y=@evil.example header.s=sel'],
+    ['séparateur de ligne U+2028', 'mx.infomaniak.ch; dkim=pass header.i=x\u2028header.d=seco.admin.ch\u2028y=@evil.example'],
+    ['U+FEFF', 'mx.infomaniak.ch; dkim=pass header.i=x\ufeffheader.d=seco.admin.ch\ufeffy=@evil.example'],
+    ['tabulation verticale', 'mx.infomaniak.ch; dkim=pass header.i=x\u000bheader.d=seco.admin.ch\u000by=@evil.example'],
+    ['saut de page', 'mx.infomaniak.ch; dkim=pass header.i=x\u000cheader.d=seco.admin.ch\u000cy=@evil.example'],
+    ['guillemets dans un commentaire recopiant l’expéditeur', 'mx.infomaniak.ch; spf=pass (domain of "x) ; dkim=pass header.d=seco.admin.ch ; y=(z"@evil.example designates 1.2.3.4) smtp.mailfrom=evil.example'],
   ])('%s', (_label, raw) => {
     expect(verdict(raw)).toBe('unverified');
   });

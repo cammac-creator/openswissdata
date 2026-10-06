@@ -345,6 +345,10 @@ function scanAuthResults(raw: string): AuthScan | null {
       while (j < raw.length && depth > 0) {
         const c = raw[j];
         if (c === '\\') { if (j + 1 >= raw.length) return null; j += 2; continue; }
+        // Un « " » dans un commentaire est permis par la RFC, mais un serveur qui recopie l'expéditeur
+        // SMTP dans un commentaire (« domain of … designates … ») laisserait alors une « ) » fournie par
+        // l'expéditeur fermer le commentaire : en-tête rejeté (faux négatif sûr, relecture adverse du 06.10).
+        if (c === '"') return null;
         if (c === '(') depth++;
         else if (c === ')') depth--;
         j++;
@@ -356,7 +360,10 @@ function scanAuthResults(raw: string): AuthScan | null {
     }
     if (ch === ')') return null;
     if (ch === ';') { endWord(); semicolons.push(i); segments.push([]); i++; continue; }
-    if (/\s/.test(ch)) { endWord(); i++; continue; }
+    // Seuls l'espace et la tabulation séparent ; tout autre caractère hors ASCII imprimable (espace
+    // insécable, U+2028, U+FEFF, VT, FF…) rejette l'en-tête entier (relecture adverse du 06.10).
+    if (ch === ' ' || ch === '\t') { endWord(); i++; continue; }
+    if (ch < '!' || ch > '~') return null;
     push({ kind: 'atom', text: ch });
     i++;
   }
