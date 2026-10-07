@@ -15,6 +15,7 @@ import { CENSUS_NAICS_ISIC_URL } from "../../classifications/naics-crosswalk.js"
 import { LINDAS_SPARQL_ENDPOINT } from "../../finma/ingest-zefix.js";
 import { SWISSTOPO_LOCALITIES_STAC_ITEMS_URL } from "../../localities/sources.js";
 import { SWISSTOPO_STREETS_STAC_ITEMS_URL } from "../../streets/sources.js";
+import { BFE_PV_CSV_URL } from "../../bfe/sources.js";
 // Adresses BAZG : dérivées de la même déclaration que la collecte (etl/tares/sources.ts,
 // BAZG_SOURCES), jamais recopiées en dur ici (tâche osd.socle).
 import { BAZG_SOURCES } from "../../tares/sources.js";
@@ -66,6 +67,15 @@ const SWISSTOPO_OPEN: SourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// Rétribution unique OFEN pour les installations photovoltaïques (tâche B5). Preuve de
+// licence : catalogue opendata.swiss « einmalvergutung-fur-photovoltaikanlagen », ressource
+// CSV, rights = terms_by (attribution obligatoire, pas terms_open) — relu le 07.10.2026.
+const BFE_OPEN: SourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-BFE-OPEN-BY",
+  authority: "Swiss Federal Office of Energy SFOE, opendata.swiss open use with attribution (terms_by)",
+  jurisdiction: "Switzerland",
+};
+
 export const SOURCES: readonly SourceDescriptor[] = [
   { id: "tares.tariff_8_digit", institution: "BAZG", url: BAZG_SOURCES.tariff_8_digit.url, canary: "raw", licence: BAZG, description: "BAZG — Liste des numéros tarifaires HS8" },
   { id: "tares.tarifstruktur", institution: "BAZG", url: BAZG_SOURCES.tarifstruktur.url, canary: "raw", licence: BAZG, description: "BAZG — Structure tarifaire hiérarchique multilingue" },
@@ -112,6 +122,10 @@ export const SOURCES: readonly SourceDescriptor[] = [
   // licence `terms_open` que le répertoire des localités (même éditeur, même catalogue).
   { id: "swisstopo.streets", institution: "swisstopo", url: SWISSTOPO_STREETS_STAC_ITEMS_URL, licence: SWISSTOPO_OPEN,
     description: "swisstopo — répertoire officiel des rues (nom de rue, NPA, commune, canton), catalogue STAC, collecte mensuelle." },
+  // Sans canari (osd.donnees, tâche B5), même raisonnement que les deux entrées swisstopo
+  // ci-dessus : `scripts/sync-bfe-pv.ts` contrôle lui-même la forme du fichier officiel.
+  { id: "bfe.pv_one_time_remuneration", institution: "BFE", url: BFE_PV_CSV_URL, licence: BFE_OPEN,
+    description: "OFEN — rétribution unique pour les installations photovoltaïques, par canton et année, collecte annuelle." },
 ];
 
 const PAR_ID = new Map(SOURCES.map(s => [s.id, s]));

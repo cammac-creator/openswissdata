@@ -76,6 +76,14 @@ const SWISSTOPO_LICENCE: PublicSourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// Copie littérale de la licence `BFE_OPEN` du registre unique (tâche B5) : attribution
+// obligatoire (terms_by), jamais terms_open comme les deux entrées swisstopo ci-dessus.
+const BFE_LICENCE: PublicSourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-BFE-OPEN-BY",
+  authority: "Swiss Federal Office of Energy SFOE, opendata.swiss open use with attribution (terms_by)",
+  jurisdiction: "Switzerland",
+};
+
 function fromCompanySources(id: CompanySourceId, institution: string, description: string, licence: PublicSourceLicence): PublicSourceEntry {
   return { id, institution, url: COMPANY_SOURCES[id].url, licence, description };
 }
@@ -112,6 +120,10 @@ export const PUBLIC_SOURCES: readonly PublicSourceEntry[] = [
   fromCompanySources("ofrc.zefix_lindas", "OFRC", "Commercial register as linked data (LINDAS, Zefix graph), public SPARQL endpoint", OFRC_LICENCE),
   fromCompanySources("swisstopo.localities", "swisstopo", "swisstopo — official directory of localities (postal code, municipality, canton), STAC catalogue, monthly collection", SWISSTOPO_LICENCE),
   fromCompanySources("swisstopo.streets", "swisstopo", "swisstopo — official directory of streets (street name, postal code, municipality, canton), STAC catalogue, monthly collection", SWISSTOPO_LICENCE),
+
+  // BFE (tâche B5) — copie littérale de `BFE_PV_CSV_URL` (`etl/bfe/sources.ts`), jamais
+  // redupliquée via `COMPANY_SOURCES` : `company_check` ne cite pas cette source.
+  { id: "bfe.pv_one_time_remuneration", institution: "BFE", url: "https://www.uvek-gis.admin.ch/BFE/ogd/84/ogd84_einmalverguetung_fuer_photovoltaikanlagen.csv", licence: BFE_LICENCE, description: "BFE (Swiss Federal Office of Energy) — one-time remuneration for photovoltaic installations, by canton and year, annual collection" },
 ];
 
 const BY_ID = new Map(PUBLIC_SOURCES.map((s) => [s.id, s]));

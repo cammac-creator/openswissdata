@@ -1,6 +1,6 @@
 /**
  * API publique en lecture `/api/v1` (tâche osd.donnees, tâche B3 du plan
- * `2026-10-06-prospection-et-api.md`).
+ * `2026-10-06-prospection-et-api.md`), étendue par la tâche B5 (`/cantons`, `/cantons/:abbr`).
  *
  * Lecture seule, JSON, limitée par réseau (jamais par jeton : ces routes n'authentifient
  * personne). Chaque réponse porte ses sources ; aucune route n'écrit, aucune ne renvoie un corps
@@ -12,8 +12,9 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import { abuseIp, trustedRequestIp } from "../lib/request-ip.js";
 import { checkApiRateLimit, type ApiRateLimitResult } from "../lib/api-rate-limit.js";
-import { getLocalities, getStreets, getFinmaVersion } from "../mcp/data-loader.js";
+import { getBfePv, getLocalities, getStreets, getFinmaVersion } from "../mcp/data-loader.js";
 import { communeProfile } from "../lib/commune-profile.js";
+import { cantonProfile, SWISS_CANTON_ABBREVIATIONS } from "../lib/canton-profile.js";
 import { companyCheck } from "../mcp/company/check.js";
 import { COMPANY_SOURCES } from "../mcp/company/sources.js";
 import { getPublicSource, PUBLIC_SOURCES, type PublicSourceEntry } from "../lib/public-sources.js";
@@ -117,6 +118,31 @@ apiV1Route.get("/communes/:bfs_id", (c) => {
   return c.json({ ...profile, sources: profile.sources.map(sourceRef) });
 });
 
+// --- GET /api/v1/cantons et /api/v1/cantons/:abbr ---------------------------------------
+// Tâche osd.donnees, tâche B5. Même plafond réseau que les autres routes de données
+// (`DATA_LIMIT`, partagé avec /localities, /communes et /sources).
+const CANTON_ABBREVIATIONS = new Set(SWISS_CANTON_ABBREVIATIONS);
+
+apiV1Route.get("/cantons", (c) => {
+  const limited = enforceRateLimit(c, DATA_LIMIT);
+  if (limited) return limited;
+  c.header("Cache-Control", "public, max-age=3600");
+  // Liste fixe (26 abréviations cantonales), sans donnée sourcée : `sources` reste présent,
+  // vide, pour garder la même forme que les autres routes de données (Global Constraint « réponses
+  // avec sources ») sans inventer une provenance à une simple énumération.
+  return c.json({ cantons: SWISS_CANTON_ABBREVIATIONS, sources: [] });
+});
+
+apiV1Route.get("/cantons/:abbr", (c) => {
+  const limited = enforceRateLimit(c, DATA_LIMIT);
+  if (limited) return limited;
+  const abbr = (c.req.param("abbr") ?? "").toUpperCase();
+  if (!CANTON_ABBREVIATIONS.has(abbr)) return c.json({ error: "invalid_canton" }, 400);
+  const profile = cantonProfile(abbr);
+  c.header("Cache-Control", "public, max-age=3600");
+  return c.json({ ...profile, sources: profile.sources.map(sourceRef) });
+});
+
 // --- GET /api/v1/sources -------------------------------------------------------------
 // Registre public des sources servies par l'API et le MCP (sans la référence de permission
 // TARES, qui porte le nom d'une personne : voir `src/lib/public-sources.ts`).
@@ -126,12 +152,14 @@ apiV1Route.get("/sources", (c) => {
   const localitiesLoaded = getLocalities();
   const streetsLoaded = getStreets();
   const finmaVersion = getFinmaVersion();
+  const bfePvLoaded = getBfePv();
   const sources = PUBLIC_SOURCES.map((s) => ({
     ...s,
     edition:
       s.id === "swisstopo.localities" ? (localitiesLoaded?.edition ?? null)
       : s.id === "swisstopo.streets" ? (streetsLoaded?.edition ?? null)
       : s.id === "finma.uid_csv" ? finmaVersion
+      : s.id === "bfe.pv_one_time_remuneration" ? (bfePvLoaded?.edition ?? null)
       : null,
   }));
   c.header("Cache-Control", "public, max-age=3600");

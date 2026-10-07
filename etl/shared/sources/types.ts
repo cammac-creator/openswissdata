@@ -1,7 +1,9 @@
 /** Une source publique lue par OpenSwissData (registre unique : canari, produits, provenance). Tâche osd.socle. */
 // "swisstopo" (minuscule, pas un acronyme comme les autres) : nom retenu par la décision du
 // 06.10.2026 pour la source `swisstopo.localities` (tâche osd.localites).
-export type Institution = "BAZG" | "FINMA" | "BFS" | "Eurostat" | "UNSD" | "GLEIF" | "US Census" | "OFRC" | "swisstopo";
+// "BFE" (tâche osd.donnees, tâche B5) : Office fédéral de l'énergie, source
+// `bfe.pv_one_time_remuneration` (rétribution unique pour les installations photovoltaïques).
+export type Institution = "BAZG" | "FINMA" | "BFS" | "Eurostat" | "UNSD" | "GLEIF" | "US Census" | "OFRC" | "swisstopo" | "BFE";
 // `raw` hashes bytes — use for files published in discrete versions (e.g. XLSX
 // releases). `json-shape` hashes only structural keys/types — use for JSON APIs.
 // `csv-shape` hashes only the header row + separator — use for CSVs that update

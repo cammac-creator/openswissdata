@@ -1,0 +1,66 @@
+name: Collecte mensuelle de la rétribution unique OFEN (photovoltaïque, publication annuelle)
+#
+# Sur le modèle exact de `refresh-finma-seats.yml` (tâche osd.donnees, tâche B5 du plan
+# `2026-10-06-prospection-et-api.md`) : un push fait avec le `GITHUB_TOKEN` par défaut (étape
+# « Committer… » ci-dessous) NE déclenche PAS `ci.yml` (règle GitHub). Sans garde propre à CE
+# workflow, un commit partirait donc en production sans être jamais rejoué par la CI. L'étape
+# « Vérifier avant de publier » reproduit donc ICI, après la collecte et AVANT tout commit/push,
+# le sous-ensemble de `ci.yml` qui couvre ce changement. Un échec de cette étape arrête le job
+# AVANT l'étape de commit (steps séquentielles) : aucun commit ne part, et l'étape d'alerte mail
+# (`if: !cancelled()`) envoie quand même son message.
+#
+# L'OFEN republie ce jeu de données une fois par an : `scripts/sync-bfe-pv.ts` garde l'édition
+# déjà publiée quand le CSV produit est identique au précédent (voir son commentaire d'en-tête),
+# si bien qu'un passage mensuel sans donnée nouvelle ne commite RIEN (CSV et meta inchangés) —
+# contrairement au siège exact FINMA, dont l'édition avance à chaque passage réussi.
+on:
+  schedule:
+    # Le 6 de chaque mois, minute non ronde, un jour après le siège exact FINMA (le 5) et hors
+    # des créneaux TARES/localités/rues : laisse chaque collecte mensuelle son propre créneau.
+    - cron: "17 9 6 * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: bfe-pv-production
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Collecter et contrôler la rétribution unique OFEN (photovoltaïque)
+        run: npm run sync:bfe-pv
+      - name: Vérifier avant de publier (jamais de commit sans ces contrôles verts)
+        run: |
+          npm run typecheck
+          npx vitest run tests/scripts/sync-bfe-pv.test.ts tests/mcp/data-loader-bfe-pv.test.ts tests/lib/canton-profile.test.ts tests/routes/api-v1-cantons.test.ts tests/routes/api-v1.test.ts tests/scripts/build-data-files.test.ts
+      - name: Committer les fichiers s'ils ont changé
+        run: |
+          git config user.name "OpenSwissData"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/mcp/data/bfe_pv.csv src/mcp/data/bfe_pv.meta.json
+          if ! git diff --cached --quiet; then
+            git commit -m "données : actualiser la rétribution unique OFEN (photovoltaïque)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Collecte de la rétribution unique OFEN
+          ALERT_WORKFLOW: refresh-bfe-pv.yml
+          ALERT_DETAIL: La collecte ou le contrôle de la rétribution unique OFEN (photovoltaïque) n'a pas abouti ; le fichier servi reste le précédent.
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

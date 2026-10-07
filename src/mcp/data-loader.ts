@@ -13,6 +13,7 @@
  *   - localities.csv                         (répertoire officiel des localités swisstopo, ~5.7k rows)
  *   - streets.csv.gz                         (répertoire officiel des rues swisstopo, compressé, ~220k rows)
  *   - finma_seats.csv                        (siège exact FINMA × registre du commerce, personnes morales, tâche B4)
+ *   - bfe_pv.csv                              (rétribution unique OFEN, photovoltaïque, par canton et année, tâche B5)
  *   - embeddings/tares_index.{json,bin}      (TARES, 7 511 lignes × 4 langues, chemin officiel ; search-index.ts)
  *   - embeddings/noga_2025_index.{json,bin}  (NOGA 2025, 798 genres × 4 langues ; search-index.ts)
  *
@@ -113,6 +114,21 @@ export interface FinmaSeatRow {
   municipality_bfs_id: string;
 }
 
+/** Une ligne de la rétribution unique OFEN pour le photovoltaïque (tâche osd.donnees, tâche
+ *  B5) : colonnes en anglais, valeurs recopiées telles que publiées par l'OFEN (y compris la
+ *  valeur `"NA"` d'une année sans donnée disponible pour ce canton — jamais un zéro deviné).
+ *  Les deux champs `..._per_100000_inhabitants` sont les ratios PUBLIÉS par l'OFEN, jamais
+ *  recalculés ici (voir `scripts/sync-bfe-pv.ts`). */
+export interface BfePvRow {
+  year: string;
+  canton: string;
+  installations_count: string;
+  installed_capacity_kw: string;
+  remuneration_chf: string;
+  installations_per_100000_inhabitants: string;
+  installed_capacity_kw_per_100000_inhabitants: string;
+}
+
 /** Une ligne du répertoire officiel des rues (swisstopo, tâche osd.localites, tâche B1) : les
  *  colonnes `postal_code`/`locality` ne portent que le PREMIER couple NPA/localité d'une rue
  *  à cheval sur plusieurs secteurs postaux (voir `scripts/sync-streets.ts`) ; seul
@@ -146,6 +162,9 @@ let _streetsEdition: string | null = null;
 let _finmaSeatsByUid: Map<string, string> | null = null;
 let _finmaSeatsLoadFailed = false;
 let _finmaSeatsEdition: string | null = null;
+let _bfePv: BfePvRow[] | null = null;
+let _bfePvLoadFailed = false;
+let _bfePvEdition: string | null = null;
 let _classificationLinks: ClassificationLink[] | null = null;
 let _classificationSources: ClassificationSource[] | null = null;
 let _taresEmbeddingsPromise: Promise<SearchIndex> | null = null;
@@ -499,6 +518,55 @@ export function parseFinmaSeatsEdition(raw: string, loadedRows: number): string 
   }
 }
 
+/**
+ * Rétribution unique OFEN pour le photovoltaïque (tâche osd.donnees, tâche B5) : toutes les
+ * lignes (26 cantons × N années), jamais indexées par canton ici (le volume reste trivial,
+ * quelques centaines de lignes) — `src/lib/canton-profile.ts` filtre lui-même par canton.
+ * Tolérant à l'absence ou à une lecture illisible : `null`, JAMAIS une exception — même motif
+ * que `getLocalities()`/`getStreets()`/`getFinmaSeats()` ci-dessus.
+ */
+export function getBfePv(): { rows: readonly BfePvRow[]; edition: string | null } | null {
+  if (_bfePvLoadFailed) return null;
+  if (!_bfePv) {
+    try {
+      const rows = loadCsv<BfePvRow>("bfe_pv.csv");
+      // Même règle que les autres répertoires : un fichier SANS ligne de données (en-tête
+      // seul, ou fichier vide) est traité comme ABSENT, jamais comme un répertoire vide.
+      if (rows.length === 0) {
+        _bfePvLoadFailed = true;
+        return null;
+      }
+      _bfePv = rows;
+      _bfePvEdition = readBfePvEdition(rows.length);
+    } catch {
+      _bfePvLoadFailed = true;
+      return null;
+    }
+  }
+  return { rows: _bfePv, edition: _bfePvEdition };
+}
+
+/** Date d'édition de la rétribution unique OFEN (`bfe_pv.meta.json`, posé par
+ *  `scripts/sync-bfe-pv.ts`) : `null` quand le fichier est absent, illisible ou mal formé,
+ *  jamais une exception ni une date devinée. Même forme que `parseFinmaSeatsEdition` ci-dessus. */
+function readBfePvEdition(loadedRows: number): string | null {
+  try {
+    return parseBfePvEdition(readFileSync(join(DATA_DIR, "bfe_pv.meta.json"), "utf8"), loadedRows);
+  } catch {
+    return null;
+  }
+}
+
+export function parseBfePvEdition(raw: string, loadedRows: number): string | null {
+  try {
+    const meta = JSON.parse(raw) as { edition?: unknown; rows?: unknown };
+    if (meta.rows !== loadedRows) return null;
+    return typeof meta.edition === "string" && /^\d{4}-\d{2}-\d{2}$/.test(meta.edition) ? meta.edition : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Révision et sources du référentiel effectivement embarqué dans le service. */
 export function getClassificationLinks(): { links: readonly ClassificationLink[]; sources: readonly ClassificationSource[]; version: string } {
   _classificationLinks ??= loadCsv<ClassificationLink>("classification_links.csv");
@@ -559,6 +627,9 @@ export function _resetDataLoaderCache(): void {
   _finmaSeatsByUid = null;
   _finmaSeatsLoadFailed = false;
   _finmaSeatsEdition = null;
+  _bfePv = null;
+  _bfePvLoadFailed = false;
+  _bfePvEdition = null;
   _classificationLinks = null;
   _classificationSources = null;
   _taresEmbeddingsPromise = null;
