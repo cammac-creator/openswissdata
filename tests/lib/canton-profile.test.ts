@@ -19,7 +19,7 @@ import {
   type CantonProfileDeps,
 } from "../../src/lib/canton-profile.js";
 import { FINMA_SEAT_MATCHING_RULE } from "../../src/lib/commune-profile.js";
-import type { BfePvRow, FinmaRegistryRow, LocalityRow } from "../../src/mcp/data-loader.js";
+import { getFinmaVersion, type BfePvRow, type FinmaRegistryRow, type LocalityRow } from "../../src/mcp/data-loader.js";
 
 function locality(partial: Partial<LocalityRow>): LocalityRow {
   return {
@@ -136,6 +136,7 @@ describe("cantonProfile : cas limites (dépendances injectées)", () => {
         edition: "2026-10-01",
       }),
       getFinmaRegistry: () => [],
+      getFinmaVersion: () => null,
       getFinmaSeats: () => null,
       getBfePv: () => null,
     }));
@@ -144,7 +145,7 @@ describe("cantonProfile : cas limites (dépendances injectées)", () => {
     expect(profile.localities_count).toBe(1);
     expect(profile.streets_count).toBe(1);
     expect(profile.sources).toEqual(["swisstopo.localities", "swisstopo.streets"]);
-    expect(profile.editions).toEqual({ localities: "2026-10-01", streets: "2026-10-01", finma_seats: null, bfe_pv: null });
+    expect(profile.editions).toEqual({ localities: "2026-10-01", streets: "2026-10-01", finma: null, finma_seats: null, bfe_pv: null });
     expect(profile.finma.entities_with_seat_in_canton).toBeNull();
     expect(profile.pv).toBeNull();
   });
@@ -192,6 +193,29 @@ describe("cantonProfile : cas limites (dépendances injectées)", () => {
     }));
     expect(profile.finma.entities_with_seat_in_canton).toBe(2);
     expect(profile.finma.distinct_entities_with_seat_in_canton).toBe(1);
+  });
+
+  it("registre FINMA indisponible (lance une exception) alors que le fichier des sièges est disponible : les deux compteurs restent null, jamais 0", () => {
+    const byUid = new Map([["CHE-100.000.000", "230"]]);
+    const profile = cantonProfile("ZH", deps({
+      getLocalities: () => ({ rows: [WINTERTHUR], edition: null }),
+      getStreets: () => null,
+      getFinmaRegistry: () => { throw new Error("registre FINMA indisponible (test)"); },
+      getFinmaSeats: seats(byUid),
+      getBfePv: () => null,
+    }));
+    expect(profile.finma.entities_with_seat_in_canton).toBeNull();
+    expect(profile.finma.distinct_entities_with_seat_in_canton).toBeNull();
+    expect(profile.finma.by_licence_type).toEqual({});
+    expect(profile.sources).toContain("ofrc.zefix_lindas"); // fichier des sièges lu malgré tout
+    expect(profile.sources).not.toContain("finma.uid_csv"); // jamais cité : jamais lu avec succès
+  });
+
+  it("editions.finma reflète la version FINMA injectée (tâche B5, point 4 de la relecture du 07.10.2026)", () => {
+    const profile = cantonProfile("ZH", deps({
+      getLocalities: () => null, getStreets: () => null, getFinmaRegistry: () => [], getFinmaVersion: () => "2026-10-05", getFinmaSeats: () => null, getBfePv: () => null,
+    }));
+    expect(profile.editions.finma).toBe("2026-10-05");
   });
 
   it("siège dont le numéro OFS n'apparaît dans aucun répertoire : jamais rattaché par approximation", () => {
@@ -250,6 +274,7 @@ describe("cantonProfile : chemin de PRODUCTION (sans dépendance)", () => {
     expect(typeof profile.finma.distinct_entities_with_seat_in_canton).toBe("number");
     expect(profile.sources).toContain("ofrc.zefix_lindas");
     expect(typeof profile.editions.finma_seats).toBe("string");
+    expect(profile.editions.finma).toBe(getFinmaVersion()); // version FINMA réellement servie, jamais figée
     expect(Array.isArray(profile.pv?.by_year)).toBe(true);
     expect(profile.pv?.by_year.length).toBeGreaterThan(0);
     for (const row of profile.pv?.by_year ?? []) {

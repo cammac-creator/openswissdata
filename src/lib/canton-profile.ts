@@ -34,6 +34,7 @@ import {
   getBfePv,
   getFinmaRegistry,
   getFinmaSeats,
+  getFinmaVersion,
   getLocalities,
   getStreets,
   type BfePvRow,
@@ -77,11 +78,12 @@ export interface CantonPvYearRow {
 }
 
 export interface CantonFinmaProfile {
-  /** Nombre de lignes FINMA (autorisations) dont l'IDE a SON SIÈGE enregistré dans CE canton
-   *  (combinaison FINMA × registre du commerce, tâche B4) ; `null` : fichier combiné non câblé
-   *  ou indisponible (jamais confondu avec `0`, qui veut dire « disponible, aucune ligne »). */
+  /** Nombre d'AUTORISATIONS FINMA (lignes du registre) dont l'IDE a SON SIÈGE enregistré dans
+   *  CE canton (combinaison FINMA × registre du commerce, tâche B4) ; `null` : fichier combiné
+   *  des sièges OU registre FINMA lui-même non câblé/indisponible (jamais confondu avec `0`,
+   *  qui veut dire « les deux sont disponibles, aucune ligne pour ce canton »). */
   entities_with_seat_in_canton: number | null;
-  /** Nombre d'IDE DISTINCTS parmi les lignes comptées ci-dessus. `null` dans les mêmes conditions. */
+  /** Nombre d'IDE DISTINCTS parmi les autorisations comptées ci-dessus. `null` dans les mêmes conditions. */
   distinct_entities_with_seat_in_canton: number | null;
   by_licence_type: Record<string, number>;
   /** Règle de rattachement, en toutes lettres : réutilise `FINMA_SEAT_MATCHING_RULE` de
@@ -102,7 +104,7 @@ export interface CantonProfile {
   pv: { by_year: CantonPvYearRow[]; ratios_note: typeof PV_RATIOS_NOTE; scope_note: typeof PV_SCOPE_NOTE } | null;
   /** Identifiants du registre des sources effectivement utilisés pour cette fiche. */
   sources: string[];
-  editions: { localities: string | null; streets: string | null; finma_seats: string | null; bfe_pv: string | null };
+  editions: { localities: string | null; streets: string | null; finma: string | null; finma_seats: string | null; bfe_pv: string | null };
   notice: string;
 }
 
@@ -114,6 +116,7 @@ export interface CantonProfileDeps {
     edition: string | null;
   } | null;
   getFinmaRegistry: () => readonly FinmaRegistryRow[];
+  getFinmaVersion: () => string | null;
   getFinmaSeats: () => { byUid: ReadonlyMap<string, string>; edition: string | null } | null;
   getBfePv: () => { rows: readonly BfePvRow[]; edition: string | null } | null;
 }
@@ -128,6 +131,7 @@ const defaultDeps: CantonProfileDeps = {
     return loaded ? { byMunicipality: loaded.byMunicipality, municipalityInfo: loaded.municipalityInfo, edition: loaded.edition } : null;
   },
   getFinmaRegistry,
+  getFinmaVersion,
   getFinmaSeats: () => {
     const loaded = getFinmaSeats();
     return loaded ? { byUid: loaded.byUid, edition: loaded.edition } : null;
@@ -247,38 +251,42 @@ export function cantonProfile(abbr: string, deps: Partial<CantonProfileDeps> = {
     streetsCount = total;
   }
 
-  // Siège exact FINMA (tâche B4) : jamais lu/compté sans le fichier combiné des sièges — voir
-  // le commentaire d'en-tête du fichier (jamais la colonne `canton` du registre FINMA).
+  // Siège exact FINMA (tâche B4) : jamais lu/compté sans le fichier combiné des sièges NI sans
+  // le registre FINMA lui-même — voir le commentaire d'en-tête du fichier (jamais la colonne
+  // `canton` du registre FINMA). Relecture du 07.10.2026 : un registre FINMA indisponible doit
+  // rendre `null` (comme le fichier combiné absent), jamais `0` — une boucle sur un tableau vide
+  // de repli donnerait silencieusement « disponible, aucune ligne », ce qui est faux.
   let entitiesWithSeat: number | null = null;
   let distinctEntitiesWithSeat: number | null = null;
   const byLicenceType = new Map<string, number>();
   const seatsLoaded = d.getFinmaSeats();
   if (seatsLoaded) {
     sources.add("ofrc.zefix_lindas");
-    let finmaAvailable = true;
-    const finmaRows = (() => {
-      try {
-        return d.getFinmaRegistry();
-      } catch {
-        finmaAvailable = false;
-        return [];
-      }
-    })();
-    if (finmaAvailable) sources.add("finma.uid_csv");
-    const cantonByBfsId = buildBfsCantonIndex(localitiesLoaded?.rows ?? [], streetsLoaded?.municipalityInfo ?? null);
-    let count = 0;
-    const distinctUids = new Set<string>();
-    for (const row of finmaRows) {
-      const bfsId = seatsLoaded.byUid.get(row.uid);
-      if (!bfsId) continue; // siège inconnu : jamais rattaché par approximation
-      if (cantonByBfsId.get(bfsId) !== wanted) continue;
-      count += 1;
-      distinctUids.add(row.uid);
-      const type = row.licence_type || "unknown";
-      byLicenceType.set(type, (byLicenceType.get(type) ?? 0) + 1);
+    let finmaRows: readonly FinmaRegistryRow[] | null;
+    try {
+      finmaRows = d.getFinmaRegistry();
+    } catch {
+      finmaRows = null;
     }
-    entitiesWithSeat = count;
-    distinctEntitiesWithSeat = distinctUids.size;
+    if (finmaRows) {
+      sources.add("finma.uid_csv");
+      const cantonByBfsId = buildBfsCantonIndex(localitiesLoaded?.rows ?? [], streetsLoaded?.municipalityInfo ?? null);
+      let count = 0;
+      const distinctUids = new Set<string>();
+      for (const row of finmaRows) {
+        const bfsId = seatsLoaded.byUid.get(row.uid);
+        if (!bfsId) continue; // siège inconnu : jamais rattaché par approximation
+        if (cantonByBfsId.get(bfsId) !== wanted) continue;
+        count += 1;
+        distinctUids.add(row.uid);
+        const type = row.licence_type || "unknown";
+        byLicenceType.set(type, (byLicenceType.get(type) ?? 0) + 1);
+      }
+      entitiesWithSeat = count;
+      distinctEntitiesWithSeat = distinctUids.size;
+    }
+    // `finmaRows === null` (registre FINMA indisponible) : `entitiesWithSeat`/`distinctEntitiesWithSeat`
+    // restent `null`, jamais `0`.
   }
 
   let pv: CantonProfile["pv"] = null;
@@ -304,6 +312,7 @@ export function cantonProfile(abbr: string, deps: Partial<CantonProfileDeps> = {
     editions: {
       localities: localitiesLoaded?.edition ?? null,
       streets: streetsLoaded?.edition ?? null,
+      finma: d.getFinmaVersion(),
       finma_seats: seatsLoaded?.edition ?? null,
       bfe_pv: bfeLoaded?.edition ?? null,
     },

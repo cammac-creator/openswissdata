@@ -81,6 +81,7 @@ describe("GET /api/v1/cantons/:abbr", () => {
     expect(typeof body.finma.entities_with_seat_in_canton).toBe("number");
     expect(typeof body.finma.distinct_entities_with_seat_in_canton).toBe("number");
     expect(typeof body.editions.finma_seats).toBe("string");
+    expect("finma" in body.editions).toBe(true); // version FINMA (null ou texte, jamais absente)
     expect(Array.isArray(body.sources)).toBe(true);
     for (const s of body.sources) {
       expect(s).toHaveProperty("id");

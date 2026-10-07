@@ -10,9 +10,10 @@
  * (26 cantons × 10 années 2014-2023), BOM UTF-8, séparateur virgule, en-tête
  * `Jahr,Kanton,Anzahl_Anlagen,Installierte_Leistung_kW,Verguetung_CHF,
  * Anzahl_Anlagen_pro_100000_Einwohner,Installierte_Leistung_kW_pro_100000_Einwohner` (voir
- * `scripts/sync-bfe-pv.ts`). Neuf lignes de l'année 2014 (les plus petits cantons) portent la
- * valeur publiée `NA` sur les cinq colonnes numériques, toujours ensemble — jamais un zéro
- * deviné, recopiée telle quelle.
+ * `scripts/sync-bfe-pv.ts`). Neuf lignes de l'année 2014 (GE, GL, JU, NW, OW, SH, TG, UR, ZG —
+ * pas spécialement les plus petits cantons, GE et TG en particulier) portent la valeur publiée
+ * `NA` sur les cinq colonnes numériques, toujours ensemble — jamais un zéro deviné, recopiée
+ * telle quelle.
  *
  * Adresse directe, contrairement aux répertoires swisstopo (STAC) : pas de catalogue
  * intermédiaire à résoudre, le lien change seulement si l'OFEN republie le jeu de données

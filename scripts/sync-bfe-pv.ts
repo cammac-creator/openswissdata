@@ -37,9 +37,10 @@
  * Contrôles stricts avant toute écriture :
  *   - en-tête EXACT (sept colonnes, même ordre, séparateur `,`, BOM toléré) — sinon échec visible.
  *   - chaque ligne : année à quatre chiffres, canton parmi les 26 abréviations cantonales,
- *     les quatre champs numériques valides (entiers ou décimaux, jamais négatifs) OU la valeur
+ *     les cinq champs numériques valides (entiers ou décimaux, jamais négatifs) OU la valeur
  *     publiée `NA` (donnée non disponible pour ce couple canton/année — relevé le 07.10.2026 :
- *     les neuf plus petits cantons en 2014, les cinq colonnes toujours ensemble) ; `NA` est
+ *     neuf lignes de l'année 2014, GE/GL/JU/NW/OW/SH/TG/UR/ZG, les cinq colonnes toujours
+ *     ensemble — pas spécialement les plus petits cantons, GE et TG en particulier) ; `NA` est
  *     recopié tel quel, jamais remplacé par un zéro deviné.
  *   - CHAQUE année doit compter les 26 cantons, tous distincts (aucun doublon Jahr/Kanton) —
  *     un contrôle sur l'ensemble du fichier seulement laisserait passer une année incomplète
@@ -82,8 +83,9 @@ const OUTPUT_COLUMNS = [
 const EDITION_RE = /^\d{4}-\d{2}-\d{2}$/;
 const YEAR_RE = /^\d{4}$/;
 // L'OFEN publie "NA" (jamais un zéro deviné) pour un couple canton/année sans valeur
-// disponible — relevé le 07.10.2026 : les neuf plus petits cantons en 2014, les cinq colonnes
-// toujours ensemble. Un fait de la source, jamais recalculé ni rempli : accepté tel quel.
+// disponible — relevé le 07.10.2026 : neuf lignes de l'année 2014 (GE, GL, JU, NW, OW, SH, TG,
+// UR, ZG — pas spécialement les plus petits cantons, GE et TG en particulier), les cinq
+// colonnes toujours ensemble. Un fait de la source, jamais recalculé ni rempli : accepté tel quel.
 const NA_VALUE = "NA";
 const NUMBER_RE = /^\d+(\.\d+)?$/;
 const NUMERIC_COLUMNS = [
@@ -172,8 +174,8 @@ export function parseOfficialCsv(buf: Buffer): Record<string, string>[] {
 }
 
 /** Contrôles stricts avant toute écriture : année à quatre chiffres, canton parmi les 26, les
- *  quatre champs numériques valides et non négatifs, les 26 cantons tous présents. Fonction
- *  pure, testée sans fichier. */
+ *  cinq champs numériques valides et non négatifs (ou "NA"), les 26 cantons tous présents pour
+ *  CHAQUE année, sans doublon. Fonction pure, testée sans fichier. */
 export function validateRows(rows: Record<string, string>[], minRows: number): void {
   if (rows.length < minRows) {
     throw new Error(`Trop peu de lignes dans le fichier officiel : ${rows.length} (seuil ${minRows})`);
