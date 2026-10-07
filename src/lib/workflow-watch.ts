@@ -26,7 +26,9 @@ const TELEGRAM_TIMEOUT = 10_000;
 const TELEGRAM_LIMIT = 4_000;
 const REPO = process.env.OSD_GITHUB_REPO?.trim() || 'cammac-creator/openswissdata';
 const SCHEDULED = ['refresh-finma.yml', 'refresh-tares.yml', 'monitor-sources.yml', 'monitor-public.yml', 'backup-db.yml',
-  'cleanup-expired.yml', 'indexnow.yml', 'dependency-audit.yml'] as const;
+  'cleanup-expired.yml', 'indexnow.yml', 'dependency-audit.yml',
+  // Collectes ajoutées les 06-07.10.2026 : une désactivation par GitHub ne doit jamais passer inaperçue.
+  'refresh-localities.yml', 'refresh-streets.yml', 'refresh-finma-seats.yml', 'refresh-bfe-pv.yml', 'prospect-sources.yml'] as const;
 const WATCHED_RUNS: Readonly<Record<string, string>> = { 'monitor-sources.yml': 'Canari des 20 sources', 'refresh-finma.yml': 'Collecte FINMA' };
 const FINMA_OAR_PAGE = 'https://www.finma.ch/fr/autorisation/organisme-d-autoregulation-oar/recherche-de-membres-oar/';
 const UA = 'OpenSwissData-veille-taches/1';
