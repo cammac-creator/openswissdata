@@ -116,7 +116,7 @@
       ],
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 : xkoord/ykoord retirées (coordonnées de bâtiment, gebbezeichnung dans l en-tête source) ; adresse/rue/numéro déjà hors de columns. Points de rassemblement d urgence, infrastructure publique."
+      "notes": "Vérifié le 07.10.2026 : xkoord/ykoord retirées (coordonnées de bâtiment, gebbezeichnung dans l'en-tête source) ; adresse/rue/numéro déjà hors de columns. Points de rassemblement d'urgence, infrastructure publique."
     },
     {
       "id": "bs-revenus-menages-commune",
@@ -200,7 +200,7 @@
       ],
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 : schulanlage_name et bildungsinstitutionen retirées (noms d établissements privés mêlés aux établissements publics dans ces deux colonnes) ; adresse/egid/coordonnées de bâtiment déjà hors de columns."
+      "notes": "Vérifié le 07.10.2026 : schulanlage_name et bildungsinstitutionen retirées (noms d'établissements privés mêlés aux établissements publics dans ces deux colonnes) ; adresse/egid/coordonnées de bâtiment déjà hors de columns."
     },
     {
       "id": "ofen-vul-propulsion-alternative",
@@ -508,49 +508,6 @@
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
       "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
-    },
-    {
-      "id": "tg-siedlungsverzeichnis-2026",
-      "title": "Siedlungsverzeichnis des Kantons Thurgau 2026",
-      "ckan_uuid": "f9f1bf42-e490-41bc-b5b6-aad0caaca66f",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc0",
-      "attribution": "",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-162/exports/csv?use_labels=true",
-      "expected_header": [
-        "Politische_Gemeinde",
-        "BFS_Nr",
-        "Bezirk_Bezeichnung",
-        "Bezirk_Nr",
-        "Siedlung",
-        "Einwohner_per_31_12_2025",
-        "PLZ",
-        "Ortschaft",
-        "Primarschulgemeinde",
-        "Sekundarschulgemeinde",
-        "Evang_Kirchgemeinde",
-        "Kath_Kirchgemeinde"
-      ],
-      "keys": {
-        "BFS_Nr": "commune_bfs"
-      },
-      "columns": [
-        "Politische_Gemeinde",
-        "BFS_Nr",
-        "Bezirk_Bezeichnung",
-        "Bezirk_Nr",
-        "Siedlung",
-        "Einwohner_per_31_12_2025",
-        "PLZ",
-        "Ortschaft",
-        "Primarschulgemeinde",
-        "Sekundarschulgemeinde",
-        "Evang_Kirchgemeinde",
-        "Kath_Kirchgemeinde"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 : clé postal_code non déclarée (cellule PLZ parfois à plusieurs codes pour une même ligne, ex. plusieurs NPA séparés par une virgule) ; colonne PLZ conservée telle quelle, sans clé."
     },
     {
       "id": "tg-comptage-trafic-routier",
@@ -1368,7 +1325,7 @@
       ],
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 : stand retirée (date d export du jour, pas une donnée du jeu ; elle aurait fait avancer l édition chaque semaine sans changement réel)."
+      "notes": "Vérifié le 07.10.2026 : stand retirée (date d'export du jour, pas une donnée du jeu ; elle aurait fait avancer l'édition chaque semaine sans changement réel)."
     },
     {
       "id": "tg-postes-vacants-noga",
