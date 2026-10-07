@@ -1364,37 +1364,6 @@
       "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
     },
     {
-      "id": "tg-emissions-ges-commune",
-      "title": "Treibhausgas-Emissionen nach Gemeinden ab 1990",
-      "ckan_uuid": "dae51783-9f30-47cf-a5e6-844c2501cc0a",
-      "publisher": "Canton de Thurgovie",
-      "licence": "terms_open",
-      "attribution": "",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/dbu-afu-23/exports/csv?select=jahr,kanton,bfs_nr_gemeinde,sektor,emico2eq&use_labels=false",
-      "expected_header": [
-        "jahr",
-        "kanton",
-        "bfs_nr_gemeinde",
-        "sektor",
-        "emico2eq"
-      ],
-      "keys": {
-        "jahr": "year",
-        "kanton": "canton",
-        "bfs_nr_gemeinde": "commune_bfs"
-      },
-      "columns": [
-        "jahr",
-        "kanton",
-        "bfs_nr_gemeinde",
-        "sektor",
-        "emico2eq"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 (lot G3-gros, jeu écarté une première fois pour 'trop_gros' avec l'export complet). Fiche CKAN (package_show, organisation kanton-thurgau) : licence de la ressource CSV = https://opendata.swiss/terms-of-use#terms_open (aucune attribution requise). Métadonnées ODS (data.tg.ch, jeu dbu-afu-23) : 492 804 lignes, portail Opendatasoft — réduit par le paramètre `select` du point /exports/csv (pas de `where`, toutes les années et communes gardées) pour tenir sous le plafond de marge de 18 Mo retenu pour ce jeu (croissance annuelle attendue) : colonnes retirées car texte dupliquant une clé déjà présente, note interne, ou poids mort sans variation (gemeinde = libellé du nom de commune redondant avec bfs_nr_gemeinde, bezirk/bfs_bezirksnummer = district non demandé par le schéma des clés, hauptgruppe/untergruppe/substanz = détail de sous-catégorie, einheit_lang = libellé long redondant avec einheit, emission = valeur dans l'unité native déjà remplacée par emico2eq normalisé en CO2-équivalent, stand = date de mise à jour de la source). Colonne `einheit` retirée à l'intégration (07.10.2026, lot jeux2) : vérifiée constante ('t/a') sur l'intégralité des 492 804 lignes en flux — aucune information, coûtait environ 1,97 Mo pour rien ; l'export réduit à 6 colonnes faisait 19 027 714 octets bruts, au-delà du seuil de prudence de 18 000 000 fixé pour ce jeu proche du plafond de 20 Mo. Export à 5 colonnes (`jahr,kanton,bfs_nr_gemeinde,sektor,emico2eq`) mesuré en flux sur l'URL réduite EXACTE ci-dessus : 17 056 490 octets bruts, sous le seuil de 18 Mo avec une marge d'environ 943 Ko. `emico2eq` reste en tonnes de CO2-équivalent par an (unité retirée mais documentée ici, jamais republiée en clair). `jahr` est un champ ODS de type 'date' mais la valeur réelle observée en flux est une année nue à 4 chiffres (ex. '1994') : compatible avec `normalizeYear`. `kanton` vaut toujours 'TG' (abréviation à 2 lettres reconnue par `normalizeCanton`). `bfs_nr_gemeinde` est un entier sans zéro de tête, compatible `normalizeCommuneBfs`. `sektor` reste un code/catégorie à vocabulaire fermé (ex. 'Landwirtschaft', 'Abfall', 'Verkehr'), aucun texte libre ni nom de personne. Plusieurs lignes par commune, année et secteur observées dans la source : une par sous-catégorie ou substance (colonnes `hauptgruppe`/`untergruppe`/`substanz` retirées pour la taille), indiscernables entre elles dans ce jeu réduit — ni confirmées ni infirmées comme sommables, aucun `group_by` côté serveur essayé à cette intégration."
-    },
-    {
       "id": "tg-comptes-communes-2020",
       "title": "Gemeinderechnungen 2020",
       "ckan_uuid": "84a69cad-310d-42e8-a2a2-5772c0202f35",
