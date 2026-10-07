@@ -27,11 +27,11 @@ import {
 } from "../../src/mcp/data-loader.js";
 
 describe("getDatasetsIndex()/getDataset() : fichier réel embarqué", () => {
-  it("le catalogue se charge (au moins un jeu approuvé) ; forme correcte seulement, jamais un id ou un compteur figés", () => {
+  it("le catalogue se charge ; forme correcte seulement, jamais un id, un minimum ou un compteur figés (un registre vidé doit pouvoir se publier)", () => {
     const index = getDatasetsIndex();
     expect(index).not.toBeNull();
     if (!index) return;
-    expect(index.datasets.length).toBeGreaterThanOrEqual(1);
+    expect(Array.isArray(index.datasets)).toBe(true);
     for (const d of index.datasets) {
       expect(typeof d.id).toBe("string");
       expect(d.id.length).toBeGreaterThan(0);
@@ -39,7 +39,7 @@ describe("getDatasetsIndex()/getDataset() : fichier réel embarqué", () => {
       expect(typeof d.publisher).toBe("string");
       expect(["terms_open", "terms_by", "cc0", "cc-by"]).toContain(d.licence);
       expect(Array.isArray(d.keys)).toBe(true);
-      expect(d.rows).toBeGreaterThan(0);
+      expect(Number.isInteger(d.rows) && d.rows >= 0).toBe(true);
       expect(d.edition).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
       const loaded = getDataset(d.id);

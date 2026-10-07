@@ -327,6 +327,23 @@ describe("syncDatasets : encodage inattendu (U+FFFD)", () => {
   });
 });
 
+describe("syncDatasets : fichier sans ligne de données", () => {
+  it("refuse un export réduit à l'en-tête : rien n'est publié (relecture du 07.10.2026)", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    writeFixture(fixDir, entry.id, HEADER + "\n");
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+
+    expect(result.anyFailed).toBe(true);
+    expect(result.failed[0].error).toMatch(/Aucune ligne/);
+    expect(existsSync(join(outDir, `${entry.id}.csv.gz`))).toBe(false);
+  });
+});
+
 describe("syncDatasets : trim cohérent des noms de colonnes entre en-tête et lignes", () => {
   it("colonne non-clé dont le nom porte un espace parasite dans l'en-tête réel : valeur quand même lue (relecture du 07.10.2026)", async () => {
     const regDir = tmpDir();

@@ -391,6 +391,9 @@ async function syncOneDataset(
   const outColumns = outputColumnNames(entry);
   const sorted = sortRows(outputRows, outColumns);
 
+  // Un fichier sans aucune ligne de données n'est jamais publié (en-tête seul, export cassé).
+  if (sorted.length === 0) throw new Error("Aucune ligne de données : jeu non publié");
+
   const previousCsv = readPreviousCsv(opts.outDir, entry.id);
   if (previousCsv !== null) {
     const prevRowCount = previousRowCount(previousCsv);
