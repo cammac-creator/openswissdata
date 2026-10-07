@@ -52,7 +52,8 @@ describe("getDatasetsIndex()/getDataset() : fichier réel embarqué", () => {
         if (key === "year") for (const row of loaded.rows.slice(0, 20)) expect(row.year).toMatch(/^\d{4}$/);
       }
     }
-  });
+    // Tous les jeux réels sont décompressés : délai large pour un runner chargé (relecture du 07.10.2026).
+  }, 30_000);
 
   it("getDataset(\"id-inconnu\") : null", () => {
     expect(getDataset("id-inconnu-du-tout-x7q9")).toBeNull();

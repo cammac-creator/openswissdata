@@ -1267,39 +1267,6 @@
       "notes": "Vérifié le 07.10.2026 : clé year non déclarée (datum = date complète, pas une année isolée ; le moteur ne découpe pas les dates)."
     },
     {
-      "id": "tg-chomage-partiel-noga",
-      "title": "Kennzahlen zur Kurzarbeit pro Monat nach Betriebsgrösse und NOGA Subgruppe ab 2004",
-      "ckan_uuid": "c4bd178f-ccca-408e-a40a-ddabaf9cdc4a",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc-by",
-      "attribution": "Source : Canton de Thurgovie, via opendata.swiss",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/djs-awa-4/exports/csv?use_labels=true",
-      "expected_header": [
-        "betriebsklasse_code",
-        "betriebsklasse_text",
-        "jahr",
-        "monat",
-        "noga_subgruppe",
-        "metrik",
-        "anzahl"
-      ],
-      "keys": {
-        "jahr": "year"
-      },
-      "columns": [
-        "betriebsklasse_code",
-        "betriebsklasse_text",
-        "jahr",
-        "monat",
-        "noga_subgruppe",
-        "metrik",
-        "anzahl"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 : noga_subgruppe combine code et libellé dans la même cellule, pas un code NOGA pur exploitable comme clé."
-    },
-    {
       "id": "tg-diplomes-ecoles-moyennes",
       "title": "Entwicklung der Bildungsabschlüsse an Mittelschulen im Kanton Thurgau ab 2007",
       "ckan_uuid": "d7433997-7bbb-43a4-8f1e-cbe76335c098",

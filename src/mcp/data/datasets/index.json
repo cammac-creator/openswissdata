@@ -452,28 +452,6 @@
       }
     },
     {
-      "id": "tg-chomage-partiel-noga",
-      "title": "Kennzahlen zur Kurzarbeit pro Monat nach Betriebsgrösse und NOGA Subgruppe ab 2004",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc-by",
-      "attribution": "Source : Canton de Thurgovie, via opendata.swiss",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/djs-awa-4/exports/csv?use_labels=true",
-      "columns": [
-        "betriebsklasse_code",
-        "betriebsklasse_text",
-        "year",
-        "monat",
-        "noga_subgruppe",
-        "metrik",
-        "anzahl"
-      ],
-      "keys": [
-        "year"
-      ],
-      "rows": 100376,
-      "edition": "2026-10-07"
-    },
-    {
       "id": "tg-comptage-trafic-routier",
       "title": "Verkehrszähldaten motorisierter Individualverkehr",
       "publisher": "Canton de Thurgovie",
