@@ -1362,6 +1362,139 @@
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
       "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
+    },
+    {
+      "id": "tg-emissions-ges-commune",
+      "title": "Treibhausgas-Emissionen nach Gemeinden ab 1990",
+      "ckan_uuid": "dae51783-9f30-47cf-a5e6-844c2501cc0a",
+      "publisher": "Canton de Thurgovie",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/dbu-afu-23/exports/csv?select=jahr,kanton,bfs_nr_gemeinde,sektor,emico2eq&use_labels=false",
+      "expected_header": [
+        "jahr",
+        "kanton",
+        "bfs_nr_gemeinde",
+        "sektor",
+        "emico2eq"
+      ],
+      "keys": {
+        "jahr": "year",
+        "kanton": "canton",
+        "bfs_nr_gemeinde": "commune_bfs"
+      },
+      "columns": [
+        "jahr",
+        "kanton",
+        "bfs_nr_gemeinde",
+        "sektor",
+        "emico2eq"
+      ],
+      "approved_on": "2026-10-07",
+      "checked_by": "intégrateur",
+      "notes": "Vérifié le 07.10.2026 (lot G3-gros, jeu écarté une première fois pour 'trop_gros' avec l'export complet). Fiche CKAN (package_show, organisation kanton-thurgau) : licence de la ressource CSV = https://opendata.swiss/terms-of-use#terms_open (aucune attribution requise). Métadonnées ODS (data.tg.ch, jeu dbu-afu-23) : 492 804 lignes, portail Opendatasoft — réduit par le paramètre `select` du point /exports/csv (pas de `where`, toutes les années et communes gardées) pour tenir sous le plafond de marge de 18 Mo retenu pour ce jeu (croissance annuelle attendue) : colonnes retirées car texte dupliquant une clé déjà présente, note interne, ou poids mort sans variation (gemeinde = libellé du nom de commune redondant avec bfs_nr_gemeinde, bezirk/bfs_bezirksnummer = district non demandé par le schéma des clés, hauptgruppe/untergruppe/substanz = détail de sous-catégorie, einheit_lang = libellé long redondant avec einheit, emission = valeur dans l'unité native déjà remplacée par emico2eq normalisé en CO2-équivalent, stand = date de mise à jour de la source). Colonne `einheit` retirée à l'intégration (07.10.2026, lot jeux2) : vérifiée constante ('t/a') sur l'intégralité des 492 804 lignes en flux — aucune information, coûtait environ 1,97 Mo pour rien ; l'export réduit à 6 colonnes faisait 19 027 714 octets bruts, au-delà du seuil de prudence de 18 000 000 fixé pour ce jeu proche du plafond de 20 Mo. Export à 5 colonnes (`jahr,kanton,bfs_nr_gemeinde,sektor,emico2eq`) mesuré en flux sur l'URL réduite EXACTE ci-dessus : 17 056 490 octets bruts, sous le seuil de 18 Mo avec une marge d'environ 943 Ko. `emico2eq` reste en tonnes de CO2-équivalent par an (unité retirée mais documentée ici, jamais republiée en clair). `jahr` est un champ ODS de type 'date' mais la valeur réelle observée en flux est une année nue à 4 chiffres (ex. '1994') : compatible avec `normalizeYear`. `kanton` vaut toujours 'TG' (abréviation à 2 lettres reconnue par `normalizeCanton`). `bfs_nr_gemeinde` est un entier sans zéro de tête, compatible `normalizeCommuneBfs`. `sektor` reste un code/catégorie à vocabulaire fermé (ex. 'Landwirtschaft', 'Abfall', 'Verkehr'), aucun texte libre ni nom de personne. Plusieurs lignes par commune, année et secteur observées dans la source : une par sous-catégorie ou substance (colonnes `hauptgruppe`/`untergruppe`/`substanz` retirées pour la taille), indiscernables entre elles dans ce jeu réduit — ni confirmées ni infirmées comme sommables, aucun `group_by` côté serveur essayé à cette intégration."
+    },
+    {
+      "id": "tg-comptes-communes-2020",
+      "title": "Gemeinderechnungen 2020",
+      "ckan_uuid": "84a69cad-310d-42e8-a2a2-5772c0202f35",
+      "publisher": "Canton de Thurgovie",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/dfs-fv-25/exports/csv?select=jahr,bfs_nr_gemeinde,typ,konto_nr,funktion_nr,funktion_bezeichnung,betrag&use_labels=false",
+      "expected_header": [
+        "jahr",
+        "bfs_nr_gemeinde",
+        "typ",
+        "konto_nr",
+        "funktion_nr",
+        "funktion_bezeichnung",
+        "betrag"
+      ],
+      "keys": {
+        "jahr": "year",
+        "bfs_nr_gemeinde": "commune_bfs"
+      },
+      "columns": [
+        "jahr",
+        "bfs_nr_gemeinde",
+        "typ",
+        "konto_nr",
+        "funktion_nr",
+        "funktion_bezeichnung",
+        "betrag"
+      ],
+      "approved_on": "2026-10-07",
+      "checked_by": "intégrateur",
+      "notes": "Vérifié le 07.10.2026 (lot G3-gros). Fiche CKAN (package_show) : licence de la ressource CSV = https://opendata.swiss/terms-of-use#terms_open (aucune attribution requise). Métadonnées ODS (data.tg.ch, jeu dfs-fv-25, canton de Thurgovie) : 40 142 lignes, un jeu CKAN SÉPARÉ par année (pas de jeu consolidé multi-années trouvé sur data.tg.ch : recherche `where=title like \"Gemeinderechnungen\"` donne 6 jeux distincts, un par année 2020-2025). Colonne de texte libre 'politische_gemeinde' (nom de commune) et les colonnes 'konto_umfasst'/'funktion_umfasst' (description longue du périmètre du compte, probable cause du dépassement de 20 Mo du fichier complet) retirées dès la première vérification. Colonne `konto_bezeichnung` retirée à l'intégration (07.10.2026, lot jeux2), après relecture complète du fichier collecté : bien que la majorité des valeurs soient de courts libellés du plan comptable harmonisé (médiane 32 caractères), 7 libellés distincts dépassent 100 caractères (jusqu'à 787) et portent des notes explicatives sur des sujets variés (péréquation financière intercantonale NFA, voies de communication, préfinancements du capital propre…) — du texte libre, interdit par les Global Constraints du plan même sous forme de libellé de compte officiel. `konto_nr` (code numérique du compte) reste dans le jeu comme identifiant du compte, sans ce risque. `funktion_bezeichnung` est gardée : relue intégralement sur ce fichier, 100 valeurs distinctes, 51 caractères au plus, vocabulaire fermé des fonctions HRM2, aucune n'approche une longueur de texte libre (102 valeurs distinctes au total sur l'union des trois années 2020/2021/2023, chacune sous 51 caractères). En-tête et taille relus par téléchargement en flux de l'URL réduite EXACTE ci-dessus : 2 453 622 octets bruts, largement sous les 20 Mo. `jahr` observé en valeur réelle comme une année nue à 4 chiffres (ex. '2020'), compatible `normalizeYear` malgré le type ODS 'date'. `bfs_nr_gemeinde` entier sans zéro de tête, compatible `normalizeCommuneBfs`. `typ` est un code à vocabulaire fermé (ex. 'ERFOLGSRECHNUNG', 'BILANZ', 'INVESTITIONSRECHNUNG'), vide sur 4 lignes sur 40 142 (dont une seule ligne 'Abschluss' ; les autres sans type ni libellé de compte dans la source elle-même, pas un défaut de lecture). Aucune colonne de personne détectée (aucune colonne de cet en-tête ne correspond aux motifs de `detectPersonColumns`)."
+    },
+    {
+      "id": "tg-comptes-communes-2021",
+      "title": "Gemeinderechnungen 2021",
+      "ckan_uuid": "efb0072b-4d6e-49f2-a617-25b94091097e",
+      "publisher": "Canton de Thurgovie",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/dfs-fv-28/exports/csv?select=jahr,bfs_nr_gemeinde,typ,konto_nr,funktion_nr,funktion_bezeichnung,betrag&use_labels=false",
+      "expected_header": [
+        "jahr",
+        "bfs_nr_gemeinde",
+        "typ",
+        "konto_nr",
+        "funktion_nr",
+        "funktion_bezeichnung",
+        "betrag"
+      ],
+      "keys": {
+        "jahr": "year",
+        "bfs_nr_gemeinde": "commune_bfs"
+      },
+      "columns": [
+        "jahr",
+        "bfs_nr_gemeinde",
+        "typ",
+        "konto_nr",
+        "funktion_nr",
+        "funktion_bezeichnung",
+        "betrag"
+      ],
+      "approved_on": "2026-10-07",
+      "checked_by": "intégrateur",
+      "notes": "Vérifié le 07.10.2026 (lot G3-gros) : même source, même structure et même raisonnement que tg-comptes-communes-2020 (jeu CKAN séparé par année sur data.tg.ch, jeu ODS dfs-fv-28). Licence de la ressource CSV = terms_open (CKAN package_show). 40 576 lignes selon les métadonnées ODS. Colonne `konto_bezeichnung` retirée à l'intégration pour la même raison que tg-comptes-communes-2020 (texte libre jusqu'à 787 caractères sur des comptes isolés, relu sur ce fichier aussi) ; `konto_nr` gardé comme identifiant du compte. `funktion_bezeichnung` gardée : relue intégralement sur ce fichier, 101 valeurs distinctes, 51 caractères au plus, vocabulaire fermé des fonctions HRM2 (102 valeurs distinctes au total sur l'union des trois années 2020/2021/2023). En-tête et taille relus par téléchargement en flux de l'URL réduite EXACTE ci-dessus : 2 481 911 octets bruts, sous les 20 Mo. `typ` vide sur 6 lignes sur 40 576, mêmes vérifications de forme des valeurs (jahr = année nue à 4 chiffres, bfs_nr_gemeinde = entier sans zéro de tête, typ = code à vocabulaire fermé) et absence de colonne de personne que pour l'année 2020."
+    },
+    {
+      "id": "tg-comptes-communes-2023",
+      "title": "Gemeinderechnungen 2023",
+      "ckan_uuid": "a7fecd98-ac97-40a7-9b56-e346ec7637d2",
+      "publisher": "Canton de Thurgovie",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/dfs-fv-30/exports/csv?select=jahr,bfs_nr_gemeinde,typ,konto_nr,funktion_nr,funktion_bezeichnung,betrag&use_labels=false",
+      "expected_header": [
+        "jahr",
+        "bfs_nr_gemeinde",
+        "typ",
+        "konto_nr",
+        "funktion_nr",
+        "funktion_bezeichnung",
+        "betrag"
+      ],
+      "keys": {
+        "jahr": "year",
+        "bfs_nr_gemeinde": "commune_bfs"
+      },
+      "columns": [
+        "jahr",
+        "bfs_nr_gemeinde",
+        "typ",
+        "konto_nr",
+        "funktion_nr",
+        "funktion_bezeichnung",
+        "betrag"
+      ],
+      "approved_on": "2026-10-07",
+      "checked_by": "intégrateur",
+      "notes": "Vérifié le 07.10.2026 (lot G3-gros) : même source, même structure et même raisonnement que tg-comptes-communes-2020 (jeu CKAN séparé par année sur data.tg.ch, jeu ODS dfs-fv-30). Licence de la ressource CSV = terms_open (CKAN package_show). 41 743 lignes selon les métadonnées ODS. Colonne `konto_bezeichnung` retirée à l'intégration pour la même raison que tg-comptes-communes-2020 (texte libre jusqu'à 787 caractères sur des comptes isolés, relu sur ce fichier aussi) ; `konto_nr` gardé comme identifiant du compte. `funktion_bezeichnung` gardée : relue intégralement sur ce fichier, 100 valeurs distinctes, 51 caractères au plus, vocabulaire fermé des fonctions HRM2 (102 valeurs distinctes au total sur l'union des trois années 2020/2021/2023). En-tête et taille relus par téléchargement en flux de l'URL réduite EXACTE ci-dessus : 2 554 235 octets bruts, sous les 20 Mo. `typ` vide sur 3 lignes sur 41 743, mêmes vérifications de forme des valeurs et absence de colonne de personne que pour l'année 2020. Note pour l'intégrateur : les années 2022, 2024 et 2025 du même jeu annuel existent sur data.tg.ch (dfs-fv-29/31/32) mais n'étaient pas dans le lot 'trop_gros' à vérifier ici ; à traiter séparément si souhaité, par le même procédé (select réduit, sans `konto_bezeichnung`)."
     }
   ]
 }
