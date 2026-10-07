@@ -1,0 +1,644 @@
+{
+  "help": "https://ckan.opendata.swiss/api/3/action/help_show?name=package_show",
+  "success": true,
+  "result": {
+    "accrual_periodicity": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+    "conforms_to": [],
+    "coverage": "",
+    "description": {
+      "de": "",
+      "fr": "REPERTOIRE DES ENTREPRISES DU CANTON DE GENEVE (REG) Le Répertoire des entreprises du canton de Genève (REG) contient des informations relatives à toutes entités (entreprise ou établissement) exercant une activité dans le canton de Genève. L'entreprise est une entité juridiquement autonome, avec ou sans personnalité juridique, organisée pour produire des biens ou fournir des services, avec ou sans but lucratif, à l'usage des particuliers ou des collectivités publiques, bénéficie d'une certaine liberté de décision quant à l'affectation des ressources et à l'utilisation des moyens destinés à la production de ces biens et services. L'établissement est le lieu topographiquement identifié dans lequel l'entreprise exerce son activité. Ne sont représentés que les entreprises dont le siège se trouve dans le canton de Genève et les établissements dont le point adresse est connu du SITG (IDPADR).",
+      "it": "",
+      "en": ""
+    },
+    "display_name": {
+      "de": "",
+      "fr": "Répertoire des entreprises (REG)",
+      "it": "",
+      "en": ""
+    },
+    "id": "faddff0d-193f-4e72-849d-88291a37aef6",
+    "identifier": "REG_ENTREPRISE_ETABLISSEMENT@canton-geneve",
+    "isopen": false,
+    "issued": "2025-06-12T00:00:00",
+    "keywords": {
+      "en": [],
+      "de": [],
+      "fr": [],
+      "it": []
+    },
+    "language": [
+      "fr"
+    ],
+    "license_id": null,
+    "license_title": null,
+    "metadata_created": "2026-01-12T16:11:55.002581",
+    "metadata_modified": "2026-10-06T03:43:17.652941",
+    "modified": "2026-10-03T00:00:00",
+    "name": "repertoire-des-entreprises-reg1",
+    "num_resources": 9,
+    "num_tags": 0,
+    "organization": {
+      "approval_status": "approved",
+      "created": "2016-06-02T15:26:07.143891",
+      "description": {
+        "fr": "Le canton de Genève s'est engagé dans une démarche d’ouverture des données publiques depuis plusieurs années. Sur ce portail, vous trouvez toutes les données provenant de l'administration cantonale genevoise qui répondent aux principes de l'Open Government Data, ainsi que les géodonnées OpenData du Système d’Information du Territoire à Genève (SITG).",
+        "de": "Der Kanton Genf verfolgt seit einigen Jahren eine Open Data Strategie. Auf diesem Portal finden Sie Daten aus der kantonalen Verwaltung die die Prinzipien des Open Government Data erfüllen, sowie sämtliche \"Open-Geodaten\" des Genfer Geoinformationssystems (SITG). ***Die Datensätze finden Sie unter der betreffenden Organisation***",
+        "en": "The canton of Geneva has been committed to making public data open for a few years now. On this portal, you will find all the data from the Geneva cantonal administration that meet the principles of Open Government Data, as well as geodata from the geographic information system of Geneva (SITG) that fall under the OpenData policy.",
+        "it": "Il cantone di Ginevra si è impegnato in un processo di apertura dei dati pubblici per diversi anni. Su questo portale, è possibile trovare tutti i dati dell'amministrazione del cantone di Ginevra che soddisfano i principi del Open Government Data, inoltre ai geodati OpenData del Sistema Informativo Territoriale di Ginevra (SITG)."
+      },
+      "display_name": {
+        "de": "Kanton Genf",
+        "en": "Canton of Geneva",
+        "fr": "Canton de Genève",
+        "it": "Cantone di Ginevra"
+      },
+      "id": "8d3f112c-aba3-495b-bf79-62a1504fcd32",
+      "image_display_url": "https://ckan.opendata.swiss/uploads/group/CANTON-DE-GENEVE.png",
+      "image_url": "https://ckan.opendata.swiss/uploads/group/CANTON-DE-GENEVE.png",
+      "is_organization": true,
+      "name": "canton-geneve",
+      "num_followers": 0,
+      "package_count": 1019,
+      "political_level": "canton",
+      "state": "active",
+      "title": {
+        "de": "Kanton Genf",
+        "en": "Canton of Geneva",
+        "fr": "Canton de Genève",
+        "it": "Cantone di Ginevra"
+      },
+      "type": "organization",
+      "url": "",
+      "tags": [],
+      "groups": []
+    },
+    "owner_org": "8d3f112c-aba3-495b-bf79-62a1504fcd32",
+    "private": false,
+    "publisher": {
+      "name": {
+        "de": "",
+        "fr": "Office cantonal de l'inspection et des relations du travail",
+        "it": "",
+        "en": ""
+      },
+      "url": "https://www.ge.ch/utiliser-repertoire-entreprises-du-canton-geneve"
+    },
+    "qualified_relations": [],
+    "relations": [
+      {
+        "label": {
+          "de": "geocat.ch Permalink",
+          "fr": "geocat.ch permalien",
+          "it": "geocat.ch link permanente",
+          "en": "geocat.ch permalink"
+        },
+        "url": "https://www.geocat.ch/datahub/dataset/REG_ENTREPRISE_ETABLISSEMENT"
+      }
+    ],
+    "see_alsos": [],
+    "spatial": "GE",
+    "state": "active",
+    "temporals": [],
+    "title": {
+      "de": "",
+      "fr": "Répertoire des entreprises (REG)",
+      "it": "",
+      "en": ""
+    },
+    "title_for_slug": "repertoire-des-entreprises-reg1",
+    "type": "dataset",
+    "url": "",
+    "version": null,
+    "groups": [
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Wirtschaft und Finanzen",
+          "en": "Economy and finance",
+          "fr": "Économie et finances",
+          "it": "Economia e finanze"
+        },
+        "id": "34f50c10-ddd0-4e37-b5c0-49456b39e31a",
+        "image_display_url": "",
+        "name": "econ",
+        "title": {
+          "de": "Wirtschaft und Finanzen",
+          "en": "Economy and finance",
+          "fr": "Économie et finances",
+          "it": "Economia e finanze"
+        }
+      }
+    ],
+    "resources": [
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-04-04T07:08:56.540019",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "REG_ENTREPRISE_ETABLISSEMENT",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "format": "API",
+        "hash": "",
+        "id": "705cef5c-edd8-4eab-bd96-5140b8277519",
+        "issued": "2025-06-12T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-06T03:43:17.662167",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-03T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "faddff0d-193f-4e72-849d-88291a37aef6",
+        "position": 0,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://vector.sitg.ge.ch/arcgis/rest/services/REG_ENTREPRISE_ETABLISSEMENT/FeatureServer",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-05-02T06:46:10.963392",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "REG_ENTREPRISE_ETABLISSEMENT",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "format": "API",
+        "hash": "",
+        "id": "6a0fca82-1676-4aea-bc57-ec55749e5de4",
+        "issued": "2025-06-12T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-06T03:43:17.662287",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-03T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "faddff0d-193f-4e72-849d-88291a37aef6",
+        "position": 1,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://vector.sitg.ge.ch/arcgis/rest/services/REG_ENTREPRISE_ETABLISSEMENT/MapServer",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-04-04T07:08:56.540015",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "REG_ENTREPRISE_ETABLISSEMENT",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "format": "WFS",
+        "hash": "",
+        "id": "74f8da51-fd4c-4c4e-8273-2e99b4e419d2",
+        "issued": "2025-06-12T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-06T03:43:17.662355",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-03T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "faddff0d-193f-4e72-849d-88291a37aef6",
+        "position": 2,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://vector.sitg.ge.ch/arcgis/services/REG_ENTREPRISE_ETABLISSEMENT/MapServer/WFSServer?service=WFS&request=GetCapabilities",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-05-02T06:46:10.963396",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "REG_ENTREPRISE_ETABLISSEMENT",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "format": "WMS",
+        "hash": "",
+        "id": "d89c542c-494d-4fa6-9d0b-6cddb6f24332",
+        "issued": "2025-06-12T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-06T03:43:17.662418",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-03T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "faddff0d-193f-4e72-849d-88291a37aef6",
+        "position": 3,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "0",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://vector.sitg.ge.ch/arcgis/services/REG_ENTREPRISE_ETABLISSEMENT/MapServer/WMSServer?request=GetCapabilities&service=WMS",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-07-05T09:36:32.665942",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "Serveur de fichiers Opendata",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "CSV",
+          "it": "",
+          "en": ""
+        },
+        "format": "CSV",
+        "hash": "",
+        "id": "3ca91e9e-8c8e-4cd7-aa04-519282233c0d",
+        "issued": "2025-06-12T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "text/csv",
+        "metadata_modified": "2026-10-06T03:43:17.662490",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-03T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "CSV",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "faddff0d-193f-4e72-849d-88291a37aef6",
+        "position": 4,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "CSV",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://ge.ch/sitg/geodata/SITG/OPENDATA/REG_ENTREPRISE_ETABLISSEMENT-CSV.zip",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-07-05T09:36:32.665946",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "Serveur de fichiers Opendata",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "GDB",
+          "it": "",
+          "en": ""
+        },
+        "format": "ZIP",
+        "hash": "",
+        "id": "26aac618-0b48-417e-b415-e05ccae18723",
+        "issued": "2025-06-12T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-06T03:43:17.662554",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-03T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "GDB",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "faddff0d-193f-4e72-849d-88291a37aef6",
+        "position": 5,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "GDB",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://ge.ch/sitg/geodata/SITG/OPENDATA/REG_ENTREPRISE_ETABLISSEMENT-GDB.zip",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-07-05T09:36:32.665948",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "Serveur de fichiers Opendata",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "GML",
+          "it": "",
+          "en": ""
+        },
+        "format": "GML",
+        "hash": "",
+        "id": "50f399a6-6795-4db7-8953-1a88db80060c",
+        "issued": "2025-06-12T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-06T03:43:17.662613",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-03T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "GML",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "faddff0d-193f-4e72-849d-88291a37aef6",
+        "position": 6,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "GML",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://ge.ch/sitg/geodata/SITG/OPENDATA/REG_ENTREPRISE_ETABLISSEMENT-GML.zip",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-07-05T09:36:32.665949",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "Serveur de fichiers Opendata",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "KML",
+          "it": "",
+          "en": ""
+        },
+        "format": "KML",
+        "hash": "",
+        "id": "ef315153-a97f-4163-917b-2240fcf07499",
+        "issued": "2025-06-12T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "application/vnd.google-earth.kml+xml",
+        "metadata_modified": "2026-10-06T03:43:17.662680",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-03T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "KML",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "faddff0d-193f-4e72-849d-88291a37aef6",
+        "position": 7,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "KML",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://ge.ch/sitg/geodata/SITG/OPENDATA/REG_ENTREPRISE_ETABLISSEMENT-KML.zip",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-07-05T09:36:32.665951",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "Serveur de fichiers Opendata",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "SHP",
+          "it": "",
+          "en": ""
+        },
+        "format": "SHP",
+        "hash": "",
+        "id": "87bc7435-d42c-496b-a87a-f343e04470f7",
+        "issued": "2025-06-12T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-06T03:43:17.662740",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-03T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "SHP",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "faddff0d-193f-4e72-849d-88291a37aef6",
+        "position": 8,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "SHP",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://ge.ch/sitg/geodata/SITG/OPENDATA/REG_ENTREPRISE_ETABLISSEMENT-SHP.zip",
+        "url_type": null
+      }
+    ],
+    "tags": [],
+    "relationships_as_subject": [],
+    "relationships_as_object": [],
+    "extras": [
+      {
+        "key": "harvest_object_id",
+        "value": "482b8351-2a4f-48fd-bc01-b0152800b802"
+      },
+      {
+        "key": "harvest_source_id",
+        "value": "c071b888-a837-4654-a1e7-6e989b648581"
+      },
+      {
+        "key": "harvest_source_title",
+        "value": "GEOCAT canton GE"
+      }
+    ]
+  }
+}

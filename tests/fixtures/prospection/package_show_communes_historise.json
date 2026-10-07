@@ -1,0 +1,557 @@
+{
+  "help": "https://ckan.opendata.swiss/api/3/action/help_show?name=package_show",
+  "success": true,
+  "result": {
+    "accrual_periodicity": "",
+    "conforms_to": [],
+    "description": {
+      "de": "Das Bundesamt für Statistik (BFS) führt dieses und übernimmt darin alle von der Geodäsie und Eidgenössische Vermessungsdirektion (swisstopo) im Bundesblatt publizierten Änderungen.\r\nDas historisierte Gemeindeverzeichnis gemäss der letzten Version des eCH-0071-Standards mit allen Gemeinden ab 1848 und ihren Mutationen, wird als Grundlagenverzeichnis für Gemeindeidentifikation und Gemeindenamen auf Stufe Bund, Kantone und Gemeinden sowie in der Privatwirtschaft eingesetzt. ",
+      "en": "This list is managed by the Federal Statistical Office (FSO) and is updated according to the latest changes published in the Federal Gazette by the Geodesy and Federal Directorate of Cadastral Surveying (swisstopo). The historical list of communes - according to the latest version of the eCH-0071 standard - contains all the communes since 1848 and their mutations and serves as a reference for the identification and the designation of communes in several administrative operations at federal, cantonal and communal level, as well as in the private sector.",
+      "fr": "Cette liste est gérée par l’Office fédéral de la statistique (OFS), qui y intègre toutes les modifications publiées dans la Feuille fédérale par la Géodésie et Direction fédérale des mensurations cadastrales (swisstopo). La liste historisée des communes - conforme à la dernière version du standard eCH-0071 - contient toutes les communes à partir de 1848 et leurs mutations, sert de référence pour l’identification et la désignation des communes dans de nombreuses opérations administratives aux niveaux fédéral, cantonal et communal de même que dans le secteur privé.",
+      "it": "Questo elenco è gestito dall'Ufficio federale di statistica (UST), che vi riprende tutte le modifiche pubblicate nel Foglio federale dalla Geodesia e Direzione federale delle misurazioni catastali (swisstopo). L'elenco storicizzato dei Comuni - conforme all'ultima versione dello standard eCH-0071 - contiene tutti i Comuni dal 1848 e le loro mutazioni, serve da riferimento per identificare e designare i Comuni in numerose operazioni amministrative a livello federale, cantonale e comunale, oltre che nel settore privato."
+    },
+    "display_name": {
+      "de": "Historisiertes Gemeindeverzeichnis der Schweiz ",
+      "en": "Swiss official commune’s historicized list ",
+      "fr": "Liste historisée des communes de la Suisse ",
+      "it": "Elenco storicizzato dei Comuni della Svizzera "
+    },
+    "documentation": [],
+    "id": "784add14-acbb-4b80-ba2d-a6c854446a14",
+    "identifier": "municipality@bundesamt-fur-statistik-bfs",
+    "isopen": false,
+    "issued": "",
+    "keywords": {
+      "en": [
+        "swiss-official-commune-s-historicized-list",
+        "municipality"
+      ],
+      "de": [
+        "historisiertes-gemeindeverzeichnis-der-schweiz",
+        "amtliches-gemeindeverzeichnis",
+        "gemeinde"
+      ],
+      "fr": [
+        "repertoire-officiel-des-communes",
+        "commune",
+        "liste-historisee-des-communes-de-la-suisse"
+      ],
+      "it": [
+        "elenco-ufficiale-dei-comuni",
+        "elenco-storicizzato-dei-comuni-della-svizzera",
+        "comune"
+      ]
+    },
+    "language": [
+      "en",
+      "de",
+      "fr",
+      "it"
+    ],
+    "license_id": null,
+    "license_title": null,
+    "metadata_created": "2023-09-27T11:13:40.570961",
+    "metadata_modified": "2026-02-18T12:50:42.723141",
+    "modified": "2026-01-01T00:00:00",
+    "name": "historisiertes-gemeindeverzeichnis-der-schweiz",
+    "num_resources": 6,
+    "num_tags": 0,
+    "organization": {
+      "approval_status": "approved",
+      "created": "2015-11-30T11:50:01.742198",
+      "description": {
+        "fr": "L'OFS est le centre de compétence de la statistique publique suisse. Il produit des informations statistiques sur la population, l'économie, la société, la formation et la recherche, le territoire et l'environnement. Ces informations servent à la formation de l’opinion publique. Elles sont un outil de planification et de gouvernance dans tous les domaines de l’action politique et contribuent au bon fonctionnement de notre État moderne et démocratique.",
+        "de": "Das BFS ist das nationale Kompetenzzentrum der öffentlichen Statistik der Schweiz. Es produziert und publiziert statistische Informationen über den Stand und die Entwicklung von Bevölkerung, Wirtschaft, Gesellschaft, Bildung, Forschung, Raum und Umwelt. Diese Informationen dienen der Meinungsbildung in der Bevölkerung sowie der Planung und Steuerung von zentralen Politikbereichen. Sie leisten einen wichtigen Beitrag für einen modernen, demokratischen Staat.",
+        "en": "The FSO is Switzerland's national competence centre for official statistics. It produces and publishes statistical information on the status and development of the population, economy, society, education, research, territory and the environment. This information is used for opinion building among the population and for the planning and management of key policy areas. They make an important contribution to a modern, democratic state.",
+        "it": "L’UST è il centro di competenza nazionale per la statistica pubblica della Svizzera. Produce e pubblica informazioni statistiche sullo stato e sull'evoluzione della popolazione, dell'economia, della società, della formazione, della ricerca, del territorio e dell'ambiente. Queste informazioni servono alla formazione dell'opinione pubblica nonché alla pianificazione e alla gestione in ambiti politici di centrale importanza. Forniscono un importante contributo per uno Stato moderno e democratico."
+      },
+      "display_name": {
+        "de": "Bundesamt für Statistik BFS",
+        "en": "Federal Statistical Office FSO",
+        "fr": "Office fédéral de la statistique OFS",
+        "it": "Ufficio federale di statistica UST"
+      },
+      "id": "4309c328-c618-4077-bcdc-378a21ee1b46",
+      "image_display_url": "https://ckan.opendata.swiss/uploads/group/BFS_08_web.jpg",
+      "image_url": "https://ckan.opendata.swiss/uploads/group/BFS_08_web.jpg",
+      "is_organization": true,
+      "name": "bundesamt-fur-statistik-bfs",
+      "num_followers": 0,
+      "package_count": 3372,
+      "political_level": "confederation",
+      "state": "active",
+      "title": {
+        "de": "Bundesamt für Statistik BFS",
+        "en": "Federal Statistical Office FSO",
+        "fr": "Office fédéral de la statistique OFS",
+        "it": "Ufficio federale di statistica UST"
+      },
+      "type": "organization",
+      "url": "https://www.bfs.admin.ch",
+      "tags": [],
+      "groups": []
+    },
+    "owner_org": "4309c328-c618-4077-bcdc-378a21ee1b46",
+    "private": false,
+    "publisher": {
+      "url": "mailto:raumnomenklaturen@bfs.admin.ch",
+      "name": {
+        "de": "BFS/OFS",
+        "en": "",
+        "fr": "",
+        "it": ""
+      }
+    },
+    "qualified_relations": [],
+    "relations": [
+      {
+        "label": {
+          "en": "",
+          "it": "",
+          "de": "legal_basis",
+          "fr": ""
+        },
+        "url": "https://www.admin.ch/opc/de/classified-compilation/19920252/index.html"
+      },
+      {
+        "label": {
+          "en": "",
+          "it": "",
+          "de": "eCH-0071 Datenstandard Historisiertes Gemeindeverzeichnis der Schweiz",
+          "fr": ""
+        },
+        "url": "https://www.ech.ch/fr/ech/ech-0071/1.1"
+      }
+    ],
+    "scheduled": "",
+    "see_alsos": [],
+    "state": "active",
+    "temporals": [
+      {
+        "end_date": "",
+        "start_date": "1848-01-01T00:00:00"
+      }
+    ],
+    "title": {
+      "de": "Historisiertes Gemeindeverzeichnis der Schweiz ",
+      "en": "Swiss official commune’s historicized list ",
+      "fr": "Liste historisée des communes de la Suisse ",
+      "it": "Elenco storicizzato dei Comuni della Svizzera "
+    },
+    "title_for_slug": "Historisiertes Gemeindeverzeichnis der Schweiz ",
+    "type": "dataset",
+    "url": "https://ld.admin.ch/dimension/municipality",
+    "version": null,
+    "groups": [
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Regierung und öffentlicher Sektor",
+          "en": "Government and public sector",
+          "fr": "Gouvernement et secteur public",
+          "it": "Governo e settore pubblico"
+        },
+        "id": "e63f4b4e-5e3e-4c7f-9d4a-4babf164878f",
+        "image_display_url": "",
+        "name": "gove",
+        "title": {
+          "de": "Regierung und öffentlicher Sektor",
+          "en": "Government and public sector",
+          "fr": "Gouvernement et secteur public",
+          "it": "Governo e settore pubblico"
+        }
+      },
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        },
+        "id": "5ce2de34-4114-43cd-ab45-e90a42db50aa",
+        "image_display_url": "",
+        "name": "regi",
+        "title": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        }
+      }
+    ],
+    "resources": [
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "coverage": "",
+        "created": "2026-02-03T14:05:20.802525",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Dieses Snapshot ist eine aktuelle Liste der Gemeinden.",
+          "en": "",
+          "fr": "Ce snapshot correspond à la liste actuelle des communes.",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Snapshot der Gemeinden (aktueller Stand)",
+          "en": "",
+          "fr": "Snapshot des communes (état actuel)",
+          "it": ""
+        },
+        "documentation": [
+          "https://www.agvchapp.bfs.admin.ch/documents/rest_api_fr.pdf",
+          "https://www.agvchapp.bfs.admin.ch/documents/rest_api_de.pdf",
+          "https://www.agvchapp.bfs.admin.ch"
+        ],
+        "download_url": "",
+        "format": "SERVICE",
+        "hash": "",
+        "id": "4c211c18-a360-4659-a1c1-86db9740d6b4",
+        "identifier": "",
+        "issued": "",
+        "language": [],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-02-18T12:50:42.731838",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "Snapshot der Gemeinden (aktueller Stand)",
+          "en": "",
+          "fr": "Snapshot des communes (état actuel)",
+          "it": ""
+        },
+        "package_id": "784add14-acbb-4b80-ba2d-a6c854446a14",
+        "position": 0,
+        "resource_type": null,
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "de": "Snapshot der Gemeinden (aktueller Stand)",
+          "en": "",
+          "fr": "Snapshot des communes (état actuel)",
+          "it": ""
+        },
+        "url": "http://www.regbl.admin.ch/agvchapp/snapshot.html",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "coverage": "",
+        "created": "2026-02-03T14:13:18.386613",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Die Übereinstimmungen geben für jede Gemeinde, die zum Zeitpunkt startPeriod existiert, an, welche Gemeinde(n) zum Zeitpunkt endPeriod die entsprechende(n) Gemeinde(n) ist/sind. Les dates sont indiquées dans la requête et peuvent être modifiées manuellement.",
+          "en": "",
+          "fr": "Les correspondances indiquent pour chaque commune existant au moment startPeriod, quelle(s) est/sont la/les commune(s) correspondante(s) au moment endPeriod. Die Zeiträume sind in der Anfrage angegeben und können manuell geändert werden.",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Gemeindeübereinstimmungen 01.01.2016 - 31.12.2025",
+          "en": "",
+          "fr": "Correspondances des communes 01.01.2016 - 31.12.2025",
+          "it": ""
+        },
+        "documentation": [
+          "https://www.agvchapp.bfs.admin.ch/documents/rest_api_de.pdf",
+          "https://www.agvchapp.bfs.admin.ch/documents/rest_api_fr.pdf",
+          "https://www.agvchapp.bfs.admin.ch"
+        ],
+        "download_url": "",
+        "format": "SERVICE",
+        "hash": "",
+        "id": "9cc098b0-5c30-460c-b0e2-39ccb528b14a",
+        "identifier": "",
+        "issued": "",
+        "language": [],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-02-16T07:57:03.210116",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "Gemeindeübereinstimmungen 01.01.2016 - 31.12.2025",
+          "en": "",
+          "fr": "Correspondances des communes 01.01.2016 - 31.12.2025",
+          "it": ""
+        },
+        "package_id": "784add14-acbb-4b80-ba2d-a6c854446a14",
+        "position": 1,
+        "resource_type": null,
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "de": "Gemeindeübereinstimmungen 01.01.2016 - 31.12.2025",
+          "en": "",
+          "fr": "Correspondances des communes 01.01.2016 - 31.12.2025",
+          "it": ""
+        },
+        "url": "https://www.agvchapp.bfs.admin.ch/api/communes/correspondances?includeUnmodified=true&includeTerritoryExchange=true&startPeriod=01-01-2016&endPeriod=31-12-2025",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "coverage": "",
+        "created": "2026-02-03T14:17:30.924182",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Die Liste der Mutationen beschreibt alle gemeindebezogenen Änderungen, die während des angegebenen Zeitraums stattgefunden haben (01.01.2016 - 31.12.2025). Die in der Anfrage angegebenen Zeiträume können manuell geändert werden.",
+          "en": "",
+          "fr": "La liste des mutations décrit tous les changements liés aux communes ayant eu lieu pendant la période spécifiée (01.01.2016 - 31.12.2025). La période indiquée peut être modifiées manuellement.",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Mutationen der Gemeinden 01.01.2016 - 31.12.2025",
+          "en": "",
+          "fr": "Mutation des communes 01.01.2016 - 31.12.2025",
+          "it": ""
+        },
+        "documentation": [
+          "https://www.agvchapp.bfs.admin.ch/documents/rest_api_de.pdf",
+          "https://www.agvchapp.bfs.admin.ch/documents/rest_api_fr.pdf",
+          "https://www.agvchapp.bfs.admin.ch"
+        ],
+        "download_url": "",
+        "format": "SERVICE",
+        "hash": "",
+        "id": "2c57fcde-17cf-458b-965c-ae8f742a88a1",
+        "identifier": "",
+        "issued": "",
+        "language": [],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-02-16T07:59:35.656374",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "Mutationen der Gemeinden 01.01.2016 - 31.12.2025",
+          "en": "",
+          "fr": "Mutation des communes 01.01.2016 - 31.12.2025",
+          "it": ""
+        },
+        "package_id": "784add14-acbb-4b80-ba2d-a6c854446a14",
+        "position": 2,
+        "resource_type": null,
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "de": "Mutationen der Gemeinden 01.01.2016 - 31.12.2025",
+          "en": "",
+          "fr": "Mutation des communes 01.01.2016 - 31.12.2025",
+          "it": ""
+        },
+        "url": "https://www.agvchapp.bfs.admin.ch/api/communes/mutations?includeTerritoryExchange=true&startPeriod=01-01-2008&endPeriod=02-01-2013",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "coverage": "",
+        "created": "2026-02-03T14:20:51.863958",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Die Raumgliederungen bieten verschiedene Klassifizierungen der Gemeinden, z. B. nach Sprachgebieten, Gemeindetypologie, Agglomerationen oder Urbanisierungsgrad. Der Status zum Datum 01.01.2026 wird angezeigt. Dieses Datum kann in der Anfrage manuell geändert werden.",
+          "en": "",
+          "fr": "Les niveaux géographiques proposent plusieurs classifications des communes selon, par exemple, les régions linguistiques, la typologie des communes, les agglomérations ou encore le degré d'urbanisation. Par défaut, l'état à la date du 01.01.2026 est indiqué. Cette date peut être modifiée manuellement dans la requête.",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Raumgliederungen der Gemeinden 01.01.2026",
+          "en": "",
+          "fr": "Niveaux géographiques des communes 01.01.2026",
+          "it": ""
+        },
+        "documentation": [
+          "https://www.agvchapp.bfs.admin.ch/documents/rest_api_de.pdf",
+          "https://www.agvchapp.bfs.admin.ch/documents/rest_api_fr.pdf",
+          "https://www.agvchapp.bfs.admin.ch"
+        ],
+        "download_url": "",
+        "format": "SERVICE",
+        "hash": "",
+        "id": "f6b265c4-2626-4eb8-9fe1-c3776d717f21",
+        "identifier": "",
+        "issued": "",
+        "language": [],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-02-18T12:50:42.732081",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "Raumgliederungen der Gemeinden 01.01.2026",
+          "en": "",
+          "fr": "Niveaux géographiques des communes 01.01.2026",
+          "it": ""
+        },
+        "package_id": "784add14-acbb-4b80-ba2d-a6c854446a14",
+        "position": 3,
+        "resource_type": null,
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "de": "Raumgliederungen der Gemeinden 01.01.2026",
+          "en": "",
+          "fr": "Niveaux géographiques des communes 01.01.2026",
+          "it": ""
+        },
+        "url": "https://www.agvchapp.bfs.admin.ch/api/communes/levels?date=01-01-2026",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "coverage": "",
+        "created": "2026-02-03T14:55:50.625545",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Gemeindestand (fr)",
+          "en": "",
+          "fr": "Etat des communes (fr)",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "",
+        "format": "SERVICE",
+        "hash": "",
+        "id": "f4435305-96a4-4c51-869f-4ca444554fe4",
+        "identifier": "",
+        "issued": "2026-01-01T00:00:00",
+        "language": [],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-02-03T15:00:50.882744",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-01-01T00:00:00",
+        "name": {
+          "de": "Gemeindestand (fr)",
+          "en": "",
+          "fr": "Etat des communes (fr)",
+          "it": ""
+        },
+        "package_id": "784add14-acbb-4b80-ba2d-a6c854446a14",
+        "position": 4,
+        "resource_type": null,
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "de": "Gemeindestand (fr)",
+          "en": "",
+          "fr": "Etat des communes (fr)",
+          "it": ""
+        },
+        "url": "https://www.agvchapp.bfs.admin.ch/fr/state/results?SnapshotDate=01.01.2026",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "coverage": "",
+        "created": "2026-02-03T14:56:54.119631",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Gemeindestand (de)",
+          "en": "",
+          "fr": "Etat des communes (de)",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "",
+        "format": "SERVICE",
+        "hash": "",
+        "id": "26514787-2ee4-40ae-9920-ea07df891218",
+        "identifier": "",
+        "issued": "2026-01-01T00:00:00",
+        "language": [],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-02-03T15:02:40.763276",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-01-01T00:00:00",
+        "name": {
+          "de": "Gemeindestand (de)",
+          "en": "",
+          "fr": "Etat des communes (de)",
+          "it": ""
+        },
+        "package_id": "784add14-acbb-4b80-ba2d-a6c854446a14",
+        "position": 5,
+        "resource_type": null,
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "de": "Gemeindestand (de)",
+          "en": "",
+          "fr": "Etat des communes (de)",
+          "it": ""
+        },
+        "url": "https://www.agvchapp.bfs.admin.ch/de/state/results?SnapshotDate=01.01.2026",
+        "url_type": null
+      }
+    ],
+    "tags": [],
+    "relationships_as_subject": [],
+    "relationships_as_object": []
+  }
+}

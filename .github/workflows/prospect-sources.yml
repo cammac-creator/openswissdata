@@ -1,0 +1,118 @@
+name: Prospection hebdomadaire de nouvelles sources (opendata.swiss)
+#
+# Tâche osd.prospection (piste A du plan 2026-10-06-prospection-et-api.md, décisions du
+# 07.10.2026 pour la fenêtre tournante). Ce workflow ne lit QUE le catalogue public
+# d'opendata.swiss (API CKAN) et ne commite QUE docs/data-status/prospection.{json,md} et
+# prospection-state.json : il ne touche jamais src/mcp/data/, ne collecte et ne publie aucune
+# donnée vendue, et ne déclenche aucun redéploiement. L'intégration effective d'une source
+# retenue reste une décision et une tâche séparées (registre → collecte → vérification ou
+# combinaison → API), prise jeu par jeu.
+#
+# Codes de sortie du script (décision du 07.10.2026, revus le 07.10.2026 — relecture Focus 1,
+# point 6) : 0 = passage mené à bien, au moins une page réellement lue ; 2 = limite de temps
+# interne atteinte (partial: true, stopped_reason "time_limit") ; 3 = catalogue illisible
+# (stopped_reason "probe_failed"/"page_failed") OU zéro page lue malgré un passage "ok" — dans
+# les deux cas (2 et 3), le rapport (partiel si besoin) est quand même committé, PUIS le job
+# échoue volontairement pour que l'alerte mail parte : un catalogue qu'on n'a pas pu lire n'est
+# JAMAIS un succès silencieux. Tout autre code = erreur non gérée du script, rien n'est commité.
+on:
+  schedule:
+    # Lundi, minute non ronde (décision du 06.10.2026) : laisse passer les tâches du début de
+    # journée (TARES, veille) sans partager leur créneau.
+    - cron: "37 5 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read # requis par scripts/alert-email.mjs (previousConclusion) — même modèle que refresh-localities.yml ;
+                # sans lui, un permissions: explicite retire l'accès par défaut et chaque échec
+                # renverrait un 403 (lookup "unavailable"), avec un mail de panne à chaque fois et
+                # jamais de mail de retour à la normale.
+concurrency:
+  group: prospection-production
+  cancel-in-progress: false
+jobs:
+  prospect:
+    runs-on: ubuntu-latest
+    # Mesuré ~60 min en réel le 06.10.2026 (54/60 pages visées alors, ~67 s/page en moyenne) pour
+    # UN passage de 60 pages ; la fenêtre tournante du 07.10.2026 vise 55 pages par passage, un
+    # ordre de grandeur comparable. 170 (décision du 07.10.2026) reste sous le plafond GitHub de
+    # 360 avec une marge large, et au-delà du délai interne du script (140 min par défaut) : un
+    # dépassement de CE délai-ci serait donc anormal (script bloqué hors de sa propre limite).
+    timeout-minutes: 170
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Prospecter le catalogue opendata.swiss (fenêtre tournante de la semaine)
+        id: prospect
+        run: |
+          set +e
+          npm run prospect:sources
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          set -e
+      - name: Contrôler le volume connu avant tout commit (au moins 100 jeux cumulés)
+        # Jamais exécuté si le script a planté pour de bon (code ni 0 ni 2) : rien à contrôler,
+        # rien à committer. Le contrôle porte sur le CUMUL connu (candidats + écartés dans
+        # l'état fusionné), pas seulement les jeux lus CE passage — une fenêtre tournante peut
+        # légitimement lire peu de jeux neufs certaines semaines tout en gardant un état riche.
+        if: steps.prospect.outputs.exit_code == '0' || steps.prospect.outputs.exit_code == '2' || steps.prospect.outputs.exit_code == '3'
+        run: |
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync("docs/data-status/prospection.json", "utf8"));
+            const total = r.totals.candidates + r.totals.excluded;
+            if (r.run.stopped_reason !== "time_limit" && total < 100) {
+              console.error(`Trop peu de jeux connus au total (${total} < 100) : commit annulé`);
+              process.exit(1);
+            }
+            console.log(`Connu (cumulé) : ${total} jeux · ce passage : ${r.run.datasets_read} jeux (${r.run.pages_read}/${r.run.max_pages} pages, page de départ ${r.run.start_page}/${r.run.total_pages}) · couverture ${(r.run.coverage_ratio * 100).toFixed(1)} % · partial=${r.run.partial} (${r.run.stopped_reason})`);
+          '
+      - name: Committer le rapport de prospection et l'état s'ils ont changé
+        if: steps.prospect.outputs.exit_code == '0' || steps.prospect.outputs.exit_code == '2' || steps.prospect.outputs.exit_code == '3'
+        run: |
+          git config user.name "OpenSwissData"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/data-status/prospection.json docs/data-status/prospection.md docs/data-status/prospection-state.json
+          if ! git diff --cached --quiet; then
+            git commit -m "données : actualiser la prospection hebdomadaire de sources (opendata.swiss)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      # Pas d'artefact du détail brut : sur un dépôt public, un artefact se télécharge par tout compte
+      # connecté, et ce détail contient des titres non filtrés (décision du 07.10.2026). Le détail reste
+      # dans docs/internal/ du runner, ignoré par Git et détruit avec lui.
+      - name: Échouer volontairement si la limite de temps interne a été atteinte (pour l'alerte)
+        # Décision du 07.10.2026 : le rapport partiel est déjà committé à l'étape précédente ;
+        # ce job échoue maintenant EXPRÈS pour que l'étape d'alerte mail (ci-dessous) s'exécute.
+        if: steps.prospect.outputs.exit_code == '2'
+        run: |
+          echo "::warning::Limite de temps interne atteinte : rapport partiel committé quand même, échec volontaire du job pour déclencher l'alerte."
+          exit 1
+      - name: Échouer volontairement si le catalogue n'a pas pu être lu (pour l'alerte)
+        # Ajouté le 07.10.2026 (relecture Focus 1, point 6) : un `probe_failed`, un `page_failed`
+        # ou un passage qui n'a lu AUCUNE page ne doit JAMAIS sortir en succès silencieux — le
+        # rapport (déjà committé, inchangé si rien de neuf) reste celui d'avant, mais l'alerte
+        # doit partir comme pour la limite de temps.
+        if: steps.prospect.outputs.exit_code == '3'
+        run: |
+          echo "::warning::Catalogue illisible ce passage (sonde ou page en échec, ou zéro page lue) : échec volontaire du job pour déclencher l'alerte."
+          exit 1
+      - name: Échouer si le script a planté (code de sortie inattendu, ni 0, 2 ni 3)
+        if: steps.prospect.outputs.exit_code != '0' && steps.prospect.outputs.exit_code != '2' && steps.prospect.outputs.exit_code != '3'
+        run: |
+          echo "::error::Le script de prospection a échoué (code de sortie ${{ steps.prospect.outputs.exit_code }}), rien n'a été committé."
+          exit 1
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Prospection hebdomadaire des sources (opendata.swiss)
+          ALERT_WORKFLOW: prospect-sources.yml
+          ALERT_DETAIL: 'La prospection hebdomadaire des sources opendata.swiss a échoué (script en erreur non géré, ou moins de 100 jeux connus au cumul) ; le rapport servi reste le précédent. Une limite de temps interne atteinte (stopped_reason "time_limit") OU un catalogue illisible ce passage (stopped_reason "probe_failed"/"page_failed", ou zéro page lue) committent quand même un rapport sûr puis échouent ICI exprès pour ce mail (revu le 07.10.2026, relecture Focus 1 : un catalogue non lu n''est plus un succès silencieux) — voir le champ "stopped_reason" du JSON committé.'
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

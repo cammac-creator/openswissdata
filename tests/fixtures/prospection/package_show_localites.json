@@ -1,0 +1,498 @@
+{
+  "help": "https://ckan.opendata.swiss/api/3/action/help_show?name=package_show",
+  "success": true,
+  "result": {
+    "accrual_periodicity": "http://publications.europa.eu/resource/authority/frequency/MONTHLY",
+    "conforms_to": [
+      "https://models.geo.admin.ch/Swisstopo/"
+    ],
+    "coverage": "",
+    "description": {
+      "de": "Mit Artikel 24 der Verordnung über die geografischen Namen (GeoNV) wurde das Bundesamt für Landestopografie swisstopo beauftragt, das neue amtliche Ortschaftenverzeichnis mit Postleitzahl und Perimeter zu erstellen, zu verwalten und zu veröffentlichen. Dieser Datensatz wird demnach zentral bei swisstopo geführt. Der Datensatz ist flächendeckend über die ganze Schweiz und kann kostenlos bezogen werden (Datensatz wird monatlich nachgeführt). Seit dem 1. Januar 2024 sind die Daten in einem neuen Datenmodell publiziert.",
+      "fr": "L’article 24 de l’ordonnance sur les noms géographiques (ONGéo) confie à l’Office fédéral de topographie swisstopo la tâche d’établir, de gérer et de publier le nouveau répertoire officiel des localités avec le code postal et le périmètre associés à chacune d’elles. La tenue de ce jeu de données est par conséquent centralisée par swisstopo. Le jeu de données couvre l'intégralité du territoire suisse et peut être obtenu gratuitement (il est actualisé mensuellement). Les données sont publiées depuis le 1er janvier 2024 selon un nouveau modèle de données.",
+      "it": "Con l’articolo 24 dell’Ordinanza sui nomi geografici (ONGeo) l’Ufficio federale di topografia è stato incaricato di realizzare, amministrare e pubblicare il nuovo elenco ufficiale delle località con il numero postale d’avviamento e il perimetro. Questo set di dati è gestito a livello centralizzato presso swisstopo. Il set di dati è capillare per tutto il territorio svizzero e può essere ottenuto gratuitamente (aggiornato con cadenza mensile). I dati sono stati pubblicati in un nuovo modello di dati dal 1° gennaio 2024.",
+      "en": "In Article 24 of the regulations governing geographic names (GeoNV), the Federal Office of Topography (swisstopo) is commissioned to establish, administer and publish the new official index of cities and towns including postal codes and perimeter. The data are stored centrally at swisstopo.The data set covers all of Switzerland and is available free of charge (Datensatz wird monatlich nachgeführt). I dati sono stati pubblicati in un nuovo modello di dati dal 1° gennaio 2024."
+    },
+    "id": "f3592a76-b9c7-4e2d-ba6b-31798ce0f124",
+    "identifier": "972cd117-f1ed-4818-be14-233d89ab9fdf@bundesamt-fur-landestopografie-swisstopo",
+    "isopen": false,
+    "issued": "2010-01-01T00:00:00",
+    "keywords": {
+      "en": [
+        "e-geoch",
+        "post-code",
+        "place",
+        "official-geodata",
+        "conservation-and-archiving-planning-aap---confederation",
+        "cadastral-surveying",
+        "administrative-units",
+        "addresses",
+        "fsdi-federal-spatial-data-infrastructure"
+      ],
+      "de": [
+        "e-geoch",
+        "postleitzahl-plz",
+        "ort",
+        "geobasisdaten",
+        "aufbewahrungs--und-archivierungsplanung-aap---bund",
+        "amtliche-vermessung-av",
+        "verwaltungseinheiten",
+        "adressen",
+        "bgdi-bundesgeodaten-infrastruktur"
+      ],
+      "fr": [
+        "e-geoch",
+        "numero-postal-dacheminement-npa",
+        "localite",
+        "geodonnees-de-base",
+        "planification-de-la-conservation-et-de-larchivage-aap---confederation",
+        "mensuration-officielle-mo",
+        "unites-administratives",
+        "adresses",
+        "ifdg-linfrastructure-federale-de-donnees-geographiques"
+      ],
+      "it": [
+        "e-geoch",
+        "numero-postale-davviamento-npa",
+        "localita",
+        "geodati-di-base",
+        "pianificazione-della-conservazione-e-dellarchiviazione-aap---confederazione",
+        "misurazione-ufficiale-mu",
+        "unita-amministrative",
+        "indirizzi",
+        "ifdg-infrastruttura-federale-dei-dati-geografici"
+      ]
+    },
+    "language": [
+      "en",
+      "de",
+      "fr",
+      "it"
+    ],
+    "license_id": null,
+    "license_title": null,
+    "metadata_created": "2022-07-19T01:15:52.046487",
+    "metadata_modified": "2026-10-06T01:18:51.130985",
+    "modified": "2026-10-01T00:00:00",
+    "name": "amtliches-ortschaftenverzeichnis-mit-postleitzahl-und-perimeter",
+    "num_resources": 5,
+    "num_tags": 0,
+    "organization": {
+      "approval_status": "approved",
+      "created": "2015-11-30T12:12:55.529975",
+      "description": {
+        "fr": "Le centre de compétence de la Confédération suisse pour les informations géographiques, c'est-à-dire pour la description, la représentation et l’archivage de données à référence spatiale.",
+        "de": "Das Kompetenzzentrum der Schweizerischen Eidgenossenschaft für Geoinformation, d.h. für die Beschreibung, Darstellung und Archivierung von raumbezogenen Geodaten.",
+        "en": "The centre of competence for the Swiss Confederation responsible for geographical reference data, for instance the description, representation and archiving of geographic spatial data.",
+        "it": "Il centro d’eccellenza della Confederazione Elvetica per geoinformazione, cioè per la descrizione, rappresentazione e archiviazione dei dati georeferenziati (geodati)."
+      },
+      "display_name": {
+        "de": "Bundesamt für Landestopografie swisstopo",
+        "en": "Federal Office of Topography swisstopo",
+        "fr": "Office fédéral de topographie swisstopo",
+        "it": "Ufficio federale di topografia swisstopo"
+      },
+      "id": "ddd28bac-6890-474c-84cb-97a85db8d2f1",
+      "image_display_url": "https://ckan.opendata.swiss/uploads/group/IMG_1857.jpg",
+      "image_url": "https://ckan.opendata.swiss/uploads/group/IMG_1857.jpg",
+      "is_organization": true,
+      "name": "bundesamt-fur-landestopografie-swisstopo",
+      "num_followers": 0,
+      "package_count": 199,
+      "political_level": "confederation",
+      "state": "active",
+      "title": {
+        "de": "Bundesamt für Landestopografie swisstopo",
+        "en": "Federal Office of Topography swisstopo",
+        "fr": "Office fédéral de topographie swisstopo",
+        "it": "Ufficio federale di topografia swisstopo"
+      },
+      "type": "organization",
+      "url": "",
+      "tags": [],
+      "groups": []
+    },
+    "owner_org": "ddd28bac-6890-474c-84cb-97a85db8d2f1",
+    "private": false,
+    "publisher": {
+      "name": {
+        "de": "Bundesamt für Landestopografie swisstopo, Vermessung",
+        "fr": "Office fédéral de topographie, mensuration",
+        "it": "Ufficio federale di topografia swisstopo, misurazione",
+        "en": "Federal office of topography swisstopo, survey"
+      },
+      "url": "https://www.cadastre.ch/"
+    },
+    "qualified_relations": [],
+    "relations": [
+      {
+        "label": {
+          "de": "geocat.ch Permalink",
+          "fr": "geocat.ch permalien",
+          "it": "geocat.ch link permanente",
+          "en": "geocat.ch permalink"
+        },
+        "url": "https://www.geocat.ch/datahub/dataset/972cd117-f1ed-4818-be14-233d89ab9fdf"
+      }
+    ],
+    "see_alsos": [],
+    "spatial": "Suisse",
+    "state": "active",
+    "temporals": [],
+    "title": {
+      "de": "Amtliches Ortschaftenverzeichnis mit Postleitzahl und Perimeter",
+      "fr": "Répertoire officiel des localités avec le code postal et le périmètre",
+      "it": "Elenco ufficiale delle località con il numero postale d'avviamento e il perimetro",
+      "en": "Official index of cities and towns including postal codes and perimeter"
+    },
+    "title_for_slug": "amtliches-ortschaftenverzeichnis-mit-postleitzahl-und-perimeter",
+    "type": "dataset",
+    "url": "https://www.swisstopo.admin.ch/fr/repertoire-officiel-des-localites",
+    "version": null,
+    "groups": [
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        },
+        "id": "5ce2de34-4114-43cd-ab45-e90a42db50aa",
+        "image_display_url": "",
+        "name": "regi",
+        "title": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        }
+      },
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        },
+        "id": "ab2cc387-d129-4d76-b78d-517326d2a772",
+        "image_display_url": "",
+        "name": "envi",
+        "title": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        }
+      }
+    ],
+    "resources": [
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2022-07-19T01:15:52.076054",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Vorschau map.geo.admin.ch",
+          "fr": "Aperçu map.geo.admin.ch",
+          "it": "Previsione map.geo.admin.ch",
+          "en": "Preview map.geo.admin.ch"
+        },
+        "display_name": {
+          "de": "Map (Preview) Vorschau map.geo.admin.ch",
+          "fr": "Map (Preview) Aperçu map.geo.admin.ch",
+          "it": "Map (Preview) Previsione map.geo.admin.ch",
+          "en": "Map (Preview) map.geo.admin.ch"
+        },
+        "format": "SERVICE",
+        "hash": "",
+        "id": "447f8b4a-1408-4a03-8689-5ef2ee3627e6",
+        "issued": "2026-10-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-01T01:19:49.965274",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-01T00:00:00",
+        "name": {
+          "de": "Map (Preview) Vorschau map.geo.admin.ch",
+          "fr": "Map (Preview) Aperçu map.geo.admin.ch",
+          "it": "Map (Preview) Previsione map.geo.admin.ch",
+          "en": "Map (Preview) map.geo.admin.ch"
+        },
+        "package_id": "f3592a76-b9c7-4e2d-ba6b-31798ce0f124",
+        "position": 0,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "Map (Preview) Vorschau map.geo.admin.ch",
+          "fr": "Map (Preview) Aperçu map.geo.admin.ch",
+          "it": "Map (Preview) Previsione map.geo.admin.ch",
+          "en": "Map (Preview) map.geo.admin.ch"
+        },
+        "url": "https://map.geo.admin.ch/?layers=ch.swisstopo-vd.ortschaftenverzeichnis_plz",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2023-03-30T00:50:30.476382",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "WMS-BGDI Dienst, Layer \"Amtliches Ortschaftenverzeichnis\"",
+          "fr": "Service WMS-IFDG, couche \"Répertoire officiel des localités\"",
+          "it": "Servizio WMS-IFDG, strato \"Elenco ufficiale delle località\"",
+          "en": "WMS-FSDI service, layer \"Official index of cities and towns\""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "ch.swisstopo-vd.ortschaftenverzeichnis_plz",
+          "it": "",
+          "en": ""
+        },
+        "format": "WMS",
+        "hash": "",
+        "id": "572222f8-6703-4fbf-ba20-68550c225f80",
+        "issued": "2026-10-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-01T01:19:49.965397",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-01T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "ch.swisstopo-vd.ortschaftenverzeichnis_plz",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "f3592a76-b9c7-4e2d-ba6b-31798ce0f124",
+        "position": 1,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "ch.swisstopo-vd.ortschaftenverzeichnis_plz",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2024-01-19T02:19:39.500588",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Download Server von geo.admin.ch",
+          "fr": "Serveur de téléchargement de geo.admin.ch",
+          "it": "Server di download di geo.admin.ch",
+          "en": "Download server from geo.admin.ch"
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "download_url": "https://www.swisstopo.admin.ch/fr/repertoire-officiel-des-localites",
+        "format": "",
+        "hash": "",
+        "id": "e3eb6f44-7e15-4dd5-98a8-1b2cae9d239e",
+        "issued": "2026-10-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-01T01:19:49.965469",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-01T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "f3592a76-b9c7-4e2d-ba6b-31798ce0f124",
+        "position": 2,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://www.swisstopo.admin.ch/fr/repertoire-officiel-des-localites",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-06-23T02:34:22.100888",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "HTML",
+        "hash": "",
+        "id": "7c0bffc4-65eb-45b7-862e-5ce1cf6fcd02",
+        "issued": "2026-10-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "text/html",
+        "metadata_modified": "2026-10-01T01:19:49.965538",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-01T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "f3592a76-b9c7-4e2d-ba6b-31798ce0f124",
+        "position": 3,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://www.swisstopo.admin.ch/fr/repertoire-officiel-des-localites",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2022-07-19T01:15:52.076068",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "RESTful API von geo.admin.ch",
+          "fr": "RESTful API de geo.admin.ch",
+          "it": "RESTful API da geo.admin.ch",
+          "en": "RESTful API from geo.admin.ch"
+        },
+        "display_name": {
+          "de": "",
+          "fr": "RESTful API de geo.admin.ch",
+          "it": "",
+          "en": ""
+        },
+        "format": "API",
+        "hash": "",
+        "id": "09f3a27d-4282-4450-96a3-126f336462ef",
+        "issued": "2026-10-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-10-01T01:19:49.965607",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-10-01T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "RESTful API de geo.admin.ch",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "f3592a76-b9c7-4e2d-ba6b-31798ce0f124",
+        "position": 4,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "RESTful API de geo.admin.ch",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://api3.geo.admin.ch/rest/services/api/MapServer/ch.swisstopo-vd.ortschaftenverzeichnis_plz",
+        "url_type": null
+      }
+    ],
+    "tags": [],
+    "relationships_as_subject": [],
+    "relationships_as_object": [],
+    "display_name": {
+      "de": "Amtliches Ortschaftenverzeichnis mit Postleitzahl und Perimeter",
+      "fr": "Répertoire officiel des localités avec le code postal et le périmètre",
+      "it": "Elenco ufficiale delle località con il numero postale d'avviamento e il perimetro",
+      "en": "Official index of cities and towns including postal codes and perimeter"
+    }
+  }
+}

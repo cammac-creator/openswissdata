@@ -1,0 +1,1091 @@
+{
+  "help": "https://ckan.opendata.swiss/api/3/action/help_show?name=package_show",
+  "success": true,
+  "result": {
+    "accrual_periodicity": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+    "conforms_to": [],
+    "description": {
+      "fr": "Ce jeu de données présente les typologies des espaces territoriaux pour les communes fribourgeoises. Il regroupe une sélection des typologies les plus pertinentes.Agglomérations statistiques (OFS) — objet statistique, sans effet juridique, produit par un algorithme uniforme sur toute la Suisse. Une trame régulière mesure la densité de population, d'emplois et de nuitées hôtelières pour identifier les noyaux ; les couronnes sont déterminées par l'intensité des flux de pendulaires vers ces noyaux ; l'ensemble noyau + couronne doit atteindre 20 000 habitants pour être qualifié d'agglomération. Les codes correspondent au numéro OFS de la commune-centre.Périmètres VACo (ARE) — objet juridico-financier. VACo signifie « Villes et Agglomérations ayant droit aux Contributions » : ce périmètre n'a pas de vocation descriptive, il détermine quelles communes peuvent bénéficier des contributions fédérales du programme en faveur du trafic d'agglomération. Il est fixé par ordonnance: ([RS 725.116.21 - Ordonnance du 7 novembre 2007 concernant l'utilisation de l'impôt sur les huiles minérales à affectation obligatoire et des autres moyens affectés à la circulation routière... | Fedlex](https://www.fedlex.admin.ch/eli/cc/2007/797/fr#art_19))[LexFind](https://www.lexfind.ch/fe/fr/tol/30723/fr)Un troisième niveau existe, distinct des deux précédents : le périmètre du projet d'agglomération (PA), délimité par l'organisme responsable et non par la Confédération. Pour Fribourg, le PA5 réunit 25 communes de la Sarine et de la Singine sur la base du périmètre VACo. La modalité « Fribourg (Communes participantes PA) » se réfère à ce périmètre-là.Sources\nEspace à caractère urbain, agglomérations et typologies – Rapport explicatif (OFS, n° 2298-2000): [Actualisation 2020 des niveaux géographiques non-institutionnels - Espace à caractère urbain, agglomérations et typologies - Rapport explicatif | Publication](https://www.bfs.admin.ch/bfs/fr/home/statistiques/catalogues-banques-donnees.assetdetail.30665779.html)\nProgramme en faveur du trafic d'agglomération de l'ARE : [https://www.are.admin.ch/fr/projets-dagglomeration-de-6e-generation](https://www.are.admin.ch/fr/projets-dagglomeration-de-6e-generation)\nProjet d'agglomération de 5e génération (PA5) – Fribourg : [https://www.agglo-fr.ch/projets-dagglomeration/instrument-projet-dagglomeration/pa5](https://www.agglo-fr.ch/projets-dagglomeration/instrument-projet-dagglomeration/pa5)",
+      "en": "",
+      "de": "",
+      "it": ""
+    },
+    "documentation": [],
+    "id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+    "identifier": "22_typologies@ssd",
+    "isopen": false,
+    "issued": "2026-03-13T00:00:00",
+    "keywords": {
+      "en": [],
+      "de": [],
+      "fr": [
+        "typologie",
+        "commune",
+        "agglomeration",
+        "urbain",
+        "rural"
+      ],
+      "it": []
+    },
+    "language": [
+      "fr"
+    ],
+    "license_id": null,
+    "license_title": null,
+    "metadata_created": "2026-02-12T01:02:56.147323",
+    "metadata_modified": "2026-10-06T03:02:28.911484",
+    "modified": "2026-03-13T08:53:59.077000+00:00",
+    "name": "gemeindetypologie",
+    "num_resources": 15,
+    "num_tags": 5,
+    "organization": {
+      "approval_status": "approved",
+      "created": "2025-01-30T19:20:38.047830",
+      "description": {
+        "fr": "Le Service de la statistique et de la donnée est le centre de compétence cantonal pour la statistique publique. Il collecte, analyse et diffuse des données statistiques sur la situation et l’évolution du canton, soutient les services de l’État dans la gestion des données et coordonne la diffusion des données administratives en libre accès.",
+        "en": "The Statistics and Data Service is the cantonal competence center for public statistics. It collects, analyzes, and disseminates statistical data on the situation and development of the canton, supports state services in data management, and coordinates the dissemination of administrative data in open access.",
+        "de": "Das Amt für Statistik und Daten ist das kantonale Kompetenzzentrum für die öffentliche Statistik. Es erhebt, analysiert und verbreitet statistische Daten über die Lage und die Entwicklung des Kantons, unterstützt die Dienststellen des Staats bei der Verwaltung ihrer Daten und koordiniert die Veröffentlichung der offenen Verwaltungsdaten. ",
+        "it": "Il Servizio Statistiche e Dati è il centro di competenza cantonale per la statistica pubblica. Raccoglie, analizza e diffonde dati statistici sulla situazione e l'evoluzione del cantone, supporta i servizi statali nella gestione dei dati e coordina la diffusione dei dati amministrativi ad accesso aperto."
+      },
+      "display_name": {
+        "de": "Amt für Statistik und Daten Freiburg",
+        "en": "Statistics and Data Service Fribourg",
+        "fr": "Service de la statistique et de la donnée Fribourg",
+        "it": "Servizio Statistiche e Dati Friburgo"
+      },
+      "id": "43c7cd23-fc8d-4923-9896-53ce3a5038af",
+      "image_display_url": "https://ckan.opendata.swiss/uploads/group/2025-01-30-192038.0271412024-11-07-150729.204597etatfribourg.png",
+      "image_url": "2025-01-30-192038.0271412024-11-07-150729.204597etatfribourg.png",
+      "is_organization": true,
+      "name": "ssd",
+      "num_followers": 0,
+      "package_count": 122,
+      "political_level": "canton",
+      "state": "active",
+      "title": {
+        "de": "Amt für Statistik und Daten Freiburg",
+        "en": "Statistics and Data Service Fribourg",
+        "fr": "Service de la statistique et de la donnée Fribourg",
+        "it": "Servizio Statistiche e Dati Friburgo"
+      },
+      "type": "organization",
+      "url": "https://www.fr.ch/deef/ssd",
+      "groups": [
+        {
+          "capacity": "public",
+          "name": "kanton_freiburg"
+        }
+      ],
+      "tags": []
+    },
+    "owner_org": "43c7cd23-fc8d-4923-9896-53ce3a5038af",
+    "private": false,
+    "publisher": {
+      "url": "https://opendata.fr.ch/explore/?refine.dcat_ap_ch.domain=ssd",
+      "name": {
+        "de": "ssd",
+        "en": "",
+        "fr": "",
+        "it": ""
+      }
+    },
+    "qualified_relations": [],
+    "relations": [
+      {
+        "label": {
+          "en": "https://www.bfs.admin.ch/bfs/fr/home/statistiken/querschnittsthemen/raeumliche-analysen/raeumliche-gliederungen.html",
+          "de": "https://www.bfs.admin.ch/bfs/fr/home/statistiken/querschnittsthemen/raeumliche-analysen/raeumliche-gliederungen.html",
+          "fr": "https://www.bfs.admin.ch/bfs/fr/home/statistiken/querschnittsthemen/raeumliche-analysen/raeumliche-gliederungen.html",
+          "it": "https://www.bfs.admin.ch/bfs/fr/home/statistiken/querschnittsthemen/raeumliche-analysen/raeumliche-gliederungen.html"
+        },
+        "url": "https://www.bfs.admin.ch/bfs/fr/home/statistiken/querschnittsthemen/raeumliche-analysen/raeumliche-gliederungen.html"
+      }
+    ],
+    "see_alsos": [],
+    "spatial": "",
+    "state": "active",
+    "temporals": [
+      {
+        "end_date": "2026-12-31T22:59:59+00:00",
+        "start_date": "2024-12-31T23:00:00+00:00"
+      }
+    ],
+    "title": {
+      "fr": "Typologies des communes",
+      "en": "",
+      "de": "",
+      "it": ""
+    },
+    "title_for_slug": "gemeindetypologie",
+    "type": "dataset",
+    "url": "https://opendata.fr.ch/explore/dataset/22_typologies/",
+    "version": null,
+    "extras": [
+      {
+        "key": "guid",
+        "value": "22_typologies@ssd"
+      },
+      {
+        "key": "uri",
+        "value": "https://opendata.fr.ch/api/v2/catalog/datasets/22_typologies"
+      }
+    ],
+    "groups": [
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        },
+        "id": "ab2cc387-d129-4d76-b78d-517326d2a772",
+        "image_display_url": "",
+        "name": "envi",
+        "title": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        }
+      }
+    ],
+    "resources": [
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154713",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (csv)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "csv",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/csv?use_labels=true",
+        "format": "CSV",
+        "hash": "",
+        "id": "39042c09-6936-4f74-b7f9-423c0747eb1f",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "text/csv",
+        "metadata_modified": "2026-07-29T08:50:01.656751",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "csv",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 0,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "csv",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/csv?use_labels=true",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/csv?use_labels=true",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154717",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (json)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "json",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/json",
+        "format": "JSON",
+        "hash": "",
+        "id": "540ebc5a-74f2-4736-92f7-5ee4129cfbd6",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "application/json",
+        "metadata_modified": "2026-07-29T08:50:01.656905",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "json",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 1,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "json",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/json",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/json",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154719",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (fgb)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "fgb",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/fgb",
+        "format": "OCTET",
+        "hash": "",
+        "id": "766e1fad-9b23-4b7a-ab92-7dcc8d6c5c4f",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T08:50:01.656983",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "fgb",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 2,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "fgb",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/fgb",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/fgb",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154720",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (geojson)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "geojson",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/geojson",
+        "format": "JSON",
+        "hash": "",
+        "id": "a9fac1cd-4275-4226-85fc-3ab0ebf895af",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "application/json",
+        "metadata_modified": "2026-07-29T08:50:01.657053",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "geojson",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 3,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "geojson",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/geojson",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/geojson",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154721",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (gpx)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "gpx",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/gpx",
+        "format": "GPX",
+        "hash": "",
+        "id": "94763363-4804-4eab-9940-992b9c455639",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T08:50:01.657130",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "gpx",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 4,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "gpx",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/gpx",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/gpx",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154722",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (jsonl)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "jsonl",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/jsonl",
+        "format": "JSON",
+        "hash": "",
+        "id": "3c4bb98b-e435-424c-8fdf-19a413c5386c",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "application/json",
+        "metadata_modified": "2026-07-29T08:50:01.657200",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "jsonl",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 5,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "jsonl",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/jsonl",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/jsonl",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154723",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (kml)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "kml",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/kml",
+        "format": "KML",
+        "hash": "",
+        "id": "2795bec0-0d6c-4024-adc6-14189a58f01f",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "application/vnd.google-earth.kml+xml",
+        "metadata_modified": "2026-07-29T08:50:01.657267",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "kml",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 6,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "kml",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/kml",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/kml",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154724",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (ov2)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "ov2",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/ov2",
+        "format": "TXT",
+        "hash": "",
+        "id": "76bedb13-f3e8-4a43-a003-4952daa161fc",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "text/plain",
+        "metadata_modified": "2026-07-29T08:50:01.657330",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "ov2",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 7,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "ov2",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/ov2",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/ov2",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154725",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (parquet)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "parquet",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/parquet",
+        "format": "PARQUET",
+        "hash": "",
+        "id": "998793ac-9220-4d2c-b687-25bab3492c10",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T08:50:01.657425",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "parquet",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 8,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "parquet",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/parquet",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/parquet",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154726",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (rdfxml)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "rdfxml",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/rdfxml",
+        "format": "RDF XML",
+        "hash": "",
+        "id": "557f6a35-867c-448f-9919-d68482f3ed76",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "application/rdf+xml",
+        "metadata_modified": "2026-07-29T08:50:01.657520",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "rdfxml",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 9,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "rdfxml",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/rdfxml",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/rdfxml",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154727",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (jsonld)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "jsonld",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/jsonld",
+        "format": "JSON-LD",
+        "hash": "",
+        "id": "09fd2822-7bc8-4de9-b09a-9e6203ad938b",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T08:50:01.657585",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "jsonld",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 10,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "jsonld",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/jsonld",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/jsonld",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154728",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (turtle)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "turtle",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/turtle",
+        "format": "RDF Turtle",
+        "hash": "",
+        "id": "2809962f-8daa-48ea-bd1c-22ab9fc415a5",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "text/turtle",
+        "metadata_modified": "2026-07-29T08:50:01.657649",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "turtle",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 11,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "turtle",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/turtle",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/turtle",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154729",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (n3)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "n3",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/n3",
+        "format": "N3",
+        "hash": "",
+        "id": "7d23bd10-eb6e-400e-8c52-8c29929452df",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "text/n3",
+        "metadata_modified": "2026-07-29T08:50:01.657712",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "n3",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 12,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "n3",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/n3",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/n3",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154730",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (shp)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "shp",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/shp",
+        "format": "ZIP",
+        "hash": "",
+        "id": "660ee361-4848-4919-97de-cd26f6cbb5d2",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "application/zip",
+        "metadata_modified": "2026-07-29T08:50:01.657776",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "shp",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 13,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "shp",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/shp",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/shp",
+        "url_type": null
+      },
+      {
+        "access_services": [],
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-02-12T01:02:56.154731",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "fr": "Typologies des communes (xlsx)",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "display_name": {
+          "fr": "xlsx",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "documentation": [],
+        "download_url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/xlsx?use_labels=true",
+        "format": "XLS",
+        "hash": "",
+        "id": "384fd2d1-112f-4659-b0a2-37adfb55a5bb",
+        "issued": "2026-03-13T00:00:00",
+        "language": [
+          "fr"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_by",
+        "media_type": "application/vnd.ms-excel",
+        "metadata_modified": "2026-07-29T08:50:01.657839",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2026-03-13T08:53:59.077000+00:00",
+        "name": {
+          "fr": "xlsx",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "package_id": "0d69e825-1a18-4e42-8a2a-2afe6e013d55",
+        "position": 14,
+        "resource_type": null,
+        "rights": "http://www.opendefinition.org/licenses/cc-by-sa",
+        "size": null,
+        "state": "active",
+        "temporal_resolution": "",
+        "title": {
+          "fr": "xlsx",
+          "en": "",
+          "de": "",
+          "it": ""
+        },
+        "uri": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/xlsx?use_labels=true",
+        "url": "https://opendata.fr.ch/api/explore/v2.1/catalog/datasets/22_typologies/exports/xlsx?use_labels=true",
+        "url_type": null
+      }
+    ],
+    "tags": [
+      {
+        "display_name": "agglomeration",
+        "id": "cd171750-b513-46e7-99f8-3dfc641fe676",
+        "name": "agglomeration",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "commune",
+        "id": "35d68b6a-805a-4194-aee2-18a84b8d2015",
+        "name": "commune",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "rural",
+        "id": "6f6eda55-6cf3-42e8-86e5-089b8d6e73ef",
+        "name": "rural",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "typologie",
+        "id": "e61fca6d-3e9c-4ca9-99d7-1a1ba4cc6fd7",
+        "name": "typologie",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "urbain",
+        "id": "31efc7e7-4104-4b6c-9af8-83131ed5360b",
+        "name": "urbain",
+        "state": "active",
+        "vocabulary_id": null
+      }
+    ],
+    "relationships_as_subject": [],
+    "relationships_as_object": [],
+    "display_name": {
+      "fr": "Typologies des communes",
+      "en": "",
+      "de": "",
+      "it": ""
+    }
+  }
+}

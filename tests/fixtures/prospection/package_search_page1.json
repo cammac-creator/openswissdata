@@ -1,0 +1,1912 @@
+{
+  "help": "https://ckan.opendata.swiss/api/3/action/help_show?name=package_search",
+  "success": true,
+  "result": {
+    "count": 16546,
+    "facets": {},
+    "results": [
+      {
+        "accrual_periodicity": "",
+        "conforms_to": [],
+        "description": {
+          "de": "Abschlüsse an öffentlichen Mittelschulen im Kanton Zug nach Schule, Schultyp, Abschluss, Fachrichtung / Schwerpunktfach und Geschlecht, 2010/11 bis 2023/24.\n\nBestandene Abschlussprüfungen ohne Privatschulen.\n\nDer \"Fachbereich\" im Gymnasium entspricht dem Schwerpunktfach.\n\n(QUELLE: Bundesamt für Statistik, Bildungsabschlüsse)",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Abschlüsse an kantonalen Mittelschulen",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "documentation": [],
+        "id": "60667b68-7add-4149-9f80-04cc1e12e817",
+        "identifier": "178df28a-c180-472f-b0bb-434085dbf4d7@kanton-zug",
+        "isopen": false,
+        "issued": "2026-10-05T00:00:00",
+        "keywords": {
+          "en": [],
+          "de": [
+            "maturitat",
+            "gymnasium",
+            "matura",
+            "abschlussprufung",
+            "kantonsschule",
+            "fachmittelschule",
+            "wirtschaftsmittelschule"
+          ],
+          "fr": [],
+          "it": []
+        },
+        "language": [],
+        "license_id": null,
+        "license_title": null,
+        "metadata_created": "2026-10-05T19:16:19.023397",
+        "metadata_modified": "2026-10-06T19:21:32.784542",
+        "modified": "2026-10-05T00:00:00",
+        "name": "abschlusse-an-kantonalen-mittelschulen",
+        "num_resources": 2,
+        "num_tags": 7,
+        "organization": {
+          "approval_status": "approved",
+          "created": "2017-10-05T11:14:18.369411",
+          "description": {
+            "fr": "",
+            "en": "",
+            "de": "Hier veröffentlicht das Team von Open Data Zug von der kantonalen Fachstelle für Daten und Statistik schrittweise offene Behördendaten der kantonalen Verwaltung.\r\n\r\nWeitere Informationen unter https://zg.ch/opendata\r\n",
+            "it": ""
+          },
+          "display_name": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "id": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+          "image_display_url": "http://liip-prod-ckan-svc:80/uploads/group/2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "image_url": "2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "is_organization": true,
+          "name": "kanton-zug",
+          "num_followers": 0,
+          "package_count": 229,
+          "political_level": "canton",
+          "state": "active",
+          "title": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "type": "organization",
+          "url": "",
+          "tags": [],
+          "groups": []
+        },
+        "owner_org": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+        "private": false,
+        "publisher": {
+          "url": "https://data.zg.ch/store/2/resource/258",
+          "name": {
+            "de": "Fachstelle für Daten und Statistik des Kantons Zug",
+            "en": "",
+            "fr": "",
+            "it": ""
+          }
+        },
+        "qualified_relations": [],
+        "relations": [],
+        "see_alsos": [],
+        "spatial": "https://sws.geonames.org/6458807",
+        "state": "active",
+        "temporals": [
+          {
+            "end_date": "2024-12-31T23:59:59.999999",
+            "start_date": "2011-01-01T00:00:00"
+          }
+        ],
+        "title": {
+          "de": "Abschlüsse an kantonalen Mittelschulen",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "title_for_slug": "abschlusse-an-kantonalen-mittelschulen",
+        "type": "dataset",
+        "url": "",
+        "version": null,
+        "extras": [
+          {
+            "key": "guid",
+            "value": "178df28a-c180-472f-b0bb-434085dbf4d7@kanton-zug"
+          },
+          {
+            "key": "uri",
+            "value": "https://data.zg.ch/store/1/resource/2473"
+          },
+          {
+            "key": "harvest_object_id",
+            "value": "dbd0b528-4749-4178-a678-17a818c843ea"
+          },
+          {
+            "key": "harvest_source_id",
+            "value": "71abd913-fa39-45e3-9537-9f4364f76c56"
+          },
+          {
+            "key": "harvest_source_title",
+            "value": "DCAT Harvester Kt. ZG"
+          }
+        ],
+        "groups": [
+          {
+            "description": {
+              "fr": "",
+              "de": "",
+              "en": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Bildung, Kultur und Sport",
+              "en": "Education, culture and sport",
+              "fr": "Éducation, culture et sport",
+              "it": "Istruzione, cultura e sport"
+            },
+            "id": "b36d9b09-dc05-422c-997e-4e81b02afd6f",
+            "image_display_url": "",
+            "name": "educ",
+            "title": "{\"de\": \"Bildung, Kultur und Sport\", \"en\": \"Education, culture and sport\", \"fr\": \"Éducation, culture et sport\", \"it\": \"Istruzione, cultura e sport\"}"
+          }
+        ],
+        "resources": [
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-05T19:16:19.043582",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Abschlüsse an kantonalen Mittelschulen",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [],
+            "download_url": "https://data.zg.ch/store/1/resource/2474",
+            "format": "CSV",
+            "hash": "2853ab6e8db30ebdde9d9b8bcf40c01f",
+            "id": "0bc60569-df3f-4822-8184-f8a7c9abbc7e",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "text/csv",
+            "metadata_modified": "2026-10-06T19:21:32.794372",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-05T11:47:12.927000+00:00",
+            "name": {
+              "de": "Abschlüsse an kantonalen Mittelschulen",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "60667b68-7add-4149-9f80-04cc1e12e817",
+            "position": 0,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Abschlüsse an kantonalen Mittelschulen",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2475",
+            "url": "https://data.zg.ch/store/1/resource/2474",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-05T19:16:19.043585",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Abschlüsse an kantonalen Mittelschulen",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [
+              "https://swagger.entryscape.com/?url=https://data.zg.ch/rowstore/dataset/1a93ace1-fdeb-416a-b584-684440f96742/swagger"
+            ],
+            "format": "JSON",
+            "hash": "",
+            "id": "c8be9f2f-3201-4c58-8817-e93fd850a833",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "application/json",
+            "metadata_modified": "2026-10-06T19:21:32.794488",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "name": {
+              "de": "Abschlüsse an kantonalen Mittelschulen",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "60667b68-7add-4149-9f80-04cc1e12e817",
+            "position": 1,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Abschlüsse an kantonalen Mittelschulen",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2485",
+            "url": "https://data.zg.ch/rowstore/dataset/1a93ace1-fdeb-416a-b584-684440f96742",
+            "url_type": null
+          }
+        ],
+        "tags": [
+          {
+            "display_name": "abschlussprufung",
+            "id": "e9dad9f7-1ef8-49ce-9d19-051d32fe3e31",
+            "name": "abschlussprufung",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "fachmittelschule",
+            "id": "c4edd594-f5b5-4836-925c-92ba6143f88f",
+            "name": "fachmittelschule",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "gymnasium",
+            "id": "0a086d60-c6be-46dd-ab77-4668298cccee",
+            "name": "gymnasium",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "kantonsschule",
+            "id": "1472e702-053c-4e9e-b51c-9193cfa0eef4",
+            "name": "kantonsschule",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "matura",
+            "id": "b323c56d-8182-44f7-8038-eef03f369a97",
+            "name": "matura",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "maturitat",
+            "id": "ad52f15f-3fe7-4c0a-88b1-d6eda5e89740",
+            "name": "maturitat",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "wirtschaftsmittelschule",
+            "id": "dfe2a324-bc37-4b9c-a195-ffbda7c2c390",
+            "name": "wirtschaftsmittelschule",
+            "state": "active",
+            "vocabulary_id": null
+          }
+        ],
+        "relationships_as_subject": [],
+        "relationships_as_object": []
+      },
+      {
+        "accrual_periodicity": "",
+        "conforms_to": [],
+        "description": {
+          "de": "Anzahl Lehrpersonen / Schulpersonal und Vollzeitäquivalente an öffentlichen Mittelschulen im Kanton Zug nach Schule, Geschlecht und Anstellungsjahr,  2001/02 bis 2024/25.\n\nBis Schuljahr 2009/10 nur die Anzahl Lehrpersonen nach Anstellungsart verfügbar.\n\nLehrpersonen: Ohne Schulleitungspersonal (bei Personen mit Schulleitungsfunktion wird Schulleitungspensum ignoriert). \n\nSchulpersonal: Lehrpersonen und Schulleitungspersonal.\n\nDas Total weicht von Einzelwerten ab, wenn Personen an mehreren Schulen tätig sind.\n\nStichtag: 15. November (ab 2010/11) / 15. August (vorher)\n\n(QUELLE: Bundesamt für Statistik, Schulpersonal (ab 2010/11); Rechenschaftsbericht des Regierungsrats (bis 2009/10))",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Lehrpersonen an kantonalen Mittelschulen",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "documentation": [],
+        "id": "b73a0d2c-c192-4a43-a120-4949c3e07d1c",
+        "identifier": "27d2a6f3-f737-4ec5-a9fc-e6f74d5cc643@kanton-zug",
+        "isopen": false,
+        "issued": "2024-12-02T00:00:00",
+        "keywords": {
+          "en": [],
+          "de": [
+            "mittelschule",
+            "lehrpersonal",
+            "gymnasium",
+            "kantonsschule",
+            "fachmittelschule"
+          ],
+          "fr": [],
+          "it": []
+        },
+        "language": [],
+        "license_id": null,
+        "license_title": null,
+        "metadata_created": "2024-11-29T12:18:23.857311",
+        "metadata_modified": "2026-10-06T19:21:25.394662",
+        "modified": "2025-09-23T00:00:00",
+        "name": "lehrpersonal-an-zuger-mittelschulen-nach-geschlecht",
+        "num_resources": 8,
+        "num_tags": 5,
+        "organization": {
+          "approval_status": "approved",
+          "created": "2017-10-05T11:14:18.369411",
+          "description": {
+            "fr": "",
+            "en": "",
+            "de": "Hier veröffentlicht das Team von Open Data Zug von der kantonalen Fachstelle für Daten und Statistik schrittweise offene Behördendaten der kantonalen Verwaltung.\r\n\r\nWeitere Informationen unter https://zg.ch/opendata\r\n",
+            "it": ""
+          },
+          "display_name": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "id": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+          "image_display_url": "http://liip-prod-ckan-svc:80/uploads/group/2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "image_url": "2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "is_organization": true,
+          "name": "kanton-zug",
+          "num_followers": 0,
+          "package_count": 229,
+          "political_level": "canton",
+          "state": "active",
+          "title": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "type": "organization",
+          "url": "",
+          "tags": [],
+          "groups": []
+        },
+        "owner_org": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+        "private": false,
+        "publisher": {
+          "url": "https://data.zg.ch/store/2/resource/258",
+          "name": {
+            "de": "Fachstelle für Daten und Statistik des Kantons Zug",
+            "en": "",
+            "fr": "",
+            "it": ""
+          }
+        },
+        "qualified_relations": [],
+        "relations": [],
+        "see_alsos": [],
+        "spatial": "https://sws.geonames.org/2657907",
+        "state": "active",
+        "temporals": [
+          {
+            "end_date": "2024-11-15T23:59:59.999999",
+            "start_date": "2001-08-15T00:00:00"
+          }
+        ],
+        "title": {
+          "de": "Lehrpersonen an kantonalen Mittelschulen",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "title_for_slug": "lehrpersonal-an-zuger-mittelschulen-nach-geschlecht",
+        "type": "dataset",
+        "url": "https://www.zg.ch/behoerden/gesundheitsdirektion/statistikfachstelle/themen/bildung/mittelschulen",
+        "version": null,
+        "extras": [
+          {
+            "key": "guid",
+            "value": "27d2a6f3-f737-4ec5-a9fc-e6f74d5cc643@kanton-zug"
+          },
+          {
+            "key": "uri",
+            "value": "https://data.zg.ch/store/1/resource/728"
+          },
+          {
+            "key": "harvest_object_id",
+            "value": "e94e2705-de39-4543-8dd7-b1b30c6ad468"
+          },
+          {
+            "key": "harvest_source_id",
+            "value": "71abd913-fa39-45e3-9537-9f4364f76c56"
+          },
+          {
+            "key": "harvest_source_title",
+            "value": "DCAT Harvester Kt. ZG"
+          }
+        ],
+        "groups": [
+          {
+            "description": {
+              "fr": "",
+              "de": "",
+              "en": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Bildung, Kultur und Sport",
+              "en": "Education, culture and sport",
+              "fr": "Éducation, culture et sport",
+              "it": "Istruzione, cultura e sport"
+            },
+            "id": "b36d9b09-dc05-422c-997e-4e81b02afd6f",
+            "image_display_url": "",
+            "name": "educ",
+            "title": "{\"de\": \"Bildung, Kultur und Sport\", \"en\": \"Education, culture and sport\", \"fr\": \"Éducation, culture et sport\", \"it\": \"Istruzione, cultura e sport\"}"
+          }
+        ],
+        "resources": [
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2024-11-29T12:18:23.885852",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "de": "Lehrpersonen: Ohne Schulleitungspersonal (bei Personen mit Schulleitungsfunktion wird Schulleitungspensum ignoriert).",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Lehrpersonen nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [],
+            "download_url": "https://data.zg.ch/store/1/resource/729",
+            "format": "CSV",
+            "hash": "",
+            "id": "c96a642a-6c02-4bf2-a460-c8891a3b22eb",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "text/csv",
+            "metadata_modified": "2026-10-06T19:21:25.403447",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T11:30:29.227000+00:00",
+            "name": {
+              "de": "Lehrpersonen nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "b73a0d2c-c192-4a43-a120-4949c3e07d1c",
+            "position": 0,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_open",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Lehrpersonen nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/730",
+            "url": "https://data.zg.ch/store/1/resource/729",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2024-11-29T12:18:23.885858",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "de": "Lehrpersonen: Ohne Schulleitungspersonal (bei Personen mit Schulleitungsfunktion wird Schulleitungspensum ignoriert).",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Lehrpersonen nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [
+              "https://swagger.entryscape.com/?url=https://data.zg.ch/rowstore/dataset/7f5c9553-3c88-4806-bda8-13c2c66d089c/swagger"
+            ],
+            "format": "JSON",
+            "hash": "",
+            "id": "b627b6bb-4eec-41bd-97c8-79161d2ffe40",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "application/json",
+            "metadata_modified": "2026-10-06T19:21:25.403558",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T11:30:29.227000+00:00",
+            "name": {
+              "de": "Lehrpersonen nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "b73a0d2c-c192-4a43-a120-4949c3e07d1c",
+            "position": 1,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Lehrpersonen nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/1653",
+            "url": "https://data.zg.ch/rowstore/dataset/7f5c9553-3c88-4806-bda8-13c2c66d089c",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-05T19:16:05.693075",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "de": "Lehrpersonen: Ohne Schulleitungspersonal (bei Personen mit Schulleitungsfunktion wird Schulleitungspensum ignoriert).",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Lehrpersonen nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [],
+            "download_url": "https://data.zg.ch/store/1/resource/2476",
+            "format": "CSV",
+            "hash": "7711677c9a850eb19ab7753b0a755ede",
+            "id": "354b6d93-c2c5-45c9-9540-3810200f6bc9",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "text/csv",
+            "metadata_modified": "2026-10-06T19:21:25.403630",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T11:30:50.674000+00:00",
+            "name": {
+              "de": "Lehrpersonen nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "b73a0d2c-c192-4a43-a120-4949c3e07d1c",
+            "position": 2,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Lehrpersonen nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2477",
+            "url": "https://data.zg.ch/store/1/resource/2476",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-05T19:16:05.693080",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "de": "Schulpersonal: Lehrpersonen und Schulleitungspersonal.",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Schulpersonal nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [],
+            "download_url": "https://data.zg.ch/store/1/resource/2478",
+            "format": "CSV",
+            "hash": "4afbf5bc1aec1ec1777f964de236dd54",
+            "id": "cb17926e-1f1e-42bd-9e50-97914d5ca96e",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "text/csv",
+            "metadata_modified": "2026-10-06T19:21:25.403696",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T11:30:40.001000+00:00",
+            "name": {
+              "de": "Schulpersonal nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "b73a0d2c-c192-4a43-a120-4949c3e07d1c",
+            "position": 3,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Schulpersonal nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2479",
+            "url": "https://data.zg.ch/store/1/resource/2478",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-05T19:16:05.693081",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "de": "Schulpersonal: Lehrpersonen und Schulleitungspersonal.",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Schulpersonal nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [],
+            "download_url": "https://data.zg.ch/store/1/resource/2480",
+            "format": "CSV",
+            "hash": "baa821b1155c0cf82693cc2ca8841a7d",
+            "id": "bff0b60e-251d-456d-9def-410005a9ea18",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "text/csv",
+            "metadata_modified": "2026-10-06T19:21:25.403758",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T11:31:01.349000+00:00",
+            "name": {
+              "de": "Schulpersonal nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "b73a0d2c-c192-4a43-a120-4949c3e07d1c",
+            "position": 4,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Schulpersonal nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2481",
+            "url": "https://data.zg.ch/store/1/resource/2480",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-05T19:16:05.693083",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "de": "Lehrpersonen: Ohne Schulleitungspersonal (bei Personen mit Schulleitungsfunktion wird Schulleitungspensum ignoriert).",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Lehrpersonen nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [
+              "https://swagger.entryscape.com/?url=https://data.zg.ch/rowstore/dataset/03ccec9c-24a6-4cdb-8936-00110e49d06c/swagger"
+            ],
+            "format": "JSON",
+            "hash": "",
+            "id": "b3cc93da-3e81-410a-9514-01287eeed84c",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "application/json",
+            "metadata_modified": "2026-10-06T19:21:25.403852",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T11:30:50.674000+00:00",
+            "name": {
+              "de": "Lehrpersonen nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "b73a0d2c-c192-4a43-a120-4949c3e07d1c",
+            "position": 5,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Lehrpersonen nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2492",
+            "url": "https://data.zg.ch/rowstore/dataset/03ccec9c-24a6-4cdb-8936-00110e49d06c",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-05T19:16:05.693084",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "de": "Schulpersonal: Lehrpersonen und Schulleitungspersonal.",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Schulpersonal nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [
+              "https://swagger.entryscape.com/?url=https://data.zg.ch/rowstore/dataset/03e478c4-93b8-429a-86af-76cdcdfb8503/swagger"
+            ],
+            "format": "JSON",
+            "hash": "",
+            "id": "b82fb8a1-c898-40af-8416-4a1dfd83b0fc",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "application/json",
+            "metadata_modified": "2026-10-06T19:21:25.403933",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T11:30:40.001000+00:00",
+            "name": {
+              "de": "Schulpersonal nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "b73a0d2c-c192-4a43-a120-4949c3e07d1c",
+            "position": 6,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Schulpersonal nach Geschlecht",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2494",
+            "url": "https://data.zg.ch/rowstore/dataset/03e478c4-93b8-429a-86af-76cdcdfb8503",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-05T19:16:05.693086",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "de": "Schulpersonal: Lehrpersonen und Schulleitungspersonal.",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Schulpersonal nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [
+              "https://swagger.entryscape.com/?url=https://data.zg.ch/rowstore/dataset/916a9278-f0bd-4b6d-a4f4-24be83ebc3b7/swagger"
+            ],
+            "format": "JSON",
+            "hash": "",
+            "id": "137ad858-4fa7-4ce5-8348-9fa02ea9a253",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "application/json",
+            "metadata_modified": "2026-10-06T19:21:25.404008",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T11:31:01.349000+00:00",
+            "name": {
+              "de": "Schulpersonal nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "b73a0d2c-c192-4a43-a120-4949c3e07d1c",
+            "position": 7,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Schulpersonal nach Anstellungsart",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2496",
+            "url": "https://data.zg.ch/rowstore/dataset/916a9278-f0bd-4b6d-a4f4-24be83ebc3b7",
+            "url_type": null
+          }
+        ],
+        "tags": [
+          {
+            "display_name": "fachmittelschule",
+            "id": "c4edd594-f5b5-4836-925c-92ba6143f88f",
+            "name": "fachmittelschule",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "gymnasium",
+            "id": "0a086d60-c6be-46dd-ab77-4668298cccee",
+            "name": "gymnasium",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "kantonsschule",
+            "id": "1472e702-053c-4e9e-b51c-9193cfa0eef4",
+            "name": "kantonsschule",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "lehrpersonal",
+            "id": "7cb1f2ea-358f-4c06-a4a5-6f7e03669fde",
+            "name": "lehrpersonal",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "mittelschule",
+            "id": "9945a851-4622-4d6f-9ec8-40cf7445ce72",
+            "name": "mittelschule",
+            "state": "active",
+            "vocabulary_id": null
+          }
+        ],
+        "relationships_as_subject": [],
+        "relationships_as_object": []
+      },
+      {
+        "accrual_periodicity": "",
+        "conforms_to": [],
+        "description": {
+          "de": "Entwicklung der Anzahl Studierenden an Universitäten und Hochschulen mit Wohnsitz im Kanton Zug (vor Studienbeginn), 1980 bis 2026.\n\nAls Studierende gelten alle Personen, die im angegebenen Winter-, resp. Herbstsemester an einer schweizerischen Hochschule (universitäre Hochschulen, Fachhochschulen, pädagogische Hochschule) immatrikuliert waren.\n\n(QUELLE: Bundesamt für Statistik, Studierende und Abschlüsse der Hochschulen)",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Studierende aus dem Kanton Zug",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "documentation": [],
+        "id": "76e48968-7d6e-47a1-ab83-8c8056518717",
+        "identifier": "a779f6f7-a5d4-42ec-8b7f-10c6eff66616@kanton-zug",
+        "isopen": false,
+        "issued": "2024-12-02T00:00:00",
+        "keywords": {
+          "en": [],
+          "de": [
+            "fachhochschule"
+          ],
+          "fr": [],
+          "it": []
+        },
+        "language": [],
+        "license_id": null,
+        "license_title": null,
+        "metadata_created": "2024-11-29T12:17:17.393922",
+        "metadata_modified": "2026-10-06T19:21:18.116428",
+        "modified": "2026-10-06T00:00:00",
+        "name": "studierende-aus-dem-kanton-zug",
+        "num_resources": 4,
+        "num_tags": 2,
+        "organization": {
+          "approval_status": "approved",
+          "created": "2017-10-05T11:14:18.369411",
+          "description": {
+            "fr": "",
+            "en": "",
+            "de": "Hier veröffentlicht das Team von Open Data Zug von der kantonalen Fachstelle für Daten und Statistik schrittweise offene Behördendaten der kantonalen Verwaltung.\r\n\r\nWeitere Informationen unter https://zg.ch/opendata\r\n",
+            "it": ""
+          },
+          "display_name": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "id": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+          "image_display_url": "http://liip-prod-ckan-svc:80/uploads/group/2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "image_url": "2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "is_organization": true,
+          "name": "kanton-zug",
+          "num_followers": 0,
+          "package_count": 229,
+          "political_level": "canton",
+          "state": "active",
+          "title": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "type": "organization",
+          "url": "",
+          "tags": [],
+          "groups": []
+        },
+        "owner_org": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+        "private": false,
+        "publisher": {
+          "url": "https://data.zg.ch/store/2/resource/258",
+          "name": {
+            "de": "Fachstelle für Daten und Statistik des Kantons Zug",
+            "en": "",
+            "fr": "",
+            "it": ""
+          }
+        },
+        "qualified_relations": [],
+        "relations": [],
+        "see_alsos": [],
+        "spatial": "https://sws.geonames.org/2657907",
+        "state": "active",
+        "temporals": [
+          {
+            "end_date": "2026-07-31T23:59:59.999999",
+            "start_date": "1980-08-01T00:00:00"
+          }
+        ],
+        "title": {
+          "de": "Studierende aus dem Kanton Zug",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "title_for_slug": "studierende-aus-dem-kanton-zug",
+        "type": "dataset",
+        "url": "https://www.zg.ch/behoerden/gesundheitsdirektion/statistikfachstelle/themen/bildung/tertiaerstufe",
+        "version": null,
+        "extras": [
+          {
+            "key": "guid",
+            "value": "a779f6f7-a5d4-42ec-8b7f-10c6eff66616@kanton-zug"
+          },
+          {
+            "key": "harvest_object_id",
+            "value": "23a497c4-d200-4ada-89f0-c125bbbb1204"
+          },
+          {
+            "key": "harvest_source_id",
+            "value": "71abd913-fa39-45e3-9537-9f4364f76c56"
+          },
+          {
+            "key": "harvest_source_title",
+            "value": "DCAT Harvester Kt. ZG"
+          },
+          {
+            "key": "uri",
+            "value": "https://data.zg.ch/store/1/resource/741"
+          }
+        ],
+        "groups": [
+          {
+            "description": {
+              "fr": "",
+              "de": "",
+              "en": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Bildung, Kultur und Sport",
+              "en": "Education, culture and sport",
+              "fr": "Éducation, culture et sport",
+              "it": "Istruzione, cultura e sport"
+            },
+            "id": "b36d9b09-dc05-422c-997e-4e81b02afd6f",
+            "image_display_url": "",
+            "name": "educ",
+            "title": "{\"de\": \"Bildung, Kultur und Sport\", \"en\": \"Education, culture and sport\", \"fr\": \"Éducation, culture et sport\", \"it\": \"Istruzione, cultura e sport\"}"
+          }
+        ],
+        "resources": [
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2024-11-29T12:17:17.428721",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Studierende aus dem Kanton Zug",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [],
+            "download_url": "https://data.zg.ch/store/1/resource/742",
+            "format": "CSV",
+            "hash": "",
+            "id": "23cd6b0b-d282-4da2-beb5-cd4345eefff2",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "text/csv",
+            "metadata_modified": "2026-10-06T19:21:18.131605",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T08:19:43.313000+00:00",
+            "name": {
+              "de": "Studierende aus dem Kanton Zug",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "76e48968-7d6e-47a1-ab83-8c8056518717",
+            "position": 0,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Studierende aus dem Kanton Zug",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/743",
+            "url": "https://data.zg.ch/store/1/resource/742",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2024-11-29T12:17:17.428727",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Studierende aus dem Kanton Zug",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [
+              "https://swagger.entryscape.com/?url=https://data.zg.ch/rowstore/dataset/b0cd8b2b-8e0b-4c64-8370-de2dfb264256/swagger"
+            ],
+            "format": "JSON",
+            "hash": "",
+            "id": "c43c8d12-2549-4173-81eb-2caee9ae51ca",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "application/json",
+            "metadata_modified": "2026-10-06T19:21:18.131761",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T08:19:43.313000+00:00",
+            "name": {
+              "de": "Studierende aus dem Kanton Zug",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "76e48968-7d6e-47a1-ab83-8c8056518717",
+            "position": 1,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Studierende aus dem Kanton Zug",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/1477",
+            "url": "https://data.zg.ch/rowstore/dataset/b0cd8b2b-8e0b-4c64-8370-de2dfb264256",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "ckan_url": "http://liip-prod-ckan-svc:80",
+            "created": "2026-10-06T19:21:08.511554",
+            "datastore_active": true,
+            "datastore_contains_all_records_of_source_file": true,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Studierende pro Hochschule",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [],
+            "download_url": "https://data.zg.ch/store/1/resource/2504",
+            "format": "CSV",
+            "hash": "5f87b340645236cb13f50824dba4298b",
+            "id": "09189d62-2961-4f85-b858-d45f975fd92c",
+            "ignore_hash": false,
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "text/csv",
+            "metadata_modified": "2026-10-06T19:21:18.131847",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T08:19:54.148000+00:00",
+            "name": {
+              "de": "Studierende pro Hochschule",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "original_url": "https://data.zg.ch/store/1/resource/2504",
+            "package_id": "76e48968-7d6e-47a1-ab83-8c8056518717",
+            "position": 2,
+            "resource_id": "09189d62-2961-4f85-b858-d45f975fd92c",
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "set_url_type": false,
+            "size": null,
+            "state": "active",
+            "task_created": "2026-10-06 19:21:08.729590",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Studierende pro Hochschule",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2505",
+            "url": "https://data.zg.ch/store/1/resource/2504",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-06T19:21:08.511565",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Studierende pro Hochschule",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [
+              "https://swagger.entryscape.com/?url=https://data.zg.ch/rowstore/dataset/d329436c-9264-49b0-90cd-9a1c44fcf5df/swagger"
+            ],
+            "format": "JSON",
+            "hash": "",
+            "id": "ee449c2a-0ca6-4927-8e03-c7cd94ed6175",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "application/json",
+            "metadata_modified": "2026-10-06T19:21:18.131922",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T08:19:54.148000+00:00",
+            "name": {
+              "de": "Studierende pro Hochschule",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "76e48968-7d6e-47a1-ab83-8c8056518717",
+            "position": 3,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Studierende pro Hochschule",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2508",
+            "url": "https://data.zg.ch/rowstore/dataset/d329436c-9264-49b0-90cd-9a1c44fcf5df",
+            "url_type": null
+          }
+        ],
+        "tags": [
+          {
+            "display_name": "fachhochschule",
+            "id": "21f0d7ba-860d-4f33-99c3-5cc01e477b2c",
+            "name": "fachhochschule",
+            "state": "active",
+            "vocabulary_id": null
+          },
+          {
+            "display_name": "universitat",
+            "id": "072ec081-c670-4406-a9ba-26f523bc0a0d",
+            "name": "universitat",
+            "state": "active",
+            "vocabulary_id": null
+          }
+        ],
+        "relationships_as_subject": [],
+        "relationships_as_object": []
+      },
+      {
+        "accrual_periodicity": "",
+        "conforms_to": [],
+        "description": {
+          "de": "Anzahl Anschlusslösungen nach Teilnahme ein einem Brückenangebot des Kantons Zug, 2009/10 bis 2025/26.\n\nDie hier ausgewiesene Anzahl Lernender entspricht nicht der Gesamtzahl der Lernenden der Brückenangebote. Lernende des I-B-A (Integrations-Brücken-Angebot), die in der Regel nach dem Einstiegsjahr ein Aufbaujahr absolvieren, sind in dieser Statistik nicht berücksichtigt. Ebenfalls nicht enthalten sind die Lernenden des I-B-A-20+ (Integrations-Brücken-Angebot für Erwachsene) sowie des BFJ (Berufsfindungsjahr).\n\n(QUELLE: Kanton Zug, Amt für Brückenangebote)",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Anschlusslösungen nach einem Brückenangebot",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "documentation": [],
+        "id": "260b7ea0-8a34-4dc7-98cc-48d1b762a768",
+        "identifier": "71605430-f258-4559-b795-c2700f5ed811@kanton-zug",
+        "isopen": false,
+        "issued": "2026-10-06T00:00:00",
+        "keywords": {
+          "en": [],
+          "de": [],
+          "fr": [],
+          "it": []
+        },
+        "language": [],
+        "license_id": null,
+        "license_title": null,
+        "metadata_created": "2026-10-06T19:19:25.221856",
+        "metadata_modified": "2026-10-06T19:19:37.409809",
+        "modified": "2026-10-06T00:00:00",
+        "name": "anschlusslosungen-nach-einem-bruckenangebot",
+        "num_resources": 2,
+        "num_tags": 0,
+        "organization": {
+          "approval_status": "approved",
+          "created": "2017-10-05T11:14:18.369411",
+          "description": {
+            "fr": "",
+            "en": "",
+            "de": "Hier veröffentlicht das Team von Open Data Zug von der kantonalen Fachstelle für Daten und Statistik schrittweise offene Behördendaten der kantonalen Verwaltung.\r\n\r\nWeitere Informationen unter https://zg.ch/opendata\r\n",
+            "it": ""
+          },
+          "display_name": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "id": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+          "image_display_url": "http://liip-prod-ckan-svc:80/uploads/group/2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "image_url": "2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "is_organization": true,
+          "name": "kanton-zug",
+          "num_followers": 0,
+          "package_count": 229,
+          "political_level": "canton",
+          "state": "active",
+          "title": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "type": "organization",
+          "url": "",
+          "tags": [],
+          "groups": []
+        },
+        "owner_org": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+        "private": false,
+        "publisher": {
+          "url": "https://data.zg.ch/store/2/resource/258",
+          "name": {
+            "de": "Fachstelle für Daten und Statistik des Kantons Zug",
+            "en": "",
+            "fr": "",
+            "it": ""
+          }
+        },
+        "qualified_relations": [],
+        "relations": [],
+        "see_alsos": [],
+        "spatial": "",
+        "state": "active",
+        "temporals": [
+          {
+            "end_date": "2026-12-31T23:59:59.999999",
+            "start_date": "2010-01-01T00:00:00"
+          }
+        ],
+        "title": {
+          "de": "Anschlusslösungen nach einem Brückenangebot",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "title_for_slug": "anschlusslosungen-nach-einem-bruckenangebot",
+        "type": "dataset",
+        "url": "",
+        "version": null,
+        "extras": [
+          {
+            "key": "guid",
+            "value": "71605430-f258-4559-b795-c2700f5ed811@kanton-zug"
+          },
+          {
+            "key": "harvest_object_id",
+            "value": "429b13c2-85f7-4e32-8e75-04479daa1113"
+          },
+          {
+            "key": "harvest_source_id",
+            "value": "71abd913-fa39-45e3-9537-9f4364f76c56"
+          },
+          {
+            "key": "harvest_source_title",
+            "value": "DCAT Harvester Kt. ZG"
+          },
+          {
+            "key": "uri",
+            "value": "https://data.zg.ch/store/1/resource/2498"
+          }
+        ],
+        "groups": [
+          {
+            "description": {
+              "fr": "",
+              "de": "",
+              "en": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Bildung, Kultur und Sport",
+              "en": "Education, culture and sport",
+              "fr": "Éducation, culture et sport",
+              "it": "Istruzione, cultura e sport"
+            },
+            "id": "b36d9b09-dc05-422c-997e-4e81b02afd6f",
+            "image_display_url": "",
+            "name": "educ",
+            "title": "{\"de\": \"Bildung, Kultur und Sport\", \"en\": \"Education, culture and sport\", \"fr\": \"Éducation, culture et sport\", \"it\": \"Istruzione, cultura e sport\"}"
+          }
+        ],
+        "resources": [
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "ckan_url": "http://liip-prod-ckan-svc:80",
+            "created": "2026-10-06T19:19:25.236148",
+            "datastore_active": true,
+            "datastore_contains_all_records_of_source_file": true,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Anschlusslösungen nach einem Brückenangebot",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [],
+            "download_url": "https://data.zg.ch/store/1/resource/2499",
+            "format": "CSV",
+            "hash": "5aa737f7b4b7386b24cc3b0a441bc42c",
+            "id": "72314388-2224-4ffd-8055-f0b7ef1b4947",
+            "ignore_hash": false,
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "text/csv",
+            "metadata_modified": "2026-10-06T19:19:37.485284",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T06:42:24.665000+00:00",
+            "name": {
+              "de": "Anschlusslösungen nach einem Brückenangebot",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "original_url": "https://data.zg.ch/store/1/resource/2499",
+            "package_id": "260b7ea0-8a34-4dc7-98cc-48d1b762a768",
+            "position": 0,
+            "resource_id": "72314388-2224-4ffd-8055-f0b7ef1b4947",
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "set_url_type": false,
+            "size": null,
+            "state": "active",
+            "task_created": "2026-10-06 19:19:26.126791",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Anschlusslösungen nach einem Brückenangebot",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2500",
+            "url": "https://data.zg.ch/store/1/resource/2499",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-06T19:19:25.236152",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Anschlusslösungen nach einem Brückenangebot",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [
+              "https://swagger.entryscape.com/?url=https://data.zg.ch/rowstore/dataset/95ec04a0-8109-49f7-98fd-8d15948c9531/swagger"
+            ],
+            "format": "JSON",
+            "hash": "",
+            "id": "73833e1d-3e8a-487e-a8fc-d5ea0ef9a9c6",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "application/json",
+            "metadata_modified": "2026-10-06T19:19:37.485451",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T06:42:24.665000+00:00",
+            "name": {
+              "de": "Anschlusslösungen nach einem Brückenangebot",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "260b7ea0-8a34-4dc7-98cc-48d1b762a768",
+            "position": 1,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Anschlusslösungen nach einem Brückenangebot",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2502",
+            "url": "https://data.zg.ch/rowstore/dataset/95ec04a0-8109-49f7-98fd-8d15948c9531",
+            "url_type": null
+          }
+        ],
+        "tags": [],
+        "relationships_as_subject": [],
+        "relationships_as_object": []
+      },
+      {
+        "accrual_periodicity": "",
+        "conforms_to": [],
+        "description": {
+          "de": "Zuweisungs- und Übertrittsquoten von öffentlichen gemeindlichen Schulen an die kantonalen Mittelschulen im Kanton Zug, 2013/14 bis 2025/26.\n\nNur öffentliche Schulen, ohne Privat- und Sonderschulen.\n\nDie kumulierte Übertrittsquote nach Kohorte summiert die Übertrittsquote aus der 3. Oberstufe eines Schuljahres mit der Übertrittsquote aus der 2. Oberstufe des vorangegangenen Schuljahres.\n\nStichtage: 20. März (Übertritte); 15. März (Zuweisungen); 15. November (Anzahl Schülerinnen und Schüler).\n\n(QUELLEN: Bundesamt für Statistik, Lernende; Kanton Zug, Amt für gemeindliche Schulen; Kanton Zug, Amt für Mittelschulen und Pädagogische Hochschule)",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Übertritte von gemeindlichen Schulen an kantonale Mittelschulen",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "documentation": [],
+        "id": "81faae5e-360f-4a49-b68d-7490f9775d21",
+        "identifier": "335721be-4bcf-44ea-a7ee-98702b3acbb8@kanton-zug",
+        "isopen": false,
+        "issued": "2026-10-06T00:00:00",
+        "keywords": {
+          "en": [],
+          "de": [],
+          "fr": [],
+          "it": []
+        },
+        "language": [],
+        "license_id": null,
+        "license_title": null,
+        "metadata_created": "2026-10-06T19:18:51.817851",
+        "metadata_modified": "2026-10-06T19:19:25.318906",
+        "modified": "2026-10-06T00:00:00",
+        "name": "ubertritte-von-gemeindlichen-schulen-an-kantonale-mittelschulen",
+        "num_resources": 2,
+        "num_tags": 0,
+        "organization": {
+          "approval_status": "approved",
+          "created": "2017-10-05T11:14:18.369411",
+          "description": {
+            "fr": "",
+            "en": "",
+            "de": "Hier veröffentlicht das Team von Open Data Zug von der kantonalen Fachstelle für Daten und Statistik schrittweise offene Behördendaten der kantonalen Verwaltung.\r\n\r\nWeitere Informationen unter https://zg.ch/opendata\r\n",
+            "it": ""
+          },
+          "display_name": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "id": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+          "image_display_url": "http://liip-prod-ckan-svc:80/uploads/group/2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "image_url": "2025-02-26-085853.479825OpenDataZGLogoquadratblackV2whitespace.jpg",
+          "is_organization": true,
+          "name": "kanton-zug",
+          "num_followers": 0,
+          "package_count": 229,
+          "political_level": "canton",
+          "state": "active",
+          "title": {
+            "de": "Kanton Zug",
+            "en": "Canton of Zug",
+            "fr": "Canton de Zoug",
+            "it": "Cantone di Zugo"
+          },
+          "type": "organization",
+          "url": "",
+          "tags": [],
+          "groups": []
+        },
+        "owner_org": "30877068-09c5-4ed3-afc2-5b77caeacdb6",
+        "private": false,
+        "publisher": {
+          "url": "https://data.zg.ch/store/2/resource/258",
+          "name": {
+            "de": "Fachstelle für Daten und Statistik des Kantons Zug",
+            "en": "",
+            "fr": "",
+            "it": ""
+          }
+        },
+        "qualified_relations": [],
+        "relations": [],
+        "see_alsos": [],
+        "spatial": "https://sws.geonames.org/2657907",
+        "state": "active",
+        "temporals": [
+          {
+            "end_date": "2026-03-20T23:59:59.999999",
+            "start_date": "2013-11-15T00:00:00"
+          }
+        ],
+        "title": {
+          "de": "Übertritte von gemeindlichen Schulen an kantonale Mittelschulen",
+          "en": "",
+          "fr": "",
+          "it": ""
+        },
+        "title_for_slug": "ubertritte-von-gemeindlichen-schulen-an-kantonale-mittelschulen",
+        "type": "dataset",
+        "url": "",
+        "version": null,
+        "extras": [
+          {
+            "key": "guid",
+            "value": "335721be-4bcf-44ea-a7ee-98702b3acbb8@kanton-zug"
+          },
+          {
+            "key": "harvest_object_id",
+            "value": "2fd0d094-3c13-43ca-a4b1-9c073c14c1aa"
+          },
+          {
+            "key": "harvest_source_id",
+            "value": "71abd913-fa39-45e3-9537-9f4364f76c56"
+          },
+          {
+            "key": "harvest_source_title",
+            "value": "DCAT Harvester Kt. ZG"
+          },
+          {
+            "key": "uri",
+            "value": "https://data.zg.ch/store/1/resource/2509"
+          }
+        ],
+        "groups": [
+          {
+            "description": {
+              "fr": "",
+              "de": "",
+              "en": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Bildung, Kultur und Sport",
+              "en": "Education, culture and sport",
+              "fr": "Éducation, culture et sport",
+              "it": "Istruzione, cultura e sport"
+            },
+            "id": "b36d9b09-dc05-422c-997e-4e81b02afd6f",
+            "image_display_url": "",
+            "name": "educ",
+            "title": "{\"de\": \"Bildung, Kultur und Sport\", \"en\": \"Education, culture and sport\", \"fr\": \"Éducation, culture et sport\", \"it\": \"Istruzione, cultura e sport\"}"
+          }
+        ],
+        "resources": [
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "ckan_url": "http://liip-prod-ckan-svc:80",
+            "created": "2026-10-06T19:18:51.828839",
+            "datastore_active": true,
+            "datastore_contains_all_records_of_source_file": true,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Übertritts- und Zuweisungsquoten",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [],
+            "download_url": "https://data.zg.ch/store/1/resource/2510",
+            "format": "CSV",
+            "hash": "4f634d6ab576c1743fe148db9564f920",
+            "id": "576206c3-aeb6-4c10-93aa-ad8b256827bf",
+            "ignore_hash": false,
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "text/csv",
+            "metadata_modified": "2026-10-06T19:19:25.332587",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "modified": "2026-10-06T09:59:09.969000+00:00",
+            "name": {
+              "de": "Übertritts- und Zuweisungsquoten",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "original_url": "https://data.zg.ch/store/1/resource/2510",
+            "package_id": "81faae5e-360f-4a49-b68d-7490f9775d21",
+            "position": 0,
+            "resource_id": "576206c3-aeb6-4c10-93aa-ad8b256827bf",
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "set_url_type": false,
+            "size": null,
+            "state": "active",
+            "task_created": "2026-10-06 19:18:52.929562",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Übertritts- und Zuweisungsquoten",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2511",
+            "url": "https://data.zg.ch/store/1/resource/2510",
+            "url_type": null
+          },
+          {
+            "access_services": [],
+            "byte_size": 0,
+            "cache_last_updated": null,
+            "cache_url": null,
+            "created": "2026-10-06T19:18:51.828845",
+            "datastore_active": false,
+            "datastore_contains_all_records_of_source_file": false,
+            "description": {
+              "en": "",
+              "de": "",
+              "fr": "",
+              "it": ""
+            },
+            "display_name": {
+              "de": "Übertritts- und Zuweisungsquoten",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "documentation": [
+              "https://swagger.entryscape.com/?url=https://data.zg.ch/rowstore/dataset/91a22186-d628-4c3e-84ee-4b8c18a5dc09/swagger"
+            ],
+            "format": "JSON",
+            "hash": "",
+            "id": "50048b72-f26f-48aa-a4c2-7b1965a0bd93",
+            "language": [],
+            "last_modified": null,
+            "license": "https://opendata.swiss/terms-of-use#terms_by",
+            "media_type": "application/json",
+            "metadata_modified": "2026-10-06T19:19:25.332709",
+            "mimetype": null,
+            "mimetype_inner": null,
+            "name": {
+              "de": "Übertritts- und Zuweisungsquoten",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "package_id": "81faae5e-360f-4a49-b68d-7490f9775d21",
+            "position": 1,
+            "resource_type": null,
+            "rights": "https://opendata.swiss/terms-of-use#terms_by",
+            "size": null,
+            "state": "active",
+            "temporal_resolution": "",
+            "title": {
+              "de": "Übertritts- und Zuweisungsquoten",
+              "en": "",
+              "fr": "",
+              "it": ""
+            },
+            "uri": "https://data.zg.ch/store/1/resource/2513",
+            "url": "https://data.zg.ch/rowstore/dataset/91a22186-d628-4c3e-84ee-4b8c18a5dc09",
+            "url_type": null
+          }
+        ],
+        "tags": [],
+        "relationships_as_subject": [],
+        "relationships_as_object": []
+      }
+    ],
+    "sort": "score desc, metadata_modified desc",
+    "search_facets": {}
+  }
+}

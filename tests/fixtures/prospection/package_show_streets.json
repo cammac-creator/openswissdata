@@ -1,0 +1,610 @@
+{
+  "help": "https://ckan.opendata.swiss/api/3/action/help_show?name=package_show",
+  "success": true,
+  "result": {
+    "accrual_periodicity": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+    "conforms_to": [],
+    "coverage": "",
+    "description": {
+      "de": "Offizieller Datensatz für «Amtliches Verzeichnis der Strassen», ID196, gemäss Katalog der Geobasisdaten nach Bundesrecht. Das amtliche Verzeichnis der Strassen beinhaltet sämtliche Strassennamen welche im Eidgenössischen Gebäude- und Wohnungsregister (GWR) offiziell deklariert werden. Die Verantwortlichkeit für die Vollständigkeit der Namen im amtlichen Verzeichnis der Strassen erfolgt nach kantonalen Vorschriften. Es handelt sich um eine Collection, die sowohl Zugriff auf die Gebäudeadressen der Schweiz als auch Liechtensteins bietet.",
+      "fr": "Jeu de données officiel du “Répertoire officiel des rues”, ID 196, selon le catalogue des géodonnées de base relevant du droit fédéral. Le répertoire officiel des rues contient toutes les rues qui sont enregistrées dans le Registre des bâtiments et des logements (RegBL) et déclarées officielles comme tel. La responsabilité pour la complétude des noms du registre officiel des rues est définie dans le règlement cantonal. Il s'agit d'une collection qui donne accès à la fois aux adresses des bâtiments de Suisse et du Liechtenstein.",
+      "it": "Dataset ufficiale dell ”elenco ufficiale delle vie”, ID 196, secondo il catalogo dei geodati di base nel diritto federale. L'elenco ufficiale delle vie contiene tutti i nomi delle strade che sono registrati nel Registro degli edifici e delle abitazioni (REA) e dichiarati ufficiali come tali. La responsabilità per la completezza dei nomi dell'elenco ufficiale delle vie è definito in base ai regolamenti cantonali. Si tratta di una raccolta che consente di accedere agli indirizzi degli edifici della Svizzera e del Liechtenstein.",
+      "en": "Official dataset for “official directory of streets”, ID196, as per the catalogue of basic geodata in accordance with Swiss Federal Law. The official directory of streets includes all of the street names that have been officially declared in the Swiss Federal Register of Buildings and Dwellings (RBD). Responsibility for the completeness of the names in the official index of streets is governed by cantonal provisions. It is a collection that provides access to the building addresses of both Switzerland and Liechtenstein."
+    },
+    "id": "82fbb1cf-eb37-4c60-9b67-6e7b38dc7660",
+    "identifier": "caf39a72-92be-4bd1-a976-4eaaeb770a44@bundesamt-fur-landestopografie-swisstopo",
+    "isopen": false,
+    "issued": "2019-12-06T00:00:00",
+    "keywords": {
+      "en": [
+        "cadastral-surveying",
+        "road-axis",
+        "fsdi-federal-spatial-data-infrastructure",
+        "official-geodata",
+        "road-network",
+        "route",
+        "addresses",
+        "nomenclature",
+        "building-address"
+      ],
+      "de": [
+        "amtliche-vermessung-av",
+        "strassenachse",
+        "bgdi-bundesgeodaten-infrastruktur",
+        "geobasisdaten",
+        "strassennetz",
+        "route",
+        "adressen",
+        "nomenklatur",
+        "gebaudeadresse"
+      ],
+      "fr": [
+        "mensuration-officielle-mo",
+        "axe-routier",
+        "ifdg-linfrastructure-federale-de-donnees-geographiques",
+        "geodonnees-de-base",
+        "reseau-routier",
+        "itineraire",
+        "adresses",
+        "nomenclature",
+        "adresse-de-batiment"
+      ],
+      "it": [
+        "misurazione-ufficiale-mu",
+        "asse-stradale",
+        "ifdg-infrastruttura-federale-dei-dati-geografici",
+        "geodati-di-base",
+        "rete-stradale",
+        "itinerario",
+        "indirizzi",
+        "nomenclatura",
+        "indirizzo-di-edificio"
+      ]
+    },
+    "language": [
+      "en",
+      "de",
+      "fr",
+      "it"
+    ],
+    "license_id": null,
+    "license_title": null,
+    "metadata_created": "2021-02-27T04:00:20.917819",
+    "metadata_modified": "2026-10-06T01:18:41.200113",
+    "modified": "",
+    "name": "amtliches-verzeichnis-der-strassen",
+    "num_resources": 7,
+    "num_tags": 0,
+    "organization": {
+      "approval_status": "approved",
+      "created": "2015-11-30T12:12:55.529975",
+      "description": {
+        "fr": "Le centre de compétence de la Confédération suisse pour les informations géographiques, c'est-à-dire pour la description, la représentation et l’archivage de données à référence spatiale.",
+        "de": "Das Kompetenzzentrum der Schweizerischen Eidgenossenschaft für Geoinformation, d.h. für die Beschreibung, Darstellung und Archivierung von raumbezogenen Geodaten.",
+        "en": "The centre of competence for the Swiss Confederation responsible for geographical reference data, for instance the description, representation and archiving of geographic spatial data.",
+        "it": "Il centro d’eccellenza della Confederazione Elvetica per geoinformazione, cioè per la descrizione, rappresentazione e archiviazione dei dati georeferenziati (geodati)."
+      },
+      "display_name": {
+        "de": "Bundesamt für Landestopografie swisstopo",
+        "en": "Federal Office of Topography swisstopo",
+        "fr": "Office fédéral de topographie swisstopo",
+        "it": "Ufficio federale di topografia swisstopo"
+      },
+      "id": "ddd28bac-6890-474c-84cb-97a85db8d2f1",
+      "image_display_url": "https://ckan.opendata.swiss/uploads/group/IMG_1857.jpg",
+      "image_url": "https://ckan.opendata.swiss/uploads/group/IMG_1857.jpg",
+      "is_organization": true,
+      "name": "bundesamt-fur-landestopografie-swisstopo",
+      "num_followers": 0,
+      "package_count": 199,
+      "political_level": "confederation",
+      "state": "active",
+      "title": {
+        "de": "Bundesamt für Landestopografie swisstopo",
+        "en": "Federal Office of Topography swisstopo",
+        "fr": "Office fédéral de topographie swisstopo",
+        "it": "Ufficio federale di topografia swisstopo"
+      },
+      "type": "organization",
+      "url": "",
+      "tags": [],
+      "groups": []
+    },
+    "owner_org": "ddd28bac-6890-474c-84cb-97a85db8d2f1",
+    "private": false,
+    "publisher": {
+      "name": {
+        "de": "Bundesamt für Landestopografie swisstopo, Vermessung",
+        "fr": "Office fédéral de topographie, mensuration",
+        "it": "Ufficio federale di topografia swisstopo, misurazione",
+        "en": "Federal office of topography swisstopo, survey"
+      },
+      "url": "https://www.cadastre.ch/"
+    },
+    "qualified_relations": [],
+    "relations": [
+      {
+        "label": {
+          "de": "geocat.ch Permalink",
+          "fr": "geocat.ch permalien",
+          "it": "geocat.ch link permanente",
+          "en": "geocat.ch permalink"
+        },
+        "url": "https://www.geocat.ch/datahub/dataset/caf39a72-92be-4bd1-a976-4eaaeb770a44"
+      }
+    ],
+    "see_alsos": [],
+    "spatial": "Schweiz",
+    "state": "active",
+    "temporals": [],
+    "title": {
+      "de": "Amtliches Verzeichnis der Strassen",
+      "fr": "Répertoire officiel des rues",
+      "it": "Elenco ufficiale delle vie",
+      "en": "Official directory of streets"
+    },
+    "title_for_slug": "amtliches-verzeichnis-der-strassen",
+    "type": "dataset",
+    "url": "https://www.swisstopo.admin.ch/de/amtliches-verzeichnis-der-strassen",
+    "version": null,
+    "groups": [
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        },
+        "id": "5ce2de34-4114-43cd-ab45-e90a42db50aa",
+        "image_display_url": "",
+        "name": "regi",
+        "title": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        }
+      },
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        },
+        "id": "ab2cc387-d129-4d76-b78d-517326d2a772",
+        "image_display_url": "",
+        "name": "envi",
+        "title": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        }
+      }
+    ],
+    "resources": [
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2022-06-13T11:31:10.589473",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Vorschau map.geo.admin.ch",
+          "fr": "Aperçu map.geo.admin.ch",
+          "it": "Previsione map.geo.admin.ch",
+          "en": "Preview map.geo.admin.ch"
+        },
+        "display_name": {
+          "de": "Map (Preview) Vorschau map.geo.admin.ch",
+          "fr": "Map (Preview) Aperçu map.geo.admin.ch",
+          "it": "Map (Preview) Previsione map.geo.admin.ch",
+          "en": "Map (Preview) map.geo.admin.ch"
+        },
+        "format": "SERVICE",
+        "hash": "",
+        "id": "b29cd8dc-6876-462d-b057-b6685b4ca45b",
+        "issued": "2019-12-06T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T03:22:21.507970",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "Map (Preview) Vorschau map.geo.admin.ch",
+          "fr": "Map (Preview) Aperçu map.geo.admin.ch",
+          "it": "Map (Preview) Previsione map.geo.admin.ch",
+          "en": "Map (Preview) map.geo.admin.ch"
+        },
+        "package_id": "82fbb1cf-eb37-4c60-9b67-6e7b38dc7660",
+        "position": 0,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "Map (Preview) Vorschau map.geo.admin.ch",
+          "fr": "Map (Preview) Aperçu map.geo.admin.ch",
+          "it": "Map (Preview) Previsione map.geo.admin.ch",
+          "en": "Map (Preview) map.geo.admin.ch"
+        },
+        "url": "https://map.geo.admin.ch/?layers=ch.swisstopo.amtliches-strassenverzeichnis",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2023-03-30T00:56:59.293236",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "WMS-BGDI Dienst, Layer \"Amtliches Strassenverzeichnis\"",
+          "fr": "Service WMS-IFDG, couche \"Répertoire officiel des rues\"",
+          "it": "Servizio WMS-IFDG, strato \"Elenco ufficiale delle vie\"",
+          "en": "WMS-FSDI service, layer \"Official street index\""
+        },
+        "display_name": {
+          "de": "ch.swisstopo.amtliches-strassenverzeichnis",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "WMS",
+        "hash": "",
+        "id": "625c889f-82af-4d08-b194-1a83339a25f5",
+        "issued": "2019-12-06T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T03:22:21.508091",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "ch.swisstopo.amtliches-strassenverzeichnis",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "82fbb1cf-eb37-4c60-9b67-6e7b38dc7660",
+        "position": 1,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "ch.swisstopo.amtliches-strassenverzeichnis",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=de",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2024-01-19T02:29:37.913829",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "download_url": "https://www.swisstopo.admin.ch/de/amtliches-verzeichnis-der-strassen",
+        "format": "",
+        "hash": "",
+        "id": "23544246-06ba-4d38-9e3d-3ad023e01209",
+        "issued": "2019-12-06T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T03:22:21.508161",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "82fbb1cf-eb37-4c60-9b67-6e7b38dc7660",
+        "position": 2,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://www.swisstopo.admin.ch/de/amtliches-verzeichnis-der-strassen",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-06-23T02:25:10.735148",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "HTML",
+        "hash": "",
+        "id": "40a415ed-06bf-4ed8-afdb-d61c2472f631",
+        "issued": "2019-12-06T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "text/html",
+        "metadata_modified": "2026-07-29T03:22:21.508227",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "82fbb1cf-eb37-4c60-9b67-6e7b38dc7660",
+        "position": 3,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://www.swisstopo.admin.ch/de/amtliches-verzeichnis-der-strassen",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2022-06-13T11:31:10.589486",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "RESTful API von geo.admin.ch",
+          "fr": "RESTful API de geo.admin.ch",
+          "it": "RESTful API da geo.admin.ch",
+          "en": "RESTful API from geo.admin.ch"
+        },
+        "display_name": {
+          "de": "RESTful API von geo.admin.ch",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "API",
+        "hash": "",
+        "id": "f898de08-d038-4fca-b361-3e1075f8c8d5",
+        "issued": "2019-12-06T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T03:22:21.508292",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "RESTful API von geo.admin.ch",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "82fbb1cf-eb37-4c60-9b67-6e7b38dc7660",
+        "position": 4,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "RESTful API von geo.admin.ch",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://api3.geo.admin.ch/rest/services/api/MapServer/ch.swisstopo.amtliches-strassenverzeichnis",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2022-11-08T00:59:33.839066",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "Linked Data",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "SERVICE",
+        "hash": "",
+        "id": "cfe63ee4-9648-43d9-ae15-51bc05a9a706",
+        "issued": "2019-12-06T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T03:22:21.508356",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "Linked Data",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "82fbb1cf-eb37-4c60-9b67-6e7b38dc7660",
+        "position": 5,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "Linked Data",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://geo.ld.admin.ch/data/streets",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-06-23T02:25:10.735152",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "Linked Data Dienst (via SPARQL)",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "HTML",
+        "hash": "",
+        "id": "113be3b4-c858-4e2e-a6ad-39c12f500dfb",
+        "issued": "2019-12-06T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "text/html",
+        "metadata_modified": "2026-07-29T03:22:21.508435",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "",
+        "name": {
+          "de": "Linked Data Dienst (via SPARQL)",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "82fbb1cf-eb37-4c60-9b67-6e7b38dc7660",
+        "position": 6,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "Linked Data Dienst (via SPARQL)",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://www.geo.admin.ch/de/geo-dienstleistungen/geodienste/linkeddata.html",
+        "url_type": null
+      }
+    ],
+    "tags": [],
+    "relationships_as_subject": [],
+    "relationships_as_object": [],
+    "display_name": {
+      "de": "Amtliches Verzeichnis der Strassen",
+      "fr": "Répertoire officiel des rues",
+      "it": "Elenco ufficiale delle vie",
+      "en": "Official directory of streets"
+    }
+  }
+}

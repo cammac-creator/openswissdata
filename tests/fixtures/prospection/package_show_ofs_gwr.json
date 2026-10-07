@@ -1,0 +1,675 @@
+{
+  "help": "https://ckan.opendata.swiss/api/3/action/help_show?name=package_show",
+  "success": true,
+  "result": {
+    "accrual_periodicity": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+    "conforms_to": [],
+    "coverage": "",
+    "description": {
+      "de": "Das eidgenössische Gebäude- und Wohnungsregister (GWR) wurde anhand von Daten der Volkszählung 2000 zu statistischen Zwecken erstellt. Das GWR hat sich nicht zuletzt dank der am 1. Juli 2017 in Kraft getretenen Totalrevision der Verordnung (VGWR) als massgebendes nationales Informationssystem für Gebäude etabliert. Das GWR enthält Informationen zu Bauprojekten, Gebäuden, Wohnungen, Gebäudeeingängen und Strassen. Daten der Stufe A sind öffentlich und können ohne Einschränkung verwendet werden. Die Datenebene \"GWR: Gebäudestatus\" veranschaulicht grafisch den Status von Gebäuden und deren Eingangsnummer(n).",
+      "fr": "Le Registre fédéral des bâtiments et logements (RegBL), a été créé sur la base des informations issues du recensement de la population 2000 pour des fins statistiques. Le RegBL s’est également imposé depuis lors - notamment grâce à la révision totale de l’ordonnance (ORegBL) entrée en vigueur au 1er juillet 2017 - comme le système national d’information de référence dans le domaine des bâtiments. Le RegBL contient des informations sur les projets de construction, les bâtiments, les logements, les entrées et les rues. Les données de niveau A sont publiques et peuvent être utilisées sans restriction. La couche de données \"RegBL : statut du bâtiment\" illustre graphiquement le statut des bâtiments et leur(s) numéro(s) d'entrée.",
+      "it": "Il Registro federale degli edifici e delle abitazioni (REA), creato sulla base delle informazioni raccolte dal censimento della popolazione 2000 per fini statistici. Il REA si è imposto – in particolare grazie alla revisione totale dell’ordinanza (OREA) entrata in vigore il 1° luglio 2017 – come sistema nazionale d’informazione nel settore degli edifici. Il REA contiene informazioni sui progetti di costruzione, sugli edifici, sulle abitazioni, sulle entrate e sulle vie. I dati di livello A sono pubblici e possono essere utilizzati senza restrizioni. Il livello di dati \"REA: stato degli edifici\" illustra graficamente lo stato degli edifici ed i/il loro numero/i d'entrata.",
+      "en": "The Federal Register of Buildings and Dwellings (RegBL) was created on the basis of information from the 2000 population census for statistical purposes. The RDB has established itself as the standard national information system for buildings, not least thanks to the total revision of his ordinance, which came into force on July 1, 2017. The RDB contains information on construction projects, buildings, dwellings, entrances, and streets. Level A data are public and can be used without restriction. The data layer \"RDB: building status\" graphically illustrates the status of buildings and their entrance number(s)."
+    },
+    "id": "8cb236ad-e08b-43e1-aa0f-14d24161eb48",
+    "identifier": "56553efe-4a2c-449d-93ba-cf7edd518d56@bundesamt-fur-statistik-bfs",
+    "isopen": false,
+    "issued": "2005-01-01T00:00:00",
+    "keywords": {
+      "en": [
+        "e-geoch",
+        "official-geoservice",
+        "register",
+        "conservation-and-archiving-planning-aap---confederation",
+        "construction",
+        "building-address",
+        "buildings",
+        "addresses",
+        "dwelling",
+        "statistics",
+        "fsdi-federal-spatial-data-infrastructure"
+      ],
+      "de": [
+        "e-geoch",
+        "geobasisdienst",
+        "register",
+        "aufbewahrungs--und-archivierungsplanung-aap---bund",
+        "bau",
+        "gebaudeadresse",
+        "gebaude",
+        "adressen",
+        "wohnung",
+        "statistik",
+        "bgdi-bundesgeodaten-infrastruktur"
+      ],
+      "fr": [
+        "e-geoch",
+        "geoservice-de-base",
+        "registre",
+        "planification-de-la-conservation-et-de-larchivage-aap---confederation",
+        "construction",
+        "adresse-de-batiment",
+        "batiments",
+        "adresses",
+        "habitation",
+        "statistiques",
+        "ifdg-linfrastructure-federale-de-donnees-geographiques"
+      ],
+      "it": [
+        "e-geoch",
+        "geoservizio-di-base",
+        "registro",
+        "pianificazione-della-conservazione-e-dellarchiviazione-aap---confederazione",
+        "costruzione",
+        "indirizzo-di-edificio",
+        "edifici",
+        "indirizzi",
+        "abitazione",
+        "statistica",
+        "ifdg-infrastruttura-federale-dei-dati-geografici"
+      ]
+    },
+    "language": [
+      "en",
+      "de",
+      "fr",
+      "it"
+    ],
+    "license_id": null,
+    "license_title": null,
+    "metadata_created": "2023-01-19T14:12:37.901033",
+    "metadata_modified": "2026-10-06T02:12:40.636699",
+    "modified": "2017-07-01T00:00:00",
+    "name": "eidg-gebaude-und-wohnungsregister-gebaudestatus",
+    "num_resources": 8,
+    "num_tags": 0,
+    "organization": {
+      "approval_status": "approved",
+      "created": "2015-11-30T11:50:01.742198",
+      "description": {
+        "fr": "L'OFS est le centre de compétence de la statistique publique suisse. Il produit des informations statistiques sur la population, l'économie, la société, la formation et la recherche, le territoire et l'environnement. Ces informations servent à la formation de l’opinion publique. Elles sont un outil de planification et de gouvernance dans tous les domaines de l’action politique et contribuent au bon fonctionnement de notre État moderne et démocratique.",
+        "de": "Das BFS ist das nationale Kompetenzzentrum der öffentlichen Statistik der Schweiz. Es produziert und publiziert statistische Informationen über den Stand und die Entwicklung von Bevölkerung, Wirtschaft, Gesellschaft, Bildung, Forschung, Raum und Umwelt. Diese Informationen dienen der Meinungsbildung in der Bevölkerung sowie der Planung und Steuerung von zentralen Politikbereichen. Sie leisten einen wichtigen Beitrag für einen modernen, demokratischen Staat.",
+        "en": "The FSO is Switzerland's national competence centre for official statistics. It produces and publishes statistical information on the status and development of the population, economy, society, education, research, territory and the environment. This information is used for opinion building among the population and for the planning and management of key policy areas. They make an important contribution to a modern, democratic state.",
+        "it": "L’UST è il centro di competenza nazionale per la statistica pubblica della Svizzera. Produce e pubblica informazioni statistiche sullo stato e sull'evoluzione della popolazione, dell'economia, della società, della formazione, della ricerca, del territorio e dell'ambiente. Queste informazioni servono alla formazione dell'opinione pubblica nonché alla pianificazione e alla gestione in ambiti politici di centrale importanza. Forniscono un importante contributo per uno Stato moderno e democratico."
+      },
+      "display_name": {
+        "de": "Bundesamt für Statistik BFS",
+        "en": "Federal Statistical Office FSO",
+        "fr": "Office fédéral de la statistique OFS",
+        "it": "Ufficio federale di statistica UST"
+      },
+      "id": "4309c328-c618-4077-bcdc-378a21ee1b46",
+      "image_display_url": "https://ckan.opendata.swiss/uploads/group/BFS_08_web.jpg",
+      "image_url": "https://ckan.opendata.swiss/uploads/group/BFS_08_web.jpg",
+      "is_organization": true,
+      "name": "bundesamt-fur-statistik-bfs",
+      "num_followers": 0,
+      "package_count": 3372,
+      "political_level": "confederation",
+      "state": "active",
+      "title": {
+        "de": "Bundesamt für Statistik BFS",
+        "en": "Federal Statistical Office FSO",
+        "fr": "Office fédéral de la statistique OFS",
+        "it": "Ufficio federale di statistica UST"
+      },
+      "type": "organization",
+      "url": "https://www.bfs.admin.ch",
+      "tags": [],
+      "groups": []
+    },
+    "owner_org": "4309c328-c618-4077-bcdc-378a21ee1b46",
+    "private": false,
+    "publisher": {
+      "name": {
+        "de": "Bundesamt für Statistik",
+        "fr": "",
+        "it": "",
+        "en": ""
+      },
+      "url": "http://www.statistik.admin.ch"
+    },
+    "qualified_relations": [],
+    "relations": [
+      {
+        "label": {
+          "de": "geocat.ch Permalink",
+          "fr": "geocat.ch permalien",
+          "it": "geocat.ch link permanente",
+          "en": "geocat.ch permalink"
+        },
+        "url": "https://www.geocat.ch/datahub/dataset/56553efe-4a2c-449d-93ba-cf7edd518d56"
+      }
+    ],
+    "see_alsos": [],
+    "spatial": "Schweiz",
+    "state": "active",
+    "temporals": [],
+    "title": {
+      "de": "Eidg. Gebäude- und Wohnungsregister: Gebäudestatus",
+      "fr": "Registre fédéral des bâtiments et des logements: statut du bâtiment",
+      "it": "Registro federale degli edifici e delle abitazioni: stato dell'edificio",
+      "en": "Federal Register of Buildings and Dwellings: building status"
+    },
+    "title_for_slug": "eidg-gebaude-und-wohnungsregister-gebaudestatus",
+    "type": "dataset",
+    "url": "https://www.bfs.admin.ch/bfs/de/home/register/gebaeude-wohnungsregister.html",
+    "version": null,
+    "groups": [
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        },
+        "id": "5ce2de34-4114-43cd-ab45-e90a42db50aa",
+        "image_display_url": "",
+        "name": "regi",
+        "title": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        }
+      },
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        },
+        "id": "ab2cc387-d129-4d76-b78d-517326d2a772",
+        "image_display_url": "",
+        "name": "envi",
+        "title": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        }
+      }
+    ],
+    "resources": [
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2023-01-19T14:12:37.914834",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Vorschau map.geo.admin.ch",
+          "fr": "Aperçu map.geo.admin.ch",
+          "it": "Previsione map.geo.admin.ch",
+          "en": "Preview map.geo.admin.ch"
+        },
+        "display_name": {
+          "de": "Map (Preview) map.geo.admin.ch: Vorschau / Aperçu / Panoramica",
+          "fr": "Map (Preview) Aperçu map.geo.admin.ch",
+          "it": "Map (Preview) Previsione map.geo.admin.ch",
+          "en": "Map (Preview) map.geo.admin.ch"
+        },
+        "format": "SERVICE",
+        "hash": "",
+        "id": "4afba28f-f844-4ae1-8655-4b046f6b0b53",
+        "issued": "2017-07-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-09-10T01:33:45.071313",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2017-07-01T00:00:00",
+        "name": {
+          "de": "Map (Preview) map.geo.admin.ch: Vorschau / Aperçu / Panoramica",
+          "fr": "Map (Preview) Aperçu map.geo.admin.ch",
+          "it": "Map (Preview) Previsione map.geo.admin.ch",
+          "en": "Map (Preview) map.geo.admin.ch"
+        },
+        "package_id": "8cb236ad-e08b-43e1-aa0f-14d24161eb48",
+        "position": 0,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "Map (Preview) map.geo.admin.ch: Vorschau / Aperçu / Panoramica",
+          "fr": "Map (Preview) Aperçu map.geo.admin.ch",
+          "it": "Map (Preview) Previsione map.geo.admin.ch",
+          "en": "Map (Preview) map.geo.admin.ch"
+        },
+        "url": "https://map.geo.admin.ch/?layers=ch.bfs.gebaeude_wohnungs_register",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2024-01-11T06:11:14.851565",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Webseiten für die Datenverteilung (MADD) gemäss der GWR-Verordnung",
+          "fr": "Pages web pour la distribution des données (MADD) conformément à l'ordonnance sur le RegBL",
+          "it": "Pagine web per la diffusione dei dati (MADD) secondo l'ordinanza sul REA",
+          "en": ""
+        },
+        "display_name": {
+          "de": "Bereitstellung von Daten MADD / Mise à disposition des données MADD / Messa a disposizione dei dati MADD",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "download_url": "https://www.housing-stat.ch/__publicdata",
+        "format": "",
+        "hash": "",
+        "id": "f3beda9a-a3d0-44aa-85c9-3600a8e4f1bb",
+        "issued": "2017-07-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-09-10T01:33:45.071425",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2017-07-01T00:00:00",
+        "name": {
+          "de": "Bereitstellung von Daten MADD / Mise à disposition des données MADD / Messa a disposizione dei dati MADD",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "8cb236ad-e08b-43e1-aa0f-14d24161eb48",
+        "position": 1,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "Bereitstellung von Daten MADD / Mise à disposition des données MADD / Messa a disposizione dei dati MADD",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://www.housing-stat.ch/__publicdata",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2023-03-30T01:53:01.720295",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "WMS-BGDI Dienst, Layer \"GWR: Gebäudestatus\"",
+          "fr": "Service WMS-IFDG, couche \"RegBL : statut du bâtiment\"",
+          "it": "Servizio WMS-IFDG, strato \"REA: stato dell`edificio\"",
+          "en": "WMS-FSDI service, layer \"RBD: building status\""
+        },
+        "display_name": {
+          "de": "ch.bfs.gebaeude_wohnungs_register",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "WMS",
+        "hash": "",
+        "id": "e905d002-7952-4150-b79e-8e6d69bdb4bb",
+        "issued": "2017-07-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T05:31:34.863369",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2017-07-01T00:00:00",
+        "name": {
+          "de": "ch.bfs.gebaeude_wohnungs_register",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "8cb236ad-e08b-43e1-aa0f-14d24161eb48",
+        "position": 2,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "ch.bfs.gebaeude_wohnungs_register",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://wms.geo.admin.ch/?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=de",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2023-03-30T01:53:01.720301",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "WMTS-BGDI Dienst, Layer \"GWR: Gebäudestatus\"",
+          "fr": "Service WMTS-IFDG, couche , Layer \"RegBL : statut du bâtiment\"",
+          "it": "Servizio WMTS-IFDG, strato \"REA: stato dell'edificio\"",
+          "en": "WMTS-FSDI service, layer \"RBD: building status\""
+        },
+        "display_name": {
+          "de": "ch.bfs.gebaeude_wohnungs_register",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "WMTS",
+        "hash": "",
+        "id": "ff5ad93f-4e49-4b4e-949a-d2ab91f5e7a4",
+        "issued": "2017-07-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T05:31:34.863485",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2017-07-01T00:00:00",
+        "name": {
+          "de": "ch.bfs.gebaeude_wohnungs_register",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "8cb236ad-e08b-43e1-aa0f-14d24161eb48",
+        "position": 3,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "ch.bfs.gebaeude_wohnungs_register",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://wmts.geo.admin.ch/EPSG/3857/1.0.0/WMTSCapabilities.xml?lang=de",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-06-23T04:19:03.336644",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Beschreibung des Registers, seiner Inhalte, der Rechtsgrundlagen, Nachführung und Weiterentwicklung",
+          "fr": "Description du registre, de son contenu, des bases légales, de l'actualisation et les développements prévus",
+          "it": "Descrizione del registro, suo contenuto, basi giuridiche, aggiornamento e sviluppi previsti",
+          "en": ""
+        },
+        "display_name": {
+          "de": "GWR-Webseite im Statistikportal Schweiz / Site web du RegBL sur le portail statistique suisse / Sito web del REA nel portale statistico svizzero",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "HTML",
+        "hash": "",
+        "id": "40d10e70-89be-4a3b-b94d-783ecebd20a3",
+        "issued": "2017-07-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "text/html",
+        "metadata_modified": "2026-09-10T01:33:45.071581",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2017-07-01T00:00:00",
+        "name": {
+          "de": "GWR-Webseite im Statistikportal Schweiz / Site web du RegBL sur le portail statistique suisse / Sito web del REA nel portale statistico svizzero",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "8cb236ad-e08b-43e1-aa0f-14d24161eb48",
+        "position": 4,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "GWR-Webseite im Statistikportal Schweiz / Site web du RegBL sur le portail statistique suisse / Sito web del REA nel portale statistico svizzero",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://www.bfs.admin.ch/bfs/de/home/register/gebaeude-wohnungsregister.html",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2023-01-19T14:12:37.914843",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "WMTS für das Nationale Geoportal",
+          "fr": "WMTS pour le géoportail national",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "ch.bfs.gebaeude_wohnungs_register",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "WMTS",
+        "hash": "",
+        "id": "bbf0ce4e-b46f-4742-8043-dc103805fd1b",
+        "issued": "2017-07-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T05:31:34.863623",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2017-07-01T00:00:00",
+        "name": {
+          "de": "ch.bfs.gebaeude_wohnungs_register",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "8cb236ad-e08b-43e1-aa0f-14d24161eb48",
+        "position": 5,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "ch.bfs.gebaeude_wohnungs_register",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://wms.geo.admin.ch/?REQUEST=GetCapabilities&SERVICE=WMS&VERSION=1.0.0",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-06-23T04:19:03.336650",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "Öffentlich zugängliche Daten",
+          "fr": "Données accessibles au public",
+          "it": "Dati accessibili al pubblico",
+          "en": ""
+        },
+        "display_name": {
+          "de": "Öffentlich zugängliche Daten / Données accessibles au public / Dati accessibili al pubblico",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "HTML",
+        "hash": "",
+        "id": "a4e2723c-acb7-4284-919a-c90e6666d8dd",
+        "issued": "2017-07-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "text/html",
+        "metadata_modified": "2026-09-10T01:33:45.071682",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2017-07-01T00:00:00",
+        "name": {
+          "de": "Öffentlich zugängliche Daten / Données accessibles au public / Dati accessibili al pubblico",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "8cb236ad-e08b-43e1-aa0f-14d24161eb48",
+        "position": 6,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "Öffentlich zugängliche Daten / Données accessibles au public / Dati accessibili al pubblico",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://www.housing-stat.ch/__publicdata",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2023-01-19T14:12:37.914845",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "RESTful API von geo.admin.ch",
+          "fr": "RESTful API de geo.admin.ch",
+          "it": "RESTful API da geo.admin.ch",
+          "en": "RESTful API from geo.admin.ch"
+        },
+        "display_name": {
+          "de": "RESTful API von geo.admin.ch",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "format": "API",
+        "hash": "",
+        "id": "b8e00178-9154-441c-822f-1e8da899e656",
+        "issued": "2017-07-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "",
+        "metadata_modified": "2026-07-29T05:31:34.863749",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2017-07-01T00:00:00",
+        "name": {
+          "de": "RESTful API von geo.admin.ch",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "package_id": "8cb236ad-e08b-43e1-aa0f-14d24161eb48",
+        "position": 7,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "RESTful API von geo.admin.ch",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "url": "https://api3.geo.admin.ch/rest/services/api/MapServer/ch.bfs.gebaeude_wohnungs_register",
+        "url_type": null
+      }
+    ],
+    "tags": [],
+    "relationships_as_subject": [],
+    "relationships_as_object": [],
+    "display_name": {
+      "de": "Eidg. Gebäude- und Wohnungsregister: Gebäudestatus",
+      "fr": "Registre fédéral des bâtiments et des logements: statut du bâtiment",
+      "it": "Registro federale degli edifici e delle abitazioni: stato dell'edificio",
+      "en": "Federal Register of Buildings and Dwellings: building status"
+    }
+  }
+}

@@ -1,0 +1,2591 @@
+{
+  "generated_on": "2026-10-07",
+  "source": "https://ckan.opendata.swiss/api/3/action/package_search",
+  "run": {
+    "pages_read": 55,
+    "page_size": 100,
+    "max_pages": 55,
+    "start_page": 97,
+    "total_pages": 166,
+    "datasets_read": 5500,
+    "datasets_total_catalog": 16547,
+    "coverage_ratio": 0.3323865353236236,
+    "partial": false,
+    "stopped_reason": "ok"
+  },
+  "totals": {
+    "candidates": 4584,
+    "excluded": 916,
+    "excluded_by_motif": {
+      "colonne_personne": 76,
+      "colonne_personne_probable": 5,
+      "licence_absente": 28,
+      "licence_cc_by_sa": 398,
+      "licence_non_ouverte": 265,
+      "personnes_detectees": 144
+    }
+  },
+  "candidates": [
+    {
+      "id": "13114d60-c1ae-423f-ade2-8bf6580a4973",
+      "title": "Données de prévisions locales - Données ponctuelles",
+      "publisher": "Office fédéral de météorologie et de climatologie MétéoSuisse",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/13114d60-c1ae-423f-ade2-8bf6580a4973",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/CONT",
+      "modified": null,
+      "join_keys": [
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c643b746-0402-4f1e-b9bb-a75e86e6460b",
+      "title": "Scénarios climatiques CH2025 par station - DAILY-LOCAL",
+      "publisher": "Office fédéral de météorologie et de climatologie MétéoSuisse",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/c643b746-0402-4f1e-b9bb-a75e86e6460b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/CONT",
+      "modified": null,
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2a877ca1-f9ff-4c4d-87ad-31a4dedd7173",
+      "title": "Emissions de CO2 moyennes par type de carburant (VT)",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/2a877ca1-f9ff-4c4d-87ad-31a4dedd7173",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/MONTHLY",
+      "modified": null,
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "4d7c825b-d73e-4d4b-a5db-e0752fad4cde",
+      "title": "Chiffres clés des VUL à propulsion alternative",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/4d7c825b-d73e-4d4b-a5db-e0752fad4cde",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/MONTHLY",
+      "modified": null,
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "98596bd4-f5f8-42db-9c19-a47cef76a634",
+      "title": "Chiffres clés des VT à propulsion alternative",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/98596bd4-f5f8-42db-9c19-a47cef76a634",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/MONTHLY",
+      "modified": null,
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "272919d6-3b92-4918-bdae-a78fb1691f6a",
+      "title": "Le Programme Bâtiments - Données sources des cantons pour les mesures indirectes",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/272919d6-3b92-4918-bdae-a78fb1691f6a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "670c72a6-bfda-438a-b7bc-8cdda2208931",
+      "title": "Le Programme Bâtiments - Données sources des cantons pour les mesures directes",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/670c72a6-bfda-438a-b7bc-8cdda2208931",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8bfd652d-f013-48e4-a72d-a66091585bff",
+      "title": "Notfalltreffpunkte Kanton Zug",
+      "publisher": "Canton de Zoug",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8bfd652d-f013-48e4-a72d-a66091585bff",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "JSON"
+      ],
+      "frequency": null,
+      "modified": null,
+      "join_keys": [
+        "canton",
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "dae51783-9f30-47cf-a5e6-844c2501cc0a",
+      "title": "Treibhausgas-Emissionen nach Gemeinden ab 1990",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/dae51783-9f30-47cf-a5e6-844c2501cc0a",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-03-30T14:25:47+00:00",
+      "join_keys": [
+        "canton",
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7584a071-bc17-4b9c-8847-84e65af87a9c",
+      "title": "Verteilung des Haushaltseinkommens nach Gemeinde",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7584a071-bc17-4b9c-8847-84e65af87a9c",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-08-04T05:00:58.433000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "36e83e91-829f-40d4-9662-c36e4a87e768",
+      "title": "Siedlungsverzeichnis des Kantons Thurgau 2022",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/36e83e91-829f-40d4-9662-c36e4a87e768",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:07:15.183000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "44e62fc0-c876-495d-a2b6-2daabb1eaa9b",
+      "title": "Nationalratswahlen Kanton Thurgau: Parteistärken nach Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/44e62fc0-c876-495d-a2b6-2daabb1eaa9b",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:03:51.612000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "4ffc39f0-8c35-4cdd-98bd-3ad5690a8d2f",
+      "title": "Schulanlagen nach Standort",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/4ffc39f0-8c35-4cdd-98bd-3ad5690a8d2f",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": null,
+      "modified": "2026-08-17T15:09:35.580000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "50f5011e-089e-4cf8-8819-8e945e1caf7a",
+      "title": "Ortschaftenverzeichnis Kanton Thurgau 2023",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/50f5011e-089e-4cf8-8819-8e945e1caf7a",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2023-04-18T12:54:12+00:00",
+      "join_keys": [
+        "commune",
+        "npa (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "538a4c3d-c127-4a6c-a670-c2e5008a9b73",
+      "title": "Ortschaftenverzeichnis Kanton Thurgau 2026",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/538a4c3d-c127-4a6c-a670-c2e5008a9b73",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:05:08.452000+00:00",
+      "join_keys": [
+        "commune",
+        "npa (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7c7e62d0-2020-438c-a6ca-2847e82e7d48",
+      "title": "Nationalratswahlen Kanton Thurgau: Wahlberechtigte und Wahlbeteiligung nach Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7c7e62d0-2020-438c-a6ca-2847e82e7d48",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:03:56.785000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b6ead37b-2d8f-4864-ab17-d06d084f4fcb",
+      "title": "Ortschaftenverzeichnis Kanton Thurgau 2025",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b6ead37b-2d8f-4864-ab17-d06d084f4fcb",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:05:03.168000+00:00",
+      "join_keys": [
+        "commune",
+        "npa (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "bad68927-4753-4179-b326-3ecd50c6fd26",
+      "title": "Trinkwasserqualität im Kanton Zürich nach Gemeinden und Verteilzonen (Selbstkontrolle der Wasserversorgungen)",
+      "publisher": "Gesundheitsdirektion Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/bad68927-4753-4179-b326-3ecd50c6fd26",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-07-09T08:33:53.084003+02:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "f9f1bf42-e490-41bc-b5b6-aad0caaca66f",
+      "title": "Siedlungsverzeichnis des Kantons Thurgau 2026",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/f9f1bf42-e490-41bc-b5b6-aad0caaca66f",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-07-17T10:56:25.599000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "121eb563-40b8-4a25-8d80-138420aa416d",
+      "title": "Kantonsgrenze",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/121eb563-40b8-4a25-8d80-138420aa416d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "1bb701f7-75ee-4e35-901c-6c8dd76a73d7",
+      "title": "Landesgrenze",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/1bb701f7-75ee-4e35-901c-6c8dd76a73d7",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "254d270e-d0d3-48d9-a43e-7ffd1bb542d5",
+      "title": "Amtliche Vermessung Parzellen und andere rechtliche Abgrenzungen",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/254d270e-d0d3-48d9-a43e-7ffd1bb542d5",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "28ca06e1-b6c7-4d6d-b42e-ca34cfccb03a",
+      "title": "Servitutpunkt: laufende Änderung",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/28ca06e1-b6c7-4d6d-b42e-ca34cfccb03a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2b901524-81c4-46ca-921f-7e0bef8cc262",
+      "title": "Servitut Linienelement",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2b901524-81c4-46ca-921f-7e0bef8cc262",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2ecc868c-9056-4512-b74f-cac885ca6071",
+      "title": "Gemeinde",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2ecc868c-9056-4512-b74f-cac885ca6071",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "3bf52371-3ad2-491e-b0ec-e91b04088c7c",
+      "title": "Liegenschaft: laufende Änderung",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/3bf52371-3ad2-491e-b0ec-e91b04088c7c",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "40a12791-a624-4ce1-8e50-ba66c92859f4",
+      "title": "Liegenschaftsgrenzpunkt",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/40a12791-a624-4ce1-8e50-ba66c92859f4",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "45adb5ff-91e8-4efd-8989-8021d14890fc",
+      "title": "Verkehrszähldaten motorisierter Individualverkehr",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/45adb5ff-91e8-4efd-8989-8021d14890fc",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": "2026-10-05T11:01:49.504000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "4e32d719-7669-4127-b05e-5db5656417c2",
+      "title": "Servitutpunkt",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/4e32d719-7669-4127-b05e-5db5656417c2",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5bf0b312-a365-41f5-b12a-6b624cb3db59",
+      "title": "Selbstrecht: laufende Änderung",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5bf0b312-a365-41f5-b12a-6b624cb3db59",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "655724a4-36b3-4465-9592-d9b99b05fdbe",
+      "title": "Servitut Linienelement: laufende Änderung",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/655724a4-36b3-4465-9592-d9b99b05fdbe",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6eb6c8d3-8f8f-4310-aa89-8ddfc8a59c11",
+      "title": "Servitutkennzeichen: laufende Änderung",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6eb6c8d3-8f8f-4310-aa89-8ddfc8a59c11",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "776806b8-28cf-4ff0-bd1f-398fef1e4282",
+      "title": "Servitut Flächenelement: laufende Änderung",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/776806b8-28cf-4ff0-bd1f-398fef1e4282",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7c38ed48-7b69-41b4-83a2-c4895b27f0f5",
+      "title": "Parzellen und andere rechtliche Abgrenzungen Text/Symbol",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7c38ed48-7b69-41b4-83a2-c4895b27f0f5",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8e444c77-d45d-42a1-8507-5156727eb205",
+      "title": "Sektion",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8e444c77-d45d-42a1-8507-5156727eb205",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "985a7d60-e18a-4aac-82d7-05c5f0bbb835",
+      "title": "Gemeindegrenzpunkt",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/985a7d60-e18a-4aac-82d7-05c5f0bbb835",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "9e93073e-2f50-44c2-a951-f2747c271a22",
+      "title": "Liegenschaft",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/9e93073e-2f50-44c2-a951-f2747c271a22",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "9f32900f-433c-454c-98ab-73e7a30a4943",
+      "title": "Selbstrecht",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/9f32900f-433c-454c-98ab-73e7a30a4943",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c3d23345-7176-4d1a-a2b7-ec30c7878355",
+      "title": "Verkehrszähldaten motorisierter Individualverkehr nach Fahrzeugklassen",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c3d23345-7176-4d1a-a2b7-ec30c7878355",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": "2026-10-05T11:01:36.746000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "dd1ff360-d111-43e4-9064-51258d366fc1",
+      "title": "Gemeindegrenze",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/dd1ff360-d111-43e4-9064-51258d366fc1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "f05a15ba-f1dc-4315-9360-adcd104c4d16",
+      "title": "Servitutkennzeichen",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/f05a15ba-f1dc-4315-9360-adcd104c4d16",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "fe45a2b5-8742-40d3-8ba4-e4844155c2d8",
+      "title": "Servitut Flächenelement",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/fe45a2b5-8742-40d3-8ba4-e4844155c2d8",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "53b7c01d-31b5-444a-bae0-34aaf9b81d1f",
+      "title": "Finanzkennzahlen der Bündner Gemeinden",
+      "publisher": "Canton des Grisons",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/53b7c01d-31b5-444a-bae0-34aaf9b81d1f",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-04-13T11:42:03.824000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "84a69cad-310d-42e8-a2a2-5772c0202f35",
+      "title": "Gemeinderechnungen 2020",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/84a69cad-310d-42e8-a2a2-5772c0202f35",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2025-03-10T14:32:32+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a72a37a5-d228-48ab-bab2-337d56de4c93",
+      "title": "Wohnungen nach Gebäudekategorie und Politischer Gemeinde (Bestand)",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a72a37a5-d228-48ab-bab2-337d56de4c93",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-09-01T05:38:38.151000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "ba941e91-b2b5-4353-92a1-68514f3ca24f",
+      "title": "Steuerfüsse Evangelische Kirchgemeinden Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/ba941e91-b2b5-4353-92a1-68514f3ca24f",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-07-09T12:55:39.356000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d05cee47-157e-4b67-afd8-e7fe03a8eca5",
+      "title": "Gebäude mit Wohnnutzung nach Gebäudekategorie und Politischer Gemeinde (Bestand)",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d05cee47-157e-4b67-afd8-e7fe03a8eca5",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-09-01T05:40:56.062000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "eb26b21f-9aa0-4ffd-856e-83807385dcdd",
+      "title": "Übersicht Finanzlage Schulgemeinden Kanton Thurgau ab 2018",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/eb26b21f-9aa0-4ffd-856e-83807385dcdd",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-05-04T06:46:34.426000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "ec0c7a47-99b5-45f3-b606-1425533fd0b8",
+      "title": "Neu erstellte Wohngebäude nach Gebäudekategorie nach Politischer Gemeinde",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/ec0c7a47-99b5-45f3-b606-1425533fd0b8",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-04-23T13:04:07.420000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "efb0072b-4d6e-49f2-a617-25b94091097e",
+      "title": "Gemeinderechnungen 2021",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/efb0072b-4d6e-49f2-a617-25b94091097e",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2025-03-10T14:32:32+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "35d832a4-f3c7-4ff8-8e3c-1148828af5db",
+      "title": "Signatur",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/35d832a4-f3c7-4ff8-8e3c-1148828af5db",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GEOJSON",
+        "GPKG",
+        "HTML",
+        "OCTET"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "013810cc-7fbc-4cfc-a8c8-b6e74795b754",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2022",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/013810cc-7fbc-4cfc-a8c8-b6e74795b754",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T16:48:08+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "0374a1ce-2bbe-497d-b0a5-7ccd78f01718",
+      "title": "Strassenfahrzeuge nach Politischer Gemeinde, Fahrzeuggruppe, Fahrzeugart und erster Inverkehrssetzung",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/0374a1ce-2bbe-497d-b0a5-7ccd78f01718",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-03-26T09:45:12+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "069a35ce-d904-4c4d-8891-d815b025473e",
+      "title": "Immobilienpreise im Kanton Zürich",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/069a35ce-d904-4c4d-8891-d815b025473e",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "JSON",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-05-04T15:26:57.845510+02:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "07526e9a-0626-4f9e-bf32-7590ac15963f",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2026",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/07526e9a-0626-4f9e-bf32-7590ac15963f",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T16:55:01+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "16eed053-fa70-4e54-b9f9-ea2fd0476997",
+      "title": "Verkehrszähldaten Veloverkehr Kanton Zürich",
+      "publisher": "Tiefbauamt Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/16eed053-fa70-4e54-b9f9-ea2fd0476997",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "TXT"
+      ],
+      "frequency": null,
+      "modified": "2026-03-30T14:09:20.873410+02:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "507aa257-4274-42ba-b3fb-8941f1d6d424",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2016",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/507aa257-4274-42ba-b3fb-8941f1d6d424",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T17:00:07+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "61e858a2-4f18-4786-b1f9-6818e5ae40fd",
+      "title": "Notfalltreffpunkte",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/61e858a2-4f18-4786-b1f9-6818e5ae40fd",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": null,
+      "modified": "2026-05-05T00:00:00+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "691948b3-46ea-4421-9993-651713ff896e",
+      "title": "Nationalratswahlen Kanton Thurgau: Mandatsverteilung nach Geschlecht auf Ebene Kanton",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/691948b3-46ea-4421-9993-651713ff896e",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:03:40.583000+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "760518e9-fb61-4329-99ac-d3a99735db42",
+      "title": "Resultate der eidgenössischen Abstimmungen im Kanton Thurgau ab 1981 - Ebene Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/760518e9-fb61-4329-99ac-d3a99735db42",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-09-27T12:51:59.491000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7682e094-44dc-4be7-81e7-d8e1662e2e41",
+      "title": "Strassenfahrzeuge nach Politischen Gemeinden, Fahrzeuggruppe und Treibstoffart ab 2023",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7682e094-44dc-4be7-81e7-d8e1662e2e41",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-03-26T09:40:47+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7a0060e8-3b81-4fbb-886e-a7222ec242e2",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2024",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7a0060e8-3b81-4fbb-886e-a7222ec242e2",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T16:51:30+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7dc904c1-645f-4fc2-83c2-799d03a4713f",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2017",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7dc904c1-645f-4fc2-83c2-799d03a4713f",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T17:02:13+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "846a9cb0-8c56-4f65-b36d-65eff81c8bba",
+      "title": "Beteiligung an eidgenössischen Abstimmungen nach Stimmkanal und Politischer Gemeinde",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/846a9cb0-8c56-4f65-b36d-65eff81c8bba",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-06-14T15:19:20+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "88126464-fe56-4aa5-8669-e84f74ca25f6",
+      "title": "Strassenfahrzeugbestand nach Fahrzeuggruppe, Fahrzeugart und Politischer Gemeinde ab 2023",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/88126464-fe56-4aa5-8669-e84f74ca25f6",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-03-26T09:41:59+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8b6c03bf-63a8-486a-8172-5b46ac33858e",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2025",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8b6c03bf-63a8-486a-8172-5b46ac33858e",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T16:53:16+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8f6093c8-8ab5-40a0-8346-5c36f9f12dbd",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2019",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8f6093c8-8ab5-40a0-8346-5c36f9f12dbd",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T17:05:53+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "914ea772-626f-4e4d-ae75-c2cfb650bfaa",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2020",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/914ea772-626f-4e4d-ae75-c2cfb650bfaa",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T16:44:37+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "9d2791b0-792d-4306-9d2a-5ce3a5a473c9",
+      "title": "Strassenfahrzeuge nach Politischer Gemeinde, Fahrzeuggruppe, Fahrzeugart und Bewilligung ab 2023",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/9d2791b0-792d-4306-9d2a-5ce3a5a473c9",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-03-26T09:46:45+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "9f499a83-a216-4a96-870d-c65a0ee35241",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2018",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/9f499a83-a216-4a96-870d-c65a0ee35241",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T17:04:00+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a6fccc0d-77d4-4aa2-b66e-fa5f9607c13f",
+      "title": "Obligatorische Schiesspflicht Auswertung: Versand Schiessbriefe",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a6fccc0d-77d4-4aa2-b66e-fa5f9607c13f",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:04:18.169000+00:00",
+      "join_keys": [
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a7fecd98-ac97-40a7-9b56-e346ec7637d2",
+      "title": "Gemeinderechnungen 2023",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a7fecd98-ac97-40a7-9b56-e346ec7637d2",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2025-05-07T09:12:56+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "af554c00-ae3c-425a-ad6f-8b0eb6818d02",
+      "title": "Steuerfüsse Katholische Kirchgemeinden Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/af554c00-ae3c-425a-ad6f-8b0eb6818d02",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-07-09T12:55:15.675000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b317dee9-2e0c-499c-842a-aaeddd0d2255",
+      "title": "Thurgauer Bodenpreis-Basisdaten",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b317dee9-2e0c-499c-842a-aaeddd0d2255",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-01-16T13:03:00+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b9f42f7f-727d-46dd-8a3c-667535e25cf8",
+      "title": "Beteiligung an kantonalen Abstimmungen nach Stimmkanal und Politischer Gemeinde",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b9f42f7f-727d-46dd-8a3c-667535e25cf8",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-06-14T15:19:31+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "ba3014ff-87dd-4019-9024-dcca41c35eda",
+      "title": "Denkmalgeschützte Gebäude",
+      "publisher": "Canton de Zoug",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/ba3014ff-87dd-4019-9024-dcca41c35eda",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON"
+      ],
+      "frequency": null,
+      "modified": "2026-02-05T00:00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c34617a0-da89-47dc-918f-eba6d1616e05",
+      "title": "Eheschliessungen und Ehescheidungen",
+      "publisher": "Canton de Zoug",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c34617a0-da89-47dc-918f-eba6d1616e05",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-07-22T00:00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c4bd178f-ccca-408e-a40a-ddabaf9cdc4a",
+      "title": "Kennzahlen zur Kurzarbeit pro Monat nach Betriebsgrösse und NOGA Subgruppe ab 2004",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c4bd178f-ccca-408e-a40a-ddabaf9cdc4a",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-06T10:14:09+00:00",
+      "join_keys": [
+        "noga"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c90862c4-4ca4-4256-bf2e-8e1b94b0c40f",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2023",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c90862c4-4ca4-4256-bf2e-8e1b94b0c40f",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T16:49:42+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d7433997-7bbb-43a4-8f1e-cbe76335c098",
+      "title": "Entwicklung der Bildungsabschlüsse an Mittelschulen im Kanton Thurgau ab 2007",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d7433997-7bbb-43a4-8f1e-cbe76335c098",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-10-05T11:01:10.470000+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d7566447-e9b5-4e48-b3f3-bd5474211c6f",
+      "title": "Schutzräume und Schutzplätze",
+      "publisher": "Canton de Zoug",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d7566447-e9b5-4e48-b3f3-bd5474211c6f",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON"
+      ],
+      "frequency": null,
+      "modified": "2026-02-06T00:00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d763f053-2c13-49a9-b6e7-1308fa338bcf",
+      "title": "Offene Stellen pro Monat nach gesuchtem Beruf und NOGA 2-Steller ab 2020",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d763f053-2c13-49a9-b6e7-1308fa338bcf",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-06T10:16:11+00:00",
+      "join_keys": [
+        "noga"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "ec1c6257-cb6d-44b0-819b-ea0c1c0df112",
+      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2021",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/ec1c6257-cb6d-44b0-819b-ea0c1c0df112",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-02T16:46:29+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "fc7cc1cd-dc47-4075-8d4b-8ec402f5fd1f",
+      "title": "Mutation Gemeinden Thurgau 1990-2000",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/fc7cc1cd-dc47-4075-8d4b-8ec402f5fd1f",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:03:18.312000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "07b1939d-9fda-44e4-b69e-24c3d079e745",
+      "title": "Naissances vivantes selon l'âge de la mère, le sexe de l'enfant et le canton, de 1969 à 2025",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/07b1939d-9fda-44e4-b69e-24c3d079e745",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "canton",
+        "canton (titre)"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "3c1ce9ee-7911-4883-9415-ef485262a52b",
+      "title": "Partenariats dissous selon l'âge de chacun des partenaires et le canton, de 2007 à 2025",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/3c1ce9ee-7911-4883-9415-ef485262a52b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "canton",
+        "canton (titre)"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "4e2246cc-d523-40e4-87fb-14523d5de160",
+      "title": "Reconnaissances de paternité selon l'âge et le sexe de l'enfant et le canton de la mère, 1987-2025",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/4e2246cc-d523-40e4-87fb-14523d5de160",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "canton",
+        "canton (titre)"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "94dee036-f108-40f6-8448-29a238206cdc",
+      "title": "Mariages selon l'âge de chacun des époux et le canton, de 1969 à 2025",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/94dee036-f108-40f6-8448-29a238206cdc",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "canton",
+        "canton (titre)"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "af4d760d-4e73-4765-94f0-f54327651ec1",
+      "title": "Adoptions selon la classe d'âge quinquennale, le sexe, la nationalité (sélection) avant l'adoption de la personne adoptée et le canton, de 1979 à 2025",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/af4d760d-4e73-4765-94f0-f54327651ec1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "canton",
+        "canton (titre)"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "cf79ec30-1cb4-48db-bbca-8d30fcadd35a",
+      "title": "Décès selon la classe d'âge quinquennale, le sexe et le canton, de 1969 à 2025",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/cf79ec30-1cb4-48db-bbca-8d30fcadd35a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "canton",
+        "canton (titre)"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "eef6473d-15c8-4654-adae-94a6820d1189",
+      "title": "Divorces selon l'âge de chacun des époux et le canton, de 1984 à 2025",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/eef6473d-15c8-4654-adae-94a6820d1189",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "canton",
+        "canton (titre)"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "05503b68-ddb9-42a7-81d9-63c66975267b",
+      "title": "Entreprises marchandes selon la division économique et la forme juridique",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/05503b68-ddb9-42a7-81d9-63c66975267b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "noga"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "24149076-2ad0-4d17-8dcc-874fff3428ad",
+      "title": "Compte de production par secteurs institutionnels",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/24149076-2ad0-4d17-8dcc-874fff3428ad",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "noga"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "39025073-0aa1-4e77-9817-667e75fac86d",
+      "title": "Compte de production par secteurs économiques",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/39025073-0aa1-4e77-9817-667e75fac86d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "noga"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "68331728-d2ff-408b-986d-c40339bb5f12",
+      "title": "Entreprises marchandes selon la division économique et la taille de l'entreprise",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/68331728-d2ff-408b-986d-c40339bb5f12",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "noga"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "b3cf57ec-75ae-4bcf-b423-7af77e806494",
+      "title": "Compte de production par branches (agrégées par sections)",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/b3cf57ec-75ae-4bcf-b423-7af77e806494",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "noga"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "cf4f0453-d476-441d-8348-47e2089b7dfe",
+      "title": "Valeur ajoutée brute des activités financières et d'assurance",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/cf4f0453-d476-441d-8348-47e2089b7dfe",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "noga"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    },
+    {
+      "id": "d461f547-32cc-4675-b0ae-81b900022c6d",
+      "title": "Compte de production par branches (64 branches)",
+      "publisher": "Office fédéral de la statistique OFS",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/d461f547-32cc-4675-b0ae-81b900022c6d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "HTML",
+        "ODS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": null,
+      "join_keys": [
+        "noga"
+      ],
+      "a_verifier_ofs": true,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": "droits à confirmer (OFS)",
+      "csv_inspected": true
+    }
+  ],
+  "already_collected": []
+}

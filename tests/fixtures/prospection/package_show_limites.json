@@ -1,0 +1,542 @@
+{
+  "help": "https://ckan.opendata.swiss/api/3/action/help_show?name=package_show",
+  "success": true,
+  "result": {
+    "accrual_periodicity": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+    "conforms_to": [],
+    "coverage": "",
+    "description": {
+      "de": "Verwaltungsgrenzen ist ein Sub Layer von Verwaltungseinheiten und basiert auf dem Datensatz swissBOUNDARIES3D von swisstopo. Dieser Datensatz enthält alle Verwaltungseinheiten und Landesgrenzen der Schweiz und des Fürstentums Liechtenstein in Vektorform. Das Produkt basiert auf einem optimierten Datenmodell für die Schweiz und ist konform mit den Daten des Bundesamtes für Statistik. swissBOUNDARIES3D ersetzt ab 2010 den Datensatz GG25.",
+      "fr": "\"Limites administratives\" est une sous-couche des unités administratives et est basée sur le jeu de données swissBOUNDARIES3D de swisstopo. Ce jeu de données contient toutes les unités administratives et les frontières nationales de la Suisse et de la Principauté du Liechtenstein sous forme vectorielle. Le produit est basé sur un modèle de données optimisé pour la Suisse et est conforme aux données de l'Office fédéral de la statistique. swissBOUNDARIES3D remplace le jeu de données GG25 à partir de 2010.",
+      "it": "",
+      "en": "Administrative boundary is a sub layer of Administrative units and is based on the data set swissBOUNDARIES3D by swisstopo. It contains all administrative units and national boundaries of Switzerland and the Principality of Liechtenstein in vector form. The product is based on an optimized data model for Switzerland and conforms to the data of the Swiss Federal Statistical Office. swissBOUNDARIES3D replaces the GG25 dataset from 2010 onwards."
+    },
+    "id": "51cbcb96-5fd0-4c6b-ad57-7d81510890cd",
+    "identifier": "419833d1-4c97-47d3-a3de-3598378b75a2@bundesamt-fur-landestopografie-swisstopo",
+    "isopen": false,
+    "issued": "2026-01-01T00:00:00",
+    "keywords": {
+      "en": [
+        "inspire",
+        "official-geodata",
+        "administrative-units",
+        "national",
+        "administrative-boundary"
+      ],
+      "de": [
+        "inspire",
+        "geobasisdaten",
+        "verwaltungseinheiten",
+        "national",
+        "verwaltungsgrenze"
+      ],
+      "fr": [
+        "inspire",
+        "geodonnees-de-base",
+        "unites-administratives",
+        "nationales",
+        "limite-administrative"
+      ],
+      "it": [
+        "inspire",
+        "geodati-di-base",
+        "unita-amministrative",
+        "nazionali",
+        "confine-amministrativo"
+      ]
+    },
+    "language": [
+      "en",
+      "de",
+      "fr",
+      "it"
+    ],
+    "license_id": null,
+    "license_title": null,
+    "metadata_created": "2023-11-18T03:36:58.171765",
+    "metadata_modified": "2026-10-06T01:15:04.300368",
+    "modified": "2025-12-18T00:00:00",
+    "name": "verwaltungsgrenzen-der-schweiz-inspire",
+    "num_resources": 6,
+    "num_tags": 0,
+    "organization": {
+      "approval_status": "approved",
+      "created": "2015-11-30T12:12:55.529975",
+      "description": {
+        "fr": "Le centre de compétence de la Confédération suisse pour les informations géographiques, c'est-à-dire pour la description, la représentation et l’archivage de données à référence spatiale.",
+        "de": "Das Kompetenzzentrum der Schweizerischen Eidgenossenschaft für Geoinformation, d.h. für die Beschreibung, Darstellung und Archivierung von raumbezogenen Geodaten.",
+        "en": "The centre of competence for the Swiss Confederation responsible for geographical reference data, for instance the description, representation and archiving of geographic spatial data.",
+        "it": "Il centro d’eccellenza della Confederazione Elvetica per geoinformazione, cioè per la descrizione, rappresentazione e archiviazione dei dati georeferenziati (geodati)."
+      },
+      "display_name": {
+        "de": "Bundesamt für Landestopografie swisstopo",
+        "en": "Federal Office of Topography swisstopo",
+        "fr": "Office fédéral de topographie swisstopo",
+        "it": "Ufficio federale di topografia swisstopo"
+      },
+      "id": "ddd28bac-6890-474c-84cb-97a85db8d2f1",
+      "image_display_url": "https://ckan.opendata.swiss/uploads/group/IMG_1857.jpg",
+      "image_url": "https://ckan.opendata.swiss/uploads/group/IMG_1857.jpg",
+      "is_organization": true,
+      "name": "bundesamt-fur-landestopografie-swisstopo",
+      "num_followers": 0,
+      "package_count": 199,
+      "political_level": "confederation",
+      "state": "active",
+      "title": {
+        "de": "Bundesamt für Landestopografie swisstopo",
+        "en": "Federal Office of Topography swisstopo",
+        "fr": "Office fédéral de topographie swisstopo",
+        "it": "Ufficio federale di topografia swisstopo"
+      },
+      "type": "organization",
+      "url": "",
+      "tags": [],
+      "groups": []
+    },
+    "owner_org": "ddd28bac-6890-474c-84cb-97a85db8d2f1",
+    "private": false,
+    "publisher": {
+      "name": {
+        "de": "Bundesamt für Landestopografie swisstopo",
+        "fr": "Office fédéral de topographie swisstopo",
+        "it": "Ufficio federale di topografia swisstopo",
+        "en": "Federal Office of Topography swisstopo"
+      },
+      "url": "http://www.swisstopo.ch"
+    },
+    "qualified_relations": [],
+    "relations": [
+      {
+        "label": {
+          "de": "geocat.ch Permalink",
+          "fr": "geocat.ch permalien",
+          "it": "geocat.ch link permanente",
+          "en": "geocat.ch permalink"
+        },
+        "url": "https://www.geocat.ch/datahub/dataset/419833d1-4c97-47d3-a3de-3598378b75a2"
+      }
+    ],
+    "see_alsos": [],
+    "spatial": "Switzerland",
+    "state": "active",
+    "temporals": [],
+    "title": {
+      "de": "Verwaltungsgrenzen der Schweiz – INSPIRE",
+      "fr": "Limites administratives de la Suisse – INSPIRE",
+      "it": "",
+      "en": "Administrative boundary Switzerland - INSPIRE"
+    },
+    "title_for_slug": "verwaltungsgrenzen-der-schweiz-inspire",
+    "type": "dataset",
+    "url": "http://www.swisstopo.admin.ch",
+    "version": null,
+    "groups": [
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        },
+        "id": "5ce2de34-4114-43cd-ab45-e90a42db50aa",
+        "image_display_url": "",
+        "name": "regi",
+        "title": {
+          "de": "Regionen und Städte",
+          "en": "Regions and cities",
+          "fr": "Régions et villes",
+          "it": "Regioni e città"
+        }
+      },
+      {
+        "description": {
+          "fr": "",
+          "de": "",
+          "en": "",
+          "it": ""
+        },
+        "display_name": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        },
+        "id": "ab2cc387-d129-4d76-b78d-517326d2a772",
+        "image_display_url": "",
+        "name": "envi",
+        "title": {
+          "de": "Umwelt",
+          "en": "Environment",
+          "fr": "Environnement",
+          "it": "Ambiente"
+        }
+      }
+    ],
+    "resources": [
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2025-11-12T01:07:08.673822",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system CH1903+ / LV95"
+        },
+        "download_url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_2056.gml.zip",
+        "format": "ZIP",
+        "hash": "",
+        "id": "159152fe-d38d-4e05-bce5-e0eb8419291a",
+        "issued": "2026-01-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "application/zip",
+        "metadata_modified": "2026-07-29T03:17:44.216793",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2025-12-18T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system CH1903+ / LV95"
+        },
+        "package_id": "51cbcb96-5fd0-4c6b-ad57-7d81510890cd",
+        "position": 0,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system CH1903+ / LV95"
+        },
+        "url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_2056.gml.zip",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2025-11-12T01:07:08.673832",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system ETRS89 / UTM zone 32N"
+        },
+        "download_url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_25832.gml.zip",
+        "format": "ZIP",
+        "hash": "",
+        "id": "689cb38d-19f1-495d-8fbe-96adbf60f26a",
+        "issued": "2026-01-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "application/zip",
+        "metadata_modified": "2026-07-29T03:17:44.216966",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2025-12-18T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system ETRS89 / UTM zone 32N"
+        },
+        "package_id": "51cbcb96-5fd0-4c6b-ad57-7d81510890cd",
+        "position": 1,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system ETRS89 / UTM zone 32N"
+        },
+        "url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_25832.gml.zip",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2025-11-12T01:07:08.673835",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system ETRS89 / ETRS-LAEA"
+        },
+        "download_url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_3035.gml.zip",
+        "format": "ZIP",
+        "hash": "",
+        "id": "375c4299-06d4-4b98-aa4d-5e1db6e20a84",
+        "issued": "2026-01-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "application/zip",
+        "metadata_modified": "2026-07-29T03:17:44.217040",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2025-12-18T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system ETRS89 / ETRS-LAEA"
+        },
+        "package_id": "51cbcb96-5fd0-4c6b-ad57-7d81510890cd",
+        "position": 2,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system ETRS89 / ETRS-LAEA"
+        },
+        "url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_3035.gml.zip",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2025-11-12T01:07:08.673839",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system WGS84 Web Mercator"
+        },
+        "download_url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_3857.gml.zip",
+        "format": "ZIP",
+        "hash": "",
+        "id": "54e8efbf-4c2c-4e90-a224-cf7ab4619793",
+        "issued": "2026-01-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "application/zip",
+        "metadata_modified": "2026-07-29T03:17:44.217109",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2025-12-18T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system WGS84 Web Mercator"
+        },
+        "package_id": "51cbcb96-5fd0-4c6b-ad57-7d81510890cd",
+        "position": 3,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system WGS84 Web Mercator"
+        },
+        "url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_3857.gml.zip",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2025-11-12T01:07:08.673842",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system ETRS89"
+        },
+        "download_url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_4258.gml.zip",
+        "format": "ZIP",
+        "hash": "",
+        "id": "b532ba9e-5cde-42bf-8057-4b41263b1986",
+        "issued": "2026-01-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "application/zip",
+        "metadata_modified": "2026-07-29T03:17:44.217175",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2025-12-18T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system ETRS89"
+        },
+        "package_id": "51cbcb96-5fd0-4c6b-ad57-7d81510890cd",
+        "position": 4,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system ETRS89"
+        },
+        "url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_4258.gml.zip",
+        "url_type": null
+      },
+      {
+        "byte_size": 0,
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2025-11-12T01:07:08.673844",
+        "datastore_active": false,
+        "datastore_contains_all_records_of_source_file": false,
+        "description": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": ""
+        },
+        "display_name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system WGS 84"
+        },
+        "download_url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_4326.gml.zip",
+        "format": "ZIP",
+        "hash": "",
+        "id": "ad50fc65-0bb7-40ec-b67b-f6852b931742",
+        "issued": "2026-01-01T00:00:00",
+        "language": [
+          "en",
+          "de",
+          "fr",
+          "it"
+        ],
+        "last_modified": null,
+        "license": "https://opendata.swiss/terms-of-use#terms_open",
+        "media_type": "application/zip",
+        "metadata_modified": "2026-07-29T03:17:44.217240",
+        "mimetype": null,
+        "mimetype_inner": null,
+        "modified": "2025-12-18T00:00:00",
+        "name": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system WGS 84"
+        },
+        "package_id": "51cbcb96-5fd0-4c6b-ad57-7d81510890cd",
+        "position": 5,
+        "resource_type": null,
+        "rights": "https://opendata.swiss/terms-of-use#terms_open",
+        "size": null,
+        "state": "active",
+        "title": {
+          "de": "",
+          "fr": "",
+          "it": "",
+          "en": "Administrative units Switzerland - INSPIRE - reference system WGS 84"
+        },
+        "url": "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d.inspire/swissboundaries3d.inspire/swissboundaries3d.inspire_4326.gml.zip",
+        "url_type": null
+      }
+    ],
+    "tags": [],
+    "relationships_as_subject": [],
+    "relationships_as_object": [],
+    "display_name": {
+      "de": "Verwaltungsgrenzen der Schweiz – INSPIRE",
+      "fr": "Limites administratives de la Suisse – INSPIRE",
+      "it": "",
+      "en": "Administrative boundary Switzerland - INSPIRE"
+    }
+  }
+}
