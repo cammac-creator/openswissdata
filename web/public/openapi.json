@@ -3,10 +3,16 @@
   "info": {
     "title": "OpenSwissData — public read-only API",
     "version": "1.0.0",
-    "description": "Read-only JSON endpoints over the official localities and streets directories (swisstopo), the combined commune and canton profiles (including the BFE one-time photovoltaic remuneration), the Swiss company fiche (company_check) and the public source registry. Free, no key, limited per network address. The company fiche is also available over MCP (`company_check`, see /mcp) without a key; the commune and canton profiles and the BFE data are REST-only. Unofficial copies: binding decisions belong to the official sources named in each `sources` entry.",
-    "contact": { "url": "https://www.openswissdata.com/en/" }
+    "description": "Read-only JSON endpoints over the official localities and streets directories (swisstopo), the combined commune and canton profiles (including the BFE one-time photovoltaic remuneration), a catalogue of approved open Swiss datasets (generic engine, filterable by canton, commune, postal code, NOGA code or year), the Swiss company fiche (company_check) and the public source registry. Free, no key, limited per network address. The company fiche is also available over MCP (`company_check`, see /mcp) without a key; the commune and canton profiles, the BFE data and the open datasets catalogue are REST-only. Unofficial copies: binding decisions belong to the official sources named in each `sources`/`source` entry.",
+    "contact": {
+      "url": "https://www.openswissdata.com/en/"
+    }
   },
-  "servers": [{ "url": "https://www.openswissdata.com" }],
+  "servers": [
+    {
+      "url": "https://www.openswissdata.com"
+    }
+  ],
   "paths": {
     "/api/v1/company/{uid}": {
       "get": {
@@ -17,14 +23,38 @@
             "name": "uid",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "pattern": "^CHE-?\\d{3}\\.?\\d{3}\\.?\\d{3}$" },
+            "schema": {
+              "type": "string",
+              "pattern": "^CHE-?\\d{3}\\.?\\d{3}\\.?\\d{3}$"
+            },
             "description": "Swiss UID (CHE-xxx.xxx.xxx)"
           }
         ],
         "responses": {
-          "200": { "description": "Company fiche", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "no-store" } } },
-          "400": { "description": "Invalid UID (bad format or invalid check digit)" },
-          "429": { "description": "Rate limit exceeded for this network address (60 requests/hour)", "headers": { "Retry-After": { "schema": { "type": "integer" } } } }
+          "200": {
+            "description": "Company fiche",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "no-store"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid UID (bad format or invalid check digit)"
+          },
+          "429": {
+            "description": "Rate limit exceeded for this network address (60 requests/hour)",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -33,14 +63,44 @@
         "summary": "Official localities directory (swisstopo)",
         "description": "Rows of the official swisstopo directory of localities (postal code, locality, municipality, canton), exactly one of the two query parameters required.",
         "parameters": [
-          { "name": "postal_code", "in": "query", "schema": { "type": "string" }, "description": "4-digit Swiss postal code, e.g. 8400" },
-          { "name": "municipality_bfs_id", "in": "query", "schema": { "type": "string" }, "description": "Official BFS municipality number, e.g. 230" }
+          {
+            "name": "postal_code",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "4-digit Swiss postal code, e.g. 8400"
+          },
+          {
+            "name": "municipality_bfs_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Official BFS municipality number, e.g. 230"
+          }
         ],
         "responses": {
-          "200": { "description": "Matching rows, directory edition and source", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "public, max-age=3600" } } },
-          "400": { "description": "Neither or both query parameters given" },
-          "503": { "description": "Directory not currently available on this service" },
-          "429": { "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /communes, /sources and /cantons)" }
+          "200": {
+            "description": "Matching rows, directory edition and source",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "public, max-age=3600"
+              }
+            }
+          },
+          "400": {
+            "description": "Neither or both query parameters given"
+          },
+          "503": {
+            "description": "Directory not currently available on this service"
+          },
+          "429": {
+            "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /communes, /sources and /cantons)"
+          }
         }
       }
     },
@@ -49,13 +109,38 @@
         "summary": "Commune profile (combined dataset)",
         "description": "Name, canton, postal codes and localities (official localities directory), number of official streets (official streets directory) and `finma.entities_with_city_named_like_commune`: FINMA register rows whose city (a postal locality name) equals this commune's name, or an exact and unique locality name of it (see `finma.matching`). A postal locality can extend into a neighbouring commune (Zürich, Genève and Zug are also postal locality names of neighbouring communes), so this is not proof of the registered seat. `finma.national_matching` gives the same counts nationally (matched/unmatched/ambiguous), plus `names_also_postal_locality_elsewhere` (matches made by commune name whose name is also a postal locality of another commune), each with its sources and directory editions. `finma.entities_with_seat_in_commune` and `finma.distinct_entities_with_seat_in_commune` combine the FINMA register (all authorisation categories, not filtered by entity_type) with the commercial register (LINDAS) for the EXACT registered seat by UID, legal persons only — whitelisted legal forms (see `finma.seat_matching`): the first counts FINMA authorisations (register rows), the second distinct UIDs. `finma.national_seats_known` is the national count of distinct UIDs with a known registered seat. These three counts are `null`, not zero, when the combined file is unavailable. No score, no ranking between communes.",
         "parameters": [
-          { "name": "bfs_id", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^\\d+$" }, "description": "Official BFS municipality number, e.g. 230" }
+          {
+            "name": "bfs_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+$"
+            },
+            "description": "Official BFS municipality number, e.g. 230"
+          }
         ],
         "responses": {
-          "200": { "description": "Commune profile", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "public, max-age=3600" } } },
-          "400": { "description": "bfs_id is not a number" },
-          "404": { "description": "Commune not found in any loaded directory" },
-          "429": { "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /sources and /cantons)" }
+          "200": {
+            "description": "Commune profile",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "public, max-age=3600"
+              }
+            }
+          },
+          "400": {
+            "description": "bfs_id is not a number"
+          },
+          "404": {
+            "description": "Commune not found in any loaded directory"
+          },
+          "429": {
+            "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /sources and /cantons)"
+          }
         }
       }
     },
@@ -64,8 +149,20 @@
         "summary": "Public registry of sources served by the API and the MCP server",
         "description": "Id, publishing institution, licence and URL of each public source, with the directory edition or data version when known, except the two Eurostat SPARQL queries used only at classification-collection time. The TARES permission reference is never shown here (it names a person): TARES entries carry `licence: \"see the provenance file of the archive\"` instead.",
         "responses": {
-          "200": { "description": "Source registry", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "public, max-age=3600" } } },
-          "429": { "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /communes and /cantons)" }
+          "200": {
+            "description": "Source registry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "public, max-age=3600"
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /communes and /cantons)"
+          }
         }
       }
     },
@@ -74,8 +171,20 @@
         "summary": "List of Swiss canton abbreviations",
         "description": "The 26 Swiss canton abbreviations, alphabetical order. No metric, no ranking. `sources` is present but empty: a fixed list, not sourced data.",
         "responses": {
-          "200": { "description": "Canton abbreviations", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "public, max-age=3600" } } },
-          "429": { "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /communes and /sources)" }
+          "200": {
+            "description": "Canton abbreviations",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "public, max-age=3600"
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /communes and /sources)"
+          }
         }
       }
     },
@@ -84,12 +193,165 @@
         "summary": "Canton profile (combined dataset)",
         "description": "Number of distinct communes and distinct localities of this canton (official localities directory), and number of official streets (official streets directory), summed over the communes attached to this canton. `finma.entities_with_seat_in_canton` counts FINMA authorisations (register rows, all authorisation categories, not filtered by entity_type) and `finma.distinct_entities_with_seat_in_canton` the distinct UIDs among them, both combining the FINMA register with the commercial register (LINDAS) for the EXACT registered seat by UID, legal persons only — whitelisted legal forms (see `finma.seat_matching`), the seat's commune then attached to its canton via the official localities/streets directories; never the FINMA register's own `canton` column, which is a GLEIF enrichment. These two counts are `null`, not zero, when the combined seats file or the FINMA register itself is unavailable. `pv.by_year` is the BFE (Swiss Federal Office of Energy) one-time remuneration for photovoltaic installations by year (installations count, installed capacity in kW, remuneration in CHF, and the two official \"per 100,000 inhabitants\" ratios, published as-is and never recalculated — see `pv.ratios_note`); this counts installations that received the one-time remuneration in a given year, not the canton's total installed PV capacity (`pv.scope_note`); a year/canton pair the BFE publishes as \"NA\" is rendered `null`, never a guessed zero. `editions.finma` is the FINMA register version; `editions.bfe_pv` is the date this exact BFE content was first collected (the BFE republishes this dataset yearly; the monthly collection keeps the same edition until the content actually changes), not the date of the last collection attempt. No score, no ranking between cantons.",
         "parameters": [
-          { "name": "abbr", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^[A-Za-z]{2}$" }, "description": "Canton abbreviation, e.g. ZH" }
+          {
+            "name": "abbr",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z]{2}$"
+            },
+            "description": "Canton abbreviation, e.g. ZH"
+          }
         ],
         "responses": {
-          "200": { "description": "Canton profile", "headers": { "Cache-Control": { "schema": { "type": "string" }, "description": "public, max-age=3600" } } },
-          "400": { "description": "Not one of the 26 Swiss canton abbreviations" },
-          "429": { "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /communes and /sources)" }
+          "200": {
+            "description": "Canton profile",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "public, max-age=3600"
+              }
+            }
+          },
+          "400": {
+            "description": "Not one of the 26 Swiss canton abbreviations"
+          },
+          "429": {
+            "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /communes and /sources)"
+          }
+        }
+      }
+    },
+    "/api/v1/datasets": {
+      "get": {
+        "summary": "Catalogue of approved open datasets (generic engine)",
+        "description": "One entry per dataset approved and collected by the generic open-datasets engine (docs/data-status/datasets-approved.json, collected weekly by scripts/sync-datasets.ts): id, title, publisher, licence, attribution (present only when the licence requires one — terms_by or cc-by — and the registry carries a non-empty text, null otherwise), source URL, edition, row count of the whole dataset, kept columns and the normalised filter keys this dataset declares (a subset of canton, commune_bfs, postal_code, noga, year). No score, no ranking between datasets.",
+        "responses": {
+          "200": {
+            "description": "Dataset catalogue",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "public, max-age=3600"
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /communes, /cantons and /sources)"
+          }
+        }
+      }
+    },
+    "/api/v1/datasets/{id}": {
+      "get": {
+        "summary": "Rows of one approved open dataset, filtered and paginated",
+        "description": "Rows filtered by EXACT equality on whichever of the five normalised keys (canton, commune_bfs, postal_code, noga, year) this dataset declares in its catalogue entry (see /api/v1/datasets). A filter query parameter naming a key this dataset does not have, or an invalid value for its key, is a 400 error (unknown_filter_key:<key> or invalid_filter_value:<key>) — never a silently ignored filter. limit defaults to 100, maximum 1000; offset defaults to 0; both reject an out-of-range or non-integer value with a 400 error (invalid_limit/invalid_offset) rather than silently clamping it. total is the row count after filtering, before pagination — distinct from the whole-dataset row count shown in the catalogue entry. attribution is present only when the licence requires one and the registry carries a non-empty text, null otherwise.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{2,63}$"
+            },
+            "description": "Dataset id, e.g. gr-finances-communes"
+          },
+          {
+            "name": "canton",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter on the canton key, when this dataset declares it (2-letter abbreviation)"
+          },
+          {
+            "name": "commune_bfs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter on the commune_bfs key, when this dataset declares it (official municipality number)"
+          },
+          {
+            "name": "postal_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter on the postal_code key, when this dataset declares it (4 digits)"
+          },
+          {
+            "name": "noga",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter on the noga key, when this dataset declares it"
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter on the year key, when this dataset declares it (4 digits)"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            },
+            "description": "Maximum rows returned"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Rows to skip, after filtering"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filtered, paginated rows of this dataset, with its catalogue metadata",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "public, max-age=3600"
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown filter key for this dataset, invalid filter value, or out-of-range/non-integer limit or offset"
+          },
+          "404": {
+            "description": "Unknown dataset id"
+          },
+          "429": {
+            "description": "Rate limit exceeded for this network address (600 requests/hour, shared with /localities, /communes, /cantons and /sources)"
+          }
         }
       }
     }

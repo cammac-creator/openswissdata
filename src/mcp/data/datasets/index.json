@@ -1,0 +1,26 @@
+{
+  "datasets": [
+    {
+      "id": "gr-finances-communes",
+      "title": "Indicateurs financiers des communes grisonnes",
+      "publisher": "Canton des Grisons",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.gr.ch/api/explore/v2.1/catalog/datasets/dfg_afg_econ_20260326/exports/csv?use_labels=false",
+      "columns": [
+        "year",
+        "commune_bfs",
+        "name",
+        "typ",
+        "betrag",
+        "gemeindestand"
+      ],
+      "keys": [
+        "commune_bfs",
+        "year"
+      ],
+      "rows": 6150,
+      "edition": "2026-10-07"
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+/**
+ * Tests de `scripts/sync-datasets.ts` (tâche osd.jeux, piste G1 du plan
+ * `2026-10-07-moteur-jeux-ouverts.md`) : collecteur générique des jeux ouverts APPROUVÉS
+ * (`docs/data-status/datasets-approved.json`).
+ *
+ * Aucun appel réseau : `fetchImpl` est toujours une maquette pure (jamais `fetch` global), et le
+ * mode `--fixture-dir`/`fixtureDir` lit un CSV local par jeu. Fixtures générées EN TEST, jamais
+ * le vrai fichier grison ni un nombre de lignes figé d'une collecte réelle.
+ */
+import { afterEach, describe, expect, it } from "vitest";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import {
+  buildOutputRow,
+  selectEntriesForRun,
+  syncDatasets,
+  validateRegistryEntry,
+  type DatasetApprovalEntry,
+} from "../../scripts/sync-datasets.js";
+
+const tmpDirs: string[] = [];
+function tmpDir(): string {
+  const dir = mkdtempSync(join(tmpdir(), "osd-sync-datasets-"));
+  tmpDirs.push(dir);
+  return dir;
+}
+afterEach(() => {
+  for (const dir of tmpDirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+});
+
+function baseEntry(overrides: Partial<DatasetApprovalEntry> = {}): DatasetApprovalEntry {
+  return {
+    id: "demo-jeu",
+    title: "Jeu de démonstration",
+    ckan_uuid: "11111111-1111-1111-1111-111111111111",
+    publisher: "Canton de test",
+    licence: "terms_open",
+    attribution: "",
+    resource_url: "https://data.example.ch/demo.csv",
+    expected_header: ["jahr", "bfs_nummer", "name", "betrag"],
+    keys: { jahr: "year", bfs_nummer: "commune_bfs" },
+    columns: ["jahr", "bfs_nummer", "name", "betrag"],
+    approved_on: "2026-10-07",
+    checked_by: "intégrateur",
+    notes: "jeu fictif pour les tests",
+    ...overrides,
+  };
+}
+
+// --------------------------------------------------------------------------------------------
+// validateRegistryEntry
+// --------------------------------------------------------------------------------------------
+describe("validateRegistryEntry", () => {
+  it("entrée complète : aucune erreur", () => {
+    expect(validateRegistryEntry(baseEntry())).toEqual([]);
+  });
+
+  it("sans expected_header : rejetée", () => {
+    const errs = validateRegistryEntry(baseEntry({ expected_header: [] }));
+    expect(errs.some((e) => /expected_header/.test(e))).toBe(true);
+  });
+
+  it("sans columns : rejetée", () => {
+    const errs = validateRegistryEntry(baseEntry({ columns: [] }));
+    expect(errs.some((e) => /columns/.test(e))).toBe(true);
+  });
+
+  it("id non conforme au gabarit (slug) : rejetée", () => {
+    const errs = validateRegistryEntry(baseEntry({ id: "Demo Jeu!" }));
+    expect(errs.some((e) => /id/.test(e))).toBe(true);
+  });
+
+  it("columns hors de expected_header : rejetée", () => {
+    const errs = validateRegistryEntry(baseEntry({ columns: ["jahr", "inconnue"] }));
+    expect(errs.length).toBeGreaterThan(0);
+  });
+
+  it("clé de jointure hors de columns : rejetée", () => {
+    const errs = validateRegistryEntry(baseEntry({ columns: ["name", "betrag"] }));
+    expect(errs.length).toBeGreaterThan(0);
+  });
+
+  it("clé de jointure non reconnue (hors des cinq) : rejetée", () => {
+    const errs = validateRegistryEntry(baseEntry({ keys: { jahr: "siecle" as never } }));
+    expect(errs.length).toBeGreaterThan(0);
+  });
+
+  it("deux colonnes mappées sur la même clé canonique : rejetée", () => {
+    const errs = validateRegistryEntry(
+      baseEntry({ expected_header: ["jahr", "annee", "bfs_nummer", "name", "betrag"], columns: ["jahr", "annee", "bfs_nummer", "name", "betrag"], keys: { jahr: "year", annee: "year", bfs_nummer: "commune_bfs" } }),
+    );
+    expect(errs.length).toBeGreaterThan(0);
+  });
+
+  it("licence terms_by sans attribution : rejetée", () => {
+    const errs = validateRegistryEntry(baseEntry({ licence: "terms_by", attribution: "" }));
+    expect(errs.some((e) => /attribution/.test(e))).toBe(true);
+  });
+
+  it("licence terms_by avec attribution : acceptée", () => {
+    expect(validateRegistryEntry(baseEntry({ licence: "terms_by", attribution: "Canton de test" }))).toEqual([]);
+  });
+
+  it("resource_url sur bfs.admin.ch : rejetée (aucune donnée OFS)", () => {
+    const errs = validateRegistryEntry(baseEntry({ resource_url: "https://www.bfs.admin.ch/asset/fr/demo.csv" }));
+    expect(errs.length).toBeGreaterThan(0);
+  });
+});
+
+// --------------------------------------------------------------------------------------------
+// selectEntriesForRun : plafond de jeux par passage
+// --------------------------------------------------------------------------------------------
+describe("selectEntriesForRun", () => {
+  it("sous le plafond : tous traités", () => {
+    const entries = [baseEntry({ id: "a" }), baseEntry({ id: "b" })];
+    const { toProcess, skipped } = selectEntriesForRun(entries, 50);
+    expect(toProcess.map((e) => e.id)).toEqual(["a", "b"]);
+    expect(skipped).toEqual([]);
+  });
+
+  it("au-delà du plafond : les premiers traités, le reste ignoré", () => {
+    const entries = Array.from({ length: 5 }, (_, i) => baseEntry({ id: `jeu-${i}` }));
+    const { toProcess, skipped } = selectEntriesForRun(entries, 3);
+    expect(toProcess.map((e) => e.id)).toEqual(["jeu-0", "jeu-1", "jeu-2"]);
+    expect(skipped.map((e) => e.id)).toEqual(["jeu-3", "jeu-4"]);
+  });
+});
+
+// --------------------------------------------------------------------------------------------
+// buildOutputRow : normalisation des clés, colonnes gardées
+// --------------------------------------------------------------------------------------------
+describe("buildOutputRow", () => {
+  const entry = baseEntry();
+
+  it("renomme les colonnes-clés, garde les autres telles quelles", () => {
+    const row = buildOutputRow(entry, { jahr: "2024", bfs_nummer: "0230", name: "Exemple", betrag: "12.5" }, 2);
+    expect(row).toEqual({ year: "2024", commune_bfs: "230", name: "Exemple", betrag: "12.5" });
+  });
+
+  it("valeur de clé invalide : erreur explicite avec le numéro de ligne", () => {
+    expect(() => buildOutputRow(entry, { jahr: "pas une année", bfs_nummer: "230", name: "x", betrag: "1" }, 7)).toThrow(/ligne 7/);
+  });
+});
+
+// --------------------------------------------------------------------------------------------
+// syncDatasets : chemin complet (fixtures, sans réseau)
+// --------------------------------------------------------------------------------------------
+function writeRegistry(dir: string, entries: DatasetApprovalEntry[]): string {
+  const path = join(dir, "datasets-approved.json");
+  writeFileSync(path, JSON.stringify({ version: 1, datasets: entries }, null, 2), "utf8");
+  return path;
+}
+
+function writeFixture(dir: string, id: string, content: string): void {
+  writeFileSync(join(dir, `${id}.csv`), content, "utf8");
+}
+
+const HEADER = "jahr,bfs_nummer,name,betrag";
+
+function csvRows(n: number, overrides: Record<number, string> = {}): string {
+  const rows = Array.from({ length: n }, (_, i) => overrides[i] ?? `2024,${1000 + i},Commune ${i},${i * 10}`);
+  return [HEADER, ...rows].join("\n") + "\n";
+}
+
+describe("syncDatasets : un jeu valide (mode fixture)", () => {
+  it("écrit le csv.gz et l'index.json, édition = date du jour", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    writeFixture(fixDir, entry.id, csvRows(30));
+
+    const result = await syncDatasets({
+      registryPath: join(regDir, "datasets-approved.json"),
+      outDir,
+      fixtureDir: fixDir,
+      now: () => new Date("2026-10-07T12:00:00Z").getTime(),
+    });
+
+    expect(result.anyFailed).toBe(false);
+    expect(result.succeeded).toEqual(["demo-jeu"]);
+    expect(existsSync(join(outDir, "demo-jeu.csv.gz"))).toBe(true);
+
+    const csv = gunzipSync(readFileSync(join(outDir, "demo-jeu.csv.gz"))).toString("utf8");
+    expect(csv.split("\n").filter(Boolean)).toHaveLength(31); // en-tête + 30 lignes
+    expect(csv.split("\n")[0]).toBe("year,commune_bfs,name,betrag");
+
+    const index = JSON.parse(readFileSync(join(outDir, "index.json"), "utf8"));
+    expect(index.datasets).toHaveLength(1);
+    expect(index.datasets[0]).toMatchObject({ id: "demo-jeu", rows: 30, edition: "2026-10-07", keys: ["commune_bfs", "year"] });
+  });
+
+  it("second passage, contenu identique : fichier inchangé, édition conservée", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    writeFixture(fixDir, entry.id, csvRows(10));
+
+    const opts = {
+      registryPath: join(regDir, "datasets-approved.json"),
+      outDir,
+      fixtureDir: fixDir,
+    };
+    await syncDatasets({ ...opts, now: () => new Date("2026-10-07T12:00:00Z").getTime() });
+    const second = await syncDatasets({ ...opts, now: () => new Date("2026-11-04T12:00:00Z").getTime() });
+
+    expect(second.unchanged).toEqual(["demo-jeu"]);
+    const index = JSON.parse(readFileSync(join(outDir, "index.json"), "utf8"));
+    expect(index.datasets[0].edition).toBe("2026-10-07"); // jamais la date du second passage
+  });
+
+  it("gzip déterministe : deux écritures du même contenu donnent les mêmes octets", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir1 = tmpDir();
+    const outDir2 = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    writeFixture(fixDir, entry.id, csvRows(12));
+
+    const registryPath = join(regDir, "datasets-approved.json");
+    await syncDatasets({ registryPath, outDir: outDir1, fixtureDir: fixDir, now: () => 0 });
+    await syncDatasets({ registryPath, outDir: outDir2, fixtureDir: fixDir, now: () => 0 });
+
+    const a = readFileSync(join(outDir1, "demo-jeu.csv.gz"));
+    const b = readFileSync(join(outDir2, "demo-jeu.csv.gz"));
+    expect(a.equals(b)).toBe(true);
+  });
+});
+
+describe("syncDatasets : en-tête différent", () => {
+  it("échoue CE jeu seulement, fichier précédent intact", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const good = baseEntry({ id: "jeu-bon" });
+    const bad = baseEntry({ id: "jeu-mauvais" });
+    writeRegistry(regDir, [good, bad]);
+    writeFixture(fixDir, good.id, csvRows(5));
+    writeFixture(fixDir, bad.id, "jahr,bfs_nummer,autre_nom,betrag\n2024,1000,x,1\n");
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+
+    expect(result.anyFailed).toBe(true);
+    expect(result.succeeded).toEqual(["jeu-bon"]);
+    expect(result.failed.map((f) => f.id)).toEqual(["jeu-mauvais"]);
+    expect(result.failed[0].error).toMatch(/en-tête/i);
+    expect(existsSync(join(outDir, "jeu-mauvais.csv.gz"))).toBe(false);
+  });
+});
+
+describe("syncDatasets : colonne de personne détectée", () => {
+  it("échoue CE jeu seulement", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry({ id: "jeu-personne", expected_header: ["jahr", "bfs_nummer", "name", "betrag", "vorname"], columns: ["jahr", "bfs_nummer", "name", "betrag"] });
+    writeRegistry(regDir, [entry]);
+    writeFixture(fixDir, entry.id, "jahr,bfs_nummer,name,betrag,vorname\n2024,1000,x,1,Jean\n");
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+
+    expect(result.anyFailed).toBe(true);
+    expect(result.failed.map((f) => f.id)).toEqual(["jeu-personne"]);
+    expect(result.failed[0].error).toMatch(/personne/i);
+  });
+});
+
+describe("syncDatasets : baisse de lignes", () => {
+  it("baisse de plus de 20 % : échec, fichier précédent intact", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+
+    writeFixture(fixDir, entry.id, csvRows(100));
+    const first = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 1 });
+    expect(first.succeeded).toEqual(["demo-jeu"]);
+
+    writeFixture(fixDir, entry.id, csvRows(50)); // -50 % : au-delà des 20 % tolérés
+    const second = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 2 });
+
+    expect(second.anyFailed).toBe(true);
+    expect(second.failed[0].error).toMatch(/baisse/i);
+    const csv = gunzipSync(readFileSync(join(outDir, "demo-jeu.csv.gz"))).toString("utf8");
+    expect(csv.split("\n").filter(Boolean)).toHaveLength(101); // toujours les 100 lignes d'origine
+  });
+
+  it("baisse de moins de 20 % : acceptée", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+
+    writeFixture(fixDir, entry.id, csvRows(100));
+    await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 1 });
+
+    writeFixture(fixDir, entry.id, csvRows(85)); // -15 %
+    const second = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 2 });
+    expect(second.anyFailed).toBe(false);
+    expect(second.succeeded).toEqual(["demo-jeu"]);
+  });
+});
+
+describe("syncDatasets : entrée de registre invalide", () => {
+  it("rejetée au chargement, échoue CE jeu seulement, les autres continuent", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const good = baseEntry({ id: "jeu-bon" });
+    const malformed = { ...baseEntry({ id: "jeu-casse" }), columns: [] };
+    writeRegistry(regDir, [good, malformed as DatasetApprovalEntry]);
+    writeFixture(fixDir, good.id, csvRows(5));
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+    expect(result.anyFailed).toBe(true);
+    expect(result.succeeded).toEqual(["jeu-bon"]);
+    expect(result.failed.map((f) => f.id)).toEqual(["jeu-casse"]);
+  });
+});
+
+describe("syncDatasets : téléchargement réel (fetchImpl injecté)", () => {
+  function fakeResponse(body: string, opts: { contentLength?: string; ok?: boolean; status?: number } = {}): Response {
+    const bytes = new TextEncoder().encode(body);
+    return {
+      ok: opts.ok ?? true,
+      status: opts.status ?? 200,
+      headers: { get: (name: string) => (name.toLowerCase() === "content-length" ? (opts.contentLength ?? String(bytes.length)) : null) },
+      arrayBuffer: async () => bytes.buffer,
+      body: null,
+    } as unknown as Response;
+  }
+
+  it("téléchargement réussi, sans fixture", async () => {
+    const regDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    const csv = csvRows(5);
+    const fetchImpl = (async () => fakeResponse(csv)) as unknown as typeof fetch;
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fetchImpl, now: () => 0 });
+    expect(result.succeeded).toEqual(["demo-jeu"]);
+  });
+
+  it("Content-Length au-delà de 20 Mo déclaré : échec sans télécharger le corps", async () => {
+    const regDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    const fetchImpl = (async () => fakeResponse(csvRows(5), { contentLength: String(25_000_000) })) as unknown as typeof fetch;
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fetchImpl, now: () => 0 });
+    expect(result.anyFailed).toBe(true);
+    expect(result.failed[0].error).toMatch(/volumineu/i);
+  });
+
+  it("HTTP non ok : échec explicite", async () => {
+    const regDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    const fetchImpl = (async () => fakeResponse("", { ok: false, status: 503 })) as unknown as typeof fetch;
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fetchImpl, now: () => 0 });
+    expect(result.anyFailed).toBe(true);
+    expect(result.failed[0].error).toMatch(/503/);
+  });
+});

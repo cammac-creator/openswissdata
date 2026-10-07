@@ -32,16 +32,20 @@
 
 import {
   getBfePv,
+  getDataset,
+  getDatasetsIndex,
   getFinmaRegistry,
   getFinmaSeats,
   getFinmaVersion,
   getLocalities,
   getStreets,
   type BfePvRow,
+  type DatasetIndexEntry,
   type FinmaRegistryRow,
   type LocalityRow,
 } from "../mcp/data-loader.js";
 import { FINMA_SEAT_MATCHING_RULE } from "./commune-profile.js";
+import { datasetsForCanton, type DatasetProfileMatch } from "./dataset-query.js";
 
 /** Les 26 abréviations cantonales suisses, ordre alphabétique stable (même liste que
  *  `SWISS_CANTONS` de `scripts/sync-localities.ts`/`scripts/sync-bfe-pv.ts`, dupliquée ici
@@ -102,6 +106,12 @@ export interface CantonProfile {
   finma: CantonFinmaProfile;
   /** `null` : rétribution unique OFEN non câblée ou indisponible. */
   pv: { by_year: CantonPvYearRow[]; ratios_note: typeof PV_RATIOS_NOTE; scope_note: typeof PV_SCOPE_NOTE } | null;
+  /** Jeux ouverts APPROUVÉS (tâche osd.jeux, piste G2) qui ont au moins une ligne pour ce
+   *  canton — ids et nombre de lignes, JAMAIS les données elles-mêmes. Champ AUTONOME : jamais
+   *  ajouté à `sources` ni `editions` ci-dessous (comparés par égalité stricte dans des tests
+   *  existants — voir `src/lib/dataset-query.ts`, `datasetsForCanton`). Tableau vide quand
+   *  aucun jeu approuvé n'a de ligne pour ce canton ; jamais `null`. */
+  datasets: DatasetProfileMatch[];
   /** Identifiants du registre des sources effectivement utilisés pour cette fiche. */
   sources: string[];
   editions: { localities: string | null; streets: string | null; finma: string | null; finma_seats: string | null; bfe_pv: string | null };
@@ -119,6 +129,11 @@ export interface CantonProfileDeps {
   getFinmaVersion: () => string | null;
   getFinmaSeats: () => { byUid: ReadonlyMap<string, string>; edition: string | null } | null;
   getBfePv: () => { rows: readonly BfePvRow[]; edition: string | null } | null;
+  /** Tâche osd.jeux, piste G2. Jamais substitué par les tests ANTÉRIEURS à cette tâche (ils ne
+   *  connaissent pas ce champ) : la valeur par défaut lit le vrai catalogue, sans jamais changer
+   *  `sources`/`editions` (voir le commentaire du champ `datasets` de `CantonProfile`). */
+  getDatasetsIndex: () => { datasets: readonly DatasetIndexEntry[] } | null;
+  getDataset: (id: string) => { rows: readonly Record<string, string>[] } | null;
 }
 
 const defaultDeps: CantonProfileDeps = {
@@ -137,6 +152,8 @@ const defaultDeps: CantonProfileDeps = {
     return loaded ? { byUid: loaded.byUid, edition: loaded.edition } : null;
   },
   getBfePv,
+  getDatasetsIndex,
+  getDataset,
 };
 
 function normalizeCanton(value: string): string {
@@ -296,6 +313,13 @@ export function cantonProfile(abbr: string, deps: Partial<CantonProfileDeps> = {
     pv = { by_year: cantonPvSeries(wanted, bfeLoaded.rows), ratios_note: PV_RATIOS_NOTE, scope_note: PV_SCOPE_NOTE };
   }
 
+  // Jeux ouverts du moteur générique (tâche osd.jeux, piste G2) : champ AUTONOME, jamais ajouté à
+  // `sources` ci-dessus (voir le commentaire du champ `datasets` de `CantonProfile`). Les communes
+  // de ce canton (mêmes deux répertoires, fusionnés) servent à compter les jeux à clé
+  // `commune_bfs` ; `datasetsForCanton` se charge seule du cas « jeu à clé canton ».
+  const communeBfsIdsForDatasets = bfsIdsForCanton(wanted, localitiesLoaded?.rows ?? [], streetsLoaded?.municipalityInfo ?? null);
+  const datasets = datasetsForCanton(wanted, communeBfsIdsForDatasets, d.getDatasetsIndex(), d.getDataset);
+
   return {
     abbreviation: wanted,
     communes_count: communesCount,
@@ -308,6 +332,7 @@ export function cantonProfile(abbr: string, deps: Partial<CantonProfileDeps> = {
       seat_matching: FINMA_SEAT_MATCHING_RULE,
     },
     pv,
+    datasets,
     sources: [...sources].sort(),
     editions: {
       localities: localitiesLoaded?.edition ?? null,

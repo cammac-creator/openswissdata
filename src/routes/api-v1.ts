@@ -12,12 +12,13 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import { abuseIp, trustedRequestIp } from "../lib/request-ip.js";
 import { checkApiRateLimit, type ApiRateLimitResult } from "../lib/api-rate-limit.js";
-import { getBfePv, getLocalities, getStreets, getFinmaVersion } from "../mcp/data-loader.js";
+import { getBfePv, getDataset, getDatasetsIndex, getLocalities, getStreets, getFinmaVersion } from "../mcp/data-loader.js";
 import { communeProfile } from "../lib/commune-profile.js";
 import { cantonProfile, SWISS_CANTON_ABBREVIATIONS } from "../lib/canton-profile.js";
 import { companyCheck } from "../mcp/company/check.js";
 import { COMPANY_SOURCES } from "../mcp/company/sources.js";
 import { getPublicSource, PUBLIC_SOURCES, type PublicSourceEntry } from "../lib/public-sources.js";
+import { datasetCatalogueEntry, filterDatasetRows, licenceRequiresAttribution, paginateDatasetRows, parseDatasetFilters, parseDatasetPagination } from "../lib/dataset-query.js";
 
 // Les cinq sources que `company_check` peut citer (`src/mcp/company/sources.ts`), dans l'ordre
 // stable de déclaration de `COMPANY_SOURCES` — toujours les mêmes, que la fiche les ait ou non
@@ -141,6 +142,54 @@ apiV1Route.get("/cantons/:abbr", (c) => {
   const profile = cantonProfile(abbr);
   c.header("Cache-Control", "public, max-age=3600");
   return c.json({ ...profile, sources: profile.sources.map(sourceRef) });
+});
+
+// --- GET /api/v1/datasets et /api/v1/datasets/:id -----------------------------------------
+// Moteur générique de jeux ouverts (tâche osd.jeux, piste G2 du plan
+// `2026-10-07-moteur-jeux-ouverts.md`) : catalogue des jeux APPROUVÉS
+// (`docs/data-status/datasets-approved.json`, collectés par `scripts/sync-datasets.ts`) et
+// lecture filtrée d'un jeu. Même plafond réseau que les autres routes de données (`DATA_LIMIT`).
+apiV1Route.get("/datasets", (c) => {
+  const limited = enforceRateLimit(c, DATA_LIMIT);
+  if (limited) return limited;
+  const index = getDatasetsIndex();
+  c.header("Cache-Control", "public, max-age=3600");
+  return c.json({ datasets: (index?.datasets ?? []).map(datasetCatalogueEntry) });
+});
+
+apiV1Route.get("/datasets/:id", (c) => {
+  const limited = enforceRateLimit(c, DATA_LIMIT);
+  if (limited) return limited;
+  const id = c.req.param("id");
+  const loaded = getDataset(id);
+  if (!loaded) return c.json({ error: "dataset_not_found" }, 404);
+
+  const query = c.req.query();
+  const filterResult = parseDatasetFilters(query, loaded.entry.keys);
+  if (!filterResult.ok) return c.json({ error: filterResult.error }, 400);
+  const paginationResult = parseDatasetPagination(query);
+  if (!paginationResult.ok) return c.json({ error: paginationResult.error }, 400);
+
+  const filtered = filterDatasetRows(loaded.rows, filterResult.filters);
+  const { rows, total } = paginateDatasetRows(filtered, paginationResult.limit, paginationResult.offset);
+  const { entry } = loaded;
+  const hasAttribution = licenceRequiresAttribution(entry.licence) && entry.attribution.trim().length > 0;
+
+  c.header("Cache-Control", "public, max-age=3600");
+  return c.json({
+    id: entry.id,
+    title: entry.title,
+    publisher: entry.publisher,
+    licence: entry.licence,
+    attribution: hasAttribution ? entry.attribution : null,
+    source: entry.resource_url,
+    edition: entry.edition,
+    columns: entry.columns,
+    total,
+    limit: paginationResult.limit,
+    offset: paginationResult.offset,
+    data: rows,
+  });
 });
 
 // --- GET /api/v1/sources -------------------------------------------------------------

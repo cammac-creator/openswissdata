@@ -14,6 +14,9 @@
  *   - streets.csv.gz                         (répertoire officiel des rues swisstopo, compressé, ~220k rows)
  *   - finma_seats.csv                        (siège exact FINMA × registre du commerce, personnes morales, tâche B4)
  *   - bfe_pv.csv                              (rétribution unique OFEN, photovoltaïque, par canton et année, tâche B5)
+ *   - datasets/index.json + datasets/<id>.csv.gz (jeux ouverts du moteur générique, tâche osd.jeux
+ *                                              piste G1/G2 — registre `docs/data-status/datasets-approved.json`,
+ *                                              produits par `scripts/sync-datasets.ts`)
  *   - embeddings/tares_index.{json,bin}      (TARES, 7 511 lignes × 4 langues, chemin officiel ; search-index.ts)
  *   - embeddings/noga_2025_index.{json,bin}  (NOGA 2025, 798 genres × 4 langues ; search-index.ts)
  *
@@ -567,6 +570,77 @@ export function parseBfePvEdition(raw: string, loadedRows: number): string | nul
   }
 }
 
+/**
+ * Jeux ouverts du moteur générique (tâche osd.jeux, piste G1/G2 du plan
+ * `2026-10-07-moteur-jeux-ouverts.md`) : catalogue (`datasets/index.json`) et contenu par jeu
+ * (`datasets/<id>.csv.gz`), produits par `scripts/sync-datasets.ts` à partir du registre
+ * `docs/data-status/datasets-approved.json`. Tolérant à l'absence ou à une lecture illisible :
+ * `null`, JAMAIS une exception — même motif que `getLocalities()`/`getStreets()`/`getBfePv()`
+ * ci-dessus. `id` est VALIDÉ contre le même gabarit que `scripts/sync-datasets.ts`
+ * (`DATASET_ID_RE`) avant toute lecture disque : un id reçu depuis une requête HTTP
+ * (`src/routes/api-v1.ts`) ne doit JAMAIS construire un chemin de fichier sans ce contrôle.
+ */
+export interface DatasetIndexEntry {
+  id: string;
+  title: string;
+  publisher: string;
+  licence: string;
+  attribution: string;
+  resource_url: string;
+  columns: string[];
+  keys: string[];
+  rows: number;
+  edition: string;
+}
+
+const DATASET_ID_RE = /^[a-z][a-z0-9-]{2,63}$/;
+let _datasetsIndex: readonly DatasetIndexEntry[] | null = null;
+let _datasetsIndexLoadFailed = false;
+const _datasetRowsById = new Map<string, readonly Record<string, string>[]>();
+
+/** Catalogue des jeux ouverts (`datasets/index.json`) ; `null` si absent, illisible ou mal
+ *  formé. Mémoïsé comme les autres chargeurs de ce fichier. */
+export function getDatasetsIndex(): { datasets: readonly DatasetIndexEntry[] } | null {
+  if (_datasetsIndexLoadFailed) return null;
+  if (!_datasetsIndex) {
+    try {
+      const raw = JSON.parse(readFileSync(join(DATA_DIR, "datasets", "index.json"), "utf8")) as { datasets?: unknown };
+      if (!Array.isArray(raw.datasets)) {
+        _datasetsIndexLoadFailed = true;
+        return null;
+      }
+      _datasetsIndex = raw.datasets as DatasetIndexEntry[];
+    } catch {
+      _datasetsIndexLoadFailed = true;
+      return null;
+    }
+  }
+  return { datasets: _datasetsIndex };
+}
+
+/**
+ * Lignes d'UN jeu ouvert (`datasets/<id>.csv.gz`), avec son entrée de catalogue. `null` : id
+ * absent du catalogue, format d'id invalide (jamais une lecture disque tentée dans ce cas — voir
+ * le commentaire d'en-tête ci-dessus), ou fichier `.csv.gz` absent/illisible. Mémoïsé par id.
+ */
+export function getDataset(id: string): { rows: readonly Record<string, string>[]; entry: DatasetIndexEntry } | null {
+  if (!DATASET_ID_RE.test(id)) return null;
+  const index = getDatasetsIndex();
+  if (!index) return null;
+  const entry = index.datasets.find((d) => d.id === id);
+  if (!entry) return null;
+  const cached = _datasetRowsById.get(id);
+  if (cached) return { rows: cached, entry };
+  try {
+    const raw = gunzipSync(readFileSync(join(DATA_DIR, "datasets", `${id}.csv.gz`))).toString("utf8");
+    const rows = parse(raw, { columns: true, skip_empty_lines: true, relax_quotes: true }) as Record<string, string>[];
+    _datasetRowsById.set(id, rows);
+    return { rows, entry };
+  } catch {
+    return null;
+  }
+}
+
 /** Révision et sources du référentiel effectivement embarqué dans le service. */
 export function getClassificationLinks(): { links: readonly ClassificationLink[]; sources: readonly ClassificationSource[]; version: string } {
   _classificationLinks ??= loadCsv<ClassificationLink>("classification_links.csv");
@@ -630,6 +704,9 @@ export function _resetDataLoaderCache(): void {
   _bfePv = null;
   _bfePvLoadFailed = false;
   _bfePvEdition = null;
+  _datasetsIndex = null;
+  _datasetsIndexLoadFailed = false;
+  _datasetRowsById.clear();
   _classificationLinks = null;
   _classificationSources = null;
   _taresEmbeddingsPromise = null;

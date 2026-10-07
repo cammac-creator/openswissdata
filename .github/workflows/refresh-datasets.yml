@@ -1,0 +1,75 @@
+name: Collecte hebdomadaire des jeux ouverts approuvés (moteur générique)
+#
+# Sur le modèle de `refresh-bfe-pv.yml` et `prospect-sources.yml` (tâche osd.jeux, piste G1/G2 du
+# plan `2026-10-07-moteur-jeux-ouverts.md`) : un push fait avec le `GITHUB_TOKEN` par défaut NE
+# déclenche PAS `ci.yml` (règle GitHub). L'étape « Vérifier avant de publier » reproduit donc ICI,
+# après la collecte et AVANT tout commit/push, le sous-ensemble de `ci.yml` qui couvre ce
+# changement.
+#
+# `scripts/sync-datasets.ts` est ISOLÉ par jeu (Global Constraint du plan, piste G) : un jeu en
+# échec n'empêche PAS les autres et ne touche JAMAIS à son fichier précédent. Le script sort avec
+# le code 1 si AU MOINS un jeu a échoué — mais les jeux RÉUSSIS doivent quand même être committés.
+# L'ORDRE est donc : collecte (le code de sortie est capturé, jamais laissé interrompre le job) →
+# contrôles → commit des jeux réussis → échec EXPRÈS si la collecte avait échoué (pour l'alerte),
+# même principe que `prospect-sources.yml` (qui commite un rapport sûr puis échoue).
+on:
+  schedule:
+    # Le mercredi à 06:23 UTC, minute non ronde, hors des créneaux des collectes spécialisées
+    # (localités le 3, rues le 4, siège exact FINMA le 5, rétribution OFEN le 6 — toutes mensuelles).
+    - cron: "23 6 * * 3"
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: datasets-production
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Collecter les jeux ouverts approuvés (un jeu en échec n'empêche pas les autres)
+        id: sync
+        run: |
+          set +e
+          npm run sync:datasets
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Vérifier avant de publier (jamais de commit sans ces contrôles verts)
+        run: |
+          npm run typecheck
+          npx vitest run tests/scripts/sync-datasets.test.ts tests/lib/dataset-keys.test.ts tests/lib/dataset-query.test.ts tests/mcp/data-loader-datasets.test.ts tests/lib/canton-profile-datasets.test.ts tests/lib/commune-profile-datasets.test.ts tests/routes/api-v1-datasets.test.ts tests/scripts/build-data-files.test.ts
+      - name: Committer les jeux réussis (s'ils ont changé)
+        run: |
+          git config user.name "OpenSwissData"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/mcp/data/datasets/
+          if ! git diff --cached --quiet; then
+            git commit -m "données : actualiser les jeux ouverts approuvés"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Échouer si au moins un jeu a échoué (pour l'alerte ; les jeux réussis sont déjà publiés)
+        if: steps.sync.outputs.exit_code != '0'
+        run: |
+          echo "::error::au moins un jeu ouvert a échoué ce passage (code ${{ steps.sync.outputs.exit_code }}) ; voir le journal de l'étape de collecte."
+          exit 1
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Collecte des jeux ouverts approuvés
+          ALERT_WORKFLOW: refresh-datasets.yml
+          ALERT_DETAIL: Au moins un jeu ouvert du registre docs/data-status/datasets-approved.json a échoué ; les jeux réussis restent publiés, le fichier d'un jeu en échec reste le précédent.
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

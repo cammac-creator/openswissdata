@@ -35,14 +35,18 @@
  */
 
 import {
+  getDataset,
+  getDatasetsIndex,
   getFinmaRegistry,
   getFinmaSeats,
   getFinmaVersion,
   getLocalities,
   getStreets,
+  type DatasetIndexEntry,
   type FinmaRegistryRow,
   type LocalityRow,
 } from "../mcp/data-loader.js";
+import { datasetsForCommune, type DatasetProfileMatch } from "./dataset-query.js";
 
 export interface CommuneProfileDeps {
   getLocalities: () => { rows: readonly LocalityRow[]; edition: string | null } | null;
@@ -58,6 +62,13 @@ export interface CommuneProfileDeps {
    *  substitué NI `getFinmaRegistry` NI `getFinmaSeats` — jamais silencieusement pour un test
    *  qui substitue déjà le registre FINMA sans connaître ce nouveau champ. */
   getFinmaSeats: () => { byUid: ReadonlyMap<string, string>; edition: string | null } | null;
+  /** Jeux ouverts du moteur générique (tâche osd.jeux, piste G2). Toujours lu par défaut, comme
+   *  `getDatasetsIndex`/`getDataset` de `canton-profile.ts` : champ AUTONOME (`datasets`), jamais
+   *  ajouté à `sources`/`editions` — aucun test antérieur à cette tâche ne peut donc casser en le
+   *  lisant silencieusement (contrairement à `getFinmaSeats` ci-dessus, dont la garde protège des
+   *  champs `finma.entities_with_seat_in_commune` déjà comparés par des tests existants). */
+  getDatasetsIndex: () => { datasets: readonly DatasetIndexEntry[] } | null;
+  getDataset: (id: string) => { rows: readonly Record<string, string>[] } | null;
 }
 
 /** Règle de rattachement, EN VÉRITÉ DES MOTS (relecture du 06.10.2026, seconde passe) :
@@ -134,6 +145,12 @@ export interface CommuneProfile {
   /** `null` : répertoire des rues non câblé/indisponible. `0` : répertoire disponible, aucune rue listée pour cette commune. */
   streets_count: number | null;
   finma: CommuneFinmaProfile;
+  /** Jeux ouverts APPROUVÉS (tâche osd.jeux, piste G2) qui ont au moins une ligne pour cette
+   *  commune — ids et nombre de lignes, JAMAIS les données. Champ AUTONOME : jamais ajouté à
+   *  `sources` ni `editions` (comparés par égalité stricte dans des tests existants — voir
+   *  `src/lib/dataset-query.ts`, `datasetsForCommune`). Tableau vide quand aucun jeu approuvé
+   *  n'a de ligne pour cette commune ; jamais `null`. */
+  datasets: DatasetProfileMatch[];
   /** Identifiants du registre des sources (`src/mcp/company/sources.ts`) effectivement utilisés pour cette fiche. */
   sources: string[];
   // `finma_seats` (tâche B4) : propriété ABSENTE (jamais `undefined` ni `null` explicite) quand
@@ -178,6 +195,8 @@ const defaultDeps: CommuneProfileDeps = {
     const loaded = getFinmaSeats();
     return loaded ? { byUid: loaded.byUid, edition: loaded.edition } : null;
   },
+  getDatasetsIndex,
+  getDataset,
 };
 
 /** NFC, casse et espaces normalisés — règle du rattachement FINMA (décision du 06.10.2026,
@@ -388,6 +407,10 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
   }
   const nationalSeatsKnown = seatsLoaded ? seatsLoaded.byUid.size : null;
 
+  // Jeux ouverts du moteur générique (tâche osd.jeux, piste G2) : champ AUTONOME, jamais ajouté à
+  // `sources` ci-dessous (voir le commentaire du champ `datasets` de `CommuneProfile`).
+  const datasets = datasetsForCommune(bfsId, d.getDatasetsIndex(), d.getDataset);
+
   return {
     bfs_id: bfsId,
     name,
@@ -395,6 +418,7 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
     postal_codes: [...postalCodes].sort(),
     localities: [...localityNames].sort(),
     streets_count: streetsCount,
+    datasets,
     finma: {
       entities_with_city_named_like_commune: entitiesWithCityNamedLikeCommune,
       by_licence_type: Object.fromEntries([...byLicenceType.entries()].sort(([a], [b]) => a.localeCompare(b))),

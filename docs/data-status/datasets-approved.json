@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "notes": "Registre des jeux ouverts APPROUVÉS par l'intégrateur (tâche osd.jeux, piste G1 du plan 2026-10-07-moteur-jeux-ouverts.md). Lu par scripts/sync-datasets.ts. Une entrée sans expected_header ni columns est rejetée par le collecteur. Démonstration G1/G2 : une seule entrée réelle, pour éprouver le moteur ; le premier lot (G3) reste une tâche séparée.",
+  "datasets": [
+    {
+      "id": "gr-finances-communes",
+      "title": "Indicateurs financiers des communes grisonnes",
+      "ckan_uuid": "53b7c01d-31b5-444a-bae0-34aaf9b81d1f",
+      "publisher": "Canton des Grisons",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.gr.ch/api/explore/v2.1/catalog/datasets/dfg_afg_econ_20260326/exports/csv?use_labels=false",
+      "expected_header": ["jahr", "bfs_nummer", "name", "typ", "betrag", "gemeindestand", "kategorie"],
+      "keys": { "jahr": "year", "bfs_nummer": "commune_bfs" },
+      "columns": ["jahr", "bfs_nummer", "name", "typ", "betrag", "gemeindestand"],
+      "approved_on": "2026-10-07",
+      "checked_by": "intégrateur",
+      "notes": "Vérifié le 07.10.2026 : fiche CKAN (package_show, organisation kanton-graubuenden), en-tête et 6150 lignes relus via l'API Opendatasoft (data.gr.ch) avant toute écriture. Colonne `kategorie` ('1. sehr gut'/'2. gut'/'3. mittel'…) retirée de `columns` : c'est une note/classement, interdite par les Global Constraints du plan, même si la source la publie. Dix types d'indicateur par commune et année (endettement, autofinancement, charge d'intérêts…), aucune colonne ni valeur de personne. Certaines lignes portent un `bfs_nummer` historique (voir `gemeindestand`, date de référence du découpage communal) qui ne correspond plus forcément à une commune du répertoire officiel swisstopo actuel (fusions de communes) : ces lignes restent dans le fichier du jeu, mais ne sont rattachées à aucun canton ni aucune commune par les profils combinés (`src/lib/canton-profile.ts`/`commune-profile.ts`), jamais une approximation."
+    }
+  ]
+}
