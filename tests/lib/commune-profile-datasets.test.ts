@@ -3,8 +3,11 @@
  * `2026-10-07-moteur-jeux-ouverts.md`).
  *
  * Fichier NEUF, à côté de `tests/lib/commune-profile.test.ts` (déjà présent sur `origin/main`,
- * jamais modifié) : `getDatasetsIndex`/`getDataset` fabriqués en mémoire. Un cas de PRODUCTION
- * réelle à la fin : forme seulement.
+ * jamais modifié) : `getDatasetsIndex` fabriqué en mémoire. Relecture adverse du 07.10.2026
+ * (avant le lot de 36 jeux) : `communeProfile()` lit SEULEMENT `by_commune_bfs` PRÉCALCULÉ
+ * (jamais un fichier de jeu) — ces tests fabriquent directement ce compteur, jamais des lignes
+ * brutes. Le cas de PRODUCTION réelle ne fixe ni id ni commune précise (le catalogue réel change
+ * de forme à chaque lot d'approbations) : forme seulement.
  */
 import { describe, expect, it } from "vitest";
 import { communeProfile, type CommuneProfileDeps } from "../../src/lib/commune-profile.js";
@@ -26,7 +29,6 @@ function minimalDeps(overrides: Partial<CommuneProfileDeps> = {}): Partial<Commu
     getFinmaVersion: () => null,
     getFinmaSeats: () => null,
     getDatasetsIndex: () => null,
-    getDataset: () => null,
     ...overrides,
   };
 }
@@ -37,12 +39,11 @@ describe("communeProfile().datasets", () => {
     expect(profile.datasets).toEqual([]);
   });
 
-  it("jeu à clé commune_bfs : compte par numéro OFS exact", () => {
+  it("jeu à clé commune_bfs (by_commune_bfs précalculé) : compte par numéro OFS exact", () => {
     const profile = communeProfile(
       "230",
       minimalDeps({
-        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-commune", keys: ["commune_bfs", "year"] })] }),
-        getDataset: (id) => (id === "jeu-commune" ? { rows: [{ commune_bfs: "230" }, { commune_bfs: "230" }, { commune_bfs: "999" }] } : null),
+        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-commune", keys: ["commune_bfs", "year"], by_commune_bfs: { "230": 2, "999": 1 } })] }),
       }),
     );
     expect(profile.datasets).toEqual([{ id: "jeu-commune", rows: 2 }]);
@@ -52,8 +53,7 @@ describe("communeProfile().datasets", () => {
     const profile = communeProfile(
       "230",
       minimalDeps({
-        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-canton", keys: ["canton"] })] }),
-        getDataset: () => ({ rows: [{ canton: "ZH" }] }),
+        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-canton", keys: ["canton"], by_canton: { ZH: 1 } })] }),
       }),
     );
     expect(profile.datasets).toEqual([]);
@@ -63,8 +63,7 @@ describe("communeProfile().datasets", () => {
     const profile = communeProfile(
       "230",
       minimalDeps({
-        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-commune", keys: ["commune_bfs"] })] }),
-        getDataset: () => ({ rows: [{ commune_bfs: "999" }] }),
+        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-commune", keys: ["commune_bfs"], by_commune_bfs: { "999": 1 } })] }),
       }),
     );
     expect(profile.datasets).toEqual([]);
@@ -75,30 +74,23 @@ describe("communeProfile().datasets", () => {
       "230",
       minimalDeps({
         getLocalities: () => null,
-        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-commune", keys: ["commune_bfs"] })] }),
-        getDataset: () => ({ rows: [{ commune_bfs: "230" }] }),
+        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-commune", keys: ["commune_bfs"], by_commune_bfs: { "230": 1 } })] }),
       }),
     );
     expect(profile.sources).toEqual(["finma.uid_csv", "gleif.lei_api"]);
     expect(profile.editions).toEqual({ localities: null, streets: null, finma: null });
   });
 
-  it("production réelle : forme correcte, jamais une valeur figée", () => {
-    // Winterthur n'a pas de ligne dans le jeu de démonstration (communes grisonnes) : tableau
-    // vide, mais jamais une exception ni une entrée inventée.
+  it("production réelle : forme correcte seulement, jamais un id ou une commune figés (le catalogue réel change de forme à chaque lot d'approbations)", () => {
+    // 230 (Winterthur) choisi seulement parce qu'une commune doit être passée ; aucune
+    // hypothèse sur la présence ou l'absence de lignes pour elle dans le catalogue actuel.
     const profile = communeProfile("230");
     expect(Array.isArray(profile.datasets)).toBe(true);
     for (const d of profile.datasets) {
       expect(typeof d.id).toBe("string");
+      expect(d.id.length).toBeGreaterThan(0);
+      expect(Number.isInteger(d.rows)).toBe(true);
       expect(d.rows).toBeGreaterThan(0);
     }
-  });
-
-  it("production réelle, une commune grisonne réellement présente dans le jeu de démonstration", () => {
-    // 3542 = Albula/Alvra (Grisons), vue dans l'échantillon réel du 07.10.2026 (README de ce test).
-    const profile = communeProfile("3542");
-    const demo = profile.datasets.find((d) => d.id === "gr-finances-communes");
-    expect(demo).toBeDefined();
-    expect(demo?.rows).toBeGreaterThan(0);
   });
 });

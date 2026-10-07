@@ -193,6 +193,43 @@ describe("syncDatasets : un jeu valide (mode fixture)", () => {
     expect(index.datasets[0]).toMatchObject({ id: "demo-jeu", rows: 30, edition: "2026-10-07", keys: ["commune_bfs", "year"] });
   });
 
+  it("by_commune_bfs précalculé dans index.json (relecture adverse du 07.10.2026) : les profils n'ouvrent plus le .csv.gz", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    // Trois lignes pour la commune 1000, une pour 1001 : compte précalculé attendu {1000: 3, 1001: 1}.
+    const csv = [HEADER, "2024,1000,a,1", "2024,1000,b,2", "2023,1000,c,3", "2024,1001,d,4"].join("\n") + "\n";
+    writeFixture(fixDir, entry.id, csv);
+
+    await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+
+    const index = JSON.parse(readFileSync(join(outDir, "index.json"), "utf8"));
+    expect(index.datasets[0].by_commune_bfs).toEqual({ "1000": 3, "1001": 1 });
+    expect(index.datasets[0].by_canton).toBeUndefined(); // ce jeu n'a pas de clé canton
+  });
+
+  it("by_canton précalculé pour un jeu à clé canton", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry({
+      id: "jeu-canton-demo",
+      expected_header: ["jahr", "kanton", "name", "betrag"],
+      columns: ["jahr", "kanton", "name", "betrag"],
+      keys: { jahr: "year", kanton: "canton" },
+    });
+    writeRegistry(regDir, [entry]);
+    writeFixture(fixDir, entry.id, "jahr,kanton,name,betrag\n2024,GR,a,1\n2024,GR,b,2\n2024,ZH,c,3\n");
+
+    await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+
+    const index = JSON.parse(readFileSync(join(outDir, "index.json"), "utf8"));
+    expect(index.datasets[0].by_canton).toEqual({ GR: 2, ZH: 1 });
+    expect(index.datasets[0].by_commune_bfs).toBeUndefined();
+  });
+
   it("second passage, contenu identique : fichier inchangé, édition conservée", async () => {
     const regDir = tmpDir();
     const fixDir = tmpDir();
@@ -271,6 +308,51 @@ describe("syncDatasets : colonne de personne détectée", () => {
   });
 });
 
+describe("syncDatasets : encodage inattendu (U+FFFD)", () => {
+  it("refuse un fichier dont le décodage UTF-8 produit un caractère de remplacement", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    // Octet 0xFF seul : invalide en UTF-8, décodé en U+FFFD par `Buffer#toString("utf8")`.
+    const invalid = Buffer.concat([Buffer.from(HEADER + "\n2024,1000,", "utf8"), Buffer.from([0xff]), Buffer.from(",1\n", "utf8")]);
+    writeFileSync(join(fixDir, `${entry.id}.csv`), invalid);
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+
+    expect(result.anyFailed).toBe(true);
+    expect(result.failed[0].error).toMatch(/FFFD|encodage/i);
+    expect(existsSync(join(outDir, `${entry.id}.csv.gz`))).toBe(false);
+  });
+});
+
+describe("syncDatasets : trim cohérent des noms de colonnes entre en-tête et lignes", () => {
+  it("colonne non-clé dont le nom porte un espace parasite dans l'en-tête réel : valeur quand même lue (relecture du 07.10.2026)", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    // En-tête réel avec un espace parasite autour de "name" (colonne NON-clé) : `expected_header`
+    // du registre reste "name" (sans espace), comparé après `splitHeaderColumns` (qui trime) — la
+    // vérification d'en-tête passe. Avant la relecture du 07.10.2026, `csv-parse` en mode
+    // `columns: true` utilisait la ligne d'en-tête BRUTE comme clés de ligne (" name " avec
+    // espaces) : `buildOutputRow` cherchait `sourceRow["name"]` (sans espace, depuis
+    // `entry.columns`) et ne le trouvait jamais → valeur silencieusement vidée ("").
+    const csvWithSpaces = "jahr,bfs_nummer, name ,betrag\n2024,1000,Exemple,42\n";
+    writeFixture(fixDir, entry.id, csvWithSpaces);
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+
+    expect(result.anyFailed).toBe(false);
+    expect(result.succeeded).toEqual(["demo-jeu"]);
+    const csv = gunzipSync(readFileSync(join(outDir, "demo-jeu.csv.gz"))).toString("utf8");
+    const lines = csv.split("\n").filter(Boolean);
+    expect(lines[1]).toBe("2024,1000,Exemple,42"); // "name" porte bien "Exemple", jamais vide
+  });
+});
+
 describe("syncDatasets : baisse de lignes", () => {
   it("baisse de plus de 20 % : échec, fichier précédent intact", async () => {
     const regDir = tmpDir();
@@ -323,6 +405,86 @@ describe("syncDatasets : entrée de registre invalide", () => {
     expect(result.anyFailed).toBe(true);
     expect(result.succeeded).toEqual(["jeu-bon"]);
     expect(result.failed.map((f) => f.id)).toEqual(["jeu-casse"]);
+  });
+});
+
+describe("syncDatasets : retrait d'un jeu sorti du registre", () => {
+  it("un jeu disparu du registre est retiré d'index.json ET son .csv.gz effacé au passage suivant", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entryA = baseEntry({ id: "jeu-a" });
+    const entryB = baseEntry({ id: "jeu-b" });
+    writeRegistry(regDir, [entryA, entryB]);
+    writeFixture(fixDir, entryA.id, csvRows(5));
+    writeFixture(fixDir, entryB.id, csvRows(5));
+
+    const registryPath = join(regDir, "datasets-approved.json");
+    const first = await syncDatasets({ registryPath, outDir, fixtureDir: fixDir, now: () => 0 });
+    expect(first.succeeded.sort()).toEqual(["jeu-a", "jeu-b"]);
+    expect(existsSync(join(outDir, "jeu-a.csv.gz"))).toBe(true);
+    expect(existsSync(join(outDir, "jeu-b.csv.gz"))).toBe(true);
+
+    // jeu-b sort du registre (ex. remplacé par un autre jeu lors d'un lot d'approbations).
+    writeRegistry(regDir, [entryA]);
+    const second = await syncDatasets({ registryPath, outDir, fixtureDir: fixDir, now: () => 1 });
+
+    expect(second.removed).toEqual(["jeu-b"]);
+    expect(second.anyFailed).toBe(false);
+    expect(existsSync(join(outDir, "jeu-b.csv.gz"))).toBe(false); // .csv.gz effacé
+    expect(existsSync(join(outDir, "jeu-a.csv.gz"))).toBe(true); // jeu-a intact
+
+    const index = JSON.parse(readFileSync(join(outDir, "index.json"), "utf8"));
+    expect(index.datasets.map((d: { id: string }) => d.id)).toEqual(["jeu-a"]); // jeu-b retiré de l'index
+  });
+
+  it("un jeu seulement skipped par le plafond (toujours approuvé) n'est jamais retiré", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entryA = baseEntry({ id: "jeu-a" });
+    const entryB = baseEntry({ id: "jeu-b" });
+    writeRegistry(regDir, [entryA, entryB]);
+    writeFixture(fixDir, entryA.id, csvRows(5));
+    writeFixture(fixDir, entryB.id, csvRows(5));
+    const registryPath = join(regDir, "datasets-approved.json");
+
+    // Premier passage : les deux jeux collectés normalement.
+    await syncDatasets({ registryPath, outDir, fixtureDir: fixDir, now: () => 0 });
+    expect(existsSync(join(outDir, "jeu-b.csv.gz"))).toBe(true);
+
+    // Second passage : plafond à 1 jeu par passage, jeu-b seulement "skipped" (toujours approuvé
+    // au registre) — jamais retiré, même absent de `toProcess` cette fois.
+    const second = await syncDatasets({ registryPath, outDir, fixtureDir: fixDir, now: () => 1, maxDatasetsPerRun: 1 });
+    expect(second.skipped).toEqual(["jeu-b"]);
+    expect(second.removed).toEqual([]);
+    expect(existsSync(join(outDir, "jeu-b.csv.gz"))).toBe(true); // jamais effacé
+    const index = JSON.parse(readFileSync(join(outDir, "index.json"), "utf8"));
+    expect(index.datasets.map((d: { id: string }) => d.id).sort()).toEqual(["jeu-a", "jeu-b"]);
+  });
+
+  it("un jeu en échec de validation (toujours au registre, mais malformé) n'est jamais retiré", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entryA = baseEntry({ id: "jeu-a" });
+    writeRegistry(regDir, [entryA]);
+    writeFixture(fixDir, entryA.id, csvRows(5));
+    const registryPath = join(regDir, "datasets-approved.json");
+
+    await syncDatasets({ registryPath, outDir, fixtureDir: fixDir, now: () => 0 });
+    expect(existsSync(join(outDir, "jeu-a.csv.gz"))).toBe(true);
+
+    // jeu-a reste au registre mais devient malformé (ex. erreur de frappe dans columns).
+    const broken = { ...entryA, columns: [] } as DatasetApprovalEntry;
+    writeRegistry(regDir, [broken]);
+    const second = await syncDatasets({ registryPath, outDir, fixtureDir: fixDir, now: () => 1 });
+
+    expect(second.failed.map((f) => f.id)).toEqual(["jeu-a"]);
+    expect(second.removed).toEqual([]);
+    expect(existsSync(join(outDir, "jeu-a.csv.gz"))).toBe(true); // fichier précédent intact
+    const index = JSON.parse(readFileSync(join(outDir, "index.json"), "utf8"));
+    expect(index.datasets.map((d: { id: string }) => d.id)).toEqual(["jeu-a"]); // toujours dans l'index
   });
 });
 

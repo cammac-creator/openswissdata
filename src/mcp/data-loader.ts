@@ -591,12 +591,65 @@ export interface DatasetIndexEntry {
   keys: string[];
   rows: number;
   edition: string;
+  /** Nombre de lignes PAR CANTON, PRÉCALCULÉ à la collecte (`scripts/sync-datasets.ts`) —
+   *  présent seulement pour un jeu dont la clé `canton` est disponible. Lu par
+   *  `src/lib/dataset-query.ts` (`datasetsForCanton`) pour que `cantonProfile()` n'ouvre JAMAIS
+   *  le fichier `.csv.gz` du jeu (relecture adverse du 07.10.2026, avant le lot de 36 jeux). */
+  by_canton?: Record<string, number>;
+  /** Nombre de lignes PAR COMMUNE (numéro OFS), PRÉCALCULÉ à la collecte — présent seulement
+   *  pour un jeu dont la clé `commune_bfs` est disponible. Lu par `datasetsForCommune` et
+   *  `datasetsForCanton` (somme sur les communes du canton) ; même motif que `by_canton`. */
+  by_commune_bfs?: Record<string, number>;
 }
 
 const DATASET_ID_RE = /^[a-z][a-z0-9-]{2,63}$/;
 let _datasetsIndex: readonly DatasetIndexEntry[] | null = null;
 let _datasetsIndexLoadFailed = false;
+// Dossier lu par `getDatasetsIndex()`/`getDataset()` ; `null` = dossier réel
+// (`src/mcp/data/datasets`). Remplaçable UNIQUEMENT par `_setDatasetsDirForTest()` (tests
+// seuls, jamais écrit dans `src/mcp/data` — relecture adverse du 07.10.2026, pour exercer la
+// VRAIE route `/api/v1/datasets` sur des jeux fabriqués sans dépendre du contenu réel du dépôt,
+// qui change de forme à chaque lot d'approbations).
+let _datasetsDirOverride: string | null = null;
+
+function datasetsDir(): string {
+  return _datasetsDirOverride ?? join(DATA_DIR, "datasets");
+}
+
+/** Aide de test SEULE : remplace le dossier des jeux ouverts (défaut : dossier réel). Toujours
+ *  suivie de `_resetDataLoaderCache()` (le cache doit être vidé pour relire le nouveau dossier),
+ *  et d'un retour à `null` en fin de test (`afterEach`) — jamais un mélange entre le contenu réel
+ *  du dépôt et un dossier de test dans une autre suite. */
+export function _setDatasetsDirForTest(path: string | null): void {
+  _datasetsDirOverride = path;
+}
+// Cache LRU BORNÉ (relecture adverse du 07.10.2026, avant le lot de 36 jeux) : au plus
+// `DATASET_ROWS_CACHE_LIMIT` jeux gardent leurs lignes décompressées en mémoire en même temps —
+// un `Map` non borné aurait gardé les 36 jeux en mémoire dès qu'un passage les aurait tous
+// servis une fois, pour une API qui ne sert qu'un jeu par appel. L'ordre d'insertion d'un `Map`
+// JS sert de file LRU : un accès RÉINSÈRE la clé (la place en position « la plus récente »), une
+// insertion au-delà du plafond évince la plus ANCIENNE (`keys().next().value`).
+const DATASET_ROWS_CACHE_LIMIT = 5;
 const _datasetRowsById = new Map<string, readonly Record<string, string>[]>();
+
+function cacheGetDatasetRows(id: string): readonly Record<string, string>[] | undefined {
+  const rows = _datasetRowsById.get(id);
+  if (rows) {
+    _datasetRowsById.delete(id);
+    _datasetRowsById.set(id, rows); // réinsertion : position « la plus récente »
+  }
+  return rows;
+}
+
+function cacheSetDatasetRows(id: string, rows: readonly Record<string, string>[]): void {
+  _datasetRowsById.delete(id); // au cas où déjà présent (jamais deux entrées pour le même id)
+  _datasetRowsById.set(id, rows);
+  while (_datasetRowsById.size > DATASET_ROWS_CACHE_LIMIT) {
+    const oldest = _datasetRowsById.keys().next().value;
+    if (oldest === undefined) break;
+    _datasetRowsById.delete(oldest);
+  }
+}
 
 /** Catalogue des jeux ouverts (`datasets/index.json`) ; `null` si absent, illisible ou mal
  *  formé. Mémoïsé comme les autres chargeurs de ce fichier. */
@@ -604,7 +657,7 @@ export function getDatasetsIndex(): { datasets: readonly DatasetIndexEntry[] } |
   if (_datasetsIndexLoadFailed) return null;
   if (!_datasetsIndex) {
     try {
-      const raw = JSON.parse(readFileSync(join(DATA_DIR, "datasets", "index.json"), "utf8")) as { datasets?: unknown };
+      const raw = JSON.parse(readFileSync(join(datasetsDir(), "index.json"), "utf8")) as { datasets?: unknown };
       if (!Array.isArray(raw.datasets)) {
         _datasetsIndexLoadFailed = true;
         return null;
@@ -629,16 +682,26 @@ export function getDataset(id: string): { rows: readonly Record<string, string>[
   if (!index) return null;
   const entry = index.datasets.find((d) => d.id === id);
   if (!entry) return null;
-  const cached = _datasetRowsById.get(id);
+  const cached = cacheGetDatasetRows(id);
   if (cached) return { rows: cached, entry };
   try {
-    const raw = gunzipSync(readFileSync(join(DATA_DIR, "datasets", `${id}.csv.gz`))).toString("utf8");
+    const raw = gunzipSync(readFileSync(join(datasetsDir(), `${id}.csv.gz`))).toString("utf8");
     const rows = parse(raw, { columns: true, skip_empty_lines: true, relax_quotes: true }) as Record<string, string>[];
-    _datasetRowsById.set(id, rows);
+    cacheSetDatasetRows(id, rows);
     return { rows, entry };
   } catch {
     return null;
   }
+}
+
+/** Aide de test SEULE : nombre de jeux actuellement en cache (borné par `DATASET_ROWS_CACHE_LIMIT`). */
+export function _datasetRowsCacheSize(): number {
+  return _datasetRowsById.size;
+}
+
+/** Aide de test SEULE : clés actuellement en cache, dans l'ordre LRU (la plus ancienne en premier). */
+export function _datasetRowsCacheKeys(): string[] {
+  return [..._datasetRowsById.keys()];
 }
 
 /** Révision et sources du référentiel effectivement embarqué dans le service. */

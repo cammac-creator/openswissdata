@@ -36,7 +36,12 @@ export interface DatasetCatalogueEntry {
    *  `GET /api/v1/datasets/:id`, qui rend `total`/`data` séparément). */
   rows: number;
   columns: string[];
-  keys: string[];
+  /** Noms des clés de jointure DISPONIBLES pour filtrer CE jeu (sous-ensemble des cinq clés
+   *  fermées de `src/lib/dataset-keys.ts`) — jamais un ensemble universel : chaque jeu déclare
+   *  les siennes (`entry.keys`, interne). Nommé `filters` dans la réponse publique (relecture
+   *  adverse du 07.10.2026) : `llms.txt`/`openapi.json` documentent « filters listed per
+   *  dataset », jamais un ensemble de filtres fixe pour toute l'API. */
+  filters: string[];
 }
 
 /** Forme publique d'une entrée de catalogue (`GET /api/v1/datasets`). Fonction pure, testée
@@ -54,7 +59,7 @@ export function datasetCatalogueEntry(entry: DatasetIndexEntry): DatasetCatalogu
     edition: entry.edition,
     rows: entry.rows,
     columns: entry.columns,
-    keys: entry.keys,
+    filters: entry.keys,
   };
 }
 
@@ -123,64 +128,57 @@ export function paginateDatasetRows<T>(rows: readonly T[], limit: number, offset
 // --------------------------------------------------------------------------------------------
 // Section « datasets » des profils de canton/commune (plan, piste G2) : « la liste des jeux
 // approuvés qui ont des lignes pour ce canton/cette commune (ids et nombre de lignes, pas les
-// données) ». Fonctions PURES (données déjà chargées passées en paramètre) — SANS E/S — pour
-// rester testables sans toucher `src/mcp/data`, et réutilisées À L'IDENTIQUE par
-// `src/lib/canton-profile.ts` et `src/lib/commune-profile.ts` (jamais deux implémentations qui
-// pourraient diverger). Volontairement SELF-CONTAINED : jamais ajouté à `sources`/`editions` des
-// profils (listes déjà comparées par égalité stricte dans des tests existants).
+// données) ». Fonctions PURES — SANS E/S — pour rester testables sans toucher `src/mcp/data`, et
+// réutilisées À L'IDENTIQUE par `src/lib/canton-profile.ts` et `src/lib/commune-profile.ts`
+// (jamais deux implémentations qui pourraient diverger). Volontairement SELF-CONTAINED : jamais
+// ajouté à `sources`/`editions` des profils (listes déjà comparées par égalité stricte dans des
+// tests existants).
+//
+// Relecture adverse du 07.10.2026 (avant le lot de 36 jeux) : lisent SEULEMENT `by_canton`/
+// `by_commune_bfs`, PRÉCALCULÉS à la collecte (`scripts/sync-datasets.ts`) et publiés dans
+// `datasets/index.json` — JAMAIS `getDataset(id)` ni le contenu d'un `.csv.gz`. Un profil de
+// canton ou de commune n'ouvre donc plus AUCUN fichier de jeu, même avec 36 jeux approuvés :
+// seul `GET /api/v1/datasets/:id` (qui sert les lignes elles-mêmes) lit encore un `.csv.gz`, par
+// le cache borné de `src/mcp/data-loader.ts` (`getDataset`, LRU à 5 jeux).
 // --------------------------------------------------------------------------------------------
 export interface DatasetProfileMatch {
   id: string;
   rows: number;
 }
 
-type DatasetRowsLoader = (id: string) => { rows: readonly Record<string, string>[] } | null;
-
 function cmpIds(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
 /** Jeux approuvés qui ont au moins une ligne pour une COMMUNE donnée (numéro OFS) : seulement
- *  ceux dont la clé `commune_bfs` est disponible, par égalité exacte sur `bfsId` — jamais un
- *  comptage approximatif par canton pour une commune, et jamais un jeu sans cette clé. */
-export function datasetsForCommune(
-  bfsId: string,
-  index: { datasets: readonly DatasetIndexEntry[] } | null,
-  loadDataset: DatasetRowsLoader,
-): DatasetProfileMatch[] {
+ *  ceux dont `by_commune_bfs` est précalculé (jeux à clé `commune_bfs`), par égalité exacte sur
+ *  `bfsId` — jamais un comptage approximatif par canton pour une commune, et jamais un jeu sans
+ *  cette clé. */
+export function datasetsForCommune(bfsId: string, index: { datasets: readonly DatasetIndexEntry[] } | null): DatasetProfileMatch[] {
   if (!index) return [];
   const out: DatasetProfileMatch[] = [];
   for (const entry of index.datasets) {
-    if (!entry.keys.includes("commune_bfs")) continue;
-    const loaded = loadDataset(entry.id);
-    if (!loaded) continue;
-    const rows = loaded.rows.filter((r) => r.commune_bfs === bfsId).length;
+    const rows = entry.by_commune_bfs?.[bfsId] ?? 0;
     if (rows > 0) out.push({ id: entry.id, rows });
   }
   return out.sort((a, b) => cmpIds(a.id, b.id));
 }
 
 /** Jeux approuvés qui ont au moins une ligne pour un CANTON donné : un jeu à clé `canton`
- *  compte par égalité directe sur l'abréviation ; un jeu à clé `commune_bfs` (jamais les deux
- *  clés en même temps dans ce moteur) compte les lignes dont la commune appartient à ce canton
- *  (`communeBfsIds`, déjà calculé par l'appelant — `bfsIdsForCanton` de `canton-profile.ts`). */
-export function datasetsForCanton(
-  abbr: string,
-  communeBfsIds: ReadonlySet<string>,
-  index: { datasets: readonly DatasetIndexEntry[] } | null,
-  loadDataset: DatasetRowsLoader,
-): DatasetProfileMatch[] {
+ *  (`by_canton` précalculé) compte par égalité directe sur l'abréviation ; un jeu à clé
+ *  `commune_bfs` (`by_commune_bfs` précalculé, jamais les deux clés en même temps dans ce
+ *  moteur) SOMME les comptes des communes de ce canton (`communeBfsIds`, déjà calculé par
+ *  l'appelant — `bfsIdsForCanton` de `canton-profile.ts`). */
+export function datasetsForCanton(abbr: string, communeBfsIds: ReadonlySet<string>, index: { datasets: readonly DatasetIndexEntry[] } | null): DatasetProfileMatch[] {
   if (!index) return [];
   const out: DatasetProfileMatch[] = [];
   for (const entry of index.datasets) {
-    const usesCanton = entry.keys.includes("canton");
-    const usesCommune = entry.keys.includes("commune_bfs");
-    if (!usesCanton && !usesCommune) continue;
-    const loaded = loadDataset(entry.id);
-    if (!loaded) continue;
-    const rows = usesCanton
-      ? loaded.rows.filter((r) => r.canton === abbr).length
-      : loaded.rows.filter((r) => communeBfsIds.has(r.commune_bfs)).length;
+    let rows = 0;
+    if (entry.by_canton) {
+      rows = entry.by_canton[abbr] ?? 0;
+    } else if (entry.by_commune_bfs) {
+      for (const bfsId of communeBfsIds) rows += entry.by_commune_bfs[bfsId] ?? 0;
+    }
     if (rows > 0) out.push({ id: entry.id, rows });
   }
   return out.sort((a, b) => cmpIds(a.id, b.id));

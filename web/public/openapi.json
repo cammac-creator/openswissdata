@@ -147,7 +147,7 @@
     "/api/v1/sources": {
       "get": {
         "summary": "Public registry of sources served by the API and the MCP server",
-        "description": "Id, publishing institution, licence and URL of each public source, with the directory edition or data version when known, except the two Eurostat SPARQL queries used only at classification-collection time. The TARES permission reference is never shown here (it names a person): TARES entries carry `licence: \"see the provenance file of the archive\"` instead.",
+        "description": "Id, publishing institution, licence and URL of each public source, with the directory edition or data version when known, except the two Eurostat SPARQL queries used only at classification-collection time. The TARES permission reference is never shown here (it names a person): TARES entries carry `licence: \"see the provenance file of the archive\"` instead. A separate dataset_sources array, derived from the current open-datasets catalogue (GET /api/v1/datasets), lists the publisher and source URL of each approved dataset — kept apart from sources, which stays the registry compared against etl/shared/sources/registry.ts.",
         "responses": {
           "200": {
             "description": "Source registry",
@@ -228,7 +228,7 @@
     "/api/v1/datasets": {
       "get": {
         "summary": "Catalogue of approved open datasets (generic engine)",
-        "description": "One entry per dataset approved and collected by the generic open-datasets engine (docs/data-status/datasets-approved.json, collected weekly by scripts/sync-datasets.ts): id, title, publisher, licence, attribution (present only when the licence requires one — terms_by or cc-by — and the registry carries a non-empty text, null otherwise), source URL, edition, row count of the whole dataset, kept columns and the normalised filter keys this dataset declares (a subset of canton, commune_bfs, postal_code, noga, year). No score, no ranking between datasets.",
+        "description": "One entry per dataset approved and collected by the generic open-datasets engine (docs/data-status/datasets-approved.json, collected weekly by scripts/sync-datasets.ts): id, title, publisher, licence, attribution (present only when the licence requires one — terms_by or cc-by — and the registry carries a non-empty text, null otherwise), source URL, edition, row count of the whole dataset, kept columns, and filters: the subset of the five normalised keys (canton, commune_bfs, postal_code, noga, year) this SPECIFIC dataset can be filtered on — filters are listed per dataset here, never a fixed set for the whole API. No score, no ranking between datasets.",
         "responses": {
           "200": {
             "description": "Dataset catalogue",
@@ -250,7 +250,7 @@
     "/api/v1/datasets/{id}": {
       "get": {
         "summary": "Rows of one approved open dataset, filtered and paginated",
-        "description": "Rows filtered by EXACT equality on whichever of the five normalised keys (canton, commune_bfs, postal_code, noga, year) this dataset declares in its catalogue entry (see /api/v1/datasets). A filter query parameter naming a key this dataset does not have, or an invalid value for its key, is a 400 error (unknown_filter_key:<key> or invalid_filter_value:<key>) — never a silently ignored filter. limit defaults to 100, maximum 1000; offset defaults to 0; both reject an out-of-range or non-integer value with a 400 error (invalid_limit/invalid_offset) rather than silently clamping it. total is the row count after filtering, before pagination — distinct from the whole-dataset row count shown in the catalogue entry. attribution is present only when the licence requires one and the registry carries a non-empty text, null otherwise.",
+        "description": "Rows filtered by EXACT equality on whichever of the five normalised keys (canton, commune_bfs, postal_code, noga, year) this dataset declares in its catalogue entry’s filters array (see /api/v1/datasets). A filter query parameter naming a key this dataset does not have, or an invalid value for its key, is a 400 error (unknown_filter_key:<key> or invalid_filter_value:<key>) — never a silently ignored filter. limit defaults to 100, maximum 1000; offset defaults to 0; both reject an out-of-range or non-integer value with a 400 error (invalid_limit/invalid_offset) rather than silently clamping it. total is the row count after filtering, before pagination — distinct from the whole-dataset row count shown in the catalogue entry. attribution is present only when the licence requires one and the registry carries a non-empty text, null otherwise. The response also echoes this dataset’s filters array, identical to its catalogue entry.",
         "parameters": [
           {
             "name": "id",

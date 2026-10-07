@@ -278,6 +278,10 @@ export interface SyncDatasetsResult {
   unchanged: string[];
   failed: { id: string; error: string }[];
   skipped: string[];
+  /** Ids présents dans `index.json` au DÉBUT du passage mais absents du registre actuel (sorti
+   *  de `docs/data-status/datasets-approved.json`) : retirés de l'index ET leur `.csv.gz`
+   *  effacé, ce passage (relecture adverse du 07.10.2026). */
+  removed: string[];
   anyFailed: boolean;
 }
 
@@ -292,6 +296,24 @@ interface IndexEntry {
   keys: string[];
   rows: number;
   edition: string;
+  by_canton?: Record<string, number>;
+  by_commune_bfs?: Record<string, number>;
+}
+
+/** Nombre de lignes PAR VALEUR d'un champ de sortie, PRÉCALCULÉ ici pour que les profils de
+ *  canton/commune n'ouvrent JAMAIS le `.csv.gz` du jeu (relecture adverse du 07.10.2026, avant le
+ *  lot de 36 jeux — voir `src/lib/dataset-query.ts`, `datasetsForCanton`/`datasetsForCommune`).
+ *  `undefined` quand `field` n'est pas une colonne de sortie de ce jeu (jamais un objet vide, pour
+ *  que `"by_canton" in entry"`/`entry.by_canton` reste un test fiable d'applicabilité). */
+function aggregateByField(rows: readonly Record<string, string>[], outColumns: string[], field: string): Record<string, number> | undefined {
+  if (!outColumns.includes(field)) return undefined;
+  const counts: Record<string, number> = {};
+  for (const r of rows) {
+    const v = r[field];
+    if (!v) continue;
+    counts[v] = (counts[v] ?? 0) + 1;
+  }
+  return counts;
 }
 
 function todayUtc(nowMs: number): string {
@@ -317,10 +339,14 @@ function loadIndex(outDir: string): Map<string, IndexEntry> {
 
 /** Traite UN jeu : télécharge (ou lit la fixture), vérifie l'en-tête, l'absence de colonne de
  *  personne, normalise les clés, contrôle la baisse de lignes, écrit `<id>.csv.gz` si le contenu
- *  a changé. Lève une erreur explicite en cas d'échec (jamais silencieuse) ; n'écrit JAMAIS rien
- *  en cas d'échec (le fichier précédent, s'il existe, reste intact). */
+ *  a changé, met à jour son entrée dans `index` (en mémoire — JAMAIS écrit sur disque ici : voir
+ *  `syncDatasets`, qui charge et réécrit `index.json` UNE SEULE FOIS pour tout le passage, afin
+ *  de pouvoir aussi y appliquer le retrait des jeux sortis du registre). Lève une erreur
+ *  explicite en cas d'échec (jamais silencieuse) ; n'écrit JAMAIS rien en cas d'échec (le
+ *  fichier précédent, s'il existe, et l'entrée d'index précédente restent intacts). */
 async function syncOneDataset(
   entry: DatasetApprovalEntry,
+  index: Map<string, IndexEntry>,
   opts: { outDir: string; fixtureDir?: string; fetchImpl: typeof fetch; now: () => number; maxBytes: number; timeoutMs: number; maxDropRatio: number },
 ): Promise<{ rows: number; edition: string; changed: boolean }> {
   let buf: Buffer;
@@ -352,7 +378,15 @@ async function syncOneDataset(
     throw new Error(`Colonne(s) de personne détectée(s), jeu écarté : ${personColumns.join(", ")}`);
   }
 
-  const rawRows = parse(stripped, { columns: true, delimiter, skip_empty_lines: true, relax_quotes: true }) as Record<string, string>[];
+  // `columns: actualHeader` (jamais `columns: true`) : `actualHeader` vient de `splitHeaderColumns`,
+  // qui TRIME chaque nom de colonne (relecture adverse du 07.10.2026) — le mode `columns: true` de
+  // csv-parse utilise la ligne d'en-tête BRUTE (espaces non retirés) comme clés des lignes, ce qui
+  // aurait désaccordé silencieusement `sourceRow[col]` dans `buildOutputRow` (col vient de
+  // `entry.columns`, toujours trimé) dès qu'un en-tête source porte un espace parasite autour d'un
+  // nom de colonne : la valeur aurait été perdue (repliée sur "" par `sourceRow[col] ?? ""`) SANS
+  // jamais lever d'erreur, pour une colonne non-clé (une colonne-clé l'aurait fait échouer, normalize
+  // rejetant une chaîne vide). `from_line: 2` saute la ligne d'en-tête réelle, déjà lue à part.
+  const rawRows = parse(stripped, { columns: actualHeader, from_line: 2, delimiter, skip_empty_lines: true, relax_quotes: true }) as Record<string, string>[];
   const outputRows = rawRows.map((row, i) => buildOutputRow(entry, row, i + 2));
   const outColumns = outputColumnNames(entry);
   const sorted = sortRows(outputRows, outColumns);
@@ -371,7 +405,6 @@ async function syncOneDataset(
   const csv = stringify(sorted, { header: true, columns: outColumns, record_delimiter: "\n" });
   const changed = previousCsv !== csv;
 
-  const index = loadIndex(opts.outDir);
   const existing = index.get(entry.id);
   const edition = !changed && existing ? existing.edition : todayUtc(opts.now());
 
@@ -391,8 +424,9 @@ async function syncOneDataset(
     keys: outputKeyNames(entry),
     rows: sorted.length,
     edition,
+    by_canton: aggregateByField(sorted, outColumns, "canton"),
+    by_commune_bfs: aggregateByField(sorted, outColumns, "commune_bfs"),
   });
-  writeIndex(opts.outDir, index);
 
   return { rows: sorted.length, edition, changed };
 }
@@ -416,6 +450,11 @@ export async function syncDatasets(opts: SyncDatasetsOptions = {}): Promise<Sync
   const allEntries = loadRegistry(registryPath);
   const { toProcess, skipped } = selectEntriesForRun(allEntries, maxDatasets);
 
+  // Index chargé UNE SEULE FOIS pour tout le passage (relecture adverse du 07.10.2026, avant le
+  // lot de 36 jeux : charger/réécrire `index.json` à chaque jeu était inutilement coûteux pour un
+  // gros registre, et empêchait d'y appliquer le retrait ci-dessous en une seule écriture finale).
+  const index = loadIndex(outDir);
+
   const succeeded: string[] = [];
   const unchanged: string[] = [];
   const failed: { id: string; error: string }[] = [];
@@ -437,7 +476,7 @@ export async function syncDatasets(opts: SyncDatasetsOptions = {}): Promise<Sync
     }
 
     try {
-      const result = await syncOneDataset(entry, { outDir, fixtureDir: opts.fixtureDir, fetchImpl, now, maxBytes, timeoutMs, maxDropRatio });
+      const result = await syncOneDataset(entry, index, { outDir, fixtureDir: opts.fixtureDir, fetchImpl, now, maxBytes, timeoutMs, maxDropRatio });
       if (result.changed) {
         succeeded.push(id);
         console.log(`[sync:datasets] "${id}" : ${result.rows} lignes, édition ${result.edition} (changé)`);
@@ -452,11 +491,30 @@ export async function syncDatasets(opts: SyncDatasetsOptions = {}): Promise<Sync
     }
   }
 
+  // Retrait (relecture adverse du 07.10.2026) : un id présent dans `index.json` mais qui n'existe
+  // PLUS DU TOUT dans le registre actuel (`allEntries`, jamais seulement `toProcess` — un id
+  // seulement `skipped` par le plafond reste approuvé, jamais retiré) est retiré de l'index ET son
+  // `.csv.gz` effacé. Une entrée `failed` (encore présente mais actuellement invalide/en échec)
+  // n'est JAMAIS retirée : seule une absence TOTALE du registre déclenche le retrait.
+  const registryIds = new Set(allEntries.map((e) => e?.id).filter((id): id is string => typeof id === "string"));
+  const removed: string[] = [];
+  for (const id of [...index.keys()]) {
+    if (registryIds.has(id)) continue;
+    index.delete(id);
+    const file = join(outDir, `${id}.csv.gz`);
+    if (existsSync(file)) unlinkSync(file);
+    removed.push(id);
+    console.log(`[sync:datasets] "${id}" retiré (absent du registre) : index et .csv.gz effacés`);
+  }
+
+  writeIndex(outDir, index);
+
   return {
     succeeded,
     unchanged,
     failed,
     skipped: skipped.map((e) => e?.id ?? "(id manquant)"),
+    removed,
     anyFailed: failed.length > 0,
   };
 }

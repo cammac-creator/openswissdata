@@ -32,7 +32,6 @@
 
 import {
   getBfePv,
-  getDataset,
   getDatasetsIndex,
   getFinmaRegistry,
   getFinmaSeats,
@@ -133,7 +132,6 @@ export interface CantonProfileDeps {
    *  connaissent pas ce champ) : la valeur par défaut lit le vrai catalogue, sans jamais changer
    *  `sources`/`editions` (voir le commentaire du champ `datasets` de `CantonProfile`). */
   getDatasetsIndex: () => { datasets: readonly DatasetIndexEntry[] } | null;
-  getDataset: (id: string) => { rows: readonly Record<string, string>[] } | null;
 }
 
 const defaultDeps: CantonProfileDeps = {
@@ -153,7 +151,6 @@ const defaultDeps: CantonProfileDeps = {
   },
   getBfePv,
   getDatasetsIndex,
-  getDataset,
 };
 
 function normalizeCanton(value: string): string {
@@ -318,7 +315,7 @@ export function cantonProfile(abbr: string, deps: Partial<CantonProfileDeps> = {
   // de ce canton (mêmes deux répertoires, fusionnés) servent à compter les jeux à clé
   // `commune_bfs` ; `datasetsForCanton` se charge seule du cas « jeu à clé canton ».
   const communeBfsIdsForDatasets = bfsIdsForCanton(wanted, localitiesLoaded?.rows ?? [], streetsLoaded?.municipalityInfo ?? null);
-  const datasets = datasetsForCanton(wanted, communeBfsIdsForDatasets, d.getDatasetsIndex(), d.getDataset);
+  const datasets = datasetsForCanton(wanted, communeBfsIdsForDatasets, d.getDatasetsIndex());
 
   return {
     abbreviation: wanted,

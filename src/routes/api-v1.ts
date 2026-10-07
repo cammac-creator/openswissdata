@@ -185,6 +185,9 @@ apiV1Route.get("/datasets/:id", (c) => {
     source: entry.resource_url,
     edition: entry.edition,
     columns: entry.columns,
+    // Noms des clés DISPONIBLES pour filtrer CE jeu seulement (jamais un ensemble universel —
+    // relecture adverse du 07.10.2026, voir `src/lib/dataset-query.ts`, `DatasetCatalogueEntry`).
+    filters: entry.keys,
     total,
     limit: paginationResult.limit,
     offset: paginationResult.offset,
@@ -211,6 +214,22 @@ apiV1Route.get("/sources", (c) => {
       : s.id === "bfe.pv_one_time_remuneration" ? (bfePvLoaded?.edition ?? null)
       : null,
   }));
+  // Champ SÉPARÉ (jamais fusionné dans `sources`, relecture adverse du 07.10.2026) : un jeu
+  // ouvert approuvé (`docs/data-status/datasets-approved.json`, tâche osd.jeux) n'est pas une
+  // entrée du registre unique `etl/shared/sources/registry.ts` — `PUBLIC_SOURCES` reste
+  // identique à ce registre (`tests/routes/api-v1.test.ts`, "PUBLIC_SOURCES reste identique au
+  // registre unique des sources", vérifié id par id) et `body.sources.length` reste
+  // `PUBLIC_SOURCES.length` (même test) : les y ajouter aurait cassé les deux. Dérivé À LA
+  // DEMANDE du catalogue des jeux (`getDatasetsIndex()`), jamais recopié ni figé.
+  const datasetsIndex = getDatasetsIndex();
+  const datasetSources = (datasetsIndex?.datasets ?? []).map((d) => ({
+    id: d.id,
+    institution: d.publisher,
+    url: d.resource_url,
+    licence: d.licence,
+    edition: d.edition,
+    description: d.title,
+  }));
   c.header("Cache-Control", "public, max-age=3600");
-  return c.json({ sources });
+  return c.json({ sources, dataset_sources: datasetSources });
 });

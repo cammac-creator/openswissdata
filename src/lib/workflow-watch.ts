@@ -28,7 +28,9 @@ const REPO = process.env.OSD_GITHUB_REPO?.trim() || 'cammac-creator/openswissdat
 const SCHEDULED = ['refresh-finma.yml', 'refresh-tares.yml', 'monitor-sources.yml', 'monitor-public.yml', 'backup-db.yml',
   'cleanup-expired.yml', 'indexnow.yml', 'dependency-audit.yml',
   // Collectes ajoutées les 06-07.10.2026 : une désactivation par GitHub ne doit jamais passer inaperçue.
-  'refresh-localities.yml', 'refresh-streets.yml', 'refresh-finma-seats.yml', 'refresh-bfe-pv.yml', 'prospect-sources.yml'] as const;
+  'refresh-localities.yml', 'refresh-streets.yml', 'refresh-finma-seats.yml', 'refresh-bfe-pv.yml', 'prospect-sources.yml',
+  // Tâche osd.jeux, piste G1/G2 (07.10.2026) : moteur générique de jeux ouverts.
+  'refresh-datasets.yml'] as const;
 const WATCHED_RUNS: Readonly<Record<string, string>> = { 'monitor-sources.yml': 'Canari des 20 sources', 'refresh-finma.yml': 'Collecte FINMA' };
 const FINMA_OAR_PAGE = 'https://www.finma.ch/fr/autorisation/organisme-d-autoregulation-oar/recherche-de-membres-oar/';
 const UA = 'OpenSwissData-veille-taches/1';

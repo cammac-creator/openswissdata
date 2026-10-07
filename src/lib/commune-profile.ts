@@ -35,7 +35,6 @@
  */
 
 import {
-  getDataset,
   getDatasetsIndex,
   getFinmaRegistry,
   getFinmaSeats,
@@ -63,12 +62,13 @@ export interface CommuneProfileDeps {
    *  qui substitue déjà le registre FINMA sans connaître ce nouveau champ. */
   getFinmaSeats: () => { byUid: ReadonlyMap<string, string>; edition: string | null } | null;
   /** Jeux ouverts du moteur générique (tâche osd.jeux, piste G2). Toujours lu par défaut, comme
-   *  `getDatasetsIndex`/`getDataset` de `canton-profile.ts` : champ AUTONOME (`datasets`), jamais
-   *  ajouté à `sources`/`editions` — aucun test antérieur à cette tâche ne peut donc casser en le
-   *  lisant silencieusement (contrairement à `getFinmaSeats` ci-dessus, dont la garde protège des
-   *  champs `finma.entities_with_seat_in_commune` déjà comparés par des tests existants). */
+   *  `getDatasetsIndex` de `canton-profile.ts` : champ AUTONOME (`datasets`), jamais ajouté à
+   *  `sources`/`editions` — aucun test antérieur à cette tâche ne peut donc casser en le lisant
+   *  silencieusement (contrairement à `getFinmaSeats` ci-dessus, dont la garde protège des
+   *  champs `finma.entities_with_seat_in_commune` déjà comparés par des tests existants). Lit
+   *  SEULEMENT le catalogue (`by_commune_bfs` précalculé à la collecte) : jamais `getDataset` ni
+   *  le contenu d'un `.csv.gz` — relecture adverse du 07.10.2026, avant le lot de 36 jeux. */
   getDatasetsIndex: () => { datasets: readonly DatasetIndexEntry[] } | null;
-  getDataset: (id: string) => { rows: readonly Record<string, string>[] } | null;
 }
 
 /** Règle de rattachement, EN VÉRITÉ DES MOTS (relecture du 06.10.2026, seconde passe) :
@@ -196,7 +196,6 @@ const defaultDeps: CommuneProfileDeps = {
     return loaded ? { byUid: loaded.byUid, edition: loaded.edition } : null;
   },
   getDatasetsIndex,
-  getDataset,
 };
 
 /** NFC, casse et espaces normalisés — règle du rattachement FINMA (décision du 06.10.2026,
@@ -409,7 +408,7 @@ export function communeProfile(bfsId: string, deps: Partial<CommuneProfileDeps> 
 
   // Jeux ouverts du moteur générique (tâche osd.jeux, piste G2) : champ AUTONOME, jamais ajouté à
   // `sources` ci-dessous (voir le commentaire du champ `datasets` de `CommuneProfile`).
-  const datasets = datasetsForCommune(bfsId, d.getDatasetsIndex(), d.getDataset);
+  const datasets = datasetsForCommune(bfsId, d.getDatasetsIndex());
 
   return {
     bfs_id: bfsId,

@@ -3,10 +3,13 @@
  * `2026-10-07-moteur-jeux-ouverts.md`).
  *
  * Fichier NEUF, à côté de `tests/lib/canton-profile.test.ts` (déjà présent sur `origin/main`,
- * jamais modifié) : mêmes dépendances injectées (localités, rues), plus `getDatasetsIndex`/
- * `getDataset` fabriqués en mémoire — jamais le vrai dossier `src/mcp/data/datasets`, pour ne
- * dépendre d'aucun jeu réellement collecté. Un cas de PRODUCTION réelle à la fin : forme
- * seulement (le jeu de démonstration réel est `terms_open`, `commune_bfs`/`year`).
+ * jamais modifié) : mêmes dépendances injectées (localités, rues), plus `getDatasetsIndex`
+ * fabriqué en mémoire — jamais le vrai dossier `src/mcp/data/datasets`, pour ne dépendre
+ * d'aucun jeu réellement collecté. Relecture adverse du 07.10.2026 (avant le lot de 36 jeux) :
+ * `cantonProfile()` lit SEULEMENT `by_canton`/`by_commune_bfs` PRÉCALCULÉS (jamais un fichier de
+ * jeu) — ces tests fabriquent donc directement ces compteurs, jamais des lignes brutes. Le cas
+ * de PRODUCTION réelle ne fixe ni id ni canton précis (le catalogue réel change de forme à
+ * chaque lot d'approbations) : forme seulement, sur n'importe quel contenu actuel.
  */
 import { describe, expect, it } from "vitest";
 import { cantonProfile, type CantonProfileDeps } from "../../src/lib/canton-profile.js";
@@ -36,7 +39,6 @@ function minimalDeps(overrides: Partial<CantonProfileDeps> = {}): Partial<Canton
     getFinmaSeats: () => null,
     getBfePv: () => null,
     getDatasetsIndex: () => null,
-    getDataset: () => null,
     ...overrides,
   };
 }
@@ -49,24 +51,22 @@ describe("cantonProfile().datasets", () => {
     expect(profile.datasets).toEqual([]);
   });
 
-  it("jeu à clé canton : compte direct sur l'abréviation", () => {
+  it("jeu à clé canton (by_canton précalculé) : compte direct sur l'abréviation", () => {
     const profile = cantonProfile(
       "ZH",
       minimalDeps({
-        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-canton", keys: ["canton", "year"] })] }),
-        getDataset: (id) => (id === "jeu-canton" ? { rows: [{ canton: "ZH", year: "2024" }, { canton: "ZH", year: "2023" }, { canton: "GR", year: "2024" }] } : null),
+        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-canton", keys: ["canton", "year"], by_canton: { ZH: 2, GR: 1 } })] }),
       }),
     );
     expect(profile.datasets).toEqual([{ id: "jeu-canton", rows: 2 }]);
   });
 
-  it("jeu à clé commune_bfs : compte les lignes des communes de ce canton", () => {
+  it("jeu à clé commune_bfs (by_commune_bfs précalculé) : somme sur les communes de ce canton", () => {
     const profile = cantonProfile(
       "ZH",
       minimalDeps({
         getLocalities: () => ({ rows: [ZH_COMMUNE], edition: "2026-10-01" }),
-        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-commune", keys: ["commune_bfs"] })] }),
-        getDataset: (id) => (id === "jeu-commune" ? { rows: [{ commune_bfs: "230" }, { commune_bfs: "230" }, { commune_bfs: "999" }] } : null),
+        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-commune", keys: ["commune_bfs"], by_commune_bfs: { "230": 2, "999": 1 } })] }),
       }),
     );
     expect(profile.datasets).toEqual([{ id: "jeu-commune", rows: 2 }]);
@@ -76,8 +76,17 @@ describe("cantonProfile().datasets", () => {
     const profile = cantonProfile(
       "VD",
       minimalDeps({
-        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-canton", keys: ["canton"] })] }),
-        getDataset: () => ({ rows: [{ canton: "ZH" }] }),
+        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-canton", keys: ["canton"], by_canton: { ZH: 1 } })] }),
+      }),
+    );
+    expect(profile.datasets).toEqual([]);
+  });
+
+  it("jeu sans by_canton ni by_commune_bfs précalculé : jamais dans le tableau, jamais une exception", () => {
+    const profile = cantonProfile(
+      "ZH",
+      minimalDeps({
+        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-sans-cle", keys: ["noga"] })] }),
       }),
     );
     expect(profile.datasets).toEqual([]);
@@ -88,24 +97,22 @@ describe("cantonProfile().datasets", () => {
       "ZH",
       minimalDeps({
         getLocalities: () => ({ rows: [ZH_COMMUNE], edition: "2026-10-01" }),
-        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-canton", keys: ["canton"] })] }),
-        getDataset: () => ({ rows: [{ canton: "ZH" }] }),
+        getDatasetsIndex: () => ({ datasets: [datasetEntry({ id: "jeu-canton", keys: ["canton"], by_canton: { ZH: 1 } })] }),
       }),
     );
     expect(profile.sources).toEqual(["swisstopo.localities"]);
     expect(profile.editions).toEqual({ localities: "2026-10-01", streets: null, finma: null, finma_seats: null, bfe_pv: null });
   });
 
-  it("production réelle : forme correcte, jamais une valeur figée", () => {
-    const profile = cantonProfile("GR");
+  it("production réelle : forme correcte seulement, jamais un id ou un canton figé (le catalogue réel change de forme à chaque lot d'approbations)", () => {
+    // ZH choisi seulement parce qu'un canton doit être passé ; aucune hypothèse sur son contenu.
+    const profile = cantonProfile("ZH");
     expect(Array.isArray(profile.datasets)).toBe(true);
     for (const d of profile.datasets) {
       expect(typeof d.id).toBe("string");
+      expect(d.id.length).toBeGreaterThan(0);
+      expect(Number.isInteger(d.rows)).toBe(true);
       expect(d.rows).toBeGreaterThan(0);
     }
-    // Le jeu de démonstration réel (`gr-finances-communes`, terms_open, clé commune_bfs) est
-    // attendu avec des lignes pour le canton des Grisons.
-    const demo = profile.datasets.find((d) => d.id === "gr-finances-communes");
-    expect(demo).toBeDefined();
   });
 });

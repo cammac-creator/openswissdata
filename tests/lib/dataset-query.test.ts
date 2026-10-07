@@ -69,7 +69,7 @@ describe("datasetCatalogueEntry", () => {
       edition: "2026-10-07",
       rows: 3,
       columns: ["year", "commune_bfs", "name"],
-      keys: ["commune_bfs", "year"],
+      filters: ["commune_bfs", "year"],
     });
   });
 });
@@ -160,75 +160,67 @@ describe("parseDatasetPagination", () => {
   });
 });
 
+// Relecture adverse du 07.10.2026 (avant le lot de 36 jeux) : `datasetsForCommune`/
+// `datasetsForCanton` lisent SEULEMENT `by_commune_bfs`/`by_canton`, précalculés à la collecte
+// (`scripts/sync-datasets.ts`) — jamais un chargeur de lignes, jamais `getDataset`. Ces tests ne
+// fabriquent donc plus de lignes brutes, seulement les compteurs déjà agrégés.
 describe("datasetsForCommune", () => {
   const index = {
     datasets: [
-      entry({ id: "jeu-commune", keys: ["commune_bfs", "year"] }),
-      entry({ id: "jeu-canton", keys: ["canton", "year"] }),
-      entry({ id: "jeu-commune-absente", keys: ["commune_bfs"] }),
+      entry({ id: "jeu-commune", keys: ["commune_bfs", "year"], by_commune_bfs: { "230": 2, "61": 1 } }),
+      entry({ id: "jeu-canton", keys: ["canton", "year"], by_canton: { ZH: 1 } }),
+      entry({ id: "jeu-commune-absente", keys: ["commune_bfs"], by_commune_bfs: { "999": 1 } }),
     ],
   };
-  const rowsByDataset: Record<string, Record<string, string>[]> = {
-    "jeu-commune": [{ commune_bfs: "230", year: "2024" }, { commune_bfs: "230", year: "2023" }, { commune_bfs: "61", year: "2024" }],
-    "jeu-canton": [{ canton: "ZH", year: "2024" }],
-    "jeu-commune-absente": [{ commune_bfs: "999" }],
-  };
-  const loadDataset = (id: string) => (rowsByDataset[id] ? { rows: rowsByDataset[id] } : null);
 
-  it("seulement les jeux à clé commune_bfs, comptage par commune", () => {
-    expect(datasetsForCommune("230", index, loadDataset)).toEqual([{ id: "jeu-commune", rows: 2 }]);
+  it("seulement les jeux à by_commune_bfs précalculé, comptage par commune", () => {
+    expect(datasetsForCommune("230", index)).toEqual([{ id: "jeu-commune", rows: 2 }]);
   });
 
   it("aucune ligne pour cette commune : jeu absent du résultat", () => {
-    expect(datasetsForCommune("777", index, loadDataset)).toEqual([]);
+    expect(datasetsForCommune("777", index)).toEqual([]);
   });
 
   it("catalogue absent : tableau vide", () => {
-    expect(datasetsForCommune("230", null, loadDataset)).toEqual([]);
+    expect(datasetsForCommune("230", null)).toEqual([]);
   });
 
-  it("jeu listé au catalogue mais dont le fichier ne charge pas : ignoré, jamais une exception", () => {
-    const idx = { datasets: [entry({ id: "jeu-absent", keys: ["commune_bfs"] })] };
-    expect(datasetsForCommune("230", idx, () => null)).toEqual([]);
+  it("jeu sans by_commune_bfs (clé absente de ce jeu) : jamais dans le résultat, jamais une exception", () => {
+    const idx = { datasets: [entry({ id: "jeu-sans-cle", keys: ["canton"], by_canton: { ZH: 1 } })] };
+    expect(datasetsForCommune("230", idx)).toEqual([]);
   });
 });
 
 describe("datasetsForCanton", () => {
   const index = {
     datasets: [
-      entry({ id: "jeu-canton", keys: ["canton", "year"] }),
-      entry({ id: "jeu-commune", keys: ["commune_bfs"] }),
+      entry({ id: "jeu-canton", keys: ["canton", "year"], by_canton: { GR: 2, ZH: 1 } }),
+      entry({ id: "jeu-commune", keys: ["commune_bfs"], by_commune_bfs: { "3542": 2, "999": 1 } }),
       entry({ id: "jeu-sans-cle-geo", keys: ["noga"] }),
     ],
   };
-  const rowsByDataset: Record<string, Record<string, string>[]> = {
-    "jeu-canton": [{ canton: "GR", year: "2024" }, { canton: "GR", year: "2023" }, { canton: "ZH", year: "2024" }],
-    "jeu-commune": [{ commune_bfs: "3542" }, { commune_bfs: "3542" }, { commune_bfs: "999" }],
-    "jeu-sans-cle-geo": [{ noga: "62.01" }],
-  };
-  const loadDataset = (id: string) => (rowsByDataset[id] ? { rows: rowsByDataset[id] } : null);
   const grCommunes = new Set(["3542", "3681"]);
 
-  it("jeu à clé canton : égalité directe sur l'abréviation", () => {
-    const result = datasetsForCanton("GR", grCommunes, index, loadDataset);
+  it("jeu à clé canton (by_canton) : égalité directe sur l'abréviation", () => {
+    const result = datasetsForCanton("GR", grCommunes, index);
     expect(result).toEqual([
       { id: "jeu-canton", rows: 2 },
       { id: "jeu-commune", rows: 2 },
     ]);
   });
 
-  it("jeu sans clé canton ni commune_bfs : jamais interrogé, jamais dans le résultat", () => {
-    const result = datasetsForCanton("GR", grCommunes, index, loadDataset);
+  it("jeu sans by_canton ni by_commune_bfs : jamais dans le résultat", () => {
+    const result = datasetsForCanton("GR", grCommunes, index);
     expect(result.find((r) => r.id === "jeu-sans-cle-geo")).toBeUndefined();
   });
 
-  it("aucune commune du canton dans le jeu à clé commune_bfs : jeu absent du résultat", () => {
-    const result = datasetsForCanton("ZH", new Set(["230"]), index, loadDataset);
+  it("aucune commune du canton dans by_commune_bfs : jeu absent du résultat", () => {
+    const result = datasetsForCanton("ZH", new Set(["230"]), index);
     expect(result.find((r) => r.id === "jeu-commune")).toBeUndefined();
   });
 
   it("catalogue absent : tableau vide", () => {
-    expect(datasetsForCanton("GR", grCommunes, null, loadDataset)).toEqual([]);
+    expect(datasetsForCanton("GR", grCommunes, null)).toEqual([]);
   });
 });
 
