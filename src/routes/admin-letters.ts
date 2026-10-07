@@ -13,7 +13,7 @@ import { constantTimeEqual } from "../lib/tokens.js";
 import { isAllowedRecipient, scheduleSlot, LETTER_STATUSES } from "../lib/letters.js";
 import { readLettersPause, writeLettersPause } from "../lib/letters-sender.js";
 import { connection, imap } from "./crm-mail.js";
-import { extractText, findLetterMatch, parseHeaderBlock, type LetterMatchTarget, type ReplyHeaders } from "../lib/mail-watch.js";
+import { extractText, parseHeaderBlock, type ReplyHeaders } from "../lib/mail-watch.js";
 
 // Pas de caractère de contrôle (ni retour à la ligne) : l'objet et le motif
 // deviendront un en-tête de mail (tâche 2) — bloque une injection d'en-tête.
@@ -54,97 +54,88 @@ const LETTER_LIST_COLUMNS =
 // et l'écart de 12 min. `cancelled`/`failed` libèrent leur créneau.
 const OCCUPYING_STATUSES = "('queued','sending','sent')";
 
-// `GET /:id/reply` (piste R du plan du 07.10.2026) : relecture à la demande du message rattaché à
-// UNE lettre, dans la boîte `contact@`. Fenêtre plus large que la veille (`mail-watch.ts`, 3 jours) :
-// une consultation manuelle, bien après l'envoi, doit encore trouver la réponse.
-const REPLY_LOOKBACK_MS = 30 * 86_400_000;
+// `GET /:id/reply` (piste R du plan du 07.10.2026, resserré après la relecture de sécurité du
+// 07.10.2026) : relecture à la demande du message déjà rattaché par `mail-watch.ts` à UNE lettre —
+// jamais une seconde décision de rattachement. On recherche le message EXACT dont `attachReply`
+// (mail-watch.ts) a écrit la trace : même hôte expéditeur (`reply_from`, égalité stricte, jamais une
+// relation de sous-domaine) ET même date reçue, calculée par la MÊME formule (`internalDate ??
+// envelope.date`), que `reply_at`. Fenêtre de recherche à partir de l'envoi réel de la lettre
+// (`sent_at`, ou `attempted_at` à défaut) : un message reçu avant l'envoi ne peut pas en être la
+// réponse, quel que soit son domaine ou sa date.
 // Bornes des appels IMAP (la connexion se ferme après 35 s, `imap()` de `crm-mail.ts`) : enveloppes
-// lues pour au plus ce nombre de messages par dossier, puis en-têtes/corps relus pour au plus les
-// candidats les plus récents parmi ceux dont le domaine correspond déjà (avant tout fetch d'en-tête).
+// lues pour au plus ce nombre de messages par dossier.
 const REPLY_MAX_ENVELOPES = 200;
-const REPLY_MAX_HEADER_FETCHES = 30;
 // Même ordre de grandeur que la lecture complète d'un message du bureau (`crm-mail.ts`, `GET /:source/:id`).
 const REPLY_SOURCE_MAX_BYTES = 1_000_000;
 const REPLY_TEXT_MAX_LENGTH = 20_000;
-const REPLY_HEADER_FIELDS = ["references", "authentication-results"];
+const REPLY_HEADER_FIELDS = ["authentication-results"];
 
-/** Même règle bidirectionnelle que `domainsRelated` de `mail-watch.ts` (non exportée) : égal ou
- * sous-domaine dans un sens ou l'autre. Sert UNIQUEMENT à borner les appels IMAP avant le test
- * complet (`findLetterMatch`, qui applique la même règle et reste seul juge du rattachement) —
- * jamais une seconde décision indépendante. */
-function sharesDomain(host: string, domains: readonly string[]): boolean {
-  return domains.some((d) => host === d || host.endsWith(`.${d}`) || d.endsWith(`.${host}`));
-}
-
-type ReplyCandidate = { folder: string; uid: number; validity: string; address: string; subject: string; receivedAt: number; inReplyTo: string | null };
+type ReplyTarget = { domain: string; receivedAt: number; since: number };
+type ReplyHit = { folder: string; uid: number; validity: string; subject: string };
 type ReplyFound = { fromDomain: string; subject: string; receivedAt: number; text: string; authenticationResults: string | null };
 
 /**
  * Relit la boîte `contact@` (lecture seule : EXAMINE, BODY.PEEK, aucun drapeau, aucun déplacement)
- * pour trouver le message le plus récent rattaché à `target` (une seule lettre), dans INBOX et le
- * dossier des indésirables, sur les `REPLY_LOOKBACK_MS` derniers jours. `null` si aucun.
+ * pour retrouver EXACTEMENT le message déjà rattaché (même hôte expéditeur strict, même date reçue
+ * à la milliseconde), dans INBOX et le dossier des indésirables, depuis `target.since`. `null` si
+ * aucun message ne correspond exactement (y compris un rattachement posé à la main par
+ * `POST /:id/reply`, sans message réel derrière).
  *
  * Deux passes distinctes, jamais entrelacées (un flux `fetch` ouvert empêche toute autre commande) :
- * 1. une boucle par dossier qui lit SEULEMENT les enveloppes (gratuites : expéditeur, objet, date,
- *    In-Reply-To) et se termine entièrement avant la suivante ;
- * 2. pour les candidats dont le domaine correspond déjà (bornage, `sharesDomain`), du plus récent au
- *    plus ancien : réouverture du dossier JUSTE AVANT chaque `fetchOne` (le client ne garde qu'un
- *    dossier « courant » — un repli sans cette réouverture pourrait, en cas d'UID identique dans deux
- *    dossiers, lire le message du mauvais dossier) et vérification de l'UIDVALIDITY ET de l'UID
- *    renvoyé, avant de lire les en-têtes puis, seulement pour le premier qui rattache réellement
- *    (`findLetterMatch`, règle exacte de la veille), le corps complet.
+ * 1. une boucle par dossier qui lit SEULEMENT les enveloppes (gratuites : expéditeur, objet, date) et
+ *    se termine entièrement avant la suivante — jamais de `break` au milieu d'un flux `fetch` ouvert,
+ *    la recherche du premier candidat exact continue jusqu'à l'épuisement du flux en cours ;
+ * 2. dès qu'un dossier a livré le message exact, réouverture du dossier JUSTE AVANT chaque
+ *    `fetchOne` (le client ne garde qu'un dossier « courant » — un appel sans cette réouverture
+ *    pourrait, en cas d'UID identique dans deux dossiers, lire le message du mauvais dossier) et
+ *    vérification de l'UIDVALIDITY ET de l'UID renvoyé, avant de lire les en-têtes puis le corps.
  */
-async function findLetterReply(client: ImapFlow, target: LetterMatchTarget, now: number): Promise<ReplyFound | null> {
-  const since = now - REPLY_LOOKBACK_MS;
+async function findLetterReply(client: ImapFlow, target: ReplyTarget): Promise<ReplyFound | null> {
   const folders = (await client.list()).filter((f) => f.path === "INBOX" || f.specialUse === "\\Junk").slice(0, 2);
-  const candidates: ReplyCandidate[] = [];
+  let hit: ReplyHit | null = null;
   for (const folder of folders) {
+    if (hit) break; // déjà trouvé dans un dossier précédent, entièrement épuisé — jamais au milieu d'un flux.
     const mailbox = await client.mailboxOpen(folder.path, { readOnly: true });
     const validity = mailbox.uidValidity.toString();
-    const query = target.domains.length === 1 ? { since: new Date(since), from: target.domains[0] } : { since: new Date(since), or: target.domains.map((from) => ({ from })) };
-    const uids = await client.search(query, { uid: true });
+    const uids = await client.search({ since: new Date(target.since), from: target.domain }, { uid: true });
     if (!Array.isArray(uids) || !uids.length) continue;
     // Enveloppe seulement ; aucune autre commande IMAP n'est lancée pendant la lecture du flux.
     for await (const m of client.fetch(uids.slice(-REPLY_MAX_ENVELOPES), { envelope: true, uid: true, internalDate: true }, { uid: true })) {
+      if (hit) continue; // flux vidé jusqu'au bout malgré tout — jamais de sortie anticipée d'un `fetch` ouvert.
       const envelope = m.envelope;
       const sender = envelope?.from?.find((a) => a.address);
       const address = sender?.address?.trim() ?? "";
       if (!envelope || !address) continue;
+      // Hôte EXACT (jamais une relation de sous-domaine), lu dans l'ADRESSE, jamais le nom affiché.
+      if (domainOf(address) !== target.domain) continue;
       const receivedAt = new Date(m.internalDate ?? envelope.date ?? Number.NaN).getTime();
-      if (!Number.isFinite(receivedAt) || receivedAt < since) continue;
-      candidates.push({ folder: folder.path, uid: m.uid, validity, address, subject: envelope.subject ?? "", receivedAt, inReplyTo: envelope.inReplyTo?.trim() || null });
+      // Même formule que celle qui a écrit `reply_at` (`attachReply`, mail-watch.ts) ; un message
+      // antérieur à l'envoi de la lettre (`target.since`) n'est de toute façon jamais une réponse.
+      if (!Number.isFinite(receivedAt) || receivedAt < target.since || receivedAt !== target.receivedAt) continue;
+      hit = { folder: folder.path, uid: m.uid, validity, subject: envelope.subject ?? "" };
     }
   }
-  const scoped = candidates
-    .filter((c) => sharesDomain(domainOf(c.address), target.domains))
-    .sort((a, b) => b.receivedAt - a.receivedAt)
-    .slice(0, REPLY_MAX_HEADER_FETCHES);
-  for (const candidate of scoped) {
-    const senderHost = domainOf(candidate.address);
-    let headers: ReplyHeaders | null = null;
-    try {
-      const mailbox = await client.mailboxOpen(candidate.folder, { readOnly: true });
-      if (mailbox.uidValidity.toString() === candidate.validity) {
-        const m = await client.fetchOne(String(candidate.uid), { headers: REPLY_HEADER_FIELDS }, { uid: true });
-        if (m && m.uid === candidate.uid && m.headers !== undefined) headers = parseHeaderBlock(m.headers);
-      }
-    } catch {
-      /* En-têtes indisponibles : le rattachement se tente quand même par objet/In-Reply-To seuls. */
+  if (!hit) return null;
+  let headers: ReplyHeaders | null = null;
+  try {
+    const mailbox = await client.mailboxOpen(hit.folder, { readOnly: true });
+    if (mailbox.uidValidity.toString() === hit.validity) {
+      const m = await client.fetchOne(String(hit.uid), { headers: REPLY_HEADER_FIELDS }, { uid: true });
+      if (m && m.uid === hit.uid && m.headers !== undefined) headers = parseHeaderBlock(m.headers);
     }
-    const matched = findLetterMatch(senderHost, candidate.subject, candidate.inReplyTo, headers?.references ?? null, [target]);
-    if (!matched) continue;
-    try {
-      const mailbox = await client.mailboxOpen(candidate.folder, { readOnly: true });
-      if (mailbox.uidValidity.toString() !== candidate.validity) continue;
-      const m = await client.fetchOne(String(candidate.uid), { source: { maxLength: REPLY_SOURCE_MAX_BYTES } }, { uid: true });
-      if (!m || m.uid !== candidate.uid || !m.source) continue;
-      const text = (await extractText(m.source, REPLY_TEXT_MAX_LENGTH)) ?? "";
-      return { fromDomain: senderHost, subject: candidate.subject, receivedAt: candidate.receivedAt, text, authenticationResults: headers?.authenticationResults ?? null };
-    } catch {
-      continue;
-    }
+  } catch {
+    /* En-têtes indisponibles : le message reste rendu, `authentication_results` à `null`. */
   }
-  return null;
+  try {
+    const mailbox = await client.mailboxOpen(hit.folder, { readOnly: true });
+    if (mailbox.uidValidity.toString() !== hit.validity) return null;
+    const m = await client.fetchOne(String(hit.uid), { source: { maxLength: REPLY_SOURCE_MAX_BYTES } }, { uid: true });
+    if (!m || m.uid !== hit.uid || !m.source) return null;
+    const text = (await extractText(m.source, REPLY_TEXT_MAX_LENGTH)) ?? "";
+    return { fromDomain: target.domain, subject: hit.subject, receivedAt: target.receivedAt, text, authenticationResults: headers?.authenticationResults ?? null };
+  } catch {
+    return null;
+  }
 }
 
 interface AdminLettersDeps {
@@ -325,32 +316,31 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
   });
 
   /**
-   * GET /:id/reply (piste R du plan du 07.10.2026) : relit le message rattaché à CETTE lettre dans
-   * la boîte `contact@` (lecture seule) et le rend tel quel — jamais stocké ni journalisé, ni le
-   * texte ni l'adresse ni l'objet (seulement un code fermé en cas d'erreur, plus bas). 404 si la
-   * lettre est inconnue ou n'a pas de réponse rattachée (`reply_at` NULL, posé par `mail-watch.ts`) ;
-   * 404 `reply_not_found` si la relecture en direct ne trouve aucun message du domaine de la lettre
-   * rattaché à elle (règle exacte de `findLetterMatch`, importée de `mail-watch.ts`, jamais
-   * recalculée ici) ; 503 si la boîte n'est pas connectée ; 502 pour toute autre erreur IMAP.
+   * GET /:id/reply (piste R du plan du 07.10.2026, resserré après la relecture de sécurité du
+   * 07.10.2026) : relit EXACTEMENT le message déjà rattaché à CETTE lettre (même hôte expéditeur
+   * strict que `reply_from`, même date reçue que `reply_at`) dans la boîte `contact@` (lecture
+   * seule) et le rend tel quel — jamais stocké ni journalisé, ni le texte ni l'adresse ni l'objet
+   * (seulement un code fermé en cas d'erreur, plus bas). 404 si la lettre est inconnue ou n'a pas de
+   * réponse rattachée (`reply_at`/`reply_from` NULL, posés par `mail-watch.ts`) ; 404
+   * `reply_not_found` si la relecture en direct ne retrouve pas EXACTEMENT ce message (jamais un
+   * autre message, même du même domaine, même plus récent, même avec un objet proche — y compris un
+   * rattachement posé à la main par `POST /:id/reply` sans message réel derrière) ; 503 si la boîte
+   * n'est pas connectée ; 502 pour toute autre erreur IMAP.
    */
   route.get("/:id/reply", async (c) => {
     const id = c.req.param("id");
     const database = db();
     const letter = database
-      .prepare("SELECT id, to_address, cc, subject, resend_id, sent_at, attempted_at, reply_at FROM institutional_letters WHERE id = ?")
+      .prepare("SELECT id, reply_at, reply_from, reply_kind, sent_at, attempted_at FROM institutional_letters WHERE id = ?")
       .get(id) as
-      | { id: string; to_address: string; cc: string | null; subject: string; resend_id: string | null; sent_at: number | null; attempted_at: number | null; reply_at: number | null }
+      | { id: string; reply_at: number | null; reply_from: string | null; reply_kind: string | null; sent_at: number | null; attempted_at: number | null }
       | undefined;
-    if (!letter || letter.reply_at === null) return c.json({ error: "not_found" }, 404);
+    if (!letter || letter.reply_at === null || letter.reply_from === null) return c.json({ error: "not_found" }, 404);
 
-    const target: LetterMatchTarget = {
-      id: letter.id,
-      kind: "letter",
-      parentId: null,
-      domains: [...new Set([domainOf(letter.to_address), ...(letter.cc ? [domainOf(letter.cc)] : [])])],
-      subject: letter.subject,
-      resendId: letter.resend_id,
-      sentAt: letter.sent_at ?? letter.attempted_at ?? 0,
+    const target: ReplyTarget = {
+      domain: letter.reply_from,
+      receivedAt: letter.reply_at,
+      since: letter.sent_at ?? letter.attempted_at ?? letter.reply_at,
     };
 
     let auth: { user: string; pass: string } | null;
@@ -362,7 +352,7 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
     if (!auth) return c.json({ error: "mailbox_not_configured" }, 503);
 
     try {
-      const found = await imap(auth, (client) => findLetterReply(client, target, now()));
+      const found = await imap(auth, (client) => findLetterReply(client, target));
       if (!found) return c.json({ error: "reply_not_found" }, 404);
       return c.json({
         letter_id: letter.id,
@@ -371,6 +361,7 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
         date: new Date(found.receivedAt).toISOString(),
         text: found.text,
         authentication_results: found.authenticationResults,
+        reply_kind: letter.reply_kind,
       });
     } catch {
       return c.json({ error: "mailbox_unavailable" }, 502);

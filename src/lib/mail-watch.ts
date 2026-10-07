@@ -97,10 +97,8 @@ export type ReplyHeaders = {
 const EMPTY_REPLY_HEADERS: ReplyHeaders = { references: null, autoSubmitted: null, autoreplyFlag: false, precedence: null, authenticationResults: null };
 /** Lettre `sent`, ou `failed` avec un essai réel, candidate au rattachement (tâche 3) — quel que soit
  * l'état de sa réponse (correction finale du 06.10) : la date « effective » (`sentAt`) est `sent_at`,
- * ou `attempted_at` à défaut (une lettre `failed` a pu malgré tout être reçue, issue incertaine).
- * Exportée pour `admin-letters.ts` (piste R, 07.10.2026, `GET /:id/reply`) : même forme pour
- * construire un unique « target » (la lettre demandée) et réutiliser `findLetterMatch` tel quel. */
-export type LetterMatchTarget = { id: string; kind: LetterKind; parentId: string | null; domains: string[]; subject: string; resendId: string | null; sentAt: number };
+ * ou `attempted_at` à défaut (une lettre `failed` a pu malgré tout être reçue, issue incertaine). */
+type LetterMatchTarget = { id: string; kind: LetterKind; parentId: string | null; domains: string[]; subject: string; resendId: string | null; sentAt: number };
 /** Rattachement trouvé pour un message : la lettre D'ORIGINE (jamais une relance) à mettre à jour. */
 type LetterMatch = { targetId: string; subject: string; sentAt: number; replyKind: ReplyKind };
 export type MailWatchCandidate = {
@@ -547,9 +545,8 @@ function pendingLetterDomains(targets: readonly LetterMatchTarget[], now: number
   return [...new Set(targets.filter(t => t.sentAt >= cutoff).flatMap(t => t.domains))];
 }
 /** Lettre (ou relance) dont le domaine ET (l'objet ou l'identifiant Resend dans l'en-tête) correspondent ;
- * la plus récemment envoyée (ou tentée) si plusieurs conviennent. Exportée pour `admin-letters.ts`
- * (piste R, 07.10.2026) : même règle exacte de rattachement, jamais recalculée ailleurs. */
-export function findLetterMatch(senderHost: string, subject: string, inReplyTo: string | null, references: string | null, targets: readonly LetterMatchTarget[]): LetterMatchTarget | null {
+ * la plus récemment envoyée (ou tentée) si plusieurs conviennent. */
+function findLetterMatch(senderHost: string, subject: string, inReplyTo: string | null, references: string | null, targets: readonly LetterMatchTarget[]): LetterMatchTarget | null {
   const sameDomain = targets.filter(t => t.domains.some(d => domainsRelated(senderHost, d)));
   if (!sameDomain.length) return null;
   const headerBlob = `${inReplyTo ?? ''} ${references ?? ''}`.toLowerCase();
