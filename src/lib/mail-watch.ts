@@ -97,8 +97,10 @@ export type ReplyHeaders = {
 const EMPTY_REPLY_HEADERS: ReplyHeaders = { references: null, autoSubmitted: null, autoreplyFlag: false, precedence: null, authenticationResults: null };
 /** Lettre `sent`, ou `failed` avec un essai réel, candidate au rattachement (tâche 3) — quel que soit
  * l'état de sa réponse (correction finale du 06.10) : la date « effective » (`sentAt`) est `sent_at`,
- * ou `attempted_at` à défaut (une lettre `failed` a pu malgré tout être reçue, issue incertaine). */
-type LetterMatchTarget = { id: string; kind: LetterKind; parentId: string | null; domains: string[]; subject: string; resendId: string | null; sentAt: number };
+ * ou `attempted_at` à défaut (une lettre `failed` a pu malgré tout être reçue, issue incertaine).
+ * Exportée pour `admin-letters.ts` (piste R, 07.10.2026, `GET /:id/reply`) : même forme pour
+ * construire un unique « target » (la lettre demandée) et réutiliser `findLetterMatch` tel quel. */
+export type LetterMatchTarget = { id: string; kind: LetterKind; parentId: string | null; domains: string[]; subject: string; resendId: string | null; sentAt: number };
 /** Rattachement trouvé pour un message : la lettre D'ORIGINE (jamais une relance) à mettre à jour. */
 type LetterMatch = { targetId: string; subject: string; sentAt: number; replyKind: ReplyKind };
 export type MailWatchCandidate = {
@@ -160,11 +162,14 @@ const clip = (text: string, max: number) => { const chars = Array.from(text); re
 const swissTime = (time: number) => new Intl.DateTimeFormat('fr-CH', { timeZone: 'Europe/Zurich', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(time);
 const fingerprint = (key: string) => createHash('sha256').update(key).digest('hex').slice(0, 32);
 
-/** Début du texte brut (partie text/plain, sinon HTML réduit en texte), sans la citation de notre lettre. */
-export async function extractText(source: Buffer): Promise<string | null> {
+/** Début du texte brut (partie text/plain, sinon HTML réduit en texte), sans la citation de notre lettre.
+ * `maxLength` (défaut `EXTRACT_LENGTH`, comportement inchangé pour les appels existants) : longueur
+ * maximale en points de code, ajouté pour `admin-letters.ts` (piste R, 07.10.2026), qui a besoin d'un
+ * texte bien plus long (20 000 caractères) que l'extrait d'alerte. */
+export async function extractText(source: Buffer, maxLength: number = EXTRACT_LENGTH): Promise<string | null> {
   const parsed = await simpleParser(source, { skipImageLinks: true, skipTextToHtml: true, maxHtmlLengthToParse: 500_000 });
   const text = compact(currentMessage(parsed.text ?? ''));
-  return text ? clip(text, EXTRACT_LENGTH) : null;
+  return text ? clip(text, maxLength) : null;
 }
 
 export function alertText(message: Pick<MailWatchCandidate, 'domain' | 'fromName' | 'fromAddress' | 'subject' | 'receivedAt' | 'extract'> & { fromLetterDomain?: boolean }): string {
@@ -264,7 +269,9 @@ function subjectMatches(letterSubject: string, receivedSubject: string): boolean
  * Ne garde que la PREMIÈRE occurrence de chaque nom (`if (!map.has(name))`) : un serveur receveur
  * ajoute son propre `Authentication-Results` tout en haut ; une occurrence plus bas peut être forgée
  * par l'expéditeur lui-même et ne doit jamais être prise pour l'évaluation du serveur receveur. */
-function parseHeaderBlock(buf: Buffer): ReplyHeaders {
+/** Exportée pour `admin-letters.ts` (piste R, 07.10.2026) : même analyse des en-têtes (repli des lignes
+ * pliées, PREMIÈRE occurrence seulement de chaque nom — une contrefaçon plus bas est ignorée). */
+export function parseHeaderBlock(buf: Buffer): ReplyHeaders {
   const unfolded = buf.toString('utf8').replace(/\r?\n[ \t]+/g, ' ');
   const map = new Map<string, string>();
   for (const line of unfolded.split(/\r?\n/)) {
@@ -540,8 +547,9 @@ function pendingLetterDomains(targets: readonly LetterMatchTarget[], now: number
   return [...new Set(targets.filter(t => t.sentAt >= cutoff).flatMap(t => t.domains))];
 }
 /** Lettre (ou relance) dont le domaine ET (l'objet ou l'identifiant Resend dans l'en-tête) correspondent ;
- * la plus récemment envoyée (ou tentée) si plusieurs conviennent. */
-function findLetterMatch(senderHost: string, subject: string, inReplyTo: string | null, references: string | null, targets: readonly LetterMatchTarget[]): LetterMatchTarget | null {
+ * la plus récemment envoyée (ou tentée) si plusieurs conviennent. Exportée pour `admin-letters.ts`
+ * (piste R, 07.10.2026) : même règle exacte de rattachement, jamais recalculée ailleurs. */
+export function findLetterMatch(senderHost: string, subject: string, inReplyTo: string | null, references: string | null, targets: readonly LetterMatchTarget[]): LetterMatchTarget | null {
   const sameDomain = targets.filter(t => t.domains.some(d => domainsRelated(senderHost, d)));
   if (!sameDomain.length) return null;
   const headerBlob = `${inReplyTo ?? ''} ${references ?? ''}`.toLowerCase();
