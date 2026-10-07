@@ -16,7 +16,10 @@ type Github = { workflows: Record<string, string>; runs: Record<string, 'success
 type Finma = { html: string; status: number | null };
 type Telegram = { calls: Array<{ chat_id: string; text: string }>; status: number; ok: boolean };
 
-const activeAll = (): Record<string, string> => Object.fromEntries(SCHEDULED.map(f => [f, 'active']));
+// Collectes ajoutées le 06-07.10.2026 : présentes et actives dans le GitHub simulé (comme en production),
+// pour que la veille puisse les suivre sans changer les cas ci-dessous.
+const ADDED_COLLECTIONS = ['refresh-localities.yml', 'refresh-streets.yml', 'refresh-finma-seats.yml', 'refresh-bfe-pv.yml', 'prospect-sources.yml'];
+const activeAll = (): Record<string, string> => Object.fromEntries([...SCHEDULED, ...ADDED_COLLECTIONS].map(f => [f, 'active']));
 const html = (links: string[] = ['/documents/membres-oar.xlsx']) => `<html><body>${links.map(l => `<a href="${l}">x</a>`).join('')}</body></html>`;
 
 /** Fetch simulé : routeur par URL, aucun accès réseau réel, une Response neuve à chaque appel. */
