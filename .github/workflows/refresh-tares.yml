@@ -21,6 +21,8 @@ jobs:
   refresh-and-publish:
     if: ${{ github.event_name == 'workflow_dispatch' || vars.TARES_CRON_ENABLED == 'true' }}
     runs-on: ubuntu-latest
+    # Secrets réservés à la branche principale (tâche osd.T17, 07.10.2026).
+    environment: collecte
     timeout-minutes: 30
     steps:
       - name: Choisir le passage
