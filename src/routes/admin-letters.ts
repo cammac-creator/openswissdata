@@ -10,7 +10,14 @@ import type Database from "better-sqlite3";
 import type { ImapFlow } from "imapflow";
 import { getDb } from "../lib/db.js";
 import { constantTimeEqual } from "../lib/tokens.js";
-import { isAllowedRecipient, scheduleSlot, LETTER_STATUSES } from "../lib/letters.js";
+import {
+  isAllowedRecipient,
+  isLicenceRequestPurpose,
+  scheduleSlot,
+  LETTER_STATUSES,
+  LICENCE_REQUEST_DEDUP_DAYS,
+  LICENCE_REQUEST_WEEKLY_CAP,
+} from "../lib/letters.js";
 import { readLettersPause, writeLettersPause } from "../lib/letters-sender.js";
 import { connection, imap } from "./crm-mail.js";
 import { extractText, parseHeaderBlock, type ReplyHeaders } from "../lib/mail-watch.js";
@@ -53,6 +60,7 @@ const LETTER_LIST_COLUMNS =
 // Statuts qui occupent encore un créneau : comptent pour le plafond journalier
 // et l'écart de 12 min. `cancelled`/`failed` libèrent leur créneau.
 const OCCUPYING_STATUSES = "('queued','sending','sent')";
+const DAY_MS = 86_400_000;
 
 // `GET /:id/reply` (piste R du plan du 07.10.2026, resserré après la relecture de sécurité du
 // 07.10.2026) : relecture à la demande du message déjà rattaché par `mail-watch.ts` à UNE lettre —
@@ -173,7 +181,9 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
    * POST / — dépose une lettre, planifiée par `scheduleSlot` (jours ouvrés,
    * 09:05–17:30 Zurich, minute non ronde, écart de 12 min, 5 lettres par
    * jour ouvré au plus). Reste `queued` : l'expéditeur périodique (tâche 2,
-   * pas encore démarré) ne tourne pas ici.
+   * pas encore démarré) ne tourne pas ici. Motif `demande-licence:` (08.10.2026) :
+   * 409 `duplicate_purpose` si le même motif a été déposé depuis moins de 120 jours,
+   * 429 `weekly_cap_reached` au-delà de 3 nouvelles demandes de licence par 7 jours.
    */
   route.post("/", async (c) => {
     const parsed = CreateLetterSchema.safeParse(
@@ -197,7 +207,26 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
     // Lecture des créneaux occupés, calcul du créneau et insertion dans une
     // seule transaction IMMEDIATE : deux dépôts concurrents ne peuvent pas
     // choisir le même créneau (pas d'`await` entre lecture et écriture).
-    const depose = database.transaction(() => {
+    const depose = database.transaction((): { scheduledAt: number } | { error: "duplicate_purpose" | "weekly_cap_reached" } => {
+      // Demandes de licence (plan du 08.10.2026) : contrôlées dans la MÊME transaction que l'insertion,
+      // pour que deux dépôts concurrents ne passent jamais tous les deux. Une lettre `cancelled` ne
+      // bloque ni ne compte (annulée avant tout envoi) ; une `failed` bloque et compte, car son issue
+      // peut être inconnue (Resend a pu la transmettre). Comparaison en JavaScript, sans tenir compte
+      // de la casse (le `lower()` de SQLite ignore les lettres accentuées).
+      if (isLicenceRequestPurpose(purpose)) {
+        const recent = database
+          .prepare(
+            `SELECT purpose, created_at FROM institutional_letters
+             WHERE kind = 'letter' AND status != 'cancelled' AND created_at > ?`,
+          )
+          .all(createdAt - LICENCE_REQUEST_DEDUP_DAYS * DAY_MS) as Array<{ purpose: string; created_at: number }>;
+        const wanted = purpose.toLowerCase();
+        if (recent.some((r) => r.purpose.toLowerCase() === wanted)) return { error: "duplicate_purpose" };
+        const lastWeek = recent.filter(
+          (r) => r.created_at > createdAt - 7 * DAY_MS && isLicenceRequestPurpose(r.purpose),
+        ).length;
+        if (lastWeek >= LICENCE_REQUEST_WEEKLY_CAP) return { error: "weekly_cap_reached" };
+      }
       // `scheduled_at` des lettres qui occupent encore un créneau, PLUS `attempted_at` des lettres
       // `failed` (correction B, 06.10, cf. letters-sender.ts) : une lettre tentée puis échouée a
       // consommé une des cinq places du jour où elle a été tentée, même si elle n'occupe plus de
@@ -234,11 +263,14 @@ export function createAdminLettersRoute(deps: Partial<AdminLettersDeps> = {}): H
           scheduled_at: scheduledAt,
           created_at: createdAt,
         });
-      return scheduledAt;
+      return { scheduledAt };
     });
 
-    const scheduledAt = depose.immediate();
-    return c.json({ id, scheduled_at: scheduledAt });
+    const outcome = depose.immediate();
+    if ("error" in outcome) {
+      return c.json({ error: outcome.error }, outcome.error === "duplicate_purpose" ? 409 : 429);
+    }
+    return c.json({ id, scheduled_at: outcome.scheduledAt });
   });
 
   /**

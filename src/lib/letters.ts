@@ -4,12 +4,52 @@
 // calcul, testable sans horloge système ni réseau (voir plan du 06.10.2026,
 // tâche 1 : « Table, dépôt et lecture »).
 
+// Administrations cantonales (décision de Claude-Alain du 08.10.2026, plan « demandes aux
+// distributeurs officiels ») : seulement les domaines qu'un canton utilise réellement dans les points
+// de contact de ses jeux sur opendata.swiss ET vérifiés sur son site officiel le 08.10.2026 (preuves
+// dans la fiche de chantier CHANTIER-20261008-094000). `lustat.ch` = LUSTAT Statistik Luzern, office
+// cantonal lié depuis lu.ch ; `bl.ch` = Bâle-Campagne (redirige vers baselland.ch, mêmes serveurs de
+// noms). Jamais une commune, une entreprise publique ni un institut de recherche ; un canton absent
+// des points de contact (OW, NW, AR, AI, VD, NE au 08.10.2026) s'ajoute par un lot relu, preuve à l'appui.
 export const ALLOWED_RECIPIENT_DOMAINS = Object.freeze([
   "admin.ch",
   "finma.ch",
   "un.org",
   "gleif.org",
+  "ag.ch",
+  "be.ch",
+  "bl.ch",
+  "bs.ch",
+  "fr.ch",
+  "ge.ch",
+  "gl.ch",
+  "gr.ch",
+  "jura.ch",
+  "lu.ch",
+  "lustat.ch",
+  "sg.ch",
+  "sh.ch",
+  "so.ch",
+  "sz.ch",
+  "tg.ch",
+  "ti.ch",
+  "ur.ch",
+  "vs.ch",
+  "zg.ch",
+  "zh.ch",
 ]) as readonly string[];
+
+// Demandes de licence aux distributeurs officiels (plan du 08.10.2026) : motif réservé, comparé sans
+// tenir compte de la casse. Le serveur refuse un second dépôt pour le même motif pendant
+// `LICENCE_REQUEST_DEDUP_DAYS` et plus de `LICENCE_REQUEST_WEEKLY_CAP` nouveaux éditeurs par 7 jours.
+export const LICENCE_REQUEST_PURPOSE_PREFIX = "demande-licence:";
+export const LICENCE_REQUEST_DEDUP_DAYS = 120;
+export const LICENCE_REQUEST_WEEKLY_CAP = 3;
+
+/** Vrai si le motif est celui d'une demande de licence (préfixe réservé, casse indifférente). */
+export function isLicenceRequestPurpose(purpose: string): boolean {
+  return purpose.toLowerCase().startsWith(LICENCE_REQUEST_PURPOSE_PREFIX);
+}
 
 export const LETTER_KINDS = ["letter", "reminder"] as const;
 export type LetterKind = (typeof LETTER_KINDS)[number];
