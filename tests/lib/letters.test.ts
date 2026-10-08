@@ -47,7 +47,13 @@ function decodeZurich(ms: number): { year: number; month: number; day: number; h
 
 describe("isAllowedRecipient", () => {
   it("accepte les domaines de la liste fermée et leurs sous-domaines", () => {
-    expect(ALLOWED_RECIPIENT_DOMAINS).toEqual(["admin.ch", "finma.ch", "un.org", "gleif.org"]);
+    expect(ALLOWED_RECIPIENT_DOMAINS).toEqual([
+      "admin.ch", "finma.ch", "un.org", "gleif.org",
+      // Administrations cantonales (décision du 08.10.2026) : domaines vus dans les points de contact
+      // d'opendata.swiss ET vérifiés sur le site officiel du canton.
+      "ag.ch", "be.ch", "bl.ch", "bs.ch", "fr.ch", "ge.ch", "gl.ch", "gr.ch", "jura.ch", "lu.ch",
+      "lustat.ch", "sg.ch", "sh.ch", "so.ch", "sz.ch", "tg.ch", "ti.ch", "ur.ch", "vs.ch", "zg.ch", "zh.ch",
+    ]);
     expect(isAllowedRecipient("boite-fictive@admin.ch")).toBe(true);
     expect(isAllowedRecipient("boite-fictive@seco.admin.ch")).toBe(true);
     expect(isAllowedRecipient("boite-fictive@fosc.seco.admin.ch")).toBe(true); // sous-sous-domaine
