@@ -69,9 +69,11 @@ jobs:
             exit 1
           fi
           # Relecture de sécurité du 08.10.2026 : le script exécuté est une copie FRAÎCHE tirée du commit
-          # (jamais le fichier du disque, qu'une dépendance installée plus haut aurait pu réécrire), dans
-          # un environnement VIDÉ (`env -i` : aucune variable posée par une étape précédente, comme
-          # NODE_OPTIONS, n'atteint le processus qui tient le secret).
+          # (pas le fichier du disque, qu'une dépendance installée plus haut aurait pu réécrire), dans un
+          # environnement VIDÉ (`env -i` : NODE_OPTIONS ou une variable posée par une étape précédente
+          # n'atteignent pas Node). Ce n'est PAS une isolation complète : ce shell détient le secret,
+          # le secret passe un instant dans les arguments de `env`, et `node`/`git` sont trouvés par le
+          # PATH du runner. Même exposition résiduelle que `refresh-finma.yml` (secret confié à npm).
           git show "${{ github.sha }}:scripts/deposit-requests.mjs" > "$RUNNER_TEMP/deposit-requests.mjs"
           NODE_BIN="$(command -v node)"
           set +e

@@ -10,7 +10,8 @@
 // Variable : ADMIN_SECRET (obligatoire). L'adresse du serveur est FIGÉE ici (relecture de sécurité du
 // 08.10.2026) : aucune variable d'environnement ne peut la détourner, et aucun appel ne suit une
 // redirection (le secret ne part jamais vers une autre adresse).
-// Le secret part dans un en-tête, jamais dans une adresse, un argument ou un journal. Le journal
+// Le secret part dans un en-tête HTTP, jamais dans une adresse ni un journal (le workflow le transmet
+// à Node par `env -i`, donc un instant dans les arguments de `env`, voir prospect-requests.yml). Le journal
 // (dépôt GitHub public) ne montre que l'éditeur et l'issue de chaque dépôt, jamais une adresse.
 import { readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
