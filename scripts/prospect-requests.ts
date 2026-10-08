@@ -47,7 +47,9 @@ const CKAN_PACKAGE_SHOW_URL = "https://ckan.opendata.swiss/api/3/action/package_
 const DEFAULT_USER_AGENT = "OpenSwissData prospection";
 const DEFAULT_DELAY_MS = 400;
 const DEFAULT_TIMEOUT_MS = 20_000;
-const MAX_CSV_HEADERS_PER_DATASET = 3;
+// Tous les CSV d'un jeu sont lus (jamais un jeu lu à moitié) ; au-delà de ce nombre, le jeu est
+// écarté (`trop_de_csv`) plutôt que partiellement vérifié (relecture du 08.10.2026).
+const MAX_CSV_PER_DATASET = 6;
 
 /** Motifs de l'état de prospection qui peuvent donner lieu à une demande (jamais CC-BY-SA, jamais un
  *  jeu écarté pour des personnes). */
@@ -161,6 +163,27 @@ export const CANTONAL_LANGUAGES: Readonly<Record<string, LetterLang>> = Object.f
   "vs.ch": "fr", "zg.ch": "de", "zh.ch": "de",
 });
 
+/** Destinataire lié au niveau de l'éditeur (relecture de sécurité du 08.10.2026) : admin.ch pour la
+ *  Confédération, un domaine cantonal autorisé pour un canton — jamais l'un pour l'autre. */
+export function recipientMatchesLevel(level: string, address: string): boolean {
+  const host = address.slice(address.lastIndexOf("@") + 1).toLowerCase();
+  const within = (d: string) => host === d || host.endsWith(`.${d}`);
+  if (level === "confederation") return within("admin.ch");
+  if (level === "canton") return Object.keys(CANTONAL_LANGUAGES).some(within);
+  return false;
+}
+
+/** Offices déjà en correspondance avec OpenSwissData sur leurs propres données (lettres du 30.09 et
+ *  du 06.10 : OFS, SECO, OFRC, FINMA) : jamais sollicités par cette tâche, pour ne pas mêler les sujets. */
+const EN_CORRESPONDANCE = ["bfs.admin.ch", "seco.admin.ch", "bj.admin.ch", "finma.ch"];
+
+function inCorrespondence(address: string): boolean {
+  const host = address.slice(address.lastIndexOf("@") + 1).toLowerCase();
+  return EN_CORRESPONDANCE.some((d) => host === d || host.endsWith(`.${d}`));
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
 /** Français pour la Confédération (comme les lettres du 06.10) ; langue du canton sinon ; `null`
  *  si le domaine du destinataire n'est pas un domaine cantonal connu (le jeu est alors écarté). */
 export function letterLanguage(level: string, recipient: string): LetterLang | null {
@@ -234,7 +257,7 @@ function bodyFor(lang: LetterLang, orgTitle: string, items: string, single: bool
         ? "Sie veröffentlichen auf opendata.swiss den folgenden Datensatz, den wir gerne in diesen Dienst aufnehmen würden:"
         : "Sie veröffentlichen auf opendata.swiss die folgenden Datensätze, die wir gerne in diesen Dienst aufnehmen würden:",
       items,
-      `Könnten Sie ${single ? "diesen Datensatz" : "diese Datensätze"} auf opendata.swiss unter einer Lizenz veröffentlichen, die auch die kommerzielle Nutzung erlaubt, zum Beispiel «terms_by» (freie Nutzung, Quellenangabe ist Pflicht) oder «terms_open» (freie Nutzung)? Wir prüfen den Katalog jede Woche: Sobald die Lizenz dort geändert ist, übernehmen wir die Daten mit ${orgTitle} als Quelle und dem Datum des Auszugs. Bis dahin übernehmen wir sie nicht.`,
+      `Könnten Sie ${single ? "diesen Datensatz" : "diese Datensätze"} auf opendata.swiss unter einer Lizenz veröffentlichen, die auch die kommerzielle Nutzung erlaubt, zum Beispiel «terms_by» (freie Nutzung, Quellenangabe ist Pflicht) oder «terms_open» (freie Nutzung)? Wir prüfen den Katalog jede Woche: Sobald die Lizenz dort geändert ist, können wir die Daten mit ${orgTitle} als Quelle und dem Datum des Auszugs übernehmen. Bis dahin übernehmen wir sie nicht.`,
       "Falls eine solche Veröffentlichung nicht möglich ist, genügt uns eine kurze Antwort.",
       "Wir würden die Integrität der Daten und die Quellenangabe respektieren und keine Verbindung zu Ihrer Organisation behaupten.",
       "Freundliche Grüsse",
@@ -249,7 +272,7 @@ function bodyFor(lang: LetterLang, orgTitle: string, items: string, single: bool
         ? "Pubblicate su opendata.swiss il seguente set di dati, che vorremmo riprendere in questo servizio:"
         : "Pubblicate su opendata.swiss i seguenti set di dati, che vorremmo riprendere in questo servizio:",
       items,
-      `Potreste ${single ? "pubblicarlo" : "pubblicarli"} su opendata.swiss con una licenza che consenta anche l'uso commerciale, ad esempio «terms_by» (libero utilizzo, obbligo di indicare la fonte) o «terms_open» (libero utilizzo)? Consultiamo il catalogo ogni settimana: non appena la licenza sarà modificata, riprenderemo questi dati citando ${orgTitle} come fonte, con la data dell'estratto. Fino ad allora non li riprendiamo.`,
+      `Potreste ${single ? "pubblicarlo" : "pubblicarli"} su opendata.swiss con una licenza che consenta anche l'uso commerciale, ad esempio «terms_by» (libero utilizzo, obbligo di indicare la fonte) o «terms_open» (libero utilizzo)? Consultiamo il catalogo ogni settimana: non appena la licenza sarà modificata, potremo riprendere questi dati citando ${orgTitle} come fonte, con la data dell'estratto. Fino ad allora non li riprendiamo.`,
       "Se una tale pubblicazione non è possibile, ci basta una breve risposta.",
       "Rispetteremmo l'integrità dei dati e l'indicazione della fonte, senza dichiarare alcun legame con la vostra organizzazione.",
       "Cordiali saluti",
@@ -263,7 +286,7 @@ function bodyFor(lang: LetterLang, orgTitle: string, items: string, single: bool
       ? "Vous publiez sur opendata.swiss le jeu de données suivant, que nous aimerions reprendre dans ce service :"
       : "Vous publiez sur opendata.swiss les jeux de données suivants, que nous aimerions reprendre dans ce service :",
     items,
-    `Pourriez-vous ${single ? "le" : "les"} publier sur opendata.swiss sous une licence qui autorise aussi l'utilisation commerciale, par exemple « terms_by » (utilisation libre, source à indiquer) ou « terms_open » (utilisation libre) ? Nous consultons le catalogue chaque semaine : dès que la licence y sera modifiée, nous reprendrons ces données en citant ${orgTitle} comme source, avec la date de l'extrait. D'ici là, nous ne les reprenons pas.`,
+    `Pourriez-vous ${single ? "le" : "les"} publier sur opendata.swiss sous une licence qui autorise aussi l'utilisation commerciale, par exemple « terms_by » (utilisation libre, source à indiquer) ou « terms_open » (utilisation libre) ? Nous consultons le catalogue chaque semaine : dès que la licence y sera modifiée, nous pourrons reprendre ces données en citant ${orgTitle} comme source, avec la date de l'extrait. D'ici là, nous ne les reprenons pas.`,
     "Si une telle publication n'est pas possible, une courte réponse nous suffit.",
     "Nous respecterions l'intégrité des données et l'indication de la source, sans laisser entendre un lien avec votre organisation.",
     "Meilleures salutations,",
@@ -274,6 +297,7 @@ function bodyFor(lang: LetterLang, orgTitle: string, items: string, single: bool
 /** Une lettre par éditeur, au plus `MAX_DATASETS_PER_LETTER` jeux, liens dans la langue de la lettre. */
 export function buildLetter(org: RequestOrg, datasets: readonly RequestDataset[], recipient: string, lang: LetterLang): RequestLetter {
   const kept = datasets.slice(0, MAX_DATASETS_PER_LETTER);
+  for (const d of kept) if (!UUID_RE.test(d.id)) throw new Error(`identifiant de jeu qui n'est pas un UUID (${org.name})`);
   const orgTitle = clip(cleanOrgTitle(localized(org.title, lang) || org.name), MAX_ORG_TITLE_CHARS);
   const items = kept
     .map((d) => {
@@ -370,6 +394,7 @@ export async function generateRequests(opts: GenerateOptions): Promise<GenerateR
     await opts.sleepImpl(opts.delayMs);
     const pkg = await fetchPackage(id, opts);
     if (!pkg) { readFailures++; skip("catalogue_illisible"); continue; }
+    if (typeof pkg.id !== "string" || !UUID_RE.test(pkg.id)) { skip("identifiant_invalide"); continue; }
     const level = pkg.organization?.political_level ?? "";
     const orgName = pkg.organization?.name ?? "";
     if (!TARGET_LEVELS.has(level) || !orgName) { skip("niveau"); continue; }
@@ -379,20 +404,25 @@ export async function generateRequests(opts: GenerateOptions): Promise<GenerateR
     if (licenceState === "ouverte") { skip("deja_ouverte"); continue; }
     if (licenceState === "cc_by_sa") { skip("cc_by_sa"); continue; }
     if (detectPersonMarkers(collectSearchableText(pkg)).length > 0) { skip("personnes"); continue; }
-    const recipients = contactEmails(pkg).filter(isAllowedRecipient);
-    if (recipients.length === 0) { skip("destinataire_hors_liste"); continue; }
+    const allowed = contactEmails(pkg).filter((a) => isAllowedRecipient(a) && recipientMatchesLevel(level, a));
+    if (allowed.length === 0) { skip("destinataire_hors_liste"); continue; }
+    const recipients = allowed.filter((a) => !inCorrespondence(a));
+    if (recipients.length === 0) { skip("correspondance_en_cours"); continue; }
 
-    const csv = (pkg.resources ?? []).filter(isCsvResource).slice(0, MAX_CSV_HEADERS_PER_DATASET);
+    // Doute = pas de lettre (plan, point bloquant 1) : CHAQUE CSV du jeu doit être lu et propre. Un
+    // en-tête illisible, une ressource sans adresse ou un CSV au-delà de la limite écartent le jeu.
+    const csv = (pkg.resources ?? []).filter(isCsvResource);
+    if (csv.length === 0) { skip("sans_entete"); continue; }
+    if (csv.length > MAX_CSV_PER_DATASET) { skip("trop_de_csv"); continue; }
     const keys = new Set<string>();
-    let headersRead = 0;
+    let unreadable = false;
     let personColumn = false;
     let individualRows = false;
     for (const r of csv) {
-      if (!r.url) continue;
+      if (!r.url) { unreadable = true; break; }
       await opts.sleepImpl(opts.delayMs);
       const header = await readCsvHeaderPartial(opts.fetchImpl, r.url, opts.userAgent, opts.timeoutMs);
-      if (!header) continue;
-      headersRead++;
+      if (!header) { unreadable = true; break; }
       const columns = splitHeaderColumns(header);
       if (detectPersonColumns(columns).length > 0) { personColumn = true; break; }
       if (detectIndividualRowColumns(columns).length > 0) { individualRows = true; break; }
@@ -400,7 +430,7 @@ export async function generateRequests(opts: GenerateOptions): Promise<GenerateR
     }
     if (personColumn) { skip("colonne_personne"); continue; }
     if (individualRows) { skip("ligne_par_personne_possible"); continue; }
-    if (headersRead === 0) { skip("sans_entete"); continue; }
+    if (unreadable) { skip("sans_entete"); continue; }
     if (keys.size === 0) { skip("sans_cle"); continue; }
 
     eligible.push({
@@ -457,7 +487,7 @@ export async function generateRequests(opts: GenerateOptions): Promise<GenerateR
 export type DemandeStatut = "deposee" | "envoyee" | "echec_envoi" | "annulee" | "licence_ouverte_constatee";
 export interface DemandesEntry { id: string; organisation: string; date: string; statut: DemandeStatut }
 export interface DemandesReport { generated_on: string | null; entries: DemandesEntry[] }
-export type DepositOutcome = "deposee" | "deja_deposee" | "plafond" | "refusee" | "erreur";
+export type DepositOutcome = "deposee" | "deja_deposee" | "destinataire_recent" | "plafond" | "refusee" | "erreur";
 export interface DepositResults {
   deposits: Array<{ organisation: string; purpose: string; outcome: DepositOutcome; http_status: number | null }>;
   statuses: Array<{ purpose: string; status: string; created_at: number }>;

@@ -8,8 +8,11 @@ name: Demandes de licence aux distributeurs officiels (opendata.swiss)
 #      trois lettres (une par éditeur) dans un fichier TEMPORAIRE du runner. Ce fichier contient les
 #      adresses des destinataires : jamais committé, jamais publié en artefact (dépôt public).
 #   2. Déposer : `scripts/deposit-requests.mjs`, Node pur sans dépendance, SEULE étape qui reçoit
-#      ADMIN_SECRET. Le serveur refait tous les contrôles (domaine, doublon 120 jours, 3 éditeurs par
-#      semaine, créneau ouvré) et envoie lui-même aux heures de bureau.
+#      ADMIN_SECRET (copie fraîche tirée du commit, environnement vidé, adresse du serveur figée,
+#      aucune redirection). Elle relit d'abord les lettres du serveur : jamais une demande déjà connue
+#      (même annulée), jamais une adresse sollicitée depuis moins de 30 jours. Le serveur refait ses
+#      contrôles (domaine, doublon 120 jours, 3 éditeurs par semaine, créneau ouvré), envoie lui-même
+#      aux heures de bureau et ne relance jamais une demande de licence.
 #   3. Rapport public (SANS secret) : `docs/data-status/demandes.json` (UUID, éditeur, date, statut),
 #      vérifié puis committé (un push par GITHUB_TOKEN ne relance jamais ci.yml).
 # Un déclenchement manuel est une SIMULATION par défaut : étape 1 seulement, résumé sans adresse.
@@ -65,8 +68,15 @@ jobs:
             echo "::error::ADMIN_SECRET absent de l'environnement collecte : aucun dépôt."
             exit 1
           fi
+          # Relecture de sécurité du 08.10.2026 : le script exécuté est une copie FRAÎCHE tirée du commit
+          # (jamais le fichier du disque, qu'une dépendance installée plus haut aurait pu réécrire), dans
+          # un environnement VIDÉ (`env -i` : aucune variable posée par une étape précédente, comme
+          # NODE_OPTIONS, n'atteint le processus qui tient le secret).
+          git show "${{ github.sha }}:scripts/deposit-requests.mjs" > "$RUNNER_TEMP/deposit-requests.mjs"
+          NODE_BIN="$(command -v node)"
           set +e
-          node scripts/deposit-requests.mjs "$RUNNER_TEMP/demandes-lot.json" "$RUNNER_TEMP/demandes-resultats.json"
+          env -i PATH="$(dirname "$NODE_BIN"):/usr/bin:/bin" ADMIN_SECRET="$ADMIN_SECRET" \
+            "$NODE_BIN" "$RUNNER_TEMP/deposit-requests.mjs" "$RUNNER_TEMP/demandes-lot.json" "$RUNNER_TEMP/demandes-resultats.json"
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
           exit 0
       - name: Échouer si le dépôt n'a produit aucun résultat

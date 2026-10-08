@@ -16,6 +16,7 @@ import type Database from "better-sqlite3";
 import { getDb } from "./db.js";
 import {
   isAllowedRecipient,
+  isLicenceRequestPurpose,
   scheduleSlot,
   isSendableNow,
   businessDaysSince,
@@ -505,10 +506,13 @@ function markRetryQueued(db: Database.Database, id: string, attempts: number): v
  * 06.10 : une réponse `unverified` arrête la relance comme une `human`, puisqu'elle a déjà le bon
  * domaine et le bon objet — seule son authenticité reste à vérifier, pas sa pertinence), et sans
  * relance déjà créée (quel que soit son statut, y compris `cancelled` : jamais de seconde relance).
- * Jamais de relance d'une relance (`kind='letter'` seulement).
+ * Jamais de relance d'une relance (`kind='letter'` seulement), jamais d'une demande de licence.
  */
 function findReminderCandidates(db: Database.Database): InstitutionalLetter[] {
-  return db
+  // Demandes de licence aux distributeurs officiels (relecture de sécurité du 08.10.2026) : jamais de
+  // relance. Le gabarit est en français et partirait même après une lettre allemande ou italienne, ou
+  // après l'ouverture de la licence ; la lettre dit déjà qu'une courte réponse suffit.
+  return (db
     .prepare(
       `SELECT l.* FROM institutional_letters l
        WHERE l.kind='letter' AND l.status='sent' AND l.sent_at IS NOT NULL
@@ -516,7 +520,7 @@ function findReminderCandidates(db: Database.Database): InstitutionalLetter[] {
          AND NOT EXISTS (SELECT 1 FROM institutional_letters r WHERE r.parent_id = l.id AND r.kind='reminder')
        ORDER BY l.sent_at ASC`,
     )
-    .all() as InstitutionalLetter[];
+    .all() as InstitutionalLetter[]).filter((l) => !isLicenceRequestPurpose(l.purpose));
 }
 
 /** Crée UNE relance pour cette lettre, atomiquement (revérifie l'absence de relance dans la transaction). */

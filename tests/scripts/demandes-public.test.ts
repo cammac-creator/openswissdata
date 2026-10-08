@@ -51,6 +51,13 @@ describe(".github/workflows/prospect-requests.yml", () => {
     expect(withSecret[0]).not.toMatch(/npm |npx |tsx/);
   });
 
+  it("l'étape de dépôt exécute une copie fraîche du script tirée du commit, dans un environnement vidé", () => {
+    const step = yml.split(/\n\s+- name: /).find((st) => st.includes("secrets.ADMIN_SECRET"))!;
+    expect(step).toContain('git show "${{ github.sha }}:scripts/deposit-requests.mjs"');
+    expect(step).toMatch(/env -i /);
+    expect(step).not.toMatch(/NODE_OPTIONS=|OSD_API_BASE/);
+  });
+
   it("ne publie aucun artefact (dépôt public) et ne commite que demandes.json", () => {
     expect(yml).not.toContain("upload-artifact");
     const adds = [...yml.matchAll(/git add ([^\n]+)/g)].map((m) => m[1].trim());

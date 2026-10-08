@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { depositRequests, validateLot } from "../../scripts/deposit-requests.mjs";
+import { readFileSync } from "node:fs";
+import { API_BASE, depositRequests, validateLot } from "../../scripts/deposit-requests.mjs";
 
 // Dépôt des demandes de licence (plan du 08.10.2026) : seule étape qui reçoit le secret
 // d'administration. Aucune dépendance, aucun appel réseau réel ici (fetch simulé).
@@ -23,10 +24,10 @@ const lotOf = (...letters: unknown[]) => ({ generated_on: "2026-10-13", letters 
 
 type Reply = { status: number; body?: unknown };
 function server(posts: Reply[], list: Reply = { status: 200, body: { letters: [] } }) {
-  const calls: Array<{ url: string; method: string; headers: Record<string, string>; body: unknown }> = [];
+  const calls: Array<{ url: string; method: string; headers: Record<string, string>; body: unknown; redirect?: string }> = [];
   let i = 0;
   const impl = vi.fn(async (url: string, init: RequestInit = {}) => {
-    calls.push({ url, method: init.method ?? "GET", headers: init.headers as Record<string, string>, body: init.body ? JSON.parse(String(init.body)) : null });
+    calls.push({ url, method: init.method ?? "GET", headers: init.headers as Record<string, string>, body: init.body ? JSON.parse(String(init.body)) : null, redirect: init.redirect });
     const reply = (init.method ?? "GET") === "POST" ? posts[i++] : list;
     if (!reply) throw new Error("appel inattendu");
     return new Response(JSON.stringify(reply.body ?? {}), { status: reply.status });
@@ -89,6 +90,59 @@ describe("depositRequests", () => {
     expect(out.statuses).toEqual([{ purpose: "demande-licence:a", status: "sent", created_at: 5 }]);
     expect(JSON.stringify(out)).not.toContain("@");
     expect(out.failed).toBe(false);
+  });
+
+  it("ne repose jamais une demande déjà connue du serveur, même annulée à la main (décision humaine)", async () => {
+    const list = { status: 200, body: { letters: [
+      { kind: "letter", purpose: "Demande-Licence:A", status: "cancelled", created_at: 5 },
+    ] } };
+    const s = server([{ status: 200, body: { id: "L2", scheduled_at: 1 } }], list);
+    const out = await depositRequests({ lot: lotOf(letter("a"), letter("b")), secret: SECRET, apiBase: API, fetchImpl: s.impl });
+    expect(out.deposits.map((d) => [d.organisation, d.outcome])).toEqual([["a", "deja_deposee"], ["b", "deposee"]]);
+    const posted = s.calls.filter((c) => c.method === "POST").map((c) => (c.body as { purpose: string }).purpose);
+    expect(posted).toEqual(["demande-licence:b"]);
+  });
+
+  it("liste du serveur illisible avant le dépôt : rien n'est posté", async () => {
+    const s = server([{ status: 200 }], { status: 502 });
+    const out = await depositRequests({ lot: lotOf(letter("a")), secret: SECRET, apiBase: API, fetchImpl: s.impl });
+    expect(s.calls.filter((c) => c.method === "POST")).toHaveLength(0);
+    expect(out.deposits.map((d) => d.outcome)).toEqual(["erreur"]);
+    expect(out.failed).toBe(true);
+  });
+
+  it("une adresse qui a reçu une demande de licence depuis moins de 30 jours n'en reçoit pas d'autre (pas un échec)", async () => {
+    const NOW = Date.UTC(2026, 9, 13, 7, 0);
+    const list = { status: 200, body: { letters: [
+      { kind: "letter", purpose: "demande-licence:z", status: "sent", created_at: NOW - 10 * 86_400_000, to_address: "Statistik@A.ch" },
+      { kind: "letter", purpose: "demande-licence:y", status: "sent", created_at: NOW - 31 * 86_400_000, to_address: "statistik@b.ch" },
+      { kind: "letter", purpose: "demande-licence:w", status: "cancelled", created_at: NOW - 86_400_000, to_address: "statistik@c.ch" },
+    ] } };
+    const s = server([{ status: 200, body: { id: "L1" } }, { status: 200, body: { id: "L2" } }], list);
+    const out = await depositRequests({ lot: lotOf(letter("a"), letter("b"), letter("c")), secret: SECRET, apiBase: API, fetchImpl: s.impl, now: () => NOW });
+    expect(out.deposits.map((d) => [d.organisation, d.outcome])).toEqual([["a", "destinataire_recent"], ["b", "deposee"], ["c", "deposee"]]);
+    expect(out.failed).toBe(false);
+    expect(JSON.stringify(out)).not.toContain("@");
+  });
+
+  it("deux lettres du même lot vers la même adresse : seule la première part", async () => {
+    const s = server([{ status: 200, body: { id: "L1" } }]);
+    const out = await depositRequests({ lot: lotOf(letter("a"), letter("b", { to: "statistik@a.ch" })), secret: SECRET, apiBase: API, fetchImpl: s.impl });
+    expect(out.deposits.map((d) => d.outcome)).toEqual(["deposee", "destinataire_recent"]);
+    expect(s.calls.filter((c) => c.method === "POST")).toHaveLength(1);
+  });
+
+  it("aucun appel ne suit une redirection (le secret ne part jamais ailleurs)", async () => {
+    const s = server([{ status: 200, body: { id: "L1" } }]);
+    await depositRequests({ lot: lotOf(letter("a")), secret: SECRET, apiBase: API, fetchImpl: s.impl });
+    expect(s.calls.length).toBeGreaterThan(0);
+    for (const c of s.calls) expect(c.redirect, `${c.method} ${c.url}`).toBe("error");
+  });
+
+  it("l'adresse du serveur est figée dans le script : aucune variable d'environnement ne la change", () => {
+    expect(API_BASE).toBe("https://www.openswissdata.com");
+    const source = readFileSync(new URL("../../scripts/deposit-requests.mjs", import.meta.url), "utf8");
+    expect([...source.matchAll(/process\.env\.([A-Z_]+)/g)].map((m) => m[1])).toEqual(["ADMIN_SECRET"]);
   });
 
   it("le secret n'apparaît jamais dans le résultat ni dans les journaux", async () => {

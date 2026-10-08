@@ -24,9 +24,17 @@ const SHOW = "https://ckan.opendata.swiss/api/3/action/package_show?id=";
 
 type Pkg = Record<string, unknown> & { id: string };
 
-function pkg(id: string, over: Record<string, unknown> = {}): Pkg {
+/** UUID déterministe tiré d'une étiquette courte (le catalogue ne donne que des UUID ; l'ordre des
+ *  étiquettes de même longueur est conservé). */
+function U(tag: string): string {
+  const hex = Buffer.from(tag).toString("hex").padEnd(32, "0").slice(0, 32);
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+function pkg(tag: string, over: Record<string, unknown> = {}): Pkg {
+  const id = tag;
   return {
-    id,
+    id: U(tag),
     name: `slug-${id}`,
     title: { de: `Gemeindefinanzen ${id}`, fr: `Finances communales ${id}` },
     notes: { de: "Budgets der Gemeinden." },
@@ -38,7 +46,8 @@ function pkg(id: string, over: Record<string, unknown> = {}): Pkg {
 }
 
 /** `fetch` simulé : package_show depuis `packages`, en-têtes CSV depuis `headers` (URL → première ligne). */
-function fakeFetch(packages: Record<string, Pkg | null>, headers: Record<string, string | null> = {}) {
+function fakeFetch(packagesByTag: Record<string, Pkg | null>, headers: Record<string, string | null> = {}) {
+  const packages: Record<string, Pkg | null> = Object.fromEntries(Object.entries(packagesByTag).map(([tag, p]) => [U(tag), p]));
   const calls: string[] = [];
   const impl = (async (input: RequestInfo | URL) => {
     const url = String(input);
@@ -58,8 +67,6 @@ function fakeFetch(packages: Record<string, Pkg | null>, headers: Record<string,
 
 const run = (rows: Array<[string, string, string]>, f: ReturnType<typeof fakeFetch>, extra: Partial<Parameters<typeof generateRequests>[0]> = {}) =>
   generateRequests({
-    stateRows: rows,
-    exclusions: new Set(),
     alreadyRequested: new Set(),
     fetchImpl: f.impl,
     sleepImpl: async () => {},
@@ -68,6 +75,9 @@ const run = (rows: Array<[string, string, string]>, f: ReturnType<typeof fakeFet
     userAgent: "OpenSwissData prospection",
     maxOrgs: 3,
     ...extra,
+    // Les étiquettes des tests deviennent des UUID, comme dans l'état réel de la prospection.
+    stateRows: rows.map(([tag, d, motif]) => [U(tag), d, motif] as [string, string, string]),
+    exclusions: new Set([...(extra.exclusions ?? [])].map(U)),
   });
 
 const HEADER_OK = "Jahr;BFS_Nr;Gemeinde;Budget";
@@ -160,6 +170,16 @@ describe("buildLetter : lettre honnête, identité reprise des lettres du 06.10,
     });
   }
 
+  it("ne promet pas une reprise : « pourrons reprendre » / « können … übernehmen » / « potremo riprendere »", () => {
+    expect(buildLetter(org, datasets, "statistik@lustat.ch", "fr").body).toContain("nous pourrons reprendre ces données");
+    expect(buildLetter(org, datasets, "statistik@lustat.ch", "de").body).toContain("können wir die Daten");
+    expect(buildLetter(org, datasets, "statistik@lustat.ch", "it").body).toContain("potremo riprendere questi dati");
+  });
+
+  it("refuse de construire un lien vers un identifiant qui n'est pas un UUID", () => {
+    expect(() => buildLetter(org, [{ ...datasets[0], id: "../../evil" }], "statistik@lustat.ch", "fr")).toThrow(/UUID/);
+  });
+
   it("titre manquant dans la langue de la lettre : repli sur une autre langue, jamais sur le slug", () => {
     const letter = buildLetter(org, datasets, "statistik@lustat.ch", "it");
     expect(letter.body).toContain("Bevölkerungsszenarien");
@@ -215,7 +235,7 @@ describe("generateRequests : seules les cibles sûres deviennent une lettre", ()
     const f = fakeFetch({ a: pkg("a") }, { "https://data.example.ch/a.csv": HEADER_OK });
     const out = await run([["a", "2026-10-07", "licence_non_ouverte"]], f);
     expect(out.letters).toHaveLength(1);
-    expect(out.letters[0]).toMatchObject({ organisation: "lustat", to: "statistik@lustat.ch", lang: "de", purpose: "demande-licence:lustat", dataset_ids: ["a"] });
+    expect(out.letters[0]).toMatchObject({ organisation: "lustat", to: "statistik@lustat.ch", lang: "de", purpose: "demande-licence:lustat", dataset_ids: [U("a")] });
   });
 
   it("ne lit que les motifs de licence de l'état (jamais les candidats ni CC-BY-SA)", async () => {
@@ -238,6 +258,10 @@ describe("generateRequests : seules les cibles sûres deviennent une lettre", ()
     ["une ligne par candidat (élections LUSTAT, sans nom mais reconnaissable)", pkg("x"), { "https://data.example.ch/x.csv": '"jahr";"gnr";"gemeinde";"partei";"partei_kurz";"sex";"kand_status";"gewaehlt";"stand";"record_id"' }, "ligne_par_personne_possible"],
     ["contact hors liste (energiefranken.ch)", pkg("x", { contact_points: [{ email: "info@energiefranken.ch" }] }), { "https://data.example.ch/x.csv": HEADER_OK }, "destinataire_hors_liste"],
     ["aucun contact", pkg("x", { contact_points: [] }), { "https://data.example.ch/x.csv": HEADER_OK }, "destinataire_hors_liste"],
+    ["éditeur cantonal dont le contact est fédéral (destinataire lié au niveau)", pkg("x", { contact_points: [{ email: "data@blv.admin.ch" }] }), { "https://data.example.ch/x.csv": HEADER_OK }, "destinataire_hors_liste"],
+    ["éditeur fédéral dont le contact est cantonal", pkg("x", { organization: { name: "blv", title: "OSAV", political_level: "confederation" }, contact_points: [{ email: "info@zh.ch" }] }), { "https://data.example.ch/x.csv": HEADER_OK }, "destinataire_hors_liste"],
+    ["éditeur déjà en correspondance (SECO, OFRC, FINMA)", pkg("x", { organization: { name: "seco", title: "SECO", political_level: "confederation" }, contact_points: [{ email: "info@seco.admin.ch" }] }), { "https://data.example.ch/x.csv": HEADER_OK }, "correspondance_en_cours"],
+    ["identifiant du jeu qui n'est pas un UUID", pkg("x", { id: "pas-un-uuid" }), { "https://data.example.ch/x.csv": HEADER_OK }, "identifiant_invalide"],
   ];
   for (const [label, p, headers, reason] of skipCases) {
     it(`écarte : ${label} (${reason})`, async () => {
@@ -246,6 +270,43 @@ describe("generateRequests : seules les cibles sûres deviennent une lettre", ()
       expect(out.skipped[reason]).toBe(1);
     });
   }
+
+  it("doute = pas de lettre : un CSV illisible parmi plusieurs écarte le jeu, même si un autre est propre", async () => {
+    const p = pkg("x", { resources: [
+      { format: "CSV", url: "https://data.example.ch/x1.csv", rights: "https://opendata.swiss/terms-of-use#terms_by_ask" },
+      { format: "CSV", url: "https://data.example.ch/x2.csv", rights: "https://opendata.swiss/terms-of-use#terms_by_ask" },
+    ] });
+    const out = await run([["x", "d", "licence_non_ouverte"]], fakeFetch({ x: p }, { "https://data.example.ch/x1.csv": null, "https://data.example.ch/x2.csv": HEADER_OK }));
+    expect(out.letters).toEqual([]);
+    expect(out.skipped.sans_entete).toBe(1);
+  });
+
+  it("doute = pas de lettre : une ressource CSV sans adresse écarte le jeu", async () => {
+    const p = pkg("x", { resources: [
+      { format: "CSV", rights: "https://opendata.swiss/terms-of-use#terms_by_ask" },
+      { format: "CSV", url: "https://data.example.ch/x2.csv", rights: "https://opendata.swiss/terms-of-use#terms_by_ask" },
+    ] });
+    const out = await run([["x", "d", "licence_non_ouverte"]], fakeFetch({ x: p }, { "https://data.example.ch/x2.csv": HEADER_OK }));
+    expect(out.letters).toEqual([]);
+    expect(out.skipped.sans_entete).toBe(1);
+  });
+
+  it("doute = pas de lettre : plus de CSV que le générateur n'en lit écarte le jeu (jamais lu à moitié)", async () => {
+    const resources = Array.from({ length: 7 }, (_, i) => ({ format: "CSV", url: `https://data.example.ch/x${i}.csv`, rights: "https://opendata.swiss/terms-of-use#terms_by_ask" }));
+    const headers = Object.fromEntries(resources.map((r) => [r.url, HEADER_OK]));
+    const f = fakeFetch({ x: pkg("x", { resources }) }, headers);
+    const out = await run([["x", "d", "licence_non_ouverte"]], f);
+    expect(out.letters).toEqual([]);
+    expect(out.skipped.trop_de_csv).toBe(1);
+    expect(f.calls.filter((u) => u.endsWith(".csv"))).toEqual([]);
+  });
+
+  it("tous les CSV lus et propres (jusqu'à six) : la lettre part", async () => {
+    const resources = Array.from({ length: 6 }, (_, i) => ({ format: "CSV", url: `https://data.example.ch/x${i}.csv`, rights: "https://opendata.swiss/terms-of-use#terms_by_ask" }));
+    const headers = Object.fromEntries(resources.map((r) => [r.url, HEADER_OK]));
+    const out = await run([["x", "d", "licence_non_ouverte"]], fakeFetch({ x: pkg("x", { resources }) }, headers));
+    expect(out.letters).toHaveLength(1);
+  });
 
   it("écarte un jeu de la liste noire durable sans même le relire", async () => {
     const f = fakeFetch({ x: pkg("x") }, { "https://data.example.ch/x.csv": HEADER_OK });
@@ -288,7 +349,7 @@ describe("generateRequests : seules les cibles sûres deviennent une lettre", ()
     const out = await run(rows, fakeFetch(packages, headers));
     expect(out.letters.map((l) => l.organisation)).toEqual(["blv", "o1", "o2"]);
     expect(out.letters[0].lang).toBe("fr");
-    expect(out.letters[1].dataset_ids).toEqual(["o1-1", "o1-2"]);
+    expect(out.letters[1].dataset_ids).toEqual([U("o1-1"), U("o1-2")]);
     expect(out.skipped.plafond_editeurs).toBe(2);
   });
 
@@ -316,7 +377,7 @@ describe("buildDemandesReport : rapport public, nos actes et le catalogue seulem
   });
 
   it("plafond atteint ou refus : rien n'est ajouté (l'éditeur reste demandable)", () => {
-    for (const outcome of ["plafond", "refusee", "erreur"] as const) {
+    for (const outcome of ["plafond", "refusee", "erreur", "destinataire_recent"] as const) {
       const report = buildDemandesReport(null, lot, { deposits: [{ organisation: "lustat", purpose: "demande-licence:lustat", outcome, http_status: 429 }], statuses: [] }, new Set(), "2026-10-13");
       expect(report.entries).toEqual([]);
     }
@@ -350,7 +411,7 @@ describe("recheckOpenLicences", () => {
       b: pkg("b"),
       c: null,
     });
-    const open = await recheckOpenLicences(["a", "b", "c"], { fetchImpl: f.impl, sleepImpl: async () => {}, delayMs: 0, timeoutMs: 1000, userAgent: "x" });
-    expect([...open]).toEqual(["a"]);
+    const open = await recheckOpenLicences([U("a"), U("b"), U("c")], { fetchImpl: f.impl, sleepImpl: async () => {}, delayMs: 0, timeoutMs: 1000, userAgent: "x" });
+    expect([...open]).toEqual([U("a")]);
   });
 });
