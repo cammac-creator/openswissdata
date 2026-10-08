@@ -32,7 +32,9 @@ const SCHEDULED = ['refresh-finma.yml', 'refresh-tares.yml', 'monitor-sources.ym
   // Tâche osd.jeux, piste G1/G2 (07.10.2026) : moteur générique de jeux ouverts.
   'refresh-datasets.yml',
   // Collecte FOSC (avis du registre du commerce), 23.10.2026 : état privé dans R2, rien de publié.
-  'refresh-fosc.yml'] as const;
+  'refresh-fosc.yml',
+  // Demandes de licence aux distributeurs officiels (08.10.2026).
+  'prospect-requests.yml'] as const;
 const WATCHED_RUNS: Readonly<Record<string, string>> = { 'monitor-sources.yml': 'Canari des 20 sources', 'refresh-finma.yml': 'Collecte FINMA' };
 const FINMA_OAR_PAGE = 'https://www.finma.ch/fr/autorisation/organisme-d-autoregulation-oar/recherche-de-membres-oar/';
 const UA = 'OpenSwissData-veille-taches/1';

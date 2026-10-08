@@ -1,0 +1,114 @@
+name: Demandes de licence aux distributeurs officiels (opendata.swiss)
+#
+# Plan du 08.10.2026 « demandes aux distributeurs officiels » (décision de Claude-Alain du même jour).
+# Chaque mardi, après la prospection du lundi (`prospect-sources.yml`) :
+#   1. Préparer (SANS secret) : `scripts/prospect-requests.ts generate` relit sur opendata.swiss les
+#      jeux écartés pour leur licence, garde les cibles sûres (Confédération ou canton, CSV lisible
+#      avec clé de jointure, aucune personne, contact dans un domaine autorisé) et écrit au plus
+#      trois lettres (une par éditeur) dans un fichier TEMPORAIRE du runner. Ce fichier contient les
+#      adresses des destinataires : jamais committé, jamais publié en artefact (dépôt public).
+#   2. Déposer : `scripts/deposit-requests.mjs`, Node pur sans dépendance, SEULE étape qui reçoit
+#      ADMIN_SECRET. Le serveur refait tous les contrôles (domaine, doublon 120 jours, 3 éditeurs par
+#      semaine, créneau ouvré) et envoie lui-même aux heures de bureau.
+#   3. Rapport public (SANS secret) : `docs/data-status/demandes.json` (UUID, éditeur, date, statut),
+#      vérifié puis committé (un push par GITHUB_TOKEN ne relance jamais ci.yml).
+# Un déclenchement manuel est une SIMULATION par défaut : étape 1 seulement, résumé sans adresse.
+on:
+  schedule:
+    # Mardi 06:41 UTC, minute non ronde, le lendemain de la prospection du lundi (05:37 UTC).
+    - cron: "41 6 * * 2"
+  workflow_dispatch:
+    inputs:
+      simulation:
+        description: "Simulation : préparer les lettres et afficher le résumé, sans rien déposer ni committer"
+        type: boolean
+        default: true
+permissions:
+  contents: write
+  actions: read # requis par scripts/alert-email.mjs (previousConclusion), comme prospect-sources.yml
+concurrency:
+  group: demandes-licence-production
+  cancel-in-progress: false
+jobs:
+  demandes:
+    runs-on: ubuntu-latest
+    environment: collecte
+    timeout-minutes: 40
+    env:
+      SIMULATION: ${{ github.event_name != 'schedule' && inputs.simulation && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Préparer les lettres (catalogue public seulement, sans secret)
+        id: generate
+        run: |
+          set +e
+          npx tsx scripts/prospect-requests.ts generate --lot "$RUNNER_TEMP/demandes-lot.json"
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Échouer si la préparation a échoué (catalogue illisible ou erreur du script)
+        if: steps.generate.outputs.exit_code != '0'
+        run: |
+          echo "::error::Préparation des lettres en échec (code ${{ steps.generate.outputs.exit_code }}) : rien n'a été déposé."
+          exit 1
+      - name: Déposer les lettres (seule étape qui reçoit le secret)
+        id: deposit
+        if: env.SIMULATION != 'true'
+        env:
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+        run: |
+          if [ -z "$ADMIN_SECRET" ]; then
+            echo "::error::ADMIN_SECRET absent de l'environnement collecte : aucun dépôt."
+            exit 1
+          fi
+          set +e
+          node scripts/deposit-requests.mjs "$RUNNER_TEMP/demandes-lot.json" "$RUNNER_TEMP/demandes-resultats.json"
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Échouer si le dépôt n'a produit aucun résultat
+        # 0 = tout déposé ou déjà déposé ; 2 = résultat écrit mais un dépôt refusé ou incertain (le
+        # rapport est quand même mis à jour, puis le job échoue plus bas pour l'alerte) ; autre = rien.
+        if: env.SIMULATION != 'true' && steps.deposit.outputs.exit_code != '0' && steps.deposit.outputs.exit_code != '2'
+        run: |
+          echo "::error::Dépôt des lettres en échec (code ${{ steps.deposit.outputs.exit_code }})."
+          exit 1
+      - name: Mettre à jour le suivi public des demandes (sans secret)
+        if: env.SIMULATION != 'true'
+        run: npx tsx scripts/prospect-requests.ts report --lot "$RUNNER_TEMP/demandes-lot.json" --results "$RUNNER_TEMP/demandes-resultats.json"
+      - name: Vérifier avant de publier (jamais de commit sans ces contrôles verts)
+        if: env.SIMULATION != 'true'
+        run: |
+          npm run typecheck
+          npx vitest run tests/scripts/demandes-public.test.ts tests/scripts/prospect-requests.test.ts tests/scripts/deposit-requests.test.ts
+      - name: Committer le suivi public s'il a changé
+        if: env.SIMULATION != 'true'
+        run: |
+          git config user.name "OpenSwissData"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/data-status/demandes.json
+          if ! git diff --cached --quiet; then
+            git commit -m "données : actualiser le suivi des demandes de licence (opendata.swiss)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Échouer si un dépôt a été refusé ou n'a pas abouti (pour l'alerte)
+        if: env.SIMULATION != 'true' && steps.deposit.outputs.exit_code == '2'
+        run: |
+          echo "::warning::Au moins un dépôt a été refusé par le serveur ou n'a pas abouti ; le suivi public est à jour."
+          exit 1
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Demandes de licence aux distributeurs officiels (opendata.swiss)
+          ALERT_WORKFLOW: prospect-requests.yml
+          ALERT_DETAIL: 'La tâche hebdomadaire des demandes de licence a échoué : catalogue illisible, secret absent, ou dépôt refusé ou incertain (voir le journal du passage, qui ne montre que les éditeurs et les codes HTTP). Aucune lettre n''est renvoyée automatiquement : le serveur refuse un second dépôt pour le même éditeur pendant 120 jours.'
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

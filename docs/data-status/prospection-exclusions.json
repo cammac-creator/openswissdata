@@ -42,6 +42,12 @@
     "note": "annuaire, rôle non vérifiable hors ligne — exclusion manuelle de l'intégrateur"
   },
   {
+    "id": "5c6d64df-2f6d-444d-8167-41b5741404dc",
+    "motif": "colonne_personne_probable",
+    "date": "2026-10-08",
+    "note": "une ligne par candidat (commune, parti, sexe, sortant, élu) : reconnaissable sans nom dans une petite commune"
+  },
+  {
     "id": "772d3cbf-b25f-4ff8-8db9-fd81812471e0",
     "motif": "colonne_personne_probable",
     "date": "2026-10-07",

@@ -30,6 +30,7 @@
     "sync:datasets": "tsx scripts/sync-datasets.ts",
     "sync:fosc": "tsx etl/fosc/collect.ts",
     "prospect:sources": "tsx scripts/prospect-sources.ts",
+    "prospect:requests": "tsx scripts/prospect-requests.ts",
     "web:dev": "cd web && npx astro dev",
     "web:build": "npm --prefix web ci && npm --prefix web run build && npm run seo:check && npm run fonts:check && npm run admin:csp:check",
     "models:prepare:embedding": "tsx src/scripts/prepare-embedding.ts",
