@@ -14,7 +14,7 @@ export async function readDatasetArchive(dataset: "tares" | "classifications", i
   const root = join(dirname(resolve(process.env.DATABASE_PATH ?? "./data/openswissdata.db")), "bronze", dataset);
   await mkdir(root, { recursive: true, mode: 0o700 });
   const today = new Date().toISOString().slice(0, 10), cutoff = Date.now() - 30 * 86_400_000;
-  let used = 0;
+  const kept = new Map<string, { day: string; path: string; size: number }[]>();
   for (const day of await readdir(root, { withFileTypes: true })) {
     if (day.isFile() && /^\.archive-[a-f0-9-]+\.tmp$/.test(day.name)) {
       const path = join(root, day.name);
@@ -27,18 +27,29 @@ export async function readDatasetArchive(dataset: "tares" | "classifications", i
     for (const file of await readdir(folder, { withFileTypes: true })) {
       if (!file.isFile() || !/^[a-f0-9]{64}\.zip$/.test(file.name)) continue;
       const path = join(folder, file.name);
-      if (Date.parse(day.name) < cutoff) await unlink(path).catch(e => { if (e.code !== "ENOENT") throw e; });
-      else used += (await stat(path)).size;
+      if (Date.parse(day.name) < cutoff) { await unlink(path).catch(e => { if (e.code !== "ENOENT") throw e; }); continue; }
+      const size = await stat(path).then(s => s.size, e => { if (e.code === "ENOENT") return -1; throw e; });
+      if (size >= 0) kept.set(file.name, [...(kept.get(file.name) ?? []), { day: day.name, path, size }]);
     }
     if (Date.parse(day.name) < cutoff) await rmdir(folder).catch(e => { if (!["ENOENT", "ENOTEMPTY"].includes(e.code)) throw e; });
   }
+  // Une même archive (même empreinte) n'est gardée qu'une fois, dans son dossier le plus récent : jusqu'au 11.10.2026,
+  // chaque jour en ajoutait un exemplaire et le plafond bloquait toute lecture au bout de deux semaines.
+  let used = 0;
+  for (const copies of kept.values()) {
+    copies.sort((a, b) => b.day.localeCompare(a.day));
+    for (const duplicate of copies.slice(1)) await unlink(duplicate.path).catch(e => { if (e.code !== "ENOENT") throw e; });
+    used += copies[0].size;
+  }
   const folder = join(root, today); await mkdir(folder, { recursive: true, mode: 0o700 });
-  const expectedPath = join(folder, info.sha256 + ".zip");
-  try {
-    const bytes = await readFile(expectedPath);
-    if (bytes.length !== info.size_bytes || createHash("sha256").update(bytes).digest("hex") !== info.sha256) throw new Error(`Bronze ${dataset} altéré`);
-    return bytes;
-  } catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
+  const existing = kept.get(info.sha256 + ".zip")?.[0]?.path;
+  for (const path of [join(folder, info.sha256 + ".zip"), ...(existing ? [existing] : [])]) {
+    try {
+      const bytes = await readFile(path);
+      if (bytes.length !== info.size_bytes || createHash("sha256").update(bytes).digest("hex") !== info.sha256) throw new Error(`Bronze ${dataset} altéré`);
+      return bytes;
+    } catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
+  }
   const space = await statfs(root);
   if (used + info.size_bytes > 200_000_000 || space.bavail * space.bsize < info.size_bytes + 300_000_000) throw new Error(`Espace bronze ${dataset} insuffisant`);
   const bytes = await getObjectBuffer(info.r2_key, { maxBytes: Math.min(100_000_000, info.size_bytes + 1_000_000) });
