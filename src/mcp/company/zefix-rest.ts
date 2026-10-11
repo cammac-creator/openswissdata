@@ -17,10 +17,13 @@
  *    collecte en lot, aucun préchargement, aucune tâche planifiée, aucun canari ;
  *  - un cache de 24 h par IDE (1 h pour « non trouvé », comme `gleif.ts`) ;
  *  - une seule requête Zefix en vol à la fois, tous IDE confondus (`SerialGate`, file bornée) ;
+ *  - au plus une requête par `MIN_INTERVAL_MS` (temps réel), même avec des IDE tous différents ;
  *  - un plafond de `DEFAULT_DAILY_LIMIT` requêtes réellement envoyées par jour UTC, compteur en
  *    mémoire remis à zéro au redémarrage du processus ;
- *  - le disjoncteur commun (`SourceBreaker`), qui coupe aussi tout de suite sur 401/403 :
- *    des identifiants refusés ne doivent jamais être rejoués en boucle.
+ *  - le disjoncteur commun (`SourceBreaker`) pour les pannes (5xx, 429, délai, réponse illisible) ;
+ *    sa remise à zéro n'a lieu qu'après une réponse de forme valide ;
+ *  - un 401 ou un 403 (identifiants refusés) arrête toute requête jusqu'au redémarrage du
+ *    processus : des identifiants refusés ne sont jamais rejoués (relecture du 11.10.2026).
  *
  * Identifiants : `ZEFIX_REST_USERNAME` et `ZEFIX_REST_PASSWORD`, lus dans l'environnement À
  * L'APPEL. Absents ou vides : aucune requête, motif fixe `ZEFIX_REST_NOT_CONFIGURED`, et la
@@ -57,7 +60,9 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const NOT_FOUND_CACHE_TTL_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Plafond quotidien de requêtes réellement envoyées à Zefix (jour UTC), succès et échecs compris. */
-export const DEFAULT_DAILY_LIMIT = 2000;
+export const DEFAULT_DAILY_LIMIT = 500;
+/** Écart minimal, en temps réel, entre deux requêtes envoyées à Zefix. */
+export const MIN_INTERVAL_MS = 1000;
 /** Au plus une requête en cours et ce nombre en attente ; au-delà, motif « busy » sans requête. */
 const MAX_WAITING = 4;
 const USER_AGENT = "OpenSwissData company_check (+https://www.openswissdata.com)";
@@ -146,8 +151,11 @@ let coalescer = new RequestCoalescer<Part<ZefixRestStatusRecord>>();
 let dailyLimit = DEFAULT_DAILY_LIMIT;
 let budgetDay = -1;
 let budgetUsed = 0;
+let minIntervalMs = MIN_INTERVAL_MS;
+let lastSentAt = -Infinity; // temps réel (Date.now), jamais l'horloge injectée : l'écart est une attente réelle
+let credentialsRefused = false;
 
-export function resetZefixRest(now: () => number = () => Date.now(), options: { dailyLimit?: number } = {}): void {
+export function resetZefixRest(now: () => number = () => Date.now(), options: { dailyLimit?: number; minIntervalMs?: number } = {}): void {
   clock = now;
   cache = new TtlCache<Part<ZefixRestStatusRecord>>({ max: CACHE_MAX, ttlMs: CACHE_TTL_MS, now });
   breaker = new SourceBreaker({ now });
@@ -156,6 +164,9 @@ export function resetZefixRest(now: () => number = () => Date.now(), options: { 
   dailyLimit = options.dailyLimit ?? DEFAULT_DAILY_LIMIT;
   budgetDay = -1;
   budgetUsed = 0;
+  minIntervalMs = options.minIntervalMs ?? MIN_INTERVAL_MS;
+  lastSentAt = -Infinity;
+  credentialsRefused = false;
 }
 
 /** Jour UTC courant ; le compteur repart à zéro quand il change. */
@@ -183,6 +194,7 @@ function consumeDailyBudget(): boolean {
 const PAUSED: Part<ZefixRestStatusRecord> = Object.freeze({ available: false, reason: "source temporarily paused after errors" });
 const DAILY_LIMIT_REACHED: Part<ZefixRestStatusRecord> = Object.freeze({ available: false, reason: "Zefix REST daily limit reached" });
 const BUSY: Part<ZefixRestStatusRecord> = Object.freeze({ available: false, reason: "Zefix REST busy, try again later" });
+const REFUSED: Part<ZefixRestStatusRecord> = Object.freeze({ available: false, reason: "Zefix REST credentials refused, paused until restart" });
 
 export async function lookupZefixRest(compactUid: string, deps: LiveDeps): Promise<Part<ZefixRestStatusRecord>> {
   if (!COMPACT_UID_RE.test(compactUid)) {
@@ -190,6 +202,7 @@ export async function lookupZefixRest(compactUid: string, deps: LiveDeps): Promi
   }
   const credentials = readZefixRestCredentials();
   if (credentials === null) return { available: false, reason: ZEFIX_REST_NOT_CONFIGURED };
+  if (credentialsRefused) return REFUSED;
 
   const cacheKey = toCanonical(compactUid);
   const cached = cache.get(cacheKey);
@@ -211,8 +224,14 @@ async function fetchZefixRest(
 ): Promise<Part<ZefixRestStatusRecord>> {
   // Revérifié une fois la place obtenue : le disjoncteur a pu s'ouvrir, ou le plafond être
   // atteint, pendant l'attente dans la file.
+  if (credentialsRefused) return REFUSED;
   if (breaker.isPaused()) return PAUSED;
   if (!consumeDailyBudget()) return DAILY_LIMIT_REACHED;
+
+  // Espacement réel entre deux envois (la file garantit qu'un seul appelant est ici à la fois).
+  const wait = lastSentAt + minIntervalMs - Date.now();
+  if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+  lastSentAt = Date.now();
 
   // Le délai ne court qu'à partir de l'envoi, jamais pendant l'attente dans la file.
   const timeoutMs = deps.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -226,6 +245,7 @@ async function fetchZefixRest(
         "user-agent": USER_AGENT,
       },
       signal: AbortSignal.timeout(timeoutMs),
+      redirect: "error", // jamais l'en-tête Authorization suivi vers une autre adresse
     });
   } catch {
     // Jamais l'erreur elle-même : elle pourrait reprendre la requête et son en-tête.
@@ -246,8 +266,10 @@ async function fetchZefixRest(
       return cacheNotFound(cacheKey, deps);
     }
     if (res.status === 401 || res.status === 403) {
-      // Identifiants refusés : pause immédiate, comme un 429, pour ne jamais les rejouer en boucle.
-      breaker.recordFailure(undefined, true);
+      // Identifiants refusés : plus aucune requête jusqu'au redémarrage (nouveaux identifiants
+      // posés dans Railway = redéploiement), jamais rejoués en boucle.
+      credentialsRefused = true;
+      return REFUSED;
     } else if (res.status === 429) {
       breaker.recordFailure(retryAfterMs(res), true);
     } else if (res.status >= 500) {
@@ -265,24 +287,33 @@ async function fetchZefixRest(
       breaker.recordFailure();
       return { available: false, reason: "Zefix REST request timed out while reading the response" };
     }
+    breaker.recordFailure();
     return { available: false, reason: "Zefix REST response is not valid JSON" };
   }
-  breaker.recordSuccess();
 
-  if (!Array.isArray(body)) return { available: false, reason: "unexpected Zefix REST response shape" };
-  if (body.length === 0) return cacheNotFound(cacheKey, deps);
+  // Le disjoncteur ne se referme qu'après une réponse de forme valide (relecture du 11.10.2026).
+  const unexpected = (): Part<ZefixRestStatusRecord> => {
+    breaker.recordFailure();
+    return { available: false, reason: "unexpected Zefix REST response shape" };
+  };
+  if (!Array.isArray(body)) return unexpected();
+  if (body.length === 0) {
+    breaker.recordSuccess();
+    return cacheNotFound(cacheKey, deps);
+  }
 
   const matches: ZefixRestStatusRecord[] = [];
   let readable = 0;
   for (const raw of body) {
     const item = readItem(raw, compactUid);
     // Un élément inexploitable rejette toute la réponse, jamais mise en cache.
-    if (item.kind === "fail") return { available: false, reason: "unexpected Zefix REST response shape" };
+    if (item.kind === "fail") return unexpected();
     if (item.kind !== "skip") readable += 1;
     if (item.kind === "match") matches.push(item.record);
   }
   // Des éléments, mais aucun avec un `uid` : réponse malformée, jamais un faux « non trouvé » en cache.
-  if (readable === 0) return { available: false, reason: "unexpected Zefix REST response shape" };
+  if (readable === 0) return unexpected();
+  breaker.recordSuccess();
   if (matches.length === 0) return cacheNotFound(cacheKey, deps);
 
   // Plusieurs éléments pour le même IDE (cas non observé) : un seul statut seulement s'ils

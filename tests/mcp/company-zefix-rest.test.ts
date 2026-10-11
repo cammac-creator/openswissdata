@@ -15,6 +15,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_DAILY_LIMIT,
+  MIN_INTERVAL_MS,
   lookupZefixRest,
   readZefixRestCredentials,
   resetZefixRest,
@@ -104,7 +105,7 @@ const deps = (fetchImpl: LiveDeps["fetch"]): LiveDeps => ({ fetch: fetchImpl, no
 
 beforeEach(() => {
   horloge = DEBUT;
-  resetZefixRest(now);
+  resetZefixRest(now, { minIntervalMs: 0 });
   resetLindasCache(now);
   resetLindasBreaker(now);
   resetGleifCache(now);
@@ -285,8 +286,8 @@ describe("lookupZefixRest : non trouvé, échecs, formes inattendues", () => {
   });
 
   it.each([
-    ["401", 401, "Zefix REST responded with HTTP 401"],
-    ["403", 403, "Zefix REST responded with HTTP 403"],
+    ["401", 401, "Zefix REST credentials refused, paused until restart"],
+    ["403", 403, "Zefix REST credentials refused, paused until restart"],
     ["500", 500, "Zefix REST responded with HTTP 500"],
     ["429", 429, "Zefix REST responded with HTTP 429"],
   ])("HTTP %s : available false, motif fixe, jamais le corps brut", async (_cas, status, motif) => {
@@ -326,15 +327,49 @@ describe("lookupZefixRest : non trouvé, échecs, formes inattendues", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2); // jamais mis en cache
   });
 
-  it("401 : disjoncteur ouvert tout de suite, l'appel suivant ne touche pas le réseau", async () => {
+  it("401 : plus aucune requête jusqu'au redémarrage, même longtemps après (relecture du 11.10.2026)", async () => {
     const fetchMock = vi.fn(async () => new Response("", { status: 401 }));
     await lookupZefixRest(UID_A, deps(fetchMock));
-    const second = await lookupZefixRest(UID_B, deps(fetchMock));
-    expect(second).toEqual({ available: false, reason: "source temporarily paused after errors" });
+    const refus = { available: false, reason: "Zefix REST credentials refused, paused until restart" };
+    expect(await lookupZefixRest(UID_B, deps(fetchMock))).toEqual(refus);
+    horloge += 24 * 60 * 60_000; // un jour plus tard : toujours rien
+    expect(await lookupZefixRest(UID_B, deps(fetchMock))).toEqual(refus);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    horloge += 60_000; // pause de base levée
+    resetZefixRest(now, { minIntervalMs: 0 }); // redémarrage (nouveaux identifiants posés)
     await lookupZefixRest(UID_B, deps(fetchMock));
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("une réponse 200 de forme inattendue ne referme pas le disjoncteur", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("", { status: 429 }))
+      .mockResolvedValueOnce(jsonResponse({ inattendu: true }))
+      .mockResolvedValue(jsonResponse(zefixBody(UID_B, "ACTIVE")));
+    await lookupZefixRest(UID_A, deps(fetchMock)); // 429 : pause de 60 s
+    horloge += 60_000;
+    expect(await lookupZefixRest(UID_A, deps(fetchMock))).toEqual({ available: false, reason: "unexpected Zefix REST response shape" });
+    // Avant la relecture, ce 200 illisible remettait tout à zéro ; désormais il prolonge la pause.
+    expect(await lookupZefixRest(UID_B, deps(fetchMock))).toEqual({ available: false, reason: "source temporarily paused after errors" });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("espace les requêtes réelles d'au moins l'intervalle minimal, même pour des IDE différents", async () => {
+    resetZefixRest(now, { minIntervalMs: 80 });
+    const envois: number[] = [];
+    const fetchMock = vi.fn(async (url: string) => {
+      envois.push(Date.now());
+      return jsonResponse(zefixBody(url.endsWith(UID_A) ? UID_A : UID_B, "ACTIVE"));
+    });
+    await Promise.all([lookupZefixRest(UID_A, deps(fetchMock)), lookupZefixRest(UID_B, deps(fetchMock))]);
+    expect(envois).toHaveLength(2);
+    expect(envois[1] - envois[0]).toBeGreaterThanOrEqual(75);
+  });
+
+  it("refuse de suivre une redirection (l'en-tête Authorization ne part jamais ailleurs)", async () => {
+    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => jsonResponse(zefixBody(UID_A, "ACTIVE")));
+    await lookupZefixRest(UID_A, deps(fetchMock));
+    expect(fetchMock.mock.calls[0][1]?.redirect).toBe("error");
   });
 
   it("500 isolé : pas de pause, et l'échec n'est jamais mis en cache", async () => {
@@ -443,7 +478,7 @@ describe("lookupZefixRest : cache, sérialisation, plafond quotidien", () => {
   });
 
   it("plafond quotidien : requêtes réelles comptées (échecs et 404 compris), puis motif « daily limit » sans requête, remis à zéro le jour UTC suivant", async () => {
-    resetZefixRest(now, { dailyLimit: 3 });
+    resetZefixRest(now, { dailyLimit: 3, minIntervalMs: 0 });
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response("", { status: 500 }))
@@ -463,8 +498,9 @@ describe("lookupZefixRest : cache, sérialisation, plafond quotidien", () => {
     expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
-  it("plafond par défaut : 2 000 requêtes par jour", () => {
-    expect(DEFAULT_DAILY_LIMIT).toBe(2000);
+  it("plafond par défaut : 500 requêtes par jour, une par seconde au plus", () => {
+    expect(DEFAULT_DAILY_LIMIT).toBe(500);
+    expect(MIN_INTERVAL_MS).toBe(1000);
   });
 });
 
@@ -625,7 +661,7 @@ describe("fiche société avec l'API REST Zefix configurée", () => {
       () => new Response(`pas du json ${PASSWORD}`, { status: 200 }),
     ];
     for (const reponse of cas) {
-      resetZefixRest(now);
+      resetZefixRest(now, { minIntervalMs: 0 });
       resetLindasCache(now);
       resetGleifCache(now);
       const fetchMock = vi.fn(async (url: string | URL) => {
