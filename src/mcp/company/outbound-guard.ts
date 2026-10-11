@@ -3,7 +3,8 @@
  * (LINDAS, GLEIF), posés AVANT l'ouverture de `company_check` aux agents sans clé (tâche
  * d'ouverture du 06.10.2026, carnet « Ce que l'ouverture devra aussi faire »).
  *
- * Deux mécanismes, indépendants l'un de l'autre :
+ * Deux mécanismes, indépendants l'un de l'autre (plus `SerialGate`, en fin de fichier, ajouté le
+ * 11.10.2026 pour l'API REST Zefix seulement) :
  *  - `SourceBreaker` : un disjoncteur par source. Une réponse 429 met la source en pause tout
  *    de suite (elle demande explicitement de ralentir) ; une réponse 5xx ou un délai dépassé
  *    ne la met en pause qu'au deuxième échec consécutif (une erreur isolée ne coupe pas la
@@ -96,5 +97,40 @@ export class RequestCoalescer<T> {
     });
     this.enVol.set(key, promesse);
     return promesse;
+  }
+}
+
+/**
+ * Sérialise les appels vers une source, TOUTES clés confondues (ajouté le 11.10.2026 pour
+ * l'API REST Zefix, dont les conditions d'utilisation excluent les requêtes de masse) : une
+ * seule tâche s'exécute à la fois, les suivantes attendent leur tour dans l'ordre d'arrivée.
+ *
+ * File BORNÉE : au-delà d'une tâche en cours et de `maxWaiting` tâches en attente, `run` rend
+ * `null` sans rien démarrer, pour qu'une rafale d'appels ne puisse jamais enchaîner des délais
+ * dépassés et tenir chaque fiche ouverte plusieurs minutes. L'appelant rend alors un motif fixe.
+ * Une tâche qui échoue ne bloque jamais les suivantes.
+ */
+export class SerialGate {
+  private readonly maxWaiting: number;
+  private tail: Promise<void> = Promise.resolve();
+  // Tâches acceptées et pas encore terminées (celle en cours + celles en attente).
+  private pending = 0;
+
+  constructor(opts: { maxWaiting: number }) {
+    this.maxWaiting = opts.maxWaiting;
+  }
+
+  run<T>(fn: () => Promise<T>): Promise<T> | null {
+    if (this.pending >= 1 + this.maxWaiting) return null;
+    this.pending += 1;
+    const resultat = this.tail.then(() => fn());
+    // La suite de la file attend la FIN de cette tâche, succès ou échec confondus.
+    this.tail = resultat.then(
+      () => undefined,
+      () => undefined,
+    );
+    return resultat.finally(() => {
+      this.pending -= 1;
+    });
   }
 }

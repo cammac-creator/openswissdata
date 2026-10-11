@@ -58,6 +58,16 @@ const OFRC_OPEN: SourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// API REST publique Zefix de l'OFRC (statut d'inscription, lu en direct par la fiche société,
+// 11.10.2026). Conditions d'utilisation de l'API acceptées pour ce service : usage gratuit, origine
+// indiquée et toute modification signalée, sans garantie (seuls l'extrait certifié et la FOSC font
+// foi), blocage possible en cas de perturbation, pas de requêtes de masse régulières.
+const OFRC_REST: SourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-OFRC-REST-TERMS",
+  authority: "Federal Office of the Commercial Register (FOCR), Zefix REST API terms of use (free use, source attribution, no regular bulk requests)",
+  jurisdiction: "Switzerland",
+};
+
 // Répertoire officiel des localités (NPA, commune, canton). Preuve de licence : catalogue
 // opendata.swiss « amtliches-ortschaftenverzeichnis-mit-postleitzahl-und-perimeter »,
 // ressources `rights = terms_open`, éditeur swisstopo, relu le 06.10.2026 (osd.localites).
@@ -112,6 +122,11 @@ export const SOURCES: readonly SourceDescriptor[] = [
   // PRODUCT_SOURCES.finma : le garde-fou Zefix de etl/finma/bundle.ts doit rester actif.
   { id: "ofrc.zefix_lindas", institution: "OFRC", url: LINDAS_SPARQL_ENDPOINT, licence: OFRC_OPEN,
     description: "Registre du commerce en données liées (LINDAS, graphe Zefix), point SPARQL public." },
+  // Hors de toute archive vendue, comme LINDAS : lue en direct par la fiche société, une société à
+  // la fois et seulement quand ses identifiants sont configurés (11.10.2026). JAMAIS de canari :
+  // il interrogerait régulièrement un point authentifié, ce que les conditions de l'API excluent.
+  { id: "ofrc.zefix_rest", institution: "OFRC", url: "https://www.zefix.admin.ch/ZefixPublicREST/api/v1/company/uid", licence: OFRC_REST,
+    description: "Registre du commerce, API REST publique Zefix : statut d'inscription lu en direct, une société à la fois." },
   // Sans canari (osd.localites) : la collecte mensuelle (`scripts/sync-localities.ts`)
   // contrôle elle-même la forme du fichier officiel et échoue visiblement si elle change,
   // au lieu d'un canari séparé qui referait le même constat.

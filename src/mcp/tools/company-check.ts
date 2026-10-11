@@ -81,6 +81,43 @@ function renderCommercialRegister(fiche: CompanyFiche): string[] {
   return [`Commercial register (LINDAS, read ${time}):`, ...renderFacts(cr.facts)];
 }
 
+/**
+ * Statut d'inscription lu par l'API REST Zefix (11.10.2026). Une seule ligne, rendue SEULEMENT
+ * quand la fiche porte un statut reconnu (voir `not_covered`) ; sinon rien ici, la précision
+ * passe dans la phrase de fin (`closingSentence`). Le résumé AXA reste ainsi sous 2 500
+ * caractères dans tous les cas ; `structured` garde le motif, la note de normalisation et la
+ * mention des documents qui font foi (`data_note`). Origine citée : Zefix, OFRC.
+ */
+function renderRegistryStatus(fiche: CompanyFiche): string[] {
+  const s = fiche.commercial_register_status;
+  if (!s || fiche.not_covered.includes("commercial_register_status")) return [];
+  const time = groupTime(s.facts, fiche.generated_at);
+  const deletion = s.deletion_date ? `, deletion date ${s.deletion_date}` : "";
+  return [`Registry status (Zefix, OFRC, read ${time}): ${s.status}${deletion}.`, ""];
+}
+
+/**
+ * Phrase claire plutôt qu'une liste de jetons (relecture finale du 06.10.2026) : les lecteurs de
+ * ce résumé ne connaissent pas les noms de champs internes de `not_covered`. Sans lecture Zefix
+ * (API non configurée), phrase strictement inchangée. Lecture tentée mais statut inconnu :
+ * même phrase, avec la raison courte entre parenthèses. Statut reconnu : la phrase ne parle plus
+ * du statut (11.10.2026).
+ */
+function closingSentence(fiche: CompanyFiche): string {
+  const rest = "FOSC publications, SECO sanctions or officers.";
+  const s = fiche.commercial_register_status;
+  if (!fiche.not_covered.includes("commercial_register_status")) return `This fiche does not cover ${rest}`;
+  let why = "active or deleted";
+  if (s) {
+    why = !s.available
+      ? "Zefix, OFRC: not available"
+      : !s.found
+        ? "Zefix, OFRC: no record for this UID"
+        : "Zefix, OFRC: status value not recognised";
+  }
+  return `This fiche does not say whether the company is still registered (${why}), and does not cover ${rest}`;
+}
+
 function renderFinma(fiche: CompanyFiche): string[] {
   const f = fiche.finma;
   const lines: string[] = [];
@@ -184,6 +221,7 @@ function renderSummary(fiche: CompanyFiche): string {
   lines.push("");
   lines.push(...renderCommercialRegister(fiche));
   lines.push("");
+  lines.push(...renderRegistryStatus(fiche));
   lines.push(...renderFinma(fiche));
   lines.push("");
   lines.push(...renderLei(fiche));
@@ -194,11 +232,7 @@ function renderSummary(fiche: CompanyFiche): string {
   lines.push("");
   lines.push(...renderStreetChecks(fiche));
   lines.push("");
-  // Phrase claire plutôt qu'une liste de jetons (relecture finale du 06.10.2026) : les
-  // lecteurs de ce résumé ne connaissent pas les noms de champs internes de `not_covered`.
-  lines.push(
-    "This fiche does not say whether the company is still registered (active or deleted), and does not cover FOSC publications, SECO sanctions or officers.",
-  );
+  lines.push(closingSentence(fiche));
   lines.push(fiche.notice);
   return lines.join("\n");
 }

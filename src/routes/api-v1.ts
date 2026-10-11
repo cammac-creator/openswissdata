@@ -16,15 +16,18 @@ import { getBfePv, getDataset, getDatasetsIndex, getLocalities, getStreets, getF
 import { communeProfile } from "../lib/commune-profile.js";
 import { cantonProfile, SWISS_CANTON_ABBREVIATIONS } from "../lib/canton-profile.js";
 import { companyCheck } from "../mcp/company/check.js";
-import { COMPANY_SOURCES } from "../mcp/company/sources.js";
+import { COMPANY_SOURCES, type CompanySourceId } from "../mcp/company/sources.js";
 import { getPublicSource, PUBLIC_SOURCES, type PublicSourceEntry } from "../lib/public-sources.js";
 import { datasetCatalogueEntry, filterDatasetRows, licenceRequiresAttribution, paginateDatasetRows, parseDatasetFilters, parseDatasetPagination } from "../lib/dataset-query.js";
 
-// Les cinq sources que `company_check` peut citer (`src/mcp/company/sources.ts`), dans l'ordre
+// Les cinq sources que `company_check` cite toujours (`src/mcp/company/sources.ts`), dans l'ordre
 // stable de déclaration de `COMPANY_SOURCES` — toujours les mêmes, que la fiche les ait ou non
 // effectivement utilisées pour cet IDE précis (même esprit que `/api/v1/sources` : un registre,
-// pas un relevé d'usage par appel).
-const COMPANY_SOURCE_IDS = Object.keys(COMPANY_SOURCES);
+// pas un relevé d'usage par appel). Exception du 11.10.2026 : `ofrc.zefix_rest` n'est citée que
+// lorsque la fiche porte `commercial_register_status`, c'est-à-dire quand l'API REST Zefix est
+// configurée sur ce service ; sans identifiants, ce service ne la lit jamais.
+const ZEFIX_REST_SOURCE_ID: CompanySourceId = "ofrc.zefix_rest";
+const COMPANY_SOURCE_IDS = (Object.keys(COMPANY_SOURCES) as CompanySourceId[]).filter((id) => id !== ZEFIX_REST_SOURCE_ID);
 
 export const apiV1Route = new Hono();
 
@@ -78,7 +81,8 @@ apiV1Route.get("/company/:uid", async (c) => {
   const uid = c.req.param("uid");
   const result = await companyCheck(uid, { fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args), now: () => Date.now() });
   if (!result.ok) return c.json({ error: "invalid_uid" }, 400);
-  return c.json({ ...result.fiche, sources: COMPANY_SOURCE_IDS.map(sourceRef) });
+  const sourceIds = result.fiche.commercial_register_status ? [...COMPANY_SOURCE_IDS, ZEFIX_REST_SOURCE_ID] : COMPANY_SOURCE_IDS;
+  return c.json({ ...result.fiche, sources: sourceIds.map(sourceRef) });
 });
 
 // --- GET /api/v1/localities -------------------------------------------------------------

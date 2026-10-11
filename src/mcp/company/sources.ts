@@ -4,7 +4,7 @@
  *
  * `src/` ne peut pas importer `etl/` (`tsconfig.json` fixe `rootDir: "./src"` et exclut
  * `etl`, qui n'est de toute façon jamais compilé dans `dist/` — voir le commentaire
- * équivalent dans `lindas.ts`). Ces cinq entrées sont donc des copies littérales des
+ * équivalent dans `lindas.ts`). Ces six entrées sont donc des copies littérales des
  * mêmes champs (`url`, `licence.reference`) du registre unique
  * `etl/shared/sources/registry.ts`. `tests/mcp/company-sources-registry.test.ts`, qui vit
  * hors de la frontière tsc (`tests/` est exclu de `tsconfig.json`), vérifie l'égalité à
@@ -13,6 +13,7 @@
 
 import { LINDAS_ENDPOINT } from "./lindas.js";
 import { GLEIF_LEI_API_URL } from "./gleif.js";
+import { ZEFIX_REST_COMPANY_UID_URL } from "./zefix-rest.js";
 
 export interface CompanySourceRef {
   url: string;
@@ -33,10 +34,19 @@ const SWISSTOPO_LOCALITIES_STAC_ITEMS_URL =
 const SWISSTOPO_STREETS_STAC_ITEMS_URL =
   "https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo.amtliches-strassenverzeichnis/items";
 
-export type CompanySourceId = "ofrc.zefix_lindas" | "finma.uid_csv" | "gleif.lei_api" | "swisstopo.localities" | "swisstopo.streets";
+// `ofrc.zefix_rest` (11.10.2026) : API REST Zefix, lue seulement quand ses identifiants sont
+// configurés ; `/api/v1/company` ne la cite que lorsque la fiche porte réellement ce statut.
+export type CompanySourceId =
+  | "ofrc.zefix_lindas"
+  | "ofrc.zefix_rest"
+  | "finma.uid_csv"
+  | "gleif.lei_api"
+  | "swisstopo.localities"
+  | "swisstopo.streets";
 
 export const COMPANY_SOURCES: Record<CompanySourceId, CompanySourceRef> = {
   "ofrc.zefix_lindas": { url: LINDAS_ENDPOINT, licence_reference: "PUBLIC-OFFICIAL-SOURCE-OFRC-OPEN-USE" },
+  "ofrc.zefix_rest": { url: ZEFIX_REST_COMPANY_UID_URL, licence_reference: "PUBLIC-OFFICIAL-SOURCE-OFRC-REST-TERMS" },
   "finma.uid_csv": { url: FINMA_UID_CSV_URL, licence_reference: "PUBLIC-OFFICIAL-SOURCE-FINMA" },
   "gleif.lei_api": { url: GLEIF_LEI_API_URL, licence_reference: "PUBLIC-OFFICIAL-SOURCE-GLEIF-CC0" },
   "swisstopo.localities": { url: SWISSTOPO_LOCALITIES_STAC_ITEMS_URL, licence_reference: "PUBLIC-OFFICIAL-SOURCE-SWISSTOPO-OPEN-USE" },

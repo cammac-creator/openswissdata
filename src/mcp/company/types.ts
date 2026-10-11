@@ -1,7 +1,8 @@
 /**
- * Types communs aux deux clients en direct de la fiche société (LINDAS, GLEIF).
+ * Types communs aux clients en direct de la fiche société (LINDAS, GLEIF et, depuis le
+ * 11.10.2026, l'API REST Zefix pour le seul statut d'inscription).
  *
- * Importés par `lindas.ts`, `gleif.ts`, `cache.ts` et par la tâche 4 (assemblage de la fiche).
+ * Importés par `lindas.ts`, `gleif.ts`, `zefix-rest.ts`, `cache.ts` et par la tâche 4 (assemblage de la fiche).
  * Aucune logique ici : seulement les formes de données (tâche osd.fiche, tâche 3).
  */
 
@@ -52,4 +53,23 @@ export interface GleifRecord {
   registration_status: string | null;
   last_update: string | null;
   registered_as: string | null;
+}
+
+/**
+ * Statut d'inscription au registre du commerce, normalisé depuis la valeur `status` de l'API
+ * REST publique Zefix (OFRC, tâche du 11.10.2026) : `ACTIVE` → `active`, `BEING_CANCELLED` →
+ * `in_liquidation`, `CANCELLED` → `deleted`. Toute autre valeur, absente ou inattendue, rend
+ * `unknown` : jamais un statut deviné.
+ */
+export type ZefixRestStatus = "active" | "in_liquidation" | "deleted" | "unknown";
+
+/**
+ * Seuls champs gardés d'une réponse Zefix REST (minimisation) : le statut normalisé et la date
+ * de radiation (`AAAA-MM-JJ`, ou `null` si absente ou d'une autre forme). La raison sociale,
+ * l'adresse et le but que porte aussi la réponse ne sont jamais conservés ici : pour une
+ * entreprise individuelle, ce sont des données personnelles que la fiche retient volontairement.
+ */
+export interface ZefixRestStatusRecord {
+  status: ZefixRestStatus;
+  deletion_date: string | null;
 }

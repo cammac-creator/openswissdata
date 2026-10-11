@@ -8,11 +8,16 @@
  * normalisation) entre ces sources : jamais une note, un score ou un verdict. `companyCheck`
  * est le seul point d'entrée réseau ; `buildCompanyFiche` est un assemblage pur, sans
  * aucun accès réseau ni disque, pour rester facile à tester et à faire évoluer séparément.
+ *
+ * Depuis le 11.10.2026, le statut d'inscription (actif, en liquidation, radié) vient en plus de
+ * l'API REST Zefix (`zefix-rest.ts`) quand ses identifiants sont configurés ; il n'entre dans
+ * aucun recoupement, il est seulement rapporté avec sa source.
  */
 
 import { parseUid } from "./uid.js";
 import { lookupLindas } from "./lindas.js";
 import { lookupGleif } from "./gleif.js";
+import { lookupZefixRest, ZEFIX_REST_NOT_CONFIGURED } from "./zefix-rest.js";
 import { COMPANY_SOURCES } from "./sources.js";
 import {
   getFinmaRegistry,
@@ -23,7 +28,7 @@ import {
   type FinmaRegistryRow,
   type LocalityRow,
 } from "../data-loader.js";
-import type { GleifRecord, LindasCompany, LiveDeps, Part } from "./types.js";
+import type { GleifRecord, LindasCompany, LiveDeps, Part, ZefixRestStatus, ZefixRestStatusRecord } from "./types.js";
 
 export interface Fact {
   field: string;
@@ -44,10 +49,32 @@ export interface CrossCheck {
   detail: string;
 }
 
+/**
+ * Statut d'inscription au registre du commerce lu par l'API REST Zefix de l'OFRC (11.10.2026).
+ * `status`/`deletion_date` sont `null` quand la source n'est pas disponible ou ne connaît pas
+ * l'IDE ; sinon le statut normalisé (`unknown` pour toute valeur non reconnue) et la date de
+ * radiation `AAAA-MM-JJ` ou `null`. `provenance` et `data_note` portent l'origine et la
+ * normalisation, comme l'exigent les conditions d'utilisation de l'API.
+ */
+export interface CommercialRegisterStatus {
+  available: boolean;
+  found: boolean;
+  reason?: string;
+  status: ZefixRestStatus | null;
+  deletion_date: string | null;
+  provenance: "Zefix (OFRC)";
+  data_note: string;
+  facts: Fact[];
+}
+
 export interface CompanyFiche {
   uid: string;
   generated_at: string;
   commercial_register: { available: boolean; found: boolean; reason?: string; facts: Fact[] };
+  // Clé ABSENTE (jamais `null`) tant que l'API REST Zefix n'est pas configurée sur ce service
+  // (variables `ZEFIX_REST_USERNAME`/`ZEFIX_REST_PASSWORD`, 11.10.2026) : la fiche reste alors
+  // strictement celle d'avant. Présente dès qu'une lecture a été tentée, réussie ou non.
+  commercial_register_status?: CommercialRegisterStatus;
   // `available` (correction 1 du 06.10.2026) : `false` quand le registre FINMA en mémoire
   // n'a pas pu être lu (`deps.finma` qui lève) — `found`/`facts` restent alors vides, sans
   // jamais faire échouer toute la fiche. `data_note` (tâche osd.fiche, tâche 4) : les faits
@@ -86,7 +113,8 @@ export interface CompanyFiche {
   // Une 5e entrée ("official_locality_directory_checks") s'ajoute SEULEMENT quand le
   // répertoire des localités est explicitement indisponible (tâche osd.localites), et une 6e
   // ("official_street_directory_checks") SEULEMENT quand le répertoire des rues est
-  // explicitement indisponible (tâche osd.localites, tâche B1).
+  // explicitement indisponible (tâche osd.localites, tâche B1). "commercial_register_status"
+  // n'en sort que lorsque `commercial_register_status` porte un statut reconnu (11.10.2026).
   not_covered: string[];
   notice: string;
 }
@@ -100,6 +128,8 @@ export interface CompanyFiche {
 // ("official_locality_directory") SEULEMENT quand `parts.localities` est explicitement
 // fourni et indisponible — jamais dans cette constante, qui reste la base commune à tous
 // les appels, y compris ceux qui ne connaissent pas encore `localities` (voir plus bas).
+// Seul retrait prévu (11.10.2026) : "commercial_register_status" quitte la liste d'UNE fiche
+// quand l'API REST Zefix a réellement rendu un statut reconnu (voir `buildCompanyFiche`).
 const NOT_COVERED = ["commercial_register_status", "fosc_publications", "seco_sanctions", "officers"] as const;
 
 const NOTICE =
@@ -438,6 +468,29 @@ function gleifFacts(records: readonly GleifRecord[], retrievedAt: string): Fact[
   return facts;
 }
 
+// Origine et modification signalées (conditions d'utilisation de l'API REST Zefix, 11.10.2026).
+// Aucun mot de verdict : un statut lu, jamais une appréciation de la société.
+const ZEFIX_REST_DATA_NOTE =
+  "Registry status read from the Zefix REST API of the Federal Office of the Commercial Register (FOCR) and normalised by this service (ACTIVE: active, BEING_CANCELLED: in_liquidation, CANCELLED: deleted, any other value: unknown). Provided without guarantee: only the certified register extract and the SOGC (FOSC) publication are legally binding.";
+
+/** Bloc `commercial_register_status` à partir de la lecture Zefix REST : deux faits au plus
+ *  (`registry_status`, `deletion_date` quand elle est connue), même forme que les autres groupes. */
+function zefixStatusBlock(part: Part<ZefixRestStatusRecord>): CommercialRegisterStatus {
+  const base = { provenance: "Zefix (OFRC)" as const, data_note: ZEFIX_REST_DATA_NOTE };
+  if (!part.available) {
+    return { available: false, found: false, reason: part.reason, status: null, deletion_date: null, ...base, facts: [] };
+  }
+  if (!part.found || !part.data) {
+    return { available: true, found: false, status: null, deletion_date: null, ...base, facts: [] };
+  }
+  const sourceId = "ofrc.zefix_rest";
+  const sourceUrl = COMPANY_SOURCES[sourceId].url;
+  const facts: Fact[] = [];
+  pushIfPresent(facts, "registry_status", part.data.status, sourceId, sourceUrl, part.retrieved_at);
+  pushIfPresent(facts, "deletion_date", part.data.deletion_date, sourceId, sourceUrl, part.retrieved_at);
+  return { available: true, found: true, status: part.data.status, deletion_date: part.data.deletion_date, ...base, facts };
+}
+
 /** `licence_type`, `status`, `licence_date` pour chaque ligne FINMA dont l'IDE est exactement
  *  celui demandé (plusieurs lignes possibles, une par autorisation). `source_url` vient de la
  *  ligne elle-même, jamais de la table locale.
@@ -501,6 +554,9 @@ export function buildCompanyFiche(
     /** Optionnel (tâche osd.localites, tâche B1) : voir le commentaire de `StreetsAccess`
      *  ci-dessus. Absent = fonctionnalité non câblée, fiche strictement identique à avant. */
     streets?: StreetsAccess;
+    /** Optionnel (11.10.2026) : lecture de l'API REST Zefix. Absent = API non configurée, fiche
+     *  strictement identique à avant (aucune clé `commercial_register_status`). */
+    zefix?: Part<ZefixRestStatusRecord>;
     now: () => number;
   },
 ): CompanyFiche {
@@ -609,7 +665,19 @@ export function buildCompanyFiche(
   }
   const street_checks_edition: string | null = parts.streets && parts.streets.available ? parts.streets.edition : null;
 
-  const not_covered: string[] = [...NOT_COVERED];
+  // Statut d'inscription : bloc présent seulement quand une lecture Zefix REST a été tentée. Il
+  // ne sort de `not_covered` que lorsqu'il est réellement connu (source disponible, IDE trouvé,
+  // statut reconnu) ; sinon la liste reste exactement celle d'avant.
+  const commercial_register_status = parts.zefix ? zefixStatusBlock(parts.zefix) : undefined;
+  const registryStatusKnown =
+    commercial_register_status !== undefined &&
+    commercial_register_status.found &&
+    commercial_register_status.status !== null &&
+    commercial_register_status.status !== "unknown";
+
+  const not_covered: string[] = registryStatusKnown
+    ? NOT_COVERED.filter((entry) => entry !== "commercial_register_status")
+    : [...NOT_COVERED];
   // Répertoire câblé mais illisible : signalé, jamais une exception (revue point 5). Un
   // appelant qui ne connaît pas encore `localities` (`undefined`) ne voit AUCUN changement.
   if (parts.localities && !parts.localities.available) {
@@ -623,6 +691,7 @@ export function buildCompanyFiche(
     uid,
     generated_at: generatedAt,
     commercial_register,
+    ...(commercial_register_status ? { commercial_register_status } : {}),
     finma,
     lei,
     cross_checks,
@@ -642,7 +711,14 @@ export async function companyCheck(
   const parsed = parseUid(rawUid);
   if (!parsed.ok) return { ok: false, reason: parsed.reason };
 
-  const [lindas, gleif] = await Promise.all([lookupLindas(parsed.compact, deps), lookupGleif(parsed.uid, deps)]);
+  const [lindas, gleif, zefixRest] = await Promise.all([
+    lookupLindas(parsed.compact, deps),
+    lookupGleif(parsed.uid, deps),
+    lookupZefixRest(parsed.compact, deps),
+  ]);
+  // API REST Zefix non configurée (aucune requête partie) : rien n'est transmis, la fiche reste
+  // strictement celle d'avant. Tout autre résultat, échec compris, entre dans la fiche.
+  const zefix = !zefixRest.available && zefixRest.reason === ZEFIX_REST_NOT_CONFIGURED ? undefined : zefixRest;
   // `getFinmaVersion()` n'est lue que lorsque le registre par défaut est utilisé : un
   // registre FINMA injecté (tests, ou tout autre appelant) n'a pas de version connue
   // correspondante (voir le commentaire sur `parts.finmaVersion` dans `buildCompanyFiche`).
@@ -676,6 +752,6 @@ export async function companyCheck(
   const streets: StreetsAccess = streetsLoaded
     ? { available: true, byMunicipality: streetsLoaded.byMunicipality, edition: streetsLoaded.edition }
     : { available: false };
-  const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, localities, streets, now: deps.now });
+  const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, localities, streets, zefix, now: deps.now });
   return { ok: true, fiche };
 }

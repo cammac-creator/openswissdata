@@ -15,8 +15,8 @@
  * construites dynamiquement (gabarit + encodage), pas des chaînes littérales qu'on peut recopier
  * à l'identique sans risque de divergence silencieuse.
  *
- * `finma.uid_csv`, `swisstopo.localities`, `swisstopo.streets`, `ofrc.zefix_lindas` et
- * `gleif.lei_api` ne sont PAS redupliqués ici : ce sont les cinq entrées déjà tenues à jour dans
+ * `finma.uid_csv`, `swisstopo.localities`, `swisstopo.streets`, `ofrc.zefix_lindas`,
+ * `ofrc.zefix_rest` et `gleif.lei_api` ne sont PAS redupliqués ici : ce sont les six entrées déjà tenues à jour dans
  * `src/mcp/company/sources.ts` (`COMPANY_SOURCES`), elles-mêmes vérifiées contre le registre par
  * `tests/mcp/company-sources-registry.test.ts`. Ce fichier les réutilise directement.
  *
@@ -70,6 +70,14 @@ const OFRC_LICENCE: PublicSourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// Copie littérale de la licence `OFRC_REST` du registre unique (11.10.2026) : conditions
+// d'utilisation de l'API REST Zefix, distinctes du `terms_open` de LINDAS ci-dessus.
+const OFRC_REST_LICENCE: PublicSourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-OFRC-REST-TERMS",
+  authority: "Federal Office of the Commercial Register (FOCR), Zefix REST API terms of use (free use, source attribution, no regular bulk requests)",
+  jurisdiction: "Switzerland",
+};
+
 const SWISSTOPO_LICENCE: PublicSourceLicence = {
   reference: "PUBLIC-OFFICIAL-SOURCE-SWISSTOPO-OPEN-USE",
   authority: "Federal Office of Topography swisstopo, opendata.swiss open use (terms_open)",
@@ -118,6 +126,7 @@ export const PUBLIC_SOURCES: readonly PublicSourceEntry[] = [
   // GLEIF, registre du commerce et swisstopo : réutilisés depuis `COMPANY_SOURCES` (déjà testés).
   fromCompanySources("gleif.lei_api", "GLEIF", "GLEIF LEI registry (public API), used to attach a LEI to FINMA entities by UID", GLEIF_LICENCE),
   fromCompanySources("ofrc.zefix_lindas", "OFRC", "Commercial register as linked data (LINDAS, Zefix graph), public SPARQL endpoint", OFRC_LICENCE),
+  fromCompanySources("ofrc.zefix_rest", "OFRC", "Commercial register, Zefix public REST API: registry status read live, one company at a time, when available", OFRC_REST_LICENCE),
   fromCompanySources("swisstopo.localities", "swisstopo", "swisstopo — official directory of localities (postal code, municipality, canton), STAC catalogue, monthly collection", SWISSTOPO_LICENCE),
   fromCompanySources("swisstopo.streets", "swisstopo", "swisstopo — official directory of streets (street name, postal code, municipality, canton), STAC catalogue, monthly collection", SWISSTOPO_LICENCE),
 
