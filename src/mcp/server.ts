@@ -90,7 +90,7 @@ export const SERVER_INSTRUCTIONS = [
   `Free without any key or sign-up (${ANONYMOUS_LIMIT_TEXT}):`,
   "- tariff_lookup: an 8-digit Swiss tariff number (dots allowed, e.g. 8471.3000) returns the full TARES line; a 2- to 7-digit HS prefix (e.g. the international HS6 code 847130) lists the Swiss 8-digit lines under it. Set lang to en, de, it or fr (default fr).",
   "- kyc_check: search the FINMA register and the FINMA warnings list by entity name.",
-  "- company_check: a Swiss UID (CHE-xxx.xxx.xxx) returns commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source, plus exact cross-checks. It does not say whether the company is still registered.",
+  "- company_check: a Swiss UID (CHE-xxx.xxx.xxx) returns commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source, plus exact cross-checks. When available, it also gives the commercial register status from Zefix (OFRC): active, in liquidation or deleted.",
   "- cross_walk: map a code between NOGA 2008, NOGA 2025, NACE 2.0, NACE 2.1 and ISIC 4, with the relation type and its source.",
   `Free trial without a key, limited to ${TRIAL_LIMIT_TEXT} in total: ${TRIAL_TOOLS_TEXT} (search TARES lines by goods description, NOGA 2025 codes by activity description, the FINMA register with typo tolerance); each trial answer states the calls left and the official source on which to check the result before use.`,
   "The change history tools (tariff_changelog, entity_history) belong to the Pro plan, which is closed to new subscribers at the moment.",

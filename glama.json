@@ -40,7 +40,7 @@
     },
     {
       "name": "company_check",
-      "description": "Swiss company lookup by UID (CHE-xxx.xxx.xxx): commercial register (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source. Does not say whether the company is still registered (no key)"
+      "description": "Swiss company lookup by UID (CHE-xxx.xxx.xxx): commercial register (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source. When available, also the commercial register status from Zefix (OFRC): active, in liquidation or deleted (no key)"
     },
     {
       "name": "cross_walk",

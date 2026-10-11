@@ -52,7 +52,7 @@ const tools = [
   {
     pack: "FINMA",
     name: "company_check",
-    desc: "Swiss company lookup by UID: commercial register (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source. Does not say whether the company is still registered.",
+    desc: "Swiss company lookup by UID: commercial register (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source. When available, also gives the commercial register status from Zefix (OFRC): active, in liquidation or deleted.",
     args: { uid: "CHE-103.137.179" },
     scope: "finma:read",
   },
