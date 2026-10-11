@@ -164,10 +164,11 @@ describe("classifyLicence — sur les fixtures réelles", () => {
     expect(v.licence).toBe("exclu");
     expect(v.motif).toBe("licence_cc_by_sa");
   });
-  it("liste historisée des communes (OFS) : aucun rights → exclu, motif licence_absente", () => {
+  // Décision de Claude-Alain du 11.10.2026 (DECISIONS.md) : la licence portée par le champ `license`
+  // compte quand `rights` est vide. Ce jeu réel porte terms_open dans `license` : il était exclu à tort.
+  it("liste historisée des communes (OFS) : rights vide, terms_open dans license → open", () => {
     const v = classifyLicence(communesHistorise.resources);
-    expect(v.licence).toBe("exclu");
-    expect(v.motif).toBe("licence_absente");
+    expect(v).toEqual({ licence: "open", matched: "open" });
   });
   it("registre des bâtiments OFS : terms_open → open (l'exclusion OFS est un flag séparé, pas une licence)", () => {
     expect(classifyLicence(ofsGwr.resources).licence).toBe("open");
@@ -512,10 +513,10 @@ describe("classifyPackage — verdict complet sur chaque fixture réelle", () =>
     expect(v.isCandidate).toBe(false);
     expect(v.exclusionMotif).toBe("licence_cc_by_sa");
   });
-  it("liste historisée des communes (sans rights) : jamais candidat", () => {
+  it("liste historisée des communes (licence dans `license`) : candidat MAIS a_verifier_ofs", () => {
     const v = classifyPackage(communesHistorise, tokens);
-    expect(v.isCandidate).toBe(false);
-    expect(v.exclusionMotif).toBe("licence_absente");
+    expect(v.isCandidate).toBe(true);
+    expect(v.ofsFlag).toBe(true);
   });
   it("Répertoire des entreprises de Genève : licence ouverte MAIS jamais candidat (personnes)", () => {
     const v = classifyPackage(regGeneve, tokens);
@@ -668,10 +669,13 @@ describe("prospectSources — orchestrateur (pages simulées, aucun réseau rée
     expect(ids).toContain(ofsGwr.id);
     expect(ids).not.toContain(regGeneve.id);
     expect(ids).not.toContain(gemeindetypologie.id);
+    // Licence lue dans `license` (11.10.2026) : compté candidat, mais absent du rapport public
+    // (aucune clé de jointure dans son en-tête simulé ni dans son titre, `isPublishableCandidate`).
     expect(ids).not.toContain(communesHistorise.id);
+    expect(report.totals.candidates).toBe(5);
     expect(report.totals.excluded_by_motif.personnes_detectees).toBe(1);
     expect(report.totals.excluded_by_motif.licence_cc_by_sa).toBe(1);
-    expect(report.totals.excluded_by_motif.licence_absente).toBe(1);
+    expect(report.totals.excluded_by_motif.licence_absente).toBeUndefined();
   });
 
   it("une candidate venant de l'OFS reste marquée a_verifier_ofs dans le rapport", async () => {
