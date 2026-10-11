@@ -1,11 +1,11 @@
 # Prospection de nouvelles sources publiques (opendata.swiss)
 
-Généré le 2026-10-07 · tâche osd.prospection. Catalogue interrogé par l'API CKAN officielle d'opendata.swiss (`package_search`), jamais de données servies modifiées par ce rapport.
+Généré le 2026-10-11 · tâche osd.prospection. Catalogue interrogé par l'API CKAN officielle d'opendata.swiss (`package_search`), jamais de données servies modifiées par ce rapport.
 
 - Ce passage : 55 / 55 pages lues (à partir de la page 97 sur 166 au total), 5500 jeux lus (100 jeux par page).
-- Couverture cumulée : 33.3 % du catalogue (16556 jeux)
-- Candidats cumulés (licence ouverte, aucun marqueur de personnes détecté dans le texte, aucune colonne de personne dans les en-têtes LUS — un en-tête jamais lu n'est jamais affirmé propre) : 4560 — 93 passent le filtre public (éditeur fédéral ou cantonal, au moins une clé de jointure, et au moins un en-tête CSV inspecté avec succès — décision de l'intégrateur du 07.10.2026) et sont conservés en détail dans `prospection.json` (plafond 300), 30 de chaque groupe (non-OFS, OFS) montrés dans les tableaux plus bas.
-- Jeux écartés (cumulé) : 953
+- Couverture cumulée : 33.3 % du catalogue (16567 jeux)
+- Candidats cumulés (licence ouverte, aucun marqueur de personnes détecté dans le texte, aucune colonne de personne dans les en-têtes LUS — un en-tête jamais lu n'est jamais affirmé propre) : 4568 — 84 passent le filtre public (éditeur fédéral ou cantonal, au moins une clé de jointure, et au moins un en-tête CSV inspecté avec succès — décision de l'intégrateur du 07.10.2026) et sont conservés en détail dans `prospection.json` (plafond 300), 30 de chaque groupe (non-OFS, OFS) montrés dans les tableaux plus bas.
+- Jeux écartés (cumulé) : 948
 - Jeux déjà au registre des sources (cumulé) : 0
 - Passage mené jusqu'au bout de la fenêtre visée, sans échec.
 
@@ -13,12 +13,12 @@ Généré le 2026-10-07 · tâche osd.prospection. Catalogue interrogé par l'AP
 
 | Motif | Jeux écartés |
 |---|---|
-| colonne_personne | 89 |
+| colonne_personne | 91 |
 | colonne_personne_probable | 5 |
-| licence_absente | 28 |
+| licence_absente | 19 |
 | licence_cc_by_sa | 398 |
 | licence_non_ouverte | 265 |
-| personnes_detectees | 168 |
+| personnes_detectees | 170 |
 
 ## Meilleurs candidats
 
@@ -36,7 +36,6 @@ Tri par éditeur (fédéral puis cantonal), nombre de clés de jointure détect�
 | Notfalltreffpunkte Kanton Zug | Canton de Zoug | canton | terms_by | canton, commune, npa | — | non | — | [lien](https://opendata.swiss/dataset/8bfd652d-f013-48e4-a72d-a66091585bff) |
 | Treibhausgas-Emissionen nach Gemeinden ab 1990 | Canton de Thurgovie | canton | attribution | canton, commune, commune (titre) | — | non | — | [lien](https://opendata.swiss/dataset/dae51783-9f30-47cf-a5e6-844c2501cc0a) |
 | Verteilung des Haushaltseinkommens nach Gemeinde | Canton de Bâle-Ville | canton | attribution | commune, commune (titre) | http://publications.europa.eu/resource/authority/frequency/ANNUAL | non | — | [lien](https://opendata.swiss/dataset/7584a071-bc17-4b9c-8847-84e65af87a9c) |
-| Notfalltreffpunkte | Canton de Bâle-Ville | canton | terms_by | canton, commune | http://publications.europa.eu/resource/authority/frequency/IRREG | non | — | [lien](https://opendata.swiss/dataset/ed261ff4-4702-46a7-9af6-b647c0f16ef6) |
 | Siedlungsverzeichnis des Kantons Thurgau 2022 | Canton de Thurgovie | canton | public_domain | commune, npa | — | non | — | [lien](https://opendata.swiss/dataset/36e83e91-829f-40d4-9662-c36e4a87e768) |
 | Nationalratswahlen Kanton Thurgau: Parteistärken nach Gemeinden | Canton de Thurgovie | canton | public_domain | commune, commune (titre) | — | non | — | [lien](https://opendata.swiss/dataset/44e62fc0-c876-495d-a2b6-2daabb1eaa9b) |
 | Schulanlagen nach Standort | Canton de Bâle-Campagne | canton | terms_by | commune, npa | — | non | — | [lien](https://opendata.swiss/dataset/4ffc39f0-8c35-4cdd-98bd-3ad5690a8d2f) |
@@ -46,16 +45,17 @@ Tri par éditeur (fédéral puis cantonal), nombre de clés de jointure détect�
 | Ortschaftenverzeichnis Kanton Thurgau 2025 | Canton de Thurgovie | canton | public_domain | commune, npa (titre) | — | non | — | [lien](https://opendata.swiss/dataset/b6ead37b-2d8f-4864-ab17-d06d084f4fcb) |
 | Trinkwasserqualität im Kanton Zürich nach Gemeinden und Verteilzonen (Selbstkontrolle der Wasserversorgungen) | Gesundheitsdirektion Kanton Zürich | canton | terms_by | commune, commune (titre) | — | non | — | [lien](https://opendata.swiss/dataset/bad68927-4753-4179-b326-3ecd50c6fd26) |
 | Siedlungsverzeichnis des Kantons Thurgau 2026 | Canton de Thurgovie | canton | public_domain | commune, npa | — | non | — | [lien](https://opendata.swiss/dataset/f9f1bf42-e490-41bc-b5b6-aad0caaca66f) |
-| Postleitzahl | Canton de Bâle-Ville | canton | terms_by | npa (titre) | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/07dadddd-f9c7-42ff-9441-e8cb4ce41338) |
-| Landesgrenze | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/1bb701f7-75ee-4e35-901c-6c8dd76a73d7) |
+| Servitutpunkt: laufende Änderung | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/28ca06e1-b6c7-4d6d-b42e-ca34cfccb03a) |
 | Verkehrszähldaten motorisierter Individualverkehr | Canton de Thurgovie | canton | public_domain | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/45adb5ff-91e8-4efd-8989-8021d14890fc) |
-| Selbstrecht: laufende Änderung | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/5bf0b312-a365-41f5-b12a-6b624cb3db59) |
-| Servitut Linienelement: laufende Änderung | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/655724a4-36b3-4465-9592-d9b99b05fdbe) |
-| Servitutkennzeichen: laufende Änderung | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/6eb6c8d3-8f8f-4310-aa89-8ddfc8a59c11) |
-| Servitut Flächenelement: laufende Änderung | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/776806b8-28cf-4ff0-bd1f-398fef1e4282) |
-| Parzellen und andere rechtliche Abgrenzungen Text/Symbol | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/7c38ed48-7b69-41b4-83a2-c4895b27f0f5) |
-| Sektion | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/8e444c77-d45d-42a1-8507-5156727eb205) |
-| Selbstrecht | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/9f32900f-433c-454c-98ab-73e7a30a4943) |
+| Servitutpunkt | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/4e32d719-7669-4127-b05e-5db5656417c2) |
+| Gemeindegrenzpunkt | Canton de Bâle-Ville | canton | terms_by | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/985a7d60-e18a-4aac-82d7-05c5f0bbb835) |
+| Verkehrszähldaten motorisierter Individualverkehr nach Fahrzeugklassen | Canton de Thurgovie | canton | public_domain | commune | http://publications.europa.eu/resource/authority/frequency/DAILY | non | — | [lien](https://opendata.swiss/dataset/c3d23345-7176-4d1a-a2b7-ec30c7878355) |
+| Finanzkennzahlen der Bündner Gemeinden | Canton des Grisons | canton | terms_open | commune | http://publications.europa.eu/resource/authority/frequency/ANNUAL | non | — | [lien](https://opendata.swiss/dataset/53b7c01d-31b5-444a-bae0-34aaf9b81d1f) |
+| Gemeinderechnungen 2020 | Canton de Thurgovie | canton | public_domain | commune | http://publications.europa.eu/resource/authority/frequency/ANNUAL | non | — | [lien](https://opendata.swiss/dataset/84a69cad-310d-42e8-a2a2-5772c0202f35) |
+| Wohnungen nach Gebäudekategorie und Politischer Gemeinde (Bestand) | Canton de Thurgovie | canton | public_domain | commune | http://publications.europa.eu/resource/authority/frequency/ANNUAL | non | — | [lien](https://opendata.swiss/dataset/a72a37a5-d228-48ab-bab2-337d56de4c93) |
+| Steuerfüsse Evangelische Kirchgemeinden Thurgau | Canton de Thurgovie | canton | public_domain | commune | http://publications.europa.eu/resource/authority/frequency/ANNUAL | non | — | [lien](https://opendata.swiss/dataset/ba941e91-b2b5-4353-92a1-68514f3ca24f) |
+| Gebäude mit Wohnnutzung nach Gebäudekategorie und Politischer Gemeinde (Bestand) | Canton de Thurgovie | canton | public_domain | commune | http://publications.europa.eu/resource/authority/frequency/ANNUAL | non | — | [lien](https://opendata.swiss/dataset/d05cee47-157e-4b67-afd8-e7fe03a8eca5) |
+| Übersicht Finanzlage Schulgemeinden Kanton Thurgau ab 2018 | Canton de Thurgovie | canton | public_domain | commune | http://publications.europa.eu/resource/authority/frequency/ANNUAL | non | — | [lien](https://opendata.swiss/dataset/eb26b21f-9aa0-4ffd-856e-83807385dcdd) |
 
 ## Jeux de l'OFS — droits à confirmer
 

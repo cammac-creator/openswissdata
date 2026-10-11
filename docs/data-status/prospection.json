@@ -1,5 +1,5 @@
 {
-  "generated_on": "2026-10-07",
+  "generated_on": "2026-10-11",
   "source": "https://ckan.opendata.swiss/api/3/action/package_search",
   "run": {
     "pages_read": 55,
@@ -8,21 +8,21 @@
     "start_page": 97,
     "total_pages": 166,
     "datasets_read": 5500,
-    "datasets_total_catalog": 16556,
-    "coverage_ratio": 0.3329910606426673,
+    "datasets_total_catalog": 16567,
+    "coverage_ratio": 0.33295104726263053,
     "partial": false,
     "stopped_reason": "ok"
   },
   "totals": {
-    "candidates": 4560,
-    "excluded": 953,
+    "candidates": 4568,
+    "excluded": 948,
     "excluded_by_motif": {
-      "colonne_personne": 89,
+      "colonne_personne": 91,
       "colonne_personne_probable": 5,
-      "licence_absente": 28,
+      "licence_absente": 19,
       "licence_cc_by_sa": 398,
       "licence_non_ouverte": 265,
-      "personnes_detectees": 168
+      "personnes_detectees": 170
     }
   },
   "candidates": [
@@ -252,32 +252,6 @@
       "join_keys": [
         "commune",
         "commune (titre)"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "ed261ff4-4702-46a7-9af6-b647c0f16ef6",
-      "title": "Notfalltreffpunkte",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/ed261ff4-4702-46a7-9af6-b647c0f16ef6",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
-      "modified": null,
-      "join_keys": [
-        "canton",
-        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -545,36 +519,11 @@
       "csv_inspected": true
     },
     {
-      "id": "07dadddd-f9c7-42ff-9441-e8cb4ce41338",
-      "title": "Postleitzahl",
+      "id": "28ca06e1-b6c7-4d6d-b42e-ca34cfccb03a",
+      "title": "Servitutpunkt: laufende Änderung",
       "publisher": "Canton de Bâle-Ville",
       "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/07dadddd-f9c7-42ff-9441-e8cb4ce41338",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "npa (titre)"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "1bb701f7-75ee-4e35-901c-6c8dd76a73d7",
-      "title": "Landesgrenze",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/1bb701f7-75ee-4e35-901c-6c8dd76a73d7",
+      "url": "https://opendata.swiss/dataset/28ca06e1-b6c7-4d6d-b42e-ca34cfccb03a",
       "licence": "terms_by",
       "formats": [
         "CSV",
@@ -617,7 +566,7 @@
         "ZIP"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": "2026-10-05T11:01:49.504000+00:00",
+      "modified": "2026-10-10T11:01:33.228000+00:00",
       "join_keys": [
         "commune"
       ],
@@ -628,11 +577,11 @@
       "csv_inspected": true
     },
     {
-      "id": "5bf0b312-a365-41f5-b12a-6b624cb3db59",
-      "title": "Selbstrecht: laufende Änderung",
+      "id": "4e32d719-7669-4127-b05e-5db5656417c2",
+      "title": "Servitutpunkt",
       "publisher": "Canton de Bâle-Ville",
       "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/5bf0b312-a365-41f5-b12a-6b624cb3db59",
+      "url": "https://opendata.swiss/dataset/4e32d719-7669-4127-b05e-5db5656417c2",
       "licence": "terms_by",
       "formats": [
         "CSV",
@@ -653,136 +602,11 @@
       "csv_inspected": true
     },
     {
-      "id": "655724a4-36b3-4465-9592-d9b99b05fdbe",
-      "title": "Servitut Linienelement: laufende Änderung",
+      "id": "985a7d60-e18a-4aac-82d7-05c5f0bbb835",
+      "title": "Gemeindegrenzpunkt",
       "publisher": "Canton de Bâle-Ville",
       "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/655724a4-36b3-4465-9592-d9b99b05fdbe",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "6eb6c8d3-8f8f-4310-aa89-8ddfc8a59c11",
-      "title": "Servitutkennzeichen: laufende Änderung",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/6eb6c8d3-8f8f-4310-aa89-8ddfc8a59c11",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "776806b8-28cf-4ff0-bd1f-398fef1e4282",
-      "title": "Servitut Flächenelement: laufende Änderung",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/776806b8-28cf-4ff0-bd1f-398fef1e4282",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "7c38ed48-7b69-41b4-83a2-c4895b27f0f5",
-      "title": "Parzellen und andere rechtliche Abgrenzungen Text/Symbol",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/7c38ed48-7b69-41b4-83a2-c4895b27f0f5",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "8e444c77-d45d-42a1-8507-5156727eb205",
-      "title": "Sektion",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/8e444c77-d45d-42a1-8507-5156727eb205",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "9f32900f-433c-454c-98ab-73e7a30a4943",
-      "title": "Selbstrecht",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/9f32900f-433c-454c-98ab-73e7a30a4943",
+      "url": "https://opendata.swiss/dataset/985a7d60-e18a-4aac-82d7-05c5f0bbb835",
       "licence": "terms_by",
       "formats": [
         "CSV",
@@ -825,32 +649,7 @@
         "ZIP"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": "2026-10-05T11:01:36.746000+00:00",
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "fe45a2b5-8742-40d3-8ba4-e4844155c2d8",
-      "title": "Servitut Flächenelement",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/fe45a2b5-8742-40d3-8ba4-e4844155c2d8",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
+      "modified": "2026-10-10T11:01:19.988000+00:00",
       "join_keys": [
         "commune"
       ],
@@ -1075,31 +874,6 @@
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
       "modified": "2025-03-10T14:32:32+00:00",
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "952ae94c-63be-441d-a010-0babe86522cf",
-      "title": "Spezielle Bauvorschriften und Bebauungspläne im Kanton Basel-Stadt",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/952ae94c-63be-441d-a010-0babe86522cf",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
-      "modified": null,
       "join_keys": [
         "commune"
       ],
@@ -1958,7 +1732,7 @@
         "XLS"
       ],
       "frequency": null,
-      "modified": "2026-10-06T11:00:57.411000+00:00",
+      "modified": "2026-10-10T11:00:56.752000+00:00",
       "join_keys": [
         "canton"
       ],
