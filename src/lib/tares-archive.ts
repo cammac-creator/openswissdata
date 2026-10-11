@@ -42,12 +42,17 @@ export async function readDatasetArchive(dataset: "tares" | "classifications", i
     used += copies[0].size;
   }
   const folder = join(root, today); await mkdir(folder, { recursive: true, mode: 0o700 });
+  const todayPath = join(folder, info.sha256 + ".zip");
   const existing = kept.get(info.sha256 + ".zip")?.[0]?.path;
-  for (const path of [join(folder, info.sha256 + ".zip"), ...(existing ? [existing] : [])]) {
+  for (const path of [todayPath, ...(existing && existing !== todayPath ? [existing] : [])]) {
     try {
       const bytes = await readFile(path);
-      if (bytes.length !== info.size_bytes || createHash("sha256").update(bytes).digest("hex") !== info.sha256) throw new Error(`Bronze ${dataset} altéré`);
-      return bytes;
+      if (bytes.length === info.size_bytes && createHash("sha256").update(bytes).digest("hex") === info.sha256) return bytes;
+      if (path === todayPath) throw new Error(`Bronze ${dataset} altéré`);
+      // Copie d'un jour précédent altérée : retirée, puis téléchargement vérifié (comme avant le 11.10.2026,
+      // où chaque nouveau jour retéléchargeait), au lieu de bloquer la lecture jusqu'à sa purge.
+      await unlink(path).catch(e => { if (e.code !== "ENOENT") throw e; });
+      used -= kept.get(info.sha256 + ".zip")![0].size;
     } catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
   }
   const space = await statfs(root);

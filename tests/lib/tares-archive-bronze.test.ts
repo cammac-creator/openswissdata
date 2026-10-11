@@ -47,11 +47,27 @@ describe("bronze TARES : un seul exemplaire par empreinte", () => {
     expect(copies(sha(other))).toEqual([day(10)]);
   });
 
-  it("refuse une copie antérieure altérée au lieu de la servir", async () => {
+  it("ne sert jamais une copie antérieure altérée : la retire et retélécharge avec vérification", async () => {
     const bytes = Buffer.from("archive TARES fictive");
     place(2, sha(bytes), Buffer.from("contenu altéré"));
+    download.mockResolvedValue(bytes);
+    await expect(readTaresArchive(info(bytes))).resolves.toEqual(bytes);
+    expect(download).toHaveBeenCalledOnce();
+    expect(copies(sha(bytes))).toEqual([day(0)]);
+  });
+
+  it("refuse toujours une copie du jour altérée", async () => {
+    const bytes = Buffer.from("archive TARES fictive");
+    place(0, sha(bytes), Buffer.from("contenu altéré"));
     await expect(readTaresArchive(info(bytes))).rejects.toThrow("altéré");
     expect(download).not.toHaveBeenCalled();
+  });
+
+  it("refuse un téléchargement dont l'empreinte ne correspond pas", async () => {
+    const bytes = Buffer.from("archive TARES fictive");
+    place(2, sha(bytes), Buffer.from("contenu altéré"));
+    download.mockResolvedValue(Buffer.from("autre contenu"));
+    await expect(readTaresArchive(info(bytes))).rejects.toThrow("Empreinte");
   });
 
   it("télécharge dans le dossier du jour quand aucune copie n'existe", async () => {
