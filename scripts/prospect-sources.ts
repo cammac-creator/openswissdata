@@ -106,6 +106,9 @@ export interface CkanResource {
   url?: string;
   format?: string;
   rights?: string | null;
+  // Relevé le 08.10.2026 : certaines ressources portent leur licence ici et laissent `rights` vide
+  // (OSAV en terms_by, OFSP en terms_open). Lu seulement quand `rights` est vide (`classifyLicence`).
+  license?: string | null;
 }
 
 export interface CkanOrganization {
@@ -241,7 +244,12 @@ export interface LicenceVerdict {
 }
 
 export function classifyLicence(resources: CkanResource[] | undefined): LicenceVerdict {
-  const codes = (resources ?? []).map((r) => classifyResourceRights(r.rights));
+  // `rights` prioritaire ; `license` seulement quand `rights` est vide (correction du 08.10.2026 :
+  // ces jeux étaient classés « licence_absente » à tort et jamais vus comme candidats).
+  const codes = (resources ?? []).map((r) => {
+    const fromRights = classifyResourceRights(r.rights);
+    return fromRights !== "absente" ? fromRights : classifyResourceRights(r.license);
+  });
   if (codes.includes("open")) return { licence: "open", matched: "open" };
   if (codes.includes("by")) return { licence: "open", matched: "by" };
   if (codes.includes("attribution")) return { licence: "open", matched: "attribution" };
