@@ -1,31 +1,56 @@
 {
-  "generated_on": "2026-10-11",
+  "generated_on": "2026-10-12",
   "source": "https://ckan.opendata.swiss/api/3/action/package_search",
   "run": {
     "pages_read": 55,
     "page_size": 100,
     "max_pages": 55,
-    "start_page": 97,
+    "start_page": 152,
     "total_pages": 166,
-    "datasets_read": 5500,
-    "datasets_total_catalog": 16567,
-    "coverage_ratio": 0.33295104726263053,
+    "datasets_read": 5421,
+    "datasets_total_catalog": 16521,
+    "coverage_ratio": 0.6620059318443193,
     "partial": false,
     "stopped_reason": "ok"
   },
   "totals": {
-    "candidates": 4568,
-    "excluded": 948,
+    "candidates": 9452,
+    "excluded": 1485,
     "excluded_by_motif": {
-      "colonne_personne": 91,
+      "colonne_personne": 239,
       "colonne_personne_probable": 5,
-      "licence_absente": 19,
-      "licence_cc_by_sa": 398,
-      "licence_non_ouverte": 265,
-      "personnes_detectees": 170
+      "licence_absente": 31,
+      "licence_cc_by_sa": 405,
+      "licence_non_ouverte": 300,
+      "personnes_detectees": 505
     }
   },
   "candidates": [
+    {
+      "id": "13345431-7cd8-4427-85b6-daf52f3be2ea",
+      "title": "Primes de l’assurance-maladie",
+      "publisher": "Office fédéral de la santé publique OFSP",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/13345431-7cd8-4427-85b6-daf52f3be2ea",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "PDF",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-09-29T00:00:00",
+      "join_keys": [
+        "canton",
+        "tarif"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
     {
       "id": "13114d60-c1ae-423f-ade2-8bf6580a4973",
       "title": "Données de prévisions locales - Données ponctuelles",
@@ -134,6 +159,28 @@
       "csv_inspected": true
     },
     {
+      "id": "2628a6a6-1ec8-42b2-afd5-17327f569fb5",
+      "title": "Rétributions uniques pour installations photovoltaïques",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/2628a6a6-1ec8-42b2-afd5-17327f569fb5",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "SPARQL"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2024-07-16T00:00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": true,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "272919d6-3b92-4918-bdae-a78fb1691f6a",
       "title": "Le Programme Bâtiments - Données sources des cantons pour les mesures indirectes",
       "publisher": "Office fédéral de l'énergie OFEN",
@@ -166,6 +213,73 @@
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
       "modified": null,
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8c5bed3e-4020-4fc2-8377-6ea009323464",
+      "title": "Potentiel d'énergie solaire des communes suisses",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/8c5bed3e-4020-4fc2-8377-6ea009323464",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2023-04-19T00:00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "cb3656ae-178e-4447-97d2-6b4987ae1f94",
+      "title": "État de la politique énergétique dans les cantons",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/cb3656ae-178e-4447-97d2-6b4987ae1f94",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "SERVICE"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2023-06-13T00:00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "0ea4bf46-f546-4cdc-9dbc-253eed4791e7",
+      "title": "Etudes de potentiel et publications sur l'utilisation de la chaleur des lacs et des eaux de surface",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "editor_level": "confederation",
+      "url": "https://opendata.swiss/dataset/0ea4bf46-f546-4cdc-9dbc-253eed4791e7",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": "2023-01-25T00:00:00",
       "join_keys": [
         "canton"
       ],
@@ -231,6 +345,151 @@
       "csv_inspected": true
     },
     {
+      "id": "dcd9e1bf-b9ca-44fc-a6c5-00822428c7dd",
+      "title": "Bilanz der Wohnbevölkerung nach Gemeinde und Quartal (seit 2003)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/dcd9e1bf-b9ca-44fc-a6c5-00822428c7dd",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/QUARTERLY",
+      "modified": "2026-09-15T06:31:53.172000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "09e3ba66-c783-4d92-b164-8113f571c1c7",
+      "title": "Energieverbrauch und erneuerbare Stromproduktion: Anzahl Hauptheizsysteme nach Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/09e3ba66-c783-4d92-b164-8113f571c1c7",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-07-07T10:52:56.750000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "32903b0f-92d3-45a9-9e51-86a8b80c2161",
+      "title": "Durchschnittlicher Quadratmeterpreis von Wohnbauland nach Gemeinde und Jahr (seit 1979)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/32903b0f-92d3-45a9-9e51-86a8b80c2161",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-08-03T15:04:26.082000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "38b5030c-f4b5-42d2-a21b-f496d1ae9536",
+      "title": "Finanzausgleich nach Gemeinde und Jahr (seit 2010)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/38b5030c-f4b5-42d2-a21b-f496d1ae9536",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-08-03T08:31:51.099000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "4fe0c6e1-5235-4e03-884f-8125b7f5ecd6",
+      "title": "Bilanz der Wohnbevölkerung nach Gemeinde und Jahr (seit 1980)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/4fe0c6e1-5235-4e03-884f-8125b7f5ecd6",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-07-21T12:47:08.937000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "7584a071-bc17-4b9c-8847-84e65af87a9c",
       "title": "Verteilung des Haushaltseinkommens nach Gemeinde",
       "publisher": "Canton de Bâle-Ville",
@@ -260,6 +519,270 @@
       "csv_inspected": true
     },
     {
+      "id": "9278b149-9565-4f8c-a323-617ce6bd8107",
+      "title": "Steuerfüsse und Steuersätze nach Gemeinde und Jahr (seit 1975)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/9278b149-9565-4f8c-a323-617ce6bd8107",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-07-23T11:56:15.274000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e2a1b018-5a95-4b46-9ad2-3c6aa330c0cf",
+      "title": "Neu erstellte Wohnungen nach Gemeinde und Jahr (seit 1994)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e2a1b018-5a95-4b46-9ad2-3c6aa330c0cf",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-08-21T08:09:34.475000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a9c5cfb5-ee2a-4620-a1aa-1bc9baeb92f1",
+      "title": "Strassen und Wege: Kantonsstrassen Riehen und Bettingen",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a9c5cfb5-ee2a-4620-a1aa-1bc9baeb92f1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": "2024-10-31T00:00:00+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e4b71a17-3eb9-4023-9c9b-4b318bf96473",
+      "title": "Kinder- und Jugendangebote",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e4b71a17-3eb9-4023-9c9b-4b318bf96473",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": "2021-07-16T00:00:00+00:00",
+      "join_keys": [
+        "canton",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "07c8b310-adfa-46da-9c68-7b116b852842",
+      "title": "Trinkwasserqualität im Kanton Zürich nach Gemeinden und Verteilzonen",
+      "publisher": "Gesundheitsdirektion Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/07c8b310-adfa-46da-9c68-7b116b852842",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-10-09T11:25:05.006315+02:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "17df8193-560c-4cec-a590-47c01bafdc9e",
+      "title": "Schulergänzende Kinderbetreuung Kanton Thurgau (Stand 31.12)",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/17df8193-560c-4cec-a590-47c01bafdc9e",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:06:28.918000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "18523a9b-25ad-4e50-9b9a-a70f4e464549",
+      "title": "Schulergänzende Kinderbetreuung Kanton Thurgau (Stand August 2020)",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/18523a9b-25ad-4e50-9b9a-a70f4e464549",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2024-11-01T10:30:48.992000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "21a3621e-03e8-4642-814e-b3983dbe777e",
+      "title": "Resultate der kantonalen Abstimmungen im Kanton Thurgau ab 2004 nach Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/21a3621e-03e8-4642-814e-b3983dbe777e",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-07-07T10:52:51.876000+00:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2d921b57-43b6-416e-8e97-1636cf9cf540",
+      "title": "Kindertagesstätten im Kanton Thurgau (Stand August 2020)",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2d921b57-43b6-416e-8e97-1636cf9cf540",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2025-11-21T08:53:43.206000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "36e83e91-829f-40d4-9662-c36e4a87e768",
       "title": "Siedlungsverzeichnis des Kantons Thurgau 2022",
       "publisher": "Canton de Thurgovie",
@@ -281,6 +804,28 @@
       "join_keys": [
         "commune",
         "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "3ef7cc79-6250-4637-9b5c-56b690ba8c7f",
+      "title": "Bevölkerung nach Gemeinde, Heimat, Geschlecht und Alter ab 2010",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/3ef7cc79-6250-4637-9b5c-56b690ba8c7f",
+      "licence": "terms_open",
+      "formats": [
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-02-06T14:05:58.698345+01:00",
+      "join_keys": [
+        "commune",
+        "commune (titre)"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -352,6 +897,35 @@
       "csv_inspected": true
     },
     {
+      "id": "50c7c307-5f8c-4250-8a9d-5d29756ecd29",
+      "title": "Ortschaftenverzeichnis Kanton Thurgau 2020",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/50c7c307-5f8c-4250-8a9d-5d29756ecd29",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2025-03-26T08:55:56.149000+00:00",
+      "join_keys": [
+        "commune",
+        "npa (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "50f5011e-089e-4cf8-8819-8e945e1caf7a",
       "title": "Ortschaftenverzeichnis Kanton Thurgau 2023",
       "publisher": "Canton de Thurgovie",
@@ -410,6 +984,98 @@
       "csv_inspected": true
     },
     {
+      "id": "6846576d-6d74-4856-aaa9-c4cae40e96de",
+      "title": "Betriebe mit einer Verkaufsbewilligung für Spirituosen nach Standort",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6846576d-6d74-4856-aaa9-c4cae40e96de",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": null,
+      "modified": "2026-08-17T14:53:34.567000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "76e068e5-b4cc-4032-81ca-553f72c7ebe7",
+      "title": "Ortschaftenverzeichnis Kanton Thurgau 2022",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/76e068e5-b4cc-4032-81ca-553f72c7ebe7",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:04:48.219000+00:00",
+      "join_keys": [
+        "commune",
+        "npa (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "79d06cf4-c8f8-4aba-a267-3c9c39b9ed5e",
+      "title": "Kindertagesstätten im Kanton Thurgau (Stand 31.12)",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/79d06cf4-c8f8-4aba-a267-3c9c39b9ed5e",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:00:16.540000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "7c7e62d0-2020-438c-a6ca-2847e82e7d48",
       "title": "Nationalratswahlen Kanton Thurgau: Wahlberechtigte und Wahlbeteiligung nach Gemeinden",
       "publisher": "Canton de Thurgovie",
@@ -431,6 +1097,98 @@
       "join_keys": [
         "commune",
         "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7e0779be-72bb-4e62-97bc-0e65629373e4",
+      "title": "Siedlungsverzeichnis des Kantons Thurgau 2019",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7e0779be-72bb-4e62-97bc-0e65629373e4",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2019-06-17T00:00:00+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "95678153-5d9e-41a5-bf3e-ed4de45f9d73",
+      "title": "Ortschaftenverzeichnis Kanton Thurgau 2019",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/95678153-5d9e-41a5-bf3e-ed4de45f9d73",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:04:31.274000+00:00",
+      "join_keys": [
+        "commune",
+        "npa (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a3acaf80-12d2-4292-9772-c6b167f228f9",
+      "title": "Öffentlich zugängliche Gastwirtschaften nach Betriebsart und Standort",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a3acaf80-12d2-4292-9772-c6b167f228f9",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": null,
+      "modified": "2026-08-17T15:11:27.621000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -490,6 +1248,87 @@
       "csv_inspected": true
     },
     {
+      "id": "c0b72262-04bc-4591-82b1-e1ba088fb242",
+      "title": "Ortschaftenverzeichnis Kanton Thurgau 2021",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c0b72262-04bc-4591-82b1-e1ba088fb242",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:04:42.815000+00:00",
+      "join_keys": [
+        "commune",
+        "npa (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "cfdb115e-2dd9-4813-a834-0fda47a3186b",
+      "title": "Luftschadstoffemissionen im Kanton Zürich",
+      "publisher": "Amt für Abfall, Wasser, Energie und Luft Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/cfdb115e-2dd9-4813-a834-0fda47a3186b",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "TXT"
+      ],
+      "frequency": null,
+      "modified": "2026-01-16T17:13:10.496446+01:00",
+      "join_keys": [
+        "canton",
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e73be66e-fe30-4b01-bfe5-ee082203f46b",
+      "title": "Schulergänzende Kinderbetreuung Kanton Thurgau (Stand Oktober 2019)",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e73be66e-fe30-4b01-bfe5-ee082203f46b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2024-11-01T10:31:35.780000+00:00",
+      "join_keys": [
+        "commune",
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "f9f1bf42-e490-41bc-b5b6-aad0caaca66f",
       "title": "Siedlungsverzeichnis des Kantons Thurgau 2026",
       "publisher": "Canton de Thurgovie",
@@ -511,6 +1350,60 @@
       "join_keys": [
         "commune",
         "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a602acbb-16f8-44a6-859c-78e0af6ee6ce",
+      "title": "Veranstaltungen mit potenziellem Einfluss auf Veloverkehr",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a602acbb-16f8-44a6-859c-78e0af6ee6ce",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/CONT",
+      "modified": "2026-10-09T16:30:58.452000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b6070ec8-717f-4ba8-b174-7763f7396186",
+      "title": "Eidgenössische und kantonale Abstimmungen Kanton Basel-Stadt 8.3.2015 - 9.2.2020",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b6070ec8-717f-4ba8-b174-7763f7396186",
+      "licence": "terms_open",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/CONT",
+      "modified": "2020-02-13T00:00:00",
+      "join_keys": [
+        "canton"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -577,6 +1470,27 @@
       "csv_inspected": true
     },
     {
+      "id": "47601b53-99e0-499c-a8fd-d742b58396bb",
+      "title": "COVID_19 Sterbeorte Kanton Zürich pro Tag ab 15.03.2020",
+      "publisher": "Gesundheitsdirektion Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/47601b53-99e0-499c-a8fd-d742b58396bb",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": "2022-03-15T00:00:00+01:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "4e32d719-7669-4127-b05e-5db5656417c2",
       "title": "Servitutpunkt",
       "publisher": "Canton de Bâle-Ville",
@@ -594,6 +1508,60 @@
       "modified": null,
       "join_keys": [
         "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "57edebcb-f68e-4d11-ae23-a5884fafe799",
+      "title": "Baumkataster: Baumbestand",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/57edebcb-f68e-4d11-ae23-a5884fafe799",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": "2026-10-10T00:00:00+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "76c9964b-5c30-4f5f-9dff-46cd4c041ac1",
+      "title": "COVID_19 Belegung Intensivpflege Kanton Zürich ab 29.10.2020 bis 02.05.2023",
+      "publisher": "Gesundheitsdirektion Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/76c9964b-5c30-4f5f-9dff-46cd4c041ac1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+      "modified": "2023-05-09T00:00:00+02:00",
+      "join_keys": [
+        "canton"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -660,6 +1628,373 @@
       "csv_inspected": true
     },
     {
+      "id": "3f15624b-73e4-4f5e-8ff1-d5cbb9f766c6",
+      "title": "Recyclingstationen",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/3f15624b-73e4-4f5e-8ff1-d5cbb9f766c6",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/WEEKLY",
+      "modified": "2026-10-11T00:00:00+00:00",
+      "join_keys": [
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "05c1f011-b71c-45d6-9a98-18d51dee0337",
+      "title": "Abstimmungsarchiv des Kantons Zürich ab 1831",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/05c1f011-b71c-45d6-9a98-18d51dee0337",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/MONTHLY",
+      "modified": "2022-05-31T00:00:00+02:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2f47a73e-2faa-43ac-aa57-53f95daf5229",
+      "title": "Wohnbevölkerung nach Bezirk",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2f47a73e-2faa-43ac-aa57-53f95daf5229",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/MONTHLY",
+      "modified": "2026-10-09T01:17:41.222000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "f2f5edd8-ae58-4ef8-b15c-046a595905a5",
+      "title": "Wohnbevölkerung nach Nationalität, Konfession, Gemeinde und Quartal (seit 2003)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/f2f5edd8-ae58-4ef8-b15c-046a595905a5",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/QUARTERLY",
+      "modified": "2026-09-15T06:30:18.105000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "10e55041-4161-4d0a-8f41-a034919937ab",
+      "title": "Wohnbevölkerung nach Geschlecht, Alter, Staatsangehörigkeit und Wohnviertel",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/10e55041-4161-4d0a-8f41-a034919937ab",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-10-01T01:19:00.685000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "1fc17971-81f7-46bb-9184-dc1e51ab6f04",
+      "title": "Gemeindefinanzen nach Rechnungsteil, Funktion, Kontenart und Jahr (seit 2015)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/1fc17971-81f7-46bb-9184-dc1e51ab6f04",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-10-05T09:50:56.052000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2d3ee6e5-e8db-4aa2-8cde-955e5d84ae31",
+      "title": "Gemeindefinanzkennzahlen Politische Gemeinden Kanton Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2d3ee6e5-e8db-4aa2-8cde-955e5d84ae31",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-04-23T12:56:23.714000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "335993cf-cb82-4e04-97ff-8129d7dd7b65",
+      "title": "Leerwohnungsziffer nach Zimmerzahl, Gemeinde und Jahr (seit 2002)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/335993cf-cb82-4e04-97ff-8129d7dd7b65",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-09-04T12:08:08.030000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "34b52269-a6b9-4514-8734-69534b2d1530",
+      "title": "Finanzausgleich Politische Gemeinden: Gesamtauswirkungen",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/34b52269-a6b9-4514-8734-69534b2d1530",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-04-23T12:54:49.396000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "36140e5b-1333-4b47-a5cf-7b0c220b12ec",
+      "title": "Wohnbevölkerung nach Geschlecht, Staatsangehörigkeit und Wohnviertel",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/36140e5b-1333-4b47-a5cf-7b0c220b12ec",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-08-10T12:31:23.042000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "38298bea-afbd-4366-ba58-288a68ffff33",
+      "title": "Finanzausgleich Politische Gemeinden: Komponenten",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/38298bea-afbd-4366-ba58-288a68ffff33",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-04-23T12:54:54.106000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "3a8e485f-b184-48f3-9d60-fda4a7d1388f",
+      "title": "Schülerinnen und Schüler der öffentlichen Volksschule nach Schulgemeinde und Staatsangehörigkeit im Kanton Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/3a8e485f-b184-48f3-9d60-fda4a7d1388f",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-09-16T22:01:07.755000+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5067dd2d-07d5-4d74-9cdf-a20013def45c",
+      "title": "Endenergieverbrauch im Gebäudebereich nach Energieträgern und Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5067dd2d-07d5-4d74-9cdf-a20013def45c",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-07-07T10:52:46.581000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "53b7c01d-31b5-444a-bae0-34aaf9b81d1f",
       "title": "Finanzkennzahlen der Bündner Gemeinden",
       "publisher": "Canton des Grisons",
@@ -678,6 +2013,146 @@
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
       "modified": "2026-04-13T11:42:03.824000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "55d84485-7d0a-4f99-83b3-e146cdbb51b1",
+      "title": "CO2-Emissionen im Gebäudebereich nach Energieträgern und Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/55d84485-7d0a-4f99-83b3-e146cdbb51b1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2025-03-04T15:48:48.466000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "652c8daa-5787-4ce6-b600-1f85ec44144c",
+      "title": "Bevölkerungsszenarien Basel-Stadt 2026-2050",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/652c8daa-5787-4ce6-b600-1f85ec44144c",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-07-16T07:46:39.867000+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "73da6448-7046-4afc-b058-d68b4a374514",
+      "title": "Leerwohnungsbestand nach Zimmerzahl, Gemeinde und Jahr (seit 2002)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/73da6448-7046-4afc-b058-d68b4a374514",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-09-04T12:07:25.539000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7720c468-e5a9-447b-a152-d71deb4c4e39",
+      "title": "Erneuerbare Elektrizitätsproduktion nach Energieträgern und Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7720c468-e5a9-447b-a152-d71deb4c4e39",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2025-03-04T15:48:50.075000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "83c5cca5-5352-4b81-9e67-98f5d902ec5e",
+      "title": "Energieförderprogramm im Kanton Thurgau: Umgesetzte Projekte in den Thurgauer Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/83c5cca5-5352-4b81-9e67-98f5d902ec5e",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-07-07T10:52:53.412000+00:00",
       "join_keys": [
         "commune"
       ],
@@ -716,6 +2191,34 @@
       "csv_inspected": true
     },
     {
+      "id": "a4ee794f-b4fb-4e50-a23a-4e911419bb02",
+      "title": "Schülerinnen und Schüler der öffentlichen Volksschule nach Schulgemeinde und Erstsprache im Kanton Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a4ee794f-b4fb-4e50-a23a-4e911419bb02",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-09-17T14:38:42.749000+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "a72a37a5-d228-48ab-bab2-337d56de4c93",
       "title": "Wohnungen nach Gebäudekategorie und Politischer Gemeinde (Bestand)",
       "publisher": "Canton de Thurgovie",
@@ -736,6 +2239,34 @@
       "modified": "2026-09-01T05:38:38.151000+00:00",
       "join_keys": [
         "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b48b395c-09be-4c36-b1d6-18b6b86b2f18",
+      "title": "Schülerinnen und Schüler der Mittelschulen des Kantons Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b48b395c-09be-4c36-b1d6-18b6b86b2f18",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2024-11-01T10:32:47.502000+00:00",
+      "join_keys": [
+        "canton"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -790,6 +2321,146 @@
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
       "modified": "2026-09-01T05:40:56.062000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d12dab98-beec-4536-a2d5-618df0587b71",
+      "title": "Wohnbevölkerung nach Geschlecht, Alter, Gemeinde und Jahr (seit 2003)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d12dab98-beec-4536-a2d5-618df0587b71",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-08-03T15:26:07.559000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "df6179cb-387b-49d7-8f2c-1e7b2d1c1a1b",
+      "title": "Schülerinnen und Schüler der öffentlichen Volksschule nach Staatsangehörigkeit im Kanton Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/df6179cb-387b-49d7-8f2c-1e7b2d1c1a1b",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-09-16T22:01:03.333000+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e1938b42-0d12-4ba4-90c2-e09172c0e9d6",
+      "title": "Wohnungsbestand nach Zimmerzahl, Gemeinde und Jahr (seit 1994)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e1938b42-0d12-4ba4-90c2-e09172c0e9d6",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-08-21T08:08:07.222000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e5715a8a-3650-4e3a-90eb-3f0e59cf7603",
+      "title": "Überbauungsstand nach Zone, Erschliessung, Gemeinde und Jahr (seit 2016)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e5715a8a-3650-4e3a-90eb-3f0e59cf7603",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-09-23T09:09:48.151000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e6e9fd87-fcfa-4a64-9d2c-b1ae20a4773a",
+      "title": "Baugesuche und Baubewilligungen nach Gebäudeart, Gemeinde und Jahr (1991/1992 - 2024)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e6e9fd87-fcfa-4a64-9d2c-b1ae20a4773a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-07-21T08:09:14.886000+00:00",
       "join_keys": [
         "commune"
       ],
@@ -884,6 +2555,337 @@
       "csv_inspected": true
     },
     {
+      "id": "f197b394-3ce0-4315-bad5-65d4e7f03396",
+      "title": "Unfallschwerpunkte",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/f197b394-3ce0-4315-bad5-65d4e7f03396",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "modified": "2026-10-09T00:00:00+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2876bf98-782d-40c2-8ec7-fe8b88458d82",
+      "title": "Gewässerschutzkarte: Gewässerschutzbereiche",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2876bf98-782d-40c2-8ec7-fe8b88458d82",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": "2026-05-06T00:00:00+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "600bb932-5fb8-4850-9b8c-4cc39d3930c5",
+      "title": "Résultats de la votation populaire du 12 février 2017 à Genève",
+      "publisher": "Administration cantonale Genève",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/600bb932-5fb8-4850-9b8c-4cc39d3930c5",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "696c8847-0cad-43eb-873e-96521dea9c5e",
+      "title": "Haltestellen des öffentlichen Verkehrs",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/696c8847-0cad-43eb-873e-96521dea9c5e",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": "2026-02-09T00:00:00+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7cb536d6-68e7-4271-ae90-e98e6ed04f93",
+      "title": "Gewässerschutzkarte: Grundwasserschutzzonen",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7cb536d6-68e7-4271-ae90-e98e6ed04f93",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": "2026-05-06T00:00:00+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7f6964cf-5a05-4cac-a761-ab12ce0e5d9b",
+      "title": "Bio-Klappen",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7f6964cf-5a05-4cac-a761-ab12ce0e5d9b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": "2026-10-11T00:00:00+00:00",
+      "join_keys": [
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "91fbe0d9-97b4-4a22-8330-2233ff05985b",
+      "title": "Standorte der Zählstellen für Verkehrszähldaten",
+      "publisher": "Canton de Bâle-Ville",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/91fbe0d9-97b4-4a22-8330-2233ff05985b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": "2026-09-04T00:00:00+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b1b7b691-a1e5-4004-8372-6e30d6062539",
+      "title": "Résultats de la votation populaire du 10 juin 2018 à Genève",
+      "publisher": "Administration cantonale Genève",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b1b7b691-a1e5-4004-8372-6e30d6062539",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "f185d799-0c9b-48b1-be75-033f62344940",
+      "title": "Résultats de la votation populaire du 25 septembre 2016 à Genève",
+      "publisher": "Administration cantonale Genève",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/f185d799-0c9b-48b1-be75-033f62344940",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+      "modified": null,
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "88ce7a47-bec2-451d-8477-f43c1e8e4534",
+      "title": "Wohngebäude nach Energieträger der Heizung, Bauperiode, Gemeinde und Jahr (seit 2022)",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/88ce7a47-bec2-451d-8477-f43c1e8e4534",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": "http://publications.europa.eu/resource/authority/frequency/BIDECENNIAL",
+      "modified": "2026-08-03T15:22:41.270000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "00d6b0ed-4139-42e5-893f-1e54259c73d4",
+      "title": "Anteil 3-Personenhaushalte [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/00d6b0ed-4139-42e5-893f-1e54259c73d4",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:13:46.334020+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "00ed0f44-3910-4c79-86a4-dfb0860c2129",
+      "title": "Anteil 2-Personenhaushalte [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/00ed0f44-3910-4c79-86a4-dfb0860c2129",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:13:42.962494+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "013810cc-7fbc-4cfc-a8c8-b6e74795b754",
       "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2022",
       "publisher": "Canton de Thurgovie",
@@ -930,6 +2932,69 @@
       ],
       "frequency": null,
       "modified": "2026-03-26T09:45:12+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "039c1549-583f-40a9-a963-7852d7786b4a",
+      "title": "Total Quellensteuerpflichtige [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/039c1549-583f-40a9-a963-7852d7786b4a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:53:42.264259+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "053f975f-fef2-491b-928f-72e67d724ab1",
+      "title": "Aerzte [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/053f975f-fef2-491b-928f-72e67d724ab1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:23.921791+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "0551fb2b-af50-4c6a-9a75-e220221b65db",
+      "title": "Bevölkerung: katholisch [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/0551fb2b-af50-4c6a-9a75-e220221b65db",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:51.259548+01:00",
       "join_keys": [
         "commune"
       ],
@@ -991,6 +3056,203 @@
       "csv_inspected": true
     },
     {
+      "id": "0777f0c4-b030-4767-89eb-b364d5e76580",
+      "title": "Verkehrsnachfrage im ÖV, MIV und im Veloverkehr nach Gemeinden und Regionen im Kanton Zürich",
+      "publisher": "Amt für Mobilität des Kantons Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/0777f0c4-b030-4767-89eb-b364d5e76580",
+      "licence": "terms_open",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2024-04-09T00:00:00+02:00",
+      "join_keys": [
+        "commune (titre)"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "09880f0b-4f33-4d82-85d6-c692d82e3bb1",
+      "title": "Hauptberufliche Landwirtschaftsbetriebe [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/09880f0b-4f33-4d82-85d6-c692d82e3bb1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:55:52.379031+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "0a65d43a-f21d-4373-86f3-5f3a85596c5b",
+      "title": "Hotelbetten [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/0a65d43a-f21d-4373-86f3-5f3a85596c5b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:36.356356+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "0bfe0e0a-374e-4f5c-bea2-6e65c01df2af",
+      "title": "Steuerertrag Politische/Schulgemeinde [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/0bfe0e0a-374e-4f5c-bea2-6e65c01df2af",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:52:48.184124+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "0c455929-0abd-4a00-a22b-586fbfed4013",
+      "title": "Anteil Grundsteuern am Steuerertrag [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/0c455929-0abd-4a00-a22b-586fbfed4013",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:15:54.037360+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "0c51e8de-4075-4b6a-836c-6657e131222d",
+      "title": "Bauzonen",
+      "publisher": "Canton de Zoug",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/0c51e8de-4075-4b6a-836c-6657e131222d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON"
+      ],
+      "frequency": null,
+      "modified": "2026-09-28T00:00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "0f2ead11-d4c8-4746-a1ea-26e172bc003a",
+      "title": "Bevölkerung: Durchschnittsalter [Jahre]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/0f2ead11-d4c8-4746-a1ea-26e172bc003a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:55:10.037932+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "10dbe771-850a-4525-b528-0c1e63262a42",
+      "title": "Anteil 6+ Zi.-Wohnungen [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/10dbe771-850a-4525-b528-0c1e63262a42",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:58.670590+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "1229a42e-245d-4909-9e16-b742108e183a",
+      "title": "Wohnungsstatistik ab 2010 nach Politischen Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/1229a42e-245d-4909-9e16-b742108e183a",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-08-28T16:59:36+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "16eed053-fa70-4e54-b9f9-ea2fd0476997",
       "title": "Verkehrszähldaten Veloverkehr Kanton Zürich",
       "publisher": "Tiefbauamt Kanton Zürich",
@@ -1005,6 +3267,713 @@
       "modified": "2026-03-30T14:09:20.873410+02:00",
       "join_keys": [
         "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "17bfa6b6-2954-4d41-9a09-8beb7e0ac98a",
+      "title": "Geb.Vol. Landwirtschaft: Anteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/17bfa6b6-2954-4d41-9a09-8beb7e0ac98a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:57.688537+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "1941a42a-fc69-4d42-bca6-9d2250ce97d4",
+      "title": "Lernende auf Sekundarstufe I im Kanton Zürich ab 2000",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/1941a42a-fc69-4d42-bca6-9d2250ce97d4",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2025-10-03T00:00:00+02:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "1b76b6a3-3761-4a3f-9764-e7a7b5138917",
+      "title": "Anteil 5-Personenhaushalte [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/1b76b6a3-3761-4a3f-9764-e7a7b5138917",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:13:55.738554+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "1d86eead-225a-4187-87bc-79bca7f2f020",
+      "title": "Bevölkerungszunahme 5 Jahre [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/1d86eead-225a-4187-87bc-79bca7f2f020",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:42:48.062346+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "201914b1-9614-4de3-ab54-428c1ed0b2b4",
+      "title": "Nettovermögen [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/201914b1-9614-4de3-ab54-428c1ed0b2b4",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:50.158163+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "20b6b188-ea20-4f7d-9181-473507ea0e07",
+      "title": "Verkäufe Stockwerkeigentum [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/20b6b188-ea20-4f7d-9181-473507ea0e07",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:36.569568+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "210ebc09-1440-45f2-8f9a-1aeb225ab20e",
+      "title": "Katholische Kirchensteuerpflichtige [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/210ebc09-1440-45f2-8f9a-1aeb225ab20e",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:53:48.411914+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "21f528e8-5fbd-4a2a-9390-5ad000452eac",
+      "title": "ÖV-Wege Quell-, Ziel- und Binnenverkehr [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/21f528e8-5fbd-4a2a-9390-5ad000452eac",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:19:18.731274+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2318859d-2fce-4286-b866-2c2e90872ba3",
+      "title": "Wasserverbrauch pro Tag und Kopf [Liter]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2318859d-2fce-4286-b866-2c2e90872ba3",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:13.146708+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "231e0f0a-6dfd-4407-a168-7bf78a559921",
+      "title": "Geb.Vol. Industrie/Lager: Zunahme [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/231e0f0a-6dfd-4407-a168-7bf78a559921",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:51.284366+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2452e855-f907-49b3-9f8a-998c878d6d11",
+      "title": "Sterbefälle [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2452e855-f907-49b3-9f8a-998c878d6d11",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:47:42.956314+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2466aece-8d0d-4567-9be1-408f725473e0",
+      "title": "EFH-Bestand [Whg.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2466aece-8d0d-4567-9be1-408f725473e0",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:47.960948+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "27fb4bbd-1b1f-4d66-b861-f6b1aa89268d",
+      "title": "Nettoinvestitionen [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/27fb4bbd-1b1f-4d66-b861-f6b1aa89268d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:40.746518+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "29f326d0-5df2-447b-9576-ea50d39a3c64",
+      "title": "Anteil 3 Zi.-Wohnungen [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/29f326d0-5df2-447b-9576-ea50d39a3c64",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:54.391897+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2baf96d5-442d-4e81-ae2b-1445c5fdbcae",
+      "title": "Strassenfahrzeugbestand nach Fahrzeuggruppe, Fahrzeugart, Marke und Politischer Gemeinde ab 2023",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2baf96d5-442d-4e81-ae2b-1445c5fdbcae",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-09-17T16:54:34+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "2d8a63c0-aa7a-4f01-ac61-c3a5bb2ebe4d",
+      "title": "Ertrags- (+) / Aufwandüberschuss (-) [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/2d8a63c0-aa7a-4f01-ac61-c3a5bb2ebe4d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:47:59.868247+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "301cdc83-0ed9-483d-87c6-c5d8bfb57f09",
+      "title": "Grosse Betriebe (250+ VZÄ) [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/301cdc83-0ed9-483d-87c6-c5d8bfb57f09",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:52:08.732500+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "30249dd2-b17f-4c6d-a2b6-860cb3c912c5",
+      "title": "Mittlere Betriebe (50-249 VZÄ) [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/30249dd2-b17f-4c6d-a2b6-860cb3c912c5",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:15:50.836004+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "3065730d-91dc-4069-b47d-2c10e02d98b9",
+      "title": "MIV-Wege Quell-, Ziel- und Binnenverkehr [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/3065730d-91dc-4069-b47d-2c10e02d98b9",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:55:44.112725+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "3381ffbb-05c9-4cab-8d26-0662585c2ba2",
+      "title": "Geburtenüberschuss 5-J.-mittel [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/3381ffbb-05c9-4cab-8d26-0662585c2ba2",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:47:36.590204+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "34baff10-9163-4b27-bad5-9fdd2d15056b",
+      "title": "Geb.Vol. Industrie/Lager: Anteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/34baff10-9163-4b27-bad5-9fdd2d15056b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:49.113501+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "34c539d9-7df7-4f4b-a988-c1f910a5555b",
+      "title": "Schadensfälle im Bereich Gewässer- und Bodenverschmutzungen im Kanton Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/34c539d9-7df7-4f4b-a988-c1f910a5555b",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-05-11T10:45:51+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "3539e167-72e9-4ba4-9199-edd1bbf4fb06",
+      "title": "Steuerkraft ber. (arith. Mittel 3 Jahre) [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/3539e167-72e9-4ba4-9199-edd1bbf4fb06",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:43:06.822078+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "36d0846e-db0c-4e4f-af55-bc7224d55250",
+      "title": "Bruttoinvestitionen [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/36d0846e-db0c-4e4f-af55-bc7224d55250",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:56:14.067284+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "372eb448-447e-4762-8f61-87948b0e290a",
+      "title": "Nettoaufwand Verkehr und Nachrichtenübermittlung [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/372eb448-447e-4762-8f61-87948b0e290a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:28.110932+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "422011a6-5143-462a-8886-ac408c334350",
+      "title": "Hotelbetten pro Hotel [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/422011a6-5143-462a-8886-ac408c334350",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:45.690437+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "43a56f47-0310-43e4-b559-68df7a68412a",
+      "title": "Bevölkerungszunahme 5 Jahre [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/43a56f47-0310-43e4-b559-68df7a68412a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:45.838426+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "444a6880-0f92-42ef-a8b7-a790c3001697",
+      "title": "Finanzvermögen [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/444a6880-0f92-42ef-a8b7-a790c3001697",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:43.917339+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "447cff54-03e2-4440-979e-72aa0096bd4d",
+      "title": "Selbstfinanzierungsgrad [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/447cff54-03e2-4440-979e-72aa0096bd4d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:41:30.887169+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "46562f91-f692-4ed4-9038-884cdfa5a26e",
+      "title": "Jugendquotient [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/46562f91-f692-4ed4-9038-884cdfa5a26e",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:51.878948+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "46a6600d-3076-45c8-b5c2-06769593cd81",
+      "title": "Geb.Vol. Nebengebäude: Zunahme [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/46a6600d-3076-45c8-b5c2-06769593cd81",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:52:04.418231+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "4790149f-956a-4807-9577-ca8ce30f5b1d",
+      "title": "Sterberate [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/4790149f-956a-4807-9577-ca8ce30f5b1d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:45:09.799180+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "48fb4c1d-6e26-479b-8b64-eea87700475e",
+      "title": "Lernende der Regelschule im Kanton Zürich nach Staatsangehörigkeit auf Ebene Schulgemeinde ab 2000",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/48fb4c1d-6e26-479b-8b64-eea87700475e",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2025-10-03T00:00:00+02:00",
+      "join_keys": [
+        "canton"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -1033,6 +4002,293 @@
       "modified": "2026-02-02T17:00:07+00:00",
       "join_keys": [
         "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "51e7e183-8bfa-4489-a505-1ffab8bab650",
+      "title": "Kühe [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/51e7e183-8bfa-4489-a505-1ffab8bab650",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:53:58.340351+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "52895845-89c9-429e-bad6-d22964de5bd6",
+      "title": "Bruttoverschuldungsanteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/52895845-89c9-429e-bad6-d22964de5bd6",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:17.818520+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5525f073-81eb-4afa-b57a-0b0f1d05754b",
+      "title": "Abfallmengen und Abfallgebühren in den Gemeinden im Kanton Zürich ab 2000",
+      "publisher": "Amt für Abfall, Wasser, Energie und Luft Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5525f073-81eb-4afa-b57a-0b0f1d05754b",
+      "licence": "terms_open",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-10-07T14:35:48.870509+02:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5532675f-e900-4d65-98d8-d098684633cb",
+      "title": "COVID_19 Impfkampagne im Kanton Zürich ab 18.01.2021 bis 12.10.2022",
+      "publisher": "Gesundheitsdirektion Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5532675f-e900-4d65-98d8-d098684633cb",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2022-10-28T00:00:00+02:00",
+      "join_keys": [
+        "npa"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "57364cd5-a588-4f5b-bf49-97a73ad5fe81",
+      "title": "Hinweisinventar Bauten Kanton Thurgau (Stand 2019)",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/57364cd5-a588-4f5b-bf49-97a73ad5fe81",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T12:58:58.751000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "589b5202-c355-400a-a43b-e5428328711e",
+      "title": "Gebäudestatistik ab 2010 nach Politischen Gemeinden",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/589b5202-c355-400a-a43b-e5428328711e",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-08-28T16:58:38+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5b39689c-23d2-47a0-8fe8-7eabfaf43a92",
+      "title": "Geburtenrate [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5b39689c-23d2-47a0-8fe8-7eabfaf43a92",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:45:12.105742+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5dc503a5-7c3b-4add-a45c-8c8484343985",
+      "title": "Anteil EFH am Wohnungsbestand [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5dc503a5-7c3b-4add-a45c-8c8484343985",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:05.168213+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5dce1758-1378-4c84-870a-dd1f69f7e96a",
+      "title": "Lernende der Mittelschulen im Kanton Zürich ab 2000",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5dce1758-1378-4c84-870a-dd1f69f7e96a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2025-10-03T00:00:00+02:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5ee8ac34-750f-49eb-9a02-0fc56974415b",
+      "title": "Geburtenrate (5-J.-mittel) [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5ee8ac34-750f-49eb-9a02-0fc56974415b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:47:38.721363+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5eecc739-3d2c-4d8f-949a-30059ba475d9",
+      "title": "Bevölkerung: Anteil 0-14-Jährige [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5eecc739-3d2c-4d8f-949a-30059ba475d9",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:48.912230+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5fc2f6e6-9bce-4bfb-919b-d77f2c212061",
+      "title": "Schafe [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5fc2f6e6-9bce-4bfb-919b-d77f2c212061",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:00.418378+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6190be55-a9f5-4cd8-9a46-aba15bad1a0b",
+      "title": "Geb.Vol. Dienstleistungen: Zunahme [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6190be55-a9f5-4cd8-9a46-aba15bad1a0b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:47.005476+01:00",
+      "join_keys": [
+        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -1074,6 +4330,111 @@
       "csv_inspected": true
     },
     {
+      "id": "668a6b5b-d927-43e4-b76c-dd282f6ad1a2",
+      "title": "Wohnungsbestand [Whg.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/668a6b5b-d927-43e4-b76c-dd282f6ad1a2",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:45.854502+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "671a61e1-6480-481f-a954-b2890415db9c",
+      "title": "Landwirtschaftsbetriebe [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/671a61e1-6480-481f-a954-b2890415db9c",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:02.490759+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "67744344-9598-468c-b210-e680c62402a8",
+      "title": "Bevölkerung [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/67744344-9598-468c-b210-e680c62402a8",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:55.513669+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "68ef42d2-22ba-4711-a625-cbd3e9d08f15",
+      "title": "Steuerertrag Grundsteuern [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/68ef42d2-22ba-4711-a625-cbd3e9d08f15",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:42:09.448953+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "690d777c-af4f-43d9-80b8-6c801076ecfc",
+      "title": "Landwirtschaftliche Nutzfläche [ha]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/690d777c-af4f-43d9-80b8-6c801076ecfc",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:06.798931+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "691948b3-46ea-4421-9993-651713ff896e",
       "title": "Nationalratswahlen Kanton Thurgau: Mandatsverteilung nach Geschlecht auf Ebene Kanton",
       "publisher": "Canton de Thurgovie",
@@ -1094,6 +4455,328 @@
       "modified": "2026-04-23T13:03:40.583000+00:00",
       "join_keys": [
         "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "69eb857a-c0cf-4d7a-809c-de82d4f4c556",
+      "title": "3-Personenhaushalte [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/69eb857a-c0cf-4d7a-809c-de82d4f4c556",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:13:36.271063+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6a1cd0b0-5c1d-4044-b351-bf8d5f91bda8",
+      "title": "Privathaushalte Total [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6a1cd0b0-5c1d-4044-b351-bf8d5f91bda8",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:41:18.228235+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6a3210cb-40bf-46d9-a509-9af43e1e2c80",
+      "title": "Nur an der Quelle besteuerte Quellensteuerpfl. [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6a3210cb-40bf-46d9-a509-9af43e1e2c80",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:42:22.002941+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6b463625-364e-4c95-903c-b47cff52e1ef",
+      "title": "Anteil 2 Zi.-Wohnungen [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6b463625-364e-4c95-903c-b47cff52e1ef",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:52.205233+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6bb05375-5392-442d-972c-d98a0bef8bed",
+      "title": "Politische Gemeinden nach Bezirken Kanton Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6bb05375-5392-442d-972c-d98a0bef8bed",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:05:42.153000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6cdbba31-ba45-4ab0-ab5d-6cf973869268",
+      "title": "Lernende der Regelschule im Kanton Zürich nach Erstsprache (Deutsch/nicht Deutsch) ab 2000",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6cdbba31-ba45-4ab0-ab5d-6cf973869268",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2025-10-03T00:00:00+02:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6da03903-c8f1-4504-88a9-80ae78e10289",
+      "title": "Verkäufe EFH [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6da03903-c8f1-4504-88a9-80ae78e10289",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:17.660742+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6da9bd7e-986b-431a-b820-e0b2d4f3c6d1",
+      "title": "Baulandpreis Modell (Median) [Fr./m2]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6da9bd7e-986b-431a-b820-e0b2d4f3c6d1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:30.352329+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "703776ad-46be-4058-a709-73a74ab2394e",
+      "title": "Ausländeranteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/703776ad-46be-4058-a709-73a74ab2394e",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:39.667799+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "714cb12f-efbd-4e61-a7c1-29c005e3adbf",
+      "title": "Restaurants [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/714cb12f-efbd-4e61-a7c1-29c005e3adbf",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:15:35.105476+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "72458cec-fb9e-42a9-9e97-ac6cd89b783a",
+      "title": "Heiraten [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/72458cec-fb9e-42a9-9e97-ac6cd89b783a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:42:12.591839+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "72e478ef-c520-41d7-9d91-95bd2fee9fdf",
+      "title": "Reformierte Kirchensteuerpflichtige [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/72e478ef-c520-41d7-9d91-95bd2fee9fdf",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:53:46.256807+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "72f24147-883b-4385-b12b-e17677c1078d",
+      "title": "Fläche [ha]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/72f24147-883b-4385-b12b-e17677c1078d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:56:11.896808+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7369dd24-7d3f-4e4a-99bc-01bf0860edc9",
+      "title": "Apotheken [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7369dd24-7d3f-4e4a-99bc-01bf0860edc9",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:49:59.930828+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "751cc0b6-bec5-4469-917e-3b97dafe24d8",
+      "title": "Anteil 4-Personenhaushalte [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/751cc0b6-bec5-4469-917e-3b97dafe24d8",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:40.274131+01:00",
+      "join_keys": [
+        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -1130,6 +4813,27 @@
       "csv_inspected": true
     },
     {
+      "id": "764d4261-a843-4524-93da-48ce6ecaad0d",
+      "title": "Bevölkerung: Frauen [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/764d4261-a843-4524-93da-48ce6ecaad0d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:55:01.397286+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "7682e094-44dc-4be7-81e7-d8e1662e2e41",
       "title": "Strassenfahrzeuge nach Politischen Gemeinden, Fahrzeuggruppe und Treibstoffart ab 2023",
       "publisher": "Canton de Thurgovie",
@@ -1148,6 +4852,69 @@
       ],
       "frequency": null,
       "modified": "2026-03-26T09:40:47+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "769c1f39-7b04-46fd-b313-384c6a114f42",
+      "title": "Restaurants pro 1000 Einwohner [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/769c1f39-7b04-46fd-b313-384c6a114f42",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:15:38.194439+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7821b855-f1ad-48d6-a526-b27e06057b16",
+      "title": "Steuerertrag Total [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7821b855-f1ad-48d6-a526-b27e06057b16",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:52:52.595773+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "78b88f41-6a62-42b1-9add-693945506558",
+      "title": "Bevölkerung: Anteil 65-79-Jährige [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/78b88f41-6a62-42b1-9add-693945506558",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:18:17.667290+01:00",
       "join_keys": [
         "commune"
       ],
@@ -1214,6 +4981,153 @@
       "csv_inspected": true
     },
     {
+      "id": "7de2bc70-8df7-4838-a485-56e54d74e07f",
+      "title": "Bevölkerungsdichte [Einw./km2]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7de2bc70-8df7-4838-a485-56e54d74e07f",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:54.993671+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "7e8e81a3-d40a-4c0c-ad53-d22a51978de5",
+      "title": "Bevölkerung: Anteil 20-39-Jährige [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/7e8e81a3-d40a-4c0c-ad53-d22a51978de5",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:52.056823+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "806237c6-7ca2-4995-959d-cb2d702676f5",
+      "title": "Lernende der Regelschule im Kanton Zürich nach Staatsangehörigkeit ab 2000",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/806237c6-7ca2-4995-959d-cb2d702676f5",
+      "licence": "terms_open",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2025-10-03T00:00:00+02:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8135f477-5594-4b99-be3a-d19d5de7f422",
+      "title": "Übersicht über alle Lernenden im Kanton Zürich ab 2000",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8135f477-5594-4b99-be3a-d19d5de7f422",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2025-10-03T00:00:00+02:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "826b31ca-5ffc-4017-8124-633d282211a8",
+      "title": "Bevölkerungszunahme 1 Jahr [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/826b31ca-5ffc-4017-8124-633d282211a8",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:58.081723+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "827f9269-d90e-4ea7-ae77-59bd0220efaa",
+      "title": "Anteil Pol./Schulgem. an allg. Gemeindesteuern [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/827f9269-d90e-4ea7-ae77-59bd0220efaa",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:41:59.942062+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "83663545-c125-4f8b-bbe7-d66d144d700c",
+      "title": "Gebäudevolumen: Zunahme [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/83663545-c125-4f8b-bbe7-d66d144d700c",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:33.474026+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "846a9cb0-8c56-4f65-b36d-65eff81c8bba",
       "title": "Beteiligung an eidgenössischen Abstimmungen nach Stimmkanal und Politischer Gemeinde",
       "publisher": "Canton de Thurgovie",
@@ -1270,6 +5184,70 @@
       "csv_inspected": true
     },
     {
+      "id": "88af1325-ccf2-472e-ad68-984e69b19fe7",
+      "title": "Klassen an öffentlichen Schulen: Kindergarten, Primarstufe und Sekundarstufe I",
+      "publisher": "Canton de Zoug",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/88af1325-ccf2-472e-ad68-984e69b19fe7",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON"
+      ],
+      "frequency": null,
+      "modified": "2026-09-30T00:00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8a0de6cb-0ff8-4529-be96-ba9d9545173c",
+      "title": "Bevölkerungszunahme 1 Jahr [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8a0de6cb-0ff8-4529-be96-ba9d9545173c",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:53.385687+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8a9a0404-8f9f-4cee-98e9-107f460527be",
+      "title": "Nettoaufwand Kultur, Sport und Freizeit [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8a9a0404-8f9f-4cee-98e9-107f460527be",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:53.300518+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "8b6c03bf-63a8-486a-8172-5b46ac33858e",
       "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2025",
       "publisher": "Canton de Thurgovie",
@@ -1290,6 +5268,48 @@
       "modified": "2026-02-02T16:53:16+00:00",
       "join_keys": [
         "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8d030241-ea95-4163-9a61-63b435eb4d09",
+      "title": "Bevölkerung: Männeranteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8d030241-ea95-4163-9a61-63b435eb4d09",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:55:05.701559+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "8f48689d-197f-4df3-89d7-3713368d3c6e",
+      "title": "Investitionsanteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8f48689d-197f-4df3-89d7-3713368d3c6e",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:20.930226+01:00",
+      "join_keys": [
+        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -1326,6 +5346,27 @@
       "csv_inspected": true
     },
     {
+      "id": "8fab9180-dc0d-41b7-82a2-bcf0d37b762c",
+      "title": "Bevölkerung: Anteil 40-64-Jährige [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/8fab9180-dc0d-41b7-82a2-bcf0d37b762c",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:47.054731+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "914ea772-626f-4e4d-ae75-c2cfb650bfaa",
       "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2020",
       "publisher": "Canton de Thurgovie",
@@ -1346,6 +5387,216 @@
       "modified": "2026-02-02T16:44:37+00:00",
       "join_keys": [
         "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "949d989c-1c2b-454b-be7d-a22ec372fdfb",
+      "title": "Gemeinnützige Wohnungen in Gemeinden des Kantons Zürich [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/949d989c-1c2b-454b-be7d-a22ec372fdfb",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:16:20.113547+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "95eed487-cdd0-4108-8b8b-359a1572c01a",
+      "title": "Lernende der Berufsbildung im Kanton Zürich ab 2000",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/95eed487-cdd0-4108-8b8b-359a1572c01a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2025-10-03T00:00:00+02:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "96033038-7cce-4277-937b-c6e48047315b",
+      "title": "Apotheken [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/96033038-7cce-4277-937b-c6e48047315b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:49:57.835068+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "968cb00e-e159-4c23-918e-8dd835db5b01",
+      "title": "Steuerkraft (arith. Mittel 3 Jahre) [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/968cb00e-e159-4c23-918e-8dd835db5b01",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:52:54.727577+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "97a3d780-0c01-417d-b8e7-cd538a4947a9",
+      "title": "Zinsbelastungsanteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/97a3d780-0c01-417d-b8e7-cd538a4947a9",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:41:27.702642+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "983add31-6c54-4516-8565-3318a13e6d96",
+      "title": "Anteil 1 Zi.-Wohnungen [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/983add31-6c54-4516-8565-3318a13e6d96",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:50.095029+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "9922cf47-5055-4890-b933-89071b45fd45",
+      "title": "Nettoaufwand Bildung [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/9922cf47-5055-4890-b933-89071b45fd45",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:15.496474+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "99ed79de-d405-4662-b944-2553fd380e35",
+      "title": "Zahnärzte [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/99ed79de-d405-4662-b944-2553fd380e35",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:42:28.145680+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "9a88f30d-c116-4970-9073-70d67f39620c",
+      "title": "Sterberate (5-J.-mittel) [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/9a88f30d-c116-4970-9073-70d67f39620c",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:45:10.927863+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "9c7b118e-7f9b-4595-970c-5b1d847d7d7e",
+      "title": "Fremdkapital [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/9c7b118e-7f9b-4595-970c-5b1d847d7d7e",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:47.032013+01:00",
+      "join_keys": [
+        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -1382,6 +5633,27 @@
       "csv_inspected": true
     },
     {
+      "id": "9e397815-e9ec-4b3b-944a-e3020e4685c6",
+      "title": "Kapitaldienstanteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/9e397815-e9ec-4b3b-944a-e3020e4685c6",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:07.503720+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "9f499a83-a216-4a96-870d-c65a0ee35241",
       "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2018",
       "publisher": "Canton de Thurgovie",
@@ -1402,6 +5674,90 @@
       "modified": "2026-02-02T17:04:00+00:00",
       "join_keys": [
         "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a044ccd5-937f-4a31-84ec-fe6049cae2be",
+      "title": "Eigenkapital [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a044ccd5-937f-4a31-84ec-fe6049cae2be",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:12.301286+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a2fd51fa-9eb3-4382-a220-89fc7e3c5792",
+      "title": "Verkäufe MFH [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a2fd51fa-9eb3-4382-a220-89fc7e3c5792",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:14.551383+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a4ba0476-3098-4e76-b6e4-775d4c217080",
+      "title": "Baulandpreis (gewichteter Median) [Fr./m2]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a4ba0476-3098-4e76-b6e4-775d4c217080",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:56.395688+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a5b5008d-294e-4c51-83fe-03f82094f17d",
+      "title": "Bevölkerung: Männer [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a5b5008d-294e-4c51-83fe-03f82094f17d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:55:03.545606+01:00",
+      "join_keys": [
+        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -1466,6 +5822,118 @@
       "csv_inspected": true
     },
     {
+      "id": "a8394ff7-6ef6-4658-8def-1b6f436c56f5",
+      "title": "Nettoaufwand allgemeine Verwaltung [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a8394ff7-6ef6-4658-8def-1b6f436c56f5",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:24.128307+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "a939df1a-0797-4ac2-ac0b-ee8c2c9f19f5",
+      "title": "Anteil Kirchgemeinden an allg. Gemeindesteuern [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/a939df1a-0797-4ac2-ac0b-ee8c2c9f19f5",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:15:57.170768+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "ab1c373d-f675-47de-8dca-9c441d62e771",
+      "title": "Gemeinderechnungen 2025",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/ab1c373d-f675-47de-8dca-9c441d62e771",
+      "licence": "attribution",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-09-04T11:14:04+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "ace55cc8-fbcc-4d91-92cf-fadb2264cada",
+      "title": "Bevölkerung: Anteil 15-19-Jährige [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/ace55cc8-fbcc-4d91-92cf-fadb2264cada",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:43.080038+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "ad59c603-2268-434f-b4a0-5a7d67b30305",
+      "title": "Personalsteuerpflichtige [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/ad59c603-2268-434f-b4a0-5a7d67b30305",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:16:51.566961+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "af554c00-ae3c-425a-ad6f-8b0eb6818d02",
       "title": "Steuerfüsse Katholische Kirchgemeinden Thurgau",
       "publisher": "Canton de Thurgovie",
@@ -1494,6 +5962,133 @@
       "csv_inspected": true
     },
     {
+      "id": "afb4c838-a455-4c11-833f-83e4bd340225",
+      "title": "Selbstfinanzierungsanteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/afb4c838-a455-4c11-833f-83e4bd340225",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:09.736552+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b0f45dc8-c548-492b-9b3e-09352110b9e1",
+      "title": "Bauzonen im Kanton Zürich",
+      "publisher": "Amt für Raumentwicklung Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b0f45dc8-c548-492b-9b3e-09352110b9e1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-10-02T15:45:31.342637+02:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b11b28bd-2e8d-430f-9fce-6e037955ba5f",
+      "title": "Arbeitslosenanteil an Bevölkerung 15-64 Jahre [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b11b28bd-2e8d-430f-9fce-6e037955ba5f",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:33.259044+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b1247f12-0a7e-4003-a674-12bf7aacecdf",
+      "title": "Bevölkerung: Heimat Schweiz [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b1247f12-0a7e-4003-a674-12bf7aacecdf",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:55:07.878170+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b2b996b3-4ba4-453e-ba0b-61b2374a8f11",
+      "title": "Mikrobetriebe (0-9 VZÄ) [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b2b996b3-4ba4-453e-ba0b-61b2374a8f11",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:15:44.438772+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b2e09da2-aa56-4385-b7b3-4498355e7601",
+      "title": "5-Personenhaushalte [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b2e09da2-aa56-4385-b7b3-4498355e7601",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:13:49.462342+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "b317dee9-2e0c-499c-842a-aaeddd0d2255",
       "title": "Thurgauer Bodenpreis-Basisdaten",
       "publisher": "Canton de Thurgovie",
@@ -1512,6 +6107,111 @@
       ],
       "frequency": null,
       "modified": "2026-01-16T13:03:00+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b5037db1-9d73-463a-85e7-d8b25ea891be",
+      "title": "2-Personenhaushalte [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b5037db1-9d73-463a-85e7-d8b25ea891be",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:13:33.125292+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b5e2d90f-bb07-4a1d-b30a-1f4751ccb576",
+      "title": "Anteil 4 Zi.-Wohnungen [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b5e2d90f-bb07-4a1d-b30a-1f4751ccb576",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:56.547007+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b6a6e5ae-7e6f-4ed7-bc5d-622457ebb43c",
+      "title": "Nettoaufwand Finanzen und Steuern [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b6a6e5ae-7e6f-4ed7-bc5d-622457ebb43c",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:37.577551+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b8e62ab1-03c6-419f-a0d6-3c70c40529f3",
+      "title": "Bevölkerung: reformiert [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b8e62ab1-03c6-419f-a0d6-3c70c40529f3",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:49.157749+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "b93ac8c7-315d-4bf2-9e50-4cfe09b6ffa0",
+      "title": "Selbstfinanzierung [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/b93ac8c7-315d-4bf2-9e50-4cfe09b6ffa0",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:21.762362+01:00",
       "join_keys": [
         "commune"
       ],
@@ -1572,6 +6272,132 @@
       "csv_inspected": true
     },
     {
+      "id": "babaa006-d885-4fb0-b44e-84931cf1ae74",
+      "title": "Rinderviehbestand [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/babaa006-d885-4fb0-b44e-84931cf1ae74",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:53:54.777956+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "bb5260f9-2c7c-4e47-a282-958de89953e0",
+      "title": "Steuerertrag allgemeine Gemeindesteuern [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/bb5260f9-2c7c-4e47-a282-958de89953e0",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:52:59.090669+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "bbd3e70b-c49b-4eaf-88c2-4a74b24104aa",
+      "title": "Wanderungsbilanz [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/bbd3e70b-c49b-4eaf-88c2-4a74b24104aa",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:13:14.284869+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "bbd7d4d2-e673-4b7f-908d-a26265fb1a9b",
+      "title": "Kleine Betriebe (10-49 VZÄ) [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/bbd7d4d2-e673-4b7f-908d-a26265fb1a9b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:15:47.607501+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "be18e485-86d5-4ac7-b9f8-9d66041351de",
+      "title": "Nettoaufwand Gesundheit [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/be18e485-86d5-4ac7-b9f8-9d66041351de",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:24.958218+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "be83b1d5-bd5f-4fa1-a0cd-1a9a204c6ae4",
+      "title": "Wohnungen: Anteil Eigentumsobjekte [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/be83b1d5-bd5f-4fa1-a0cd-1a9a204c6ae4",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:02.936909+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "bef371f6-3c56-408f-832f-0f50f0b24781",
       "title": "Strassen und Wege: Strassentypen und Wege",
       "publisher": "Canton de Bâle-Ville",
@@ -1605,6 +6431,104 @@
       "csv_inspected": true
     },
     {
+      "id": "c048ac62-e08b-4c84-b976-a306440e5871",
+      "title": "Hinweisinventar Bauten Kanton Thurgau (Stand 2023)",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c048ac62-e08b-4c84-b976-a306440e5871",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T12:59:10.312000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c27284fd-901a-4400-b3f2-d66cedbc52fe",
+      "title": "Geb.Vol. Dienstleistungen: Anteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c27284fd-901a-4400-b3f2-d66cedbc52fe",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:44.894829+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c2ab0938-edfa-40d9-959b-c200482135b1",
+      "title": "Altersquotient [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c2ab0938-edfa-40d9-959b-c200482135b1",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:59.183340+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c2fd86b6-c136-4116-9c8e-22051a0da415",
+      "title": "Schülerinnen und Schüler der öffentlichen Volksschule nach Schulgemeinden im Kanton Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c2fd86b6-c136-4116-9c8e-22051a0da415",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2024-11-01T10:33:10.690000+00:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "c34617a0-da89-47dc-918f-eba6d1616e05",
       "title": "Eheschliessungen und Ehescheidungen",
       "publisher": "Canton de Zoug",
@@ -1616,6 +6540,27 @@
       ],
       "frequency": null,
       "modified": "2026-07-22T00:00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c37322c2-9a8d-49c0-94e3-704b6328c544",
+      "title": "Geb.Vol. Landwirtschaft: Zunahme [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c37322c2-9a8d-49c0-94e3-704b6328c544",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:59.819556+01:00",
       "join_keys": [
         "commune"
       ],
@@ -1646,6 +6591,48 @@
       "modified": "2026-02-06T10:14:09+00:00",
       "join_keys": [
         "noga"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c5263e1f-64b7-4c7d-a767-9d559095bedc",
+      "title": "Leerwohnungen Total [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c5263e1f-64b7-4c7d-a767-9d559095bedc",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:53:03.633897+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c6e3bda3-9302-4598-b82c-d99481518ad7",
+      "title": "Heiraten [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c6e3bda3-9302-4598-b82c-d99481518ad7",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:45:13.219393+01:00",
+      "join_keys": [
+        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -1687,6 +6674,27 @@
       "csv_inspected": true
     },
     {
+      "id": "c7b05d5a-1777-45ab-8cc4-87c3c1bec044",
+      "title": "Steuerkraft berichtigt pro Kopf [Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c7b05d5a-1777-45ab-8cc4-87c3c1bec044",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:43:00.587126+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
       "id": "c90862c4-4ca4-4256-bf2e-8e1b94b0c40f",
       "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2023",
       "publisher": "Canton de Thurgovie",
@@ -1707,6 +6715,217 @@
       "modified": "2026-02-02T16:49:42+00:00",
       "join_keys": [
         "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "c912a538-1c8a-471b-9e67-e064caa0a36d",
+      "title": "4-Personenhaushalte [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/c912a538-1c8a-471b-9e67-e064caa0a36d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:41:21.431178+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "cbcd4a6e-6829-4253-918f-c4e76aab0ce8",
+      "title": "1-Personenhaushalte [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/cbcd4a6e-6829-4253-918f-c4e76aab0ce8",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:13:29.972871+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "cfdb34cc-8a57-4469-931e-b7b14ef52830",
+      "title": "Nettoaufwand Volkswirtschaft [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/cfdb34cc-8a57-4469-931e-b7b14ef52830",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:34.432973+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "cffc2e77-956b-44db-b3e7-e4a63f4ea24d",
+      "title": "Aerzte [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/cffc2e77-956b-44db-b3e7-e4a63f4ea24d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:27.080064+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d003bb07-0e3c-49d5-9018-7808b6f79af6",
+      "title": "Steuerkraft berichtigt [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d003bb07-0e3c-49d5-9018-7808b6f79af6",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:43:03.698275+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d090bbcb-6977-4217-a3fa-ae0f62cabb1a",
+      "title": "Zahnärzte [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d090bbcb-6977-4217-a3fa-ae0f62cabb1a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:42:31.269397+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d1bde196-bf50-4a85-8559-4ba9f57d6995",
+      "title": "Geburten [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d1bde196-bf50-4a85-8559-4ba9f57d6995",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:47:40.836608+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d31f3471-fd59-4531-9b5f-d78813891b7c",
+      "title": "Bevölkerungsbefragung im Kanton Zürich zur Zufriedenheit mit der Wohngemeinde",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d31f3471-fd59-4531-9b5f-d78813891b7c",
+      "licence": "terms_open",
+      "formats": [
+        "CSV",
+        "PDF"
+      ],
+      "frequency": null,
+      "modified": "2025-03-17T00:00:00+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d38154ee-e2db-4c80-9576-04c562f2da1e",
+      "title": "MIV-Anteil (Modal Split) [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d38154ee-e2db-4c80-9576-04c562f2da1e",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:43:10.042173+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "d5ca8732-fc0f-4c8a-bd15-28360dfa6e07",
+      "title": "Christkatholische Kirchensteuerpflichtige [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/d5ca8732-fc0f-4c8a-bd15-28360dfa6e07",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:53:50.582346+01:00",
+      "join_keys": [
+        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -1793,26 +7012,19 @@
       "csv_inspected": true
     },
     {
-      "id": "ec1c6257-cb6d-44b0-819b-ea0c1c0df112",
-      "title": "Fahrzeugbestand Kanton Thurgau am 01.01.2021",
-      "publisher": "Canton de Thurgovie",
+      "id": "d9330a90-e84e-4d8d-8d4c-4bf1e9734a34",
+      "title": "Anteil Gemeinnützige Wohnungen in Gemeinden des Kantons Zürich [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
       "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/ec1c6257-cb6d-44b0-819b-ea0c1c0df112",
-      "licence": "attribution",
+      "url": "https://opendata.swiss/dataset/d9330a90-e84e-4d8d-8d4c-4bf1e9734a34",
+      "licence": "terms_by",
       "formats": [
-        "CSV",
-        "JSON",
-        "JSON-LD",
-        "N3",
-        "PARQUET",
-        "RDF TURTLE",
-        "RDF XML",
-        "XLS"
+        "CSV"
       ],
       "frequency": null,
-      "modified": "2026-02-02T16:46:29+00:00",
+      "modified": "2026-03-27T14:16:17.008698+01:00",
       "join_keys": [
-        "canton"
+        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -1821,11 +7033,255 @@
       "csv_inspected": true
     },
     {
-      "id": "fc7cc1cd-dc47-4075-8d4b-8ec402f5fd1f",
-      "title": "Mutation Gemeinden Thurgau 1990-2000",
+      "id": "da7a7b03-253c-4285-b188-0fa0ce8112f8",
+      "title": "Nettoaufwand soziale Sicherheit [Fr./Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/da7a7b03-253c-4285-b188-0fa0ce8112f8",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:14:18.585528+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "db689407-2251-4224-a3ea-2957f58a1288",
+      "title": "Hotels [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/db689407-2251-4224-a3ea-2957f58a1288",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:39.452785+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "de973b62-8f96-4323-b3a1-3cf67e5e2804",
+      "title": "Geschossflächen im Kanton Zürich",
+      "publisher": "Amt für Raumentwicklung Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/de973b62-8f96-4323-b3a1-3cf67e5e2804",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-10-02T15:45:43.643102+02:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "df4cddcd-a8eb-46ef-b01a-c1b2aed1e810",
+      "title": "Durchschnittliche Haushaltsgrösse [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/df4cddcd-a8eb-46ef-b01a-c1b2aed1e810",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:38.124175+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "dfaa94be-f86f-4443-9efb-282aeea25abc",
+      "title": "Geb.Vol. Infrastruktur: Zunahme [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/dfaa94be-f86f-4443-9efb-282aeea25abc",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:55.534416+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e131ce30-18ba-4f40-b7a6-b7c8c59e911d",
+      "title": "Geb.Vol. Nebengebäude: Anteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e131ce30-18ba-4f40-b7a6-b7c8c59e911d",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:52:02.218466+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e4bf6672-3fb2-4888-ab91-4a54fa016e5c",
+      "title": "Geb.Vol. Infrastruktur: Anteil [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e4bf6672-3fb2-4888-ab91-4a54fa016e5c",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:53.412340+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e6369b70-fbb0-4f93-8bab-6d624c1cd30b",
+      "title": "Steuerkraft [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e6369b70-fbb0-4f93-8bab-6d624c1cd30b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:52:42.548670+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e670b1d3-54b6-4c01-927d-140dd47fd461",
+      "title": "Gemeindekennzahlen",
+      "publisher": "Canton de Bâle-Campagne",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e670b1d3-54b6-4c01-927d-140dd47fd461",
+      "licence": "terms_by",
+      "formats": [
+        "CSV",
+        "GPX",
+        "JSON",
+        "JSON-LD",
+        "KML",
+        "N3",
+        "OCTET",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "TXT",
+        "XLS",
+        "ZIP"
+      ],
+      "frequency": null,
+      "modified": "2026-09-23T07:51:41.204000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e6ce5ece-6f89-4f33-8787-1a750cbecffb",
+      "title": "ÖV-Anteil (Modal Split) [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e6ce5ece-6f89-4f33-8787-1a750cbecffb",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:19:15.651321+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "e9b55d06-1910-4096-8b1c-234d3e4cfb73",
+      "title": "Steuerertrag Kirchgemeinden [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/e9b55d06-1910-4096-8b1c-234d3e4cfb73",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:52:45.932109+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "ebb52176-6f8b-43c7-b700-16ed3fb9898d",
+      "title": "Hinweisinventar Bauten Kanton Thurgau (Stand 2021)",
       "publisher": "Canton de Thurgovie",
       "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/fc7cc1cd-dc47-4075-8d4b-8ec402f5fd1f",
+      "url": "https://opendata.swiss/dataset/ebb52176-6f8b-43c7-b700-16ed3fb9898d",
       "licence": "public_domain",
       "formats": [
         "CSV",
@@ -1838,7 +7294,7 @@
         "XLS"
       ],
       "frequency": null,
-      "modified": "2026-04-23T13:03:18.312000+00:00",
+      "modified": "2026-04-23T12:59:05.429000+00:00",
       "join_keys": [
         "commune"
       ],
@@ -1847,405 +7303,11 @@
       "deja_collecte": false,
       "status_note": null,
       "csv_inspected": true
-    },
-    {
-      "id": "07b1939d-9fda-44e4-b69e-24c3d079e745",
-      "title": "Naissances vivantes selon l'âge de la mère, le sexe de l'enfant et le canton, de 1969 à 2025",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/07b1939d-9fda-44e4-b69e-24c3d079e745",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "canton",
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "3c1ce9ee-7911-4883-9415-ef485262a52b",
-      "title": "Partenariats dissous selon l'âge de chacun des partenaires et le canton, de 2007 à 2025",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/3c1ce9ee-7911-4883-9415-ef485262a52b",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "canton",
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "4e2246cc-d523-40e4-87fb-14523d5de160",
-      "title": "Reconnaissances de paternité selon l'âge et le sexe de l'enfant et le canton de la mère, 1987-2025",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/4e2246cc-d523-40e4-87fb-14523d5de160",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "canton",
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "94dee036-f108-40f6-8448-29a238206cdc",
-      "title": "Mariages selon l'âge de chacun des époux et le canton, de 1969 à 2025",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/94dee036-f108-40f6-8448-29a238206cdc",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "canton",
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "af4d760d-4e73-4765-94f0-f54327651ec1",
-      "title": "Adoptions selon la classe d'âge quinquennale, le sexe, la nationalité (sélection) avant l'adoption de la personne adoptée et le canton, de 1979 à 2025",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/af4d760d-4e73-4765-94f0-f54327651ec1",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "canton",
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "cf79ec30-1cb4-48db-bbca-8d30fcadd35a",
-      "title": "Décès selon la classe d'âge quinquennale, le sexe et le canton, de 1969 à 2025",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/cf79ec30-1cb4-48db-bbca-8d30fcadd35a",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "canton",
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "eef6473d-15c8-4654-adae-94a6820d1189",
-      "title": "Divorces selon l'âge de chacun des époux et le canton, de 1984 à 2025",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/eef6473d-15c8-4654-adae-94a6820d1189",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "canton",
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "05503b68-ddb9-42a7-81d9-63c66975267b",
-      "title": "Entreprises marchandes selon la division économique et la forme juridique",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/05503b68-ddb9-42a7-81d9-63c66975267b",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "noga"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "24149076-2ad0-4d17-8dcc-874fff3428ad",
-      "title": "Compte de production par secteurs institutionnels",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/24149076-2ad0-4d17-8dcc-874fff3428ad",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "noga"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "39025073-0aa1-4e77-9817-667e75fac86d",
-      "title": "Compte de production par secteurs économiques",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/39025073-0aa1-4e77-9817-667e75fac86d",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "noga"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "642ddb58-82ec-4e2c-9de1-d64c8b395a34",
-      "title": "Logements occupés selon le statut d'occupation, par canton",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/642ddb58-82ec-4e2c-9de1-d64c8b395a34",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "68331728-d2ff-408b-986d-c40339bb5f12",
-      "title": "Entreprises marchandes selon la division économique et la taille de l'entreprise",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/68331728-d2ff-408b-986d-c40339bb5f12",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "noga"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "707d92a1-d535-4075-8b1d-0f806f82004e",
-      "title": "Taux de logements occupés par leur propriétaire, par canton",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/707d92a1-d535-4075-8b1d-0f806f82004e",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "b3cf57ec-75ae-4bcf-b423-7af77e806494",
-      "title": "Compte de production par branches (agrégées par sections)",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/b3cf57ec-75ae-4bcf-b423-7af77e806494",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "noga"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "cf4f0453-d476-441d-8348-47e2089b7dfe",
-      "title": "Valeur ajoutée brute des activités financières et d'assurance",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/cf4f0453-d476-441d-8348-47e2089b7dfe",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "noga"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "d461f547-32cc-4675-b0ae-81b900022c6d",
-      "title": "Compte de production par branches (64 branches)",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/d461f547-32cc-4675-b0ae-81b900022c6d",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "ODS"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": null,
-      "join_keys": [
-        "noga"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
-    },
-    {
-      "id": "34e0eecb-d679-4226-b845-2bd3528e14ec",
-      "title": "Décès selon la classe d'âge quinquennale, le sexe, la semaine et le canton, 2000-2025",
-      "publisher": "Office fédéral de la statistique OFS",
-      "editor_level": "confederation",
-      "url": "https://opendata.swiss/dataset/34e0eecb-d679-4226-b845-2bd3528e14ec",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "HTML",
-        "XLS"
-      ],
-      "frequency": null,
-      "modified": null,
-      "join_keys": [
-        "canton (titre)"
-      ],
-      "a_verifier_ofs": true,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": "droits à confirmer (OFS)",
-      "csv_inspected": true
     }
   ],
-  "already_collected": []
+  "already_collected": [
+    "2628a6a6-1ec8-42b2-afd5-17327f569fb5",
+    "82fbb1cf-eb37-4c60-9b67-6e7b38dc7660",
+    "f3592a76-b9c7-4e2d-ba6b-31798ce0f124"
+  ]
 }
