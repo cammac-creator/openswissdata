@@ -1,17 +1,17 @@
 {
-  "version": "2026.10.13",
-  "collected_on": "2026-10-13",
+  "version": "2026.10.14",
+  "collected_on": "2026-10-14",
   "registry_rows": 2943,
-  "unique_uids": 2747,
-  "warning_rows": 2347,
+  "unique_uids": 2748,
+  "warning_rows": 2346,
   "populated_fields": {
-    "uid": 2858,
-    "lei": 785,
+    "uid": 2859,
+    "lei": 786,
     "licence_date": 0,
     "status": 0,
-    "canton": 677,
+    "canton": 678,
     "city": 2943,
-    "address": 785
+    "address": 786
   },
   "entity_type_rows": {
     "bank": 514,
@@ -27,8 +27,8 @@
   },
   "supervisory_organisation_rows": 1518,
   "history": {
-    "available_from": "2026-07-14",
-    "available_until": "2026-10-13",
+    "available_from": "2026-07-15",
+    "available_until": "2026-10-14",
     "snapshots": 60,
     "gaps": [
       {
