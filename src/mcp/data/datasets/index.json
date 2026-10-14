@@ -475,8 +475,8 @@
       "keys": [
         "year"
       ],
-      "rows": 73632,
-      "edition": "2026-10-07"
+      "rows": 65376,
+      "edition": "2026-10-14"
     },
     {
       "id": "tg-comptage-trafic-routier-classes-vehicules",
@@ -511,8 +511,8 @@
       "keys": [
         "year"
       ],
-      "rows": 43008,
-      "edition": "2026-10-07"
+      "rows": 38592,
+      "edition": "2026-10-14"
     },
     {
       "id": "tg-comptes-communes-2020",
