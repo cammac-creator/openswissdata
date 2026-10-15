@@ -1,20 +1,20 @@
 {
-  "version": "2026.10.14",
-  "collected_on": "2026-10-14",
-  "registry_rows": 2943,
+  "version": "2026.10.15",
+  "collected_on": "2026-10-15",
+  "registry_rows": 2942,
   "unique_uids": 2748,
-  "warning_rows": 2346,
+  "warning_rows": 2374,
   "populated_fields": {
     "uid": 2859,
     "lei": 786,
     "licence_date": 0,
     "status": 0,
     "canton": 678,
-    "city": 2943,
+    "city": 2942,
     "address": 786
   },
   "entity_type_rows": {
-    "bank": 514,
+    "bank": 513,
     "insurance": 207,
     "asset_manager_collective": 444,
     "asset_manager_individual": 1607,
@@ -27,8 +27,8 @@
   },
   "supervisory_organisation_rows": 1518,
   "history": {
-    "available_from": "2026-07-15",
-    "available_until": "2026-10-14",
+    "available_from": "2026-07-16",
+    "available_until": "2026-10-15",
     "snapshots": 60,
     "gaps": [
       {
