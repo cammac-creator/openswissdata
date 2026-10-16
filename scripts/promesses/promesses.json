@@ -41,11 +41,11 @@
   },
   {
    "id": "finma-historique",
-   "promesse": "Historique des versions du registre",
+   "promesse": "Historique des versions du registre : une version par jour de la fenêtre servie, hors trous déclarés (décision d6 du 16.10.2026, F7 accordé ; remplace le seuil fixe de 61 versions)",
    "catalogue": "finma",
-   "champ": "history.snapshots",
-   "op": ">=",
-   "valeur": 61
+   "champ": "history",
+   "op": "couverture",
+   "valeur": { "tolerance_jours": 3, "fenetre_min_jours": 85 }
   },
   {
    "id": "finma-historique-continu",

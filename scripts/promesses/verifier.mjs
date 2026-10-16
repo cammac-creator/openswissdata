@@ -6,6 +6,7 @@
 // Lancement : node scripts/promesses/verifier.mjs [chemin du fichier de promesses]
 // Éprouvé le 05.10.2026 : 19 promesses tenues sur la production ; contre-épreuve à deux promesses faussées détectée.
 import { readFileSync } from 'node:fs';
+import { couvertureTenue } from './couverture.mjs';
 
 const fichier = process.argv[2] ?? 'scripts/promesses/promesses.json';
 const spec = JSON.parse(readFileSync(fichier, 'utf8'));
@@ -37,9 +38,13 @@ for (const p of spec.promesses) {
       'age_jours<=': () => typeof v === 'string' && (Date.parse(today) - Date.parse(v.slice(0, 10).replaceAll('.', '-'))) / 86_400_000 <= p.valeur,
       // Chaque catégorie annoncée (clé de l'objet) doit avoir au moins N lignes : version en ligne du test C4.
       'toutes>=': () => v !== null && typeof v === 'object' && Object.keys(v).length > 0 && Object.values(v).every(n => typeof n === 'number' && n >= p.valeur),
+      // Historique à fenêtre glissante : voir couverture.mjs (décision d6 du 16.10.2026).
+      'couverture': () => couvertureTenue(v, p.valeur).ok,
     }[p.op];
     if (!ok) echecs.push(`${p.id} : opérateur inconnu ${p.op}`);
-    else if (!ok()) echecs.push(`${p.id} : ${p.champ} = ${JSON.stringify(v)} (attendu ${p.op} ${JSON.stringify(p.valeur ?? '')})`);
+    else if (!ok()) echecs.push(p.op === 'couverture'
+      ? `${p.id} : ${couvertureTenue(v, p.valeur).detail}`
+      : `${p.id} : ${p.champ} = ${JSON.stringify(v)} (attendu ${p.op} ${JSON.stringify(p.valeur ?? '')})`);
   } catch (e) {
     echecs.push(`${p.id} : lecture impossible (${e instanceof Error ? e.message : 'erreur'})`);
   }
