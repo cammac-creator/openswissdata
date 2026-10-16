@@ -4,7 +4,7 @@ import { couvertureTenue } from "../../scripts/promesses/couverture.mjs";
 // Décision d6 de Claude-Alain (16.10.2026) : la promesse finma-historique suit la fenêtre glissante au lieu
 // d'un seuil fixe de 61 versions, rouge à tort depuis le 13.10 (60 versions servies, aucune perte).
 // Valeurs servies le 16.10.2026 : du 2026-07-17 au 2026-10-16, 60 versions, un trou de 32 jours.
-const REGLE = { tolerance_jours: 3, fenetre_min_jours: 85 };
+const REGLE = { tolerance_jours: 3, fenetre_min_jours: 85, trous_connus: [{ from: "2026.08.24", to: "2026.09.25" }] };
 const SERVI = {
   available_from: "2026-07-17",
   available_until: "2026-10-16",
@@ -35,11 +35,22 @@ describe("couvertureTenue : historique FINMA à fenêtre glissante", () => {
     expect(r.ok).toBe(true);
   });
 
+  it("rougit sur un nouveau trou, même quand le trou connu est sorti de la fenêtre (relecture du 16.10.2026)", () => {
+    // 14.02.2027 : nouveau trou de 41 jours, 52 versions sur 91 jours ; l'ancien seuil fixe rougissait aussi.
+    const r = couvertureTenue({ available_from: "2026-11-15", available_until: "2027-02-14", snapshots: 52, gaps: [{ from: "2026.12.10", to: "2027.01.20", days: 41 }] }, REGLE);
+    expect(r.ok).toBe(false);
+    expect(r.detail).toContain("52 versions pour 89 attendues");
+    // Un nouveau trou dans la fenêtre du trou connu n'est pas excusé non plus.
+    expect(couvertureTenue({ ...SERVI, snapshots: 55, gaps: [...SERVI.gaps, { from: "2026.10.05", to: "2026.10.11", days: 6 }] }, REGLE).ok).toBe(false);
+  });
+
   it("refuse une donnée illisible ou une règle mal écrite", () => {
     expect(couvertureTenue(undefined, REGLE).ok).toBe(false);
     expect(couvertureTenue({ ...SERVI, gaps: [{ days: "32" }] }, REGLE).ok).toBe(false);
     expect(couvertureTenue({ ...SERVI, available_until: "pas une date" }, REGLE).ok).toBe(false);
     expect(couvertureTenue(SERVI, { tolerance_jours: -1, fenetre_min_jours: 85 }).ok).toBe(false);
     expect(couvertureTenue(SERVI, undefined).ok).toBe(false);
+    expect(couvertureTenue(SERVI, { tolerance_jours: 3, fenetre_min_jours: 85 }).ok).toBe(false);   // trous connus absents
+    expect(couvertureTenue(SERVI, { ...REGLE, trous_connus: [{ from: "pas une date", to: "2026.09.25" }] }).ok).toBe(false);
   });
 });

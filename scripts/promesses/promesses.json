@@ -41,11 +41,11 @@
   },
   {
    "id": "finma-historique",
-   "promesse": "Historique des versions du registre : une version par jour de la fenêtre servie, hors trous déclarés (décision d6 du 16.10.2026, F7 accordé ; remplace le seuil fixe de 61 versions)",
+   "promesse": "Historique des versions du registre : une version par jour de la fenêtre servie, hors le trou connu du 24.08 au 25.09.2026 (décision d6 du 16.10.2026, F7 accordé ; remplace le seuil fixe de 61 versions)",
    "catalogue": "finma",
    "champ": "history",
    "op": "couverture",
-   "valeur": { "tolerance_jours": 3, "fenetre_min_jours": 85 }
+   "valeur": { "tolerance_jours": 3, "fenetre_min_jours": 85, "trous_connus": [{ "from": "2026.08.24", "to": "2026.09.25" }] }
   },
   {
    "id": "finma-historique-continu",
