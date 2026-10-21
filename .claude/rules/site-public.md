@@ -23,7 +23,7 @@ Sections déplacées mot pour mot depuis AGENTS.md le 02.10.2026 (charte osd.N01
 - Téléchargement des poids au build : reprise bornée (4 essais, 2/4/8 s ou `Retry-After` plafonné à 60 s) seulement pour un refus passager (408, 425, 429, 5xx) ou une panne réseau avant réponse ; une adresse absente ou un contenu non conforme échoue aussitôt. La CI garde `dist/models` en cache par empreinte des références ; chaque fichier du cache est revérifié.
 
 ## Polices et confidentialité — 26.09.2026
-- Les cinq familles sont servies localement, fichiers WOFF2 officiels inchangés et empreintes produites par Astro. Aucun téléchargement de police au build ni connexion du navigateur à Google Fonts.
+- Les deux familles (Geist et Geist Mono, depuis le retrait de la page privée du 21.10.2026) sont servies localement, fichiers WOFF2 officiels inchangés et empreintes produites par Astro. Aucun téléchargement de police au build ni connexion du navigateur à Google Fonts.
 - Les provenances et SHA sont dans `web/src/assets/fonts/provenance.json`, les licences OFL sont distribuées dans `/fonts/licenses/`. Le contrôle `fonts:check`, obligatoire après le build, vérifie les octets, les licences, les liens CSS et l’absence d’appels Google Fonts.
 - Importer `fonts-geist.css` dans les nouveaux gabarits qui utilisent Geist. Ne pas rétablir de domaine tiers dans `style-src` ou `font-src` pour charger une police.
 
