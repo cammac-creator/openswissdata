@@ -48,7 +48,7 @@
     "csv-parse": "7.0.3",
     "csv-stringify": "^6.7.0",
     "franc-min": "^6.2.0",
-    "hono": "4.13.9",
+    "hono": "4.13.13",
     "imapflow": "^2.0.6",
     "mailparser": "^3.9.28",
     "nace-codes": "^1.0.3",
@@ -70,7 +70,7 @@
     "vitest": "4.1.11"
   },
   "overrides": {
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "esbuild": "0.28.2"
   }
 }

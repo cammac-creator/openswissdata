@@ -8,7 +8,16 @@ Le contrôle npm porte sur les graphes verrouillés de l’application, du site,
 - Intégrations : SDK MCP officiel 1.30.1 et dépendances transitives actualisées ; Vitest 4 pour les deux paquets maintenus. Le délai de requête inclut désormais le corps de réponse. Échange MCP réel en mémoire et processus STDIO issu de l’archive installée vérifiés ; distributions ESM et CommonJS du client également.
 - Site : Astro 7.3.5 en génération statique, sans serveur Astro en production. Les avis d’optimisation d’images et de rendu serveur ne prouvent donc pas une exploitation du service existant ; la mise à jour réduit néanmoins les dépendances signalées.
 - Un seul moteur Transformers.js 3.8.1 pour recherche et traduction. L’ancien Xenova 2 et son ancien protobufjs sont retirés. Les requêtes sont traitées localement. Les index existants restent distincts des collectes de fichiers. Les caches de reprise exigent la révision du modèle et le moteur de calcul courants ; les anciens caches sont recalculés.
-- Deux contraintes transitives explicites : sharp 0.35.4 (correctifs des décodeurs d’images) et esbuild 0.28.2 (serveur de développement). Pas d’entrée image dans nos parcours IA ; build, traduction et recherche doivent être revalidés lors de leur évolution. Retirer ces contraintes lorsque les paquets parents adoptent des versions corrigées compatibles.
+- Deux contraintes transitives explicites : sharp 0.35.5 depuis le 21.10.2026 (0.35.4 auparavant ; correctifs des décodeurs d’images) et esbuild 0.28.2 (serveur de développement). Pas d’entrée image dans nos parcours IA ; build, traduction et recherche doivent être revalidés lors de leur évolution. Retirer ces contraintes lorsque les paquets parents adoptent des versions corrigées compatibles.
+
+## Mise à jour du 21.10.2026
+
+Avis apparus les 19 et 21.10.2026 (contrôle hebdomadaire rouge, puis CI des intégrations) :
+- Application : Hono 4.13.9 → 4.13.13 (avis GHSA-5r4p-p66f-jhc7, le serveur utilise `serveStatic`) ; contrainte sharp 0.35.4 → 0.35.5 (dépendance de libvips corrigée) ; vite 8.3.5 et source-map-js 1.2.2 par `npm audit fix`, sans changement majeur.
+- Site : sharp, vite, source-map-js et http-cache-semantics par `npm audit fix` ; entrées @emnapi/core et @emnapi/runtime conservées dans le lock.
+- Intégrations : vite et hono dans les lockfiles des deux kits (même jour).
+- Restent cinq avis moyens côté application, tous sous `@huggingface/transformers` 3.8.1 (global-agent, roarr, sprintf-js, onnxruntime-node) : leur correctif est la version majeure 4, qui demande de revalider modèle, index et recherche ensemble (même règle que pour une nouvelle révision de modèle). Et deux avis moyens côté site sous `@tailwindcss/typography` (outil de construction, rien n'est servi au navigateur). À traiter dans un lot dédié.
+- Preuves : typage 0, suite complète 213 fichiers (3 312 tests), `web:build` avec seo, polices et bureau verts, construction complète du serveur réussie, sous Node 22.23.3 et npm 10.9.9.
 
 ## Modèle de recherche
 
