@@ -3,8 +3,9 @@
  *
  * Returns the timeline of changes for a FINMA-supervised entity, keyed by
  * Swiss UID (CHE-xxx.xxx.xxx), as observed in OpenSwissData's daily
- * snapshots: first appearance, then changes of name, authorisation type,
- * status and locality (city, canton) when the snapshots contain them.
+ * snapshots: first appearance, then changes of name, authorisation type and
+ * city. Status and canton are tracked fields but empty in the current
+ * collection (uid.csv is read for Name, UID, City, AuthorisationType only).
  * Corrections of 21.10.2026: the address is not a tracked field (the former
  * wording announced address moves) ; the warning-list flag is NEVER served,
  * because snapshots before 2026-09-25 carried a flag derived from an
@@ -226,7 +227,7 @@ export function entityHistoryHandler(args: unknown): {
 export const entityHistoryTool = {
   name: "entity_history",
   description:
-    "Returns the dated timeline of changes observed in OpenSwissData's daily snapshots of the public FINMA registry for one entity, keyed by Swiss UID (CHE-xxx.xxx.xxx): first appearance, then changes of name, authorisation type, status and locality (city, canton) when the snapshots contain them. Addresses and warning-list membership are not reported. Observation dates are not official decision dates, and a change first seen on 2026-09-25 may come from a change in OpenSwissData's collection rather than from FINMA. Snapshots are OpenSwissData's own collection and may have gaps; finma.ch only publishes the current state.",
+    "Returns the dated timeline of changes observed in OpenSwissData's daily snapshots of the public FINMA registry for one entity, keyed by Swiss UID (CHE-xxx.xxx.xxx): first appearance, then changes of name, authorisation type and city. The status and canton fields exist but are empty in the current collection; addresses and warning-list membership are not reported. Observation dates are not official decision dates, and a change first seen on 2026-09-25 may come from a change in OpenSwissData's collection rather than from FINMA. Snapshots are OpenSwissData's own collection and may have gaps; finma.ch only publishes the current state.",
   inputSchema: entityHistorySchema,
   handler: entityHistoryHandler,
 } as const;

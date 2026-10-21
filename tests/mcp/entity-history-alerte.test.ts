@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -50,7 +50,13 @@ describe("entity_history et la liste d'alerte", () => {
   });
 
   it("ne promet ni adresses ni liste d'alerte dans sa description", () => {
-    expect(entityHistoryTool.description).toMatch(/Addresses and warning-list membership are not reported/);
+    expect(entityHistoryTool.description).toMatch(/addresses and warning-list membership are not reported/i);
+    expect(entityHistoryTool.description).toMatch(/status and canton fields exist but are empty/);
     expect(entityHistoryTool.description).not.toMatch(/address moves|warning-list flag transitions/);
+  });
+
+  it("garde le même texte, mot pour mot, dans le tableau des annuaires", () => {
+    const tableau = readFileSync(join(process.cwd(), "docs/launch/mcp-catalog-submissions.md"), "utf8");
+    expect(tableau).toContain(`| 8 | \`entity_history\` | Pro | ${entityHistoryTool.description} |`);
   });
 });
