@@ -854,7 +854,7 @@ async function inspectCsvHeaders(
 }
 
 // ---------------------------------------------------------------------------------------
-// Appel d'une page `package_search`, avec UNE retentative sur échec (puis abandon de la page).
+// Appel d'une page `package_search` : UNE retentative sur échec, sauf refus pour trop d'appels (429, 503) : attentes croissantes, voir plus bas.
 // ---------------------------------------------------------------------------------------
 // Tri EXPLICITE, jamais le tri par défaut de CKAN (`score desc, metadata_modified desc` en
 // l'absence de requête texte) : relevé en direct le 06.10.2026, ce tri par défaut renvoie
@@ -890,13 +890,51 @@ async function fetchCkanPage(
     headers: { "User-Agent": userAgent },
     signal: AbortSignal.timeout(timeoutMs),
   });
-  if (!res.ok) throw new Error(`CKAN package_search : HTTP ${res.status}`);
+  if (!res.ok) throw new CkanHttpError(res.status, parseRetryAfterMs(res.headers.get("retry-after"), Date.now()));
   const body = (await res.json()) as CkanSearchResponse;
   if (body.success !== true || !body.result) throw new Error("Réponse CKAN invalide (success=false ou result absent)");
   return body.result;
 }
 
-async function fetchCkanPageWithRetry(
+// ---------------------------------------------------------------------------------------
+// Refus pour trop d'appels (21.10.2026) : le 19.10, CKAN a répondu 429 à la 4e page et la
+// retentative unique, 500 ms plus tard, a échoué aussi : passage partiel (3/55 pages). Un 429
+// ou un 503 (serveur surchargé) n'est pas une panne : on attend de plus en plus longtemps
+// (30 s, 60 s, 120 s, 240 s), ou le délai demandé par le serveur (`Retry-After`) s'il est plus
+// long, plafonné à 300 s, et la page n'est abandonnée qu'après 5 essais. Toute autre erreur
+// garde le comportement d'avant : un essai et une seule retentative.
+// ---------------------------------------------------------------------------------------
+export class CkanHttpError extends Error {
+  constructor(readonly status: number, readonly retryAfterMs: number | null) {
+    super(`CKAN package_search : HTTP ${status}`);
+    this.name = "CkanHttpError";
+  }
+}
+
+export const RATE_LIMIT_MAX_ATTEMPTS = 5;
+export const RATE_LIMIT_BASE_WAIT_MS = 30_000;
+export const RATE_LIMIT_MAX_WAIT_MS = 300_000;
+
+/** Délai demandé par `Retry-After` (secondes ou date HTTP), en millisecondes ; null si absent ou illisible. */
+export function parseRetryAfterMs(value: string | null, nowMs: number): number | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) return Number(trimmed) * 1000;
+  const date = Date.parse(trimmed);
+  if (Number.isNaN(date)) return null;
+  return Math.max(0, date - nowMs);
+}
+
+/** Attente avant l'essai `attempt + 1` après un refus pour trop d'appels (attempt commence à 1). */
+export function rateLimitWaitMs(attempt: number, retryAfterMs: number | null): number {
+  const doubled = RATE_LIMIT_BASE_WAIT_MS * 2 ** (attempt - 1);
+  return Math.min(RATE_LIMIT_MAX_WAIT_MS, Math.max(doubled, retryAfterMs ?? 0));
+}
+
+const isRateLimited = (err: unknown): err is CkanHttpError =>
+  err instanceof CkanHttpError && (err.status === 429 || err.status === 503);
+
+export async function fetchCkanPageWithRetry(
   fetchImpl: typeof fetch,
   userAgent: string,
   start: number,
@@ -905,18 +943,31 @@ async function fetchCkanPageWithRetry(
   delayMs: number,
   sleepImpl: (ms: number) => Promise<void>,
 ): Promise<CkanSearchResult | null> {
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  let otherFailures = 0;
+  let rateLimited = 0;
+  for (;;) {
     try {
       return await fetchCkanPage(fetchImpl, userAgent, start, rows, timeoutMs);
     } catch (err) {
-      if (attempt === 2) {
+      if (isRateLimited(err)) {
+        rateLimited++;
+        if (rateLimited >= RATE_LIMIT_MAX_ATTEMPTS) {
+          console.error(`[prospect:sources] page start=${start} : abandon après ${rateLimited} refus pour trop d'appels (${err.message})`);
+          return null;
+        }
+        const wait = rateLimitWaitMs(rateLimited, err.retryAfterMs);
+        console.error(`[prospect:sources] page start=${start} : ${err.message}, nouvel essai dans ${Math.round(wait / 1000)} s`);
+        await sleepImpl(wait);
+        continue;
+      }
+      otherFailures++;
+      if (otherFailures >= 2) {
         console.error(`[prospect:sources] page start=${start} : échec après une retentative (${err instanceof Error ? err.message : String(err)})`);
         return null;
       }
       await sleepImpl(delayMs);
     }
   }
-  return null;
 }
 
 // ---------------------------------------------------------------------------------------
