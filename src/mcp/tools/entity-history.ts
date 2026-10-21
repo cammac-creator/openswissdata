@@ -2,9 +2,14 @@
  * Tool: entity_history
  *
  * Returns the timeline of changes for a FINMA-supervised entity, keyed by
- * Swiss UID (CHE-xxx.xxx.xxx). Captures registration, authorisation type
- * changes, status mutations, address moves and warning-list cross-flag
- * transitions over the rolling history window.
+ * Swiss UID (CHE-xxx.xxx.xxx), as observed in OpenSwissData's daily
+ * snapshots: first appearance, then changes of name, authorisation type,
+ * status and locality (city, canton) when the snapshots contain them.
+ * Corrections of 21.10.2026: the address is not a tracked field (the former
+ * wording announced address moves) ; the warning-list flag is NEVER served,
+ * because snapshots before 2026-09-25 carried a flag derived from an
+ * approximate name match (removed since), and the project rule only allows
+ * exact matches with the FINMA warning list.
  *
  * Why this is irreplicable:
  *   - finma.ch publishes the *current* state of each registry per category
@@ -70,7 +75,7 @@ const TRACKED_FIELDS = [
   "status",
   "canton",
   "city",
-  "is_warning_listed",
+  // "is_warning_listed" volontairement absent (21.10.2026) : drapeau approché avant le 25.09.2026.
 ] as const;
 
 /**
@@ -168,7 +173,7 @@ export function entityHistoryHandler(args: unknown): {
        FROM dataset_snapshots
        WHERE dataset_id = 'finma'
          AND entity_key = ?
-         AND field IN ('name', 'licence_type', 'status', 'canton', 'city', 'is_warning_listed')
+         AND field IN ('name', 'licence_type', 'status', 'canton', 'city')
        ORDER BY recorded_at ASC`,
     )
     .all(uid) as SnapshotRow[];
@@ -221,7 +226,7 @@ export function entityHistoryHandler(args: unknown): {
 export const entityHistoryTool = {
   name: "entity_history",
   description:
-    "Returns the timeline of changes for a FINMA-supervised entity (registration, authorisation type changes, status mutations, address moves, warning-list flag transitions). Keyed by Swiss UID (CHE-xxx.xxx.xxx). Irreplicable by scraping — finma.ch only publishes the current state.",
+    "Returns the dated timeline of changes observed in OpenSwissData's daily snapshots of the public FINMA registry for one entity, keyed by Swiss UID (CHE-xxx.xxx.xxx): first appearance, then changes of name, authorisation type, status and locality (city, canton) when the snapshots contain them. Addresses and warning-list membership are not reported. Observation dates are not official decision dates, and a change first seen on 2026-09-25 may come from a change in OpenSwissData's collection rather than from FINMA. Snapshots are OpenSwissData's own collection and may have gaps; finma.ch only publishes the current state.",
   inputSchema: entityHistorySchema,
   handler: entityHistoryHandler,
 } as const;
