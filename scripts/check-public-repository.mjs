@@ -18,6 +18,8 @@ const findings = [];
 for (const path of files) {
   if (/^docs\/launch\/mailing-list\/.*\.csv$/i.test(path)) findings.push(`${path} : liste de prospection interdite dans le dépôt public`);
   if (/^\.design-preview\//.test(path)) findings.push(`${path} : page de travail interne interdite dans le dépôt public (retrait du 21.10.2026)`);
+  if (/^web\/public\/pour-[^/]+\//.test(path) || /^web\/src\/pages\/famille\./.test(path)) findings.push(`${path} : page personnelle interdite sur le site public (retrait du 21.10.2026)`);
+  if (/^docs\/launch\/(mailing-list\/|pitch-presse)/.test(path)) findings.push(`${path} : document de prospection interdit dans le dépôt public (retrait du 21.10.2026)`);
   const absolute = resolve(root, path);
   if (!existsSync(absolute)) continue;
   const content = readFileSync(absolute);

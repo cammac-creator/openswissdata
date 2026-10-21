@@ -7,7 +7,7 @@ Statut : ✅ Stripe LIVE actif en production
 
 - **Account ID** : `***REDACTED — see Stripe dashboard***`
 - **Country** : CH
-- **Email** : cam@ogens.ch
+- **Email** : (adresse personnelle de l’éditeur, retirée)
 - **Default currency** : CHF
 - **Charges enabled** : ✅ true
 - **Payouts enabled** : ✅ true

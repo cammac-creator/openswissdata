@@ -318,7 +318,7 @@
 | Phase 5 — Catalogue | 60j | ~80h | 3 SKUs + 1 tier Pro, ARR M3 5-10k CHF MRR |
 | Phase 6 — Scale | 90j | ~100h | Postgres, RC pro, trademark, plan B |
 
-**Sur 10-15h/sem** (contrainte Alain UIKER) : Phase 0→2 = 2 semaines, Phase 3 = 1.5 semaine, Phase 4 = 4 semaines en parallèle. Prévoir **6-7 semaines calendaires pour atteindre 5 ventes TARES.**
+**Sur le temps disponible** : Phase 0→2 = 2 semaines, Phase 3 = 1.5 semaine, Phase 4 = 4 semaines en parallèle. Prévoir **6-7 semaines calendaires pour atteindre 5 ventes TARES.**
 
 ---
 

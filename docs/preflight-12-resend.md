@@ -24,9 +24,9 @@ Statut : ✅ PASS — Resend prêt pour cold + transactionnel
 
 | Date | To | Subject | Status |
 |---|---|---|---|
-| 2026-04-24 19:34 | claudealainmartin06@gmail.com | [#12 pre-flight] Test header List-Unsubscribe | delivered |
-| 2026-04-23 19:42 | cam@ogens.ch | Your TARES — Swiss Customs Tariff download | delivered |
-| 2026-04-23 19:10 | claudealainmartin06@gmail.com | Your TARES — Swiss Customs Tariff download | delivered |
+| 2026-04-24 19:34 | (adresse personnelle de l’éditeur, retirée) | [#12 pre-flight] Test header List-Unsubscribe | delivered |
+| 2026-04-23 19:42 | (adresse personnelle de l’éditeur, retirée) | Your TARES — Swiss Customs Tariff download | delivered |
+| 2026-04-23 19:10 | (adresse personnelle de l’éditeur, retirée) | Your TARES — Swiss Customs Tariff download | delivered |
 | 2026-04-23 18:19 | e2e-test-2026-04-23@openswissdata.com | Your openswissdata login link | suppressed |
 | 2026-04-23 18:19 | e2e-test-2026-04-23@openswissdata.com | Your TARES — Swiss Customs Tariff download | bounced |
 

@@ -10,7 +10,7 @@
 
 ## Réponse BAZG (TARES) — 2026-04-21
 
-Répondu par Michael Beer, Chef Tarifgrundlagen, BAZG Zolltarif und Tarifgrundlagen (michael.beer@bazg.admin.ch).
+Répondu par Michael Beer, Chef Tarifgrundlagen, BAZG Zolltarif und Tarifgrundlagen (adresse directe retirée ; adresse générique : info@bazg.admin.ch).
 
 **Conditions strictes à respecter :**
 
@@ -30,7 +30,7 @@ Répondu par Michael Beer, Chef Tarifgrundlagen, BAZG Zolltarif und Tarifgrundla
 
 - [x] Ajouter la mention DE/FR/EN « Non-officiel » dans le README du bundle TARES (modifier `etl/tares/bundle.ts` : constantes `DATASET_LICENSE` et `readme`). *(fait 2026-04-16)*
 - [x] Ajouter un bandeau visuel « Non-officiel · Source autoritative : xtares.admin.ch » en haut de `web/src/pages/datasets/tares.astro`. *(fait 2026-04-16)*
-- [x] Mettre à jour `LICENSE.txt` spécifiquement pour TARES avec la clause de non-officialité + for juridique Berne (distinct des autres datasets dont le for reste canton d'Alain). *(fait 2026-04-16 — `DATASET_LICENSE` dans `etl/tares/bundle.ts` remplacé par version TARES-spécifique avec for Berne)*
+- [x] Mettre à jour `LICENSE.txt` spécifiquement pour TARES avec la clause de non-officialité + for juridique Berne (distinct des autres datasets dont le for reste celui de l'éditeur). *(fait 2026-04-16 — `DATASET_LICENSE` dans `etl/tares/bundle.ts` remplacé par version TARES-spécifique avec for Berne)*
 - [x] Fixtures actuelles vérifiées : `sample-5-rows.json` ne contient que code/désignation/droit/régime/restrictions, pas de notes explicatives → ✅ conforme.
 - [x] Pour le scraping réel futur (Task 2.4), **exclure explicitement** les colonnes notes explicatives (« Erläuterungen ») et décisions de classification (« Entscheide ») de l'ingestion. *(fait 2026-04-16 — guard `assertNoForbiddenFields()` dans `etl/tares/normalize.ts` + commentaire FORBIDDEN dans `etl/tares/types.ts`)*
 - [ ] Ajouter dans CGV une section spécifique TARES avec for Berne. *(pending — Task 2.5)*
