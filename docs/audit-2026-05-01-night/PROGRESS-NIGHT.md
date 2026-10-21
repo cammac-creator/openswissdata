@@ -173,7 +173,7 @@ Tout vert.
    ```
    Si l'erreur apparaît dans Sentry → on supprime l'endpoint debug et on enchaîne.
 
-2. **Lancer Self-purchase LIVE test** (30-40 min) : suivre la procédure dans `.design-preview/sentry-and-self-purchase-guide.html` (4 SKUs × 10 min).
+2. **Lancer Self-purchase LIVE test** (30-40 min) : suivre la procédure dans `.design-preview/sentry-and-self-purchase-guide.html` (page de travail retirée du dépôt public le 21.10.2026) (4 SKUs × 10 min).
 
 3. **Décider sur bundle Stripe 797 vs 799** (action humaine sur Stripe Dashboard).
 
@@ -186,8 +186,8 @@ Tout vert.
 - 📄 **Cette nuit** : 5 rapports dans `docs/audit-2026-05-01-night/` (UX-FUNNEL, RESPONSIVE-MOBILE, A11Y, PERFORMANCE, MCP-E2E)
 - 📄 **Hier nuit** : `docs/audit-2026-04-30/PROGRESS-NIGHT-2026-04-30.md`
 - 📄 **Audit complet** : `docs/audit-2026-04-30/AUDIT-COMPLET.md`
-- 📄 **Synthèse 10 décisions** : `.design-preview/synthese-finale-2026-04-30.html`
-- 📄 **Guide email + self-purchase** : `.design-preview/sentry-and-self-purchase-guide.html`
+- 📄 **Synthèse 10 décisions** : `.design-preview/synthese-finale-2026-04-30.html` (page de travail retirée du dépôt public le 21.10.2026)
+- 📄 **Guide email + self-purchase** : `.design-preview/sentry-and-self-purchase-guide.html` (page de travail retirée du dépôt public le 21.10.2026)
 - 🔒 **Playbook stratégique** (HORS REPO) : `~/Documents/openswissdata-strategy/playbook-launch-defensif-2026-04-30.md`
 - 🔒 **Credentials** (HORS REPO) : `~/Documents/openswissdata-strategy/credentials.txt`
 

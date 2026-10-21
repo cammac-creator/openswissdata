@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Porter le mockup V4 (`.design-preview/index.html`) dans le code Astro réel — refonte totale de `web/src/pages/index.astro` avec design system Geist + animations smooth + 3 angles persona orchestrés sans saturer.
+**Goal:** Porter le mockup V4 (`.design-preview/index.html` (page de travail retirée du dépôt public le 21.10.2026)) dans le code Astro réel — refonte totale de `web/src/pages/index.astro` avec design system Geist + animations smooth + 3 angles persona orchestrés sans saturer.
 
 **Architecture:** Cohabitation CSS — on **ajoute** les nouveaux tokens et classes V4 à `web/src/styles/global.css` sans casser les anciennes classes utilisées par les pages dataset/legal/blog non refondues cette session. On crée 10 nouveaux composants Astro réutilisables. On remplace `Header.astro` (référencé dans `BaseLayout`) par `StatusBar.astro`, et on simplifie `Footer.astro`. JS d'animations V4 inline dans `index.astro`.
 
@@ -11,7 +11,7 @@
 **Note TDD:** Cette plan touche uniquement du UI visuel. Aucun test unitaire pertinent — la QA est `npm run dev` + inspection navigateur, et `npm run build` pour valider la compilation Astro. Pas de "failing test first".
 
 **Spec source:** `docs/superpowers/specs/2026-04-29-landing-redesign-v4-design.md`
-**Mockup source de vérité:** `.design-preview/index.html` (gitignored, présent sur le disque)
+**Mockup source de vérité:** `.design-preview/index.html` (page de travail retirée du dépôt public le 21.10.2026) (gitignored, présent sur le disque)
 
 ---
 
@@ -507,7 +507,7 @@ const { source, date, text, author, role, affiliation, ctas } = Astro.props;
 
 - [ ] **Step 1: Append les classes V4 à la fin de global.css**
 
-Ouvrir `web/src/styles/global.css` et **ajouter à la fin du fichier** (ne rien supprimer) le bloc CSS V4 ci-dessous. Source de vérité : `.design-preview/index.html` (le mockup validé), section `<style>` lignes ≈10-690 (toutes les classes commençant par `.bg-grid`, `.reveal`, `.status`, `.eyebrow`, `.h1`, `.lede`, `.spec*`, `.cta-row`, `.btn*`, `.permission-line`, `.hero-trace`, `.term*`, `.cursor`, `.trust*`, `.personas`, `.section-*`, `.persona*`, `.datasets`, `.dataset-grid`, `.fiche*`, `.fmt-chip`, `.how`, `.steps`, `.step*`, `.quote-section`, `.quote-*`, `.cta-final*`, `.install-bar*`, `footer`, `.foot*`).
+Ouvrir `web/src/styles/global.css` et **ajouter à la fin du fichier** (ne rien supprimer) le bloc CSS V4 ci-dessous. Source de vérité : `.design-preview/index.html` (page de travail retirée du dépôt public le 21.10.2026) (le mockup validé), section `<style>` lignes ≈10-690 (toutes les classes commençant par `.bg-grid`, `.reveal`, `.status`, `.eyebrow`, `.h1`, `.lede`, `.spec*`, `.cta-row`, `.btn*`, `.permission-line`, `.hero-trace`, `.term*`, `.cursor`, `.trust*`, `.personas`, `.section-*`, `.persona*`, `.datasets`, `.dataset-grid`, `.fiche*`, `.fmt-chip`, `.how`, `.steps`, `.step*`, `.quote-section`, `.quote-*`, `.cta-final*`, `.install-bar*`, `footer`, `.foot*`).
 
 Le bloc complet à ajouter (~680 lignes) :
 
@@ -1522,7 +1522,7 @@ git revert <hash-phase-1>..HEAD          # ou git reset --hard <hash-pre-V4> si 
 railway up --detach
 ```
 
-Le mockup `.design-preview/index.html` reste sur le disque pour reprendre le travail.
+Le mockup `.design-preview/index.html` (page de travail retirée du dépôt public le 21.10.2026) reste sur le disque pour reprendre le travail.
 
 ---
 

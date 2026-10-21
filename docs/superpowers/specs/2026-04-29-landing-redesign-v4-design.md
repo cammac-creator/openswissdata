@@ -4,7 +4,7 @@
 **Auteur :** brainstorming session avec Claude-Alain Martin
 **Statut :** spec validée, prête pour planification d'implémentation
 **Scope :** refonte design system + page d'accueil `web/src/pages/index.astro`
-**Mockup de référence :** `.design-preview/index.html` (V4 finale validée)
+**Mockup de référence :** `.design-preview/index.html` (page de travail retirée du dépôt public le 21.10.2026) (V4 finale validée)
 
 ---
 
@@ -275,7 +275,7 @@ Le design actuel (Inter + Instrument Serif italique + grain noise + spotlight ro
 
 ## 12. Mockup de référence
 
-Le mockup HTML autonome final est dans `.design-preview/index.html` (gitignored via `.gitignore.local`). Il contient :
+Le mockup HTML autonome final est dans `.design-preview/index.html` (page de travail retirée du dépôt public le 21.10.2026) (gitignored via `.gitignore.local`). Il contient :
 - Le code CSS V4 complet (à porter dans `global.css`)
 - Le markup HTML de chaque section (à porter dans les composants Astro)
 - Le JS d'animations (à porter inline dans `index.astro`)

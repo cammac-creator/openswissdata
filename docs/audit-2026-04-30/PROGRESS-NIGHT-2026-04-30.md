@@ -200,7 +200,7 @@ D'après ta validation D2=jeudi-7-mai (synthèse-finale-2026-04-30.html) :
 ## 📦 Documents stratégiques (rappel)
 
 - 📄 **Audit complet** (~3000 mots) : `docs/audit-2026-04-30/AUDIT-COMPLET.md`
-- 📄 **Page HTML synthèse 10 décisions** : `.design-preview/synthese-finale-2026-04-30.html`
+- 📄 **Page HTML synthèse 10 décisions** : `.design-preview/synthese-finale-2026-04-30.html` (page de travail retirée du dépôt public le 21.10.2026)
 - 📄 **Audit concurrence 14 acteurs** : `docs/competitive-analysis-2026-04-30.md`
 - 🔒 **Playbook stratégique** (HORS REPO) : `~/Documents/openswissdata-strategy/playbook-launch-defensif-2026-04-30.md`
 - 📄 **PROGRESS pages légales** : `docs/audit-2026-04-30/PROGRESS-pages-legales.md`
