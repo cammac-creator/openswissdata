@@ -55,14 +55,14 @@
     "size": 112749
   },
   "bfs.noga_2025": {
-    "hash": "1d2451f528b26b6a40c6ac9f6d41c66ff5ba10317ccf7af2fa791aef66501638",
-    "checked_at": "2026-09-25T16:18:33.863Z",
-    "size": 5669370
+    "hash": "56514a6b7ad2c16f0abd0e74cfc0f64ff28b3efd71a874cf904bfd3a291213ef",
+    "checked_at": "2026-10-21T10:00:00.000Z",
+    "size": 5669386
   },
   "bfs.noga_2008": {
-    "hash": "a159ba13a640a2c4e06c12f7f3acea677755702f9653f86c96684c8c117bbd82",
-    "checked_at": "2026-09-25T16:18:33.863Z",
-    "size": 3601007
+    "hash": "8a80eee4e003fc2e9d1a5f2b59f88c1819c6fc37585739e771f191c12676eced",
+    "checked_at": "2026-10-21T10:00:00.000Z",
+    "size": 3601023
   },
   "eurostat.nace21_rdf": {
     "hash": "d98047ce74d345c12a8a0970fa14df232a1245891c8581b036994776505fef20",
