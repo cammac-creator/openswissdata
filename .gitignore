@@ -40,3 +40,6 @@ etl/canary-report.json
 
 # Les listes de prospection restent dans les dossiers privés autorisés.
 docs/launch/mailing-list/*.csv
+
+# Pages de travail internes (retirées du dépôt public le 21.10.2026)
+.design-preview/
