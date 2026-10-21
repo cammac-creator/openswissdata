@@ -1,9 +1,9 @@
 {
-  "version": "2026.10.20",
-  "collected_on": "2026-10-20",
+  "version": "2026.10.21",
+  "collected_on": "2026-10-21",
   "registry_rows": 2943,
   "unique_uids": 2748,
-  "warning_rows": 2376,
+  "warning_rows": 2377,
   "populated_fields": {
     "uid": 2859,
     "lei": 785,
@@ -27,8 +27,8 @@
   },
   "supervisory_organisation_rows": 1519,
   "history": {
-    "available_from": "2026-07-21",
-    "available_until": "2026-10-20",
+    "available_from": "2026-07-22",
+    "available_until": "2026-10-21",
     "snapshots": 60,
     "gaps": [
       {
