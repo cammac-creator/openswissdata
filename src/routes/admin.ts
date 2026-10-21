@@ -6,6 +6,7 @@ import { BackupInspectionError, type BackupInspection } from "../lib/backup-insp
 import { writeBackupAttempt } from "../lib/backup-state.js";
 import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
+import { realCustomerSql } from "./crm.js";
 import { runFullCleanup } from "../lib/cleanup.js";
 import { refreshFinmaFromR2, refreshTaresFromR2, refreshClassificationsFromR2, getMcpFreshness, extractCsvFromZip } from "../mcp/r2-refresh.js";
 import { getObjectBuffer } from "../lib/r2.js";
@@ -39,6 +40,98 @@ adminRoute.get("/operations", (c) => {
 });
 
 // Métadonnées publiques du produit uniquement ; aucune donnée client.
+/**
+ * GET /api/admin/indicateurs?days=7 — relevé de CHIFFRES seulement (21.10.2026), lu par le lanceur sans
+ * modèle de la séance hebdomadaire et par les bilans : protégé par le secret d'administration comme
+ * /operations. Jamais d'adresse, de nom, d'empreinte de visiteur, d'identifiant de client ou de session, de
+ * chemin complet ni de nom fourni par un appelant : des comptes, sous des clés fixes. Les visiteurs sont
+ * des « visiteurs-jours » (empreinte renouvelée chaque jour), pas des personnes uniques sur la période.
+ * Ventes et comptes : même règle que le CRM (réels cs_live_*, payés, nets des remboursements, sans les
+ * comptes internes de ADMIN_EMAILS, CRM_INTERNAL_EMAILS et crm_profiles.internal) ; centimes de CHF.
+ */
+const OUTILS_MCP = new Set([
+  "tariff_lookup", "kyc_check", "company_check", "cross_walk", "tariff_semantic_search",
+  "classify_text", "finma_search", "tariff_changelog", "entity_history", "statent_lookup",
+]);
+// Événements produits par le serveur lui-même (noms réservés de src/routes/events.ts, refusés aux appelants).
+const EVENEMENTS_SERVEUR = [
+  "mcp_initialize", "mcp_rate_limited", "mcp_trial", "checkout_started", "payment_paid",
+  "delivery_sent", "download_authorized", "sample_served",
+] as const;
+const SECTION = /^[a-z0-9-]{1,40}$/;
+
+adminRoute.get("/indicateurs", (c) => {
+  const secret = c.req.header("x-admin-secret");
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) return c.json({ error: "unauthorized" }, 401);
+  const days = Math.min(90, Math.max(1, Number.parseInt(c.req.query("days") ?? "7", 10) || 7));
+  const since = Date.now() - days * 24 * 3600 * 1000;
+  const db = getDb();
+  const reel = realCustomerSql("c");
+  const ventes = (depuis: number) => db.prepare(`
+    SELECT COUNT(*) AS commandes, COUNT(DISTINCT o.customer_id) AS clients,
+           COALESCE(SUM(o.amount_chf - o.refunded_chf), 0) AS net_centimes
+    FROM orders o JOIN customers c ON c.id = o.customer_id LEFT JOIN crm_profiles p ON p.customer_id = c.id
+    WHERE o.status = 'paid' AND o.stripe_session_id GLOB 'cs_live_*' AND o.created_at >= ? AND ${reel.sql}
+  `).get(depuis, ...reel.params) as { commandes: number; clients: number; net_centimes: number };
+  const comptes = db.prepare(`
+    SELECT COUNT(*) AS nouveaux FROM customers c LEFT JOIN crm_profiles p ON p.customer_id = c.id
+    WHERE c.created_at >= ? AND ${reel.sql}
+  `).get(since, ...reel.params) as { nouveaux: number };
+
+  const filtrePages = `kind = 'custom' AND name = 'page_view' AND origin = 'server' AND ts >= ? AND ua_class IN ('desktop', 'mobile') AND visitor_hash IS NOT NULL`;
+  const total = db.prepare(`SELECT COUNT(DISTINCT visitor_hash) AS n FROM events WHERE ${filtrePages}`).get(since) as { n: number };
+  const brutes = db.prepare(`
+    WITH v AS (SELECT visitor_hash, COALESCE(json_extract(meta_json, '$.path'), '') AS p FROM events WHERE ${filtrePages}),
+         s AS (SELECT visitor_hash, CASE WHEN p IN ('', '/') THEN 'accueil'
+                                         WHEN instr(substr(p, 2), '/') > 0 THEN substr(p, 2, instr(substr(p, 2), '/') - 1)
+                                         ELSE substr(p, 2) END AS section FROM v)
+    SELECT section, COUNT(DISTINCT visitor_hash) AS visiteurs_jours FROM s GROUP BY section ORDER BY visiteurs_jours DESC LIMIT 60
+  `).all(since) as Array<{ section: string; visiteurs_jours: number }>;
+  const parSection = new Map<string, number>();
+  for (const r of brutes) {
+    const cle = SECTION.test(r.section) ? r.section : "autre";
+    parSection.set(cle, (parSection.get(cle) ?? 0) + r.visiteurs_jours);
+  }
+  const sections = [...parSection.entries()].map(([section, visiteurs_jours]) => ({ section, visiteurs_jours }))
+    .sort((a, b) => b.visiteurs_jours - a.visiteurs_jours || a.section.localeCompare(b.section)).slice(0, 20);
+
+  const appelsMcp = db.prepare(`
+    SELECT json_extract(meta_json, '$.tool') AS outil, COALESCE(ua_class, 'unknown') AS classe,
+           COUNT(*) AS appels, COUNT(DISTINCT visitor_hash) AS visiteurs_jours
+    FROM events
+    WHERE kind = 'custom' AND name = 'mcp_tool_call' AND origin IN ('server', 'legacy') AND ts >= ?
+      AND COALESCE(json_extract(meta_json, '$.admin'), 0) = 0
+    GROUP BY outil, classe
+  `).all(since) as Array<{ outil: unknown; classe: string; appels: number; visiteurs_jours: number }>;
+  const mcp: Record<string, { appels: number; visiteurs_jours: number; par_classe: Record<string, number> }> = {};
+  for (const r of appelsMcp) {
+    const outil = typeof r.outil === "string" && OUTILS_MCP.has(r.outil) ? r.outil : "autre";
+    const m = (mcp[outil] ??= { appels: 0, visiteurs_jours: 0, par_classe: {} });
+    m.appels += r.appels;
+    m.visiteurs_jours += r.visiteurs_jours;
+    m.par_classe[r.classe] = (m.par_classe[r.classe] ?? 0) + r.appels;
+  }
+
+  const evenements = db.prepare(`
+    SELECT name AS nom, COUNT(*) AS nombre, COUNT(DISTINCT visitor_hash) AS visiteurs_jours
+    FROM events
+    WHERE kind IN ('custom', 'conversion') AND origin = 'server' AND ts >= ?
+      AND name IN (${EVENEMENTS_SERVEUR.map(() => "?").join(",")})
+    GROUP BY name ORDER BY nombre DESC
+  `).all(since, ...EVENEMENTS_SERVEUR) as Array<{ nom: string; nombre: number; visiteurs_jours: number }>;
+
+  return c.json({
+    genere_le: new Date().toISOString(),
+    fenetre_jours: days,
+    ventes: { periode: ventes(since), depuis_toujours: ventes(0) },
+    comptes_crees: comptes.nouveaux,
+    visites: { visiteurs_jours_navigateurs: total.n, par_section: sections },
+    mcp,
+    evenements,
+    notes: "Chiffres seulement. Fenêtre glissante (pas la période suisse du CRM). Visiteurs-jours : empreinte renouvelée chaque jour, pas des personnes uniques. Montants en centimes de CHF.",
+  });
+});
+
 adminRoute.get("/dataset-versions/:id", (c) => {
   const secret = c.req.header("x-admin-secret");
   if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) return c.json({ error: "unauthorized" }, 401);
