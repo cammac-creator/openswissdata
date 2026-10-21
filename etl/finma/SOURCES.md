@@ -128,6 +128,53 @@ chaque fichier dans `quality.json` et le README de l'archive (accord FINMA du
 `scripts/monitor-sources.ts` les suit en mode `xlsx-shape` (nom de feuille et
 ligne d'en-tête), références dans `etl/canary-baseline.json`.
 
+## Mouvements mensuels (`quality.json`, bloc `history.movements`, depuis le 21.10.2026)
+
+Données de la future vitrine « Mouvements FINMA » (décisions de Claude-Alain des
+16.10 et 21.10.2026). Calcul : `etl/finma/movements.ts`, appelé par `release.ts`
+sur les versions publiées de la fenêtre de 90 jours ; tests :
+`tests/etl/finma-movements*.test.ts` (données fictives).
+
+**Totaux seulement.** Aucun nom, IDE ni adresse de page : la liste d'alerte et
+les personnes physiques du registre (entreprises individuelles) n'apparaissent
+qu'en nombres, par mois et par catégorie.
+
+**Registre.** Comparaison de deux collectes consécutives avec la clé du
+changelog (`delta.ts`), sur les mêmes champs que `buildHistory` (guillemets
+retirés, adresse GLEIF ignorée). Dans une même comparaison, une apparition et
+une disparition de la même identité (IDE, à défaut nom exact) forment un
+changement de type d'autorisation, compté dans la catégorie de la nouvelle
+autorisation ; avec le même libellé FINMA et une autre catégorie, c'est un
+reclassement de notre collecte (`reclassified_by_collection`), exclu des
+mouvements (cas réel : 7 lignes `other` → `fintech` le 29.09.2026). Plusieurs
+apparitions ou disparitions de la même identité restent comptées telles quelles.
+`changelog_90d` n'est pas modifié.
+
+**Liste d'alerte.** `added_dated_in_month` : adresses distinctes dont la
+`date_added` FINMA tombe dans le mois, vues par une comparaison comptée ou
+présentes au début de la période lue. `appeared` et `removed` : par l'adresse
+exacte `source_url`, jamais par le nom ; un changement d'adresse de page compte
+comme un retrait et une apparition, `removed_possible_url_change` signale les
+retraits dont la même date d'ajout réapparaît sous une autre adresse.
+`appeared_late` : date d'ajout antérieure à la collecte précédente (publication
+tardive ou rétroactive de la FINMA, cas réel du 15.10.2026).
+
+**Trou et faux mouvements.** Une comparaison de plus de deux jours (le trou du
+24.08 au 25.09.2026) n'est comptée dans aucun mois : elle part dans
+`resumptions`, avec ses dates et, pour la liste d'alerte, la ventilation par mois
+de la date FINMA. Une comparaison de plus de max(30 lignes, 1 % des lignes de la
+version précédente) par jour écoulé est exclue du mois pour la liste concernée
+et listée dans `excluded` ; la collecte continue (la mesure ne bloque pas la vente).
+
+**Mois figés.** Un mois est figé à la première collecte datée du 3 du mois
+suivant ou après (retard de publication mesuré : 76 % des ajouts vus le
+lendemain, aucun à deux ou trois jours). Les mois figés et les reprises sont
+recopiés tels quels du bloc de la version publiée la plus récente qui en porte
+un : ils survivent à la fenêtre glissante. Un bloc hérité présent mais illisible
+arrête la publication (contrôle `mouvements_herites_illisibles`), car repartir de
+zéro perdrait des mois figés. Le premier passage amorce le bloc depuis la
+fenêtre : juillet, août et septembre 2026 y sont partiels (`partial`).
+
 ## Sources covered (registry)
 
 9 sources registered in `sources.ts`:

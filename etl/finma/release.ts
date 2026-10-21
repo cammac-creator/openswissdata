@@ -12,6 +12,7 @@ import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FinmaEntity, FinmaWarning } from "./types.js";
 import { writeControlStopReport } from "./control-report.js";
+import { buildMovements, MovementsInheritanceError, summarizeMovements, type MovementsBlock } from "./movements.js";
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -206,8 +207,37 @@ export async function runRelease(
     throw new Error("Variation FINMA supérieure à 10 % : contrôle humain nécessaire");
   }
   const history = buildHistory(snapshots, { version, entities });
-  writeFileSync(join(outDir, `controle-${version}.json`), JSON.stringify({ version, registry_rows: entities.length, warnings: warnings.length, lei_rows: entities.filter(e => e.lei).length, supervisory_organisation: supervision?.matching ?? null, reference_sros: supervision?.sros.length ?? 0, reference_supervisory_organisations: supervision?.supervisoryOrganisations.length ?? 0, history: history.coverage, changes: history.changes.length }, null, 2));
-  const bundle = await buildBundle({ entities, warnings, zefixByUid, supervision, recentChanges: history.changes, historyCoverage: history.coverage }, version, outDir);
+  // Mouvements mensuels (totaux seulement) : mois figés et reprises recopiés du bloc
+  // hérité. Un bloc hérité illisible arrête la publication : repartir de zéro
+  // perdrait en silence les mois figés sortis de la fenêtre de 90 jours.
+  let movements: MovementsBlock;
+  try {
+    movements = buildMovements(snapshots, { version, entities, warnings });
+  } catch (error) {
+    if (error instanceof MovementsInheritanceError) {
+      writeControlStopReport({
+        control: "mouvements_herites_illisibles",
+        observed: error.message,
+        expected: "un bloc history.movements lisible dans la version publiée la plus récente qui en porte un",
+        source: `archive FINMA publiée ${error.version} (quality.json)`,
+        date: today(),
+        stays_served: "la version précédente reste en vente",
+        options: [
+          { label: "relire le bloc history.movements de cette archive", level: "AUTO" },
+          { label: "corriger la lecture ou le calcul du bloc, puis relancer la collecte", level: "RELU" },
+        ],
+      });
+    }
+    throw error;
+  }
+  const movementSummary = summarizeMovements(movements);
+  console.log(`[release-finma] mouvements : ${movementSummary.months} mois (${movementSummary.frozen_months} figés), ${movementSummary.excluded_comparisons} comparaison(s) exclue(s), ${movementSummary.resumptions.length} reprise(s)`);
+  for (const month of movements.months) {
+    if (month.status === "frozen" && month.frozen_in_version !== version) continue;
+    for (const excluded of month.excluded) console.warn(`[release-finma] comparaison exclue des mouvements (${excluded.list}) : ${excluded.from} → ${excluded.to}, ${excluded.reason}`);
+  }
+  writeFileSync(join(outDir, `controle-${version}.json`), JSON.stringify({ version, registry_rows: entities.length, warnings: warnings.length, lei_rows: entities.filter(e => e.lei).length, supervisory_organisation: supervision?.matching ?? null, reference_sros: supervision?.sros.length ?? 0, reference_supervisory_organisations: supervision?.supervisoryOrganisations.length ?? 0, history: history.coverage, changes: history.changes.length, movements: movementSummary }, null, 2));
+  const bundle = await buildBundle({ entities, warnings, zefixByUid, supervision, recentChanges: history.changes, historyCoverage: { ...history.coverage, movements } }, version, outDir);
   console.log(
     `[release-finma] bundle sha256 ${bundle.sha256.slice(0, 12)}..., ${(bundle.sizeBytes / 1024).toFixed(1)} KB`
   );

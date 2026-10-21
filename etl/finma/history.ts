@@ -5,12 +5,25 @@ import { createHash } from "node:crypto";
 import { getObjectBuffer } from "../../src/lib/r2.js";
 import { extractCsvFromZip } from "../../src/mcp/r2-refresh.js";
 import { computeDelta, type DeltaChange } from "./delta.js";
-import type { FinmaEntity } from "./types.js";
+import type { FinmaEntity, FinmaWarning } from "./types.js";
 
 export interface PublishedVersion {
   version: string; r2_key: string; sha256: string; size_bytes: number; released_at: number;
 }
-export interface FinmaSnapshot { version: string; entities: FinmaEntity[] }
+/** `warnings` et `quality` : absents des archives qui ne les portent pas (quality.json n'existe que depuis le 25.09.2026). */
+export interface FinmaSnapshot { version: string; entities: FinmaEntity[]; warnings?: FinmaWarning[]; quality?: unknown }
+
+/** Fichier JSON facultatif d'une archive : absent → undefined ; illisible → erreur (jamais avalée). */
+async function optionalJson(bytes: Buffer, name: string): Promise<unknown> {
+  let text: string;
+  try {
+    text = await extractCsvFromZip(bytes, name);
+  } catch (error) {
+    if (error instanceof Error && error.message === `${name} not found in ZIP`) return undefined;
+    throw error;
+  }
+  return JSON.parse(text);
+}
 export function versionDate(version: string) { return `${version.slice(0, 4)}-${version.slice(5, 7)}-${version.slice(8, 10)}`; }
 
 export async function readPublishedSnapshots(versions: PublishedVersion[], cacheDir: string): Promise<FinmaSnapshot[]> {
@@ -27,7 +40,11 @@ export async function readPublishedSnapshots(versions: PublishedVersion[], cache
     }
     const entities = JSON.parse(await extractCsvFromZip(bytes, "finma_registry.json")) as FinmaEntity[];
     if (!Array.isArray(entities) || entities.length < 2_000) throw new Error(`Archive historique incomplète : ${version.version}`);
-    snapshots.push({ version: version.version, entities });
+    // Liste d'alerte et quality.json : lus pour les mouvements mensuels (etl/finma/movements.ts).
+    const warnings = await optionalJson(bytes, "finma_warnings.json");
+    if (warnings !== undefined && !Array.isArray(warnings)) throw new Error(`Liste d'alerte historique illisible : ${version.version}`);
+    const quality = await optionalJson(bytes, "quality.json");
+    snapshots.push({ version: version.version, entities, warnings: warnings as FinmaWarning[] | undefined, quality });
   }
   return snapshots;
 }

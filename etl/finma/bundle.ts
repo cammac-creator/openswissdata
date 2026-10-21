@@ -706,6 +706,17 @@ ${REFERENCE_TABLES_NOTE}
 - finma_reference_supervisory_organisations : ${soCsvRows.length} OS autorisés. Source : ${supervision.sources.ao.url}, ${sourceDate(supervision.sources.ao)}.
 `
     : "";
+  // Mouvements mensuels (etl/finma/movements.ts) : décrits seulement quand l'archive les porte.
+  const movementsBlock = input.historyCoverage?.movements;
+  const hasMovements = typeof movementsBlock === "object" && movementsBlock !== null;
+  const movementsSection = hasMovements
+    ? `
+## Mouvements mensuels
+
+quality.json porte, dans history.movements, les totaux des mouvements observés mois par mois, sans aucun nom : pour le registre, par catégorie, les apparitions, disparitions et changements de type d'autorisation, de nom et de localité ; pour la liste d'avertissements, les ajouts datés par la FINMA, puis les apparitions et retraits relevés par l'adresse exacte de la page de détail.
+Ce sont des dates d'observation, pas des dates de décision. Un mois clos est figé, puis repris tel quel dans chaque archive. Les mouvements constatés à la reprise après une interruption de collecte sont publiés à part et ne comptent dans aucun mois. Une comparaison anormale est exclue du mois et signalée. Un reclassement de la collecte (même autorisation FINMA, autre catégorie) n'est pas compté comme un mouvement. Une disparition ou un retrait n'est pas une sanction.
+`
+    : "";
   const readme = `# Registre FINMA — version ${version}
 
 ${input.entities.length} lignes d'autorisation, réparties dans ${Object.values(countByType).filter(n => n > 0).length} catégories présentes.
@@ -719,7 +730,7 @@ ${warnings.length} entrées dans la liste d'avertissements séparée.
 - finma_<type>.csv : fichiers des catégories non vides.
 - finma_warnings.csv / .json / .sql / .parquet : avertissements officiels et liens de détail.${supervisionUsage}
 - changelog_90d.csv / .json : changements réellement observés entre les versions disponibles.
-- quality.json : couverture exacte des champs et de l'historique, y compris les interruptions.
+- quality.json : couverture exacte des champs et de l'historique, y compris les interruptions${hasMovements ? ", et mouvements mensuels (history.movements)" : ""}.
 - schema.json / schema_warnings.json : schémas de données.
 - checksums.sha256 et provenance.json : intégrité, signature Ed25519 et horodatage.
 - LICENSE.txt : conditions d'utilisation.
@@ -739,7 +750,7 @@ Ce fichier ne contient pas les affiliations aux organismes d'autorégulation (OA
 
 DE: Diese Datei enthält keine Zugehörigkeiten zu Selbstregulierungsorganisationen (SRO, Geldwäschereigesetz GwG) und kein Register der Versicherungsvermittlerinnen und Versicherungsvermittler. SRO-Mitglieder-Suche der FINMA: ${FINMA_OAR_SEARCH_URL_DE}
 EN: This file does not contain self-regulatory organisation (SRO) affiliations under the Anti-Money Laundering Act (AMLA), nor the register for insurance intermediaries. FINMA's official SRO member search: ${FINMA_OAR_SEARCH_URL_EN}
-${supervisionSection}
+${supervisionSection}${movementsSection}
 ## Couverture par catégorie
 
 ${entityTypes.filter(t => countByType[t] > 0).map(t => `- ${t} : ${countByType[t]} lignes`).join("\n")}
