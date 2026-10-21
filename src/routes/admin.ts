@@ -58,6 +58,9 @@ const EVENEMENTS_SERVEUR = [
   "mcp_initialize", "mcp_rate_limited", "mcp_trial", "checkout_started", "payment_paid",
   "delivery_sent", "download_authorized", "sample_served",
 ] as const;
+// Déclarations de visiteurs à nom FIXÉ d'avance (route publique /api/events/track) : comptées à part,
+// jamais mêlées aux événements du serveur ; un nom hors de cette liste n'atteint jamais la sortie.
+const DECLARATIONS_VISITEURS = ["etre_prevenu"] as const;
 const SECTION = /^[a-z0-9-]{1,40}$/;
 
 adminRoute.get("/indicateurs", (c) => {
@@ -120,6 +123,14 @@ adminRoute.get("/indicateurs", (c) => {
     GROUP BY name ORDER BY nombre DESC
   `).all(since, ...EVENEMENTS_SERVEUR) as Array<{ nom: string; nombre: number; visiteurs_jours: number }>;
 
+  const declarations = db.prepare(`
+    SELECT name AS nom, COUNT(*) AS nombre, COUNT(DISTINCT visitor_hash) AS visiteurs_jours
+    FROM events
+    WHERE kind IN ('custom', 'conversion') AND origin = 'client' AND ts >= ? AND ua_class IN ('desktop', 'mobile')
+      AND name IN (${DECLARATIONS_VISITEURS.map(() => "?").join(",")})
+    GROUP BY name ORDER BY nombre DESC
+  `).all(since, ...DECLARATIONS_VISITEURS) as Array<{ nom: string; nombre: number; visiteurs_jours: number }>;
+
   return c.json({
     genere_le: new Date().toISOString(),
     fenetre_jours: days,
@@ -128,7 +139,8 @@ adminRoute.get("/indicateurs", (c) => {
     visites: { visiteurs_jours_navigateurs: total.n, par_section: sections },
     mcp,
     evenements,
-    notes: "Chiffres seulement. Fenêtre glissante (pas la période suisse du CRM). Visiteurs-jours : empreinte renouvelée chaque jour, pas des personnes uniques. Montants en centimes de CHF.",
+    declarations_visiteurs: declarations,
+    notes: "Chiffres seulement. Déclarations de visiteurs : déclaratives (navigateurs seulement, un clic n'est pas une personne). Fenêtre glissante (pas la période suisse du CRM). Visiteurs-jours : empreinte renouvelée chaque jour, pas des personnes uniques. Montants en centimes de CHF.",
   });
 });
 
