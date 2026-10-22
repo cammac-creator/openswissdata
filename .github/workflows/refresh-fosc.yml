@@ -1,0 +1,78 @@
+name: Collecte quotidienne des avis du registre du commerce (FOSC)
+#
+# Décision de Claude-Alain du 16.10.2026 (d3 = A, F8 accordé) : « des totaux, et les événements
+# des sociétés ». Détail : etl/fosc/SOURCES.md.
+#
+# Ce workflow ne publie rien et ne commite rien : l'état (événements des sociétés, avec leur
+# jour de suppression) et les totaux vivent dans le bucket R2 PRIVÉ, réécrits à chaque
+# passage pour que la purge efface vraiment. Ni le dépôt (public, historique permanent), ni un
+# artefact (téléchargeable par tout compte connecté) : une donnée y resterait au-delà de la
+# durée de publication des avis. Le journal n'affiche que des nombres et des dates.
+#
+# Codes de sortie de la collecte : 0 normal (un passage partiel reprend le lendemain) ; 1 arrêt
+# sur un contrôle (conditions générales modifiées ou acceptation de plus de 90 jours, schéma
+# changé, jour en échec) ; 2 le plus ancien jour de la fenêtre de rattrapage n'a pas pu être
+# collecté et va en sortir. Dans les deux derniers cas l'étape échoue et le mail d'alerte part.
+#
+# Le déclenchement manuel démarre en simulation (échantillon de détails, écriture dans le
+# dossier temporaire du runner seulement, aucun secret R2 transmis).
+on:
+  schedule:
+    # Tous les jours, minute non ronde, hors des créneaux des autres collectes : les avis du jour
+    # sont mis en ligne dans la nuit (`updateDate` relevé vers 22 h 35 UTC la veille, avis du
+    # 20.10.2026).
+    - cron: "43 6 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Simulation : lire le portail sans rien écrire dans R2"
+        type: boolean
+        default: true
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: fosc-production
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    # Secrets réservés à la branche principale (tâche osd.T17, 07.10.2026).
+    environment: collecte
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Vérifier avant de lire le portail
+        run: |
+          npm run typecheck
+          npx vitest run tests/etl/fosc-xml.test.ts tests/etl/fosc-client.test.ts tests/etl/fosc-communes.test.ts tests/etl/fosc-collect.test.ts tests/etl/sources-registry-fosc.test.ts
+      - name: Simulation (déclenchement manuel)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        env:
+          FOSC_DRY_RUN: "1"
+        run: npm run sync:fosc -- --out "$RUNNER_TEMP/fosc-simulation" --sample-details 50 --max-requests 600
+      - name: Collecter, purger et écrire l'état privé (R2)
+        if: ${{ github.event_name == 'schedule' || !inputs.dry_run }}
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: npm run sync:fosc -- --write-r2
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Collecte FOSC (registre du commerce)
+          ALERT_WORKFLOW: refresh-fosc.yml
+          ALERT_DETAIL: La collecte des avis HR de la FOSC n'a pas abouti (installation, contrôles, lecture de l'état, conditions générales, schéma, jour en échec ou jour perdu). La purge des lignes n'est enregistrée que par un passage qui a pu relire l'état ; le journal du passage dit si c'est le cas (ligne « purge »).
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs
