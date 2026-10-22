@@ -131,7 +131,8 @@ describe("Mouvements FINMA : sans bloc lisible, aucun nombre", () => {
       expect(page.state).toBe("waiting");
       expect([page.latest, page.months.length, page.trend.length, page.resumptions.length]).toEqual([null, 0, 0, 0]);
       expect(dynamicPart(page)).not.toMatch(/\d/);
-      expect(page.copy.waitingTitle).toMatch(/prochaine collecte|nächsten Erhebung|next collection/);
+      expect(page.copy.waitingTitle).toMatch(/pas encore affichés|noch nicht angezeigt|not shown yet/);
+      expect(`${page.copy.waitingTitle} ${page.copy.waitingText}`).not.toMatch(/prochaine|nächsten|next collection|vient d|soeben|just been/);
     }
   });
 
