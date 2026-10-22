@@ -1,15 +1,15 @@
 {
-  "version": "2026.10.21",
-  "collected_on": "2026-10-21",
+  "version": "2026.10.22",
+  "collected_on": "2026-10-22",
   "registry_rows": 2943,
   "unique_uids": 2748,
-  "warning_rows": 2377,
+  "warning_rows": 2380,
   "populated_fields": {
     "uid": 2859,
     "lei": 785,
     "licence_date": 0,
     "status": 0,
-    "canton": 677,
+    "canton": 678,
     "city": 2943,
     "address": 785
   },
@@ -27,8 +27,8 @@
   },
   "supervisory_organisation_rows": 1519,
   "history": {
-    "available_from": "2026-07-22",
-    "available_until": "2026-10-21",
+    "available_from": "2026-07-23",
+    "available_until": "2026-10-22",
     "snapshots": 60,
     "gaps": [
       {
@@ -37,6 +37,389 @@
         "days": 32
       }
     ],
-    "interpretation": "Changements observés entre deux versions ; la date exacte du changement à la source peut être antérieure. Une autorisation retirée du fichier n'est pas une décision de sanction."
+    "interpretation": "Changements observés entre deux versions ; la date exacte du changement à la source peut être antérieure. Une autorisation retirée du fichier n'est pas une décision de sanction.",
+    "movements": {
+      "schema_version": 1,
+      "method": "Totaux seulement : aucun nom, aucun IDE, aucune adresse de page. Registre : comparaison de deux collectes consécutives avec la clé du changelog (IDE, à défaut nom exact, catégorie et libellé d'autorisation). Une apparition et une disparition de la même identité dans la même comparaison forment un changement de type d'autorisation, compté dans la catégorie de la nouvelle autorisation ; si le libellé FINMA est le même et que seule notre catégorie change, c'est un reclassement de la collecte, compté à part et exclu des mouvements. Plusieurs apparitions ou disparitions de la même identité restent comptées telles quelles. Liste d'alerte : ajouts du mois selon la date d'ajout publiée par la FINMA, pour les entrées vues par une comparaison comptée ou déjà présentes au début de la période lue ; apparitions et retraits par l'adresse exacte de la page de détail, jamais par le nom. Un changement d'adresse de page compte comme un retrait et une apparition ; « removed_possible_url_change » signale les retraits dont la même date d'ajout réapparaît sous une autre adresse dans la même comparaison. Dates d'observation : un mouvement est rangé dans le mois de la collecte qui le constate, pas à la date de la décision de la FINMA. Une comparaison de plus de deux jours n'est comptée dans aucun mois : ses mouvements sont publiés à part, dans « resumptions » (constatés à la reprise). Une comparaison anormale (plus de max(30 lignes, 1 % des lignes de la version précédente) par jour écoulé) est exclue du mois pour la liste concernée et listée dans « excluded ». Un mois est figé à la première collecte datée du 3 du mois suivant ou après, puis recopié tel quel dans chaque archive ; un mois incomplet porte « partial ». Une disparition ou un retrait ne dit pas pourquoi : ce n'est pas une sanction.",
+      "rules": {
+        "gap_days": 2,
+        "freeze_day": 3,
+        "anomaly_min_rows": 30,
+        "anomaly_share": 0.01
+      },
+      "computed_in_version": "2026.10.22",
+      "first_observed": "2026-07-24",
+      "last_observed": "2026-10-22",
+      "months": [
+        {
+          "month": "2026-07",
+          "status": "frozen",
+          "frozen_in_version": "2026.10.22",
+          "days_in_month": 31,
+          "first_observed": "2026-07-24",
+          "last_observed": "2026-07-31",
+          "partial": true,
+          "registry": {
+            "totals": {
+              "added": 6,
+              "removed": 2,
+              "licence_changed": 0,
+              "name_changed": 0,
+              "city_changed": 2,
+              "status_changed": 0,
+              "address_changed": 0
+            },
+            "by_category": {
+              "securities_firm": {
+                "added": 0,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 2,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "asset_manager_collective": {
+                "added": 4,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "asset_manager_individual": {
+                "added": 2,
+                "removed": 1,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "insurance": {
+                "added": 0,
+                "removed": 1,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              }
+            },
+            "reclassified_by_collection": 0,
+            "comparisons": 8,
+            "days_covered": 8,
+            "complete": false
+          },
+          "warnings": {
+            "appeared": 11,
+            "appeared_late": 0,
+            "removed": 0,
+            "removed_possible_url_change": 0,
+            "comparisons": 8,
+            "days_covered": 8,
+            "complete": false,
+            "added_dated_in_month": 35,
+            "added_as_of": "2026.10.22"
+          },
+          "excluded": []
+        },
+        {
+          "month": "2026-08",
+          "status": "frozen",
+          "frozen_in_version": "2026.10.22",
+          "days_in_month": 31,
+          "first_observed": "2026-08-01",
+          "last_observed": "2026-08-24",
+          "partial": true,
+          "registry": {
+            "totals": {
+              "added": 10,
+              "removed": 5,
+              "licence_changed": 0,
+              "name_changed": 3,
+              "city_changed": 6,
+              "status_changed": 0,
+              "address_changed": 0
+            },
+            "by_category": {
+              "asset_manager_individual": {
+                "added": 8,
+                "removed": 1,
+                "licence_changed": 0,
+                "name_changed": 2,
+                "city_changed": 4,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "insurance": {
+                "added": 0,
+                "removed": 3,
+                "licence_changed": 0,
+                "name_changed": 1,
+                "city_changed": 1,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "other": {
+                "added": 1,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "securities_firm": {
+                "added": 0,
+                "removed": 1,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "asset_manager_collective": {
+                "added": 0,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 1,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "fund_representative": {
+                "added": 1,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              }
+            },
+            "reclassified_by_collection": 0,
+            "comparisons": 24,
+            "days_covered": 24,
+            "complete": false
+          },
+          "warnings": {
+            "appeared": 32,
+            "appeared_late": 5,
+            "removed": 4,
+            "removed_possible_url_change": 4,
+            "comparisons": 24,
+            "days_covered": 24,
+            "complete": false,
+            "added_dated_in_month": 24,
+            "added_as_of": "2026.10.22"
+          },
+          "excluded": []
+        },
+        {
+          "month": "2026-09",
+          "status": "frozen",
+          "frozen_in_version": "2026.10.22",
+          "days_in_month": 30,
+          "first_observed": "2026-09-26",
+          "last_observed": "2026-09-30",
+          "partial": true,
+          "registry": {
+            "totals": {
+              "added": 0,
+              "removed": 0,
+              "licence_changed": 0,
+              "name_changed": 0,
+              "city_changed": 0,
+              "status_changed": 0,
+              "address_changed": 0
+            },
+            "by_category": {},
+            "reclassified_by_collection": 7,
+            "comparisons": 5,
+            "days_covered": 5,
+            "complete": false
+          },
+          "warnings": {
+            "appeared": 0,
+            "appeared_late": 0,
+            "removed": 0,
+            "removed_possible_url_change": 0,
+            "comparisons": 5,
+            "days_covered": 5,
+            "complete": false,
+            "added_dated_in_month": 10,
+            "added_as_of": "2026.10.22"
+          },
+          "excluded": []
+        },
+        {
+          "month": "2026-10",
+          "status": "open",
+          "frozen_in_version": null,
+          "days_in_month": 31,
+          "first_observed": "2026-10-01",
+          "last_observed": "2026-10-22",
+          "partial": true,
+          "registry": {
+            "totals": {
+              "added": 10,
+              "removed": 10,
+              "licence_changed": 1,
+              "name_changed": 8,
+              "city_changed": 5,
+              "status_changed": 0,
+              "address_changed": 0
+            },
+            "by_category": {
+              "insurance": {
+                "added": 1,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 2,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "asset_manager_individual": {
+                "added": 8,
+                "removed": 9,
+                "licence_changed": 1,
+                "name_changed": 2,
+                "city_changed": 2,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "asset_manager_collective": {
+                "added": 0,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 1,
+                "city_changed": 2,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "bank": {
+                "added": 1,
+                "removed": 1,
+                "licence_changed": 0,
+                "name_changed": 3,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "fund_representative": {
+                "added": 0,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 1,
+                "status_changed": 0,
+                "address_changed": 0
+              }
+            },
+            "reclassified_by_collection": 0,
+            "comparisons": 21,
+            "days_covered": 22,
+            "complete": false
+          },
+          "warnings": {
+            "appeared": 37,
+            "appeared_late": 29,
+            "removed": 2,
+            "removed_possible_url_change": 1,
+            "comparisons": 21,
+            "days_covered": 22,
+            "complete": false,
+            "added_dated_in_month": 13,
+            "added_as_of": "2026.10.22"
+          },
+          "excluded": []
+        }
+      ],
+      "resumptions": [
+        {
+          "from": "2026.08.24",
+          "to": "2026.09.25",
+          "days": 32,
+          "registry": {
+            "totals": {
+              "added": 12,
+              "removed": 7,
+              "licence_changed": 0,
+              "name_changed": 11,
+              "city_changed": 6,
+              "status_changed": 0,
+              "address_changed": 0
+            },
+            "by_category": {
+              "bank": {
+                "added": 0,
+                "removed": 1,
+                "licence_changed": 0,
+                "name_changed": 2,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "fund_representative": {
+                "added": 1,
+                "removed": 1,
+                "licence_changed": 0,
+                "name_changed": 1,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "asset_manager_collective": {
+                "added": 4,
+                "removed": 2,
+                "licence_changed": 0,
+                "name_changed": 3,
+                "city_changed": 1,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "asset_manager_individual": {
+                "added": 7,
+                "removed": 3,
+                "licence_changed": 0,
+                "name_changed": 4,
+                "city_changed": 5,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "securities_firm": {
+                "added": 0,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 1,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              }
+            },
+            "reclassified_by_collection": 0
+          },
+          "registry_anomaly": null,
+          "warnings": {
+            "appeared": 46,
+            "appeared_late": 2,
+            "removed": 2,
+            "removed_possible_url_change": 2,
+            "appeared_by_finma_month": {
+              "2026-02": 1,
+              "2026-07": 1,
+              "2026-08": 16,
+              "2026-09": 28
+            },
+            "appeared_undated": 0
+          },
+          "warnings_anomaly": null
+        }
+      ],
+      "warnings_without_date_added": 0
+    }
   }
 }
