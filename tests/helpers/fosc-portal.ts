@@ -41,8 +41,11 @@ export interface FakeAvis {
   canton: string | null;
   expirationDate?: string | null;
   state?: string;
-  after?: FakeCompany | null;
-  before?: FakeCompany | null;
+  /** Un bloc, plusieurs blocs (le schéma autorise plusieurs `company` ou plusieurs `commonsNew`), ou aucun. */
+  after?: FakeCompany | FakeCompany[] | null;
+  before?: FakeCompany | FakeCompany[] | null;
+  /** `companies` (défaut) : plusieurs `company` dans un seul `commonsX` ; `commons` : un `commonsX` par bloc. */
+  layout?: "companies" | "commons";
   testImport?: boolean;
   revisionUid?: string;
 }
@@ -51,10 +54,9 @@ export const avisId = (n: number) => `00000000-0000-4000-8000-${String(n).padSta
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function companyXml(tag: string, c: FakeCompany | null | undefined, revisionUid?: string): string {
-  if (!c) return "";
+function oneCompany(c: FakeCompany): string {
   const field = (name: string, v: string | null | undefined) => (v === undefined || v === null ? "" : `<${name}>${esc(v)}</${name}>`);
-  return `<${tag}>
+  return `
     <company>
       <name>${WITNESSES[1]}</name>
       <translations>(${WITNESSES[1]} Ltd)</translations>
@@ -64,9 +66,17 @@ function companyXml(tag: string, c: FakeCompany | null | undefined, revisionUid?
       ${field("seat", c.seat)}
       ${field("legalForm", c.legalForm)}
       <address><street>${WITNESSES[3]}</street><houseNumber>1</houseNumber><swissZipCode>1000</swissZipCode><town>Lausanne</town></address>
-    </company>
+    </company>`;
+}
+
+function companyXml(tag: string, c: FakeCompany | FakeCompany[] | null | undefined, layout: FakeAvis["layout"], revisionUid?: string): string {
+  if (!c) return "";
+  const list = Array.isArray(c) ? c : [c];
+  const tail = `
     <purpose><![CDATA[${WITNESSES[2]} & <b>riche</b>]]></purpose>
-    ${revisionUid ? `<revision><optingOut>false</optingOut><revisionCompany><name>Organe Temoin SA</name><uid>${revisionUid}</uid></revisionCompany></revision>` : ""}
+    ${revisionUid ? `<revision><optingOut>false</optingOut><revisionCompany><name>Organe Temoin SA</name><uid>${revisionUid}</uid></revisionCompany></revision>` : ""}`;
+  if (layout === "commons") return list.map((x) => `<${tag}>${oneCompany(x)}${tail}</${tag}>`).join("\n");
+  return `<${tag}>${list.map(oneCompany).join("")}${tail}
   </${tag}>`;
 }
 
@@ -84,8 +94,8 @@ export function avisXml(a: FakeAvis, overrideId?: string): string {
 <content>
   <testImport>${a.testImport ? "true" : "false"}</testImport>
   <publicationText>${WITNESSES[0]} ${WITNESSES[4]} &amp; associés</publicationText>
-  ${companyXml("commonsNew", a.after, a.revisionUid)}
-  ${companyXml("commonsActual", a.before)}
+  ${companyXml("commonsNew", a.after, a.layout, a.revisionUid)}
+  ${companyXml("commonsActual", a.before, a.layout)}
 </content>
 </${sub}:publication>`;
 }
@@ -96,11 +106,13 @@ export interface FakePortal {
   avis: FakeAvis[];
   /** Réponses forcées, consommées dans l'ordre, pour une adresse qui contient la clé. */
   forced: { match: string; status: number; headers?: Record<string, string> }[];
+  /** Détail XML servi tel quel pour un identifiant (documents volontairement malformés). */
+  rawDetail: Map<string, string>;
   termsBytes: Buffer;
 }
 
 export function fakePortal(avis: FakeAvis[], termsBytes: Buffer = FAKE_TERMS): FakePortal {
-  const portal: FakePortal = { calls: [], avis, forced: [], termsBytes, fetchImpl: undefined as unknown as typeof fetch };
+  const portal: FakePortal = { calls: [], avis, forced: [], rawDetail: new Map(), termsBytes, fetchImpl: undefined as unknown as typeof fetch };
   portal.fetchImpl = (async (input: string | URL | Request) => {
     const url = String(input instanceof Request ? input.url : input);
     portal.calls.push(url);
@@ -113,6 +125,8 @@ export function fakePortal(avis: FakeAvis[], termsBytes: Buffer = FAKE_TERMS): F
     const u = new URL(url);
     const detail = /\/publications\/([0-9a-f-]{36})\/xml$/.exec(u.pathname);
     if (detail) {
+      const raw = portal.rawDetail.get(detail[1]);
+      if (raw !== undefined) return new Response(raw, { status: 200, headers: { "content-type": "application/xml" } });
       const a = portal.avis.find((x) => x.id === detail[1]);
       if (!a) return new Response("absent", { status: 404 });
       return new Response(avisXml(a), { status: 200, headers: { "content-type": "application/xml" } });

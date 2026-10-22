@@ -1,12 +1,15 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { createPoliteClient } from "../../etl/fosc/client.js";
-import { evenSample, parseCliArgs, runFoscCollection, type CollectOptions } from "../../etl/fosc/collect.js";
+import { evenSample, FoscUnexpectedError, parseCliArgs, runFoscCollection, type CollectOptions } from "../../etl/fosc/collect.js";
 import type { CommuneResolver } from "../../etl/fosc/communes.js";
-import { memoryStore, r2Store } from "../../etl/fosc/store.js";
+import { fileStore, FoscStoreError, memoryStore, r2Store } from "../../etl/fosc/store.js";
 import { MAX_RETENTION_DAYS, type FoscState } from "../../etl/fosc/state.js";
 import type { TotalsDocument } from "../../etl/fosc/totals.js";
-import { avisId, FAKE_TERMS_SHA256, fakePortal, IDE, WITNESSES, type FakeAvis } from "../helpers/fosc-portal.js";
+import { avisId, avisXml, FAKE_TERMS_SHA256, fakePortal, IDE, WITNESSES, type FakeAvis } from "../helpers/fosc-portal.js";
 
 // Toutes les données sont inventées (dépôt public). Le 21.10.2026 à 10 h (heure suisse).
 const NOW = new Date("2026-10-21T08:00:00Z");
@@ -55,7 +58,7 @@ describe("collecte FOSC : ce qui est stocké", () => {
     expect(serialized).not.toContain(IDE.revision);
     expect(serialized).not.toContain("Lausanne");
     for (const row of stateOf(store).events) {
-      expect(Object.keys(row).sort()).toEqual(["canton", "event_type", "expires_on", "ide", "legal_form", "municipality_bfs_id", "publication_date", "publication_id", "verified_on"]);
+      expect(Object.keys(row).sort()).toEqual(["canton", "delete_on", "event_type", "ide", "legal_form", "municipality_bfs_id", "publication_date", "publication_id", "verified_on"]);
     }
   });
 
@@ -76,6 +79,107 @@ describe("collecte FOSC : ce qui est stocké", () => {
     expect(report.missing.commune_unresolved).toBe(1);
     expect(s.events.find((e) => e.ide === IDE.unknown)!.municipality_bfs_id).toBeNull();
     expect(s.events.find((e) => e.ide === IDE.sa1)!.municipality_bfs_id).toBe(5586);
+  });
+});
+
+describe("collecte FOSC : avis à plusieurs blocs société (relecture du 22.10.2026)", () => {
+  for (const layout of ["companies", "commons"] as const) {
+    it(`un IDE d'entreprise individuelle n'entre jamais en ligne avec la forme d'un autre bloc (${layout})`, async () => {
+      const store = memoryStore();
+      const { opts } = setup([{
+        id: avisId(30), subRubric: "HR01", date: DAY, canton: "VD", layout,
+        after: [{ uid: null, legalForm: "0106", seat: "Lausanne" }, { uid: IDE.soleProp, legalForm: "0101", seat: "Lausanne" }],
+      }]);
+      const report = await runFoscCollection(opts(store));
+      expect(stateOf(store).events).toHaveLength(0);
+      expect(JSON.stringify(store.state)).not.toContain(IDE.soleProp);
+      expect(report.missing.multiple_blocks).toBe(1);
+      expect(report.days[0]).toMatchObject({ stored_rows: 0, totals_only: 1, sole_proprietorships: 1 });
+      expect(stateOf(store).days[0].tallies).toEqual([{ event_type: "HR01", canton: "VD", legal_form: "inconnue", count: 1 }]);
+    });
+  }
+
+  it("deux sociétés autorisées dans un même avis : totaux seulement aussi", async () => {
+    const store = memoryStore();
+    const { opts } = setup([{ id: avisId(31), subRubric: "HR03", date: DAY, canton: "ZH", before: [{ uid: IDE.sa1, legalForm: "0106", seat: "Zürich" }, { uid: IDE.sa2, legalForm: "0106", seat: "Zürich" }] }]);
+    await runFoscCollection(opts(store));
+    expect(stateOf(store).events).toHaveLength(0);
+    expect(stateOf(store).days[0].tallies).toEqual([{ event_type: "HR03", canton: "ZH", legal_form: "0106", count: 1 }]);
+  });
+
+  it("un bloc sans IDE : totaux seulement", async () => {
+    const store = memoryStore();
+    const { opts } = setup([{ id: avisId(32), subRubric: "HR01", date: DAY, canton: "VD", after: { uid: null, legalForm: "0106", seat: "Lausanne" } }]);
+    const report = await runFoscCollection(opts(store));
+    expect(stateOf(store).events).toHaveLength(0);
+    expect(report.missing.uid).toBe(1);
+    expect(stateOf(store).days[0].tallies).toEqual([{ event_type: "HR01", canton: "VD", legal_form: "0106", count: 1 }]);
+  });
+
+  it("une mutation dont l'état avant porte un second bloc d'entreprise individuelle : totaux seulement", async () => {
+    const store = memoryStore();
+    const { opts } = setup([{
+      id: avisId(33), subRubric: "HR02", date: DAY, canton: "GE",
+      after: { uid: IDE.sarl, legalForm: "0107", seat: "Genève" },
+      before: [{ uid: IDE.sarl, legalForm: "0107", seat: "Genève" }, { uid: IDE.soleProp, legalForm: "0101", seat: "Genève" }],
+    }]);
+    await runFoscCollection(opts(store));
+    expect(stateOf(store).events).toHaveLength(0);
+    expect(JSON.stringify(store.state)).not.toContain(IDE.soleProp);
+  });
+});
+
+describe("collecte FOSC : pannes", () => {
+  it("un détail à référence numérique invalide est compté en échec, sans arrêter le passage", async () => {
+    const avis = baseAvis();
+    const store = memoryStore();
+    const { opts, portal } = setup(avis);
+    // Référence au-delà de U+10FFFF dans le siège : `String.fromCodePoint` lèverait une RangeError.
+    portal.rawDetail.set(avis[0].id, avisXml(avis[0]).replace("<seat>Lausanne</seat>", "<seat>Lausanne&#x110000;</seat>"));
+    const report = await runFoscCollection(opts(store));
+    expect(report.exit_code).toBe(0);
+    expect(report.days[0].detail_failed).toBe(1);
+    expect(stateOf(store).events.find((e) => e.ide === IDE.sa1)).toBeUndefined();
+  });
+
+  it("une panne inattendue au milieu d'un jour n'empêche pas l'enregistrement de la purge", async () => {
+    const avis = baseAvis();
+    avis[0].expirationDate = "2026-10-25";
+    const store = memoryStore();
+    const { opts, portal } = setup(avis);
+    await runFoscCollection(opts(store));
+    expect(stateOf(store).events).toHaveLength(4);
+    // Passage du 31.10 : la ligne échue le 25.10 est purgée en mémoire au début, puis le calcul
+    // d'un nouveau jour casse au milieu (rapprochement de commune en panne).
+    const later = "2026-10-31";
+    portal.avis.push({ id: avisId(40), subRubric: "HR01", date: later, canton: "VD", after: { uid: IDE.other, legalForm: "0106", seat: "Lausanne" } });
+    const writesBefore = store.writes;
+    const broken: CommuneResolver = () => { throw new Error("panne inattendue"); };
+    const err = await runFoscCollection({ ...opts(store, new Date(`${later}T08:00:00Z`)), resolveCommune: broken, days: [later] }).catch((e) => e);
+    expect(err).toBeInstanceOf(FoscUnexpectedError);
+    expect((err as FoscUnexpectedError).original).toMatchObject({ message: "panne inattendue" });
+    expect((err as FoscUnexpectedError).report).toMatchObject({ exit_code: 1, purge: { expired: 1 } });
+    expect(store.writes).toBe(writesBefore + 1); // l'état a été enregistré malgré la panne
+    const saved = stateOf(store);
+    expect(saved.events.find((e) => e.ide === IDE.sa1)).toBeUndefined(); // purge enregistrée
+    expect(saved.events).toHaveLength(3); // les trois autres, revérifiées, restent
+    expect(saved.events.every((e) => e.verified_on === later)).toBe(true);
+    expect(saved.days.find((d) => d.date === later)).toBeUndefined(); // aucun jour nouveau enregistré
+    expect(JSON.stringify(saved)).not.toContain(IDE.other); // (déjà absent : avis du 20.10 en totaux seulement)
+  });
+
+  it("un état stocké illisible arrête le passage avec un message sans extrait", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "osd-fosc-store-"));
+    try {
+      writeFileSync(join(dir, "hr-state-v1.json"), `{"events":[{"ide":"${IDE.sa1}"`);
+      const store = fileStore(dir);
+      const err = (await store.loadState().catch((e: unknown) => e)) as Error;
+      expect(err).toBeInstanceOf(FoscStoreError);
+      expect(err.message).not.toContain(IDE.sa1);
+      expect(err.message).toMatch(/octets/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 
@@ -144,25 +248,43 @@ describe("collecte FOSC : idempotence", () => {
 });
 
 describe("collecte FOSC : purge", () => {
-  it("supprime une ligne à sa date de fin (expirationDate ou plancher d'un mois)", async () => {
+  it("une ligne n'existe plus le jour J+30, ni le jour de l'échéance de l'avis", async () => {
     const avis = baseAvis();
     avis[0].expirationDate = "2026-10-25";
     const store = memoryStore();
     const { opts } = setup(avis);
     await runFoscCollection(opts(store));
     const rows = stateOf(store).events;
-    expect(rows.find((e) => e.ide === IDE.sa1)!.expires_on).toBe("2026-10-25");
-    expect(rows.find((e) => e.ide === IDE.sarl)!.expires_on).toBe("2026-11-19"); // 20.10 + 30 jours
+    expect(rows.find((e) => e.ide === IDE.sa1)!.delete_on).toBe("2026-10-25");
+    expect(rows.find((e) => e.ide === IDE.sarl)!.delete_on).toBe("2026-11-19"); // 20.10 + 30 jours
     expect(MAX_RETENTION_DAYS).toBe(30);
-    // Passage du 27.10 : l'avis à échéance du 25.10 est parti, les autres restent.
-    const later = await runFoscCollection({ ...opts(store, new Date("2026-10-27T08:00:00Z")), days: [] });
-    expect(later.purge.expired).toBe(1);
+    // Passage du 23.10 : l'échéance du 25.10 n'est pas encore à la porte.
+    await runFoscCollection({ ...opts(store, new Date("2026-10-23T08:00:00Z")), days: [] });
+    expect(stateOf(store).events.find((e) => e.ide === IDE.sa1)).toBeDefined();
+    // Passage du 24.10 : la ligne ne doit pas exister le 25.10, elle part dès ce passage.
+    const eve = await runFoscCollection({ ...opts(store, new Date("2026-10-24T08:00:00Z")), days: [] });
+    expect(eve.purge.expired).toBe(1);
     expect(stateOf(store).events.find((e) => e.ide === IDE.sa1)).toBeUndefined();
     expect(stateOf(store).events).toHaveLength(3);
-    // Passage du 20.11 : plus aucune ligne du 20.10.
-    const end = await runFoscCollection({ ...opts(store, new Date("2026-11-20T08:00:00Z")), days: [] });
+    // Passages du 17.11 (J+28) puis du 18.11 (J+29, veille de J+30) : tout part au second.
+    for (const d of ["2026-10-27", "2026-10-30", "2026-11-02", "2026-11-05", "2026-11-08", "2026-11-11", "2026-11-14"]) {
+      await runFoscCollection({ ...opts(store, new Date(`${d}T08:00:00Z`)), days: [] });
+    }
+    await runFoscCollection({ ...opts(store, new Date("2026-11-17T08:00:00Z")), days: [] });
+    expect(stateOf(store).events).toHaveLength(3);
+    const end = await runFoscCollection({ ...opts(store, new Date("2026-11-18T08:00:00Z")), days: [] });
     expect(end.purge.expired).toBe(3);
     expect(stateOf(store).events).toHaveLength(0);
+  });
+
+  it("n'enregistre pas un avis dont l'échéance tombe demain", async () => {
+    const avis = baseAvis();
+    avis[0].expirationDate = "2026-10-22"; // passage du 21.10 : la ligne ne pourrait pas exister le 22.10
+    const store = memoryStore();
+    const { opts } = setup(avis);
+    await runFoscCollection(opts(store));
+    expect(stateOf(store).events.find((e) => e.ide === IDE.sa1)).toBeUndefined();
+    expect(stateOf(store).days[0].tallies).toContainEqual({ event_type: "HR01", canton: "VD", legal_form: "0106", count: 1 });
   });
 
   it("supprime une ligne dès que l'avis n'est plus publié, même hors de la fenêtre", async () => {

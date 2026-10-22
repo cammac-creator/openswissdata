@@ -13,7 +13,8 @@
  *
  * Ordre d'un passage :
  *   1. relire l'état (illisible → arrêt, jamais un état recréé à vide) ;
- *   2. purge sans réseau des lignes arrivées à leur fin de conservation, puis mois figés ;
+ *   2. purge sans réseau des lignes dont le jour de suppression arrive (`delete_on` ≤ demain), puis
+ *      mois figés ;
  *   3. garde-fous des CG : acceptation de moins de 90 jours (CG 1.2 al. 1), PDF des CG inchangé
  *      (CG 1.1 al. 4) ; sinon aucune lecture du portail, l'état purgé est quand même écrit ;
  *   4. revérification des jours stockés hors fenêtre (liste PUBLISHED de chaque jour) ;
@@ -21,7 +22,9 @@
  *      seulement revérifié ; un jour nouveau ou changé est recalculé EN ENTIER (sociétés déjà
  *      connues relues dans l'état sans requête, autres avis relus en mémoire) ;
  *   6. purge des lignes non revérifiées depuis plus de trois jours (y compris quand le portail
- *      n'a pas pu être lu), puis écriture de l'état et des totaux.
+ *      n'a pas pu être lu), puis écriture de l'état et des totaux. Une panne inattendue survenue
+ *      pendant les étapes 3 à 5 n'empêche pas cette étape : aucun jour nouveau n'est alors
+ *      enregistré, mais la purge l'est, puis la panne est relancée (code de sortie 1).
  *
  * Usage :
  *   FOSC_DRY_RUN=1 tsx etl/fosc/collect.ts --out <dossier hors du dépôt> [--days J1,J2] [--sample-details N]
@@ -40,7 +43,7 @@ import {
   detailXmlUrl, FOSC_MAX_PAGE_SIZE, FOSC_TERMS_ACCEPTED_ON, FOSC_TERMS_RENEWAL_DAYS, FOSC_TERMS_SHA256, FOSC_TERMS_URL, listUrl,
 } from "./sources.js";
 import {
-  addTally, applyVerification, emptyState, expiresOn, freezeMonths, purgeExpired, purgeUnverified, replaceDay, sortTallies,
+  addTally, applyVerification, deleteOn, emptyState, freezeMonths, isDeletionDue, purgeExpired, purgeUnverified, replaceDay, sortTallies,
   validateState, WINDOW_DAYS, windowDays, zurichDay, type DayRecord, type FoscEventRow, type FoscState, type PurgeCounts, type Tally,
 } from "./state.js";
 import { fileStore, r2Store, type FoscStore } from "./store.js";
@@ -59,7 +62,11 @@ const MAX_LIST_BYTES = 30_000_000;
 const MAX_DETAIL_BYTES = 2_000_000;
 const MAX_TERMS_BYTES = 5_000_000;
 
-export interface MissingCounts { uid: number; legal_form: number; seat: number; canton: number; commune_unresolved: number }
+export interface MissingCounts {
+  uid: number; legal_form: number; seat: number; canton: number; commune_unresolved: number;
+  /** Avis à plusieurs blocs société d'un même côté : totaux seulement, hors du contrôle du schéma. */
+  multiple_blocks: number;
+}
 
 export interface DayReport {
   date: string;
@@ -109,6 +116,14 @@ export interface CollectOptions {
   termsAcceptedOn?: string;
 }
 
+/** Panne inattendue : levée APRÈS l'enregistrement de l'état purgé, avec le rapport du passage. */
+export class FoscUnexpectedError extends Error {
+  constructor(readonly report: CollectReport, readonly original: unknown) {
+    super(`Panne inattendue pendant la collecte (${original instanceof Error ? original.name : "erreur inconnue"}) : état purgé enregistré, aucun jour nouveau`);
+    this.name = "FoscUnexpectedError";
+  }
+}
+
 type Classified =
   | { kind: "row"; row: FoscEventRow; tally: Omit<Tally, "count"> }
   | { kind: "totals"; tally: Omit<Tally, "count">; soleProprietorship: boolean };
@@ -117,27 +132,47 @@ const daysBetween = (from: string, to: string) => Math.round((Date.parse(`${to}T
 
 /**
  * Décide ce qu'un avis devient : une ligne de société (liste blanche) ou un simple total.
- * Canton retenu : celui de la commune du siège quand elle est rapprochée (après l'événement ;
- * avant pour une radiation), sinon celui de l'avis (office qui publie).
+ *
+ * Bloc retenu : l'unique bloc société du côté « après » (« avant » pour une radiation), ou à défaut
+ * l'unique bloc de l'autre côté. Une ligne n'est possible que si chaque côté porte AU PLUS un bloc,
+ * qu'aucun champ n'est répété dans un bloc, que TOUTES les formes de TOUS les blocs (avant et
+ * après) sont dans la liste blanche, et que l'IDE, la forme et le siège viennent de ce même bloc
+ * (garanti par la lecture bloc par bloc de `xml.ts`). Sinon : totaux seulement.
+ * Canton retenu : celui de la commune du siège quand elle est rapprochée, sinon celui de l'avis
+ * (office qui publie).
  */
 export function classifyAvis(entry: ListEntry, detail: AvisDetail, resolveCommune: CommuneResolver, today: string, missing: MissingCounts): Classified {
-  const primary = entry.subRubric === "HR03" ? (detail.before ?? detail.after) : (detail.after ?? detail.before);
-  const sides = [detail.after, detail.before].filter((s): s is NonNullable<typeof s> => s !== null);
+  const main = entry.subRubric === "HR03" ? detail.before : detail.after;
+  const other = entry.subRubric === "HR03" ? detail.after : detail.before;
+  const primarySide = main.length > 0 ? main : other;
+  const blocks = [...detail.after, ...detail.before];
+  const multiple = detail.after.length > 1 || detail.before.length > 1;
+  const single = !multiple && primarySide.length === 1 ? primarySide[0] : null;
+  const soleProprietorship = blocks.some((b) => b.legalForm === SOLE_PROPRIETORSHIP);
   const avisCanton = entry.canton && SWISS_CANTONS.has(entry.canton) ? entry.canton : null;
-  const commune = resolveCommune(primary?.seat ?? null, avisCanton);
+
+  if (multiple) {
+    // Plusieurs sociétés dans un même avis : impossible de savoir à coup sûr quelle forme va avec
+    // quel IDE ; la forme des totaux n'est gardée que si tous les blocs retenus la partagent.
+    missing.multiple_blocks++;
+    const forms = [...new Set(primarySide.map((b) => b.legalForm))];
+    const tally = { event_type: entry.subRubric, canton: avisCanton ?? UNKNOWN_CANTON, legal_form: totalsLegalForm(forms.length === 1 ? forms[0] : null) };
+    return { kind: "totals", tally, soleProprietorship };
+  }
+
+  const commune = single ? resolveCommune(single.seat, avisCanton) : null;
   const canton = commune?.canton ?? avisCanton;
   if (!canton) missing.canton++;
-  const legalForm = primary?.legalForm ?? null;
+  const legalForm = single?.legalForm ?? null;
   if (!legalForm) missing.legal_form++;
-  const uid = primary?.uid ? parseUid(primary.uid) : null;
+  const uid = single?.uid ? parseUid(single.uid) : null;
   if (!uid?.ok) missing.uid++;
-  if (!primary?.seat) missing.seat++;
+  if (!single?.seat) missing.seat++;
   const tally = { event_type: entry.subRubric, canton: canton ?? UNKNOWN_CANTON, legal_form: totalsLegalForm(legalForm) };
-  const expires = expiresOn(entry.publicationDate, entry.expirationDate);
-  const storable = primary !== null && isRowStorable(sides.map((s) => s.legalForm)) && uid?.ok === true && canton !== null && expires >= today;
-  if (!storable || !uid?.ok || !canton || !legalForm) {
-    return { kind: "totals", tally, soleProprietorship: sides.some((s) => s.legalForm === SOLE_PROPRIETORSHIP) };
-  }
+  const deletion = deleteOn(entry.publicationDate, entry.expirationDate);
+  const storable = single !== null && blocks.every((b) => !b.repeated) && isRowStorable(blocks.map((b) => b.legalForm))
+    && uid?.ok === true && canton !== null && legalForm !== null && !isDeletionDue(deletion, today);
+  if (!storable || !uid?.ok || !canton || !legalForm) return { kind: "totals", tally, soleProprietorship };
   if (commune === null) missing.commune_unresolved++;
   return {
     kind: "row",
@@ -150,7 +185,7 @@ export function classifyAvis(entry: ListEntry, detail: AvisDetail, resolveCommun
       municipality_bfs_id: commune?.bfs ?? null,
       canton,
       legal_form: legalForm,
-      expires_on: expires,
+      delete_on: deletion,
       verified_on: today,
     },
   };
@@ -222,16 +257,19 @@ export async function runFoscCollection(opts: CollectOptions): Promise<CollectRe
   const report: CollectReport = {
     mode: opts.mode ?? "test", today, purge: { expired: purgeExpired(state, today), unverified: 0, unpublished: 0 }, months_frozen: 0, terms: "ok",
     verification: { days_checked: 0, days_failed: 0 }, days: [],
-    missing: { uid: 0, legal_form: 0, seat: 0, canton: 0, commune_unresolved: 0 },
+    missing: { uid: 0, legal_form: 0, seat: 0, canton: 0, commune_unresolved: 0, multiple_blocks: 0 },
     parsed_details: 0, rows_stored_total: 0, requests: 0, rate_limited: 0, waited_seconds: 0, stopped: null, exit_code: 0,
   };
-  report.months_frozen = freezeMonths(state, today, now, window).length;
-  const frozenMonths = new Set(state.months.map((m) => m.month));
+  let frozenMonths = new Set(state.months.map((m) => m.month));
   const targetDays = [...new Set(opts.days ?? windowDays(today, window))].sort();
   const pending: { record: DayRecord; rows: FoscEventRow[] }[] = [];
   let failed = false;
+  /** Panne inattendue : relancée APRÈS l'enregistrement de la purge (l'état a pu être lu). */
+  let unexpected: unknown = null;
 
   try {
+    report.months_frozen = freezeMonths(state, today, now, window).length;
+    frozenMonths = new Set(state.months.map((m) => m.month));
     report.terms = await checkTerms(client, today, opts.termsSha256 ?? FOSC_TERMS_SHA256, opts.termsAcceptedOn ?? FOSC_TERMS_ACCEPTED_ON);
     if (report.terms !== "ok") {
       report.stopped = "terms";
@@ -337,17 +375,22 @@ export async function runFoscCollection(opts: CollectOptions): Promise<CollectRe
       }
     }
   } catch (error) {
-    if (!(error instanceof FoscBudgetError)) throw error;
-    report.stopped = error.reason === "requests" ? "budget" : error.reason;
+    if (error instanceof FoscBudgetError) {
+      report.stopped = error.reason === "requests" ? "budget" : error.reason;
+    } else {
+      unexpected = error;
+      failed = true;
+    }
     // Le jour en cours de calcul n'est pas enregistré : il sera refait en entier au passage suivant.
   }
 
-  // Contrôle du schéma sur l'ensemble des détails lus pendant ce passage.
+  // Contrôle du schéma sur l'ensemble des détails lus pendant ce passage. Après une panne
+  // inattendue, aucun jour nouveau n'est enregistré ; la purge et les revérifications, si.
   const missingCore = Math.max(report.missing.uid, report.missing.legal_form);
   if (report.parsed_details >= MIN_PARSED_FOR_RATIO && missingCore > report.parsed_details * MAX_MISSING_RATIO) {
     report.stopped = "schema";
     failed = true;
-  } else {
+  } else if (unexpected === null) {
     for (const p of pending) replaceDay(state, p.record, p.rows);
   }
 
@@ -364,6 +407,7 @@ export async function runFoscCollection(opts: CollectOptions): Promise<CollectRe
   const oldestLost = opts.days === undefined && state.collection_started_on !== null && oldest >= state.collection_started_on
     && !state.days.some((d) => d.date === oldest) && !frozenMonths.has(oldest.slice(0, 7));
   report.exit_code = failed ? 1 : oldestLost ? 2 : 0;
+  if (unexpected !== null) throw new FoscUnexpectedError(report, unexpected);
   return report;
 }
 
@@ -433,7 +477,7 @@ export function formatReport(r: CollectReport): string {
     ...r.days.map((d) => `[fosc] ${d.date} ${d.status} : ${d.listed} avis listés (${Object.entries(d.by_subrubric).map(([k, v]) => `${k} ${v}`).join(", ") || "aucun"}), `
       + `${d.details_read} détails lus, ${d.stored_rows} lignes de sociétés, ${d.totals_only} en totaux seulement dont ${d.sole_proprietorships} entreprises individuelles, `
       + `${d.test_imports} essais, ${d.detail_failed} en échec, ${d.not_sampled} hors échantillon`),
-    `[fosc] champs manquants sur ${r.parsed_details} détails : IDE ${r.missing.uid}, forme ${r.missing.legal_form}, siège ${r.missing.seat}, canton ${r.missing.canton}, commune non rapprochée ${r.missing.commune_unresolved}`,
+    `[fosc] champs manquants sur ${r.parsed_details} détails : IDE ${r.missing.uid}, forme ${r.missing.legal_form}, siège ${r.missing.seat}, canton ${r.missing.canton}, commune non rapprochée ${r.missing.commune_unresolved}, avis à plusieurs sociétés ${r.missing.multiple_blocks}`,
     `[fosc] lignes conservées : ${r.rows_stored_total} ; requêtes : ${r.requests}, refus 429/503 : ${r.rate_limited}, attente : ${r.waited_seconds} s ; code de sortie ${r.exit_code}`,
   ];
   return lines.join("\n");
@@ -453,8 +497,17 @@ async function main(): Promise<void> {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   main().catch((err) => {
-    // Message seul : jamais une pile ni un extrait de réponse (journal public).
-    console.error("[fosc] ERREUR :", err instanceof Error ? err.message : "erreur inconnue");
+    // Message seul : jamais une pile ni un extrait de réponse (journal public). Le message d'une
+    // SyntaxError cite l'entrée analysée : il est remplacé par son seul type.
+    const describe = (e: unknown) => !(e instanceof Error) ? "erreur inconnue"
+      : e instanceof SyntaxError ? "SyntaxError (message masqué : il citerait le contenu lu)" : `${e.name} : ${e.message}`;
+    if (err instanceof FoscUnexpectedError) {
+      // L'état purgé a été enregistré : le journal montre la ligne « purge » du passage.
+      console.log(formatReport(err.report));
+      console.error("[fosc] ERREUR :", err.message, "—", describe(err.original));
+    } else {
+      console.error("[fosc] ERREUR :", describe(err));
+    }
     process.exitCode = 1;
   });
 }

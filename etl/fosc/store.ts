@@ -31,6 +31,24 @@ export interface FoscStore {
 
 const serialize = (value: unknown) => `${JSON.stringify(value, null, 1)}\n`;
 
+export class FoscStoreError extends Error {
+  constructor(where: string, bytes: number) {
+    // Message fixe : jamais d'extrait du contenu (le message de SyntaxError de Node en cite un,
+    // qui pourrait contenir des IDE, et il finirait dans un journal public).
+    super(`État FOSC illisible : JSON invalide (${where}, ${bytes} octets) ; passage arrêté, l'état n'est jamais recréé à vide`);
+    this.name = "FoscStoreError";
+  }
+}
+
+/** Lecture JSON sans jamais laisser passer le message d'origine. */
+export function parseStoredJson(text: string, where: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new FoscStoreError(where, Buffer.byteLength(text, "utf8"));
+  }
+}
+
 export function memoryStore(initial: unknown | null = null): FoscStore & { state: unknown | null; totals: TotalsDocument | null; writes: number } {
   const store = {
     kind: "memory" as const,
@@ -60,7 +78,7 @@ export function fileStore(dir: string): FoscStore {
     async loadState() {
       const p = join(dir, STATE_FILE);
       if (!existsSync(p)) return null;
-      return JSON.parse(readFileSync(p, "utf8"));
+      return parseStoredJson(readFileSync(p, "utf8"), STATE_FILE);
     },
     async saveState(state) { writeAtomic(join(dir, STATE_FILE), serialize(state)); },
     async saveTotals(doc) { writeAtomic(join(dir, TOTALS_FILE), serialize(doc)); },
@@ -86,7 +104,7 @@ export function r2Store(): FoscStore {
         if (isMissingObject(error)) return null;
         throw error;
       }
-      return JSON.parse(bytes.toString("utf8"));
+      return parseStoredJson(bytes.toString("utf8"), R2_STATE_KEY);
     },
     async saveState(state) { await putObjectBytes(R2_STATE_KEY, Buffer.from(serialize(state)), "application/json"); },
     async saveTotals(doc) { await putObjectBytes(R2_TOTALS_KEY, Buffer.from(serialize(doc)), "application/json"); },

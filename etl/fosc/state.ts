@@ -5,16 +5,19 @@
  *   - `events` : une ligne par avis d'une SOCIÉTÉ de la liste blanche (`legal-forms.ts`) :
  *     identifiant technique de l'avis (pour l'idempotence et la revérification, jamais publié),
  *     IDE, type d'événement (sous-rubrique HR01, HR02, HR03), date de publication, numéro OFS de
- *     la commune du siège, canton, forme juridique, date de fin de conservation, date de la
- *     dernière revérification. Jamais de texte libre, de raison sociale, de nom, de but ni
+ *     la commune du siège, canton, forme juridique, jour de suppression (`delete_on`), date de
+ *     la dernière revérification. Jamais de texte libre, de raison sociale, de nom, de but ni
  *     d'adresse. Jamais une entreprise individuelle.
  *   - `days` : par jour de publication, des TOTAUX (type × canton × forme juridique), entreprises
  *     individuelles comprises, sans aucun identifiant d'avis ni d'entreprise.
  *   - `months` : les mois figés, mêmes totaux.
  *
- * Conservation des lignes (règle prudente, rapport du lot du 22.10.2026) : une ligne part dès que
- *   (a) sa date de fin `expires_on` est passée : min(`expirationDate` de l'avis, publication +
- *       `MAX_RETENTION_DAYS`) ;
+ * Conservation des lignes (règle prudente, rapport du lot du 22.10.2026, rendue exacte après
+ * relecture) : une ligne part dès que
+ *   (a) son jour de suppression `delete_on` arrive : min(`expirationDate` de l'avis, publication
+ *       + `MAX_RETENTION_DAYS`). Un passage du jour T supprime toute ligne dont `delete_on` ≤ T + 1 :
+ *       la ligne n'existe donc plus le jour `delete_on` (J + 30 au plus tard, J = publication) dès
+ *       que le passage de la veille a eu lieu ; sinon elle part au premier passage suivant ;
  *   (b) l'avis n'est plus dans la liste PUBLISHED de son jour lors d'une revérification ;
  *   (c) elle n'a pas pu être revérifiée depuis plus de `MAX_UNVERIFIED_DAYS` jours.
  * La durée de publication d'un avis HR n'est pas fixée (`expirationDate` nul, art. 11 al. 2
@@ -27,7 +30,7 @@ import { SOLE_PROPRIETORSHIP } from "./legal-forms.js";
 export const STATE_SCHEMA = "openswissdata.fosc-hr-state";
 export const STATE_SCHEMA_VERSION = 1;
 
-/** Plancher d'un mois de l'art. 11 al. 2 OFOSC (30 jours). */
+/** Plancher d'un mois de l'art. 11 al. 2 OFOSC : la ligne n'existe plus le 30e jour après la publication. */
 export const MAX_RETENTION_DAYS = 30;
 /** Une ligne qu'on n'a pas pu revérifier depuis plus de 3 jours est supprimée. */
 export const MAX_UNVERIFIED_DAYS = 3;
@@ -42,7 +45,8 @@ export interface FoscEventRow {
   municipality_bfs_id: number | null;
   canton: string;
   legal_form: string;
-  expires_on: string;
+  /** Jour où la ligne ne doit plus exister (supprimée au passage de la veille au plus tard possible). */
+  delete_on: string;
   verified_on: string;
 }
 
@@ -127,11 +131,11 @@ export function validateState(value: unknown): FoscState {
   if (s.schema !== STATE_SCHEMA || s.schema_version !== STATE_SCHEMA_VERSION) throw new FoscStateError("schéma inattendu");
   if (s.collection_started_on !== null && !DAY_RE.test(String(s.collection_started_on))) throw new FoscStateError("date de début");
   if (!Array.isArray(s.events) || !Array.isArray(s.days) || !Array.isArray(s.months)) throw new FoscStateError("tableaux absents");
-  const allowedRowKeys = new Set(["publication_id", "ide", "event_type", "publication_date", "municipality_bfs_id", "canton", "legal_form", "expires_on", "verified_on"]);
+  const allowedRowKeys = new Set(["publication_id", "ide", "event_type", "publication_date", "municipality_bfs_id", "canton", "legal_form", "delete_on", "verified_on"]);
   for (const e of s.events) {
     if (!e || typeof e !== "object") throw new FoscStateError("ligne");
     for (const k of Object.keys(e)) if (!allowedRowKeys.has(k)) throw new FoscStateError("champ de ligne non autorisé");
-    if (!IDE_RE.test(e.ide) || !DAY_RE.test(e.publication_date) || !DAY_RE.test(e.expires_on) || !DAY_RE.test(e.verified_on)) {
+    if (!IDE_RE.test(e.ide) || !DAY_RE.test(e.publication_date) || !DAY_RE.test(e.delete_on) || !DAY_RE.test(e.verified_on)) {
       throw new FoscStateError("ligne mal formée");
     }
     if (e.legal_form === SOLE_PROPRIETORSHIP) throw new FoscStateError("entreprise individuelle en ligne");
@@ -165,9 +169,15 @@ export function windowDays(today: string, windowDays = WINDOW_DAYS): string[] {
   return out;
 }
 
-export function expiresOn(publicationDate: string, expirationDate: string | null): string {
+/** Jour de suppression : min(échéance de l'avis, publication + 30 jours). */
+export function deleteOn(publicationDate: string, expirationDate: string | null): string {
   const max = addDays(publicationDate, MAX_RETENTION_DAYS);
   return expirationDate && expirationDate < max ? expirationDate : max;
+}
+
+/** Une ligne doit partir au passage du jour `today` si elle ne peut pas exister demain. */
+export function isDeletionDue(deleteOnDay: string, today: string): boolean {
+  return deleteOnDay <= addDays(today, 1);
 }
 
 export interface PurgeCounts { expired: number; unverified: number; unpublished: number }
@@ -175,7 +185,7 @@ export interface PurgeCounts { expired: number; unverified: number; unpublished:
 /** Règle (a) : sans réseau, au début de chaque passage, avant toute lecture du portail. */
 export function purgeExpired(state: FoscState, today: string): number {
   const before = state.events.length;
-  state.events = state.events.filter((e) => e.expires_on >= today);
+  state.events = state.events.filter((e) => !isDeletionDue(e.delete_on, today));
   return before - state.events.length;
 }
 
@@ -242,10 +252,12 @@ export function freezeMonths(state: FoscState, today: string, now: Date, window 
     const m = d.date.slice(0, 7);
     byMonth.set(m, [...(byMonth.get(m) ?? []), d]);
   }
+  const due = [...byMonth.keys()].filter((month) => lastDayOfMonth(month) < windowStart);
+  // Contrôle AVANT toute modification : une erreur laisse l'état intact (la purge reste enregistrable).
+  if (due.some((month) => state.months.some((m) => m.month === month))) throw new FoscStateError("mois déjà figé recalculé");
   const frozen: string[] = [];
   for (const [month, days] of byMonth) {
-    if (lastDayOfMonth(month) >= windowStart) continue;
-    if (state.months.some((m) => m.month === month)) throw new FoscStateError("mois déjà figé recalculé");
+    if (!due.includes(month)) continue;
     const tallies = new Map<string, Tally>();
     for (const d of days) for (const t of d.tallies) addTally(tallies, t, t.count);
     state.months.push({
