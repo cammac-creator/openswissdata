@@ -71,6 +71,7 @@
   },
   "overrides": {
     "sharp": "0.35.5",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "global-agent": "^4.1.3"
   }
 }

@@ -10,6 +10,14 @@ Le contrôle npm porte sur les graphes verrouillés de l’application, du site,
 - Un seul moteur Transformers.js 3.8.1 pour recherche et traduction. L’ancien Xenova 2 et son ancien protobufjs sont retirés. Les requêtes sont traitées localement. Les index existants restent distincts des collectes de fichiers. Les caches de reprise exigent la révision du modèle et le moteur de calcul courants ; les anciens caches sont recalculés.
 - Deux contraintes transitives explicites : sharp 0.35.5 depuis le 21.10.2026 (0.35.4 auparavant ; correctifs des décodeurs d’images) et esbuild 0.28.2 (serveur de développement). Pas d’entrée image dans nos parcours IA ; build, traduction et recherche doivent être revalidés lors de leur évolution. Retirer ces contraintes lorsque les paquets parents adoptent des versions corrigées compatibles.
 
+## Mise à jour du 22.10.2026
+
+Les sept avis moyens restants (voir le 21.10) sont levés sans version majeure :
+- Application : `overrides` `global-agent` ^4.1.3 (au lieu de 3.0.0 sous `onnxruntime-node` 1.21.0). La version 4 ne dépend plus de `roarr` ni de `sprintf-js` (avis GHSA-hp3w-g68c-fv3c, aucune version corrigée de `sprintf-js`). `onnxruntime-node` n'utilise `global-agent` que dans son script d'installation (`bootstrap()`, présent en 4.1.3 et vérifié). Transformers.js reste en 3.8.1 : modèle, révision, moteur et index de recherche inchangés.
+- Site : `overrides` `postcss-selector-parser` ^7.1.7 sous `@tailwindcss/typography` (avis GHSA-rj75-hqrm-r3gf ; la dernière version 0.5.20 du greffon impose encore 6.0.10). Les 15 feuilles CSS construites sont identiques à l'octet près à celles de main.
+- Lockfiles calculés par npm 11.6.2, installés et vérifiés par `npm ci` sous npm 10.9.9 ; entrées @emnapi/core et @emnapi/runtime conservées dans le lock du site.
+- Preuves : `npm audit` 0 avis (application et site), typage 0, suite complète 218 fichiers (3 350 tests), `web:build` avec seo, polices et bureau verts, sous Node 22.23.3.
+
 ## Mise à jour du 21.10.2026
 
 Avis apparus les 19 et 21.10.2026 (contrôle hebdomadaire rouge, puis CI des intégrations) :
