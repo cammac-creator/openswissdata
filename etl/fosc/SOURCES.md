@@ -41,19 +41,25 @@ Les réponses sont lues **en mémoire seulement** : aucune copie brute, ni sur d
 contiennent le texte libre des avis (noms de personnes, buts, adresses). C'est un écart voulu à la règle « bronze
 d'abord » des autres collectes.
 
-Du détail XML, seuls sont lus `content/commonsNew/company/{uid,legalForm,seat}` (état après l'événement),
-`content/commonsActual/company/{uid,legalForm,seat}` (état avant : mutation, radiation) et `content/testImport`.
-Le chemin est comparé en entier : l'IDE de l'organe de révision n'est jamais lu.
+Du détail XML, seuls sont lus `content/testImport` et, **bloc par bloc**, chaque `content/commonsNew/company`
+(état après l'événement) et chaque `content/commonsActual/company` (état avant : mutation, radiation), avec leurs
+propres `uid`, `legalForm` et `seat`. Le schéma autorise plusieurs blocs par côté et un `uid` absent : un IDE n'est
+jamais associé à la forme ou au siège d'un autre bloc. Le chemin est comparé en entier : l'IDE de l'organe de
+révision n'est jamais lu.
 
-**Lignes d'événements (argent)** : une ligne par avis seulement si toutes les formes juridiques lues (avant et après)
-sont dans la liste blanche `ROW_STORABLE_LEGAL_FORMS` : SA, Sàrl, SCmA, coopérative, association, fondation, SCmPC,
-SICAV, SICAF, institut de droit public. Champs : identifiant technique de l'avis (idempotence et revérification,
-jamais publié), IDE, type d'événement (sous-rubrique), date de publication, numéro OFS de la commune du siège,
-canton, forme juridique, date de fin de conservation, date de la dernière revérification.
+**Lignes d'événements (argent)** : une ligne par avis seulement si chaque côté (après, avant) porte au plus un bloc
+société, si le bloc retenu (après ; avant pour une radiation) a un IDE valide, une forme et un siège, si aucun champ
+n'est répété dans un bloc, et si les formes juridiques de tous les blocs (avant et après) sont dans la liste blanche
+`ROW_STORABLE_LEGAL_FORMS` : SA, Sàrl, SCmA, coopérative, association, fondation, SCmPC, SICAV, SICAF, institut de
+droit public. Champs : identifiant technique de l'avis (idempotence et revérification, jamais publié), IDE, type
+d'événement (sous-rubrique), date de publication, numéro OFS de la commune du siège, canton, forme juridique, jour
+de suppression (`delete_on`), date de la dernière revérification.
 
 **Totaux seulement** : entreprise individuelle (0101), procuration non commerciale (0118), représentant d'indivision
 (0119), société en nom collectif (0103), société en commandite (0104), succursales (0111, 0151), forme particulière
-(0113), forme absente ou inconnue, et toute mutation dont l'état avant ou après sort de la liste blanche. La liste
+(0113), forme absente ou inconnue, toute mutation dont l'état avant ou après sort de la liste blanche, tout avis à
+plusieurs blocs société d'un même côté (sa forme n'est gardée dans les totaux que si tous ses blocs la partagent),
+et tout avis dont le bloc retenu n'a pas d'IDE. La liste
 blanche est plus stricte que la décision, qui ne nomme que l'entreprise individuelle ; l'élargir est une décision
 de Claude-Alain.
 
@@ -68,11 +74,15 @@ lors d'un transfert de siège dans un autre canton.
 - Les avis HR n'ont pas d'échéance dans l'API (`expirationDate` vide) et restent consultables des années sur le
   portail : c'est l'accès « pour une durée indéterminée » de l'art. 11 al. 2 OFOSC, que le service d'annonces peut
   limiter (au moins un mois) ou réduire pour un avis qui contient des données personnelles (al. 3).
-- Règle appliquée, la plus prudente : une ligne est supprimée (a) à l'`expirationDate` de l'avis si elle existe,
-  au plus tard 30 jours après la publication (`MAX_RETENTION_DAYS`, plancher d'un mois de l'art. 11 al. 2) ;
-  (b) dès que l'avis n'est plus dans la liste PUBLISHED de son jour, relue à chaque passage pour chaque jour
-  stocké ; (c) si elle n'a pas pu être revérifiée depuis plus de 3 jours. Prolonger la conservation est une
-  décision de Claude-Alain.
+- Règle appliquée, la plus prudente : (a) chaque ligne a un jour de suppression `delete_on`, l'`expirationDate` de
+  l'avis si elle existe, au plus tard le 30e jour après la publication J (`MAX_RETENTION_DAYS`, plancher d'un mois
+  de l'art. 11 al. 2) ; le passage d'un jour T supprime toute ligne dont `delete_on` tombe au plus tard le
+  lendemain (T + 1), et n'enregistre pas un tel avis : la ligne n'existe donc plus le jour J + 30 (ni le jour de
+  l'échéance) dès que le passage de la veille a eu lieu, sinon elle part au premier passage suivant ; (b) une ligne
+  part dès que l'avis n'est plus dans la liste PUBLISHED de son jour, relue à chaque passage pour chaque jour
+  stocké ; (c) une ligne part si elle n'a pas pu être revérifiée depuis plus de 3 jours. Ces suppressions sont
+  enregistrées à chaque passage qui a pu relire l'état, même si un jour échoue ensuite. Prolonger la conservation
+  est une décision de Claude-Alain.
 
 ## Totaux (or, non publié)
 
