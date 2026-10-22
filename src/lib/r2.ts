@@ -47,6 +47,27 @@ export async function uploadZip(
 }
 
 /**
+ * Écrit (ou remplace) un petit objet privé à partir d'octets en mémoire. Sert à l'état de
+ * collecte FOSC (`etl/fosc/store.ts`), réécrit à chaque passage pour que la purge efface
+ * vraiment : jamais `immutable` ici.
+ */
+export async function putObjectBytes(
+  r2Key: string,
+  body: Buffer,
+  contentType: string,
+): Promise<void> {
+  const client = buildClient();
+  await client.send(
+    new PutObjectCommand({
+      Bucket: requireBucket(),
+      Key: r2Key,
+      Body: body,
+      ContentType: contentType,
+    })
+  );
+}
+
+/**
  * Download an object from R2 fully into memory. Used by the MCP data-refresh
  * engine to pull the current dataset ZIP at boot/release/timer (never on the
  * request path). Bounded use only — callers fetch small slices (FINMA ZIP

@@ -28,6 +28,7 @@
     "sync:finma-seats": "tsx scripts/sync-finma-seats.ts",
     "sync:bfe-pv": "tsx scripts/sync-bfe-pv.ts",
     "sync:datasets": "tsx scripts/sync-datasets.ts",
+    "sync:fosc": "tsx etl/fosc/collect.ts",
     "prospect:sources": "tsx scripts/prospect-sources.ts",
     "web:dev": "cd web && npx astro dev",
     "web:build": "npm --prefix web ci && npm --prefix web run build && npm run seo:check && npm run fonts:check && npm run admin:csp:check",

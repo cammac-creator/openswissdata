@@ -25,7 +25,7 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
   getSignedUrl: getSignedUrlMock,
 }));
 
-import { uploadZip, signedDownloadUrl } from "../../src/lib/r2.js";
+import { uploadZip, signedDownloadUrl, putObjectBytes } from "../../src/lib/r2.js";
 import { writeFileSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -83,6 +83,19 @@ describe("lib/r2", () => {
     it("throws when R2_BUCKET is missing", async () => {
       delete process.env.R2_BUCKET;
       await expect(uploadZip(localPath, "k")).rejects.toThrow(/R2_BUCKET/);
+    });
+  });
+
+  describe("putObjectBytes", () => {
+    it("remplace un petit objet privé (état FOSC), sans condition d'immuabilité", async () => {
+      await putObjectBytes("fosc/argent/hr-state-v1.json", Buffer.from("{}"), "application/json");
+      expect(sendMock).toHaveBeenCalledTimes(1);
+      const cmd = sendMock.mock.calls[0][0];
+      expect(cmd.__type).toBe("PutObjectCommand");
+      expect(cmd.input.Bucket).toBe("openswissdata-test");
+      expect(cmd.input.Key).toBe("fosc/argent/hr-state-v1.json");
+      expect(cmd.input.ContentType).toBe("application/json");
+      expect(cmd.input.IfNoneMatch).toBeUndefined();
     });
   });
 

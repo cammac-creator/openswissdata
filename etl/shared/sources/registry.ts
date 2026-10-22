@@ -16,6 +16,7 @@ import { LINDAS_SPARQL_ENDPOINT } from "../../finma/ingest-zefix.js";
 import { SWISSTOPO_LOCALITIES_STAC_ITEMS_URL } from "../../localities/sources.js";
 import { SWISSTOPO_STREETS_STAC_ITEMS_URL } from "../../streets/sources.js";
 import { BFE_PV_CSV_URL } from "../../bfe/sources.js";
+import { FOSC_PUBLICATIONS_URL } from "../../fosc/sources.js";
 // Adresses BAZG : dérivées de la même déclaration que la collecte (etl/tares/sources.ts,
 // BAZG_SOURCES), jamais recopiées en dur ici (tâche osd.socle).
 import { BAZG_SOURCES } from "../../tares/sources.js";
@@ -86,6 +87,18 @@ const BFE_OPEN: SourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// Portail des feuilles officielles du SECO (FOSC, rubrique HR). Réponse écrite du SECO du
+// 12.10.2026 : réutilisation soumise aux conditions générales du portail (version du 07.06.2024),
+// en particulier au point 3.3. Conditions acceptées pour le service sur décision de Claude-Alain
+// du 16.10.2026 (d3 = A, F8 accordé), à renouveler tous les 90 jours (CG 1.2 al. 1, contrôlé par
+// la collecte, `etl/fosc/sources.ts`). Détail : `etl/fosc/SOURCES.md`.
+const SECO_FOSC: SourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-SECO-FOSC-TERMS",
+  authority: "State Secretariat for Economic Affairs SECO, Official Gazettes Portal terms of use of 07.06.2024 (point 3.3: source attribution, not an official publication, data protection, publication periods)",
+  date: "2026-10-12",
+  jurisdiction: "Switzerland",
+};
+
 export const SOURCES: readonly SourceDescriptor[] = [
   { id: "tares.tariff_8_digit", institution: "BAZG", url: BAZG_SOURCES.tariff_8_digit.url, canary: "raw", licence: BAZG, description: "BAZG — Liste des numéros tarifaires HS8" },
   { id: "tares.tarifstruktur", institution: "BAZG", url: BAZG_SOURCES.tarifstruktur.url, canary: "raw", licence: BAZG, description: "BAZG — Structure tarifaire hiérarchique multilingue" },
@@ -141,6 +154,11 @@ export const SOURCES: readonly SourceDescriptor[] = [
   // ci-dessus : `scripts/sync-bfe-pv.ts` contrôle lui-même la forme du fichier officiel.
   { id: "bfe.pv_one_time_remuneration", institution: "BFE", url: BFE_PV_CSV_URL, licence: BFE_OPEN,
     description: "OFEN — rétribution unique pour les installations photovoltaïques, par canton et année, collecte annuelle." },
+  // Sans canari (lot FOSC, 22.10.2026) : la collecte quotidienne (`etl/fosc/collect.ts`) relit
+  // elle-même l'empreinte des CG et contrôle la forme des réponses. Hors de toute archive vendue :
+  // ne pas l'ajouter à PRODUCT_SOURCES sans nouvelle décision (rien n'est publié à ce jour).
+  { id: "seco.fosc_hr", institution: "SECO", url: FOSC_PUBLICATIONS_URL, licence: SECO_FOSC,
+    description: "SECO — FOSC, avis du registre du commerce (rubrique HR), API publique du Portail des feuilles officielles, collecte quotidienne." },
 ];
 
 const PAR_ID = new Map(SOURCES.map(s => [s.id, s]));
