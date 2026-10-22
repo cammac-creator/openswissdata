@@ -52,3 +52,7 @@ Décision de Claude-Alain du 29.09.2026, complétée le 30.09.2026 pour l’ancr
 - Deux workflows figent encore l’ancien état : `cleanup-expired.yml` (14 catégories exactes) et `backup-db.yml` (profil `service-crm-2026-09-29`). Leur version tolérante (ancien ou nouvel état) doit être livrée dans la même fusion que le serveur, puis resserrée sur le nouvel état une fois le SHA servi vérifié.
 - Retour arrière : l’ancien code ignore la table et la copie, sans erreur, mais n’applique plus les durées ; ne supprimer ni la table ni `retention/erasures.json`. Une donnée effacée ne revient pas par un retour de code ; elle ne revient que par une restauration, que le rejeu corrige au démarrage suivant d’une version compatible.
 - Annuler un effacement erroné : `OSD_SKIP_ERASURE_REPLAY=1`, restauration, retrait des seules entrées concernées de la copie (et de la table si la sauvegarde les contient), retrait de l’interrupteur. Procédure détaillée : `docs/sauvegarde-et-reprise.md`.
+
+## Hors base : collecte FOSC (22.10.2026)
+
+Les événements des sociétés tirés des avis HR de la FOSC ne sont pas dans la base du service : ils vivent dans le bucket R2 privé (`fosc/argent/hr-state-v1.json`), réécrit à chaque passage de la collecte quotidienne. Une ligne y est effacée au plus tard 30 jours après la publication de l'avis, dès que l'avis n'est plus publié, ou faute de revérification depuis 3 jours ; les entreprises individuelles n'y figurent jamais. Ce nettoyage est fait par la collecte elle-même, pas par `runCleanup`. Règle et sources : `etl/fosc/SOURCES.md`.
