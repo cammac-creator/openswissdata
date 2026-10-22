@@ -48,7 +48,8 @@ jamais associé à la forme ou au siège d'un autre bloc. Le chemin est comparé
 révision n'est jamais lu.
 
 **Lignes d'événements (argent)** : une ligne par avis seulement si chaque côté (après, avant) porte au plus un bloc
-société, si le bloc retenu (après ; avant pour une radiation) a un IDE valide, une forme et un siège, si aucun champ
+société, si le bloc retenu (après, ou avant pour une radiation ; à défaut, l'unique bloc de l'autre côté) a un IDE
+valide et une forme, si un canton est connu (celui de la commune du siège, sinon celui de l'avis), si aucun champ
 n'est répété dans un bloc, et si les formes juridiques de tous les blocs (avant et après) sont dans la liste blanche
 `ROW_STORABLE_LEGAL_FORMS` : SA, Sàrl, SCmA, coopérative, association, fondation, SCmPC, SICAV, SICAF, institut de
 droit public. Champs : identifiant technique de l'avis (idempotence et revérification, jamais publié), IDE, type
