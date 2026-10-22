@@ -1,0 +1,154 @@
+---
+/**
+ * Vitrine « Mouvements FINMA » (FR/DE/EN, maquette B « tableau de bord » choisie le 20.10.2026).
+ * Chiffres rendus au build depuis le témoin public `docs/data-status/finma.json` (bloc
+ * `history.movements`) : lisibles sans JavaScript. Aucun nom, aucun lien vers une entrée de la
+ * liste d'alerte, aucun prix ni aucune date pour la suite. Le seul script révèle le bouton
+ * « être prévenu », qui envoie un événement anonyme par la route existante.
+ */
+import AtlasLayout from '../layouts/AtlasLayout.astro';
+import '../styles/atlas-mouvements.css';
+import { getLangFromPath, localizePath } from '../i18n/utils';
+import { movementsPage } from '../lib/finma-movements';
+
+const lang = getLangFromPath(Astro.url.pathname);
+const L = (path: string) => localizePath(path, lang);
+// Fichier absent (copie partielle du dépôt) : même message d'attente qu'un bloc absent, jamais un échec du build.
+const witness = Object.values(import.meta.glob('../../../docs/data-status/finma.json', { eager: true, import: 'default' }))[0];
+const page = movementsPage(witness, lang);
+const { copy, latest } = page;
+---
+<AtlasLayout title={`${copy.metaTitle} | openswissdata`} description={copy.description} image="/og-finma.png">
+<div class="mv" data-movements-state={page.state}>
+ <nav class="atlas-shell atlas-breadcrumb" aria-label={copy.breadcrumbLabel}><a href={`${L('/')}#datasets`}>{copy.breadcrumb[0]}</a><span aria-hidden="true">/</span><a href={L('/datasets/finma/')}>{copy.breadcrumb[1]}</a><span aria-hidden="true">/</span><span>{copy.breadcrumb[2]}</span></nav>
+
+ <header class="atlas-shell mv-hero">
+  <p class="atlas-kicker">{copy.kicker}</p>
+  <h1>{copy.h1} <em>{copy.accent}</em></h1>
+  <p class="mv-lede">{copy.lede}</p>
+  <ul class="mv-notice">{copy.notice.map(text => <li>{text}</li>)}</ul>
+  {page.freshness && <p class="mv-freshness">{page.freshness}</p>}
+ </header>
+
+ <div class="atlas-shell mv-body">
+ {page.state !== 'ready' && (
+  <section class="mv-waiting" aria-labelledby="mv-attente">
+   <h2 id="mv-attente">{page.state === 'waiting' ? copy.waitingTitle : copy.unavailableTitle}</h2>
+   <p>{page.state === 'waiting' ? copy.waitingText : copy.unavailableText}</p>
+  </section>
+ )}
+
+ {latest && (
+  <section class="mv-summary" id="resume" aria-labelledby="mv-resume">
+   <div class="mv-head"><div><p class="atlas-kicker">{copy.summaryKicker}</p><h2 id="mv-resume">{copy.summaryTitle}</h2></div></div>
+   <div class="mv-period"><strong>{latest.label}</strong>{latest.tags.map(tag => <span class="mv-tag">{tag}</span>)}<span>{latest.coverage}</span></div>
+   <dl class="mv-stats">{latest.stats.map(stat => (
+    <div class={`mv-stat mv-stat-${stat.tone}`}><dt>{stat.label}</dt><dd class="mv-value">{stat.value}</dd><dd class="mv-note">{stat.note}</dd></div>
+   ))}</dl>
+   <p class="mv-secondary">{latest.secondary}</p>
+   {latest.notes.map(note => <p class="mv-aside">{note}</p>)}
+  </section>
+ )}
+
+ {latest && (
+  <div class="mv-charts">
+   <section class="mv-panel" aria-labelledby="mv-categories">
+    <h3 id="mv-categories">{copy.categoriesTitle} <span>· {latest.label}</span></h3>
+    <p class="mv-small">{copy.categoriesNote}</p>
+    <p class="mv-legend" aria-hidden="true"><span><i class="mv-swatch"></i>{copy.legendAdded}</span><span><i class="mv-swatch mv-swatch-out"></i>{copy.legendRemoved}</span></p>
+    {latest.categories.length === 0 ? <p class="mv-small">{copy.categoriesEmpty}</p> : (
+     <ul class="mv-categories">{latest.categories.map(row => (
+      <li aria-label={row.aria}><span class="mv-category-name">{row.label}</span><span class="mv-track" aria-hidden="true"><i class="mv-bar-in" style={`width:${row.addedWidth}%`}></i><i class="mv-bar-out" style={`width:${row.removedWidth}%`}></i></span><span class="mv-category-number" aria-hidden="true">+{row.added} / −{row.removed}</span></li>
+     ))}</ul>
+    )}
+   </section>
+   <section class="mv-panel" aria-labelledby="mv-tendance">
+    <h3 id="mv-tendance">{copy.trendTitle}</h3>
+    <p class="mv-legend" aria-hidden="true"><span><i class="mv-swatch"></i>{copy.legendAdded}</span><span><i class="mv-swatch mv-swatch-out"></i>{copy.legendRemoved}</span><span><i class="mv-swatch mv-swatch-warn"></i>{copy.legendWarnings}</span></p>
+    <div class="mv-trend" aria-hidden="true">{page.trend.map(group => (
+     <div class="mv-trend-group"><div class="mv-trend-bars">{group.bars.map(bar => <span class={`mv-trend-bar mv-trend-${bar.kind}`} style={`height:${bar.height}%`}><b>{bar.value}</b></span>)}</div><span class="mv-trend-label">{group.short}{group.partial && <small>{copy.partial}</small>}</span></div>
+    ))}</div>
+    <p class="mv-small">{copy.trendNote}</p>
+   </section>
+  </div>
+ )}
+
+ {page.months.length > 0 && (
+  <section class="mv-section" id="registre" aria-labelledby="mv-registre">
+   <div class="mv-head"><div><p class="atlas-kicker">{copy.registryKicker}</p><h2 id="mv-registre">{copy.registryTitle}</h2></div><p class="mv-intro">{copy.registryIntro}</p></div>
+   <div class="mv-table-scroll" tabindex="0" role="region" aria-label={`${copy.registryTitle}. ${copy.scrollHint}`}>
+    <table class="mv-table" role="table">
+     <caption class="sr-only">{copy.registryTitle}</caption>
+     <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">{copy.cols.month}</th><th scope="col" role="columnheader">{copy.cols.coverage}</th><th scope="col" role="columnheader">{copy.cols.added}</th><th scope="col" role="columnheader">{copy.cols.removed}</th><th scope="col" role="columnheader">{copy.cols.licence}</th><th scope="col" role="columnheader">{copy.cols.names}</th><th scope="col" role="columnheader">{copy.cols.cities}</th></tr></thead>
+     <tbody role="rowgroup">{page.months.map(row => (
+      <tr role="row"><th scope="row" role="rowheader">{row.label}{row.tags.map(tag => <span class="mv-tag">{tag}</span>)}</th><td role="cell" data-label={copy.cols.coverage}>{row.registryCoverage}</td><td role="cell" data-label={copy.cols.added}>{row.registry.added}</td><td role="cell" data-label={copy.cols.removed}>{row.registry.removed}</td><td role="cell" data-label={copy.cols.licence}>{row.registry.licence_changed}</td><td role="cell" data-label={copy.cols.names}>{row.registry.name_changed}</td><td role="cell" data-label={copy.cols.cities}>{row.registry.city_changed}</td></tr>
+     ))}</tbody>
+    </table>
+   </div>
+  </section>
+ )}
+
+ {page.months.length > 0 && (
+  <section class="mv-section" id="liste-alerte" aria-labelledby="mv-alerte">
+   <div class="mv-head"><div><p class="atlas-kicker">{copy.warningsKicker}</p><h2 id="mv-alerte">{copy.warningsTitle}</h2></div><p class="mv-intro">{copy.warningsIntro}</p></div>
+   <div class="mv-table-scroll" tabindex="0" role="region" aria-label={`${copy.warningsTitle}. ${copy.scrollHint}`}>
+    <table class="mv-table" role="table">
+     <caption class="sr-only">{copy.warningsTitle}</caption>
+     <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">{copy.wcols.month}</th><th scope="col" role="columnheader">{copy.wcols.coverage}</th><th scope="col" role="columnheader">{copy.wcols.dated}</th><th scope="col" role="columnheader">{copy.wcols.appeared}</th><th scope="col" role="columnheader">{copy.wcols.late}</th><th scope="col" role="columnheader">{copy.wcols.removed}</th></tr></thead>
+     <tbody role="rowgroup">{page.months.map(row => (
+      <tr role="row"><th scope="row" role="rowheader">{row.label}{row.tags.map(tag => <span class="mv-tag">{tag}</span>)}</th><td role="cell" data-label={copy.wcols.coverage}>{row.warningsCoverage}</td><td role="cell" data-label={copy.wcols.dated}>{row.warnings.addedDated}</td><td role="cell" data-label={copy.wcols.appeared}>{row.warnings.appeared}</td><td role="cell" data-label={copy.wcols.late}>{row.warnings.appearedLate}</td><td role="cell" data-label={copy.wcols.removed}>{row.removedCell}</td></tr>
+     ))}</tbody>
+    </table>
+   </div>
+   {copy.warningsNote.map(note => <p class="mv-small">{note}</p>)}
+  </section>
+ )}
+
+ {page.resumptions.length > 0 && (
+  <section class="mv-section mv-resumption" id="reprise" aria-labelledby="mv-reprise">
+   <div class="mv-head"><div><p class="atlas-kicker">{copy.resumptionKicker}</p><h2 id="mv-reprise">{copy.resumptionTitle}</h2></div><p class="mv-intro">{copy.resumptionIntro}</p></div>
+   {page.resumptions.map(r => (
+    <article class="mv-panel">
+     <h3>{r.heading}</h3>
+     <div class="mv-resumption-grid">
+      <div><h4>{copy.resumptionRegistry}</h4><dl class="mv-pairs">{r.registry.map(([label, value]) => <div><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>
+      <div><h4>{copy.resumptionWarnings}</h4>{r.warnings ? <dl class="mv-pairs">{r.warnings.map(([label, value]) => <div><dt>{label}</dt><dd>{value}</dd></div>)}</dl> : <p class="mv-small">{copy.resumptionNoWarnings}</p>}
+       {r.byMonth.length > 0 && <><p class="mv-small mv-by-month-title">{copy.resumptionByMonth}</p><ul class="mv-by-month">{r.byMonth.map(([label, value]) => <li><span>{label}</span><strong>{value}</strong></li>)}</ul></>}
+       {r.undated && <p class="mv-small">{r.undated}</p>}
+      </div>
+     </div>
+     {r.anomaly && <p class="mv-aside">{copy.resumptionAnomaly}</p>}
+    </article>
+   ))}
+  </section>
+ )}
+
+ <section class="mv-method" id="methode" aria-labelledby="mv-methode">
+  <p class="atlas-kicker">{copy.methodKicker}</p>
+  <h2 id="mv-methode">{copy.methodTitle}</h2>
+  <p class="mv-intro">{copy.methodIntro}</p>
+  <ol class="mv-method-grid">{copy.method.map(([title, text]) => <li><h3>{title}</h3><p>{text}</p></li>)}</ol>
+ </section>
+
+ <aside class="mv-next" aria-labelledby="mv-suite" data-movements-interest data-event={page.interest.event} data-lang={lang} data-thanks={page.interest.thanks} data-error={page.interest.error}>
+  <div>
+   <h2 id="mv-suite">{copy.nextTitle}</h2>
+   <p>{copy.nextText}</p>
+  </div>
+  <div class="mv-next-action">
+   <button type="button" class="atlas-btn" data-interest hidden>{page.interest.button}<span aria-hidden="true">→</span></button>
+   <p class="mv-small" data-interest-note hidden>{page.interest.note}</p>
+   <p class="mv-interest-status" role="status" data-interest-status></p>
+  </div>
+ </aside>
+
+ <footer class="mv-source">
+  <p><strong>{copy.sourceTitle}</strong> {copy.sourceText}</p>
+  <p class="mv-links"><a class="atlas-text-link" href={page.links.official} rel="noopener">{copy.sourceLink} ↗</a><a class="atlas-text-link" href={page.links.product}>{copy.productLink} →</a><a class="atlas-text-link" href={page.links.guide}>{copy.guideLink} →</a></p>
+ </footer>
+ </div>
+</div>
+<script>
+ import '../scripts/finma-movements';
+</script>
+</AtlasLayout>

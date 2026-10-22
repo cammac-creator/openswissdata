@@ -21,6 +21,9 @@ const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w-]+)\s*=\s*["']([^
 const errors = new Set();
 const pages = new Map();
 let linkCount = 0, alternateCount = 0, sitemapCount = 0, datasetPages = 0, guidePages = 0;
+// Vitrine « Mouvements FINMA » : une même adresse dans les trois langues, toutes au plan du site.
+const MOVEMENTS_URLS = ['/finma-movements/', '/de/finma-movements/', '/en/finma-movements/'].map(path => origin + path);
+const sitemapUrls = new Set();
 for (const file of files.filter(f => f.endsWith('.html'))) {
   const html = await readFile(file, 'utf8');
   // Les fichiers de validation Google portent .html mais ne sont pas des pages.
@@ -88,6 +91,7 @@ for (const file of files.filter(f => /sitemap-\d+\.xml$/.test(f))) {
   if (xml.includes('<lastmod>')) errors.add('Dates sitemap présentes sans suivi des changements significatifs.');
   for (const m of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
     sitemapCount++;
+    sitemapUrls.add(m[1]);
     const url = new URL(m[1]);
     const page = pages.get(normalize(url.pathname));
     if (url.origin !== origin || !page || page.noindex || page.canonical !== m[1]) errors.add(`URL sitemap non indexable : ${m[1]}`);
@@ -100,8 +104,13 @@ for (const file of files.filter(f => /sitemap-\d+\.xml$/.test(f))) {
 if (!sitemapCount || pages.size < 40) errors.add('Construction ou sitemap incomplet.');
 if (datasetPages !== 9) errors.add(`Fiches produit attendues : 9, trouvées : ${datasetPages}.`);
 if (guidePages !== 9) errors.add(`Guides attendus : 9, trouvés : ${guidePages}.`);
+for (const url of MOVEMENTS_URLS) {
+  const page = pages.get(normalize(new URL(url).pathname));
+  if (!page || page.noindex || page.canonical !== url || page.alternates.length !== 4) errors.add(`Page des mouvements FINMA absente ou incomplète : ${url}`);
+  if (!sitemapUrls.has(url)) errors.add(`Page des mouvements FINMA absente du plan du site : ${url}`);
+}
 if (errors.size) {
   console.error([...errors].slice(0, 30).join('\n'));
   throw new Error(`${errors.size} anomalie(s) de référencement.`);
 }
-console.log(`Référencement vérifié : ${pages.size} pages, ${linkCount} liens internes, ${alternateCount} références de langue, ${sitemapCount} URLs sitemap, ${datasetPages} fiches avec Dataset, ${guidePages} guides avec Article ; zéro anomalie.`);
+console.log(`Référencement vérifié : ${pages.size} pages, ${linkCount} liens internes, ${alternateCount} références de langue, ${sitemapCount} URLs sitemap, ${datasetPages} fiches avec Dataset, ${guidePages} guides avec Article, ${MOVEMENTS_URLS.length} pages des mouvements FINMA ; zéro anomalie.`);

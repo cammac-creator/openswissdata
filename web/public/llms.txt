@@ -48,6 +48,10 @@ Written from FINMA, FSO, FOJ, SECO and GLEIF pages, with the official sources li
 - [The FINMA warning list: what it says and what it does not](https://www.openswissdata.com/en/guides/finma-warning-list/): who is on it, why an entry is not proof of a breach, how to handle similar names.
 - [Automating FINMA checks on your counterparties](https://www.openswissdata.com/en/guides/finma-screening-automation/): matching by UID, then LEI, then name, with tested SQLite and Python examples and the free `kyc_check` tool.
 
+## FINMA movements, month by month (free page)
+
+- [FINMA movements, month by month](https://www.openswissdata.com/en/finma-movements/): monthly totals of authorisations appearing in and disappearing from FINMA's public register, by category, and of additions to the FINMA warning list, counted from the daily collections. Totals only, no names; observation dates, not FINMA decision dates; a removal is not a sanction; partial months are flagged with their days covered, and the collection gap from 24.08 to 25.09.2026 is shown separately. Not an official FINMA publication. The same address with `/finma-movements/` (French) or `/de/finma-movements/` (German) serves the other languages. The figures come from `history.movements` in `GET /api/catalog/finma`.
+
 ## REST API
 
 Free, read-only, no key, limited per network address. Same data as the MCP tools above, plus the official localities and streets directories, a combined commune profile and a combined canton profile (including the BFE one-time photovoltaic remuneration), and a catalogue of approved open Swiss datasets (generic engine; each dataset is filterable only on the subset of canton, commune, postal code, NOGA code or year it declares — filters are listed per dataset, see `GET /api/v1/datasets`) — all REST-only, not exposed over MCP.
