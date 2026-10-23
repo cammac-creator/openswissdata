@@ -9,6 +9,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
+import { EMPTY_BODY_RETRY } from "../etl/shared/bronze.js";
 import { SOURCES } from "../etl/shared/sources/registry.js";
 import type { CanaryMode } from "../etl/shared/sources/types.js";
 import XLSX from "../etl/shared/xlsx.js";
@@ -119,22 +120,34 @@ export function hashXlsxShape(buf: Buffer): { hash: string; sheet: string; heade
 
 // Sources publiques → bronze daté immuable → empreintes de contrôle.
 // Dans GitHub, le bronze reste dans l'espace temporaire du travail ; seul le rapport est conservé.
-export async function fetchAndHash(canary: SourceCanary): Promise<{ hash: string; size: number }> {
-  const res = await fetch(canary.url, {
-    headers: { "user-agent": USER_AGENT },
-    signal: AbortSignal.timeout(30_000),
-  });
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status} ${res.statusText}`);
+export async function fetchAndHash(
+  canary: SourceCanary, retry: { attempts?: number; delayMs?: number } = {},
+): Promise<{ hash: string; size: number }> {
+  // Même règle que fetchBronze (etl/shared/bronze.ts) : une réponse vide avec HTTP 200 est réessayée (FINMA, 23.10.2026).
+  const attempts = Math.max(1, retry.attempts ?? EMPTY_BODY_RETRY.attempts);
+  const delayMs = retry.delayMs ?? EMPTY_BODY_RETRY.delayMs;
+  let buf = Buffer.alloc(0);
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    if (attempt > 1) await new Promise(resolve => setTimeout(resolve, delayMs));
+    const res = await fetch(canary.url, {
+      headers: { "user-agent": USER_AGENT },
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    }
+    if (!res.body) throw new Error("Réponse vide");
+    const parts:Uint8Array[]=[];let size=0;
+    for await (const chunk of res.body) {
+      size+=chunk.length;
+      if(size>50_000_000)throw new Error("Source trop volumineuse pour le contrôle (50 Mo)");
+      parts.push(chunk);
+    }
+    buf=Buffer.concat(parts);
+    if (buf.length) break;
   }
-  if (!res.body) throw new Error("Réponse vide");
-  const parts:Uint8Array[]=[];let size=0;
-  for await (const chunk of res.body) {
-    size+=chunk.length;
-    if(size>50_000_000)throw new Error("Source trop volumineuse pour le contrôle (50 Mo)");
-    parts.push(chunk);
-  }
-  const buf=Buffer.concat(parts);
+  // Une source restée vide n'est jamais écrite dans le bronze ni empreintée comme la source.
+  if (!buf.length) throw new Error("Réponse vide");
   if(!/^[a-z0-9_.-]+$/i.test(canary.id))throw new Error("Identifiant de source invalide");
   const folder=(process.env.CANARY_BRONZE_DIR??"data/bronze/canary")+"/"+new Date().toISOString().slice(0,10);
   mkdirSync(folder,{recursive:true});
