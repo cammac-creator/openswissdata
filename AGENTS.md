@@ -6,7 +6,7 @@ Données publiques suisses (TARES, NOGA/NACE/ISIC, FINMA) vendues en fichiers si
 Ce fichier reste sous 200 lignes et 20 Ko : une règle de détail va dans le fichier `.claude/rules/` de son thème (index plus bas), jamais ici. Chaque section ajoutée par la charte est entourée de marqueurs `charte:<id>`.
 
 ## Où est le reste
-- `CLAUDE.md` (pile technique et conventions), `README.md` (commandes), `.claude/rules/*.md` (détails par thème). Claude charge une règle seul quand il LIT un fichier concerné, pas quand il en crée un nouveau : avant de créer un fichier, lire la règle indiquée par l'index. Codex lit le fichier indiqué par l'index avant de toucher ces chemins.
+- Pile technique et conventions : section « Pile et conventions » plus bas (venue de `CLAUDE.md` le 23.10.2026, qui n'est plus qu'un renvoi), `README.md` (commandes), `.claude/rules/*.md` (détails par thème). Claude charge une règle seul quand il LIT un fichier concerné, pas quand il en crée un nouveau : avant de créer un fichier, lire la règle indiquée par l'index. Codex lit le fichier indiqué par l'index avant de toucher ces chemins.
 - État, décisions, journal : `~/.collaboration-agents/projets/openswissdata/` (ETAT.md, DECISIONS.md, JOURNAL.md). Fiche mémoire : `~/.claude/projects/-Users-claude-alainmartin/memory/openswissdata-project.md`. Règles générales : `~/.codex/AGENTS.md`.
 - Preuves et rapports privés : `docs/internal/` (ignoré par Git, jamais publié, jamais cité dans un fichier public).
 
@@ -66,6 +66,14 @@ Les cas « ça dépend » sont ceux de la ligne BOUTON. Hors de cette ligne, l'a
 - Interprétation de F7 : ajouter un garde-fou qui resserre est RELU ; le retirer ou l'assouplir est BOUTON.
 - Seule exception à F2 : supprimer `scripts/create-mcp-business-price.mjs` (osd.F01) est RELU, car cela retire un pouvoir sans rien changer à la vente.
 <!-- /charte:osd.A01 -->
+
+## Pile et conventions (venues de `CLAUDE.md`, 23.10.2026)
+- Pile : TypeScript strict ; Hono pour l'API ; Astro pour le site statique ; better-sqlite3 (mode WAL) pour les données ; Stripe Checkout pour les paiements ; Resend pour les mails transactionnels ; Cloudflare R2 pour les archives ZIP. Version de Node : section « Environnement et tests isolés ».
+- Langue : français pour les échanges, commentaires et commits ; identifiants de code conservés en anglais.
+- Commits : conventional commits (`feat:`, `fix:`, `chore:`, `docs:`).
+- Tests : Vitest, dans `tests/`, qui reprend l'arborescence de `src/`.
+- Pas de `any` sans justification.
+- Erreurs : `HTTPException` de Hono, jamais de try/catch silencieux.
 
 ## Sections gardées telles quelles
 
