@@ -1464,6 +1464,708 @@
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
       "notes": "Vérifié le 07.10.2026 (lot G3-gros) : même source, même structure et même raisonnement que tg-comptes-communes-2020 (jeu CKAN séparé par année sur data.tg.ch, jeu ODS dfs-fv-30). Licence de la ressource CSV = terms_open (CKAN package_show). 41 743 lignes selon les métadonnées ODS. Colonne `konto_bezeichnung` retirée à l'intégration pour la même raison que tg-comptes-communes-2020 (texte libre jusqu'à 787 caractères sur des comptes isolés, relu sur ce fichier aussi) ; `konto_nr` gardé comme identifiant du compte. `funktion_bezeichnung` gardée : relue intégralement sur ce fichier, 100 valeurs distinctes, 51 caractères au plus, vocabulaire fermé des fonctions HRM2 (102 valeurs distinctes au total sur l'union des trois années 2020/2021/2023). En-tête et taille relus par téléchargement en flux de l'URL réduite EXACTE ci-dessus : 2 554 235 octets bruts, sous les 20 Mo. `typ` vide sur 3 lignes sur 41 743, mêmes vérifications de forme des valeurs et absence de colonne de personne que pour l'année 2020. Note pour l'intégrateur : les années 2022, 2024 et 2025 du même jeu annuel existent sur data.tg.ch (dfs-fv-29/31/32) mais n'étaient pas dans le lot 'trop_gros' à vérifier ici ; à traiter séparément si souhaité, par le même procédé (select réduit, sans `konto_bezeichnung`)."
+    },
+    {
+      "id": "ofen-potentiel-solaire-communes",
+      "title": "Potentiel solaire par commune en Suisse et au Liechtenstein",
+      "ckan_uuid": "8c5bed3e-4020-4fc2-8377-6ea009323464",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "licence": "terms_by",
+      "attribution": "Source : Office fédéral de l'énergie OFEN, via opendata.swiss",
+      "resource_url": "https://www.bfe-ogd.ch/ogd52/Solarenergiepotenziale_Gemeinden_Daecher_und_Fassaden.csv",
+      "expected_header": [
+        "MunicipalityNumber",
+        "MunicipalityName",
+        "Canton",
+        "Country",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month01_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month02_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month03_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month04_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month05_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month06_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month07_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month08_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month09_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month10_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month11_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month12_GWh",
+        "Scenario2_RoofsOnly_PotentialSolarElectricity_GWh",
+        "Scenario2_RoofsOnly_PotentialSolarHeat_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month01_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month02_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month03_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month04_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month05_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month06_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month07_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month08_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month09_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month10_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month11_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month12_GWh",
+        "Scenario4_RoofsFacades_PotentialSolarElectricity_GWh",
+        "Scenario4_RoofsFacades_PotentialSolarHeat_GWh",
+        "Factsheet",
+        "Methodology",
+        "HIST_NR"
+      ],
+      "keys": {
+        "MunicipalityNumber": "commune_bfs"
+      },
+      "columns": [
+        "MunicipalityNumber",
+        "MunicipalityName",
+        "Canton",
+        "Country",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month01_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month02_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month03_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month04_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month05_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month06_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month07_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month08_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month09_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month10_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month11_GWh",
+        "Scenario1_RoofsOnly_PotentialSolarElectricity_Month12_GWh",
+        "Scenario2_RoofsOnly_PotentialSolarElectricity_GWh",
+        "Scenario2_RoofsOnly_PotentialSolarHeat_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month01_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month02_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month03_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month04_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month05_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month06_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month07_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month08_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month09_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month10_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month11_GWh",
+        "Scenario3_RoofsFacades_PotentialSolarElectricity_Month12_GWh",
+        "Scenario4_RoofsFacades_PotentialSolarElectricity_GWh",
+        "Scenario4_RoofsFacades_PotentialSolarHeat_GWh",
+        "HIST_NR"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation bundesamt-fur-energie-bfe ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (673130 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 2132 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : MunicipalityNumber ; exemples relus dans le référentiel local de localités : 1 = Aeugst am Albis, 10 = Obfelden, 261 = Zürich. Canton est un nom complet et reste sans clé canton. Country conservé : le fichier contient aussi 11 communes du Liechtenstein (codes 7001 à 7011), sans canton suisse. Sur 2132 codes, 2107 figurent dans le référentiel local courant ; 14 autres codes suisses et les 11 codes liechtensteinois restent des valeurs source sans rattachement approximatif. HIST_NR conservé comme identifiant historique, sans clé. Factsheet et Methodology retirées : liens documentaires redondants avec la source, sans mesure."
+    },
+    {
+      "id": "bs-points-recyclage",
+      "title": "Points de collecte des déchets recyclables à Bâle-Ville",
+      "ckan_uuid": "3f15624b-73e4-4f5e-8ff1-d5cbb9f766c6",
+      "publisher": "Canton de Bâle-Ville",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Bâle-Ville, via opendata.swiss",
+      "resource_url": "https://data.bs.ch/api/v2/catalog/datasets/100027/exports/csv?use_labels=true",
+      "expected_header": [
+        "Geo Point",
+        "Geo Shape",
+        "ID_RS",
+        "NAME",
+        "STATUS",
+        "ADRESSE",
+        "PLZ",
+        "ORT",
+        "WEBSEITE",
+        "Map Links"
+      ],
+      "keys": {
+        "PLZ": "postal_code"
+      },
+      "columns": [
+        "Geo Point",
+        "ID_RS",
+        "NAME",
+        "ADRESSE",
+        "PLZ",
+        "ORT"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-basel-stadt ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (28594 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 65 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : PLZ ; NPA de quatre chiffres relus (4052, 4055 et 4058), présents pour Bâle dans le référentiel local de localités. Les noms et adresses désignent des points de collecte publics, jamais leurs utilisateurs. Geo Shape retirée car redondante avec Geo Point ; Map Links et WEBSEITE, STATUS retirées : liens auxiliaires et statut numérique non documenté."
+    },
+    {
+      "id": "tg-systemes-chauffage-communes",
+      "title": "Systèmes de chauffage principaux par commune en Thurgovie",
+      "ckan_uuid": "09e3ba66-c783-4d92-b164-8113f571c1c7",
+      "publisher": "Canton de Thurgovie",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/div-energie-12/exports/csv?use_labels=true",
+      "expected_header": [
+        "JAHR",
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "oelfeuerungen",
+        "erdgasfeuerungen",
+        "elektroheizungen",
+        "holzfeuerungen",
+        "waermenetzanschluesse",
+        "waermepumpen",
+        "andere_erneuerbar",
+        "andere_nicht_erneuerbar",
+        "total"
+      ],
+      "keys": {
+        "BFS_NR_GEMEINDE": "commune_bfs",
+        "JAHR": "year"
+      },
+      "columns": [
+        "JAHR",
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "oelfeuerungen",
+        "erdgasfeuerungen",
+        "elektroheizungen",
+        "holzfeuerungen",
+        "waermenetzanschluesse",
+        "waermepumpen",
+        "andere_erneuerbar",
+        "andere_nicht_erneuerbar",
+        "total"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = https://opendata.swiss/terms-of-use#terms_open, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (35181 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 720 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : JAHR et BFS_NR_GEMEINDE ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes sont conservées. Les petites cases comptent des systèmes de chauffage, pas des personnes."
+    },
+    {
+      "id": "zh-zones-a-batir",
+      "title": "Surfaces des zones à bâtir par affectation dans le canton de Zurich",
+      "ckan_uuid": "b0f45dc8-c548-492b-9b3e-09352110b9e1",
+      "publisher": "Amt für Raumentwicklung Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Raumentwicklung Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://daten.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00001120_00002165.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEO_LEVEL_LEVEL",
+        "GEBIET_NAME",
+        "JAHR",
+        "Ueberbaute_Wohnzonen",
+        "Ueberbaute_Mischzonen",
+        "Ueberbaute_Arbeitszonen",
+        "Ueberbaute_Zone_Oeffentliche_Bauten",
+        "Nicht_ueberbaute_Wohnzonen",
+        "Nicht_ueberbaute_Mischzonen",
+        "Nicht_ueberbaute_Arbeitszonen",
+        "Nicht_ueberbaute_Zone_Oeffentliche_Bauten",
+        "Einheit"
+      ],
+      "keys": {
+        "JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEO_LEVEL_LEVEL",
+        "GEBIET_NAME",
+        "JAHR",
+        "Ueberbaute_Wohnzonen",
+        "Ueberbaute_Mischzonen",
+        "Ueberbaute_Arbeitszonen",
+        "Ueberbaute_Zone_Oeffentliche_Bauten",
+        "Nicht_ueberbaute_Wohnzonen",
+        "Nicht_ueberbaute_Mischzonen",
+        "Nicht_ueberbaute_Arbeitszonen",
+        "Nicht_ueberbaute_Zone_Oeffentliche_Bauten",
+        "Einheit"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation are-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (379809 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 5941 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Ressource choisie : Bauzonen gruppiert grob ab 1996 in ha ; surfaces en hectares, bâties et non bâties, sans appréciation. Clé réelle : JAHR (1996 à 2025). BFS_NR conservé sans clé : GEO_LEVEL_LEVEL distingue canton (1), district (2), commune (3) et région (6) ; le même numéro peut désigner des territoires de niveaux différents. Toutes les colonnes sont conservées, notamment le niveau géographique."
+    },
+    {
+      "id": "bs-collecte-biodechets",
+      "title": "Points de collecte des biodéchets à Bâle-Ville",
+      "ckan_uuid": "7f6964cf-5a05-4cac-a761-ab12ce0e5d9b",
+      "publisher": "Canton de Bâle-Ville",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Bâle-Ville, via opendata.swiss",
+      "resource_url": "https://data.bs.ch/api/v2/catalog/datasets/100028/exports/csv?use_labels=true",
+      "expected_header": [
+        "Geo Point",
+        "Geo Shape",
+        "ID",
+        "Name",
+        "PLZ",
+        "Ort",
+        "Webseite",
+        "Map Links"
+      ],
+      "keys": {
+        "PLZ": "postal_code"
+      },
+      "columns": [
+        "Geo Point",
+        "ID",
+        "Name",
+        "PLZ",
+        "Ort"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-basel-stadt ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (3185 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 8 lignes analysées et 8 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : PLZ ; NPA de quatre chiffres relus (4052, 4055 et 4058), présents pour Bâle dans le référentiel local de localités. Les noms et adresses désignent des points de collecte publics, jamais leurs utilisateurs. Geo Shape retirée car redondante avec Geo Point ; Map Links et Webseite retirées : liens auxiliaires, sans mesure."
+    },
+    {
+      "id": "zh-consommation-eau",
+      "title": "Consommation quotidienne d’eau par habitant dans le canton de Zurich",
+      "ckan_uuid": "2318859d-2fce-4286-b866-2c2e90872ba3",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_469.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (566732 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 3476 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : INDIKATOR_JAHR (années à quatre chiffres, dont 2006, 2007, 2008). BFS_NR conservé sans clé : les totaux de districts, régions et canton portent 0 ; des communes historiques sont aussi présentes. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées car constantes et redondantes avec la fiche ; colonne finale sans nom retirée car entièrement vide."
+    },
+    {
+      "id": "tg-indicateurs-financiers-communes",
+      "title": "Indicateurs financiers des communes thurgoviennes",
+      "ckan_uuid": "2d3ee6e5-e8db-4aa2-8cde-955e5d84ae31",
+      "publisher": "Canton de Thurgovie",
+      "licence": "cc0",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-4/exports/csv?use_labels=true",
+      "expected_header": [
+        "bfs_nr_gemeinde",
+        "gemeinde_name",
+        "jahr",
+        "selbstfinanzierungsgrad_in",
+        "selbstfinanzierungsanteil_in",
+        "zinsbelastungsanteil_in_%",
+        "kapitaldienstanteil_in",
+        "investitionsanteil_in",
+        "bruttoverschuldungsanteil_in",
+        "nettoschuld_nettovermogen_pro_einwohner_in_chf",
+        "nettoverschuldungsquotient_in",
+        "bilanzuberschussquotient_in"
+      ],
+      "keys": {
+        "bfs_nr_gemeinde": "commune_bfs",
+        "jahr": "year"
+      },
+      "columns": [
+        "bfs_nr_gemeinde",
+        "gemeinde_name",
+        "jahr",
+        "selbstfinanzierungsgrad_in",
+        "selbstfinanzierungsanteil_in",
+        "zinsbelastungsanteil_in_%",
+        "kapitaldienstanteil_in",
+        "investitionsanteil_in",
+        "bruttoverschuldungsanteil_in",
+        "nettoschuld_nettovermogen_pro_einwohner_in_chf",
+        "nettoverschuldungsquotient_in",
+        "bilanzuberschussquotient_in"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (45274 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 480 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : jahr et bfs_nr_gemeinde ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes sont conservées. Ratios financiers et montants bruts, sans note qualitative ni rang."
+    },
+    {
+      "id": "zh-dechets-communes",
+      "title": "Quantités de déchets par type et commune dans le canton de Zurich",
+      "ckan_uuid": "5525f073-81eb-4afa-b57a-0b0f1d05754b",
+      "publisher": "Amt für Abfall, Wasser, Energie und Luft Kanton Zürich",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://daten.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00001803_00003460.csv",
+      "expected_header": [
+        "Jahr",
+        "Gemeinde_Nr",
+        "Gemeinde",
+        "Abfallart",
+        "Wert",
+        "Einheit"
+      ],
+      "keys": {
+        "Jahr": "year",
+        "Gemeinde_Nr": "commune_bfs"
+      },
+      "columns": [
+        "Jahr",
+        "Gemeinde_Nr",
+        "Gemeinde",
+        "Abfallart",
+        "Wert",
+        "Einheit"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation awel-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_open, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (1871940 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 42560 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Ressource choisie : Abfallmengen nach Abfallarten und Gemeinden, quantités seulement (aucun tarif annoncé). Clés réelles : Jahr (2000 à 2025) et Gemeinde_Nr ; les 160 codes existent dans le référentiel local de localités, dont 1 = Aeugst am Albis et 261 = Zürich. Les petites valeurs sont des tonnes de déchets ; NA est conservé comme valeur source manquante, jamais transformé en zéro. Toutes les colonnes sont conservées."
+    },
+    {
+      "id": "zh-depenses-transports",
+      "title": "Dépenses nettes de transport et de communication des communes zurichoises",
+      "ckan_uuid": "372eb448-447e-4762-8f61-87948b0e290a",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_428.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (1339976 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : INDIKATOR_JAHR (années à quatre chiffres, dont 1990, 1991, 1992). BFS_NR conservé sans clé : les totaux de districts, régions et canton portent 0 ; des communes historiques sont aussi présentes. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées car constantes et redondantes avec la fiche ; colonne finale sans nom retirée car entièrement vide."
+    },
+    {
+      "id": "tg-perequation-montants-communes",
+      "title": "Montants de péréquation financière par commune en Thurgovie",
+      "ckan_uuid": "34b52269-a6b9-4514-8734-69534b2d1530",
+      "publisher": "Canton de Thurgovie",
+      "licence": "cc0",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-1/exports/csv?use_labels=true",
+      "expected_header": [
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "Jahr",
+        "Auszahlung_Abschoepfung_in_CHF",
+        "Auszahlung_Abschoepfung_in_CHF_pro_Einwohner"
+      ],
+      "keys": {
+        "BFS_NR_GEMEINDE": "commune_bfs",
+        "Jahr": "year"
+      },
+      "columns": [
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "Jahr",
+        "Auszahlung_Abschoepfung_in_CHF",
+        "Auszahlung_Abschoepfung_in_CHF_pro_Einwohner"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (58252 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 1760 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : Jahr et BFS_NR_GEMEINDE ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes sont conservées. Montants de péréquation globaux par commune, aucun bénéficiaire individuel ; les cellules vides restent vides."
+    },
+    {
+      "id": "tg-energie-batiments-communes",
+      "title": "Consommation énergétique des bâtiments par commune en Thurgovie",
+      "ckan_uuid": "5067dd2d-07d5-4d74-9cdf-a20013def45c",
+      "publisher": "Canton de Thurgovie",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/div-energie-5/exports/csv?use_labels=true",
+      "expected_header": [
+        "JAHR",
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "EINWOHNER",
+        "energiebezugsflaeche",
+        "erdoelbrennstoffe",
+        "erdgas",
+        "elektrizitaet",
+        "holzenergie",
+        "fernwaerme",
+        "umweltwaerme",
+        "solarwaerme",
+        "andere",
+        "total"
+      ],
+      "keys": {
+        "BFS_NR_GEMEINDE": "commune_bfs",
+        "JAHR": "year"
+      },
+      "columns": [
+        "JAHR",
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "EINWOHNER",
+        "energiebezugsflaeche",
+        "erdoelbrennstoffe",
+        "erdgas",
+        "elektrizitaet",
+        "holzenergie",
+        "fernwaerme",
+        "umweltwaerme",
+        "solarwaerme",
+        "andere",
+        "total"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = https://opendata.swiss/terms-of-use#terms_open, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (60855 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 720 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : JAHR et BFS_NR_GEMEINDE ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes sont conservées. La population est un total communal (minimum observé : 320 habitants), jamais un sous-groupe de 1 à 3 personnes ; les autres valeurs mesurent des surfaces, de l’énergie ou des émissions."
+    },
+    {
+      "id": "zh-evolution-volume-batiments",
+      "title": "Évolution du volume des bâtiments dans le canton de Zurich",
+      "ckan_uuid": "83663545-c125-4f8b-bbe7-d66d144d700c",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_170.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (671467 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 4626 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : INDIKATOR_JAHR (années à quatre chiffres, dont 1995, 2001, 2002). BFS_NR conservé sans clé : les totaux de districts, régions et canton portent 0 ; des communes historiques sont aussi présentes. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées car constantes et redondantes avec la fiche ; colonne finale sans nom retirée car entièrement vide."
+    },
+    {
+      "id": "tg-co2-batiments-communes",
+      "title": "Émissions de CO2 des bâtiments par commune en Thurgovie",
+      "ckan_uuid": "55d84485-7d0a-4f99-83b3-e146cdbb51b1",
+      "publisher": "Canton de Thurgovie",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Thurgovie, via opendata.swiss",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/div-energie-8/exports/csv?use_labels=true",
+      "expected_header": [
+        "JAHR",
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "EINWOHNER",
+        "energiebezugsflaeche",
+        "erdoelbrennstoffe",
+        "erdgas",
+        "andere",
+        "total"
+      ],
+      "keys": {
+        "BFS_NR_GEMEINDE": "commune_bfs",
+        "JAHR": "year"
+      },
+      "columns": [
+        "JAHR",
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "EINWOHNER",
+        "energiebezugsflaeche",
+        "erdoelbrennstoffe",
+        "erdgas",
+        "andere",
+        "total"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (44347 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 720 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : JAHR et BFS_NR_GEMEINDE ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes sont conservées. La population est un total communal (minimum observé : 320 habitants), jamais un sous-groupe de 1 à 3 personnes ; les autres valeurs mesurent des surfaces, de l’énergie ou des émissions."
+    },
+    {
+      "id": "zh-depenses-culture-loisirs",
+      "title": "Dépenses nettes de culture, sport et loisirs des communes zurichoises",
+      "ckan_uuid": "8a9a0404-8f9f-4cee-98e9-107f460527be",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_424.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (1267034 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : INDIKATOR_JAHR (années à quatre chiffres, dont 1990, 1991, 1992). BFS_NR conservé sans clé : les totaux de districts, régions et canton portent 0 ; des communes historiques sont aussi présentes. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées car constantes et redondantes avec la fiche ; colonne finale sans nom retirée car entièrement vide."
+    },
+    {
+      "id": "tg-electricite-renouvelable-communes",
+      "title": "Production d’électricité renouvelable par commune en Thurgovie",
+      "ckan_uuid": "7720c468-e5a9-447b-a152-d71deb4c4e39",
+      "publisher": "Canton de Thurgovie",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Thurgovie, via opendata.swiss",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/div-energie-10/exports/csv?use_labels=true",
+      "expected_header": [
+        "JAHR",
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "EINWOHNER",
+        "wasserkraft",
+        "biomasse_holz",
+        "biogasanlagen_landwirtschaft",
+        "abfall_reststoffe",
+        "biogasanlagen_industrie",
+        "biogasanlagen_abwasser",
+        "photovoltaik",
+        "wind",
+        "total"
+      ],
+      "keys": {
+        "BFS_NR_GEMEINDE": "commune_bfs",
+        "JAHR": "year"
+      },
+      "columns": [
+        "JAHR",
+        "BFS_NR_GEMEINDE",
+        "GEMEINDE_NAME",
+        "EINWOHNER",
+        "wasserkraft",
+        "biomasse_holz",
+        "biogasanlagen_landwirtschaft",
+        "abfall_reststoffe",
+        "biogasanlagen_industrie",
+        "biogasanlagen_abwasser",
+        "photovoltaik",
+        "wind",
+        "total"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (34872 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 720 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : JAHR et BFS_NR_GEMEINDE ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes sont conservées. La population est un total communal (minimum observé : 320 habitants), jamais un sous-groupe de 1 à 3 personnes ; les autres valeurs mesurent des surfaces, de l’énergie ou des émissions."
+    },
+    {
+      "id": "zh-depenses-formation",
+      "title": "Dépenses nettes de formation des communes zurichoises",
+      "ckan_uuid": "9922cf47-5055-4890-b933-89071b45fd45",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_421.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by (deux champs ouverts). CSV direct entièrement téléchargé (1144802 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : INDIKATOR_JAHR (années à quatre chiffres, dont 1990, 1991, 1992). BFS_NR conservé sans clé : les totaux de districts, régions et canton portent 0 ; des communes historiques sont aussi présentes. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées car constantes et redondantes avec la fiche ; colonne finale sans nom retirée car entièrement vide."
+    },
+    {
+      "id": "tg-communes-districts",
+      "title": "Rattachement des communes thurgoviennes aux districts",
+      "ckan_uuid": "6bb05375-5392-442d-972c-d98a0bef8bed",
+      "publisher": "Canton de Thurgovie",
+      "licence": "cc0",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-79/exports/csv?use_labels=true",
+      "expected_header": [
+        "BFS_Bezirksnummer",
+        "Bezirk",
+        "BFS_Gemeindenummer",
+        "Gemeinde",
+        "Sortierung_in_Bezirk",
+        "Bezirk_bis_2010",
+        "BFS_Bezirksnummer_bis_2010"
+      ],
+      "keys": {
+        "BFS_Gemeindenummer": "commune_bfs"
+      },
+      "columns": [
+        "BFS_Bezirksnummer",
+        "Bezirk",
+        "BFS_Gemeindenummer",
+        "Gemeinde",
+        "Bezirk_bis_2010",
+        "BFS_Bezirksnummer_bis_2010"
+      ],
+      "approved_on": "2026-10-23",
+      "checked_by": "codex (lot G4), à relire par l'intégrateur",
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (4207 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 80 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : BFS_Gemeindenummer ; les 80 codes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). La description CKAN donne comme source Amt für Daten und Statistik Kanton Thurgau ; sa mention BFS concerne la numérotation, pas un jeu édité par l’OFS. Sortierung_in_Bezirk retirée : numéro auxiliaire de tri alphabétique, inutile pour la jointure ; aucune note ni appréciation conservée. Les colonnes bis_2010 décrivent l’ancien découpage, sans clé supplémentaire."
     }
   ]
 }

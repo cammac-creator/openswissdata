@@ -18,7 +18,8 @@
  * BORNÉ EN FLUX, jamais `arrayBuffer()` d'abord : un point `/exports/csv` Opendatasoft (fréquent
  * chez les éditeurs cantonaux, voir `scripts/prospect-sources.ts`) ignore parfois le `Range` et
  * répond 200 avec le fichier entier, le même piège que `readCsvHeaderPartial` — ; 60 s par
- * téléchargement ; 50 jeux au plus par passage (`selectEntriesForRun`, le reste `skipped`, jamais
+ * téléchargement ; 50 jeux au plus par passage, départ tournant chaque semaine (`selectEntriesForRun`,
+ * `weeklyRotationOffset`, depuis le 23.10.2026), le reste `skipped`, jamais
  * traité ce passage).
  *
  * Détection de changement sur le CSV DÉCOMPRESSÉ, jamais sur les octets `.gz` eux-mêmes
@@ -123,11 +124,24 @@ export function validateRegistryEntry(entry: DatasetApprovalEntry): string[] {
   return errors;
 }
 
-/** Plafond de jeux traités en UN passage (50 par défaut) : les premiers de la liste sont
- *  traités, le reste `skipped` (jamais traité ce passage, jamais en échec non plus — un passage
- *  suivant les reprendra). Fonction pure, triviale, testée directement. */
-export function selectEntriesForRun(entries: DatasetApprovalEntry[], max: number): { toProcess: DatasetApprovalEntry[]; skipped: DatasetApprovalEntry[] } {
-  return { toProcess: entries.slice(0, max), skipped: entries.slice(max) };
+/** Plafond de jeux traités en UN passage (50 par défaut) : `max` jeux à partir de `offset` (en
+ *  bouclant sur la liste), le reste `skipped` (jamais traité ce passage, jamais en échec non plus —
+ *  un passage suivant les reprendra). `offset` 0 = les premiers de la liste. Fonction pure. */
+export function selectEntriesForRun(entries: DatasetApprovalEntry[], max: number, offset = 0): { toProcess: DatasetApprovalEntry[]; skipped: DatasetApprovalEntry[] } {
+  if (entries.length <= max) return { toProcess: entries.slice(), skipped: [] };
+  const start = ((offset % entries.length) + entries.length) % entries.length;
+  const rotated = entries.slice(start).concat(entries.slice(0, start));
+  return { toProcess: rotated.slice(0, max), skipped: rotated.slice(max) };
+}
+
+const WEEK_MS = 7 * 86_400_000;
+
+/** Départ tournant du passage hebdomadaire (lot G4, 23.10.2026 : 56 jeux pour un plafond de 50) :
+ *  le départ avance de `max` jeux chaque semaine, si bien qu'aucun jeu n'est sauté deux semaines
+ *  de suite tant que le registre compte moins de deux fois le plafond. */
+export function weeklyRotationOffset(nowMs: number, max: number, count: number): number {
+  if (count <= max) return 0;
+  return (Math.floor(nowMs / WEEK_MS) * max) % count;
 }
 
 /** Construit la ligne de sortie : colonnes-clés renommées vers leur nom canonique et
@@ -451,7 +465,7 @@ export async function syncDatasets(opts: SyncDatasetsOptions = {}): Promise<Sync
   const maxDropRatio = opts.maxDropRatio ?? DEFAULT_MAX_DROP_RATIO;
 
   const allEntries = loadRegistry(registryPath);
-  const { toProcess, skipped } = selectEntriesForRun(allEntries, maxDatasets);
+  const { toProcess, skipped } = selectEntriesForRun(allEntries, maxDatasets, weeklyRotationOffset(now(), maxDatasets, allEntries.length));
 
   // Index chargé UNE SEULE FOIS pour tout le passage (relecture adverse du 07.10.2026, avant le
   // lot de 36 jeux : charger/réécrire `index.json` à chaque jeu était inutilement coûteux pour un
