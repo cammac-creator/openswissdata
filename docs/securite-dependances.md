@@ -10,6 +10,12 @@ Le contrôle npm porte sur les graphes verrouillés de l’application, du site,
 - Un seul moteur Transformers.js 3.8.1 pour recherche et traduction. L’ancien Xenova 2 et son ancien protobufjs sont retirés. Les requêtes sont traitées localement. Les index existants restent distincts des collectes de fichiers. Les caches de reprise exigent la révision du modèle et le moteur de calcul courants ; les anciens caches sont recalculés.
 - Deux contraintes transitives explicites : sharp 0.35.5 depuis le 21.10.2026 (0.35.4 auparavant ; correctifs des décodeurs d’images) et esbuild 0.28.2 (serveur de développement). Pas d’entrée image dans nos parcours IA ; build, traduction et recherche doivent être revalidés lors de leur évolution. Retirer ces contraintes lorsque les paquets parents adoptent des versions corrigées compatibles.
 
+## Mise à jour du 23.10.2026
+
+Avis GHSA-rxp7-6hxx-x8q5 (moyen) sur `ip-address` ≤ 10.7.3, apparu dans la CI des intégrations du 23.10 (paquet MCP) :
+- `ip-address` 10.7.2 → 10.7.4 dans le lockfile de l'application (sous `socks`, plage ^10.1.1) et dans celui de `sdks/mcp-server` (sous `express-rate-limit`, plage ^10.2.0). Aucune dépendance ni moteur Node changés entre les deux versions ; aucune nouvelle version du paquet publié.
+- Preuves : `npm ci` puis `npm audit --audit-level=low` à 0 avis des deux côtés ; paquet MCP : typage, 12 tests et construction verts ; application : typage 0, suite complète 223 fichiers (3 400 tests), sous Node 22.23.3 et npm 10.9.9.
+
 ## Mise à jour du 22.10.2026
 
 Les sept avis moyens restants (voir le 21.10) sont levés sans version majeure :
