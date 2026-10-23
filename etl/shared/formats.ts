@@ -1,5 +1,5 @@
 import { stringify } from "csv-stringify/sync";
-import parquet from "parquetjs-lite";
+import parquet, { type ParquetSchema } from "parquetjs-lite";
 import { writeFileSync } from "node:fs";
 
 export function writeCsv(rows: Record<string, unknown>[], path: string): void {
@@ -10,10 +10,9 @@ export function writeCsv(rows: Record<string, unknown>[], path: string): void {
 
 export async function writeParquet<T extends Record<string, unknown>>(
   rows: T[],
-  schema: parquet.ParquetSchema,
+  schema: ParquetSchema,
   path: string
 ): Promise<void> {
-  // @ts-expect-error parquetjs-lite openFile return type not fully typed
   const writer = await parquet.ParquetWriter.openFile(schema, path);
   for (const row of rows) await writer.appendRow(row);
   await writer.close();

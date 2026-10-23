@@ -105,9 +105,9 @@ export function mergeIsicByLang(perLang: NomenclatureRow[][]): NomenclatureRow[]
         for (const k of ["label_en", "label_fr", "label_de", "label_it"] as const) {
           if (!cur[k] && r[k]) cur[k] = r[k];
         }
-        const rec = r as Record<string, unknown>;
-        if (rec.label_es && !(cur as Record<string, unknown>).label_es) {
-          (cur as Record<string, unknown>).label_es = rec.label_es;
+        const rec = r;
+        if (rec.label_es && !cur.label_es) {
+          cur.label_es = rec.label_es;
         }
       } else {
         byCode.set(r.code, { ...r });

@@ -283,7 +283,8 @@ export function finalizeSeats(
 }
 
 export function toCsv(rows: readonly FinmaSeatRow[]): string {
-  return stringify(rows, { header: true, columns: [...OUTPUT_COLUMNS], record_delimiter: "\n" });
+  // stringify parcourt ce tableau sans le modifier ; son type Input exige pourtant un tableau mutable.
+  return stringify(rows as FinmaSeatRow[], { header: true, columns: [...OUTPUT_COLUMNS], record_delimiter: "\n" });
 }
 
 function cmp(a: string, b: string): number {

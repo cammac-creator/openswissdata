@@ -234,7 +234,8 @@ export function sortRows(rows: BfePvRow[]): BfePvRow[] {
 }
 
 export function toCsv(rows: readonly BfePvRow[]): string {
-  return stringify(rows, { header: true, columns: [...OUTPUT_COLUMNS], record_delimiter: "\n" });
+  // stringify parcourt ce tableau sans le modifier ; son type Input exige pourtant un tableau mutable.
+  return stringify(rows as BfePvRow[], { header: true, columns: [...OUTPUT_COLUMNS], record_delimiter: "\n" });
 }
 
 function readPreviousRowCount(path: string): number | null {

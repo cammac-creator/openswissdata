@@ -16,7 +16,6 @@ const zipPath = process.argv[2] ?? "./data/tares/tares-2026.04.30.1.zip";
 const tmp = mkdtempSync(join(tmpdir(), "osd-emb-check-"));
 try {
   execSync(`unzip -o -q "${zipPath}" -d "${tmp}"`, { stdio: "ignore" });
-  // @ts-expect-error parquetjs-lite types incomplete
   const reader = await parquet.ParquetReader.openFile(join(tmp, "tares_embeddings.parquet"));
   const cursor = reader.getCursor();
   const rows: { hs_code: string; lang: string; description: string; embedding: number[] }[] = [];

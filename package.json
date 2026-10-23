@@ -12,7 +12,7 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.etl.json",
     "security:public": "node scripts/check-public-repository.mjs",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "node --env-file=.env --import tsx/esm src/db/seed.ts",

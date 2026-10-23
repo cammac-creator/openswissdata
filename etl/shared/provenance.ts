@@ -324,7 +324,8 @@ async function postTsr(url: string, body: Buffer, timeoutMs: number): Promise<Bu
         "content-type": "application/timestamp-query",
         accept: "application/timestamp-reply",
       },
-      body,
+      // Copie des mêmes octets DER dans le type de corps accepté par fetch.
+      body: new Uint8Array(body),
       signal: ctrl.signal,
     });
     if (!res.ok) {
