@@ -1,9 +1,10 @@
 // Inscription par e-mail « être prévenu quand l'historique détaillé sera disponible » (24.10.2026).
 // POST /request (JSON de la vitrine) → mail avec lien → GET /confirm (page, n'écrit rien) → POST /confirm (bouton).
 // GET /unsubscribe (page) → POST /unsubscribe (bouton, ou désinscription en un clic RFC 8058 depuis la messagerie).
-// Règles : même réponse pour une adresse nouvelle, en attente ou confirmée ; limites par réseau et par adresse avant
-// toute lecture ; envoi du mail APRÈS la réponse (la durée de réponse ne dit pas si un mail part) ; aucune adresse
-// dans une réponse, un journal ou une erreur ; tout échec rend un message fixe.
+// Règles : même réponse pour une adresse nouvelle, en attente ou confirmée ; avant la réponse, SEULEMENT la validation et
+// les limites (réseau, adresse, budget quotidien du réseau), qui ne lisent jamais l'inscription ; lecture et écriture de
+// la demande, scellement, rendu et envoi du mail APRÈS la réponse (la durée de réponse ne dit rien de l'adresse) ; aucune
+// adresse dans une réponse, un journal ou une erreur ; tout échec rend un message fixe.
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
 import { bodyLimit } from 'hono/body-limit';
@@ -17,8 +18,10 @@ import { prepareAnnouncementConfirmationEmail, sendPreparedEmail, type PreparedE
 import {
   ANNOUNCEMENT_LANGS, ANNOUNCEMENT_SUBJECTS, abandonAnnouncementDelivery, confirmAnnouncement, eraseAnnouncementSubscription,
   inspectAnnouncementConfirmation, inspectAnnouncementSubscription, openUnsubscribeReference, registerAnnouncementRequest,
-  sealUnsubscribeReference, type AnnouncementDelivery, type AnnouncementLang,
+  sealUnsubscribeReference, assertAnnouncementConfiguration, consumeAnnouncementNetworkBudget, recordCappedAnnouncement,
+  type AnnouncementDelivery, type AnnouncementLang, type AnnouncementSubject,
 } from '../lib/announcements.js';
+import { ANNOUNCEMENT_FALLBACK_END } from '../lib/announcement-retention.js';
 import { announcementPage, announcementPrivacyPath, announcementRequestLang, type AnnouncementPageKind } from '../lib/announcement-page.js';
 import { syncAnnouncementErasureMirror } from '../lib/announcement-erasures.js';
 
@@ -62,20 +65,57 @@ export function settleAnnouncementDeliveries(): Promise<void> {
   return Promise.all([...inFlight]).then(() => undefined);
 }
 
-function scheduleDelivery(delivery: AnnouncementDelivery, payload: PreparedEmail): void {
-  const task: Promise<void> = (async () => {
-    let sent = false;
-    try {
-      sent = (await sendPreparedEmail(payload, `announcement-confirmation/${randomUUID()}`)).sent;
-    } catch {
-      sent = false;
-    }
-    if (sent) return;
-    // Mail non parti : la demande neuve disparaît, un renvoi rend l'ancien lien ; nouvel essai possible.
-    console.warn('[annonce] e-mail de confirmation non remis');
-    try { if (abandonAnnouncementDelivery(getDb(), delivery)) syncErasureMirror(); } catch { console.warn('[annonce] demande non retirée après un envoi manqué'); }
-  })().finally(() => { inFlight.delete(task); });
+/** Travail différé, suivi jusqu'à sa fin (tests, arrêt du service). */
+function track(work: () => Promise<void>): void {
+  const task: Promise<void> = work().finally(() => { inFlight.delete(task); });
   inFlight.add(task);
+}
+
+/**
+ * Tout ce qui dépend de l'adresse, APRÈS la réponse : lecture et écriture de la demande, plafond commun, scellement du
+ * lien de désinscription, rendu du mail, envoi. Le tour de boucle d'attente garantit que la réponse est déjà rendue.
+ */
+function scheduleRequest(input: { email: string; lang: AnnouncementLang; subject: AnnouncementSubject }): void {
+  track(async () => {
+    await new Promise(resolve => setImmediate(resolve));
+    const db = getDb();
+    let delivery: AnnouncementDelivery | 'capped' | null;
+    try {
+      delivery = registerAnnouncementRequest(db, input);
+    } catch {
+      console.warn('[annonce] demande non enregistrée');
+      return;
+    }
+    if (delivery === 'capped') {
+      try { recordCappedAnnouncement(db); } catch { console.warn('[annonce] refus du plafond non compté'); }
+      reportCap();
+      return;
+    }
+    if (!delivery) return;
+    if (delivery.replacedExpired) syncErasureMirror();
+    let payload: PreparedEmail;
+    try {
+      payload = confirmationPayload(delivery);
+    } catch {
+      console.warn('[annonce] e-mail de confirmation non préparé');
+      try { if (abandonAnnouncementDelivery(db, delivery)) syncErasureMirror(); } catch { console.warn('[annonce] demande non retirée après un envoi manqué'); }
+      return;
+    }
+    await deliver(delivery, payload);
+  });
+}
+
+async function deliver(delivery: AnnouncementDelivery, payload: PreparedEmail): Promise<void> {
+  let sent = false;
+  try {
+    sent = (await sendPreparedEmail(payload, `announcement-confirmation/${randomUUID()}`)).sent;
+  } catch {
+    sent = false;
+  }
+  if (sent) return;
+  // Mail non parti : la demande neuve disparaît (inscrite au registre), un renvoi rend l'ancien lien ; nouvel essai possible.
+  console.warn('[annonce] e-mail de confirmation non remis');
+  try { if (abandonAnnouncementDelivery(getDb(), delivery)) syncErasureMirror(); } catch { console.warn('[annonce] demande non retirée après un envoi manqué'); }
 }
 
 function confirmationPayload(delivery: AnnouncementDelivery): PreparedEmail {
@@ -118,6 +158,17 @@ announcementsRoute.post('/request', bodyLimit({ maxSize: 1024, onError: c => c.j
   if (!raw || typeof raw !== 'object' || Array.isArray(raw) || (raw as Record<string, unknown>).consent !== true) return c.json({ error: 'consent_required' }, 400);
   const parsed = RequestBody.safeParse(raw);
   if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+  // Après la fin du 30.06.2027 (date du bilan), une demande sans annonce serait effacée au nettoyage suivant : aucune
+  // n'est plus acceptée, même réponse neutre, rien d'écrit ni d'envoyé.
+  if (Date.now() >= ANNOUNCEMENT_FALLBACK_END) return c.json({ ok: true });
+  try {
+    // Configuration indépendante de l'adresse : une clé absente donne 503 avant toute écriture.
+    assertAnnouncementConfiguration();
+    loginOrigin();
+  } catch {
+    console.warn('[annonce] configuration indisponible');
+    return unavailableJson(c);
+  }
   try {
     // Même compteur pour une adresse inconnue, en attente ou confirmée, avant toute lecture de l'inscription.
     if (!consumeAuthLimit(db, 'email', `announcement:${parsed.data.email}`)) return tooMany(c, 60);
@@ -125,27 +176,15 @@ announcementsRoute.post('/request', bodyLimit({ maxSize: 1024, onError: c => c.j
     reportAuthLimitFailure(error);
     return unavailableJson(c);
   }
-  let delivery: AnnouncementDelivery | 'capped' | null;
   try {
-    delivery = registerAnnouncementRequest(db, parsed.data);
+    // Budget quotidien du réseau : compté pour toute demande valide, quel que soit l'état de l'adresse.
+    if (!consumeAnnouncementNetworkBudget(db, authRequestIp(c))) return tooMany(c, 3600);
   } catch {
-    console.warn('[annonce] demande non enregistrée');
+    console.warn('[annonce] budget du réseau indisponible');
     return unavailableJson(c);
   }
-  if (delivery === 'capped') {
-    reportCap();
-  } else if (delivery) {
-    let payload: PreparedEmail;
-    try {
-      payload = confirmationPayload(delivery);
-    } catch {
-      console.warn('[annonce] e-mail de confirmation non préparé');
-      try { if (abandonAnnouncementDelivery(db, delivery)) syncErasureMirror(); } catch { console.warn('[annonce] demande non retirée après un envoi manqué'); }
-      return unavailableJson(c);
-    }
-    scheduleDelivery(delivery, payload);
-  }
-  // Même réponse dans tous les cas, sans attendre l'envoi.
+  scheduleRequest(parsed.data);
+  // Même réponse dans tous les cas, avant toute lecture ou écriture de la demande.
   return c.json({ ok: true });
 });
 

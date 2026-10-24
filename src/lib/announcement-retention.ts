@@ -52,6 +52,9 @@ export function applyAnnouncementRetention(db: Database.Database, now = Date.now
         .all(now - PENDING_RETENTION_MS, announcementAnniversaryCutoff(now), now, ANNOUNCEMENT_FALLBACK_END) as Array<{ id: number }>;
       recordAnnouncementErasures(db, erased.map(row => row.id), now);
       db.prepare('UPDATE announcement_subscriptions SET token_hash=NULL,token_expires_at=NULL WHERE confirmed_at IS NULL AND token_expires_at IS NOT NULL AND token_expires_at <= ?').run(now);
+      // Compteurs de 24 h (budget par réseau, refus du plafond) : retirés passé ce délai, non comptés dans le témoin.
+      db.prepare('DELETE FROM announcement_network_requests WHERE accepted_at <= ?').run(now - 86_400_000);
+      db.prepare('DELETE FROM announcement_capped_requests WHERE capped_at <= ?').run(now - 86_400_000);
       return { deleted: erased.length };
     }).immediate();
   } catch {

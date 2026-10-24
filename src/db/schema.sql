@@ -520,3 +520,15 @@ CREATE TABLE IF NOT EXISTS announcement_erasures (
   erased_at INTEGER NOT NULL CHECK(typeof(erased_at)='integer' AND erased_at>=1000000000000),
   PRIMARY KEY(subject_id, erased_at)
 );
+-- Budget quotidien par réseau des demandes d'inscription (5 par 24 h) : empreinte HMAC du réseau (préfixe /64 en
+-- IPv6), jamais l'adresse IP ; lignes retirées après 24 h. Demandes écartées par le plafond commun : la date seule.
+CREATE TABLE IF NOT EXISTS announcement_network_requests (
+  identity_key TEXT NOT NULL CHECK(length(identity_key)=64),
+  accepted_at INTEGER NOT NULL CHECK(typeof(accepted_at)='integer' AND accepted_at>=1000000000000)
+);
+CREATE INDEX IF NOT EXISTS idx_announcement_network_requests ON announcement_network_requests(identity_key, accepted_at);
+CREATE INDEX IF NOT EXISTS idx_announcement_network_requests_time ON announcement_network_requests(accepted_at);
+CREATE TABLE IF NOT EXISTS announcement_capped_requests (
+  capped_at INTEGER NOT NULL CHECK(typeof(capped_at)='integer' AND capped_at>=1000000000000)
+);
+CREATE INDEX IF NOT EXISTS idx_announcement_capped_requests ON announcement_capped_requests(capped_at);

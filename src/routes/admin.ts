@@ -8,7 +8,9 @@ import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
 import { realCustomerSql } from "./crm.js";
 import { runFullCleanup } from "../lib/cleanup.js";
-import { countConfirmedAnnouncements } from "../lib/announcements.js";
+import { bodyLimit } from "hono/body-limit";
+import { countCappedAnnouncements, countConfirmedAnnouncements, eraseAnnouncementsByEmail } from "../lib/announcements.js";
+import { syncAnnouncementErasureMirror } from "../lib/announcement-erasures.js";
 import { internalEmails } from "../lib/crm-customers.js";
 import { refreshFinmaFromR2, refreshTaresFromR2, refreshClassificationsFromR2, getMcpFreshness, extractCsvFromZip } from "../mcp/r2-refresh.js";
 import { getObjectBuffer } from "../lib/r2.js";
@@ -145,8 +147,38 @@ adminRoute.get("/indicateurs", (c) => {
     // Inscriptions « être prévenu » confirmées, par sujet (clés fixes) : un nombre, jamais une adresse.
     // Toute la durée de conservation, pas la fenêtre ; adresses de ADMIN_EMAILS et CRM_INTERNAL_EMAILS exclues.
     inscriptions_confirmees: countConfirmedAnnouncements(db, internalEmails()),
-    notes: "Chiffres seulement. Déclarations de visiteurs : déclaratives (navigateurs seulement, un clic n'est pas une personne). Fenêtre glissante (pas la période suisse du CRM). Visiteurs-jours : empreinte renouvelée chaque jour, pas des personnes uniques. Montants en centimes de CHF. Inscriptions confirmées : total en cours, hors adresses internes.",
+    // Demandes écartées par le plafond commun des mails de confirmation, sur les dernières 24 h : un nombre seulement.
+    inscriptions_ecartees_plafond_24h: countCappedAnnouncements(db),
+    notes: "Chiffres seulement. Déclarations de visiteurs : déclaratives (navigateurs seulement, un clic n'est pas une personne). Fenêtre glissante (pas la période suisse du CRM). Visiteurs-jours : empreinte renouvelée chaque jour, pas des personnes uniques. Montants en centimes de CHF. Inscriptions confirmées : total en cours, hors adresses internes. Inscriptions écartées par le plafond : dernières 24 h.",
   });
+});
+
+/**
+ * POST /api/admin/announcements/erase — effacement sur demande écrite (contact@, notice section 3) des inscriptions
+ * « être prévenu » d'une adresse, par la même fonction que la désinscription (registre des effacements compris).
+ * Corps JSON {"email": "..."} ; réponse : le seul NOMBRE de lignes effacées. L'adresse n'entre dans aucune réponse,
+ * aucun journal ni aucune erreur.
+ */
+const AnnouncementEraseBody = z.object({ email: z.string().trim().min(3).max(254).email() }).strict();
+adminRoute.post("/announcements/erase", bodyLimit({ maxSize: 1024, onError: c => c.json({ error: "body_too_large" }, 413) }), async (c) => {
+  const secret = c.req.header("x-admin-secret");
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) return c.json({ error: "unauthorized" }, 401);
+  let parsed;
+  try { parsed = AnnouncementEraseBody.safeParse(await c.req.json()); } catch { return c.json({ error: "invalid_body" }, 400); }
+  if (!parsed.success) return c.json({ error: "invalid_body" }, 400);
+  let erased: number;
+  try {
+    erased = eraseAnnouncementsByEmail(getDb(), parsed.data.email);
+  } catch {
+    console.warn("[annonce] effacement sur demande non enregistré");
+    c.header("Retry-After", "1");
+    return c.json({ error: "temporarily_unavailable" }, 503);
+  }
+  if (erased) {
+    try { syncAnnouncementErasureMirror(getDb()); }
+    catch { console.warn("[annonce] copie du registre des effacements non mise à jour ; reprise au prochain nettoyage"); }
+  }
+  return c.json({ erased });
 });
 
 adminRoute.get("/dataset-versions/:id", (c) => {

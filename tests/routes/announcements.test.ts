@@ -337,15 +337,23 @@ describe('Inscription « être prévenu » : routes', () => {
     expect(sendMock).toHaveBeenCalledTimes(1);
   });
 
-  it('la réponse n’attend pas l’envoi du mail', async () => {
+  it('la réponse part avant toute lecture ou écriture de la demande, et avant l’envoi', async () => {
     const app = createApp();
+    const ordre: string[] = [];
+    // Toute écriture de la demande est notée par la base elle-même (fonction appelée par un déclencheur).
+    getDb().function('noter_ecriture', () => { ordre.push('écriture'); return null; });
+    getDb().exec('CREATE TEMP TRIGGER noter_demande AFTER INSERT ON announcement_subscriptions BEGIN SELECT noter_ecriture(); END');
     let release!: (value: EmailSendResult) => void;
-    sendMock.mockImplementationOnce(() => new Promise<EmailSendResult>(resolve => { release = resolve; }));
+    sendMock.mockImplementationOnce(() => { ordre.push('envoi'); return new Promise<EmailSendResult>(resolve => { release = resolve; }); });
     const res = await app.request(`${SITE}/api/announcements/request`, {
       method: 'POST', headers: { 'content-type': 'application/json', origin: SITE, 'x-real-ip': nextIp() }, body: JSON.stringify(valid()),
     });
+    ordre.push('réponse');
     expect(res.status).toBe(200);
-    expect(sendMock).toHaveBeenCalledTimes(1);
+    expect(rows()).toEqual([]);
+    expect(sendMock).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(sendMock).toHaveBeenCalledTimes(1));
+    expect(ordre).toEqual(['réponse', 'écriture', 'envoi']);
     release({ sent: true });
     await settleAnnouncementDeliveries();
     expect(rows()).toHaveLength(1);
@@ -378,9 +386,10 @@ describe('Inscription « être prévenu » : routes', () => {
     await confirmPost(app, links().confirm);
     now += 2 * 60_000;
     getDb().exec('DROP TABLE announcement_subscriptions');
+    // La demande est traitée après la réponse : la panne de base ne change pas la réponse neutre, elle est journalisée.
     const panne = await demande(app, valid('troisieme@example.com'));
-    expect(panne.status).toBe(503);
-    expect(await panne.text()).toBe(JSON.stringify({ error: 'temporarily_unavailable' }));
+    expect([panne.status, await panne.text()]).toEqual([200, JSON.stringify({ ok: true })]);
+    expect(lignes.join('\n')).toContain('[annonce] demande non enregistrée');
     const page = await app.request(`${SITE}/api/announcements/confirm?token=${'Q'.repeat(43)}`);
     expect(page.status).toBe(503);
     expect(lignes.length).toBeGreaterThan(0);

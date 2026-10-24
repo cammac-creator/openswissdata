@@ -25,9 +25,19 @@ export const LAST_RESEND_AGE_MS = PENDING_RETENTION_MS - CONFIRMATION_TTL_MS;
 /**
  * Plafond commun de mails de confirmation sur 24 h glissantes, toutes adresses confondues. Le formulaire peut sinon
  * servir à faire écrire notre domaine à des adresses choisies par un tiers, et le compte Resend est partagé avec les
- * livraisons des achats : ce plafond protège leur quota. Au-delà, même réponse, aucun mail, rien d'enregistré.
+ * livraisons des achats : ce plafond protège leur quota. Comptés : les liens émis depuis moins de 24 h encore en
+ * attente ET les inscriptions confirmées depuis moins de 24 h (une confirmation ne libère pas de place). Au-delà, même
+ * réponse, aucun mail, rien d'enregistré sauf la date du refus (compte exposé au relevé de chiffres).
  */
 export const DAILY_CONFIRMATION_CAP = 50;
+/**
+ * Budget quotidien par réseau (préfixe /64 en IPv6) : 5 demandes acceptées par 24 h glissantes, pour qu'un seul réseau
+ * ne puisse pas remplir le plafond commun. Compté pour toute demande valide qui a passé les autres limites, AVANT toute
+ * lecture de l'inscription : le budget consommé ne dépend jamais de l'état de l'adresse (aucune énumération).
+ */
+export const NETWORK_DAILY_BUDGET = 5;
+/** Au-delà, plus aucune demande acceptée (sans éviction) : la table ne grandit pas sans fin. */
+const NETWORK_ROWS_MAX = 50_000;
 
 export class AnnouncementError extends Error {
   constructor(readonly code: 'configuration' | 'storage') { super(`announcement_${code}`); }
@@ -51,12 +61,58 @@ export type AnnouncementDelivery = {
   token: string;
   tokenHash: string;
   previous: { lang: AnnouncementLang; tokenHash: string | null; expiresAt: number | null } | null;
+  /** Une demande échue non encore purgée a été effacée (inscrite au registre) avant la nouvelle : copie à synchroniser. */
+  replacedExpired: boolean;
 };
+
+function networkKey(network: string): string {
+  const secret = process.env.SESSION_SECRET;
+  if ((process.env.RAILWAY_ENVIRONMENT_ID || !['development', 'test'].includes(process.env.NODE_ENV ?? '')) && (!secret || secret.length < 16)) {
+    throw new AnnouncementError('configuration');
+  }
+  return createHmac('sha256', secret || 'osd-local-announcement-development-only').update('openswissdata:announcement-network:v1:').update(network).digest('hex');
+}
+
+/** Budget quotidien du réseau, consommé seulement si la demande est acceptée ; transaction courte, sans réseau. */
+export function consumeAnnouncementNetworkBudget(db: Database.Database, network: string, now = Date.now()): boolean {
+  if (!Number.isSafeInteger(now) || now < 1_000_000_000_000) throw new AnnouncementError('configuration');
+  const key = networkKey(network);
+  try {
+    return db.transaction(() => {
+      db.prepare('DELETE FROM announcement_network_requests WHERE rowid IN (SELECT rowid FROM announcement_network_requests WHERE accepted_at<=? ORDER BY accepted_at LIMIT 500)').run(now - DAY);
+      const mine = db.prepare('SELECT COUNT(*) AS n FROM announcement_network_requests WHERE identity_key=? AND accepted_at>?').get(key, now - DAY) as { n: number };
+      if (mine.n >= NETWORK_DAILY_BUDGET) return false;
+      const all = db.prepare('SELECT COUNT(*) AS n FROM announcement_network_requests WHERE accepted_at>?').get(now - DAY) as { n: number };
+      if (all.n >= NETWORK_ROWS_MAX) return false;
+      db.prepare('INSERT INTO announcement_network_requests(identity_key,accepted_at) VALUES(?,?)').run(key, now);
+      return true;
+    }).immediate();
+  } catch { throw new AnnouncementError('storage'); }
+}
+
+/** Date d'une demande écartée par le plafond commun (aucune adresse, aucun réseau). */
+export function recordCappedAnnouncement(db: Database.Database, now = Date.now()): void {
+  db.transaction(() => {
+    db.prepare('DELETE FROM announcement_capped_requests WHERE rowid IN (SELECT rowid FROM announcement_capped_requests WHERE capped_at<=? ORDER BY capped_at LIMIT 500)').run(now - DAY);
+    db.prepare('INSERT INTO announcement_capped_requests(capped_at) VALUES(?)').run(now);
+  }).immediate();
+}
+
+/** Nombre de demandes écartées par le plafond commun sur les dernières 24 h. */
+export function countCappedAnnouncements(db: Database.Database, now = Date.now()): number {
+  return (db.prepare('SELECT COUNT(*) AS n FROM announcement_capped_requests WHERE capped_at>?').get(now - DAY) as { n: number }).n;
+}
+
+/** Contrôle de configuration fait AVANT la réponse (il ne dépend d'aucune adresse) : clé du lien de désinscription. */
+export function assertAnnouncementConfiguration(): void {
+  unsubscribeKey();
+}
 
 /**
  * Enregistre une demande et dit s'il faut envoyer un mail (`'capped'` : plafond commun atteint, rien n'est fait).
- * Même traitement apparent pour l'appelant :
- * - adresse inconnue (ou demande échue non encore purgée) : nouvelle demande, un mail ;
+ * Appelé APRÈS la réponse : la durée de réponse ne dépend pas de l'état de l'adresse. Traitement :
+ * - adresse inconnue : nouvelle demande, un mail ;
+ * - demande échue non encore purgée : effacée (inscrite au registre), puis nouvelle demande sous un nouvel identifiant ;
  * - demande en attente : un nouveau lien au plus toutes les 24 h et seulement pendant les 5 premiers
  *   jours (le lien remplace le précédent) ; sinon rien ;
  * - inscription déjà confirmée : rien, aucun mail.
@@ -73,33 +129,30 @@ export function registerAnnouncementRequest(
       const row = db.prepare('SELECT id,lang,requested_at,confirmed_at,token_hash,token_expires_at FROM announcement_subscriptions WHERE email=? AND subject=?')
         .get(email, input.subject) as Row | undefined;
       if (row && row.confirmed_at !== null) return null;
-      if (row && now - row.requested_at < PENDING_RETENTION_MS) {
+      const expired = row !== undefined && now - row.requested_at >= PENDING_RETENTION_MS;
+      if (row && !expired) {
         const lastSent = row.token_expires_at === null ? null : row.token_expires_at - CONFIRMATION_TTL_MS;
         if (lastSent !== null && now - lastSent < RESEND_INTERVAL_MS) return null;
         if (now - row.requested_at > LAST_RESEND_AGE_MS) return null;
       }
-      // Un lien émis depuis moins de 24 h = un mail parti (le renvoi n'a lieu qu'une fois par 24 h et par demande).
-      const recent = db.prepare('SELECT COUNT(*) AS n FROM announcement_subscriptions WHERE confirmed_at IS NULL AND token_expires_at > ?')
-        .get(now + CONFIRMATION_TTL_MS - RESEND_INTERVAL_MS) as { n: number };
+      // Un lien émis depuis moins de 24 h et encore en attente = un mail parti (au plus un par 24 h et par demande) ;
+      // une confirmation des dernières 24 h compte aussi : confirmer ne libère pas de place.
+      const recent = db.prepare('SELECT COUNT(*) AS n FROM announcement_subscriptions WHERE (confirmed_at IS NULL AND token_expires_at > ?) OR confirmed_at > ?')
+        .get(now + CONFIRMATION_TTL_MS - RESEND_INTERVAL_MS, now - DAY) as { n: number };
       if (recent.n >= DAILY_CONFIRMATION_CAP) return 'capped';
       const token = generateToken(), tokenHash = announcementTokenFingerprint(token), expiresAt = now + CONFIRMATION_TTL_MS;
       const base = { email, lang: input.lang, subject: input.subject, token, tokenHash };
-      if (!row) {
+      if (!row || expired) {
+        // Demande échue que le nettoyage n'a pas encore retirée : effacée et inscrite au registre, jamais réutilisée.
+        if (row) eraseAnnouncementRows(db, [row], now);
         const info = db.prepare('INSERT INTO announcement_subscriptions(email,lang,subject,requested_at,token_hash,token_expires_at) VALUES(?,?,?,?,?,?)')
           .run(email, input.lang, input.subject, now, tokenHash, expiresAt);
-        return { ...base, kind: 'new', id: Number(info.lastInsertRowid), requestedAt: now, previous: null };
-      }
-      if (now - row.requested_at >= PENDING_RETENTION_MS) {
-        // Demande échue que le nettoyage n'a pas encore retirée : elle repart comme une demande neuve.
-        const reset = db.prepare('UPDATE announcement_subscriptions SET lang=?,requested_at=?,token_hash=?,token_expires_at=? WHERE id=? AND confirmed_at IS NULL')
-          .run(input.lang, now, tokenHash, expiresAt, row.id);
-        if (reset.changes !== 1) throw new AnnouncementError('storage');
-        return { ...base, kind: 'new', id: row.id, requestedAt: now, previous: null };
+        return { ...base, kind: 'new', id: Number(info.lastInsertRowid), requestedAt: now, previous: null, replacedExpired: expired };
       }
       const update = db.prepare('UPDATE announcement_subscriptions SET lang=?,token_hash=?,token_expires_at=? WHERE id=? AND confirmed_at IS NULL')
         .run(input.lang, tokenHash, expiresAt, row.id);
       if (update.changes !== 1) throw new AnnouncementError('storage');
-      return { ...base, kind: 'resend', id: row.id, requestedAt: row.requested_at, previous: { lang: row.lang, tokenHash: row.token_hash, expiresAt: row.token_expires_at } };
+      return { ...base, kind: 'resend', id: row.id, requestedAt: row.requested_at, previous: { lang: row.lang, tokenHash: row.token_hash, expiresAt: row.token_expires_at }, replacedExpired: false };
     }).immediate();
   } catch (error) {
     if (error instanceof AnnouncementError) throw error;
@@ -207,16 +260,40 @@ export function inspectAnnouncementSubscription(db: Database.Database, reference
 }
 
 /**
- * Désinscription : la ligne disparaît immédiatement. Seuls son identifiant interne et la date de l'effacement entrent au
- * registre (même transaction), pour qu'une restauration ne la ramène pas.
+ * Seule fonction d'effacement sur demande (désinscription, demande échue remplacée, demande écrite à contact@) : la
+ * ligne disparaît, et son identifiant interne avec la date de l'effacement entre au registre, dans la transaction de
+ * l'appelant, pour qu'une restauration ne la ramène pas. Renvoie le nombre de lignes effacées.
  */
+function eraseAnnouncementRows(db: Database.Database, rows: ReadonlyArray<{ id: number; requested_at: number }>, now: number): number {
+  const erase = db.prepare('DELETE FROM announcement_subscriptions WHERE id=? AND requested_at=?');
+  let erased = 0;
+  for (const row of rows) {
+    if (erase.run(row.id, row.requested_at).changes !== 1) continue;
+    recordAnnouncementErasures(db, [row.id], Math.max(now, row.requested_at));
+    erased++;
+  }
+  return erased;
+}
+
+/** Désinscription par le lien scellé : effacement immédiat. */
 export function eraseAnnouncementSubscription(db: Database.Database, reference: UnsubscribeReference, now = Date.now()): { erased: boolean; lang: AnnouncementLang | null } {
   return db.transaction(() => {
     const row = inspectAnnouncementSubscription(db, reference);
     if (!row) return { erased: false, lang: null };
-    const done = db.prepare('DELETE FROM announcement_subscriptions WHERE id=? AND requested_at=?').run(reference.id, reference.requestedAt);
-    if (done.changes === 1) recordAnnouncementErasures(db, [reference.id], Math.max(now, reference.requestedAt));
-    return { erased: done.changes === 1, lang: row.lang };
+    const erased = eraseAnnouncementRows(db, [{ id: reference.id, requested_at: reference.requestedAt }], now) === 1;
+    return { erased, lang: row.lang };
+  }).immediate();
+}
+
+/**
+ * Demande écrite d'effacement (contact@, notice section 3) : toutes les inscriptions de cette adresse, en attente ou
+ * confirmées, par la même fonction que la désinscription. Ne renvoie qu'un nombre.
+ */
+export function eraseAnnouncementsByEmail(db: Database.Database, email: string, now = Date.now()): number {
+  const normalized = normalizeAnnouncementEmail(email);
+  return db.transaction(() => {
+    const rows = db.prepare('SELECT id, requested_at FROM announcement_subscriptions WHERE email=?').all(normalized) as Array<{ id: number; requested_at: number }>;
+    return eraseAnnouncementRows(db, rows, now);
   }).immediate();
 }
 
