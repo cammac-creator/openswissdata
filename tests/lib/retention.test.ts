@@ -420,7 +420,7 @@ describe('Durées de conservation du 29.09.2026 et registre des effacements', ()
       foreignKeysIntact();
       expect(readCleanupProof(db)).toEqual(proof);
       // Un témoin d'avant ce lot (14 catégories) ne prouve pas la conservation : la minuterie refait un passage.
-      const legacy = proof.entries.filter(e => !['purchase_records', 'crm_records', 'customer_accounts', 'erasure_registry'].includes(e.name));
+      const legacy = proof.entries.filter(e => !['purchase_records', 'crm_records', 'customer_accounts', 'erasure_registry', 'announcement_subscriptions'].includes(e.name));
       db.prepare("UPDATE operation_checks SET details_json=? WHERE name='cleanup'").run(JSON.stringify({ ...proof, entries: legacy, totalDeleted: legacy.reduce((n, e) => n + e.deleted, 0) }));
       expect(legacy).toHaveLength(14);
       expect(readCleanupProof(db)).toBeNull();

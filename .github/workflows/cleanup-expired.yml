@@ -49,8 +49,9 @@ jobs:
               sys.exit(1)
           print('HTTP',sys.argv[2])
           legacy={'magic_links','sessions','download_tokens','mcp_oauth_codes','request_log','events','download_activity','delivery_message_references','bronze_dashboard','bronze_financial','auth_request_limits','checkout_request_limits','delivery_incident_events','delivery_incidents'}
-          # Durées de conservation (29.09.2026) : témoin à 18 catégories exactes ; l'ancien format à 14 n'est plus accepté.
-          expected=legacy|{'purchase_records','crm_records','customer_accounts','erasure_registry'}
+          # Durées de conservation (29.09.2026) et inscriptions « être prévenu » (24.10.2026) : témoin à 19 catégories exactes ;
+          # les anciens formats à 14 et 18 ne sont plus acceptés.
+          expected=legacy|{'purchase_records','crm_records','customer_accounts','erasure_registry','announcement_subscriptions'}
           entries=data.get('entries') if isinstance(data,dict) else None
           valid=isinstance(entries,list) and all(isinstance(e,dict) and isinstance(e.get('name'),str) and e.get('name') in expected|{'cleanup_proof'} and e.get('status') in ('ok','not_applicable','error') for e in entries)
           if valid:

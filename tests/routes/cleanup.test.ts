@@ -19,7 +19,7 @@ describe('Résultat vérifiable du nettoyage planifié', () => {
     const response = await createApp().request('/api/admin/cleanup-expired', { method: 'POST', headers });
     const body = await response.json();
     expect(response.status).toBe(200); expect(body.ok).toBe(true);
-    expect(body.entries).toHaveLength(18);
+    expect(body.entries).toHaveLength(19);
     for (const name of ['purchase_records', 'crm_records', 'customer_accounts', 'erasure_registry']) expect(body.entries.find((e: { name: string }) => e.name === name)?.status).toBe('ok');
     expect(body.entries).toContainEqual({ name: 'checkout_request_limits', status: 'ok', deleted: 0, unit: 'rows' });
     expect(body.entries).toContainEqual({ name: 'auth_request_limits', deleted: 0, status: 'ok', unit: 'rows' });
