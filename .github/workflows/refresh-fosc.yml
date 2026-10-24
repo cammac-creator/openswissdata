@@ -50,7 +50,7 @@ jobs:
       - name: Vérifier avant de lire le portail
         run: |
           npm run typecheck
-          npx vitest run tests/etl/fosc-xml.test.ts tests/etl/fosc-client.test.ts tests/etl/fosc-communes.test.ts tests/etl/fosc-collect.test.ts tests/etl/sources-registry-fosc.test.ts
+          npx vitest run tests/etl/fosc-xml.test.ts tests/etl/fosc-client.test.ts tests/etl/fosc-communes.test.ts tests/etl/fosc-collect.test.ts tests/etl/sources-registry-fosc.test.ts tests/etl/fosc-faillites-lecture.test.ts tests/etl/fosc-faillites-collect.test.ts tests/etl/fosc-faillites-fuite.test.ts tests/etl/fosc-faillites-relecture.test.ts
       - name: Simulation (déclenchement manuel)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         env:
