@@ -1,16 +1,27 @@
 /**
- * État « argent » de la collecte FOSC (rubrique HR) et ses règles de conservation.
+ * État « argent » de la collecte FOSC et ses règles de conservation : rubrique HR (lot du
+ * 22.10.2026) et, depuis le lot du 24.10.2026, faillites (KK), concordats (NA), appels aux
+ * créanciers suite à une liquidation (LS) et autres appels aux créanciers (SR), sociétés seulement.
  *
  * Étage écrit : argent. Il contient seulement :
  *   - `events` : une ligne par avis d'une SOCIÉTÉ de la liste blanche (`legal-forms.ts`) :
  *     identifiant technique de l'avis (pour l'idempotence et la revérification, jamais publié),
- *     IDE, type d'événement (sous-rubrique HR01, HR02, HR03), date de publication, numéro OFS de
- *     la commune du siège, canton, forme juridique, jour de suppression (`delete_on`), date de
- *     la dernière revérification. Jamais de texte libre, de raison sociale, de nom, de but ni
- *     d'adresse. Jamais une entreprise individuelle.
+ *     IDE, type d'événement (sous-rubrique : HR01 à HR03, ou une sous-rubrique de
+ *     `subrubrics.ts`), date de publication, numéro OFS de la commune (siège pour HR, adresse de
+ *     la société pour les autres rubriques), canton, forme juridique, jour de suppression
+ *     (`delete_on`), date de la dernière revérification et, pour les nouvelles rubriques
+ *     seulement, `dates` : les dates structurées de la procédure (liste fermée par sous-rubrique).
+ *     Jamais de texte libre, de raison sociale, de nom, de but ni d'adresse. Jamais une
+ *     entreprise individuelle, une personne physique ni une succession.
  *   - `days` : par jour de publication, des TOTAUX (type × canton × forme juridique), entreprises
- *     individuelles comprises, sans aucun identifiant d'avis ni d'entreprise.
- *   - `months` : les mois figés, mêmes totaux.
+ *     individuelles, personnes et successions comprises (codes `personne`, `succession`), sans
+ *     aucun identifiant d'avis ni d'entreprise, avec les rubriques couvertes par le calcul.
+ *   - `months` : les mois figés, mêmes totaux, et les jours couverts par rubrique.
+ *
+ * Version 2 (24.10.2026) : champ facultatif `dates` des lignes, `rubrics`, `persons` et `estates`
+ * des jours, `days_collected_by_rubric` des mois. Un état version 1 (lot HR) est toujours lu : ses
+ * jours et ses mois sont comptés pour la seule rubrique HR, puis il est réécrit en version 2, sous
+ * la MÊME clé R2 (aucun objet laissé derrière, la purge continue d'effacer au même endroit).
  *
  * Conservation des lignes (règle prudente, rapport du lot du 22.10.2026, rendue exacte après
  * relecture) : une ligne part dès que
@@ -25,10 +36,14 @@
  * `MAX_RETENTION_DAYS` reprend ce plancher d'un mois. Le prolonger est une décision de
  * Claude-Alain.
  */
-import { SOLE_PROPRIETORSHIP } from "./legal-forms.js";
+import { ROW_STORABLE_LEGAL_FORMS, SOLE_PROPRIETORSHIP } from "./legal-forms.js";
+import { FOSC_RUBRICS } from "./sources.js";
+import { rowDateTags } from "./subrubrics.js";
 
 export const STATE_SCHEMA = "openswissdata.fosc-hr-state";
-export const STATE_SCHEMA_VERSION = 1;
+export const STATE_SCHEMA_VERSION = 2;
+/** Versions relues : la version 1 (lot HR du 22.10.2026) est convertie en mémoire. */
+export const READABLE_STATE_VERSIONS: ReadonlySet<number> = new Set([1, 2]);
 
 /** Plancher d'un mois de l'art. 11 al. 2 OFOSC : la ligne n'existe plus le 30e jour après la publication. */
 export const MAX_RETENTION_DAYS = 30;
@@ -48,6 +63,8 @@ export interface FoscEventRow {
   /** Jour où la ligne ne doit plus exister (supprimée au passage de la veille au plus tard possible). */
   delete_on: string;
   verified_on: string;
+  /** Nouvelles rubriques seulement : dates structurées de la procédure (balise → AAAA-MM-JJ). */
+  dates?: Record<string, string>;
 }
 
 export interface Tally {
@@ -71,6 +88,12 @@ export interface DayRecord {
   test_imports: number;
   /** Détails illisibles ou en échec : comptés avec une forme « inconnue ». */
   detail_failed: number;
+  /** Rubriques dont la liste du jour a été lue pour ce calcul (`["HR"]` pour un jour de la version 1). */
+  rubrics: string[];
+  /** Dont débiteurs personnes physiques (successions comprises), comptés dans les totaux seulement. */
+  persons: number;
+  /** Dont successions (succession, succession répudiée). */
+  estates: number;
   computed_at: string;
   tallies: Tally[];
 }
@@ -81,6 +104,8 @@ export interface MonthRecord {
   days_collected: string[];
   listed: number;
   detail_failed: number;
+  /** Jours collectés de ce mois, par rubrique (une rubrique absente n'était pas encore collectée). */
+  days_collected_by_rubric: Record<string, string[]>;
   tallies: Tally[];
 }
 
@@ -108,6 +133,13 @@ export function emptyState(now: Date): FoscState {
 }
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Date civile valide AAAA-MM-JJ (le 2026-02-30 est refusé). */
+export function isValidDay(value: string): boolean {
+  if (!DAY_RE.test(value)) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
 const MONTH_RE = /^\d{4}-\d{2}$/;
 const IDE_RE = /^CHE-\d{3}\.\d{3}\.\d{3}$/;
 
@@ -124,14 +156,21 @@ const isTally = (t: unknown): t is Tally => {
     && Number.isInteger(x.count) && x.count > 0;
 };
 
-/** Contrôle strict d'un état relu : une forme inattendue arrête le passage. */
+const KNOWN_RUBRICS: ReadonlySet<string> = new Set(FOSC_RUBRICS);
+const isDayList = (v: unknown): v is string[] => Array.isArray(v) && v.every((d) => typeof d === "string" && DAY_RE.test(d));
+
+/**
+ * Contrôle strict d'un état relu : une forme inattendue arrête le passage. Un état version 1 est
+ * converti en version 2 (jours et mois comptés pour la seule rubrique HR).
+ */
 export function validateState(value: unknown): FoscState {
-  const s = value as FoscState;
+  const s = value as Omit<FoscState, "schema_version"> & { schema_version: number };
   if (!s || typeof s !== "object") throw new FoscStateError("pas un objet");
-  if (s.schema !== STATE_SCHEMA || s.schema_version !== STATE_SCHEMA_VERSION) throw new FoscStateError("schéma inattendu");
+  if (s.schema !== STATE_SCHEMA || !READABLE_STATE_VERSIONS.has(s.schema_version)) throw new FoscStateError("schéma inattendu");
+  const fromV1 = s.schema_version === 1;
   if (s.collection_started_on !== null && !DAY_RE.test(String(s.collection_started_on))) throw new FoscStateError("date de début");
   if (!Array.isArray(s.events) || !Array.isArray(s.days) || !Array.isArray(s.months)) throw new FoscStateError("tableaux absents");
-  const allowedRowKeys = new Set(["publication_id", "ide", "event_type", "publication_date", "municipality_bfs_id", "canton", "legal_form", "delete_on", "verified_on"]);
+  const allowedRowKeys = new Set(["publication_id", "ide", "event_type", "publication_date", "municipality_bfs_id", "canton", "legal_form", "delete_on", "verified_on", "dates"]);
   for (const e of s.events) {
     if (!e || typeof e !== "object") throw new FoscStateError("ligne");
     for (const k of Object.keys(e)) if (!allowedRowKeys.has(k)) throw new FoscStateError("champ de ligne non autorisé");
@@ -139,16 +178,44 @@ export function validateState(value: unknown): FoscState {
       throw new FoscStateError("ligne mal formée");
     }
     if (e.legal_form === SOLE_PROPRIETORSHIP) throw new FoscStateError("entreprise individuelle en ligne");
+    if (!ROW_STORABLE_LEGAL_FORMS.has(e.legal_form)) throw new FoscStateError("forme juridique non autorisée en ligne");
+    const dateTags = rowDateTags(e.event_type);
+    if (dateTags === null || (fromV1 && !/^HR0[1-3]$/.test(e.event_type))) throw new FoscStateError("type d'événement non autorisé en ligne");
+    if (e.dates !== undefined) {
+      if (fromV1 || !e.dates || typeof e.dates !== "object" || Array.isArray(e.dates)) throw new FoscStateError("dates de ligne mal formées");
+      for (const [tag, day] of Object.entries(e.dates)) {
+        if (!dateTags.includes(tag) || typeof day !== "string" || !isValidDay(day)) throw new FoscStateError("date de ligne non autorisée");
+      }
+    }
   }
   for (const d of s.days) {
     if (!d || !DAY_RE.test(d.date) || !Array.isArray(d.tallies) || !d.tallies.every(isTally)) throw new FoscStateError("jour mal formé");
-  }
-  for (const m of s.months) {
-    if (!m || !MONTH_RE.test(m.month) || !Array.isArray(m.tallies) || !m.tallies.every(isTally) || !Array.isArray(m.days_collected)) {
-      throw new FoscStateError("mois mal formé");
+    if (fromV1) {
+      if (d.rubrics !== undefined) throw new FoscStateError("jour mal formé");
+      d.rubrics = ["HR"];
+      d.persons = 0;
+      d.estates = 0;
+    } else if (!Array.isArray(d.rubrics) || !d.rubrics.every((r) => KNOWN_RUBRICS.has(r)) || !Number.isInteger(d.persons) || !Number.isInteger(d.estates)) {
+      throw new FoscStateError("jour mal formé");
     }
   }
-  return s;
+  for (const m of s.months) {
+    if (!m || !MONTH_RE.test(m.month) || !Array.isArray(m.tallies) || !m.tallies.every(isTally) || !isDayList(m.days_collected)) {
+      throw new FoscStateError("mois mal formé");
+    }
+    if (fromV1) {
+      if (m.days_collected_by_rubric !== undefined) throw new FoscStateError("mois mal formé");
+      m.days_collected_by_rubric = { HR: [...m.days_collected] };
+    } else {
+      const byRubric = m.days_collected_by_rubric;
+      if (!byRubric || typeof byRubric !== "object" || Array.isArray(byRubric)
+        || !Object.entries(byRubric).every(([r, days]) => KNOWN_RUBRICS.has(r) && isDayList(days))) {
+        throw new FoscStateError("mois mal formé");
+      }
+    }
+  }
+  s.schema_version = STATE_SCHEMA_VERSION;
+  return s as FoscState;
 }
 
 /** Date civile suisse (Europe/Zurich) d'un instant, AAAA-MM-JJ. */
@@ -260,12 +327,16 @@ export function freezeMonths(state: FoscState, today: string, now: Date, window 
     if (!due.includes(month)) continue;
     const tallies = new Map<string, Tally>();
     for (const d of days) for (const t of d.tallies) addTally(tallies, t, t.count);
+    const byRubric: Record<string, string[]> = {};
+    for (const d of days) for (const r of d.rubrics) (byRubric[r] ??= []).push(d.date);
+    for (const list of Object.values(byRubric)) list.sort();
     state.months.push({
       month,
       frozen_at: now.toISOString(),
       days_collected: days.map((d) => d.date).sort(),
       listed: days.reduce((s, d) => s + d.listed, 0),
       detail_failed: days.reduce((s, d) => s + d.detail_failed, 0),
+      days_collected_by_rubric: Object.fromEntries(Object.entries(byRubric).sort(([a], [b]) => a.localeCompare(b))),
       tallies: sortTallies(tallies.values()),
     });
     state.days = state.days.filter((d) => d.date.slice(0, 7) !== month);

@@ -87,8 +87,10 @@ const BFE_OPEN: SourceLicence = {
   jurisdiction: "Switzerland",
 };
 
-// Portail des feuilles officielles du SECO (FOSC, rubrique HR). Réponse écrite du SECO du
-// 12.10.2026 : réutilisation soumise aux conditions générales du portail (version du 07.06.2024),
+// Portail des feuilles officielles du SECO (FOSC : rubrique HR depuis le 22.10.2026 ; faillites,
+// concordats, liquidations et appels aux créanciers, sociétés seulement, depuis le 24.10.2026).
+// Réponse écrite du SECO du 12.10.2026 : réutilisation soumise aux conditions générales du
+// portail (version du 07.06.2024),
 // en particulier au point 3.3. Conditions acceptées pour le service sur décision de Claude-Alain
 // du 16.10.2026 (d3 = A, F8 accordé), à renouveler tous les 90 jours (CG 1.2 al. 1, contrôlé par
 // la collecte, `etl/fosc/sources.ts`). Détail : `etl/fosc/SOURCES.md`.
@@ -158,7 +160,7 @@ export const SOURCES: readonly SourceDescriptor[] = [
   // elle-même l'empreinte des CG et contrôle la forme des réponses. Hors de toute archive vendue :
   // ne pas l'ajouter à PRODUCT_SOURCES sans nouvelle décision (rien n'est publié à ce jour).
   { id: "seco.fosc_hr", institution: "SECO", url: FOSC_PUBLICATIONS_URL, licence: SECO_FOSC,
-    description: "SECO — FOSC, avis du registre du commerce (rubrique HR), API publique du Portail des feuilles officielles, collecte quotidienne." },
+    description: "SECO — FOSC, avis du registre du commerce (rubrique HR) et, pour les sociétés seulement, faillites (KK), concordats (NA) et appels aux créanciers (LS, SR), API publique du Portail des feuilles officielles, collecte quotidienne." },
 ];
 
 const PAR_ID = new Map(SOURCES.map(s => [s.id, s]));

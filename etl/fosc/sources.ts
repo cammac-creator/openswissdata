@@ -1,8 +1,11 @@
 /**
  * FOSC (Feuille officielle suisse du commerce), Portail des feuilles officielles du SECO :
- * rubrique HR (registre du commerce). Décision de Claude-Alain du 16.10.2026 (d3 = A, F8
- * accordé) : « des totaux, et les événements des sociétés ». Détail et preuves :
- * `etl/fosc/SOURCES.md` et la ligne « SECO / FOSC » de `docs/droits-des-sources.md`.
+ * rubrique HR (registre du commerce) depuis le 22.10.2026 ; rubriques KK (faillites), NA
+ * (concordats), LS (appels aux créanciers suite à une liquidation) et SR (autres appels aux
+ * créanciers du droit des sociétés) depuis le 24.10.2026, pour les sociétés seulement.
+ * Décision de Claude-Alain du 16.10.2026 (d3 = A, F8 accordé) : « des totaux, et les événements
+ * des sociétés », étendue le 24.10.2026. Détail et preuves : `etl/fosc/SOURCES.md` et la ligne
+ * « SECO / FOSC » de `docs/droits-des-sources.md`.
  *
  * API publique, sans compte : documentation technique https://www.amtsblattportal.ch/docs/api/
  * (relue le 22.10.2026). Une liste par jour de publication, puis le détail XML de chaque avis
@@ -17,14 +20,23 @@ export const FOSC_PUBLICATIONS_URL = `${FOSC_API_BASE}/publications`;
 /** Rubrique du registre du commerce. Sous-rubriques documentées : HR01 à HR03. */
 export const FOSC_RUBRIC = "HR";
 
+/**
+ * Rubriques lues par la collecte, dans une seule liste par jour (`rubrics=…` répété, forme
+ * documentée : « rubrics=KK&rubrics=NA »). Codes relevés le 24.10.2026 dans
+ * `https://www.shab.ch/api/v1/rubrics` (catalogue des rubriques du portail, intitulés officiels
+ * repris dans `insolvency.ts`). Les successions (ES), les poursuites (SB, dont la commination de
+ * faillite SB07) et le marché financier (FM, dont FM10) ne sont pas lus : hors de la décision.
+ */
+export const FOSC_RUBRICS = ["HR", "KK", "NA", "LS", "SR"] as const;
+
 /** Plafond documenté : « More than 2000 hits are not allowed » par page. */
 export const FOSC_MAX_PAGE_SIZE = 2000;
 
-/** Liste des avis encore publiés (`publicationStates=PUBLISHED`) d'un jour de publication. */
+/** Liste des avis encore publiés (`publicationStates=PUBLISHED`) d'un jour de publication, toutes rubriques lues. */
 export function listUrl(day: string, page: number, size = FOSC_MAX_PAGE_SIZE): string {
-  const params = new URLSearchParams({
-    publicationStates: "PUBLISHED",
-    rubrics: FOSC_RUBRIC,
+  const params = new URLSearchParams({ publicationStates: "PUBLISHED" });
+  for (const rubric of FOSC_RUBRICS) params.append("rubrics", rubric);
+  for (const [key, value] of Object.entries({
     "publicationDate.start": day,
     "publicationDate.end": day,
     "pageRequest.page": String(page),
@@ -32,7 +44,7 @@ export function listUrl(day: string, page: number, size = FOSC_MAX_PAGE_SIZE): s
     // Tri stable (numéro de publication croissant) : sans lui, l'ordre entre deux pages d'un
     // même jour n'est pas garanti (tri par défaut = date de publication, identique pour tous).
     "pageRequest.sortOrders": "column:PUBLICATION_NUMBER|direction:ASC",
-  });
+  })) params.append(key, value);
   return `${FOSC_PUBLICATIONS_URL}?${params.toString()}`;
 }
 
@@ -84,9 +96,9 @@ export const FOSC_QUALITY_NOTICE = {
 } as const;
 
 export const FOSC_SOURCE_LABEL = {
-  fr: "Feuille officielle suisse du commerce (FOSC), Portail des feuilles officielles du SECO, rubrique Registre du commerce",
-  de: "Schweizerisches Handelsamtsblatt (SHAB), Amtsblattportal des SECO, Rubrik Handelsregister",
-  en: "Swiss Official Gazette of Commerce (SOGC), SECO Official Gazettes Portal, Commercial Register section",
+  fr: "Feuille officielle suisse du commerce (FOSC), Portail des feuilles officielles du SECO, rubriques Registre du commerce, Faillites, Concordats, Appels aux créanciers suite à la liquidation et Autres appels aux créanciers relevant du droit des sociétés",
+  de: "Schweizerisches Handelsamtsblatt (SHAB), Amtsblattportal des SECO, Rubriken Handelsregister, Konkurse, Nachlassverfahren, Liquidationsschuldenrufe und Weitere gesellschaftsrechtliche Schuldenrufe",
+  en: "Swiss Official Gazette of Commerce (SOGC), SECO Official Gazettes Portal, sections Commercial Register, Bankruptcies, Composition proceedings, Calls to creditors following liquidation and Other calls to creditors issued under company law",
 } as const;
 
 /** Liste des formes juridiques de l'OFS (source des codes et libellés de `legal-forms.ts`). */

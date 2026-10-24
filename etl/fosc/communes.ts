@@ -65,3 +65,54 @@ export function communeResolverFromCsv(csv: string, minCommunes = 1000): Commune
 export function loadCommuneResolver(path = DEFAULT_LOCALITIES_PATH): CommuneResolver {
   return communeResolverFromCsv(readFileSync(path, "utf8"));
 }
+
+/**
+ * Adresse d'une société (faillites, concordats, liquidations, appels aux créanciers ; lot du
+ * 24.10.2026) → numéro OFS et canton de la commune. Ces schémas ne portent pas de siège : le bloc
+ * société n'a qu'une adresse (`address/swissZipCode`, `address/town`), lue en mémoire seulement
+ * pour en tirer la commune, jamais gardée. Rapprochement EXACT seulement, sur le même répertoire
+ * (colonnes `postal_code`, `locality`, `municipality`) :
+ *   1. le NPA ne désigne qu'une seule commune ;
+ *   2. sinon, parmi les lignes de ce NPA, le lieu égale exactement une localité ou un nom de
+ *      commune, et ces lignes désignent une seule commune.
+ * À défaut, `null` (commune vide, cas compté dans le rapport du passage).
+ */
+export type PostalResolver = (swissZipCode: string | null, town: string | null) => ResolvedCommune | null;
+
+export function postalResolverFromCsv(csv: string, minCommunes = 1000): PostalResolver {
+  const rows = parse(csv, { columns: true, skip_empty_lines: true }) as Record<string, string>[];
+  const byZip = new Map<string, { locality: string; municipality: string; bfs: number; canton: string }[]>();
+  const communes = new Set<number>();
+  for (const row of rows) {
+    const zip = (row.postal_code ?? "").trim();
+    const canton = row.canton ?? "";
+    const bfs = Number(row.municipality_bfs_id);
+    if (!/^\d{4}$/.test(zip) || !SWISS_CANTONS.has(canton) || !Number.isInteger(bfs) || bfs <= 0) continue;
+    const list = byZip.get(zip) ?? [];
+    list.push({ locality: norm(row.locality ?? ""), municipality: norm(row.municipality ?? ""), bfs, canton });
+    byZip.set(zip, list);
+    communes.add(bfs);
+  }
+  if (communes.size < minCommunes) throw new Error(`Répertoire des communes trop court (${communes.size} communes)`);
+  const single = (list: { bfs: number; canton: string }[]): ResolvedCommune | null => {
+    const ids = new Map(list.map((r) => [r.bfs, r.canton]));
+    if (ids.size !== 1) return null;
+    const [[bfs, canton]] = [...ids];
+    return { bfs, canton };
+  };
+  return (swissZipCode, town) => {
+    const zip = swissZipCode?.trim() ?? "";
+    if (!/^\d{4}$/.test(zip)) return null;
+    const list = byZip.get(zip);
+    if (!list) return null;
+    const byZipOnly = single(list);
+    if (byZipOnly) return byZipOnly;
+    const t = town ? norm(town) : "";
+    if (!t) return null;
+    return single(list.filter((r) => r.locality === t || r.municipality === t));
+  };
+}
+
+export function loadPostalResolver(path = DEFAULT_LOCALITIES_PATH): PostalResolver {
+  return postalResolverFromCsv(readFileSync(path, "utf8"));
+}

@@ -1,18 +1,24 @@
-# FOSC : avis du registre du commerce (rubrique HR)
+# FOSC : avis du registre du commerce, faillites, concordats, liquidations et appels aux créanciers
 
-> **État au 22.10.2026.** Collecte construite et testée, **rien n'est publié** et aucune page ne lit ces données.
+> **État au 24.10.2026.** Collecte construite et testée, **rien n'est publié** et aucune page ne lit ces données.
 > Décision de Claude-Alain du 16.10.2026 (d3 = A, F8 accordé) : « des totaux, et les événements des sociétés ».
+> Étendue le 24.10.2026 aux faillites, concordats, liquidations et appels aux créanciers, **pour les sociétés
+> seulement** (section « Faillites, concordats, liquidations et appels aux créanciers » ci-dessous).
 > En cas de doute, le code fait foi (`etl/fosc/`).
 
 ## Source
 
 - Éditeur : Secrétariat d'État à l'économie (SECO), Portail des feuilles officielles, Feuille officielle suisse du
-  commerce (FOSC), rubrique HR (registre du commerce). Sous-rubriques : HR01 nouvelles inscriptions, HR02 mutations,
-  HR03 radiations.
-- API publique, sans compte : documentation technique https://www.amtsblattportal.ch/docs/api/ (relue le 22.10.2026).
-  - Liste d'un jour : `https://www.shab.ch/api/v1/publications?publicationStates=PUBLISHED&rubrics=HR&publicationDate.start=J&publicationDate.end=J`
+  commerce (FOSC). Rubriques lues : HR (registre du commerce : HR01 nouvelles inscriptions, HR02 mutations, HR03
+  radiations) ; depuis le 24.10.2026, KK (faillites), NA (concordats), LS (appels aux créanciers suite à la
+  liquidation) et SR (autres appels aux créanciers relevant du droit des sociétés).
+- API publique, sans compte : documentation technique https://www.amtsblattportal.ch/docs/api/ (relue le 22.10.2026
+  et le 24.10.2026) ; catalogue des rubriques et de leurs intitulés officiels : `https://www.shab.ch/api/v1/rubrics`.
+  - Liste d'un jour, une seule requête pour toutes les rubriques lues :
+    `https://www.shab.ch/api/v1/publications?publicationStates=PUBLISHED&rubrics=HR&rubrics=KK&rubrics=NA&rubrics=LS&rubrics=SR&publicationDate.start=J&publicationDate.end=J`
     (pages de 2 000 au plus, tri stable par numéro de publication).
-  - Détail d'un avis : `https://www.shab.ch/api/v1/publications/{id}/xml` (schéma d'export HR, version 1.26).
+  - Détail d'un avis : `https://www.shab.ch/api/v1/publications/{id}/xml` (schémas d'export, version 1.26 :
+    `https://www.shab.ch/api/v1/schemas/shab/1.26/<code>-export.xsd`).
 - Conditions : conditions générales (CG) du portail, https://shab.ch/static/agb_fr.pdf, version du 07.06.2024.
   Empreinte SHA-256 du PDF français relevée le 22.10.2026 : `e8770a63beb1b9a6344e347023410c9ad4c3d287187a8efa88745ce237bf708e`.
 - Liste des formes juridiques : OFS, concept I14Y « Rechtsform eines Unternehmens » v1.2.0
@@ -24,7 +30,7 @@
 |---|---|---|
 | Accepter les CG avant la première utilisation, puis tous les 90 jours | CG 1.2 al. 1 | `FOSC_TERMS_ACCEPTED_ON` (16.10.2026) ; au-delà de 90 jours, la collecte ne lit plus le portail et échoue visiblement. Nouvelle acceptation = geste de Claude-Alain. |
 | S'informer de la version actuelle des CG | CG 1.1 al. 4 | Le PDF des CG est relu à chaque passage ; une empreinte différente arrête la collecte. |
-| Protection des données ; art. 11 al. 3 OFOSC par analogie | CG 3.3 | Aucune donnée de personne : champs structurés des sociétés seulement, entreprises individuelles dans des totaux. |
+| Protection des données ; art. 11 al. 3 OFOSC par analogie | CG 3.3 | Aucune donnée de personne : champs structurés des sociétés seulement ; entreprises individuelles, personnes physiques et successions dans des totaux. |
 | Données d'entreprises dans la structure du registre IDE | CG 3.3 | IDE contrôlé (chiffre de contrôle) et écrit `CHE-xxx.xxx.xxx`. |
 | Indiquer la source | CG 3.3 | `source` dans chaque document de totaux. |
 | « Ceci n'est pas une publication officielle… » | CG 3.3 | `not_official_notice` (formules FR, DE, EN des CG). |
@@ -33,7 +39,7 @@
 
 Les CG ne fixent aucune limite chiffrée de requêtes. La collecte reste polie : une requête à la fois, 500 ms de pause,
 attente qui double sur 429 ou 503 (jamais moins que `Retry-After`, arrêt au-delà de 300 s), 3 000 requêtes au plus
-par passage, heure limite de 60 minutes.
+par passage (valeur par défaut, `--max-requests`), heure limite de 60 minutes.
 
 ## Ce qui est lu et ce qui est gardé
 
@@ -70,6 +76,71 @@ sinon même nom s'il ne désigne qu'une commune en Suisse ; à défaut la commun
 canton retenu est celui de la commune du siège : le canton d'un avis est celui de l'office qui publie, qui diffère
 lors d'un transfert de siège dans un autre canton.
 
+## Faillites, concordats, liquidations et appels aux créanciers (sociétés seulement, 24.10.2026)
+
+Décision de Claude-Alain du 24.10.2026 : étendre la collecte à ces rubriques **pour les sociétés seulement**. Code :
+`etl/fosc/subrubrics.ts` (codes, intitulés, chemins, dates permises) et `etl/fosc/insolvency.ts` (lecture et classement).
+
+| Rubrique | Sous-rubriques lues | Blocs société lus | Avis par jour ouvré (19 au 23.10.2026) |
+|---|---|---|---|
+| KK Faillites | KK01 à KK12 (KK10 « Autre avis » : compté sans lecture) | `content/debtor/companies/company` | 101 à 406 |
+| NA Concordats | NA01 à NA12 (NA11 « Autre avis » : compté sans lecture) | `content/debtor/companies/company` | 3 à 12 |
+| LS Appels aux créanciers suite à la liquidation | LS01 à LS08 | `content/dissolved/companies/company` | 37 à 41 |
+| SR Autres appels aux créanciers du droit des sociétés | SR01 à SR06 | sociétés qui transfèrent, reprennent, réduisent leur capital… | 5 à 10 |
+
+Ensemble : 154 à 464 avis par jour ouvré (moyenne 290), en plus des 1 046 à 1 319 avis HR. Les intitulés officiels FR,
+DE et EN de chaque sous-rubrique sont repris du catalogue du portail. Les successions (rubrique ES), les poursuites (SB,
+dont la commination de faillite SB07) et le marché financier (FM, dont FM10 « FINMA-Insolvabilité ») ne sont pas lus :
+ils ne font pas partie de la décision.
+
+**Une ligne n'est écrite que pour UNE société identifiée dans la structure XML**, toutes conditions réunies :
+schéma reconnu (espace de noms de la racine `https://shab.ch/shab/<code>-export`, version 1.26) ; aucune personne
+physique (aucun élément `person`, `prename`, `dateOfBirth`, `dateOfDeath` où que ce soit sous `content`, aucun débiteur
+de type « person ») ; aucune succession ni succession répudiée (`addition` = `legacy`, `refusedLegacy`), aucun autre
+avenant ; un seul bloc société, à un chemin connu, et aucun autre élément `company` ; IDE valide (chiffre de contrôle),
+`noUID` jamais vrai ; forme juridique **lue dans le bloc** et dans la liste blanche de HR, sans l'élargir ; un canton
+connu. La forme n'est jamais déduite : ni de l'intitulé de la sous-rubrique (LS01 « société anonyme » sert seulement de
+contrôle : une forme lue contraire envoie l'avis dans les totaux), ni du nom.
+
+**Totaux seulement** (comptes anonymes par jour, sous-rubrique, canton et forme ; jamais de nom, d'IDE, d'adresse ni de
+date de naissance) : personne physique (code `personne`), succession et succession répudiée (code `succession`),
+entreprise individuelle (0101), société sans forme juridique indiquée (code `inconnue`, cas de la plupart des faillites
+de sociétés : 11 blocs société KK sur 13 regardés le 24.10.2026), sans IDE ou `noUID` vrai, SNC, commandite,
+succursales et autres formes hors liste blanche, avis à plusieurs sociétés (SR01 à SR04 et SR06 en ont presque toujours
+deux : fusion, scission, transformation, transfert à l'étranger), structure inattendue, version de schéma ou espace de
+noms inconnus, et les « autres avis » KK10 et NA11, dont l'événement n'est décrit que dans le texte libre.
+
+**Champs d'une ligne** : les mêmes que HR (identifiant technique de l'avis, IDE, sous-rubrique, date de publication,
+commune OFS, canton, forme juridique, jour de suppression, revérification), plus `dates` : au plus les dates de la
+procédure que le schéma donne en balise propre directement sous `content`, une seule occurrence, liste fermée par
+sous-rubrique (par exemple `resolutionDate`, date d'ouverture de la faillite, et `entryDeadline`, fin du délai de
+production, pour KK02 ; `moratoriumDateFrom` pour NA02). Jamais une date sous `debtor/person`, jamais un groupe répété
+(assemblée des créanciers, enchères), jamais un texte libre, jamais le nom d'un liquidateur, d'un commissaire ou d'un
+office (`meta/registrationOffice`, y compris son IDE, n'est jamais lu).
+
+**Commune et canton** : ces schémas n'ont pas de siège. Le NPA et le lieu de l'adresse de la société sont lus en
+mémoire et rapprochés exactement du répertoire des localités (NPA d'une seule commune, sinon lieu égal à une localité
+de ce NPA qui ne désigne qu'une commune) ; ils ne sont jamais gardés. À défaut, ou si la commune n'est pas dans le
+canton indiqué par le bloc société, la commune reste vide (mesuré le 24.10.2026 : 4 lignes sur 5 dans la simulation,
+6 adresses sur 10 dans un échantillon d'appels aux créanciers ; un NPA ou une localité partagés entre plusieurs
+communes sont fréquents). Canton : celui de la commune, sinon celui du bloc société, sinon celui de
+l'office qui publie (canton de la liste), qui n'est pas retenu quand l'avis est listé dans deux cantons (62 avis sur
+1 451, du 19 au 23.10.2026).
+
+**Garde-fous propres** : une sous-rubrique inconnue de KK, NA, LS ou SR dans la liste (par exemple un futur KK13 au
+schéma non relu) arrête le passage, comme un schéma HR changé (code 1, aucun jour enregistré, purge enregistrée) ;
+plus de 5 % d'avis sans aucune partie reconnue (sur au moins 50 détails) arrêtent aussi le passage ; une version de
+schéma ou un espace de noms inconnus n'arrêtent rien (les jours sont enregistrés, HR continue) mais envoient l'avis dans
+les totaux, le compte apparaît dans le journal (« schéma inconnu ») et le passage sort en code 1 pour que l'alerte parte
+(sinon, à la prochaine version des formulaires, plus aucune ligne ne serait écrite sans que personne le voie).
+Conditions générales, plafond de requêtes, jour en échec et codes de sortie : les mêmes que HR ; le seuil du jour en
+échec (au moins 3 détails illisibles et plus de 1 %) porte sur tous les détails du jour, HR compris.
+
+**Durées de publication** (catalogue du portail, champ `publicPeriod`, et `expirationDate` des avis) : 1 à 60 mois,
+60 par défaut, pour KK et NA ; 60 mois pour LS ; 12 à 60 mois, 36 par défaut, pour SR. Quelques avis KK et NA échoient
+après 31, 61 ou 182 jours. La règle de conservation ci-dessous (jour de suppression = min(échéance, J + 30)) s'applique
+telle quelle.
+
 ## Durée de publication et conservation
 
 - Les avis HR n'ont pas d'échéance dans l'API (`expirationDate` vide) et restent consultables des années sur le
@@ -87,11 +158,13 @@ lors d'un transfert de siège dans un autre canton.
 
 ## Totaux (or, non publié)
 
-Document `openswissdata.fosc-hr-monthly-totals` v1 : par mois, totaux par type d'événement × canton × forme
-juridique, entreprises individuelles comprises, avec la source, la mention non officielle, les indications de
-qualité, la méthode et la couverture (jours collectés, jours manquants). Un jour de la fenêtre de rattrapage
-(7 jours) est recalculé en entier s'il change ; ensuite il est figé, et un mois est figé quand tous ses jours ont
-quitté la fenêtre. Aucun nom, aucun IDE, aucun classement d'entreprise.
+Document `openswissdata.fosc-hr-monthly-totals` v2 (nom gardé, 24.10.2026) : par mois, totaux par type d'événement
+(sous-rubrique) × canton × forme juridique, entreprises individuelles, personnes (`personne`) et successions
+(`succession`) comprises, avec la source, la mention non officielle, les indications de qualité, la méthode et la
+couverture (jours collectés, jours manquants), en tout et **par rubrique** : un jour calculé avec la seule rubrique HR
+ne compte jamais comme couvert pour KK. Un jour de la fenêtre de rattrapage (7 jours) est recalculé en entier s'il
+change ; ensuite il est figé, et un mois est figé quand tous ses jours ont quitté la fenêtre. Aucun nom, aucun IDE,
+aucun classement d'entreprise.
 
 **Ce qui resterait publiable après la durée de publication : à décider avant toute publication.** Une case de 1
 dans un petit canton ou pour une forme rare désigne un seul avis, souvent une entreprise individuelle ; il faudra
@@ -101,8 +174,12 @@ choisir un seuil de petites cases, le niveau de détail (canton ou national) et 
 
 - Passage réel : bucket R2 privé existant, objets `fosc/argent/hr-state-v1.json` (état) et
   `fosc/or/hr-monthly-totals-v1.json` (totaux), réécrits à chaque passage. Jamais dans le dépôt (public, historique
-  permanent) ni dans un artefact GitHub.
+  permanent) ni dans un artefact GitHub. Les clés gardent leur nom depuis le lot du 24.10.2026 : l'état passe en
+  version 2 sous la même clé (un état version 1 est relu, ses jours comptés pour HR seulement), pour qu'aucun ancien
+  objet ne reste derrière la purge.
 - Simulation : `FOSC_DRY_RUN=1 npm run sync:fosc -- --out <dossier hors du dépôt> [--days J1,J2] [--sample-details N]`.
   Elle lit l'API réelle, écrit seulement dans le dossier indiqué et n'affiche que des nombres.
 - Passage réel : `npm run sync:fosc -- --write-r2` (workflow planifié ; sans identifiants R2, refus).
-- Tests : `tests/etl/fosc-*.test.ts`, données synthétiques (`tests/helpers/fosc-portal.ts`).
+- Tests : `tests/etl/fosc-*.test.ts`, données synthétiques (`tests/helpers/fosc-portal.ts`,
+  `tests/helpers/fosc-insolvency-portal.ts`) ; `tests/etl/fosc-faillites-fuite.test.ts` inspecte tout ce qui sort
+  (objets R2 simulés, fichiers de `--out`, journal) et y cherche les noms, IDE, adresses et dates de naissance fictifs.

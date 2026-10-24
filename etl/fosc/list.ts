@@ -15,6 +15,13 @@ export interface ListEntry {
   expirationDate: string | null;
   /** Premier canton de `meta.cantons` (un seul canton pour 1 187 avis sur 1 187 le 20.10.2026). */
   canton: string | null;
+  /**
+   * Présent (et vrai) seulement si `meta.cantons` porte plusieurs cantons distincts : 62 avis de
+   * faillite, de concordat ou d'appel aux créanciers sur 1 451 en portaient deux, du 19 au
+   * 23.10.2026. Le classement de ces rubriques ne retient alors pas le canton de la liste
+   * (`insolvency.ts`) ; celui des avis HR est inchangé.
+   */
+  multipleCantons?: true;
 }
 
 export interface ListPage { total: number; entries: ListEntry[] }
@@ -58,6 +65,7 @@ export function parseListPage(body: unknown): ListPage {
       publicationState,
       expirationDate: datePart(meta.expirationDate),
       canton: cantons[0] ?? null,
+      ...(new Set(cantons).size > 1 ? { multipleCantons: true as const } : {}),
     });
   }
   return { total, entries };

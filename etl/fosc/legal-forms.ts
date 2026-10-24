@@ -46,6 +46,18 @@ export const UNKNOWN_LEGAL_FORM = "inconnue";
 
 export const SOLE_PROPRIETORSHIP = "0101";
 
+/**
+ * Codes des totaux pour un débiteur qui n'est pas une société (faillites, concordats, lot du
+ * 24.10.2026) : une personne physique, ou une succession (succession, succession répudiée). Ces
+ * avis ne donnent jamais de ligne ; ils ne comptent que dans les totaux, sous ces deux codes.
+ */
+export const PERSON_TOTALS_CODE = "personne";
+export const ESTATE_TOTALS_CODE = "succession";
+export const SPECIAL_TOTALS_LABELS: Readonly<Record<string, LegalFormLabel>> = {
+  [PERSON_TOTALS_CODE]: { fr: "Personne physique", de: "Natürliche Person", en: "Natural person" },
+  [ESTATE_TOTALS_CODE]: { fr: "Succession (y compris répudiée)", de: "Nachlass (auch ausgeschlagene Erbschaft)", en: "Estate (including a refused estate)" },
+};
+
 /** Liste BLANCHE : seules ces formes peuvent avoir une ligne d'événement stockée. */
 export const ROW_STORABLE_LEGAL_FORMS: ReadonlySet<string> = new Set([
   "0105", "0106", "0107", "0108", "0109", "0110", "0114", "0115", "0116", "0117",
