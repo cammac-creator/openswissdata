@@ -94,7 +94,7 @@ describe("faillites : une personne, une succession ou une entreprise individuell
     const state = JSON.parse(r2Objects.get(R2_STATE_KEY)!.toString("utf8")) as FoscState;
     // Une seule ligne : la Sàrl en liquidation.
     expect(state.events.map((e) => [e.event_type, e.ide])).toEqual([["LS02", IDE.sarl]]);
-    expect(state.events[0].dates).toEqual({ entryDeadline: "2026-11-30" });
+    expect(state.events[0]).not.toHaveProperty("dates"); // aucune date de procédure gardée
     const tallies = state.days[0].tallies;
     expect(tallies).toEqual(expect.arrayContaining([
       { event_type: "KK02", canton: "VD", legal_form: "personne", count: 1 },
@@ -112,6 +112,8 @@ describe("faillites : une personne, une succession ou une entreprise individuell
     expect(everything).not.toContain(PERSON.birth);
     expect(everything).not.toContain("2026-11-20");
     expect(everything).not.toContain("2026-11-25");
+    expect(everything).not.toContain("2026-11-21");
+    expect(everything).not.toContain("2026-11-30");
   });
 
   it("fichiers de --out : seulement l'état et les totaux, sans aucune donnée de personne ni XML brut", async () => {

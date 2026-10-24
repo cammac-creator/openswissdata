@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { postalResolverFromCsv } from "../../etl/fosc/communes.js";
 import { classifyInsolvencyAvis, parseInsolvencyDetail } from "../../etl/fosc/insolvency.js";
 import type { ListEntry } from "../../etl/fosc/list.js";
-import { INSOLVENCY_BY_CODE, INSOLVENCY_SPECS, rowDateTags } from "../../etl/fosc/subrubrics.js";
+import { INSOLVENCY_BY_CODE, INSOLVENCY_SPECS, isRowEventType } from "../../etl/fosc/subrubrics.js";
 import { FoscXmlError } from "../../etl/fosc/xml.js";
 import { IDE, insolvencyXml, PERSON, type InsolvencyAvis } from "../helpers/fosc-insolvency-portal.js";
 
@@ -33,7 +33,8 @@ describe("faillites : lecture du détail XML", () => {
     expect(d.companies).toEqual([{ uid: IDE.sa1, legalForm: "0106", canton: "VD", swissZipCode: "1000", town: "Lausanne", repeated: [] }]);
     expect(d.personMarkers).toBeGreaterThanOrEqual(3); // person, prename, dateOfBirth
     expect(d.debtorTypes.sort()).toEqual(["company", "person"]);
-    expect(d.dates).toEqual({ creditorHearingDate: ["2026-11-02"], entryDeadline: ["2026-11-25"] });
+    expect(d).not.toHaveProperty("dates"); // aucune date de procédure lue (relecture du 24.10.2026)
+    expect(JSON.stringify(d)).not.toContain("2026-11-25");
     expect(JSON.stringify(d)).not.toContain(PERSON.name);
     expect(JSON.stringify(d)).not.toContain(PERSON.birth);
     expect(JSON.stringify(d)).not.toContain(IDE.revision);
@@ -48,17 +49,14 @@ describe("faillites : lecture du détail XML", () => {
     expect((caught as Error).message).not.toContain(PERSON.name);
   });
 
-  it("chaque sous-rubrique a un chemin de bloc, et ses dates sont des balises directement sous content", () => {
+  it("chaque sous-rubrique a un chemin de bloc ; les « autres avis » et les codes inconnus ne sont jamais des lignes", () => {
     expect(INSOLVENCY_SPECS.map((s) => s.code)).toHaveLength(12 + 12 + 8 + 6);
-    for (const s of INSOLVENCY_SPECS) {
-      expect(s.companyPaths.length).toBeGreaterThan(0);
-      for (const d of s.dates) expect(d).toMatch(/^[a-zA-Z]+$/);
-      expect(s.dates.some((d) => /birth|death/i.test(d))).toBe(false);
-    }
-    expect(rowDateTags("KK10")).toBeNull();
-    expect(rowDateTags("NA11")).toBeNull();
-    expect(rowDateTags("KK13")).toBeNull();
-    expect(rowDateTags("HR01")).toEqual([]);
+    for (const s of INSOLVENCY_SPECS) expect(s.companyPaths.length).toBeGreaterThan(0);
+    expect(isRowEventType("KK10")).toBe(false);
+    expect(isRowEventType("NA11")).toBe(false);
+    expect(isRowEventType("KK13")).toBe(false);
+    expect(isRowEventType("HR01")).toBe(true);
+    expect(isRowEventType("KK02")).toBe(true);
   });
 });
 

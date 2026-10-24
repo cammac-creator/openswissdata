@@ -21,10 +21,11 @@
  * parties, cas ambigu, schéma inconnu) : TOTAUX SEULEMENT, comptes anonymes par jour,
  * sous-rubrique, canton et forme ; jamais un nom, un IDE, une adresse ni une date de naissance.
  *
- * Champs d'une ligne : ceux de HR (identifiant technique de l'avis, IDE, sous-rubrique, date de
- * publication, commune OFS, canton, forme juridique, jour de suppression, revérification), plus au
- * plus les DATES de la procédure listées dans `subrubrics.ts` (balises propres, une occurrence).
- * Jamais un texte libre, ni le nom d'un liquidateur, d'un commissaire ou d'un office.
+ * Champs d'une ligne : EXACTEMENT ceux de HR (identifiant technique de l'avis, IDE, sous-rubrique,
+ * date de publication, commune OFS, canton, forme juridique, jour de suppression, revérification),
+ * pour que la version précédente de la collecte (b5dc6fc) sache relire et purger l'état après un
+ * retour arrière (relecture du 24.10.2026). Aucune date de procédure, jamais un texte libre, ni le
+ * nom d'un liquidateur, d'un commissaire ou d'un office.
  *
  * Commune : ces schémas n'ont pas de siège ; le NPA et le lieu de l'adresse de la société sont lus
  * en mémoire pour un rapprochement exact (`communes.ts`), jamais gardés. Une adresse répétée, ou une
@@ -36,7 +37,7 @@ import {
   ESTATE_TOTALS_CODE, PERSON_TOTALS_CODE, ROW_STORABLE_LEGAL_FORMS, SOLE_PROPRIETORSHIP, totalsLegalForm, UNKNOWN_LEGAL_FORM,
 } from "./legal-forms.js";
 import type { ListEntry } from "./list.js";
-import { deleteOn, isDeletionDue, isValidDay, type FoscEventRow, type Tally } from "./state.js";
+import { deleteOn, isDeletionDue, type FoscEventRow, type Tally } from "./state.js";
 import type { InsolvencySpec } from "./subrubrics.js";
 import { readIdAndTestImport, scanDetail, type DetailProfile } from "./xml.js";
 
@@ -74,7 +75,6 @@ export interface InsolvencyDetail {
   additionElements: number;
   debtorTypes: string[];
   noUid: string[];
-  dates: Record<string, string[]>;
 }
 
 const profiles = new Map<string, DetailProfile>();
@@ -89,7 +89,6 @@ function profileFor(spec: InsolvencySpec): DetailProfile {
     [`${CONTENT}/debtor/selectType`]: "debtorType",
   };
   for (const p of spec.companyPaths) scalars[`${CONTENT}/${p.replace(/\/company$/, "/noUID")}`] = "noUID";
-  for (const tag of spec.dates) scalars[`${CONTENT}/${tag}`] = `date:${tag}`;
   const profile: DetailProfile = {
     blocks: Object.fromEntries(spec.companyPaths.map((p) => [`${CONTENT}/${p}`, "party"])),
     blockFields: BLOCK_FIELDS,
@@ -114,11 +113,6 @@ function schemaKnown(code: string, rootName: string | null, namespaces: Record<s
 export function parseInsolvencyDetail(xml: string, spec: InsolvencySpec): InsolvencyDetail {
   const scanned = scanDetail(xml, profileFor(spec));
   const { id, testImport } = readIdAndTestImport(scanned);
-  const dates: Record<string, string[]> = {};
-  for (const tag of spec.dates) {
-    const v = scanned.scalars[`date:${tag}`];
-    if (v) dates[tag] = v;
-  }
   const count = (name: string) => scanned.counts[name] ?? 0;
   return {
     id,
@@ -138,7 +132,6 @@ export function parseInsolvencyDetail(xml: string, spec: InsolvencySpec): Insolv
     additionElements: count("addition"),
     debtorTypes: scanned.scalars.debtorType ?? [],
     noUid: scanned.scalars.noUID ?? [],
-    dates,
   };
 }
 
@@ -202,11 +195,6 @@ export function classifyInsolvencyAvis(
   const deletion = deleteOn(entry.publicationDate, entry.expirationDate);
   if (isDeletionDue(deletion, today)) return fail("expiring");
 
-  const dates: Record<string, string> = {};
-  for (const tag of spec.dates) {
-    const values = detail.dates[tag] ?? [];
-    if (values.length === 1 && isValidDay(values[0])) dates[tag] = values[0];
-  }
   const row: FoscEventRow = {
     publication_id: entry.id,
     ide: uid.uid,
@@ -217,7 +205,6 @@ export function classifyInsolvencyAvis(
     legal_form: form,
     delete_on: deletion,
     verified_on: today,
-    ...(Object.keys(dates).length > 0 ? { dates } : {}),
   };
   return { kind: "row", outcome: "row", row, tally: { event_type: spec.code, canton, legal_form: form }, communeResolved: commune !== null };
 }

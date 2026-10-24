@@ -79,7 +79,7 @@ lors d'un transfert de siège dans un autre canton.
 ## Faillites, concordats, liquidations et appels aux créanciers (sociétés seulement, 24.10.2026)
 
 Décision de Claude-Alain du 24.10.2026 : étendre la collecte à ces rubriques **pour les sociétés seulement**. Code :
-`etl/fosc/subrubrics.ts` (codes, intitulés, chemins, dates permises) et `etl/fosc/insolvency.ts` (lecture et classement).
+`etl/fosc/subrubrics.ts` (codes, intitulés, chemins des blocs société) et `etl/fosc/insolvency.ts` (lecture et classement).
 
 | Rubrique | Sous-rubriques lues | Blocs société lus | Avis par jour ouvré (19 au 23.10.2026) |
 |---|---|---|---|
@@ -110,13 +110,14 @@ succursales et autres formes hors liste blanche, avis à plusieurs sociétés (S
 deux : fusion, scission, transformation, transfert à l'étranger), structure inattendue, version de schéma ou espace de
 noms inconnus, et les « autres avis » KK10 et NA11, dont l'événement n'est décrit que dans le texte libre.
 
-**Champs d'une ligne** : les mêmes que HR (identifiant technique de l'avis, IDE, sous-rubrique, date de publication,
-commune OFS, canton, forme juridique, jour de suppression, revérification), plus `dates` : au plus les dates de la
-procédure que le schéma donne en balise propre directement sous `content`, une seule occurrence, liste fermée par
-sous-rubrique (par exemple `resolutionDate`, date d'ouverture de la faillite, et `entryDeadline`, fin du délai de
-production, pour KK02 ; `moratoriumDateFrom` pour NA02). Jamais une date sous `debtor/person`, jamais un groupe répété
-(assemblée des créanciers, enchères), jamais un texte libre, jamais le nom d'un liquidateur, d'un commissaire ou d'un
-office (`meta/registrationOffice`, y compris son IDE, n'est jamais lu).
+**Champs d'une ligne** : EXACTEMENT les neuf champs de HR (identifiant technique de l'avis, IDE, sous-rubrique, date de
+publication, commune OFS, canton, forme juridique, jour de suppression, revérification). Jamais un texte libre, jamais
+le nom d'un liquidateur, d'un commissaire ou d'un office (`meta/registrationOffice`, y compris son IDE, n'est jamais
+lu). Les dates de la procédure (ouverture de la faillite, fin d'un délai…) ne sont PAS gardées depuis la relecture du
+24.10.2026 : un champ de ligne en plus serait refusé par la version précédente de la collecte, qui ne pourrait alors
+plus relire l'état ni purger après un retour arrière ; ailleurs dans l'état, rien ne garantissait leur effacement par
+cette version ; un objet R2 distinct resterait orphelin. Les reprendre demanderait un objet distinct et une procédure
+d'effacement manuelle (F6) : décision de Claude-Alain.
 
 **Commune et canton** : ces schémas n'ont pas de siège. Le NPA et le lieu de l'adresse de la société sont lus en
 mémoire et rapprochés exactement du répertoire des localités (NPA d'une seule commune, sinon lieu égal à une localité
@@ -133,8 +134,10 @@ plus de 5 % d'avis sans aucune partie reconnue (sur au moins 50 détails) arrêt
 schéma ou un espace de noms inconnus n'arrêtent rien (les jours sont enregistrés, HR continue) mais envoient l'avis dans
 les totaux, le compte apparaît dans le journal (« schéma inconnu ») et le passage sort en code 1 pour que l'alerte parte
 (sinon, à la prochaine version des formulaires, plus aucune ligne ne serait écrite sans que personne le voie).
-Conditions générales, plafond de requêtes, jour en échec et codes de sortie : les mêmes que HR ; le seuil du jour en
-échec (au moins 3 détails illisibles et plus de 1 %) porte sur tous les détails du jour, HR compris.
+Conditions générales, plafond de requêtes, jour en échec et codes de sortie : les mêmes que HR. Le seuil du jour en
+échec (au moins 3 détails illisibles et plus de 1 %) est calculé séparément pour HR (exactement comme avant) et pour les
+nouvelles rubriques ; le jour échoue si l'un OU l'autre le dépasse : des détails sains d'une famille ne diluent jamais
+les échecs de l'autre (relecture du 24.10.2026).
 
 **Durées de publication** (catalogue du portail, champ `publicPeriod`, et `expirationDate` des avis) : 1 à 60 mois,
 60 par défaut, pour KK et NA ; 60 mois pour LS ; 12 à 60 mois, 36 par défaut, pour SR. Quelques avis KK et NA échoient
@@ -174,12 +177,30 @@ choisir un seuil de petites cases, le niveau de détail (canton ou national) et 
 
 - Passage réel : bucket R2 privé existant, objets `fosc/argent/hr-state-v1.json` (état) et
   `fosc/or/hr-monthly-totals-v1.json` (totaux), réécrits à chaque passage. Jamais dans le dépôt (public, historique
-  permanent) ni dans un artefact GitHub. Les clés gardent leur nom depuis le lot du 24.10.2026 : l'état passe en
-  version 2 sous la même clé (un état version 1 est relu, ses jours comptés pour HR seulement), pour qu'aucun ancien
-  objet ne reste derrière la purge.
+  permanent) ni dans un artefact GitHub. Depuis le lot du 24.10.2026, les lignes des nouvelles rubriques vivent dans
+  le MÊME état, qui reste en version 1 (mêmes neuf champs de ligne ; champs facultatifs ajoutés aux jours et aux mois :
+  `rubrics`, `persons`, `estates`, `days_collected_by_rubric`). Aucun état en version 2 n'a jamais été écrit dans R2 :
+  la version 2 de la révision 35d0262 n'a existé que dans une simulation locale, effacée.
 - Simulation : `FOSC_DRY_RUN=1 npm run sync:fosc -- --out <dossier hors du dépôt> [--days J1,J2] [--sample-details N]`.
   Elle lit l'API réelle, écrit seulement dans le dossier indiqué et n'affiche que des nombres.
 - Passage réel : `npm run sync:fosc -- --write-r2` (workflow planifié ; sans identifiants R2, refus).
 - Tests : `tests/etl/fosc-*.test.ts`, données synthétiques (`tests/helpers/fosc-portal.ts`,
   `tests/helpers/fosc-insolvency-portal.ts`) ; `tests/etl/fosc-faillites-fuite.test.ts` inspecte tout ce qui sort
-  (objets R2 simulés, fichiers de `--out`, journal) et y cherche les noms, IDE, adresses et dates de naissance fictifs.
+  (objets R2 simulés, fichiers de `--out`, journal) et y cherche les noms, IDE, adresses et dates de naissance fictifs ;
+  `tests/etl/fosc-faillites-relecture.test.ts` prouve le seuil séparé du jour en échec et le retour arrière.
+
+## Retour arrière (vers la révision b5dc6fc, collecte HR seule)
+
+- Aucun geste manuel n'est nécessaire, et la purge n'est jamais bloquée : le contrôle de b5dc6fc accepte l'état écrit
+  par cette version (les champs ajoutés aux jours et aux mois sont ignorés, les lignes ont les neuf champs attendus).
+  Prouvé par `tests/etl/fosc-faillites-relecture.test.ts`, qui contient une copie datée du contrôle et de la purge de
+  b5dc6fc.
+- Au premier passage de b5dc6fc, toutes les lignes des nouvelles rubriques partent : la revérification ne relit que la
+  liste HR (un avis absent de la liste perd sa ligne) et les jours de la fenêtre sont recalculés sur HR seul ; à défaut,
+  la purge à J + 30 et la purge des lignes non revérifiées depuis 3 jours les effacent de toute façon.
+- Restent, anonymes : les totaux des nouvelles rubriques (codes `personne`, `succession`…) dans les jours anciens et les
+  mois figés ; b5dc6fc les recopie dans ses totaux mensuels, sous leur code de sous-rubrique.
+- Retour en avant ensuite : la version de ce lot relit l'état réécrit par b5dc6fc sans erreur (test « sens inverse ») ;
+  un jour sans `rubrics` est recalculé avec toutes les rubriques ; un mois figé par b5dc6fc sans
+  `days_collected_by_rubric` compte pour HR seul : la couverture des nouvelles rubriques est alors sous-estimée,
+  jamais surestimée.

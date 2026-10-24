@@ -63,8 +63,16 @@ export { UNKNOWN_CANTON };
 /** Au-delà de 5 % de détails sans IDE ou sans forme juridique, le schéma a probablement changé. */
 export const MAX_MISSING_RATIO = 0.05;
 export const MIN_PARSED_FOR_RATIO = 50;
-/** Un jour dont plus de 1 % des détails (au moins 3) échouent n'est pas enregistré. */
+/**
+ * Un jour dont plus de 1 % des détails (au moins 3) échouent n'est pas enregistré. Le seuil est
+ * calculé SÉPARÉMENT pour HR (exactement comme avant le lot du 24.10.2026) et pour les nouvelles
+ * rubriques : des détails sains d'une famille ne diluent jamais les échecs de l'autre.
+ */
 export const MAX_DETAIL_FAILED_RATIO = 0.01;
+
+/** Seuil du jour en échec pour une famille de détails (`read` compte aussi les lectures illisibles, comme avant). */
+export const detailFailureExceeded = (failed: number, read: number): boolean =>
+  failed >= 3 && failed > (read + failed) * MAX_DETAIL_FAILED_RATIO;
 export const DEFAULT_MAX_REQUESTS = 3000;
 const MAX_LIST_BYTES = 30_000_000;
 const MAX_DETAIL_BYTES = 2_000_000;
@@ -84,8 +92,6 @@ export interface InsolvencyCounts {
   outcomes: Record<InsolvencyOutcome, number>;
   /** Lignes dont la commune n'a pas pu être rapprochée (canton gardé). */
   commune_unresolved: number;
-  /** Lignes qui portent au moins une date de procédure. */
-  with_dates: number;
   /** « Autres avis » (KK10, NA11) : comptés sans lire le détail. */
   general_notices: number;
 }
@@ -97,7 +103,6 @@ export const emptyInsolvencyCounts = (): InsolvencyCounts => ({
     multiple_parties: 0, no_party: 0, ambiguous: 0, unknown_schema: 0, no_canton: 0, expiring: 0,
   },
   commune_unresolved: 0,
-  with_dates: 0,
   general_notices: 0,
 });
 
@@ -106,7 +111,10 @@ export interface DayReport {
   status: "unchanged" | "computed" | "skipped_budget" | "failed" | "frozen_month" | "list_failed" | "schema_unknown";
   listed: number;
   by_subrubric: Record<string, number>;
+  /** Détails HR seulement (contrôle du jour en échec HR, inchangé). */
   details_read: number;
+  /** Détails des nouvelles rubriques (contrôle distinct, même seuil). */
+  insolvency_details_read: number;
   stored_rows: number;
   totals_only: number;
   sole_proprietorships: number;
@@ -114,7 +122,10 @@ export interface DayReport {
   persons: number;
   estates: number;
   test_imports: number;
+  /** Détails HR en échec. */
   detail_failed: number;
+  /** Détails des nouvelles rubriques en échec. */
+  insolvency_detail_failed: number;
   not_sampled: number;
 }
 
@@ -271,8 +282,8 @@ async function checkTerms(client: PoliteClient, today: string, sha256: string, a
 }
 
 const emptyDayReport = (date: string, status: DayReport["status"]): DayReport => ({
-  date, status, listed: 0, by_subrubric: {}, details_read: 0, stored_rows: 0, totals_only: 0,
-  sole_proprietorships: 0, persons: 0, estates: 0, test_imports: 0, detail_failed: 0, not_sampled: 0,
+  date, status, listed: 0, by_subrubric: {}, details_read: 0, insolvency_details_read: 0, stored_rows: 0, totals_only: 0,
+  sole_proprietorships: 0, persons: 0, estates: 0, test_imports: 0, detail_failed: 0, insolvency_detail_failed: 0, not_sampled: 0,
 });
 
 /** Échantillon régulier (simulation) : un avis sur `pas`, pour couvrir HR01, HR02 et HR03. */
@@ -406,14 +417,16 @@ export async function runFoscCollection(opts: CollectOptions): Promise<CollectRe
           let insolvencyDetail: InsolvencyDetail | null = null;
           try {
             const xml = await client.get(detailXmlUrl(entry.id), { kind: "détail d'un avis", accept: "application/xml", maxBytes: MAX_DETAIL_BYTES });
-            dr.details_read++;
+            if (spec) dr.insolvency_details_read++;
+            else dr.details_read++;
             if (spec) insolvencyDetail = parseInsolvencyDetail(xml.toString("utf8"), spec);
             else detail = parseAvisDetail(xml.toString("utf8"));
             if ((insolvencyDetail ?? detail)?.id !== entry.id) throw new FoscXmlError("avis différent de celui demandé");
           } catch (error) {
             if (error instanceof FoscBudgetError) throw error;
             if (!(error instanceof FoscHttpError) && !(error instanceof FoscXmlError)) throw error;
-            dr.detail_failed++;
+            if (spec) dr.insolvency_detail_failed++;
+            else dr.detail_failed++;
             addTally(tallies, { event_type: entry.subRubric, canton, legal_form: totalsLegalForm(null) });
             continue;
           }
@@ -428,7 +441,6 @@ export async function runFoscCollection(opts: CollectOptions): Promise<CollectRe
               rows.push(c.row);
               dr.stored_rows++;
               if (!c.communeResolved) ins.commune_unresolved++;
-              if (c.row.dates) ins.with_dates++;
             } else {
               dr.totals_only++;
               if (c.outcome === "person" || c.outcome === "estate") dr.persons++;
@@ -447,8 +459,8 @@ export async function runFoscCollection(opts: CollectOptions): Promise<CollectRe
             if (c.soleProprietorship) dr.sole_proprietorships++;
           }
         }
-        const attempted = dr.details_read + dr.detail_failed;
-        if (dr.detail_failed >= 3 && dr.detail_failed > attempted * MAX_DETAIL_FAILED_RATIO) {
+        // Deux contrôles distincts : HR (calcul inchangé) OU nouvelles rubriques.
+        if (detailFailureExceeded(dr.detail_failed, dr.details_read) || detailFailureExceeded(dr.insolvency_detail_failed, dr.insolvency_details_read)) {
           dr.status = "failed";
           failed = true;
           report.days.push(dr);
@@ -458,7 +470,7 @@ export async function runFoscCollection(opts: CollectOptions): Promise<CollectRe
           rows,
           record: {
             date: day, listed: listed.length, stored_rows: dr.stored_rows, totals_only: dr.totals_only,
-            sole_proprietorships: dr.sole_proprietorships, test_imports: dr.test_imports, detail_failed: dr.detail_failed,
+            sole_proprietorships: dr.sole_proprietorships, test_imports: dr.test_imports, detail_failed: dr.detail_failed + dr.insolvency_detail_failed,
             rubrics: [...FOSC_RUBRICS], persons: dr.persons, estates: dr.estates,
             computed_at: now.toISOString(), tallies: sortTallies(tallies.values()),
           },
@@ -579,9 +591,9 @@ export function formatReport(r: CollectReport): string {
     `[fosc] purge : ${r.purge.expired} échue(s), ${r.purge.unpublished} plus publiée(s), ${r.purge.unverified} non revérifiée(s) ; mois figés : ${r.months_frozen}`,
     `[fosc] revérification : ${r.verification.days_checked} jour(s), ${r.verification.days_failed} en échec`,
     ...r.days.map((d) => `[fosc] ${d.date} ${d.status} : ${d.listed} avis listés (${Object.entries(d.by_subrubric).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${k} ${v}`).join(", ") || "aucun"}), `
-      + `${d.details_read} détails lus, ${d.stored_rows} lignes de sociétés, ${d.totals_only} en totaux seulement dont ${d.sole_proprietorships} entreprises individuelles `
+      + `${d.details_read} détails HR et ${d.insolvency_details_read} autres lus, ${d.stored_rows} lignes de sociétés, ${d.totals_only} en totaux seulement dont ${d.sole_proprietorships} entreprises individuelles `
       + `et ${d.persons} personnes physiques (dont ${d.estates} successions), `
-      + `${d.test_imports} essais, ${d.detail_failed} en échec, ${d.not_sampled} hors échantillon`),
+      + `${d.test_imports} essais, ${d.detail_failed} HR et ${d.insolvency_detail_failed} autres en échec, ${d.not_sampled} hors échantillon`),
     `[fosc] HR, champs manquants sur ${r.parsed_details} détails : IDE ${r.missing.uid}, forme ${r.missing.legal_form}, siège ${r.missing.seat}, canton ${r.missing.canton}, commune non rapprochée ${r.missing.commune_unresolved}, avis à plusieurs sociétés ${r.missing.multiple_blocks}`,
     formatInsolvency(r.insolvency),
     `[fosc] lignes conservées : ${r.rows_stored_total} ; requêtes : ${r.requests}, refus 429/503 : ${r.rate_limited}, attente : ${r.waited_seconds} s ; code de sortie ${r.exit_code}`,
@@ -593,7 +605,7 @@ export function formatReport(r: CollectReport): string {
 export function formatInsolvency(c: InsolvencyCounts): string {
   const o = c.outcomes;
   return `[fosc] faillites, concordats, liquidations, appels aux créanciers sur ${c.parsed} détails : ${o.row} lignes de sociétés `
-    + `(${c.with_dates} avec dates, ${c.commune_unresolved} sans commune) ; totaux seulement : personnes ${o.person}, successions ${o.estate}, `
+    + `(${c.commune_unresolved} sans commune) ; totaux seulement : personnes ${o.person}, successions ${o.estate}, `
     + `entreprises individuelles ${o.sole_proprietorship}, sans forme juridique ${o.no_legal_form}, sans IDE ${o.no_uid}, autre forme ${o.other_form}, `
     + `plusieurs parties ${o.multiple_parties}, sans partie reconnue ${o.no_party}, cas ambigus ${o.ambiguous}, schéma inconnu ${o.unknown_schema}, `
     + `sans canton ${o.no_canton}, échéance proche ${o.expiring} ; autres avis non lus ${c.general_notices}`;

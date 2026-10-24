@@ -169,11 +169,13 @@ export interface CombinedPortal {
   calls: string[];
   hr: FakeAvis[];
   ins: InsolvencyAvis[];
+  /** Détail servi tel quel pour un identifiant (par exemple un avis HR tronqué). */
+  rawDetail: Map<string, string>;
 }
 
 /** Portail qui sert à la fois des avis HR (`fosc-portal.ts`) et des avis des nouvelles rubriques. */
 export function combinedPortal(ins: InsolvencyAvis[], hr: FakeAvis[] = []): CombinedPortal {
-  const portal: CombinedPortal = { calls: [], hr, ins, fetchImpl: undefined as unknown as typeof fetch };
+  const portal: CombinedPortal = { calls: [], hr, ins, rawDetail: new Map(), fetchImpl: undefined as unknown as typeof fetch };
   portal.fetchImpl = (async (input: string | URL | Request) => {
     const url = String(input instanceof Request ? input.url : input);
     portal.calls.push(url);
@@ -181,6 +183,8 @@ export function combinedPortal(ins: InsolvencyAvis[], hr: FakeAvis[] = []): Comb
     const u = new URL(url);
     const detail = /\/publications\/([0-9a-f-]{36})\/xml$/.exec(u.pathname);
     if (detail) {
+      const raw = portal.rawDetail.get(detail[1]);
+      if (raw !== undefined) return new Response(raw, { status: 200, headers: { "content-type": "application/xml" } });
       const a = portal.ins.find((x) => x.id === detail[1]);
       if (a) {
         const xml = insolvencyXml(a);

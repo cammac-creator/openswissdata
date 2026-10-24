@@ -44,34 +44,34 @@ const stateOf = (store: ReturnType<typeof memoryStore>) => store.state as FoscSt
 const detailCalls = (calls: string[]) => calls.filter((c) => c.endsWith("/xml")).length;
 
 describe("faillites, concordats, liquidations : lignes des sociétés", () => {
-  it("une faillite de SA, un concordat et un appel aux créanciers de liquidation sont écrits avec les seuls champs permis", async () => {
+  it("une faillite de SA, un concordat et un appel aux créanciers de liquidation sont écrits avec les seuls champs permis (ceux de HR)", async () => {
     const store = memoryStore();
     const { opts } = setup(companyAvis());
     const report = await runFoscCollection(opts(store));
     expect(report.exit_code).toBe(0);
     const rows = stateOf(store).events;
     expect(rows).toHaveLength(3);
-    for (const row of rows) expect(Object.keys(row).sort()).toEqual([...ROW_KEYS, "dates"].sort());
+    for (const row of rows) expect(Object.keys(row).sort()).toEqual([...ROW_KEYS].sort());
     expect(rows.find((r) => r.event_type === "KK02")).toEqual({
       publication_id: insId(1), ide: IDE.sa1, event_type: "KK02", publication_date: DAY, municipality_bfs_id: 5586, canton: "VD",
-      legal_form: "0106", delete_on: "2026-11-19", verified_on: "2026-10-21", dates: { resolutionDate: "2026-10-15", entryDeadline: "2026-11-20" },
+      legal_form: "0106", delete_on: "2026-11-19", verified_on: "2026-10-21",
     });
-    expect(rows.find((r) => r.event_type === "NA02")).toMatchObject({ ide: IDE.sa2, canton: "ZH", municipality_bfs_id: 261, legal_form: "0106",
-      dates: { moratoriumDateFrom: "2026-10-14", entryDeadline: "2027-04-14" } });
-    expect(rows.find((r) => r.event_type === "LS02")).toMatchObject({ ide: IDE.sarl, canton: "GE", municipality_bfs_id: 6621, legal_form: "0107",
-      dates: { entryDeadline: "2026-11-30" } });
+    expect(rows.find((r) => r.event_type === "NA02")).toMatchObject({ ide: IDE.sa2, canton: "ZH", municipality_bfs_id: 261, legal_form: "0106" });
+    expect(rows.find((r) => r.event_type === "LS02")).toMatchObject({ ide: IDE.sarl, canton: "GE", municipality_bfs_id: 6621, legal_form: "0107" });
     expect(report.insolvency.outcomes.row).toBe(3);
-    expect(report.insolvency.with_dates).toBe(3);
-    expect(report.days[0]).toMatchObject({ listed: 3, stored_rows: 3, totals_only: 0, persons: 0, details_read: 3 });
+    expect(report.days[0]).toMatchObject({ listed: 3, stored_rows: 3, totals_only: 0, persons: 0, details_read: 0, insolvency_details_read: 3 });
     expect(stateOf(store).days[0].rubrics).toEqual(["HR", "KK", "NA", "LS", "SR"]);
   });
 
-  it("une date invalide ou hors de la liste fermée de la sous-rubrique n'est jamais gardée ; la ligne reste", async () => {
+  it("les dates de la procédure ne sont jamais gardées (compatibilité avec la version précédente) ; la ligne reste", async () => {
     const store = memoryStore();
     const { opts } = setup([{ id: insId(4), subRubric: "KK03", date: DAY, cantons: ["VD"], companies: [{ uid: IDE.sa1, legalForm: "0106" }],
-      dates: { resolutionDate: "2026-02-30", cessationDate: "2026-10-16", entryDeadline: "2026-11-05", hearingDate: "2026-12-01" } }]);
+      dates: { resolutionDate: "2026-10-12", cessationDate: "2026-10-16", entryDeadline: "2026-11-05" } }]);
     await runFoscCollection(opts(store));
-    expect(stateOf(store).events[0].dates).toEqual({ cessationDate: "2026-10-16", entryDeadline: "2026-11-05" });
+    expect(Object.keys(stateOf(store).events[0]).sort()).toEqual([...ROW_KEYS].sort());
+    const text = JSON.stringify(store.state) + JSON.stringify(store.totals);
+    expect(text).not.toContain("2026-10-12");
+    expect(text).not.toContain("2026-11-05");
   });
 
   it("une sous-rubrique à plusieurs sociétés (fusion) n'entre que dans les totaux", async () => {
@@ -89,7 +89,7 @@ describe("faillites, concordats, liquidations : lignes des sociétés", () => {
     const { opts } = setup([{ id: insId(6), subRubric: "SR05", date: DAY, cantons: ["VD"], companies: [{ uid: IDE.sa1, legalForm: "0106" }],
       dates: { resolutionDate: "2026-10-01", entryDeadline: "2026-11-19" } }]);
     await runFoscCollection(opts(store));
-    expect(stateOf(store).events).toEqual([expect.objectContaining({ event_type: "SR05", ide: IDE.sa1, dates: { resolutionDate: "2026-10-01", entryDeadline: "2026-11-19" } })]);
+    expect(stateOf(store).events).toEqual([expect.objectContaining({ event_type: "SR05", ide: IDE.sa1 })]);
   });
 
   it("un « autre avis » (KK10) est compté sans que son détail soit lu", async () => {
@@ -150,6 +150,7 @@ describe("faillites : garde-fous", () => {
     expect(report.stopped).toBeNull(); // pas un arrêt : HR et les autres avis continuent
     expect(report.insolvency.outcomes.unknown_schema).toBe(2);
     expect(report.days[0].detail_failed).toBe(0);
+    expect(report.days[0].insolvency_detail_failed).toBe(0);
     expect(report.days[0].status).toBe("computed");
     expect(stateOf(store).days).toHaveLength(1);
     expect(stateOf(store).events.map((e) => e.event_type)).toEqual(["LS02"]);
@@ -222,7 +223,7 @@ describe("faillites : garde-fous", () => {
     const store = memoryStore();
     const { opts } = setup([...companyAvis(), ...broken], hr);
     const report = await runFoscCollection({ ...opts(store), resolveCommune: (seat) => (seat === "Lausanne" ? { bfs: 5586, canton: "VD" } : null) });
-    expect(report.days[0]).toMatchObject({ status: "failed", detail_failed: 3 });
+    expect(report.days[0]).toMatchObject({ status: "failed", detail_failed: 0, insolvency_detail_failed: 3 });
     expect(report.exit_code).toBe(1);
     expect(stateOf(store).days).toHaveLength(0);
     expect(stateOf(store).events).toHaveLength(0); // ni les sociétés, ni la ligne HR du même jour
@@ -313,14 +314,14 @@ describe("faillites : lecture de l'état de la version 1 (lot HR)", () => {
     };
   }
 
-  it("relit un état version 1, garde ses lignes HR, recalcule le jour avec les nouvelles rubriques et réécrit en version 2", async () => {
+  it("relit un état version 1, garde ses lignes HR, recalcule le jour avec les nouvelles rubriques et réécrit en version 1", async () => {
     const hr: FakeAvis[] = [{ id: avisId(50), subRubric: "HR01", date: DAY, canton: "VD", after: { uid: IDE.other, legalForm: "0106", seat: "Lausanne" } }];
     const store = memoryStore(v1State());
     const { opts, portal } = setup(companyAvis(), hr);
     const report = await runFoscCollection(opts(store));
     expect(report.exit_code).toBe(0);
     const s = stateOf(store);
-    expect(s.schema_version).toBe(2);
+    expect(s.schema_version).toBe(1); // version gardée : b5dc6fc doit pouvoir relire et purger
     expect(report.days[0].status).toBe("computed"); // jour calculé avec HR seul : recalculé
     // La ligne HR est reprise de l'état, sans relire son détail ; les trois sociétés s'ajoutent.
     expect(portal.calls.filter((c) => c.endsWith(`${avisId(50)}/xml`))).toHaveLength(0);
@@ -345,14 +346,14 @@ describe("faillites : lecture de l'état de la version 1 (lot HR)", () => {
     expect(oct.days_collected_by_rubric).toEqual({ HR: 1 });
   });
 
-  it("refuse un état version 1 qui porterait une ligne d'une nouvelle rubrique ou des dates", async () => {
+  it("refuse une ligne qui porterait un champ en plus (des dates) ou un type d'événement qui ne peut pas être une ligne", async () => {
     const withDates = v1State();
     (withDates.events as Record<string, unknown>[])[0].dates = { resolutionDate: "2026-10-15" };
     const { opts } = setup([]);
-    await expect(runFoscCollection(opts(memoryStore(withDates)))).rejects.toThrow(/dates de ligne/);
-    const kk = v1State();
-    (kk.events as Record<string, unknown>[])[0].event_type = "KK02";
-    await expect(runFoscCollection(opts(memoryStore(kk)))).rejects.toThrow(/type d'événement/);
+    await expect(runFoscCollection(opts(memoryStore(withDates)))).rejects.toThrow(/non autorisé/);
+    const kk10 = v1State();
+    (kk10.events as Record<string, unknown>[])[0].event_type = "KK10";
+    await expect(runFoscCollection(opts(memoryStore(kk10)))).rejects.toThrow(/type d'événement/);
   });
 
   it("refuse un état version 2 qui porterait une forme hors liste blanche, un « autre avis » ou une date non prévue", async () => {
@@ -362,6 +363,6 @@ describe("faillites : lecture de l'état de la version 1 (lot HR)", () => {
     const tamper = (f: (s: FoscState) => void) => { const t = JSON.parse(JSON.stringify(store.state)) as FoscState; f(t); return memoryStore(t); };
     await expect(runFoscCollection(opts(tamper((t) => { t.events[0].legal_form = "0103"; })))).rejects.toThrow(/forme juridique/);
     await expect(runFoscCollection(opts(tamper((t) => { t.events[0].event_type = "KK10"; })))).rejects.toThrow(/type d'événement/);
-    await expect(runFoscCollection(opts(tamper((t) => { t.events[0].dates = { dateOfBirth: "1901-02-03" }; })))).rejects.toThrow(/date de ligne/);
+    await expect(runFoscCollection(opts(tamper((t) => { (t.events[0] as unknown as Record<string, unknown>).dates = { dateOfBirth: "1901-02-03" }; })))).rejects.toThrow(/non autorisé/);
   });
 });
