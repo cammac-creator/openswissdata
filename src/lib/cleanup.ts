@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { EVENT_RETENTION_MS } from './event-retention.js';
 import { applyAccountRetention, applyCrmRetention, applyPurchaseRetention, RetentionError, type RuleOutcome } from './retention-rules.js';
 import { reapplyErasures } from './erasure-registry.js';
+import { applyAnnouncementRetention } from './announcement-retention.js';
 export type { CleanupEntry, CleanupResult } from './cleanup-types.js';
 
 const DAY = 86_400_000;
@@ -63,6 +64,9 @@ export function runCleanup(db: Database.Database, now = Date.now()): CleanupResu
       entries.push({ name: plan.name, deleted: 0, status: 'error', unit, error: 'database_error' });
     }
   }
+  // Inscriptions « être prévenu » (24.10.2026) : catégorie indépendante, une transaction sans réseau.
+  const announcements = applyAnnouncementRetention(db, now);
+  entries.push({ name: 'announcement_subscriptions', deleted: announcements.deleted, status: announcements.error ? 'error' : 'ok', unit: 'rows', ...(announcements.error ? { error: announcements.error } : {}) });
   for (const rule of RETENTION_RULES) {
     try {
       // Chaque règle est une transaction sans réseau : un échec l'annule entière, les suivantes continuent.

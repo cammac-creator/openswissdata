@@ -3,10 +3,12 @@
  * Vitrine « Mouvements FINMA » (FR/DE/EN, maquette B « tableau de bord » choisie le 20.10.2026).
  * Chiffres rendus au build depuis le témoin public `docs/data-status/finma.json` (bloc
  * `history.movements`) : lisibles sans JavaScript. Aucun nom, aucun lien vers une entrée de la
- * liste d'alerte, aucun prix ni aucune date pour la suite. Le seul script révèle le bouton
- * « être prévenu », qui envoie un événement anonyme par la route existante.
+ * liste d'alerte, aucun prix ni aucune date pour la suite. Le script de la page révèle le bouton
+ * « être prévenu », qui envoie un événement anonyme par la route existante. Dessous, l'inscription par
+ * e-mail (24.10.2026) vit dans son propre composant, avec son propre script : AnnouncementSignup.
  */
 import AtlasLayout from '../layouts/AtlasLayout.astro';
+import AnnouncementSignup from './AnnouncementSignup.astro';
 import '../styles/atlas-mouvements.css';
 import { getLangFromPath, localizePath } from '../i18n/utils';
 import { movementsPage } from '../lib/finma-movements';
@@ -139,6 +141,7 @@ const { copy, latest } = page;
    <button type="button" class="atlas-btn" data-interest hidden>{page.interest.button}<span aria-hidden="true">→</span></button>
    <p class="mv-small" data-interest-note hidden>{page.interest.note}</p>
    <p class="mv-interest-status" role="status" data-interest-status></p>
+   <AnnouncementSignup lang={lang} subject={page.signup.subject} privacyHref={page.signup.privacyHref} copy={page.signup.copy} />
   </div>
  </aside>
 

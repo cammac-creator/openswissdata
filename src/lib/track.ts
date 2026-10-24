@@ -61,7 +61,9 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
     path.startsWith("/api/admin") ||
     path.startsWith("/api/webhook/") ||
     // Don't double-track: /api/events/track already inserts an event row.
-    path.startsWith("/api/events/");
+    path.startsWith("/api/events/") ||
+    // Inscriptions « être prévenu » : aucune trace (pays, empreinte, référent) rapprochable par l'heure d'une inscription.
+    path.startsWith("/api/announcements/");
   if (skip) return next();
 
   const started = Date.now();

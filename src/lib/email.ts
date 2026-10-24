@@ -21,6 +21,8 @@ export interface PreparedEmail {
   /** Corps en texte brut, en plus du HTML — ADDITIF, voir ci-dessus. */
   text?: string;
   attachments?: Array<{ filename: string; content: string }>;
+  /** En-têtes supplémentaires (Resend `headers`) — ADDITIF, posé seulement par l'inscription « être prévenu » (List-Unsubscribe). */
+  headers?: Record<string, string>;
 }
 
 /** Buyer-facing language for transactional emails. */
@@ -584,4 +586,98 @@ function escapeHtml(s: string): string {
 
 function escapeHtmlAttr(s: string): string {
   return escapeHtml(s);
+}
+
+// ---------------------------------------------------------------------------
+// Inscription « être prévenu » (24.10.2026) : mail de confirmation, FR/DE/EN.
+// Texte court et factuel. Aucun pixel ni paramètre de mesure : les liens sont les adresses nues du site
+// (le suivi des ouvertures et des clics est désactivé chez Resend pour le domaine depuis le 29.09.2026, et
+// ce module n'envoie aucune option de suivi). Le logo du cadre commun est une image fixe, identique pour
+// tous les destinataires, sans identifiant. Désinscription en un clic : en-têtes RFC 8058.
+// ---------------------------------------------------------------------------
+
+export interface AnnouncementConfirmationEmailParams {
+  to: string;
+  locale: Locale;
+  confirmUrl: string;
+  unsubscribeUrl: string;
+  privacyUrl: string;
+}
+
+const ANNOUNCEMENT_COPY: Record<Locale, {
+  subject: string; preheader: string; eyebrow: string; heading: string; intro: string; button: string;
+  validity: string; ignore: string; privacyLead: string; privacyLink: string; unsubscribeLead: string; unsubscribeLink: string; unsubscribeTail: string;
+}> = {
+  fr: {
+    subject: "Confirmez votre inscription : historique détaillé FINMA",
+    preheader: "Un clic pour confirmer. Le lien est valable 48 heures.",
+    eyebrow: "Inscription par e-mail",
+    heading: "Confirmez votre inscription",
+    intro: "Vous avez demandé à être prévenu(e) par e-mail quand l’historique détaillé des mouvements FINMA sera disponible sur openswissdata.com.",
+    button: "Confirmer mon inscription",
+    validity: "Ce lien est valable 48 heures. Il ouvre une page où un bouton confirme votre demande.",
+    ignore: "Si vous n’avez rien demandé, ignorez ce message : sans clic, votre adresse est effacée après 7 jours.",
+    privacyLead: "Comment nous traitons votre adresse :", privacyLink: "politique de confidentialité",
+    unsubscribeLead: "Vous ne souhaitez plus être prévenu(e) ?", unsubscribeLink: "Se désinscrire", unsubscribeTail: "(effacement immédiat).",
+  },
+  de: {
+    subject: "Bestätigen Sie Ihre Anmeldung: detaillierter FINMA-Verlauf",
+    preheader: "Ein Klick zur Bestätigung. Der Link ist 48 Stunden gültig.",
+    eyebrow: "Anmeldung per E-Mail",
+    heading: "Bestätigen Sie Ihre Anmeldung",
+    intro: "Sie möchten per E-Mail benachrichtigt werden, wenn der detaillierte Verlauf der FINMA-Bewegungen auf openswissdata.com verfügbar ist.",
+    button: "Anmeldung bestätigen",
+    validity: "Dieser Link ist 48 Stunden gültig. Er öffnet eine Seite, auf der eine Schaltfläche Ihre Anfrage bestätigt.",
+    ignore: "Falls Sie nichts angefordert haben, ignorieren Sie diese Nachricht: Ohne Klick wird Ihre Adresse nach 7 Tagen gelöscht.",
+    privacyLead: "Wie wir Ihre Adresse bearbeiten:", privacyLink: "Datenschutzerklärung",
+    unsubscribeLead: "Keine Benachrichtigung mehr gewünscht?", unsubscribeLink: "Abmelden", unsubscribeTail: "(sofortige Löschung).",
+  },
+  en: {
+    subject: "Confirm your sign-up: detailed FINMA history",
+    preheader: "One click to confirm. The link is valid for 48 hours.",
+    eyebrow: "E-mail sign-up",
+    heading: "Confirm your sign-up",
+    intro: "You asked to be notified by e-mail when the detailed history of FINMA movements is available on openswissdata.com.",
+    button: "Confirm my sign-up",
+    validity: "This link is valid for 48 hours. It opens a page where a button confirms your request.",
+    ignore: "If you did not request this, ignore this message: without a click, your address is erased after 7 days.",
+    privacyLead: "How we handle your address:", privacyLink: "privacy policy",
+    unsubscribeLead: "No longer want to be notified?", unsubscribeLink: "Unsubscribe", unsubscribeTail: "(immediate erasure).",
+  },
+};
+
+export function renderAnnouncementConfirmationEmail(p: AnnouncementConfirmationEmailParams): { subject: string; html: string; text: string } {
+  const locale = parseLocale(p.locale), copy = ANNOUNCEMENT_COPY[locale];
+  const link = (href: string, label: string) =>
+    `<a href="${escapeHtmlAttr(href)}" target="_blank" style="color:${BRAND.ink};text-decoration:underline;">${escapeHtml(label)}</a>`;
+  const fine = (html: string) =>
+    `<p style="margin:0 0 10px 0;font-family:${FONT_SANS};font-size:13px;line-height:1.6;color:${BRAND.inkMute};">${html}</p>`;
+  const body =
+    eyebrow(copy.eyebrow) +
+    para(escapeHtml(copy.intro)) +
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 22px 0;"><tr><td>` +
+    emailButton({ href: p.confirmUrl, label: copy.button }) +
+    `</td></tr></table>` +
+    para(escapeHtml(copy.validity)) +
+    para(escapeHtml(copy.ignore)) +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 18px 0;"><tr>` +
+    `<td style="height:1px;line-height:1px;font-size:1px;background:${BRAND.line};">&nbsp;</td></tr></table>` +
+    fine(`${escapeHtml(copy.privacyLead)} ${link(p.privacyUrl, copy.privacyLink)}.`) +
+    fine(`${escapeHtml(copy.unsubscribeLead)} ${link(p.unsubscribeUrl, copy.unsubscribeLink)} ${escapeHtml(copy.unsubscribeTail)}`);
+  const html = emailShell({ heading: copy.heading, bodyHtml: body, preheader: copy.preheader, locale });
+  const text = [
+    copy.heading, "", copy.intro, "", `${copy.button}${locale === "fr" ? " :" : ":"} ${p.confirmUrl}`, "", copy.validity, copy.ignore, "",
+    `${copy.privacyLead} ${p.privacyUrl}`, `${copy.unsubscribeLead} ${copy.unsubscribeLink} ${copy.unsubscribeTail} ${p.unsubscribeUrl}`,
+    "", FOOTER_DISCLAIMER[locale],
+  ].join("\n");
+  return { subject: copy.subject, html, text };
+}
+
+/** Contenu prêt pour `sendPreparedEmail`, avec la désinscription en un clic (RFC 8058). */
+export function prepareAnnouncementConfirmationEmail(p: AnnouncementConfirmationEmailParams): PreparedEmail {
+  const { subject, html, text } = renderAnnouncementConfirmationEmail(p);
+  return {
+    from: fromAddress(), to: [p.to], reply_to: replyToAddress(), subject, html, text,
+    headers: { "List-Unsubscribe": `<${p.unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+  };
 }

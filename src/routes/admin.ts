@@ -8,6 +8,8 @@ import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
 import { realCustomerSql } from "./crm.js";
 import { runFullCleanup } from "../lib/cleanup.js";
+import { countConfirmedAnnouncements } from "../lib/announcements.js";
+import { internalEmails } from "../lib/crm-customers.js";
 import { refreshFinmaFromR2, refreshTaresFromR2, refreshClassificationsFromR2, getMcpFreshness, extractCsvFromZip } from "../mcp/r2-refresh.js";
 import { getObjectBuffer } from "../lib/r2.js";
 import { snapshotFromRows, getReleasedAt, type SnapshotDataset } from "../mcp/snapshots.js";
@@ -140,7 +142,10 @@ adminRoute.get("/indicateurs", (c) => {
     mcp,
     evenements,
     declarations_visiteurs: declarations,
-    notes: "Chiffres seulement. Déclarations de visiteurs : déclaratives (navigateurs seulement, un clic n'est pas une personne). Fenêtre glissante (pas la période suisse du CRM). Visiteurs-jours : empreinte renouvelée chaque jour, pas des personnes uniques. Montants en centimes de CHF.",
+    // Inscriptions « être prévenu » confirmées, par sujet (clés fixes) : un nombre, jamais une adresse.
+    // Toute la durée de conservation, pas la fenêtre ; adresses de ADMIN_EMAILS et CRM_INTERNAL_EMAILS exclues.
+    inscriptions_confirmees: countConfirmedAnnouncements(db, internalEmails()),
+    notes: "Chiffres seulement. Déclarations de visiteurs : déclaratives (navigateurs seulement, un clic n'est pas une personne). Fenêtre glissante (pas la période suisse du CRM). Visiteurs-jours : empreinte renouvelée chaque jour, pas des personnes uniques. Montants en centimes de CHF. Inscriptions confirmées : total en cours, hors adresses internes.",
   });
 });
 

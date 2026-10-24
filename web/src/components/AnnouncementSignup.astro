@@ -1,0 +1,53 @@
+---
+/**
+ * Inscription par e-mail « être prévenu » (24.10.2026), posée sous le bouton anonyme de la vitrine.
+ * Amélioration progressive, comme le bouton : sans JavaScript le formulaire reste caché (la route lit du JSON).
+ * Case NON cochée par défaut ; le serveur refuse toute demande sans `consent: true`. Aucun script tiers :
+ * le module local `announcement-signup` envoie l'adresse à la route de même origine et pose les messages par
+ * textContent dans une zone annoncée (role="status").
+ */
+import type { SignupCopy } from '../lib/finma-movements';
+
+interface Props { lang: 'fr' | 'de' | 'en'; subject: string; privacyHref: string; copy: SignupCopy }
+const { lang, subject, privacyHref, copy } = Astro.props;
+const id = `signup-${subject}`;
+---
+<form class="mv-signup" data-announcement-signup data-lang={lang} data-subject={subject}
+  data-success={copy.success} data-invalid-email={copy.invalidEmail} data-consent-missing={copy.consentMissing}
+  data-too-many={copy.tooMany} data-error={copy.error} aria-labelledby={`${id}-title`} novalidate hidden>
+ <h3 id={`${id}-title`} class="mv-signup-title">{copy.title}</h3>
+ <label class="mv-signup-label" for={`${id}-email`}>{copy.emailLabel}</label>
+ <input id={`${id}-email`} class="mv-signup-input" type="email" name="email" required maxlength="254"
+  autocomplete="email" inputmode="email" spellcheck="false" autocapitalize="off" aria-describedby={`${id}-status`} />
+ <label class="mv-signup-consent" for={`${id}-consent`}>
+  <input id={`${id}-consent`} type="checkbox" name="consent" value="yes" required />
+  <span>{copy.consent}</span>
+ </label>
+ <p class="mv-signup-privacy">{copy.privacyLead} <a href={privacyHref}>{copy.privacyLink}</a></p>
+ <button type="submit" class="atlas-btn atlas-btn-secondary mv-signup-submit">{copy.submit}</button>
+ <p id={`${id}-status`} class="mv-signup-status" role="status" aria-atomic="true" data-signup-status></p>
+</form>
+<script>
+ import '../scripts/announcement-signup';
+</script>
+<style>
+ .mv-signup { display:grid; gap:10px; margin-top:22px; padding-top:20px; border-top:1px solid var(--atlas-line); min-width:0; }
+ .mv-signup[hidden] { display:none; }
+ .mv-signup-title { font-size:15px; font-weight:600; letter-spacing:-.01em; color:var(--atlas-ink); }
+ .mv-signup-label { font-size:12px; font-weight:560; color:var(--atlas-ink); }
+ /* 16 px au moins : Safari sur iPhone n'agrandit alors pas la page au toucher du champ. */
+ .mv-signup-input { width:100%; min-width:0; min-height:50px; padding:12px 14px; border:1px solid #b9c8bb; border-radius:6px; background:#f4f3ed; color:var(--atlas-ink); font:inherit; font-size:16px; }
+ .mv-signup-input:focus-visible { outline:3px solid var(--atlas-red); outline-offset:2px; background:#fff; }
+ .mv-signup-input[aria-invalid="true"] { border-color:var(--atlas-red); }
+ .mv-signup-consent { display:flex; align-items:flex-start; gap:10px; font-size:14px; line-height:1.55; color:var(--atlas-ink); cursor:pointer; min-width:0; }
+ .mv-signup-consent span { min-width:0; overflow-wrap:anywhere; }
+ .mv-signup-consent input { flex:0 0 20px; width:20px; height:20px; margin:1px 0 0; accent-color:#16382f; }
+ .mv-signup-consent input:focus-visible { outline:3px solid var(--atlas-red); outline-offset:3px; }
+ .mv-signup-privacy { font-size:12px!important; line-height:1.6; margin-top:0!important; }
+ .mv-signup-privacy a { color:var(--atlas-ink); text-decoration:underline; text-underline-offset:3px; }
+ .mv-signup-submit { justify-self:start; max-width:100%; }
+ .mv-signup-submit:disabled { opacity:.6; cursor:wait; }
+ .mv-signup-status { font-size:14px!important; font-weight:560; color:var(--atlas-ink)!important; margin-top:0!important; }
+ .mv-signup-status:empty { display:none; }
+ @media (max-width: 640px) { .mv-signup-submit { justify-self:stretch; width:100%; } }
+</style>

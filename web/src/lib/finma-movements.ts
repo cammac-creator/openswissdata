@@ -16,6 +16,8 @@ import { SOURCES } from './guides';
 
 export const MOVEMENTS_PATH = '/finma-movements/';
 export const MOVEMENTS_EVENT = 'etre_prevenu';
+/** Sujet de l'inscription par e-mail (route /api/announcements/request) : seule valeur acceptée par le serveur. */
+export const MOVEMENTS_SIGNUP_SUBJECT = 'finma-historique';
 export const MOVEMENTS_SCHEMA_VERSION = 1;
 
 const MONTH = /^(\d{4})-(0[1-9]|1[0-2])$/;
@@ -183,7 +185,14 @@ interface Copy {
   resumptionByMonth: string; resumptionUndated: (n: number) => string; resumptionAnomaly: string; resumptionNoWarnings: string;
   methodKicker: string; methodTitle: string; methodIntro: string; method: Array<[string, string]>;
   nextTitle: string; nextText: string; button: string; buttonNote: string; thanks: string; error: string;
+  signup: SignupCopy;
   sourceTitle: string; sourceText: string; sourceLink: string; productLink: string; guideLink: string;
+}
+
+/** Inscription par e-mail sous le bouton (24.10.2026) : case non cochée, confirmation par e-mail. */
+export interface SignupCopy {
+  title: string; emailLabel: string; consent: string; privacyLead: string; privacyLink: string; submit: string;
+  success: string; invalidEmail: string; consentMissing: string; tooMany: string; error: string;
 }
 
 const COPY: Record<Lang, Copy> = {
@@ -244,6 +253,18 @@ const COPY: Record<Lang, Copy> = {
     button: 'Être prévenu de l’historique détaillé',
     buttonNote: 'Sans adresse e-mail ni inscription : le clic est compté comme nos autres statistiques de visite, pseudonymisées (voir la politique de confidentialité). Il sert seulement à mesurer l’intérêt. Suivez cette page pour la suite.',
     thanks: 'Merci, c’est noté.', error: 'Le signal n’a pas pu être envoyé. Vous pouvez réessayer plus tard.',
+    signup: {
+      title: 'Être prévenu(e) par e-mail',
+      emailLabel: 'Adresse e-mail',
+      consent: 'Je veux être prévenu(e) par e-mail quand l’historique détaillé sera disponible',
+      privacyLead: 'Une confirmation vous est demandée par e-mail. Détails :', privacyLink: 'politique de confidentialité',
+      submit: 'Envoyer la demande',
+      success: 'Si l’adresse est valide, un e-mail de confirmation vient de partir.',
+      invalidEmail: 'Indiquez une adresse e-mail valide.',
+      consentMissing: 'Cochez la case pour confirmer votre demande.',
+      tooMany: 'Trop de demandes en peu de temps. Réessayez dans une minute.',
+      error: 'La demande n’a pas pu être envoyée. Vous pouvez réessayer plus tard.',
+    },
     sourceTitle: 'Source : FINMA, listes publiques.',
     sourceText: 'Lecture proposée par OpenSwissData, service privé indépendant, sans affiliation à la FINMA. Ceci n’est pas une publication officielle de la FINMA.',
     sourceLink: 'Consulter les listes officielles de la FINMA', productLink: 'Le fichier FINMA complet', guideLink: 'Lire le guide sur la liste d’alerte',
@@ -305,6 +326,18 @@ const COPY: Record<Lang, Copy> = {
     button: 'Über den detaillierten Verlauf informiert werden',
     buttonNote: 'Ohne E-Mail-Adresse und ohne Anmeldung: Der Klick wird wie unsere übrigen, pseudonymisierten Besuchsstatistiken gezählt (siehe Datenschutzerklärung). Er dient nur dazu, das Interesse zu messen. Verfolgen Sie diese Seite für das Weitere.',
     thanks: 'Danke, notiert.', error: 'Das Signal konnte nicht gesendet werden. Sie können es später erneut versuchen.',
+    signup: {
+      title: 'Per E-Mail benachrichtigt werden',
+      emailLabel: 'E-Mail-Adresse',
+      consent: 'Ich möchte per E-Mail benachrichtigt werden, wenn der detaillierte Verlauf verfügbar ist',
+      privacyLead: 'Sie erhalten eine E-Mail zur Bestätigung. Details:', privacyLink: 'Datenschutzerklärung',
+      submit: 'Anfrage senden',
+      success: 'Wenn die Adresse gültig ist, wurde soeben eine Bestätigungs-E-Mail versendet.',
+      invalidEmail: 'Geben Sie eine gültige E-Mail-Adresse ein.',
+      consentMissing: 'Kreuzen Sie das Kästchen an, um Ihre Anfrage zu bestätigen.',
+      tooMany: 'Zu viele Anfragen in kurzer Zeit. Versuchen Sie es in einer Minute erneut.',
+      error: 'Die Anfrage konnte nicht gesendet werden. Sie können es später erneut versuchen.',
+    },
     sourceTitle: 'Quelle: FINMA, öffentliche Listen.',
     sourceText: 'Auswertung von OpenSwissData, einem unabhängigen privaten Dienst ohne Verbindung zur FINMA. Dies ist keine offizielle Veröffentlichung der FINMA.',
     sourceLink: 'Die offiziellen Listen der FINMA ansehen', productLink: 'Die vollständige FINMA-Datei', guideLink: 'Den Leitfaden zur Warnliste lesen',
@@ -366,6 +399,18 @@ const COPY: Record<Lang, Copy> = {
     button: 'Get notified about the detailed history',
     buttonNote: 'No e-mail address and no sign-up: the click is counted like our other, pseudonymised visit statistics (see the privacy policy). It only measures interest. Follow this page for what comes next.',
     thanks: 'Thank you, noted.', error: 'The signal could not be sent. You can try again later.',
+    signup: {
+      title: 'Get notified by e-mail',
+      emailLabel: 'E-mail address',
+      consent: 'I want to be notified by e-mail when the detailed history is available',
+      privacyLead: 'You will be asked to confirm by e-mail. Details:', privacyLink: 'privacy policy',
+      submit: 'Send request',
+      success: 'If the address is valid, a confirmation e-mail has just been sent.',
+      invalidEmail: 'Enter a valid e-mail address.',
+      consentMissing: 'Tick the box to confirm your request.',
+      tooMany: 'Too many requests in a short time. Try again in a minute.',
+      error: 'The request could not be sent. You can try again later.',
+    },
     sourceTitle: 'Source: FINMA, public lists.',
     sourceText: 'Reading by OpenSwissData, an independent private service not affiliated with FINMA. This is not an official FINMA publication.',
     sourceLink: 'View FINMA’s official lists', productLink: 'The complete FINMA file', guideLink: 'Read the guide to the warning list',
@@ -416,6 +461,8 @@ export interface MovementsPage {
   resumptions: ResumptionView[];
   links: { official: string; product: string; guide: string };
   interest: { event: string; button: string; note: string; thanks: string; error: string };
+  /** Inscription par e-mail : sujet fixe, lien vers la section « Finalités et fondements » de la notice. */
+  signup: { subject: string; privacyHref: string; copy: SignupCopy };
 }
 
 const pct = (value: number, max: number) => (max > 0 ? Math.round((value / max) * 1000) / 10 : 0);
@@ -429,6 +476,7 @@ export function movementsPage(witness: unknown, lang: Lang): MovementsPage {
     lang, copy, state: reading.state, freshness: null, latest: null, trend: [], months: [], resumptions: [],
     links: { official: SOURCES['finma-autorises'].url[lang], product: `${prefix}/datasets/finma/`, guide: `${prefix}/guides/finma-warning-list/` },
     interest: { event: MOVEMENTS_EVENT, button: copy.button, note: copy.buttonNote, thanks: copy.thanks, error: copy.error },
+    signup: { subject: MOVEMENTS_SIGNUP_SUBJECT, privacyHref: `${prefix}/legal/privacy#finalites`, copy: copy.signup },
   } satisfies MovementsPage;
   if (reading.state !== 'ready') return base;
   const { block } = reading;

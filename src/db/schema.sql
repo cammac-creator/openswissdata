@@ -487,3 +487,28 @@ CREATE TABLE IF NOT EXISTS institutional_letters (
 );
 CREATE INDEX IF NOT EXISTS idx_institutional_letters_status_scheduled ON institutional_letters(status, scheduled_at);
 CREATE INDEX IF NOT EXISTS idx_institutional_letters_parent ON institutional_letters(parent_id);
+
+-- Inscriptions « être prévenu » (24.10.2026, texte de protection des données validé par Claude-Alain) :
+-- miroir de src/db/migrations/004_announcement_subscriptions.sql. Ni IP, ni navigateur, ni pays, ni jeton en clair.
+CREATE TABLE IF NOT EXISTS announcement_subscriptions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  -- Adresse normalisée (espaces retirés, minuscules) ; la seule donnée de contact gardée.
+  email TEXT NOT NULL CHECK(length(email) BETWEEN 3 AND 254 AND email = lower(trim(email))),
+  lang TEXT NOT NULL CHECK(lang IN ('fr','de','en')),
+  subject TEXT NOT NULL CHECK(subject IN ('finma-historique')),
+  -- Première demande du cycle en cours : jamais repoussée par une nouvelle demande (purge à 7 jours).
+  requested_at INTEGER NOT NULL CHECK(typeof(requested_at)='integer' AND requested_at >= 1000000000000),
+  confirmed_at INTEGER CHECK(confirmed_at IS NULL OR (typeof(confirmed_at)='integer' AND confirmed_at >= requested_at)),
+  -- Toujours NULL en pratique : une désinscription efface la ligne. Colonne gardée car la notice la cite.
+  unsubscribed_at INTEGER CHECK(unsubscribed_at IS NULL OR (typeof(unsubscribed_at)='integer' AND unsubscribed_at >= 1000000000000)),
+  -- Date de l'annonce de la disponibilité (NULL tant qu'aucune annonce n'est partie) : départ des 12 mois.
+  announced_at INTEGER CHECK(announced_at IS NULL OR (typeof(announced_at)='integer' AND announced_at >= 1000000000000)),
+  -- Empreinte SHA-256 du jeton de confirmation, jamais le jeton ; effacée à la confirmation (usage unique).
+  token_hash TEXT CHECK(token_hash IS NULL OR (length(token_hash)=64 AND token_hash NOT GLOB '*[^0-9a-f]*')),
+  token_expires_at INTEGER CHECK(token_expires_at IS NULL OR (typeof(token_expires_at)='integer' AND token_expires_at >= 1000000000000)),
+  CHECK((token_hash IS NULL) = (token_expires_at IS NULL)),
+  CHECK(confirmed_at IS NULL OR token_hash IS NULL),
+  UNIQUE(email, subject)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_announcement_subscriptions_token ON announcement_subscriptions(token_hash) WHERE token_hash IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_announcement_subscriptions_pending ON announcement_subscriptions(confirmed_at, requested_at);

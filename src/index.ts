@@ -22,6 +22,7 @@ import { authRoute } from "./routes/auth.js";
 import { accountRoute } from "./routes/account.js";
 import { downloadRoute, publicDownload } from "./routes/download.js";
 import { eventsRoute } from "./routes/events.js";
+import { announcementsRoute, settleAnnouncementDeliveries } from "./routes/announcements.js";
 import { mcpRoute } from "./routes/mcp/index.js";
 import { apiV1Route } from "./routes/api-v1.js";
 import { trackApiRequest, trackPageView } from "./lib/track.js";
@@ -40,6 +41,7 @@ import { reapplyErasures } from "./lib/erasure-registry.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
 import { CHECKOUT_NOTICE_CSP, isCheckoutNotice } from './lib/checkout-notice.js';
 import {LOGIN_CONFIRMATION_CSP} from './lib/login-confirmation-page.js';
+import {ANNOUNCEMENT_PAGE_CSP} from './lib/announcement-page.js';
 import { deliveryLocaleFromHeader, deliveryNoticePage } from './lib/delivery-page.js';
 import {authorizationCsp} from './mcp/oauth/redirects.js';
 
@@ -65,6 +67,12 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
       c.header('Content-Security-Policy', authorizationCsp(destination));
     }
     if (/^\/api\/auth\/(verify|confirm)$/.test(c.req.path)) c.header('Content-Security-Policy', LOGIN_CONFIRMATION_CSP);
+    // Pages des liens « être prévenu » : style par empreinte, aucun script ; strict-origin garde l'Origin du bouton
+    // (no-referrer l'enverrait à null) sans transmettre le chemin ni le jeton.
+    if (/^\/api\/announcements\/(confirm|unsubscribe)$/.test(c.req.path)) {
+      c.header('Content-Security-Policy', ANNOUNCEMENT_PAGE_CSP);
+      c.header('Referrer-Policy', 'strict-origin');
+    }
     if (isCheckoutNotice(c)) c.header('Content-Security-Policy', CHECKOUT_NOTICE_CSP);
     if (/^\/api\/(delivery|download|auth)\//.test(c.req.path)) c.header("Referrer-Policy", "no-referrer");
     // no-referrer transforme l'Origin d'un formulaire en null dans les navigateurs.
@@ -260,6 +268,7 @@ export function createApp({webRoot="./web/dist"}:{webRoot?:string}={}) {
   app.route("/api/auth", authRoute);
   app.route("/api/account", accountRoute);
   app.route("/api/events", eventsRoute);
+  app.route("/api/announcements", announcementsRoute);
   app.route("/api", downloadRoute);      // serves /api/account/download-request
   app.route("/api", publicDownload);     // serves /api/download/:token
 
@@ -370,6 +379,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     // Asynchrone (correction I4e, 06.10) : attend la fin d'un envoi en cours (au plus 10 s) plutôt
     // que de laisser SIGTERM l'interrompre entre la requête à Resend et l'écriture de `sent_at`.
     await stopLettersSender();
+    // Mails de confirmation « être prévenu » encore en route : quelques secondes au plus.
+    await Promise.race([settleAnnouncementDeliveries(), new Promise(resolve => setTimeout(resolve, 5000))]);
     stopWorkflowWatch();
     console.log(`[shutdown] received ${sig}, flushing Sentry…`);
     await flushSentry(2000);

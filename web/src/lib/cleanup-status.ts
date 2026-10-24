@@ -5,6 +5,7 @@ export type ErasureReplay = ReplayResult;
 const labels: Record<CleanupEntry['name'], string> = {
   delivery_incident_events: 'Historique technique des incidents', delivery_incidents: 'Incidents de livraison clos',
   checkout_request_limits: 'Compteurs temporaires de paiement',
+  announcement_subscriptions: 'Inscriptions « être prévenu » (7 jours sans confirmation, 12 mois après l’annonce, 30.06.2027 au plus tard)',
   auth_request_limits: 'Compteurs temporaires de connexion', magic_links: 'Anciens liens de connexion', sessions: 'Liens de connexion et sessions', download_tokens: 'Liens de livraison',
   mcp_oauth_codes: 'Codes de connexion MCP', request_log: 'Ancien journal des requêtes', events: 'Événements statistiques',
   download_activity: 'Traces des liens de téléchargement', delivery_message_references: 'Références techniques des mails',
