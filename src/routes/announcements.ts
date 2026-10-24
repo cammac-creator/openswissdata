@@ -20,6 +20,7 @@ import {
   sealUnsubscribeReference, type AnnouncementDelivery, type AnnouncementLang,
 } from '../lib/announcements.js';
 import { announcementPage, announcementPrivacyPath, announcementRequestLang, type AnnouncementPageKind } from '../lib/announcement-page.js';
+import { syncAnnouncementErasureMirror } from '../lib/announcement-erasures.js';
 
 export const announcementsRoute = new Hono();
 
@@ -39,6 +40,12 @@ const RequestBody = z.object({
 const unavailableJson = (c: Context) => { c.header('Retry-After', '1'); return c.json({ error: 'temporarily_unavailable' }, 503); };
 const tooMany = (c: Context, seconds: number) => { c.header('Retry-After', String(seconds)); return c.json({ error: 'too_many_requests' }, 429); };
 const contentType = (c: Context) => c.req.header('content-type')?.split(';')[0].trim().toLowerCase() ?? '';
+
+/** Copie hors base du registre, juste après un effacement ; un échec ne fait jamais échouer la réponse (reprise au nettoyage). */
+function syncErasureMirror(): void {
+  try { syncAnnouncementErasureMirror(getDb()); }
+  catch { console.warn('[annonce] copie du registre des effacements non mise à jour ; reprise au prochain nettoyage'); }
+}
 
 // Plafond commun atteint : un signal au plus par heure, sans adresse ni compte.
 let lastCapReport = 0;
@@ -66,7 +73,7 @@ function scheduleDelivery(delivery: AnnouncementDelivery, payload: PreparedEmail
     if (sent) return;
     // Mail non parti : la demande neuve disparaît, un renvoi rend l'ancien lien ; nouvel essai possible.
     console.warn('[annonce] e-mail de confirmation non remis');
-    try { abandonAnnouncementDelivery(getDb(), delivery); } catch { console.warn('[annonce] demande non retirée après un envoi manqué'); }
+    try { if (abandonAnnouncementDelivery(getDb(), delivery)) syncErasureMirror(); } catch { console.warn('[annonce] demande non retirée après un envoi manqué'); }
   })().finally(() => { inFlight.delete(task); });
   inFlight.add(task);
 }
@@ -133,7 +140,7 @@ announcementsRoute.post('/request', bodyLimit({ maxSize: 1024, onError: c => c.j
       payload = confirmationPayload(delivery);
     } catch {
       console.warn('[annonce] e-mail de confirmation non préparé');
-      try { abandonAnnouncementDelivery(db, delivery); } catch { console.warn('[annonce] demande non retirée après un envoi manqué'); }
+      try { if (abandonAnnouncementDelivery(db, delivery)) syncErasureMirror(); } catch { console.warn('[annonce] demande non retirée après un envoi manqué'); }
       return unavailableJson(c);
     }
     scheduleDelivery(delivery, payload);
@@ -258,6 +265,7 @@ announcementsRoute.post('/unsubscribe', bodyLimit({ maxSize: 1024, onError: c =>
     if (!reference) return html(c, lang, 'link_invalid', 400);
     // Déjà effacée : même réponse, la désinscription est rejouable sans effet.
     const result = eraseAnnouncementSubscription(getDb(), reference);
+    if (result.erased) syncErasureMirror();
     return html(c, result.lang ?? lang, 'unsubscribed');
   } catch {
     console.warn('[annonce] désinscription non enregistrée');

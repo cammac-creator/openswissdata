@@ -251,7 +251,7 @@ const COPY: Record<Lang, Copy> = {
     nextTitle: 'Historique détaillé et veille : en préparation.',
     nextText: 'Un historique plus fin de ces mouvements vous serait utile ? Dites-le d’un clic.',
     button: 'Être prévenu de l’historique détaillé',
-    buttonNote: 'Sans adresse e-mail ni inscription : le clic est compté comme nos autres statistiques de visite, pseudonymisées (voir la politique de confidentialité). Il sert seulement à mesurer l’intérêt. Suivez cette page pour la suite.',
+    buttonNote: 'Ce bouton ne demande ni adresse ni inscription : le clic est compté comme nos autres statistiques de visite, pseudonymisées (voir la politique de confidentialité). Il sert seulement à mesurer l’intérêt. Suivez cette page pour la suite.',
     thanks: 'Merci, c’est noté.', error: 'Le signal n’a pas pu être envoyé. Vous pouvez réessayer plus tard.',
     signup: {
       title: 'Être prévenu(e) par e-mail',
@@ -324,7 +324,7 @@ const COPY: Record<Lang, Copy> = {
     nextTitle: 'Detaillierter Verlauf und Überwachung: in Vorbereitung.',
     nextText: 'Wäre Ihnen ein genauerer Verlauf dieser Bewegungen nützlich? Sagen Sie es mit einem Klick.',
     button: 'Über den detaillierten Verlauf informiert werden',
-    buttonNote: 'Ohne E-Mail-Adresse und ohne Anmeldung: Der Klick wird wie unsere übrigen, pseudonymisierten Besuchsstatistiken gezählt (siehe Datenschutzerklärung). Er dient nur dazu, das Interesse zu messen. Verfolgen Sie diese Seite für das Weitere.',
+    buttonNote: 'Diese Schaltfläche verlangt weder Adresse noch Anmeldung: Der Klick wird wie unsere übrigen, pseudonymisierten Besuchsstatistiken gezählt (siehe Datenschutzerklärung). Er dient nur dazu, das Interesse zu messen. Verfolgen Sie diese Seite für das Weitere.',
     thanks: 'Danke, notiert.', error: 'Das Signal konnte nicht gesendet werden. Sie können es später erneut versuchen.',
     signup: {
       title: 'Per E-Mail benachrichtigt werden',
@@ -397,7 +397,7 @@ const COPY: Record<Lang, Copy> = {
     nextTitle: 'Detailed history and monitoring: in preparation.',
     nextText: 'Would a finer history of these movements be useful to you? Tell us with one click.',
     button: 'Get notified about the detailed history',
-    buttonNote: 'No e-mail address and no sign-up: the click is counted like our other, pseudonymised visit statistics (see the privacy policy). It only measures interest. Follow this page for what comes next.',
+    buttonNote: 'This button asks for no address and no sign-up: the click is counted like our other, pseudonymised visit statistics (see the privacy policy). It only measures interest. Follow this page for what comes next.',
     thanks: 'Thank you, noted.', error: 'The signal could not be sent. You can try again later.',
     signup: {
       title: 'Get notified by e-mail',

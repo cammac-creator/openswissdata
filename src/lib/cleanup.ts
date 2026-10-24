@@ -12,6 +12,7 @@ import { EVENT_RETENTION_MS } from './event-retention.js';
 import { applyAccountRetention, applyCrmRetention, applyPurchaseRetention, RetentionError, type RuleOutcome } from './retention-rules.js';
 import { reapplyErasures } from './erasure-registry.js';
 import { applyAnnouncementRetention } from './announcement-retention.js';
+import { announcementReplayError, reapplyAnnouncementErasures } from './announcement-erasures.js';
 export type { CleanupEntry, CleanupResult } from './cleanup-types.js';
 
 const DAY = 86_400_000;
@@ -113,6 +114,16 @@ async function performFullCleanup(db: Database.Database, now: number): Promise<C
     const error = replay.status === 'suspended' ? 'registry_suspended' as const : replay.issues.includes('database_error') ? 'database_error' as const
       : replay.issues.some(issue => issue !== 'replay_pending') ? 'storage_error' as const : 'replay_pending' as const;
     result.entries.push({ name: 'erasure_registry', deleted: 0, status: 'error', unit: 'rows', error });
+  }
+  // Registre propre aux inscriptions (copie retention/announcement-erasures.json) : son état rejoint la catégorie
+  // announcement_subscriptions, sans nouvelle catégorie ; une erreur de purge déjà signalée reste prioritaire.
+  const announcementReplay = reapplyAnnouncementErasures(db, now, 'cleanup');
+  const announcementError = announcementReplayError(announcementReplay);
+  const announcementEntry = result.entries.find(entry => entry.name === 'announcement_subscriptions');
+  if (announcementError && announcementEntry && announcementEntry.status !== 'error') {
+    announcementEntry.status = 'error';
+    announcementEntry.error = announcementError;
+    result.ok = false;
   }
   const proof: CleanupProof = { ...result, checked_at: now };
   try {

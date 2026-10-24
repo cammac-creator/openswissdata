@@ -5,6 +5,7 @@
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes } from 'node:crypto';
 import type Database from 'better-sqlite3';
 import { generateToken, isValidTokenFormat } from './tokens.js';
+import { recordAnnouncementErasures } from './announcement-erasures.js';
 
 export const ANNOUNCEMENT_SUBJECTS = ['finma-historique'] as const;
 export type AnnouncementSubject = (typeof ANNOUNCEMENT_SUBJECTS)[number];
@@ -106,14 +107,21 @@ export function registerAnnouncementRequest(
   }
 }
 
-/** Le mail n'est pas parti : rien n'est retenu pour une demande neuve, l'ancien lien revient pour un renvoi. */
-export function abandonAnnouncementDelivery(db: Database.Database, delivery: AnnouncementDelivery): void {
+/**
+ * Le mail n'est pas parti : rien n'est retenu pour une demande neuve (effacement inscrit au registre), l'ancien lien
+ * revient pour un renvoi. Renvoie true si une ligne a été effacée (la copie du registre est alors à synchroniser).
+ */
+export function abandonAnnouncementDelivery(db: Database.Database, delivery: AnnouncementDelivery, now = Date.now()): boolean {
   if (delivery.kind === 'new' || !delivery.previous) {
-    db.prepare('DELETE FROM announcement_subscriptions WHERE id=? AND token_hash=? AND confirmed_at IS NULL').run(delivery.id, delivery.tokenHash);
-    return;
+    return db.transaction(() => {
+      const done = db.prepare('DELETE FROM announcement_subscriptions WHERE id=? AND token_hash=? AND confirmed_at IS NULL').run(delivery.id, delivery.tokenHash);
+      if (done.changes) recordAnnouncementErasures(db, [delivery.id], Math.max(now, delivery.requestedAt));
+      return done.changes > 0;
+    }).immediate();
   }
   db.prepare('UPDATE announcement_subscriptions SET lang=?,token_hash=?,token_expires_at=? WHERE id=? AND token_hash=? AND confirmed_at IS NULL')
     .run(delivery.previous.lang, delivery.previous.tokenHash, delivery.previous.expiresAt, delivery.id, delivery.tokenHash);
+  return false;
 }
 
 type Pending = { id: number; lang: AnnouncementLang; requested_at: number; token_expires_at: number };
@@ -198,12 +206,16 @@ export function inspectAnnouncementSubscription(db: Database.Database, reference
   return (db.prepare('SELECT lang FROM announcement_subscriptions WHERE id=? AND requested_at=?').get(reference.id, reference.requestedAt) as { lang: AnnouncementLang } | undefined) ?? null;
 }
 
-/** Désinscription : la ligne disparaît immédiatement (aucune trace gardée, pas même la date). */
-export function eraseAnnouncementSubscription(db: Database.Database, reference: UnsubscribeReference): { erased: boolean; lang: AnnouncementLang | null } {
+/**
+ * Désinscription : la ligne disparaît immédiatement. Seuls son identifiant interne et la date de l'effacement entrent au
+ * registre (même transaction), pour qu'une restauration ne la ramène pas.
+ */
+export function eraseAnnouncementSubscription(db: Database.Database, reference: UnsubscribeReference, now = Date.now()): { erased: boolean; lang: AnnouncementLang | null } {
   return db.transaction(() => {
     const row = inspectAnnouncementSubscription(db, reference);
     if (!row) return { erased: false, lang: null };
     const done = db.prepare('DELETE FROM announcement_subscriptions WHERE id=? AND requested_at=?').run(reference.id, reference.requestedAt);
+    if (done.changes === 1) recordAnnouncementErasures(db, [reference.id], Math.max(now, reference.requestedAt));
     return { erased: done.changes === 1, lang: row.lang };
   }).immediate();
 }

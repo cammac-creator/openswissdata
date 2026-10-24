@@ -16,6 +16,8 @@
 -- Effacement (src/lib/announcement-retention.ts, catégorie `announcement_subscriptions` du
 -- nettoyage) : demande non confirmée après 7 jours, inscription 12 mois après l'annonce ou, sans
 -- annonce, à la fin du 30.06.2027 (heure de Zurich) ; désinscription = effacement immédiat.
+-- Chaque effacement est inscrit dans announcement_erasures (même lot, pas encore publié) et dans sa copie hors base,
+-- pour qu'une restauration de sauvegarde ne ramène jamais une inscription effacée.
 
 CREATE TABLE IF NOT EXISTS announcement_subscriptions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,3 +41,12 @@ CREATE TABLE IF NOT EXISTS announcement_subscriptions (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_announcement_subscriptions_token ON announcement_subscriptions(token_hash) WHERE token_hash IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_announcement_subscriptions_pending ON announcement_subscriptions(confirmed_at, requested_at);
+
+-- Registre des effacements des inscriptions (src/lib/announcement-erasures.ts) : identifiant interne et date, rien
+-- d'autre ; pas de clé étrangère (l'entrée survit à la ligne qu'elle décrit). Copie hors base :
+-- retention/announcement-erasures.json, rejouée au démarrage et à chaque nettoyage.
+CREATE TABLE IF NOT EXISTS announcement_erasures (
+  subject_id INTEGER NOT NULL CHECK(typeof(subject_id)='integer' AND subject_id>0),
+  erased_at INTEGER NOT NULL CHECK(typeof(erased_at)='integer' AND erased_at>=1000000000000),
+  PRIMARY KEY(subject_id, erased_at)
+);

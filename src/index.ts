@@ -38,6 +38,7 @@ import { startWorkflowWatch } from "./lib/workflow-watch.js";
 import { checkAdminEmailsAtStartup } from "./lib/controle-demarrage.js";
 import { getDb } from "./lib/db.js";
 import { reapplyErasures } from "./lib/erasure-registry.js";
+import { reapplyAnnouncementErasures } from "./lib/announcement-erasures.js";
 import { adminPagePolicy } from "./lib/admin-page-policy.js";
 import { CHECKOUT_NOTICE_CSP, isCheckoutNotice } from './lib/checkout-notice.js';
 import {LOGIN_CONFIRMATION_CSP} from './lib/login-confirmation-page.js';
@@ -345,6 +346,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     else if (replay.status === "suspended") console.warn("[conservation] rejeu du registre suspendu (OSD_SKIP_ERASURE_REPLAY) ; service ouvert");
     // Codes fermés, catégories et identifiants internes seulement, jamais une valeur client.
     else console.error("[conservation] registre des effacements à examiner ; service ouvert", { issues: replay.issues, reapplied, future: replay.future, deferred: replay.deferred_entries });
+    // Registre propre aux inscriptions « être prévenu » : même rôle, même règle (jamais bloquant, nombres seulement).
+    const announcements = reapplyAnnouncementErasures(database, Date.now(), "startup");
+    if (announcements.status === "ok") console.info(`[annonce] registre des effacements rejoué : ${announcements.reapplied} inscription(s) réeffacée(s)`);
+    else if (announcements.status === "suspended") console.warn("[annonce] rejeu du registre suspendu (OSD_SKIP_ERASURE_REPLAY) ; service ouvert");
+    else console.error("[annonce] registre des effacements à examiner ; service ouvert", { issues: announcements.issues, reapplied: announcements.reapplied, future: announcements.future });
   }
   const app = createApp();
   serve({ fetch: app.fetch, port: env.PORT });

@@ -30,11 +30,13 @@ Le registre rend un effacement définitif, même face à une restauration. **Ann
 
 1. Dans les variables du service, ajouter `OSD_SKIP_ERASURE_REPLAY=1`, puis redéployer : le rejeu est suspendu au démarrage comme au nettoyage, la copie n’est ni lue ni réécrite, et le bureau l’affiche en rouge (« suspendue »).
 2. Restaurer la sauvegarde voulue selon la procédure de reprise.
-3. Depuis un terminal du conteneur (`railway ssh`), retirer de `retention/erasures.json` les seules entrées concernées (catégorie, identifiant interne, date), sans toucher aux autres ; si la sauvegarde restaurée les contient aussi dans `retention_erasures`, les y retirer.
+3. Depuis un terminal du conteneur (`railway ssh`), retirer de `retention/erasures.json` les seules entrées concernées (catégorie, identifiant interne, date), sans toucher aux autres ; si la sauvegarde restaurée les contient aussi dans `retention_erasures`, les y retirer. Pour une inscription « être prévenu », même geste dans `retention/announcement-erasures.json` (identifiant interne et date) et la table `announcement_erasures` : l’interrupteur suspend aussi ce registre.
 4. Retirer `OSD_SKIP_ERASURE_REPLAY`, redéployer, puis vérifier le journal de démarrage et le témoin : état `ok`, rien en attente.
 5. Consigner l’intervention dans la passation privée, sans donnée personnelle.
 
 Pendant la suspension, le nettoyage continue d’appliquer les durées et d’inscrire ses effacements dans la table ; la copie les reçoit au premier passage après le retrait de l’interrupteur.
+
+Les inscriptions « être prévenu » ont leur propre registre, sur le même modèle (`announcement_erasures` et `retention/announcement-erasures.json`, détail dans `docs/conservation-des-donnees.md`) : au démarrage et à chaque nettoyage, toute inscription de même identifiant demandée au plus tard à la date d’un effacement est effacée de nouveau ; une demande plus récente qui aurait reçu le même identifiant n’est jamais touchée.
 
 Limite : une restauration sur un volume neuf ne retrouve pas la copie. Le registre de la sauvegarde restaurée couvre alors seulement les effacements antérieurs à sa création ; les effacements plus récents doivent être réappliqués à partir d’une copie de `retention/erasures.json` conservée ailleurs, ou attendre le prochain passage du nettoyage, qui efface de nouveau ce qui a dépassé sa durée (sauf si une action ou un incident a été rouvert par la restauration). Le profil de vérification `service-retention-2026-09-29` contrôle la présence de la table dans chaque sauvegarde.
 

@@ -57,6 +57,10 @@ export function renderCleanupStatus(proof: CleanupProof | null | undefined, now 
         : entry.error === 'replay_pending' ? 'Des effacements restaurés attendent leur réapplication : voir le registre ci-dessous.'
         : entry.error === 'database_error' ? 'Réapplication interrompue par la base : nouvel essai au prochain passage.'
         : 'Copie hors base à vérifier : illisible ou impossible à écrire, un effacement pourrait revenir après une restauration.')
+      : entry.name === 'announcement_subscriptions' && entry.status === 'error' && entry.error !== 'timestamp_format' && entry.error !== 'database_error'
+        ? (entry.error === 'registry_suspended' ? 'Réapplication des effacements d’inscriptions suspendue par l’interrupteur d’intervention.'
+          : entry.error === 'replay_pending' ? 'Un effacement d’inscription est daté dans le futur : horloge à vérifier.'
+          : 'Copie hors base des effacements d’inscriptions à vérifier : une désinscription pourrait revenir après une restauration.')
       : entry.status === 'error' ? `Échec à vérifier${count ? ` · ${removed}` : ''}` : entry.status === 'not_applicable' ? (entry.unit === 'folders' ? 'Pas de dossier de copies à contrôler' : 'Ancienne table absente · aucun contenu à purger') : count ? removed : 'Rien à retirer lors de ce passage.';
     return `<div class="health-row"><div class="health-icon ${entry.status === 'error' ? 'amber' : ''}">${entry.status === 'error' ? '!' : '✓'}</div><div class="health-copy"><strong>${label}</strong><p>${detail}</p></div></div>`;
   }).join('') ?? '';

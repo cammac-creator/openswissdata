@@ -3,7 +3,7 @@
 // des en-têtes où le vrai module parle à un `fetch` simulé.
 import '../helpers/session-origin.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { PreparedEmail, EmailSendResult } from '../../src/lib/email.js';
@@ -242,6 +242,22 @@ describe('Inscription « être prévenu » : routes', () => {
     expect(rows()).toEqual([]);
     expect((await post()).status).toBe(200);
     expect(await (await app.request(`${SITE}/api/announcements/unsubscribe?token=${unsubscribe}`)).text()).toContain('Aucune inscription liée à ce lien');
+  });
+
+  it('désinscription : l’effacement entre aussitôt au registre et dans sa copie hors base, sans attendre le nettoyage', async () => {
+    const app = createApp();
+    await demande(app, valid());
+    const { unsubscribe } = links();
+    const id = rows()[0].id;
+    now += HOUR;
+    const res = await app.request(`${SITE}/api/announcements/unsubscribe?token=${unsubscribe}`, {
+      method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click',
+    });
+    expect(res.status).toBe(200);
+    expect(getDb().prepare('SELECT subject_id, erased_at FROM announcement_erasures').all()).toEqual([{ subject_id: id, erased_at: START + HOUR }]);
+    const copie = readFileSync(join(tmp, 'retention', 'announcement-erasures.json'), 'utf8');
+    expect(JSON.parse(copie)).toEqual({ version: 1, entries: [{ subject_id: id, erased_at: START + HOUR }] });
+    expect(copie).not.toMatch(/@|example/);
   });
 
   it('désinscription en un clic (RFC 8058) : POST de la messagerie sans origine, urlencoded ou multipart', async () => {
