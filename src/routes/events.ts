@@ -16,7 +16,8 @@ export const eventsRoute = new Hono();
 const Body = z.object({
   name: z.string().min(1).max(64).regex(/^[a-z0-9_.\-:]+$/i),
   kind: z.enum(["custom", "conversion"]).default("custom"),
-  meta: z.record(z.unknown()).optional(),
+  // zod 4 exige la clé explicite (zod 3 la supposait textuelle) : même comportement.
+  meta: z.record(z.string(), z.unknown()).optional(),
 }).strict();
 
 // Limiter le corps et les métadonnées avant tout stockage.
