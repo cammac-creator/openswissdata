@@ -65,9 +65,14 @@ export function settleAnnouncementDeliveries(): Promise<void> {
   return Promise.all([...inFlight]).then(() => undefined);
 }
 
-/** Travail différé, suivi jusqu'à sa fin (tests, arrêt du service). */
+/**
+ * Travail différé, suivi jusqu'à sa fin (tests, arrêt du service). Une erreur imprévue y est rattrapée : une promesse
+ * rejetée sans gestionnaire arrêterait le processus. Message fixe, sans adresse.
+ */
 function track(work: () => Promise<void>): void {
-  const task: Promise<void> = work().finally(() => { inFlight.delete(task); });
+  const task: Promise<void> = work()
+    .catch(() => { console.warn('[annonce] tâche différée interrompue'); })
+    .finally(() => { inFlight.delete(task); });
   inFlight.add(task);
 }
 
@@ -78,9 +83,10 @@ function track(work: () => Promise<void>): void {
 function scheduleRequest(input: { email: string; lang: AnnouncementLang; subject: AnnouncementSubject }): void {
   track(async () => {
     await new Promise(resolve => setImmediate(resolve));
-    const db = getDb();
+    let db: ReturnType<typeof getDb>;
     let delivery: AnnouncementDelivery | 'capped' | null;
     try {
+      db = getDb();
       delivery = registerAnnouncementRequest(db, input);
     } catch {
       console.warn('[annonce] demande non enregistrée');
