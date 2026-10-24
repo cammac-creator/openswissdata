@@ -10,6 +10,15 @@ Le contrôle npm porte sur les graphes verrouillés de l’application, du site,
 - Un seul moteur Transformers.js 3.8.1 pour recherche et traduction. L’ancien Xenova 2 et son ancien protobufjs sont retirés. Les requêtes sont traitées localement. Les index existants restent distincts des collectes de fichiers. Les caches de reprise exigent la révision du modèle et le moteur de calcul courants ; les anciens caches sont recalculés.
 - Deux contraintes transitives explicites : sharp 0.35.5 depuis le 21.10.2026 (0.35.4 auparavant ; correctifs des décodeurs d’images) et esbuild 0.28.2 (serveur de développement). Pas d’entrée image dans nos parcours IA ; build, traduction et recherche doivent être revalidés lors de leur évolution. Retirer ces contraintes lorsque les paquets parents adoptent des versions corrigées compatibles.
 
+## Mise à jour du 24.10.2026
+
+Avis apparus dans la CI des intégrations du 24.10 (paquet MCP), puis relevés sur les quatre lockfiles :
+- `sdks/mcp-server` : `zod` 4.3.6 → 4.6.7 (avis élevé GHSA-mrhx-c7xc-m3w5, versions < 4.6.6 ; version épinglée dans `package.json`, seul changement de déclaration), `body-parser` 2.3.0 → 2.4.0 (élevé), `fast-uri` 3.1.8 → 3.1.9 (moyen) ; aucune nouvelle version du paquet publié.
+- Site (`web`) : `undici` 8.11.2 → 8.12.3 (élevé) et `zod` 4.6.5 → 4.6.7, dans les plages déclarées ; `@emnapi/core` et `@emnapi/runtime` gardés dans le lockfile.
+- Application : `mailparser` 3.9.28 → 3.12.4 et ses dépendances, dans la plage ^3.9.28, pour lever l'avis moyen sur `nodemailer` < 10.1.4 qu'il embarquait. `qs` 6.16.1 suit `body-parser` dans le paquet MCP sans corriger d'avis.
+- **Reste ouvert : `zod` 3 de l'application** (plage ^3.23.0). L'avis GHSA-mrhx-c7xc-m3w5 vise toutes les versions < 4.6.6 et aucune version 3 n'est corrigée : il faut migrer l'application vers zod 4 (29 fichiers de `src/` et 3 de `etl/` l'importent). Le contrôle hebdomadaire du lundi échouera pour l'application tant que cette migration n'est pas faite. Cinq routes bornent le corps avant validation (`bodyLimit` : événements, paiement, connexion, confirmation de connexion, CRM) ; les outils MCP, OAuth et l'administration restent à examiner avec la migration.
+- Preuves : sous Node 22.23.3 et npm 10.9.9, `npm audit --audit-level=low` à 0 avis pour `sdks/mcp-server`, `sdks/sdk-ts` et `web` ; paquet MCP : typage, 12 tests, construction et `npm pack --dry-run` verts ; site : `npm ci` puis construction verte (11 672 pages) ; application : suite complète verte (230 fichiers, 3 513 tests).
+
 ## Mise à jour du 23.10.2026
 
 Avis GHSA-rxp7-6hxx-x8q5 (moyen) sur `ip-address` ≤ 10.7.3, apparu dans la CI des intégrations du 23.10 (paquet MCP) :
