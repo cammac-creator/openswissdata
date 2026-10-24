@@ -2166,6 +2166,1497 @@
       "approved_on": "2026-10-23",
       "checked_by": "codex (lot G4), à relire par l'intégrateur",
       "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (4207 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 80 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clé réelle : BFS_Gemeindenummer ; les 80 codes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). La description CKAN donne comme source Amt für Daten und Statistik Kanton Thurgau ; sa mention BFS concerne la numérotation, pas un jeu édité par l’OFS. Sortierung_in_Bezirk retirée : numéro auxiliaire de tri alphabétique, inutile pour la jointure ; aucune note ni appréciation conservée. Les colonnes bis_2010 décrivent l’ancien découpage, sans clé supplémentaire."
+    },
+    {
+      "id": "zg-zones-a-batir",
+      "title": "Zones à bâtir bâties et non bâties des communes zougoises",
+      "ckan_uuid": "0c51e8de-4075-4b6a-836c-6657e131222d",
+      "publisher": "Canton de Zoug",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Zoug, via opendata.swiss",
+      "resource_url": "https://data.zg.ch/store/1/resource/2424",
+      "expected_header": [
+        "jahr",
+        "gemeinde",
+        "bfscode",
+        "status",
+        "flaeche_ha"
+      ],
+      "keys": {
+        "jahr": "year",
+        "bfscode": "commune_bfs"
+      },
+      "columns": [
+        "jahr",
+        "gemeinde",
+        "bfscode",
+        "status",
+        "flaeche_ha"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation kanton-zug ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (12006 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 330 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Source citée par la fiche : Canton de Zoug, Amt für Raum und Verkehr. Surfaces en hectares, 2010 à 2024. Les 11 numéros de commune correspondent au référentiel local (src/mcp/data/localities.csv), un seul nom par numéro."
+    },
+    {
+      "id": "ofen-retribution-unique-pv-cantons",
+      "title": "Rétribution unique des installations photovoltaïques par canton",
+      "ckan_uuid": "2628a6a6-1ec8-42b2-afd5-17327f569fb5",
+      "publisher": "Office fédéral de l'énergie OFEN",
+      "licence": "terms_by",
+      "attribution": "Source : Office fédéral de l'énergie OFEN, via opendata.swiss",
+      "resource_url": "https://www.uvek-gis.admin.ch/BFE/ogd/84/ogd84_einmalverguetung_fuer_photovoltaikanlagen.csv",
+      "expected_header": [
+        "Jahr",
+        "Kanton",
+        "Anzahl_Anlagen",
+        "Installierte_Leistung_kW",
+        "Verguetung_CHF",
+        "Anzahl_Anlagen_pro_100000_Einwohner",
+        "Installierte_Leistung_kW_pro_100000_Einwohner"
+      ],
+      "keys": {
+        "Jahr": "year",
+        "Kanton": "canton"
+      },
+      "columns": [
+        "Jahr",
+        "Kanton",
+        "Anzahl_Anlagen",
+        "Installierte_Leistung_kW",
+        "Verguetung_CHF"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bundesamt-fur-energie-bfe ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (10138 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 260 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Nombre d'installations, puissance et montant versé par canton et année de paiement (2014 à 2023), agrégats sans bénéficiaire. Kanton : les 26 abréviations exactes. Colonnes « pro 100000 Einwohner » retirées (dénominateur de population d'une autre statistique). NA conservé tel quel dans les colonnes de valeurs."
+    },
+    {
+      "id": "tg-votations-cantonales-communes",
+      "title": "Résultats des votations cantonales thurgoviennes par commune",
+      "ckan_uuid": "21a3621e-03e8-4642-814e-b3983dbe777e",
+      "publisher": "Canton de Thurgovie",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-52/exports/csv?use_labels=true",
+      "expected_header": [
+        "datum_abstimmung",
+        "vorlage_bezeichnung",
+        "vorlageart_code",
+        "vorlageart_bezeichnung",
+        "bezirk_nr",
+        "bezirk_name",
+        "bfs_nr_gemeinde",
+        "gemeinde_name",
+        "stimmberechtigte",
+        "eingelegte_stimmzettel",
+        "leere_stimmen",
+        "ungueltige_stimmen",
+        "gueltige_stimmen",
+        "ja_stimmen",
+        "nein_stimmen",
+        "stimmbeteiligung",
+        "url_abstimmungsvorlage"
+      ],
+      "keys": {
+        "bfs_nr_gemeinde": "commune_bfs"
+      },
+      "columns": [
+        "datum_abstimmung",
+        "vorlage_bezeichnung",
+        "vorlageart_code",
+        "vorlageart_bezeichnung",
+        "bezirk_nr",
+        "bezirk_name",
+        "bfs_nr_gemeinde",
+        "gemeinde_name",
+        "stimmberechtigte",
+        "eingelegte_stimmzettel",
+        "leere_stimmen",
+        "ungueltige_stimmen",
+        "gueltige_stimmen",
+        "ja_stimmen",
+        "nein_stimmen",
+        "stimmbeteiligung"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = https://opendata.swiss/terms-of-use#terms_open, license = https://opendata.swiss/terms-of-use#terms_open. CSV direct entièrement téléchargé (974172 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 3680 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Résultats officiels des votations cantonales depuis 2004 par commune (électeurs inscrits, bulletins, oui, non, participation) : agrégats, aucune personne ni candidat. vorlage_bezeichnung = titre officiel de l'objet soumis au vote. Les 80 numéros correspondent au référentiel local (variantes d'écriture d'un même nom seulement). Lien de la brochure retiré. datum_abstimmung est une date complète, laissée sans clé. Réexamen d'un jeu laissé en réserve par le lot G4 (contrôle des intitulés et des petites cases achevé ici)."
+    },
+    {
+      "id": "bs-points-noirs-accidents",
+      "title": "Points noirs des accidents de la route à Bâle-Ville",
+      "ckan_uuid": "f197b394-3ce0-4315-bad5-65d4e7f03396",
+      "publisher": "Canton de Bâle-Ville",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Bâle-Ville, via opendata.swiss",
+      "resource_url": "https://data.bs.ch/api/v2/catalog/datasets/100216/exports/csv?use_labels=true",
+      "expected_header": [
+        "Id-Unfallschwerpunkt",
+        "Kategorie",
+        "Beschreibung der Kategorie des Unfallschwerpunktes",
+        "Jahr",
+        "Strasse",
+        "Anlagetyp",
+        "Lichtsignalanlage",
+        "Gemeinde",
+        "Geo Point",
+        "Geo Shape"
+      ],
+      "keys": {
+        "Jahr": "year"
+      },
+      "columns": [
+        "Id-Unfallschwerpunkt",
+        "Jahr",
+        "Strasse",
+        "Anlagetyp",
+        "Lichtsignalanlage",
+        "Gemeinde",
+        "Geo Point"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation kanton-basel-stadt ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (54859 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 187 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Points noirs d'accidents désignés par année selon la norme VSS SN 641 724 : emplacements de voirie, aucun accident individuel ni personne. Kategorie et sa description retirées par prudence (état du traitement de chaque point, pas une donnée de lieu) ; Geo Shape retiré (redondant avec Geo Point). Gemeinde n'est pas une clé (valeurs Bund, Basel, Basel-Stadt, Riehen)."
+    },
+    {
+      "id": "zh-eleves-nationalite",
+      "title": "Élèves de l'école ordinaire zurichoise par nationalité",
+      "ckan_uuid": "806237c6-7ca2-4995-959d-cb2d702676f5",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://www.bista.zh.ch/basicapi/ogd/data_lernende_regelschule_staatsangehoerigkeit",
+      "expected_header": [
+        "stand",
+        "kanton",
+        "jahr",
+        "staatsangehoerigkeit",
+        "staatsangehoerigkeit_iso2_code",
+        "anzahl"
+      ],
+      "keys": {
+        "kanton": "canton",
+        "jahr": "year"
+      },
+      "columns": [
+        "kanton",
+        "jahr",
+        "staatsangehoerigkeit",
+        "staatsangehoerigkeit_iso2_code",
+        "anzahl"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_open, license = https://opendata.swiss/terms-of-use#terms_open. CSV direct entièrement téléchargé (107496 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 2988 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG)."
+    },
+    {
+      "id": "zh-apprentis-formation-professionnelle",
+      "title": "Apprenants de la formation professionnelle zurichoise par domaine",
+      "ckan_uuid": "95eed487-cdd0-4108-8b8b-359a1572c01a",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Bildungsstatistik Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.bista.zh.ch/basicapi/ogd/data_lernende_berufsbildung_bildungsfeld",
+      "expected_header": [
+        "stand",
+        "kanton",
+        "jahr",
+        "bildungsfeld",
+        "berufsmaturitaetstyp",
+        "anzahl"
+      ],
+      "keys": {
+        "kanton": "canton",
+        "jahr": "year"
+      },
+      "columns": [
+        "kanton",
+        "jahr",
+        "bildungsfeld",
+        "berufsmaturitaetstyp",
+        "anzahl"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (31533 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 442 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs agrégés à l'échelle du canton, aucune case masquée (minimum relevé : 12). Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG)."
+    },
+    {
+      "id": "zh-eleves-secondaire-1",
+      "title": "Élèves du degré secondaire I zurichois par commune scolaire et niveau",
+      "ckan_uuid": "1941a42a-fc69-4d42-bca6-9d2250ce97d4",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Bildungsstatistik Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.bista.zh.ch/basicapi/ogd/data_lernende_sekundarstufe_i_anforderungstyp",
+      "expected_header": [
+        "stand",
+        "kanton",
+        "jahr",
+        "schulgemeinde",
+        "anforderungstyp",
+        "anzahl"
+      ],
+      "keys": {
+        "kanton": "canton",
+        "jahr": "year"
+      },
+      "columns": [
+        "kanton",
+        "jahr",
+        "schulgemeinde",
+        "anforderungstyp",
+        "anzahl"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (639814 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 13902 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG)."
+    },
+    {
+      "id": "zh-eleves-langue-premiere",
+      "title": "Élèves de l'école ordinaire zurichoise par autorité scolaire et langue première",
+      "ckan_uuid": "6cdbba31-ba45-4ab0-ab5d-6cf973869268",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Bildungsstatistik Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.bista.zh.ch/basicapi/ogd/data_lernende_regelschule_regional_erstsprache",
+      "expected_header": [
+        "stand",
+        "kanton",
+        "jahr",
+        "schultraeger_code",
+        "schultraeger",
+        "schultraegertyp",
+        "erstsprache",
+        "anzahl"
+      ],
+      "keys": {
+        "kanton": "canton",
+        "jahr": "year"
+      },
+      "columns": [
+        "kanton",
+        "jahr",
+        "schultraeger_code",
+        "schultraeger",
+        "schultraegertyp",
+        "erstsprache",
+        "anzahl"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (942439 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 10684 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG). Le jeu de la même source par autorité scolaire et nationalité n'est pas retenu : ses totaux par année et autorité sont identiques à ceux de ce jeu, ce qui permettrait de recalculer une case masquée (relecture du 24.10.2026). Contrôlé : la somme de ce jeu ne permet pas de recalculer une case à partir du total cantonal (au moins 9 cases masquées par année dans ce jeu, le total cantonal n'en isole jamais une seule)."
+    },
+    {
+      "id": "tg-eleves-langue-premiere",
+      "title": "Élèves de l'école obligatoire thurgovienne par commune scolaire et langue première",
+      "ckan_uuid": "a4ee794f-b4fb-4e50-a23a-4e911419bb02",
+      "publisher": "Canton de Thurgovie",
+      "licence": "cc0",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/dek-gs-7/exports/csv?use_labels=true",
+      "expected_header": [
+        "stand",
+        "kanton",
+        "jahr",
+        "schultraeger_code",
+        "schultraeger",
+        "schultraegertyp",
+        "erstsprache",
+        "anzahl"
+      ],
+      "keys": {
+        "kanton": "canton",
+        "jahr": "year"
+      },
+      "columns": [
+        "kanton",
+        "jahr",
+        "schultraeger_code",
+        "schultraeger",
+        "schultraegertyp",
+        "erstsprache",
+        "anzahl"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open. CSV direct entièrement téléchargé (270180 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 3210 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG). Le jeu de la même source par autorité scolaire et nationalité n'est pas retenu : ses totaux par année et autorité sont identiques à ceux de ce jeu, ce qui permettrait de recalculer une case masquée (relecture du 24.10.2026). Contrôlé : la somme de ce jeu ne permet pas de recalculer une case à partir du total cantonal (cases masquées des deux côtés chaque année)."
+    },
+    {
+      "id": "tg-eleves-nationalite",
+      "title": "Élèves de l'école obligatoire thurgovienne par nationalité",
+      "ckan_uuid": "df6179cb-387b-49d7-8f2c-1e7b2d1c1a1b",
+      "publisher": "Canton de Thurgovie",
+      "licence": "cc0",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/dek-gs-5/exports/csv?use_labels=true",
+      "expected_header": [
+        "stand",
+        "kanton",
+        "jahr",
+        "staatsangehoerigkeit",
+        "staatsangehoerigkeit_iso2_code",
+        "anzahl"
+      ],
+      "keys": {
+        "kanton": "canton",
+        "jahr": "year"
+      },
+      "columns": [
+        "kanton",
+        "jahr",
+        "staatsangehoerigkeit",
+        "staatsangehoerigkeit_iso2_code",
+        "anzahl"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open. CSV direct entièrement téléchargé (40469 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 1045 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG)."
+    },
+    {
+      "id": "zh-communes-endettement-brut",
+      "title": "Part de l'endettement brut des communes zurichoises",
+      "ckan_uuid": "52895845-89c9-429e-bad6-d22964de5bd6",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_413.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (957201 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-fonds-propres",
+      "title": "Fonds propres par habitant des communes zurichoises",
+      "ckan_uuid": "a044ccd5-937f-4a31-84ec-fe6049cae2be",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_414.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1075615 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-resultat-annuel",
+      "title": "Résultat annuel par habitant des communes zurichoises",
+      "ckan_uuid": "2d8a63c0-aa7a-4f01-ac61-c3a5bb2ebe4d",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_828.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1257795 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-patrimoine-financier",
+      "title": "Patrimoine financier par habitant des communes zurichoises",
+      "ckan_uuid": "444a6880-0f92-42ef-a8b7-a790c3001697",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_415.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1097468 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-capitaux-tiers",
+      "title": "Capitaux de tiers par habitant des communes zurichoises",
+      "ckan_uuid": "9c7b118e-7f9b-4595-970c-5b1d847d7d7e",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_416.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1075880 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-part-investissements",
+      "title": "Part des investissements dans les dépenses des communes zurichoises",
+      "ckan_uuid": "8f48689d-197f-4df3-89d7-3713368d3c6e",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_418.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (905893 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-service-dette",
+      "title": "Part du service de la dette des communes zurichoises",
+      "ckan_uuid": "9e397815-e9ec-4b3b-944a-e3020e4685c6",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_419.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (909271 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-depenses-finances-impots",
+      "title": "Charges nettes « finances et impôts » des communes zurichoises",
+      "ckan_uuid": "b6a6e5ae-7e6f-4ed7-bc5d-622457ebb43c",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_422.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1242707 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-depenses-sante",
+      "title": "Charges nettes de santé des communes zurichoises",
+      "ckan_uuid": "be18e485-86d5-4ac7-b9f8-9d66041351de",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_423.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1158200 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-depenses-economie",
+      "title": "Charges nettes « économie publique » des communes zurichoises",
+      "ckan_uuid": "cfdb34cc-8a57-4469-931e-b7b14ef52830",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_429.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1192651 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-depenses-administration",
+      "title": "Charges nettes d'administration générale des communes zurichoises",
+      "ckan_uuid": "a8394ff7-6ef6-4658-8def-1b6f436c56f5",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_420.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1235760 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-depenses-securite-sociale",
+      "title": "Charges nettes de sécurité sociale des communes zurichoises",
+      "ckan_uuid": "da7a7b03-253c-4285-b188-0fa0ce8112f8",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_426.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1214649 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-investissements-nets",
+      "title": "Investissements nets par habitant des communes zurichoises",
+      "ckan_uuid": "27fb4bbd-1b1f-4d66-b861-f6b1aa89268d",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_430.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1111748 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-patrimoine-net",
+      "title": "Patrimoine net par habitant des communes zurichoises",
+      "ckan_uuid": "201914b1-9614-4de3-ab54-428c1ed0b2b4",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_431.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1089516 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-autofinancement",
+      "title": "Autofinancement par habitant des communes zurichoises",
+      "ckan_uuid": "b93ac8c7-315d-4bf2-9e50-4cfe09b6ffa0",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_432.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1111851 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-part-autofinancement",
+      "title": "Part d'autofinancement des communes zurichoises",
+      "ckan_uuid": "afb4c838-a455-4c11-833f-83e4bd340225",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_433.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (954167 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-degre-autofinancement",
+      "title": "Degré d'autofinancement des communes zurichoises",
+      "ckan_uuid": "447cff54-03e2-4440-979e-72aa0096bd4d",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_434.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (947008 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-communes-charge-interets",
+      "title": "Part de la charge d'intérêts des communes zurichoises",
+      "ckan_uuid": "97a3d780-0c01-417d-b8e7-cd538a4947a9",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_435.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (919206 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6975 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique des finances communales du canton (comptes des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-impots-fonciers",
+      "title": "Rendement des impôts fonciers des communes zurichoises",
+      "ckan_uuid": "68ef42d2-22ba-4711-a625-cbd3e9d08f15",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_295.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (901537 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 5922 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-impots-paroisses",
+      "title": "Rendement fiscal des paroisses par commune zurichoise",
+      "ckan_uuid": "e9b55d06-1910-4096-8b1c-234d3e4cfb73",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_296.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (913122 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 5922 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-impots-communes-ecoles",
+      "title": "Rendement fiscal des communes politiques et scolaires zurichoises",
+      "ckan_uuid": "0bfe0e0a-374e-4f5c-bea2-6e65c01df2af",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_297.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (975758 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 5922 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-impots-total",
+      "title": "Rendement fiscal total des communes zurichoises",
+      "ckan_uuid": "7821b855-f1ad-48d6-a526-b27e06057b16",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_287.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (863653 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 5922 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-impots-communaux-generaux",
+      "title": "Rendement des impôts communaux généraux zurichois",
+      "ckan_uuid": "bb5260f9-2c7c-4e47-a282-958de89953e0",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_314.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (987783 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 5922 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-capacite-fiscale",
+      "title": "Capacité fiscale des communes zurichoises",
+      "ckan_uuid": "e6369b70-fbb0-4f93-8bab-6d624c1cd30b",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_376.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (939575 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6922 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-capacite-fiscale-corrigee",
+      "title": "Capacité fiscale corrigée des communes zurichoises",
+      "ckan_uuid": "d003bb07-0e3c-49d5-9018-7808b6f79af6",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_273.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1015628 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6920 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-capacite-fiscale-corrigee-habitant",
+      "title": "Capacité fiscale corrigée par habitant des communes zurichoises",
+      "ckan_uuid": "c7b05d5a-1777-45ab-8cc4-87c3c1bec044",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_274.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1093909 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6920 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-prix-terrain-median",
+      "title": "Prix médian pondéré du terrain à bâtir des communes zurichoises",
+      "ckan_uuid": "a4ba0476-3098-4e76-b6e4-775d4c217080",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_199.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1383997 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 8625 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique cantonale des transactions immobilières (ventes de gré à gré). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet). L'éditeur ne publie aucun prix en dessous de 4 transactions (valeur null)."
+    },
+    {
+      "id": "zh-prix-terrain-modele",
+      "title": "Prix modélisé du terrain à bâtir des communes zurichoises",
+      "ckan_uuid": "6da9bd7e-986b-431a-b820-e0b2d4f3c6d1",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_477.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1262696 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 8160 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique cantonale des transactions immobilières (ventes de gré à gré). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-ventes-maisons-individuelles",
+      "title": "Ventes de maisons individuelles par commune zurichoise",
+      "ckan_uuid": "6da03903-c8f1-4504-88a9-80ae78e10289",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_188.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (410964 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 3312 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique cantonale des transactions immobilières (ventes de gré à gré). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-ventes-immeubles-locatifs",
+      "title": "Ventes d'immeubles collectifs par commune zurichoise",
+      "ckan_uuid": "a2fd51fa-9eb3-4382-a220-89fc7e3c5792",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_191.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (409192 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 3312 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique cantonale des transactions immobilières (ventes de gré à gré). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "zh-ventes-proprietes-par-etages",
+      "title": "Ventes de propriétés par étages par commune zurichoise",
+      "ckan_uuid": "20b6b188-ea20-4f7d-9181-473507ea0e07",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_193.csv",
+      "expected_header": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "THEMA_NAME",
+        "SET_NAME",
+        "SUBSET_NAME",
+        "INDIKATOR_ID",
+        "INDIKATOR_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG",
+        ""
+      ],
+      "keys": {
+        "INDIKATOR_JAHR": "year"
+      },
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "INDIKATOR_JAHR",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "approved_on": "2026-10-24",
+      "checked_by": "intégrateur (lot G5)",
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (457515 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 3312 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique cantonale des transactions immobilières (ventes de gré à gré). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
     }
   ]
 }
