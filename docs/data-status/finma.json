@@ -1,6 +1,6 @@
 {
-  "version": "2026.10.24",
-  "collected_on": "2026-10-24",
+  "version": "2026.10.25",
+  "collected_on": "2026-10-25",
   "registry_rows": 2943,
   "unique_uids": 2748,
   "warning_rows": 2385,
@@ -27,8 +27,8 @@
   },
   "supervisory_organisation_rows": 1519,
   "history": {
-    "available_from": "2026-07-25",
-    "available_until": "2026-10-24",
+    "available_from": "2026-07-26",
+    "available_until": "2026-10-25",
     "snapshots": 59,
     "gaps": [
       {
@@ -47,9 +47,9 @@
         "anomaly_min_rows": 30,
         "anomaly_share": 0.01
       },
-      "computed_in_version": "2026.10.24",
+      "computed_in_version": "2026.10.25",
       "first_observed": "2026-07-24",
-      "last_observed": "2026-10-24",
+      "last_observed": "2026-10-25",
       "months": [
         {
           "month": "2026-07",
@@ -260,7 +260,7 @@
           "frozen_in_version": null,
           "days_in_month": 31,
           "first_observed": "2026-10-01",
-          "last_observed": "2026-10-24",
+          "last_observed": "2026-10-25",
           "partial": true,
           "registry": {
             "totals": {
@@ -320,8 +320,8 @@
               }
             },
             "reclassified_by_collection": 0,
-            "comparisons": 22,
-            "days_covered": 24,
+            "comparisons": 23,
+            "days_covered": 25,
             "complete": false
           },
           "warnings": {
@@ -329,11 +329,11 @@
             "appeared_late": 29,
             "removed": 2,
             "removed_possible_url_change": 1,
-            "comparisons": 22,
-            "days_covered": 24,
+            "comparisons": 23,
+            "days_covered": 25,
             "complete": false,
             "added_dated_in_month": 18,
-            "added_as_of": "2026.10.24"
+            "added_as_of": "2026.10.25"
           },
           "excluded": []
         }
