@@ -1,15 +1,15 @@
 {
-  "generated_on": "2026-10-19",
+  "generated_on": "2026-10-26",
   "source": "https://ckan.opendata.swiss/api/3/action/package_search",
   "run": {
-    "pages_read": 3,
+    "pages_read": 0,
     "page_size": 100,
     "max_pages": 55,
-    "start_page": 97,
+    "start_page": 152,
     "total_pages": 162,
-    "datasets_read": 300,
-    "datasets_total_catalog": 16116,
-    "coverage_ratio": 0.6786423430131546,
+    "datasets_read": 0,
+    "datasets_total_catalog": 16131,
+    "coverage_ratio": 0.67801128262352,
     "partial": true,
     "stopped_reason": "page_failed"
   },
@@ -18,10 +18,10 @@
     "excluded": 1485,
     "excluded_by_motif": {
       "colonne_personne": 239,
-      "colonne_personne_probable": 5,
+      "colonne_personne_probable": 6,
       "licence_absente": 31,
       "licence_cc_by_sa": 405,
-      "licence_non_ouverte": 300,
+      "licence_non_ouverte": 299,
       "personnes_detectees": 505
     }
   },
