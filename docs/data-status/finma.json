@@ -1,23 +1,23 @@
 {
-  "version": "2026.10.26",
-  "collected_on": "2026-10-26",
+  "version": "2026.10.27",
+  "collected_on": "2026-10-27",
   "registry_rows": 2943,
   "unique_uids": 2748,
-  "warning_rows": 2385,
+  "warning_rows": 2388,
   "populated_fields": {
     "uid": 2859,
-    "lei": 785,
+    "lei": 786,
     "licence_date": 0,
     "status": 0,
     "canton": 678,
     "city": 2943,
-    "address": 785
+    "address": 786
   },
   "entity_type_rows": {
-    "bank": 513,
+    "bank": 512,
     "insurance": 207,
     "asset_manager_collective": 444,
-    "asset_manager_individual": 1608,
+    "asset_manager_individual": 1609,
     "securities_firm": 78,
     "fund_representative": 69,
     "supervisory_org": 4,
@@ -25,10 +25,10 @@
     "infrastructure": 13,
     "other": 0
   },
-  "supervisory_organisation_rows": 1519,
+  "supervisory_organisation_rows": 1520,
   "history": {
-    "available_from": "2026-07-27",
-    "available_until": "2026-10-26",
+    "available_from": "2026-07-28",
+    "available_until": "2026-10-27",
     "snapshots": 59,
     "gaps": [
       {
@@ -47,9 +47,9 @@
         "anomaly_min_rows": 30,
         "anomaly_share": 0.01
       },
-      "computed_in_version": "2026.10.26",
+      "computed_in_version": "2026.10.27",
       "first_observed": "2026-07-24",
-      "last_observed": "2026-10-26",
+      "last_observed": "2026-10-27",
       "months": [
         {
           "month": "2026-07",
@@ -260,15 +260,15 @@
           "frozen_in_version": null,
           "days_in_month": 31,
           "first_observed": "2026-10-01",
-          "last_observed": "2026-10-26",
+          "last_observed": "2026-10-27",
           "partial": true,
           "registry": {
             "totals": {
-              "added": 10,
-              "removed": 10,
+              "added": 11,
+              "removed": 11,
               "licence_changed": 1,
-              "name_changed": 8,
-              "city_changed": 5,
+              "name_changed": 12,
+              "city_changed": 7,
               "status_changed": 0,
               "address_changed": 0
             },
@@ -278,16 +278,16 @@
                 "removed": 0,
                 "licence_changed": 0,
                 "name_changed": 2,
-                "city_changed": 0,
+                "city_changed": 1,
                 "status_changed": 0,
                 "address_changed": 0
               },
               "asset_manager_individual": {
-                "added": 8,
+                "added": 9,
                 "removed": 9,
                 "licence_changed": 1,
-                "name_changed": 2,
-                "city_changed": 2,
+                "name_changed": 4,
+                "city_changed": 3,
                 "status_changed": 0,
                 "address_changed": 0
               },
@@ -295,14 +295,14 @@
                 "added": 0,
                 "removed": 0,
                 "licence_changed": 0,
-                "name_changed": 1,
+                "name_changed": 2,
                 "city_changed": 2,
                 "status_changed": 0,
                 "address_changed": 0
               },
               "bank": {
                 "added": 1,
-                "removed": 1,
+                "removed": 2,
                 "licence_changed": 0,
                 "name_changed": 3,
                 "city_changed": 0,
@@ -313,27 +313,27 @@
                 "added": 0,
                 "removed": 0,
                 "licence_changed": 0,
-                "name_changed": 0,
+                "name_changed": 1,
                 "city_changed": 1,
                 "status_changed": 0,
                 "address_changed": 0
               }
             },
             "reclassified_by_collection": 0,
-            "comparisons": 24,
-            "days_covered": 26,
+            "comparisons": 25,
+            "days_covered": 27,
             "complete": false
           },
           "warnings": {
-            "appeared": 42,
+            "appeared": 45,
             "appeared_late": 29,
             "removed": 2,
             "removed_possible_url_change": 1,
-            "comparisons": 24,
-            "days_covered": 26,
+            "comparisons": 25,
+            "days_covered": 27,
             "complete": false,
-            "added_dated_in_month": 18,
-            "added_as_of": "2026.10.26"
+            "added_dated_in_month": 21,
+            "added_as_of": "2026.10.27"
           },
           "excluded": []
         }
