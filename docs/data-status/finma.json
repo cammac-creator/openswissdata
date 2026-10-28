@@ -1,9 +1,9 @@
 {
-  "version": "2026.10.27",
-  "collected_on": "2026-10-27",
+  "version": "2026.10.28",
+  "collected_on": "2026-10-28",
   "registry_rows": 2943,
   "unique_uids": 2748,
-  "warning_rows": 2388,
+  "warning_rows": 2390,
   "populated_fields": {
     "uid": 2859,
     "lei": 786,
@@ -27,8 +27,8 @@
   },
   "supervisory_organisation_rows": 1520,
   "history": {
-    "available_from": "2026-07-28",
-    "available_until": "2026-10-27",
+    "available_from": "2026-07-29",
+    "available_until": "2026-10-28",
     "snapshots": 59,
     "gaps": [
       {
@@ -47,9 +47,9 @@
         "anomaly_min_rows": 30,
         "anomaly_share": 0.01
       },
-      "computed_in_version": "2026.10.27",
+      "computed_in_version": "2026.10.28",
       "first_observed": "2026-07-24",
-      "last_observed": "2026-10-27",
+      "last_observed": "2026-10-28",
       "months": [
         {
           "month": "2026-07",
@@ -260,7 +260,7 @@
           "frozen_in_version": null,
           "days_in_month": 31,
           "first_observed": "2026-10-01",
-          "last_observed": "2026-10-27",
+          "last_observed": "2026-10-28",
           "partial": true,
           "registry": {
             "totals": {
@@ -268,7 +268,7 @@
               "removed": 11,
               "licence_changed": 1,
               "name_changed": 12,
-              "city_changed": 7,
+              "city_changed": 8,
               "status_changed": 0,
               "address_changed": 0
             },
@@ -287,7 +287,7 @@
                 "removed": 9,
                 "licence_changed": 1,
                 "name_changed": 4,
-                "city_changed": 3,
+                "city_changed": 4,
                 "status_changed": 0,
                 "address_changed": 0
               },
@@ -320,20 +320,20 @@
               }
             },
             "reclassified_by_collection": 0,
-            "comparisons": 25,
-            "days_covered": 27,
+            "comparisons": 26,
+            "days_covered": 28,
             "complete": false
           },
           "warnings": {
-            "appeared": 45,
+            "appeared": 47,
             "appeared_late": 29,
             "removed": 2,
             "removed_possible_url_change": 1,
-            "comparisons": 25,
-            "days_covered": 27,
+            "comparisons": 26,
+            "days_covered": 28,
             "complete": false,
-            "added_dated_in_month": 21,
-            "added_as_of": "2026.10.27"
+            "added_dated_in_month": 23,
+            "added_as_of": "2026.10.28"
           },
           "excluded": []
         }
