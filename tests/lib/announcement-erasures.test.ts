@@ -44,6 +44,7 @@ describe('Registre des effacements des inscriptions', () => {
   });
   afterEach(async () => {
     await settleAnnouncementDeliveries();
+    vi.useRealTimers();
     vi.restoreAllMocks();
     closeDb();
     rmSync(dir, { recursive: true, force: true });
@@ -122,11 +123,16 @@ describe('Registre des effacements des inscriptions', () => {
     writeFileSync(mirror, '{');
     expect(reapplyAnnouncementErasures(db, T0 + HOUR, 'startup')).toMatchObject({ status: 'error', issues: ['mirror_unreadable'], reapplied: 0 });
     // Le service répond : une demande (mail impossible sans clé, donc demande retirée) et une désinscription.
+    // Le service date son effacement à l'horloge : figée entre T0 + 1 h et T0 + 2 h, sinon il tombe après les
+    // nettoyages de T0 + 3 h et T0 + 4 h dès que la date réelle les dépasse (rouge depuis le 26.10.2026).
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(T0 + 90 * 60_000);
     const res = await createApp().request('https://www.openswissdata.com/api/announcements/request', {
       method: 'POST', headers: { 'content-type': 'application/json', origin: 'https://www.openswissdata.com', 'x-real-ip': '10.30.0.1' },
       body: JSON.stringify({ email: 'autre@example.com', lang: 'fr', subject: 'finma-historique', consent: true }),
     });
     await settleAnnouncementDeliveries();
+    vi.useRealTimers();
     expect(res.status).toBe(200);
     expect(eraseAnnouncementSubscription(db, { id: delivery.id, requestedAt: T0 }, T0 + 2 * HOUR)).toMatchObject({ erased: true });
     expect(() => syncAnnouncementErasureMirror(db)).toThrow(AnnouncementRegistryError);
