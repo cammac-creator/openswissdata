@@ -1,17 +1,17 @@
 {
-  "version": "2026.10.29",
-  "collected_on": "2026-10-29",
+  "version": "2026.10.30",
+  "collected_on": "2026-10-30",
   "registry_rows": 2943,
   "unique_uids": 2748,
-  "warning_rows": 2400,
+  "warning_rows": 2401,
   "populated_fields": {
     "uid": 2859,
-    "lei": 786,
+    "lei": 787,
     "licence_date": 0,
     "status": 0,
-    "canton": 678,
+    "canton": 679,
     "city": 2943,
-    "address": 786
+    "address": 787
   },
   "entity_type_rows": {
     "bank": 512,
@@ -27,8 +27,8 @@
   },
   "supervisory_organisation_rows": 1520,
   "history": {
-    "available_from": "2026-07-30",
-    "available_until": "2026-10-29",
+    "available_from": "2026-07-31",
+    "available_until": "2026-10-30",
     "snapshots": 59,
     "gaps": [
       {
@@ -47,9 +47,9 @@
         "anomaly_min_rows": 30,
         "anomaly_share": 0.01
       },
-      "computed_in_version": "2026.10.29",
+      "computed_in_version": "2026.10.30",
       "first_observed": "2026-07-24",
-      "last_observed": "2026-10-29",
+      "last_observed": "2026-10-30",
       "months": [
         {
           "month": "2026-07",
@@ -260,14 +260,14 @@
           "frozen_in_version": null,
           "days_in_month": 31,
           "first_observed": "2026-10-01",
-          "last_observed": "2026-10-29",
+          "last_observed": "2026-10-30",
           "partial": true,
           "registry": {
             "totals": {
               "added": 11,
               "removed": 11,
               "licence_changed": 1,
-              "name_changed": 12,
+              "name_changed": 13,
               "city_changed": 8,
               "status_changed": 0,
               "address_changed": 0
@@ -286,7 +286,7 @@
                 "added": 9,
                 "removed": 9,
                 "licence_changed": 1,
-                "name_changed": 4,
+                "name_changed": 5,
                 "city_changed": 4,
                 "status_changed": 0,
                 "address_changed": 0
@@ -320,20 +320,20 @@
               }
             },
             "reclassified_by_collection": 0,
-            "comparisons": 27,
-            "days_covered": 29,
+            "comparisons": 28,
+            "days_covered": 30,
             "complete": false
           },
           "warnings": {
-            "appeared": 57,
+            "appeared": 58,
             "appeared_late": 29,
             "removed": 2,
             "removed_possible_url_change": 1,
-            "comparisons": 27,
-            "days_covered": 29,
+            "comparisons": 28,
+            "days_covered": 30,
             "complete": false,
-            "added_dated_in_month": 33,
-            "added_as_of": "2026.10.29"
+            "added_dated_in_month": 34,
+            "added_as_of": "2026.10.30"
           },
           "excluded": []
         }
