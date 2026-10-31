@@ -1,6 +1,6 @@
 {
-  "version": "2026.10.30",
-  "collected_on": "2026-10-30",
+  "version": "2026.10.31",
+  "collected_on": "2026-10-31",
   "registry_rows": 2943,
   "unique_uids": 2748,
   "warning_rows": 2401,
@@ -27,8 +27,8 @@
   },
   "supervisory_organisation_rows": 1520,
   "history": {
-    "available_from": "2026-07-31",
-    "available_until": "2026-10-30",
+    "available_from": "2026-08-01",
+    "available_until": "2026-10-31",
     "snapshots": 59,
     "gaps": [
       {
@@ -47,9 +47,9 @@
         "anomaly_min_rows": 30,
         "anomaly_share": 0.01
       },
-      "computed_in_version": "2026.10.30",
+      "computed_in_version": "2026.10.31",
       "first_observed": "2026-07-24",
-      "last_observed": "2026-10-30",
+      "last_observed": "2026-10-31",
       "months": [
         {
           "month": "2026-07",
@@ -260,8 +260,8 @@
           "frozen_in_version": null,
           "days_in_month": 31,
           "first_observed": "2026-10-01",
-          "last_observed": "2026-10-30",
-          "partial": true,
+          "last_observed": "2026-10-31",
+          "partial": false,
           "registry": {
             "totals": {
               "added": 11,
@@ -320,20 +320,20 @@
               }
             },
             "reclassified_by_collection": 0,
-            "comparisons": 28,
-            "days_covered": 30,
-            "complete": false
+            "comparisons": 29,
+            "days_covered": 31,
+            "complete": true
           },
           "warnings": {
             "appeared": 58,
             "appeared_late": 29,
             "removed": 2,
             "removed_possible_url_change": 1,
-            "comparisons": 28,
-            "days_covered": 30,
-            "complete": false,
+            "comparisons": 29,
+            "days_covered": 31,
+            "complete": true,
             "added_dated_in_month": 34,
-            "added_as_of": "2026.10.30"
+            "added_as_of": "2026.10.31"
           },
           "excluded": []
         }
