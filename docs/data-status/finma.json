@@ -1,6 +1,6 @@
 {
-  "version": "2026.11.01",
-  "collected_on": "2026-11-01",
+  "version": "2026.11.02",
+  "collected_on": "2026-11-02",
   "registry_rows": 2943,
   "unique_uids": 2748,
   "warning_rows": 2401,
@@ -27,8 +27,8 @@
   },
   "supervisory_organisation_rows": 1520,
   "history": {
-    "available_from": "2026-08-02",
-    "available_until": "2026-11-01",
+    "available_from": "2026-08-03",
+    "available_until": "2026-11-02",
     "snapshots": 59,
     "gaps": [
       {
@@ -47,9 +47,9 @@
         "anomaly_min_rows": 30,
         "anomaly_share": 0.01
       },
-      "computed_in_version": "2026.11.01",
+      "computed_in_version": "2026.11.02",
       "first_observed": "2026-07-24",
-      "last_observed": "2026-11-01",
+      "last_observed": "2026-11-02",
       "months": [
         {
           "month": "2026-07",
@@ -333,7 +333,7 @@
             "days_covered": 31,
             "complete": true,
             "added_dated_in_month": 34,
-            "added_as_of": "2026.11.01"
+            "added_as_of": "2026.11.02"
           },
           "excluded": []
         },
@@ -343,7 +343,7 @@
           "frozen_in_version": null,
           "days_in_month": 30,
           "first_observed": "2026-11-01",
-          "last_observed": "2026-11-01",
+          "last_observed": "2026-11-02",
           "partial": true,
           "registry": {
             "totals": {
@@ -357,8 +357,8 @@
             },
             "by_category": {},
             "reclassified_by_collection": 0,
-            "comparisons": 1,
-            "days_covered": 1,
+            "comparisons": 2,
+            "days_covered": 2,
             "complete": false
           },
           "warnings": {
@@ -366,11 +366,11 @@
             "appeared_late": 0,
             "removed": 0,
             "removed_possible_url_change": 0,
-            "comparisons": 1,
-            "days_covered": 1,
+            "comparisons": 2,
+            "days_covered": 2,
             "complete": false,
             "added_dated_in_month": 0,
-            "added_as_of": "2026.11.01"
+            "added_as_of": "2026.11.02"
           },
           "excluded": []
         }
