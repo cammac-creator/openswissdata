@@ -101,6 +101,26 @@
       }
     },
     {
+      "id": "bs-chiens-quartiers",
+      "title": "Chiens enregistrés par quartier à Bâle-Ville depuis 1970",
+      "publisher": "Canton de Bâle-Ville",
+      "licence": "cc-by",
+      "attribution": "Source : Canton de Bâle-Ville, via opendata.swiss",
+      "resource_url": "https://data.bs.ch/api/v2/catalog/datasets/100445/exports/csv?use_labels=true",
+      "columns": [
+        "year",
+        "Wohnviertel ID",
+        "Wohnviertel Name",
+        "Gemeinde",
+        "Hundebestand"
+      ],
+      "keys": [
+        "year"
+      ],
+      "rows": 589,
+      "edition": "2026-11-03"
+    },
+    {
       "id": "bs-collecte-biodechets",
       "title": "Points de collecte des biodéchets à Bâle-Ville",
       "publisher": "Canton de Bâle-Ville",
@@ -119,6 +139,38 @@
       ],
       "rows": 8,
       "edition": "2026-10-24"
+    },
+    {
+      "id": "bs-places-stationnement",
+      "title": "Places de stationnement sur voirie à Bâle-Ville",
+      "publisher": "Canton de Bâle-Ville",
+      "licence": "cc-by",
+      "attribution": "Source : Canton de Bâle-Ville, via opendata.swiss",
+      "resource_url": "https://data.bs.ch/api/v2/catalog/datasets/100329/exports/csv?use_labels=true",
+      "columns": [
+        "ID",
+        "Strasse",
+        "Anzahl Parkplätze pro Parkfeld",
+        "ID Parkflächentyp",
+        "Parkflächentyp",
+        "Tarif-Gebiet",
+        "Tarif pro Stunde",
+        "Tarif-ID",
+        "Tarif-Subzone",
+        "Gebührenpflichtiger Zeitraum",
+        "Maximale Parkierdauer",
+        "Zeitraum ohne max. Parkierdauer",
+        "postal_code",
+        "Wohnviertel-ID",
+        "Wohnviertel",
+        "Bezirks-ID",
+        "Bezirk"
+      ],
+      "keys": [
+        "postal_code"
+      ],
+      "rows": 7822,
+      "edition": "2026-11-03"
     },
     {
       "id": "bs-points-noirs-accidents",
@@ -2766,6 +2818,131 @@
         "year"
       ],
       "rows": 2106,
+      "edition": "2026-11-03"
+    },
+    {
+      "id": "sg-comptes-ecoles-obligatoires",
+      "title": "Comptes des écoles obligatoires saint-galloises",
+      "publisher": "Canton de Saint-Gall",
+      "licence": "cc-by",
+      "attribution": "Source : Canton de Saint-Gall, via opendata.swiss",
+      "resource_url": "https://daten.sg.ch/api/v2/catalog/datasets/rechnungszahlen-volksschultrager-kanton-stgallen/exports/csv?use_labels=true",
+      "columns": [
+        "year",
+        "gemeinde_id_afgb",
+        "bfsnr",
+        "volksschultraeger_name_kurz",
+        "volksschultraeger_name",
+        "volksschulangebot",
+        "gemeindetyp",
+        "gemeindetyp_2",
+        "kontenrahmen",
+        "anzahl_schueler",
+        "nettoaufwand_pro_schueler",
+        "nettoaufwand_angerechneter",
+        "aufwand_angerechneter",
+        "ertrag_angerechneter",
+        "rmsg_0_allgemeine_verwaltung_aufwand",
+        "rmsg_01_legislative_exekutive_aufwand",
+        "rmsg_0121_schulrat_kommission_einheitsgemeinde_aufwand",
+        "rmsg_21_obligatorische_schule_total_aufwand",
+        "rmsg_211_kindergarten_aufwand",
+        "rmsg_212_primarstufe_aufwand",
+        "rmsg_213_oberstufe_aufwand",
+        "rmsg_214_musikschulen_aufwand",
+        "rmsg_217_schulliegenschaften_aufwand",
+        "rmsg_218_tagesbetreuung_aufwand",
+        "rmsg_219_uebriges_aufwand",
+        "rmsg_2190_schulleitung_verwaltung_aufwand",
+        "rmsg_2191_schulinformatik_aufwand",
+        "rmsg_2192_sonstiges_aufwand",
+        "rmsg_2192x_schulgelder_teil_von_sonstiges_aufwand",
+        "rmsg_2193_sonderpaedagogische_massnahmen_aufwand",
+        "rmsg_219x_weiteres_aufwand",
+        "rmsg_29_uebriges_bildungswesen_aufwand",
+        "rmsg_3_kultur_sport_freizeit_aufwand",
+        "rmsg_32_kultur_uebrige_aufwand",
+        "rmsg_4_gesundheit_aufwand",
+        "rmsg_43_gesundheitspraevention_aufwand",
+        "rmsg_5_soziale_sicherheit_aufwand",
+        "rmsg_54_familie_jugend_aufwand",
+        "rmsg_9_finanzen_steuern_aufwand",
+        "rmsg_96_vermoegens_schuldenverwaltung_aufwand",
+        "rmsg_97_rueckverteilungen_aufwand",
+        "rmsg_99_nicht_aufgeteilte_posten_aufwand",
+        "rmsg_2199_finanzbedarf_autonomer_schulgemeinden_aufwand",
+        "rmsg_433_schulgesundheitsdienst_einheitsgemeinde_aufwand",
+        "rmsg_0_allgemeine_verwaltung_ertrag",
+        "rmsg_01_legislative_exekutive_ertrag",
+        "rmsg_0121_schulrat_kommission_einheitsgemeinde_ertrag",
+        "rmsg_21_obligatorische_schule_total_ertrag",
+        "rmsg_211_kindergarten_ertrag",
+        "rmsg_212_primarstufe_ertrag",
+        "rmsg_213_oberstufe_ertrag",
+        "rmsg_214_musikschulen_ertrag",
+        "rmsg_217_schulliegenschaften_ertrag",
+        "rmsg_218_tagesbetreuung_ertrag",
+        "rmsg_219_uebriges_ertrag",
+        "rmsg_2190_schulleitung_verwaltung_ertrag",
+        "rmsg_2191_schulinformatik_ertrag",
+        "rmsg_2192_sonstiges_ertrag",
+        "rmsg_2192x_schulgelder_teil_von_sonstiges_ertrag",
+        "rmsg_2193_sonderpaedagogische_massnahmen_ertrag",
+        "rmsg_219x_weiteres_ertrag",
+        "rmsg_29_uebriges_bildungswesen_ertrag",
+        "rmsg_3_kultur_sport_freizeit_ertrag",
+        "rmsg_32_kultur_uebrige_ertrag",
+        "rmsg_4_gesundheit_ertrag",
+        "rmsg_43_gesundheitspraevention_ertrag",
+        "rmsg_5_soziale_sicherheit_ertrag",
+        "rmsg_54_familie_jugend_ertrag",
+        "rmsg_9_finanzen_steuern_ertrag",
+        "rmsg_96_vermoegens_schuldenverwaltung_ertrag",
+        "rmsg_97_rueckverteilungen_ertrag",
+        "rmsg_99_nicht_aufgeteilte_posten_ertrag",
+        "rmsg_2199_finanzbedarf_autonomer_schulgemeinden_ertrag",
+        "rmsg_433_schulgesundheitsdienst_einheitsgemeinde_ertrag"
+      ],
+      "keys": [
+        "year"
+      ],
+      "rows": 265,
+      "edition": "2026-11-03"
+    },
+    {
+      "id": "sg-transports-regionaux-lignes",
+      "title": "Transports publics régionaux saint-gallois : offre et financement par ligne",
+      "publisher": "Canton de Saint-Gall",
+      "licence": "cc-by",
+      "attribution": "Source : Canton de Saint-Gall, via opendata.swiss",
+      "resource_url": "https://daten.sg.ch/api/v2/catalog/datasets/offentlicher-orts-und-regionalverkehr-kanton-stgallen-angebote-und-finanzierung/exports/csv?use_labels=true",
+      "columns": [
+        "year",
+        "Verkehrsmittel",
+        "Fahrplanfeld",
+        "Linie",
+        "Kürzel Transportunternehmen",
+        "Name Transportunternehmen",
+        "Kurspaare Mo-Fr",
+        "Kurspaare Sa",
+        "Kurspaare So",
+        "Angebotsstufe Code",
+        "Angebotsstufe Label",
+        "Kurskilometer",
+        "Linienanteil Kanton SG (Prozent)",
+        "Abgeltung Linienanteil SG Bund (in Fr.)",
+        "Abgeltung Linienanteil SG Kanton (in Fr.)",
+        "Offerierter Kostendeckungsgrad",
+        "Kostendeckungsgrad Minimum",
+        "Kostendeckungsgrad Ziel",
+        "Offerierte Linienbelastung",
+        "Linienbelastung Minimum",
+        "Linienbelastung Ziel"
+      ],
+      "keys": [
+        "year"
+      ],
+      "rows": 802,
       "edition": "2026-11-03"
     },
     {
@@ -5985,6 +6162,40 @@
       }
     },
     {
+      "id": "zg-sieges-grand-conseil-communes",
+      "title": "Sièges au Grand Conseil zougois par parti et commune",
+      "publisher": "Canton de Zoug",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Zoug, via opendata.swiss",
+      "resource_url": "https://data.zg.ch/store/1/resource/1419",
+      "columns": [
+        "year",
+        "partei",
+        "gemeinde",
+        "commune_bfs",
+        "anzahl"
+      ],
+      "keys": [
+        "commune_bfs",
+        "year"
+      ],
+      "rows": 411,
+      "edition": "2026-11-03",
+      "by_commune_bfs": {
+        "1701": 39,
+        "1702": 39,
+        "1703": 37,
+        "1704": 36,
+        "1705": 35,
+        "1706": 37,
+        "1707": 38,
+        "1708": 38,
+        "1709": 38,
+        "1710": 35,
+        "1711": 39
+      }
+    },
+    {
       "id": "zg-taux-impot-communes",
       "title": "Taux d'impôt des communes zougoises",
       "publisher": "Canton de Zoug",
@@ -6138,6 +6349,27 @@
       ],
       "rows": 6920,
       "edition": "2026-10-24"
+    },
+    {
+      "id": "zh-capacite-fiscale-moyenne-3-ans",
+      "title": "Capacité fiscale des communes zurichoises, moyenne sur trois ans",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_375.csv",
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "year",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "keys": [
+        "year"
+      ],
+      "rows": 6920,
+      "edition": "2026-11-03"
     },
     {
       "id": "zh-communes-autofinancement",
@@ -6986,6 +7218,90 @@
       ],
       "rows": 5922,
       "edition": "2026-10-24"
+    },
+    {
+      "id": "zh-logements-utilite-publique",
+      "title": "Logements d'utilité publique dans les communes zurichoises",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_840.csv",
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "year",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "keys": [
+        "year"
+      ],
+      "rows": 1519,
+      "edition": "2026-11-03"
+    },
+    {
+      "id": "zh-part-communes-impots-generaux",
+      "title": "Part des communes politiques et scolaires dans les impôts communaux généraux (Zurich)",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_292.csv",
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "year",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "keys": [
+        "year"
+      ],
+      "rows": 5922,
+      "edition": "2026-11-03"
+    },
+    {
+      "id": "zh-part-impots-fonciers",
+      "title": "Part des impôts fonciers dans le rendement fiscal des communes zurichoises",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_290.csv",
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "year",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "keys": [
+        "year"
+      ],
+      "rows": 5922,
+      "edition": "2026-11-03"
+    },
+    {
+      "id": "zh-part-paroisses-impots-generaux",
+      "title": "Part des paroisses dans les impôts communaux généraux (Zurich)",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "licence": "terms_by",
+      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
+      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_291.csv",
+      "columns": [
+        "BFS_NR",
+        "GEBIET_NAME",
+        "year",
+        "INDIKATOR_VALUE",
+        "EINHEIT_KURZ",
+        "EINHEIT_LANG"
+      ],
+      "keys": [
+        "year"
+      ],
+      "rows": 5922,
+      "edition": "2026-11-03"
     },
     {
       "id": "zh-prix-terrain-median",
