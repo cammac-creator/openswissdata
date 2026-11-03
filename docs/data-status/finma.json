@@ -1,23 +1,23 @@
 {
-  "version": "2026.11.02",
-  "collected_on": "2026-11-02",
-  "registry_rows": 2943,
-  "unique_uids": 2748,
+  "version": "2026.11.03",
+  "collected_on": "2026-11-03",
+  "registry_rows": 2944,
+  "unique_uids": 2749,
   "warning_rows": 2401,
   "populated_fields": {
-    "uid": 2859,
+    "uid": 2860,
     "lei": 787,
     "licence_date": 0,
     "status": 0,
-    "canton": 679,
-    "city": 2943,
+    "canton": 682,
+    "city": 2944,
     "address": 787
   },
   "entity_type_rows": {
     "bank": 512,
     "insurance": 207,
     "asset_manager_collective": 444,
-    "asset_manager_individual": 1609,
+    "asset_manager_individual": 1610,
     "securities_firm": 78,
     "fund_representative": 69,
     "supervisory_org": 4,
@@ -25,10 +25,10 @@
     "infrastructure": 13,
     "other": 0
   },
-  "supervisory_organisation_rows": 1520,
+  "supervisory_organisation_rows": 1521,
   "history": {
-    "available_from": "2026-08-03",
-    "available_until": "2026-11-02",
+    "available_from": "2026-08-04",
+    "available_until": "2026-11-03",
     "snapshots": 59,
     "gaps": [
       {
@@ -47,9 +47,9 @@
         "anomaly_min_rows": 30,
         "anomaly_share": 0.01
       },
-      "computed_in_version": "2026.11.02",
+      "computed_in_version": "2026.11.03",
       "first_observed": "2026-07-24",
-      "last_observed": "2026-11-02",
+      "last_observed": "2026-11-03",
       "months": [
         {
           "month": "2026-07",
@@ -256,8 +256,8 @@
         },
         {
           "month": "2026-10",
-          "status": "open",
-          "frozen_in_version": null,
+          "status": "frozen",
+          "frozen_in_version": "2026.11.03",
           "days_in_month": 31,
           "first_observed": "2026-10-01",
           "last_observed": "2026-10-31",
@@ -333,7 +333,7 @@
             "days_covered": 31,
             "complete": true,
             "added_dated_in_month": 34,
-            "added_as_of": "2026.11.02"
+            "added_as_of": "2026.11.03"
           },
           "excluded": []
         },
@@ -343,22 +343,50 @@
           "frozen_in_version": null,
           "days_in_month": 30,
           "first_observed": "2026-11-01",
-          "last_observed": "2026-11-02",
+          "last_observed": "2026-11-03",
           "partial": true,
           "registry": {
             "totals": {
-              "added": 0,
+              "added": 1,
               "removed": 0,
               "licence_changed": 0,
-              "name_changed": 0,
-              "city_changed": 0,
+              "name_changed": 1,
+              "city_changed": 2,
               "status_changed": 0,
               "address_changed": 0
             },
-            "by_category": {},
+            "by_category": {
+              "insurance": {
+                "added": 0,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 1,
+                "city_changed": 0,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "bank": {
+                "added": 0,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 1,
+                "status_changed": 0,
+                "address_changed": 0
+              },
+              "asset_manager_individual": {
+                "added": 1,
+                "removed": 0,
+                "licence_changed": 0,
+                "name_changed": 0,
+                "city_changed": 1,
+                "status_changed": 0,
+                "address_changed": 0
+              }
+            },
             "reclassified_by_collection": 0,
-            "comparisons": 2,
-            "days_covered": 2,
+            "comparisons": 3,
+            "days_covered": 3,
             "complete": false
           },
           "warnings": {
@@ -366,11 +394,11 @@
             "appeared_late": 0,
             "removed": 0,
             "removed_possible_url_change": 0,
-            "comparisons": 2,
-            "days_covered": 2,
+            "comparisons": 3,
+            "days_covered": 3,
             "complete": false,
             "added_dated_in_month": 0,
-            "added_as_of": "2026.11.02"
+            "added_as_of": "2026.11.03"
           },
           "excluded": []
         }
