@@ -1,11 +1,17 @@
 {
- "generated_on": "2026-10-27",
+ "generated_on": "2026-11-03",
  "entries": [
+  {
+   "id": "c26a60b9-361c-4925-9a8a-7016ac1062b0",
+   "organisation": "eidgenoessische_zollverwaltung_ezv",
+   "date": "2026-11-03",
+   "statut": "deposee"
+  },
   {
    "id": "1169ec56-9e6c-49d0-bba9-19bc1bd0792c",
    "organisation": "lustat",
    "date": "2026-10-27",
-   "statut": "deposee"
+   "statut": "envoyee"
   }
  ]
 }
