@@ -1885,12 +1885,11 @@
         "BFS_NR_GEMEINDE",
         "GEMEINDE_NAME",
         "Jahr",
-        "Auszahlung_Abschoepfung_in_CHF",
-        "Auszahlung_Abschoepfung_in_CHF_pro_Einwohner"
+        "Auszahlung_Abschoepfung_in_CHF"
       ],
       "approved_on": "2026-10-23",
       "checked_by": "codex (lot G4), à relire par l'intégrateur",
-      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (58252 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 1760 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : Jahr et BFS_NR_GEMEINDE ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes sont conservées. Montants de péréquation globaux par commune, aucun bénéficiaire individuel ; les cellules vides restent vides."
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (58252 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 1760 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : Jahr et BFS_NR_GEMEINDE ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes étaient conservées jusqu'au 03.11.2026 ; Auszahlung_Abschoepfung_in_CHF_pro_Einwohner est retirée depuis (relecture du 03.11.2026 : le montant total et le montant par habitant d'une même commune et d'une même année redonnent sa population, règle « jamais un total et un ratio par habitant de la même grandeur »). La colonne reste dans expected_header, contrôle de l'en-tête source. Montants de péréquation globaux par commune, aucun bénéficiaire individuel ; les cellules vides restent vides."
     },
     {
       "id": "tg-energie-batiments-communes",
@@ -3439,43 +3438,6 @@
       "approved_on": "2026-10-24",
       "checked_by": "intégrateur (lot G5)",
       "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1015628 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6920 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
-    },
-    {
-      "id": "zh-capacite-fiscale-corrigee-habitant",
-      "title": "Capacité fiscale corrigée par habitant des communes zurichoises",
-      "ckan_uuid": "c7b05d5a-1777-45ab-8cc4-87c3c1bec044",
-      "publisher": "Amt für Statistik und Daten Kanton Zürich",
-      "licence": "terms_by",
-      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
-      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_274.csv",
-      "expected_header": [
-        "BFS_NR",
-        "GEBIET_NAME",
-        "THEMA_NAME",
-        "SET_NAME",
-        "SUBSET_NAME",
-        "INDIKATOR_ID",
-        "INDIKATOR_NAME",
-        "INDIKATOR_JAHR",
-        "INDIKATOR_VALUE",
-        "EINHEIT_KURZ",
-        "EINHEIT_LANG",
-        ""
-      ],
-      "keys": {
-        "INDIKATOR_JAHR": "year"
-      },
-      "columns": [
-        "BFS_NR",
-        "GEBIET_NAME",
-        "INDIKATOR_JAHR",
-        "INDIKATOR_VALUE",
-        "EINHEIT_KURZ",
-        "EINHEIT_LANG"
-      ],
-      "approved_on": "2026-10-24",
-      "checked_by": "intégrateur (lot G5)",
-      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (1093909 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 6920 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique fiscale cantonale (rendement et capacité fiscale des communes). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
     },
     {
       "id": "zh-prix-terrain-median",

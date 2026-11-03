@@ -5196,15 +5196,14 @@
         "commune_bfs",
         "GEMEINDE_NAME",
         "year",
-        "Auszahlung_Abschoepfung_in_CHF",
-        "Auszahlung_Abschoepfung_in_CHF_pro_Einwohner"
+        "Auszahlung_Abschoepfung_in_CHF"
       ],
       "keys": [
         "commune_bfs",
         "year"
       ],
       "rows": 1760,
-      "edition": "2026-10-24",
+      "edition": "2026-11-03",
       "by_commune_bfs": {
         "4401": 22,
         "4406": 22,
@@ -6315,27 +6314,6 @@
       "licence": "terms_by",
       "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
       "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_273.csv",
-      "columns": [
-        "BFS_NR",
-        "GEBIET_NAME",
-        "year",
-        "INDIKATOR_VALUE",
-        "EINHEIT_KURZ",
-        "EINHEIT_LANG"
-      ],
-      "keys": [
-        "year"
-      ],
-      "rows": 6920,
-      "edition": "2026-10-24"
-    },
-    {
-      "id": "zh-capacite-fiscale-corrigee-habitant",
-      "title": "Capacité fiscale corrigée par habitant des communes zurichoises",
-      "publisher": "Amt für Statistik und Daten Kanton Zürich",
-      "licence": "terms_by",
-      "attribution": "Source : Amt für Statistik und Daten Kanton Zürich, via opendata.swiss",
-      "resource_url": "https://www.web.statistik.zh.ch/ogd/data/KANTON_ZUERICH_274.csv",
       "columns": [
         "BFS_NR",
         "GEBIET_NAME",
