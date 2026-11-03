@@ -9,13 +9,16 @@
  * à ouvrir).
  *
  * Produit `src/mcp/data/bfe_pv.csv` (colonnes en anglais : year, canton, installations_count,
- * installed_capacity_kw, remuneration_chf, installations_per_100000_inhabitants,
- * installed_capacity_kw_per_100000_inhabitants ; triées par année puis canton) et
+ * installed_capacity_kw, remuneration_chf ; triées par année puis canton) et
  * `src/mcp/data/bfe_pv.meta.json` (`{ edition, source, rows }`), lus par
  * `src/mcp/data-loader.ts` (`getBfePv()`). Écriture ATOMIQUE pour les deux fichiers.
  *
- * Les deux ratios « pro 100 000 Einwohner » sont ceux PUBLIÉS par l'OFEN : jamais recalculés
- * ici, seulement recopiés (Global Constraint du plan du 06.10.2026).
+ * Les deux ratios « pro 100 000 Einwohner » de la source restent contrôlés (en-tête, valeurs)
+ * mais ne sont plus conservés depuis le 03.11.2026 : à côté des totaux, leur quotient redonne la
+ * population de chaque canton (règle du registre des jeux : jamais un total et un montant par
+ * habitant de la même grandeur). Le fichier produit est public, dans le dépôt : retirer ces
+ * colonnes du seul profil cantonal ne suffirait pas. Même choix que
+ * `ofen-retribution-unique-pv-cantons`, même source, dans `docs/data-status/datasets-approved.json`.
  *
  * Usage :
  *   tsx scripts/sync-bfe-pv.ts                                    — téléchargement réel (adresse directe)
@@ -75,10 +78,7 @@ const SWISS_CANTONS = new Set([
   "SG", "SH", "SO", "SZ", "TG", "TI", "UR", "VD", "VS", "ZG", "ZH",
 ]);
 
-const OUTPUT_COLUMNS = [
-  "year", "canton", "installations_count", "installed_capacity_kw", "remuneration_chf",
-  "installations_per_100000_inhabitants", "installed_capacity_kw_per_100000_inhabitants",
-] as const;
+const OUTPUT_COLUMNS = ["year", "canton", "installations_count", "installed_capacity_kw", "remuneration_chf"] as const;
 
 const EDITION_RE = /^\d{4}-\d{2}-\d{2}$/;
 const YEAR_RE = /^\d{4}$/;
@@ -99,8 +99,6 @@ export interface BfePvRow {
   installations_count: string;
   installed_capacity_kw: string;
   remuneration_chf: string;
-  installations_per_100000_inhabitants: string;
-  installed_capacity_kw_per_100000_inhabitants: string;
 }
 
 export interface BfePvMeta {
@@ -218,8 +216,6 @@ export function reduceRows(rows: Record<string, string>[]): BfePvRow[] {
     installations_count: r["Anzahl_Anlagen"],
     installed_capacity_kw: r["Installierte_Leistung_kW"],
     remuneration_chf: r["Verguetung_CHF"],
-    installations_per_100000_inhabitants: r["Anzahl_Anlagen_pro_100000_Einwohner"],
-    installed_capacity_kw_per_100000_inhabitants: r["Installierte_Leistung_kW_pro_100000_Einwohner"],
   }));
 }
 

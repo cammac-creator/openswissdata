@@ -107,6 +107,34 @@ describe("validateRegistryEntry", () => {
     const errs = validateRegistryEntry(baseEntry({ resource_url: "https://www.bfs.admin.ch/asset/fr/demo.csv" }));
     expect(errs.length).toBeGreaterThan(0);
   });
+
+  // Option `exclude_rows` (03.11.2026) : écarter des lignes selon la valeur d'une colonne source.
+  it("exclude_rows valide : aucune erreur", () => {
+    expect(validateRegistryEntry(baseEntry({ exclude_rows: { name: ["A", "B"] } }))).toEqual([]);
+  });
+
+  it("exclude_rows sur une colonne de expected_header absente de columns : acceptée", () => {
+    const entry = baseEntry({ columns: ["jahr", "bfs_nummer", "betrag"], exclude_rows: { name: ["A"] } });
+    expect(validateRegistryEntry(entry)).toEqual([]);
+  });
+
+  it("exclude_rows sur une colonne hors de expected_header : rejetée", () => {
+    const errs = validateRegistryEntry(baseEntry({ exclude_rows: { inconnue: ["A"] } }));
+    expect(errs.some((e) => /exclude_rows/.test(e) && /inconnue/.test(e))).toBe(true);
+  });
+
+  it.each([
+    ["liste vide", { name: [] }],
+    ["valeur vide", { name: ["A", ""] }],
+    ["valeur faite d'espaces", { name: ["   "] }],
+    ["valeur non textuelle", { name: [12] }],
+    ["liste absente", { name: "A" }],
+    ["objet vide", {}],
+    ["tableau au lieu d'un objet", ["name"]],
+  ])("exclude_rows invalide (%s) : rejetée", (_label, exclude_rows) => {
+    const errs = validateRegistryEntry(baseEntry({ exclude_rows: exclude_rows as never }));
+    expect(errs.some((e) => /exclude_rows/.test(e))).toBe(true);
+  });
 });
 
 // --------------------------------------------------------------------------------------------
@@ -267,6 +295,121 @@ describe("syncDatasets : un jeu valide (mode fixture)", () => {
     const a = readFileSync(join(outDir1, "demo-jeu.csv.gz"));
     const b = readFileSync(join(outDir2, "demo-jeu.csv.gz"));
     expect(a.equals(b)).toBe(true);
+  });
+});
+
+describe("syncDatasets : option exclude_rows", () => {
+  const LONG_HEADER = "jahr,bfs_nummer,typ,betrag";
+  const longEntry = (overrides: Partial<DatasetApprovalEntry> = {}) => baseEntry({
+    expected_header: ["jahr", "bfs_nummer", "typ", "betrag"],
+    columns: ["jahr", "bfs_nummer", "typ", "betrag"],
+    ...overrides,
+  });
+  /** Deux communes, trois types par commune : un total, un montant par habitant, un pourcentage. */
+  const LONG_CSV = [
+    LONG_HEADER,
+    "2024,1000,Total,500000",
+    "2024,1000,Par habitant,100",
+    "2024,1000,Part,12.5",
+    "2024,1001,Total,800000",
+    "2024,1001,Par habitant,200",
+    "2024,1001,Part,7.5",
+  ].join("\n") + "\n";
+
+  async function run(entry: DatasetApprovalEntry, csv: string, outDir = tmpDir()) {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    writeRegistry(regDir, [entry]);
+    writeFixture(fixDir, entry.id, csv);
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+    return { result, outDir };
+  }
+  const servedCsv = (outDir: string, id: string) => gunzipSync(readFileSync(join(outDir, `${id}.csv.gz`))).toString("utf8");
+  const readIndex = (outDir: string) => JSON.parse(readFileSync(join(outDir, "index.json"), "utf8"));
+
+  it("les lignes écartées sont absentes du fichier, et l'index compte les lignes restantes", async () => {
+    const entry = longEntry({ exclude_rows: { typ: ["Par habitant"] } });
+    const { result, outDir } = await run(entry, LONG_CSV);
+    expect(result.anyFailed).toBe(false);
+    expect(servedCsv(outDir, entry.id)).toBe(
+      ["year,commune_bfs,typ,betrag", "2024,1000,Part,12.5", "2024,1000,Total,500000", "2024,1001,Part,7.5", "2024,1001,Total,800000"].join("\n") + "\n",
+    );
+    const index = readIndex(outDir);
+    expect(index.datasets[0].rows).toBe(4);
+    expect(index.datasets[0].by_commune_bfs).toEqual({ "1000": 2, "1001": 2 });
+  });
+
+  it("plusieurs valeurs écartées, et colonne de filtre qui n'est pas servie", async () => {
+    const entry = longEntry({ columns: ["jahr", "bfs_nummer", "betrag"], exclude_rows: { typ: ["Par habitant", "Part"] } });
+    const { result, outDir } = await run(entry, LONG_CSV);
+    expect(result.anyFailed).toBe(false);
+    expect(servedCsv(outDir, entry.id)).toBe(["year,commune_bfs,betrag", "2024,1000,500000", "2024,1001,800000"].join("\n") + "\n");
+  });
+
+  it("l'égalité est exacte : une valeur voisine n'est pas écartée", async () => {
+    const entry = longEntry({ exclude_rows: { typ: ["Par habitant"] } });
+    const csv = LONG_CSV + "2024,1002,Par habitant (corrigé),300\n";
+    const { outDir } = await run(entry, csv);
+    expect(servedCsv(outDir, entry.id)).toContain("Par habitant (corrigé)");
+  });
+
+  it("sans l'option : même fichier qu'avant, octet pour octet, rien n'est écarté", async () => {
+    const { outDir } = await run(longEntry(), LONG_CSV);
+    const csv = servedCsv(outDir, "demo-jeu");
+    expect(csv.split("\n").filter(Boolean)).toHaveLength(7);
+    expect(csv).toContain("Par habitant");
+    expect(readIndex(outDir).datasets[0].rows).toBe(6);
+  });
+
+  it("une valeur déclarée qui n'apparaît plus dans la source : échec, fichier précédent intact (un renommage ne remet jamais ces lignes en ligne)", async () => {
+    const entry = longEntry({ exclude_rows: { typ: ["Par habitant"] } });
+    const { outDir } = await run(entry, LONG_CSV);
+    const before = readFileSync(join(outDir, `${entry.id}.csv.gz`));
+    const renamed = LONG_CSV.replaceAll("Par habitant", "Pro Kopf");
+    const { result } = await run(entry, renamed, outDir);
+    expect(result.anyFailed).toBe(true);
+    expect(result.failed[0].error).toMatch(/exclude_rows/);
+    expect(result.failed[0].error).toContain("Par habitant");
+    expect(readFileSync(join(outDir, `${entry.id}.csv.gz`)).equals(before)).toBe(true);
+  });
+
+  it("une valeur de clé invalide garde le numéro de sa ligne source malgré les lignes écartées", async () => {
+    const entry = longEntry({ exclude_rows: { typ: ["Par habitant"] } });
+    const csv = [LONG_HEADER, "2024,1000,Par habitant,100", "2024,1000,Par habitant,100", "pas une année,1000,Total,500"].join("\n") + "\n";
+    const { result } = await run(entry, csv);
+    expect(result.failed[0].error).toMatch(/ligne 4/);
+  });
+
+  it("second passage, fichier déjà filtré : inchangé, édition conservée", async () => {
+    const entry = longEntry({ exclude_rows: { typ: ["Par habitant"] } });
+    const { outDir } = await run(entry, LONG_CSV);
+    const { result } = await run(entry, LONG_CSV, outDir);
+    expect(result.unchanged).toEqual([entry.id]);
+  });
+
+  describe("contrôle de baisse du nombre de lignes, sur les lignes qui restent", () => {
+    /** `total` lignes, dont `excluded` à écarter : le fichier précédent, lui, les contient toutes. */
+    const csvWith = (total: number, excluded: number) => [
+      LONG_HEADER,
+      ...Array.from({ length: total }, (_, i) => `2024,${1000 + i},${i < excluded ? "Par habitant" : "Total"},${i}`),
+    ].join("\n") + "\n";
+
+    it("baisse d'exactement 20 % : acceptée (limite non comprise dans le refus)", async () => {
+      const outDir = tmpDir();
+      await run(longEntry(), csvWith(10, 2), outDir);
+      const { result } = await run(longEntry({ exclude_rows: { typ: ["Par habitant"] } }), csvWith(10, 2), outDir);
+      expect(result.anyFailed).toBe(false);
+      expect(readIndex(outDir).datasets[0].rows).toBe(8);
+    });
+
+    it("baisse de plus de 20 % : refusée, fichier précédent intact", async () => {
+      const outDir = tmpDir();
+      await run(longEntry(), csvWith(10, 3), outDir);
+      const before = readFileSync(join(outDir, "demo-jeu.csv.gz"));
+      const { result } = await run(longEntry({ exclude_rows: { typ: ["Par habitant"] } }), csvWith(10, 3), outDir);
+      expect(result.failed[0].error).toMatch(/Baisse/);
+      expect(readFileSync(join(outDir, "demo-jeu.csv.gz")).equals(before)).toBe(true);
+    });
   });
 });
 

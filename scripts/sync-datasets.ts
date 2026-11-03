@@ -28,6 +28,13 @@
  * GitHub (Linux), ce qui ferait croire à un changement — et donc avancer l'édition — au premier
  * passage sur une nouvelle machine, sans aucune donnée réellement différente.
  *
+ * Lignes écartées (option `exclude_rows` du registre, 03.11.2026) : le jeu peut écarter des lignes
+ * selon la valeur EXACTE d'une colonne source, pour une source au format long où une même colonne
+ * mélange un total et un montant par habitant (règle du 03.11.2026 : jamais les deux pour une même
+ * grandeur, leur quotient redonne la population). Une valeur déclarée qui n'apparaît plus dans la
+ * source fait échouer le jeu : un simple renommage chez l'éditeur ne remet jamais ces lignes en
+ * ligne en silence. Le contrôle de baisse compare toujours les lignes RESTANTES au fichier précédent.
+ *
  * Usage :
  *   tsx scripts/sync-datasets.ts
  *   tsx scripts/sync-datasets.ts --registry <chemin> --out-dir <dossier>
@@ -74,6 +81,9 @@ export interface DatasetApprovalEntry {
   /** Colonnes gardées dans l'ordre (sous-ensemble de `expected_header`) ; toutes les autres
    *  colonnes de la ressource source sont ignorées à l'écriture. */
   columns: string[];
+  /** Facultatif. Colonne source (de `expected_header`, servie ou non) → valeurs EXACTES dont les
+   *  lignes sont écartées avant l'écriture (voir l'en-tête du fichier). */
+  exclude_rows?: Record<string, string[]>;
   approved_on: string;
   checked_by: string;
   notes: string;
@@ -121,6 +131,23 @@ export function validateRegistryEntry(entry: DatasetApprovalEntry): string[] {
   if ((entry.licence === "terms_by" || entry.licence === "cc-by") && !(entry.attribution ?? "").trim()) {
     errors.push(`attribution requise pour une licence "${entry.licence}" (texte vide)`);
   }
+  errors.push(...validateExcludeRows(entry.exclude_rows, headerSet));
+  return errors;
+}
+
+/** Contrôle de l'option facultative `exclude_rows` : absente = aucune erreur ; sinon un objet non
+ *  vide, chaque colonne dans `expected_header`, chaque liste non vide et faite de chaînes non vides. */
+function validateExcludeRows(rules: unknown, header: ReadonlySet<string>): string[] {
+  if (rules === undefined) return [];
+  if (rules === null || typeof rules !== "object" || Array.isArray(rules) || Object.keys(rules).length === 0) {
+    return ["exclude_rows invalide (objet non vide attendu : colonne source → valeurs à écarter)"];
+  }
+  const errors: string[] = [];
+  for (const [col, values] of Object.entries(rules)) {
+    if (!header.has(col)) errors.push(`exclude_rows référence une colonne hors de expected_header : "${col}"`);
+    const valid = Array.isArray(values) && values.length > 0 && values.every((v) => typeof v === "string" && v.trim() !== "");
+    if (!valid) errors.push(`exclude_rows("${col}") doit être une liste non vide de chaînes non vides`);
+  }
   return errors;
 }
 
@@ -164,6 +191,33 @@ export function buildOutputRow(entry: DatasetApprovalEntry, sourceRow: Record<st
     }
   }
   return out;
+}
+
+/** Lignes source gardées après l'option `exclude_rows`, chacune avec son numéro de ligne dans la
+ *  source (pour les messages d'erreur de `buildOutputRow`). Égalité EXACTE sur la valeur brute,
+ *  avant toute normalisation. Lève une erreur si une valeur déclarée n'apparaît sur aucune ligne :
+ *  l'éditeur l'a renommée ou retirée, et ces lignes pourraient revenir sous un autre nom. */
+export function keepSourceRows(entry: DatasetApprovalEntry, rawRows: readonly Record<string, string>[]): { row: Record<string, string>; line: number }[] {
+  const rules = Object.entries(entry.exclude_rows ?? {}).map(([column, values]) => ({ column, values: new Set(values), seen: new Set<string>() }));
+  const kept: { row: Record<string, string>; line: number }[] = [];
+  rawRows.forEach((row, i) => {
+    let excluded = false;
+    for (const rule of rules) {
+      const value = row[rule.column] ?? "";
+      if (rule.values.has(value)) {
+        rule.seen.add(value);
+        excluded = true;
+      }
+    }
+    if (!excluded) kept.push({ row, line: i + 2 });
+  });
+  for (const rule of rules) {
+    const missing = [...rule.values].filter((v) => !rule.seen.has(v));
+    if (missing.length > 0) {
+      throw new Error(`exclude_rows : valeur(s) absente(s) de la colonne "${rule.column}" de la source : ${missing.map((v) => `"${v}"`).join(", ")} (éditeur à relire, jeu non publié)`);
+    }
+  }
+  return kept;
 }
 
 /** Noms de colonnes de sortie, dans l'ordre de `entry.columns`, clés renommées vers leur nom
@@ -401,7 +455,7 @@ async function syncOneDataset(
   // jamais lever d'erreur, pour une colonne non-clé (une colonne-clé l'aurait fait échouer, normalize
   // rejetant une chaîne vide). `from_line: 2` saute la ligne d'en-tête réelle, déjà lue à part.
   const rawRows = parse(stripped, { columns: actualHeader, from_line: 2, delimiter, skip_empty_lines: true, relax_quotes: true }) as Record<string, string>[];
-  const outputRows = rawRows.map((row, i) => buildOutputRow(entry, row, i + 2));
+  const outputRows = keepSourceRows(entry, rawRows).map(({ row, line }) => buildOutputRow(entry, row, line));
   const outColumns = outputColumnNames(entry);
   const sorted = sortRows(outputRows, outColumns);
 

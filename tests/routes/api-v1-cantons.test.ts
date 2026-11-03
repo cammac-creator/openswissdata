@@ -95,8 +95,11 @@ describe("GET /api/v1/cantons/:abbr", () => {
     expect(body.pv.by_year.length).toBeGreaterThan(0);
     for (const row of body.pv.by_year) {
       expect(typeof row.year).toBe("number");
+      // Règle du 03.11.2026 : les totaux sans les séries par habitant, leur quotient redonnerait la population.
+      expect(Object.keys(row)).toEqual(["year", "installations_count", "installed_capacity_kw", "remuneration_chf"]);
     }
-    expect(typeof body.pv.ratios_note).toBe("string");
+    expect(body.pv).not.toHaveProperty("ratios_note");
+    expect(JSON.stringify(body)).not.toContain("per_100000");
     expect(typeof body.pv.scope_note).toBe("string");
     expect(typeof body.editions.bfe_pv).toBe("string");
     expect(body.notice.length).toBeGreaterThan(0);

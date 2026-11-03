@@ -155,8 +155,7 @@ describe("reduceRows et sortRows", () => {
     const reduced = reduceRows(rows);
     const ge = reduced.find((r) => r.canton === "GE");
     expect(ge).toEqual({
-      year: "2020", canton: "GE", installations_count: "NA", installed_capacity_kw: "NA",
-      remuneration_chf: "NA", installations_per_100000_inhabitants: "NA", installed_capacity_kw_per_100000_inhabitants: "NA",
+      year: "2020", canton: "GE", installations_count: "NA", installed_capacity_kw: "NA", remuneration_chf: "NA",
     });
   });
 
@@ -173,11 +172,10 @@ describe("reduceRows et sortRows", () => {
 describe("toCsv", () => {
   it("en-tête anglais stable", () => {
     const rows: BfePvRow[] = [{
-      year: "2020", canton: "ZH", installations_count: "1", installed_capacity_kw: "1",
-      remuneration_chf: "1", installations_per_100000_inhabitants: "1", installed_capacity_kw_per_100000_inhabitants: "1",
+      year: "2020", canton: "ZH", installations_count: "1", installed_capacity_kw: "1", remuneration_chf: "1",
     }];
     expect(toCsv(rows).split("\n")[0].trim()).toBe(
-      "year,canton,installations_count,installed_capacity_kw,remuneration_chf,installations_per_100000_inhabitants,installed_capacity_kw_per_100000_inhabitants",
+      "year,canton,installations_count,installed_capacity_kw,remuneration_chf",
     );
   });
 });
@@ -192,7 +190,7 @@ describe("syncBfePv (mode fixture, aucun réseau)", () => {
     expect(result.cantonsSeen).toBe(26);
     expect(result.changed).toBe(true);
     const csv = readFileSync(outputPath, "utf8");
-    expect(csv.split("\n")[0]).toContain("installations_per_100000_inhabitants");
+    expect(csv.split("\n")[0]).toBe("year,canton,installations_count,installed_capacity_kw,remuneration_chf");
     const meta = JSON.parse(readFileSync(result.metaPath, "utf8"));
     expect(meta).toEqual({ edition: EDITION, source: BFE_PV_CSV_URL, rows: 26 });
   });
@@ -236,17 +234,33 @@ describe("syncBfePv (mode fixture, aucun réseau)", () => {
     expect(second.changed).toBe(false);
   });
 
-  it("deux ratios OFEN volontairement incohérents avec le compte d'installations : recopiés tels quels, jamais recalculés", async () => {
+  it("les deux ratios « pro 100 000 Einwohner » ne sortent jamais du collecteur (règle du 03.11.2026) : le quotient redonnerait la population", async () => {
     const dir = tmpDir();
-    // 2 installations mais un ratio "pro 100 000 Einwohner" de 99999 : incohérent en apparence,
-    // mais c'est un FAIT publié par l'OFEN (dénominateur = population, pas le compte lui-même) —
-    // le script ne doit jamais le corriger ni le recalculer.
     const fixturePath = writeFixtureFile(dir, fixtureCsv(["2020"], { ZH: "2020,ZH,2,2.5,2500,99999,88888" }));
     const outputPath = join(dir, "bfe_pv.csv");
     await syncBfePv({ fixturePath, edition: EDITION, outputPath, minRows: 1 });
     const csv = readFileSync(outputPath, "utf8");
-    const zhLine = csv.split("\n").find((l) => l.startsWith("2020,ZH,"));
-    expect(zhLine).toBe("2020,ZH,2,2.5,2500,99999,88888");
+    expect(csv.split("\n").find((l) => l.startsWith("2020,ZH,"))).toBe("2020,ZH,2,2.5,2500");
+    expect(csv).not.toContain("100000");
+    expect(csv).not.toContain("99999");
+  });
+
+  it("les deux ratios restent contrôlés dans la source, même non conservés : une valeur invalide reste une erreur", async () => {
+    const dir = tmpDir();
+    const fixturePath = writeFixtureFile(dir, fixtureCsv(["2020"], { ZH: "2020,ZH,2,2.5,2500,abc,88888" }));
+    await expect(syncBfePv({ fixturePath, edition: EDITION, outputPath: join(dir, "bfe_pv.csv"), minRows: 1 })).rejects.toThrow(/Anzahl_Anlagen_pro_100000_Einwohner/);
+  });
+
+  it("fichier précédent à sept colonnes : réécrit à cinq, mêmes lignes, sans refus de baisse", async () => {
+    const dir = tmpDir();
+    const outputPath = join(dir, "bfe_pv.csv");
+    const oldHeader = "year,canton,installations_count,installed_capacity_kw,remuneration_chf,installations_per_100000_inhabitants,installed_capacity_kw_per_100000_inhabitants";
+    writeFileSync(outputPath, [oldHeader, ...CANTONS.map((c) => `2020,${c},1,1,1,1,1`)].join("\n") + "\n", "utf8");
+    const fixturePath = writeFixtureFile(dir, fixtureCsv(["2020"]));
+    const result = await syncBfePv({ fixturePath, edition: EDITION, outputPath, minRows: 1 });
+    expect(result.changed).toBe(true);
+    expect(result.previousRowCount).toBe(26);
+    expect(readFileSync(outputPath, "utf8")).not.toContain("100000");
   });
 });
 

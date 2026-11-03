@@ -12,7 +12,6 @@ import {
   cantonProfile,
   cantonPvSeries,
   countCommunesAndLocalities,
-  PV_RATIOS_NOTE,
   PV_SCOPE_NOTE,
   SWISS_CANTON_ABBREVIATIONS,
   toPvNumber,
@@ -40,8 +39,7 @@ function finmaRow(partial: Partial<FinmaRegistryRow>): FinmaRegistryRow {
 
 function bfeRow(partial: Partial<BfePvRow>): BfePvRow {
   return {
-    year: "2020", canton: "ZH", installations_count: "1", installed_capacity_kw: "1",
-    remuneration_chf: "1", installations_per_100000_inhabitants: "1", installed_capacity_kw_per_100000_inhabitants: "1",
+    year: "2020", canton: "ZH", installations_count: "1", installed_capacity_kw: "1", remuneration_chf: "1",
     ...partial,
   };
 }
@@ -116,13 +114,19 @@ describe("cantonPvSeries", () => {
       bfeRow({ year: "2021", canton: "ZH", installations_count: "5" }),
       bfeRow({ year: "2020", canton: "ZH", installations_count: "3" }),
       bfeRow({ year: "2020", canton: "GE", installations_count: "9" }),
-      bfeRow({ year: "2022", canton: "ZH", installations_count: "NA", installed_capacity_kw: "NA", remuneration_chf: "NA", installations_per_100000_inhabitants: "NA", installed_capacity_kw_per_100000_inhabitants: "NA" }),
+      bfeRow({ year: "2022", canton: "ZH", installations_count: "NA", installed_capacity_kw: "NA", remuneration_chf: "NA" }),
     ];
     const series = cantonPvSeries("ZH", rows);
     expect(series.map((r) => r.year)).toEqual([2020, 2021, 2022]);
     expect(series[0].installations_count).toBe(3);
     expect(series[2].installations_count).toBeNull();
     expect(series[2].installed_capacity_kw).toBeNull();
+  });
+
+  it("ne sert jamais de série par habitant, même si le fichier chargé en portait encore une (règle du 03.11.2026)", () => {
+    const oldFormatRow = { ...bfeRow({ year: "2020", canton: "ZH" }), installations_per_100000_inhabitants: "8", installed_capacity_kw_per_100000_inhabitants: "62" };
+    const [row] = cantonPvSeries("ZH", [oldFormatRow]);
+    expect(Object.keys(row)).toEqual(["year", "installations_count", "installed_capacity_kw", "remuneration_chf"]);
   });
 });
 
@@ -227,14 +231,15 @@ describe("cantonProfile : cas limites (dépendances injectées)", () => {
     expect(profile.finma.entities_with_seat_in_canton).toBe(0);
   });
 
-  it("série OFEN par année : recopiée, ratios et portée décrits tels quels", () => {
+  it("série OFEN par année : recopiée, portée décrite telle quelle, aucun ratio par habitant", () => {
     const rows = [bfeRow({ year: "2020", canton: "ZH", installations_count: "42" }), bfeRow({ year: "2021", canton: "ZH", installations_count: "50" })];
     const profile = cantonProfile("ZH", deps({
       getLocalities: () => null, getStreets: () => null, getFinmaRegistry: () => [], getFinmaSeats: () => null,
       getBfePv: () => ({ rows, edition: "2026-10-07" }),
     }));
     expect(profile.pv?.by_year.map((r) => r.installations_count)).toEqual([42, 50]);
-    expect(profile.pv?.ratios_note).toBe(PV_RATIOS_NOTE);
+    expect(profile.pv).not.toHaveProperty("ratios_note");
+    expect(JSON.stringify(profile)).not.toContain("per_100000");
     expect(profile.pv?.scope_note).toBe(PV_SCOPE_NOTE);
     expect(profile.editions.bfe_pv).toBe("2026-10-07");
     expect(profile.sources).toContain("bfe.pv_one_time_remuneration");

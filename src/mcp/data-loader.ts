@@ -120,16 +120,14 @@ export interface FinmaSeatRow {
 /** Une ligne de la rétribution unique OFEN pour le photovoltaïque (tâche osd.donnees, tâche
  *  B5) : colonnes en anglais, valeurs recopiées telles que publiées par l'OFEN (y compris la
  *  valeur `"NA"` d'une année sans donnée disponible pour ce canton — jamais un zéro deviné).
- *  Les deux champs `..._per_100000_inhabitants` sont les ratios PUBLIÉS par l'OFEN, jamais
- *  recalculés ici (voir `scripts/sync-bfe-pv.ts`). */
+ *  Totaux seulement : les deux ratios par habitant de la source ne sont pas conservés (voir
+ *  `scripts/sync-bfe-pv.ts`). */
 export interface BfePvRow {
   year: string;
   canton: string;
   installations_count: string;
   installed_capacity_kw: string;
   remuneration_chf: string;
-  installations_per_100000_inhabitants: string;
-  installed_capacity_kw_per_100000_inhabitants: string;
 }
 
 /** Une ligne du répertoire officiel des rues (swisstopo, tâche osd.localites, tâche B1) : les

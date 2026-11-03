@@ -21,10 +21,11 @@
  *
  * OFEN — rétribution unique pour le photovoltaïque : la série par année est recopiée TELLE
  * QUELLE (y compris la valeur `"NA"` d'une année sans donnée disponible, rendue ici `null` —
- * jamais un zéro deviné), les deux ratios « pro 100 000 Einwohner » sont ceux PUBLIÉS par
- * l'OFEN, jamais recalculés (Global Constraint du plan du 06.10.2026). Cette série compte les
- * installations qui ont REÇU la rétribution unique une année donnée, pas la puissance
- * photovoltaïque totale installée dans le canton.
+ * jamais un zéro deviné). Totaux seulement : les deux ratios « pro 100 000 Einwohner » de l'OFEN
+ * ne sont plus servis depuis le 03.11.2026, leur quotient avec les totaux redonnait la population
+ * du canton (voir `scripts/sync-bfe-pv.ts`). Cette série compte les installations qui ont REÇU la
+ * rétribution unique une année donnée, pas la puissance photovoltaïque totale installée dans le
+ * canton.
  *
  * Jamais de note, de score ou de classement entre cantons : seulement des faits datés et
  * sourcés, comme le reste du service.
@@ -59,11 +60,6 @@ const NOTICE =
   "swisstopo (data.geo.admin.ch) for localities and streets, finma.ch for supervised institutions, " +
   "the BFE (opendata.swiss) for the one-time photovoltaic remuneration.";
 
-/** Les deux ratios « pro 100 000 Einwohner » sont ceux PUBLIÉS par l'OFEN lui-même : jamais
- *  recalculés ici (Global Constraint du plan du 06.10.2026). */
-export const PV_RATIOS_NOTE =
-  "The two 'per 100,000 inhabitants' ratios are published as-is by the BFE (Swiss Federal Office of Energy); never recalculated here.";
-
 /** La série ne compte que les installations qui ont REÇU la rétribution unique une année
  *  donnée : ce n'est jamais la puissance photovoltaïque totale installée dans le canton. */
 export const PV_SCOPE_NOTE =
@@ -76,8 +72,6 @@ export interface CantonPvYearRow {
   installations_count: number | null;
   installed_capacity_kw: number | null;
   remuneration_chf: number | null;
-  installations_per_100000_inhabitants: number | null;
-  installed_capacity_kw_per_100000_inhabitants: number | null;
 }
 
 export interface CantonFinmaProfile {
@@ -104,7 +98,7 @@ export interface CantonProfile {
   streets_count: number | null;
   finma: CantonFinmaProfile;
   /** `null` : rétribution unique OFEN non câblée ou indisponible. */
-  pv: { by_year: CantonPvYearRow[]; ratios_note: typeof PV_RATIOS_NOTE; scope_note: typeof PV_SCOPE_NOTE } | null;
+  pv: { by_year: CantonPvYearRow[]; scope_note: typeof PV_SCOPE_NOTE } | null;
   /** Jeux ouverts APPROUVÉS (tâche osd.jeux, piste G2) qui ont au moins une ligne pour ce
    *  canton — ids et nombre de lignes, JAMAIS les données elles-mêmes. Champ AUTONOME : jamais
    *  ajouté à `sources` ni `editions` ci-dessous (comparés par égalité stricte dans des tests
@@ -234,8 +228,6 @@ export function cantonPvSeries(abbr: string, rows: readonly BfePvRow[]): CantonP
       installations_count: toPvNumber(r.installations_count),
       installed_capacity_kw: toPvNumber(r.installed_capacity_kw),
       remuneration_chf: toPvNumber(r.remuneration_chf),
-      installations_per_100000_inhabitants: toPvNumber(r.installations_per_100000_inhabitants),
-      installed_capacity_kw_per_100000_inhabitants: toPvNumber(r.installed_capacity_kw_per_100000_inhabitants),
     }))
     .sort((a, b) => a.year - b.year);
 }
@@ -307,7 +299,7 @@ export function cantonProfile(abbr: string, deps: Partial<CantonProfileDeps> = {
   const bfeLoaded = d.getBfePv();
   if (bfeLoaded) {
     sources.add("bfe.pv_one_time_remuneration");
-    pv = { by_year: cantonPvSeries(wanted, bfeLoaded.rows), ratios_note: PV_RATIOS_NOTE, scope_note: PV_SCOPE_NOTE };
+    pv = { by_year: cantonPvSeries(wanted, bfeLoaded.rows), scope_note: PV_SCOPE_NOTE };
   }
 
   // Jeux ouverts du moteur générique (tâche osd.jeux, piste G2) : champ AUTONOME, jamais ajouté à

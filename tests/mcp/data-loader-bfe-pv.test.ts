@@ -32,10 +32,9 @@ describe("getBfePv() : fichier réel embarqué", () => {
       expect(row.year).toMatch(YEAR_RE);
       expect(CANTONS.has(row.canton), row.canton).toBe(true);
       seenCantons.add(row.canton);
-      for (const field of [
-        "installations_count", "installed_capacity_kw", "remuneration_chf",
-        "installations_per_100000_inhabitants", "installed_capacity_kw_per_100000_inhabitants",
-      ] as const) {
+      // Colonnes exactes (règle du 03.11.2026) : aucune série par habitant à côté de ces totaux.
+      expect(Object.keys(row)).toEqual(["year", "canton", "installations_count", "installed_capacity_kw", "remuneration_chf"]);
+      for (const field of ["installations_count", "installed_capacity_kw", "remuneration_chf"] as const) {
         expect(row[field], `${row.year}/${row.canton}/${field}`).toMatch(NUMBER_OR_NA_RE);
       }
     }

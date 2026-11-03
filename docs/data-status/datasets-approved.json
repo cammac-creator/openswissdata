@@ -31,9 +31,15 @@
         "betrag",
         "gemeindestand"
       ],
+      "exclude_rows": {
+        "typ": [
+          "Nettoschuld/-vermögen(-) je Einwohner in CHF",
+          "Selbstfinanzierung je Einwohner in CHF"
+        ]
+      },
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 : fiche CKAN (package_show, organisation kanton-graubuenden), en-tête et 6150 lignes relus via l'API Opendatasoft (data.gr.ch) avant toute écriture. Colonne `kategorie` ('1. sehr gut'/'2. gut'/'3. mittel'…) retirée de `columns` : c'est une note/classement, interdite par les Global Constraints du plan, même si la source la publie. Dix types d'indicateur par commune et année (endettement, autofinancement, charge d'intérêts…), aucune colonne ni valeur de personne. Certaines lignes portent un `bfs_nummer` historique (voir `gemeindestand`, date de référence du découpage communal) qui ne correspond plus forcément à une commune du répertoire officiel swisstopo actuel (fusions de communes) : ces lignes restent dans le fichier du jeu, mais ne sont rattachées à aucun canton ni aucune commune par les profils combinés (`src/lib/canton-profile.ts`/`commune-profile.ts`), jamais une approximation."
+      "notes": "Vérifié le 07.10.2026 : fiche CKAN (package_show, organisation kanton-graubuenden), en-tête et 6150 lignes relus via l'API Opendatasoft (data.gr.ch) avant toute écriture. Colonne `kategorie` ('1. sehr gut'/'2. gut'/'3. mittel'…) retirée de `columns` : c'est une note/classement, interdite par les Global Constraints du plan, même si la source la publie. Dix types d'indicateur par commune et année dans la source (endettement, autofinancement, charge d'intérêts…), huit servis depuis le 03.11.2026, aucune colonne ni valeur de personne. Certaines lignes portent un `bfs_nummer` historique (voir `gemeindestand`, date de référence du découpage communal) qui ne correspond plus forcément à une commune du répertoire officiel swisstopo actuel (fusions de communes) : ces lignes restent dans le fichier du jeu, mais ne sont rattachées à aucun canton ni aucune commune par les profils combinés (`src/lib/canton-profile.ts`/`commune-profile.ts`), jamais une approximation. Depuis le 03.11.2026 (décision de Claude-Alain, règle « jamais un total et un montant par habitant de la même grandeur ») : les deux types « je Einwohner » sont écartés par exclude_rows (6 150 → 4 920 lignes), car le montant absolu et le montant par habitant d'une même commune et d'une même année redonnaient sa population (615 couples sur 615, les deux quotients concordant à 1 % près). Les montants absolus et les pourcentages restent, comme pour Zurich et la Thurgovie."
     },
     {
       "id": "ofen-co2-carburant-vt",
@@ -798,10 +804,8 @@
         "einwohner",
         "einwohner_psgvsg",
         "schueler",
-        "schuelerproew",
         "steuerkraft",
         "steuerkraft_psgvsg",
-        "steuerkraftproew",
         "steuerfuss",
         "steuerfuss_sek",
         "steuerfuss_total",
@@ -839,7 +843,7 @@
       ],
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 : sg_id identifie une commune scolaire (unité administrative, pas une commune politique OFS) ; clé réelle = année."
+      "notes": "Vérifié le 07.10.2026 : sg_id identifie une commune scolaire (unité administrative, pas une commune politique OFS) ; clé réelle = année. Depuis le 03.11.2026 (règle « jamais un total et un montant par habitant de la même grandeur ») : schuelerproew et steuerkraftproew sont retirées de columns et restent dans expected_header, contrôle de l'en-tête source. Leur quotient avec schueler et steuerkraft redonnait einwohner (609 lignes sur 609 à 1 % près). Les colonnes _psgvsg sont un découpage en communes scolaires, pas un ratio par habitant ; les autres quotients servis ont un autre dénominateur."
     },
     {
       "id": "tg-nouveaux-batiments-habitation-commune",
@@ -1785,13 +1789,12 @@
         "kapitaldienstanteil_in",
         "investitionsanteil_in",
         "bruttoverschuldungsanteil_in",
-        "nettoschuld_nettovermogen_pro_einwohner_in_chf",
         "nettoverschuldungsquotient_in",
         "bilanzuberschussquotient_in"
       ],
       "approved_on": "2026-10-23",
       "checked_by": "codex (lot G4), à relire par l'intégrateur",
-      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (45274 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 480 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : jahr et bfs_nr_gemeinde ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes sont conservées. Ratios financiers et montants bruts, sans note qualitative ni rang."
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (45274 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 480 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : jahr et bfs_nr_gemeinde ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes étaient conservées jusqu'au 03.11.2026 ; nettoschuld_nettovermogen_pro_einwohner_in_chf est retirée depuis (règle « jamais un total et un montant par habitant de la même grandeur ») et reste dans expected_header, contrôle de l'en-tête source. Le bilan de tg-comptes-communes-2020 à 2023 (comptes 20 moins comptes 10) en redonne le total : le quotient retrouvait à 1 % près la population publiée par le canton dans 164 couples commune-année sur 320. Ratios financiers et montants bruts, sans note qualitative ni rang."
     },
     {
       "id": "zh-dechets-communes",
