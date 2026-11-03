@@ -324,6 +324,134 @@
       }
     },
     {
+      "id": "gr-zones-a-batir",
+      "title": "Zones à bâtir et état de la construction des communes grisonnes",
+      "publisher": "Canton des Grisons",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.gr.ch/api/explore/v2.1/catalog/datasets/dvs_are_soci_20250224/exports/csv?use_labels=false",
+      "columns": [
+        "commune_bfs",
+        "gemeinde",
+        "region",
+        "ch_hauptnutzung_code",
+        "ch_hauptnutzung_name",
+        "ch_hauptnutzung_aggregiert4_name",
+        "standueberbauung",
+        "standueberbauung_aggregiert2",
+        "auswertung_datum",
+        "flaeche_m2",
+        "flaeche_ha"
+      ],
+      "keys": [
+        "commune_bfs"
+      ],
+      "rows": 1467,
+      "edition": "2026-11-03",
+      "by_commune_bfs": {
+        "3506": 15,
+        "3513": 9,
+        "3514": 14,
+        "3542": 23,
+        "3543": 19,
+        "3544": 17,
+        "3551": 21,
+        "3561": 17,
+        "3572": 16,
+        "3575": 18,
+        "3581": 13,
+        "3582": 15,
+        "3603": 16,
+        "3618": 21,
+        "3619": 20,
+        "3633": 13,
+        "3637": 9,
+        "3638": 11,
+        "3640": 15,
+        "3661": 17,
+        "3662": 9,
+        "3663": 9,
+        "3668": 20,
+        "3669": 12,
+        "3670": 10,
+        "3672": 13,
+        "3673": 18,
+        "3681": 11,
+        "3695": 9,
+        "3701": 14,
+        "3711": 7,
+        "3712": 14,
+        "3713": 7,
+        "3714": 17,
+        "3715": 12,
+        "3721": 16,
+        "3722": 15,
+        "3723": 16,
+        "3731": 13,
+        "3732": 14,
+        "3733": 15,
+        "3734": 15,
+        "3746": 19,
+        "3752": 13,
+        "3762": 25,
+        "3764": 14,
+        "3781": 11,
+        "3782": 8,
+        "3783": 9,
+        "3784": 14,
+        "3785": 12,
+        "3786": 13,
+        "3787": 14,
+        "3788": 17,
+        "3789": 15,
+        "3790": 13,
+        "3791": 15,
+        "3792": 19,
+        "3804": 10,
+        "3805": 16,
+        "3808": 12,
+        "3810": 14,
+        "3821": 15,
+        "3822": 20,
+        "3823": 13,
+        "3831": 9,
+        "3832": 17,
+        "3834": 17,
+        "3835": 16,
+        "3837": 18,
+        "3847": 19,
+        "3851": 21,
+        "3861": 15,
+        "3862": 9,
+        "3863": 12,
+        "3871": 21,
+        "3881": 7,
+        "3882": 15,
+        "3891": 18,
+        "3901": 22,
+        "3911": 15,
+        "3921": 15,
+        "3945": 16,
+        "3946": 15,
+        "3947": 16,
+        "3951": 10,
+        "3952": 11,
+        "3953": 14,
+        "3954": 13,
+        "3955": 16,
+        "3961": 17,
+        "3962": 11,
+        "3972": 12,
+        "3981": 19,
+        "3982": 22,
+        "3983": 9,
+        "3985": 15,
+        "3986": 16,
+        "3987": 15,
+        "3988": 18
+      }
+    },
+    {
       "id": "ofen-co2-carburant-vt",
       "title": "Emissions de CO2 moyennes par type de carburant (VT)",
       "publisher": "Office fédéral de l'énergie OFEN",
@@ -348,8 +476,8 @@
       "keys": [
         "year"
       ],
-      "rows": 94,
-      "edition": "2026-10-07"
+      "rows": 95,
+      "edition": "2026-11-03"
     },
     {
       "id": "ofen-potentiel-solaire-communes",
@@ -2609,8 +2737,8 @@
       "keys": [
         "year"
       ],
-      "rows": 2730,
-      "edition": "2026-10-07"
+      "rows": 2756,
+      "edition": "2026-11-03"
     },
     {
       "id": "ofen-vul-propulsion-alternative",
@@ -2637,8 +2765,8 @@
       "keys": [
         "year"
       ],
-      "rows": 2080,
-      "edition": "2026-10-07"
+      "rows": 2106,
+      "edition": "2026-11-03"
     },
     {
       "id": "tg-batiments-usage-habitation-commune",
@@ -2981,8 +3109,8 @@
       "keys": [
         "year"
       ],
-      "rows": 73728,
-      "edition": "2026-10-24"
+      "rows": 73920,
+      "edition": "2026-11-03"
     },
     {
       "id": "tg-comptage-trafic-routier-classes-vehicules",
@@ -3017,8 +3145,8 @@
       "keys": [
         "year"
       ],
-      "rows": 41088,
-      "edition": "2026-10-24"
+      "rows": 42240,
+      "edition": "2026-11-03"
     },
     {
       "id": "tg-comptes-communes-2020",
@@ -3228,6 +3356,111 @@
         "4941": 419,
         "4946": 660,
         "4951": 417
+      }
+    },
+    {
+      "id": "tg-comptes-communes-2022",
+      "title": "Gemeinderechnungen 2022",
+      "publisher": "Canton de Thurgovie",
+      "licence": "cc0",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/dfs-fv-29/exports/csv?select=jahr,bfs_nr_gemeinde,typ,konto_nr,funktion_nr,funktion_bezeichnung,betrag&use_labels=false",
+      "columns": [
+        "year",
+        "commune_bfs",
+        "typ",
+        "konto_nr",
+        "funktion_nr",
+        "funktion_bezeichnung",
+        "betrag"
+      ],
+      "keys": [
+        "commune_bfs",
+        "year"
+      ],
+      "rows": 41301,
+      "edition": "2026-11-03",
+      "by_commune_bfs": {
+        "4401": 783,
+        "4406": 326,
+        "4411": 712,
+        "4416": 414,
+        "4421": 353,
+        "4426": 373,
+        "4431": 552,
+        "4436": 688,
+        "4441": 428,
+        "4446": 274,
+        "4451": 301,
+        "4461": 854,
+        "4471": 601,
+        "4476": 518,
+        "4486": 514,
+        "4495": 396,
+        "4501": 422,
+        "4506": 503,
+        "4511": 466,
+        "4536": 614,
+        "4545": 480,
+        "4546": 601,
+        "4551": 567,
+        "4561": 557,
+        "4566": 1165,
+        "4571": 908,
+        "4590": 458,
+        "4591": 396,
+        "4601": 505,
+        "4606": 330,
+        "4611": 484,
+        "4616": 501,
+        "4621": 410,
+        "4641": 578,
+        "4643": 326,
+        "4646": 717,
+        "4651": 236,
+        "4656": 541,
+        "4666": 517,
+        "4671": 1162,
+        "4681": 450,
+        "4683": 525,
+        "4691": 485,
+        "4696": 595,
+        "4701": 386,
+        "4711": 443,
+        "4716": 470,
+        "4721": 365,
+        "4723": 352,
+        "4724": 761,
+        "4726": 456,
+        "4741": 470,
+        "4746": 467,
+        "4751": 330,
+        "4756": 294,
+        "4761": 956,
+        "4776": 676,
+        "4781": 594,
+        "4786": 416,
+        "4791": 323,
+        "4801": 569,
+        "4806": 402,
+        "4811": 438,
+        "4816": 574,
+        "4821": 550,
+        "4826": 529,
+        "4831": 592,
+        "4841": 552,
+        "4846": 294,
+        "4851": 615,
+        "4864": 738,
+        "4871": 365,
+        "4881": 348,
+        "4891": 501,
+        "4901": 307,
+        "4911": 648,
+        "4921": 411,
+        "4941": 432,
+        "4946": 673,
+        "4951": 418
       }
     },
     {
@@ -5718,6 +5951,74 @@
       }
     },
     {
+      "id": "zg-recettes-fiscales-communes",
+      "title": "Recettes des impôts communaux des communes zougoises",
+      "publisher": "Canton de Zoug",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Zoug, via opendata.swiss",
+      "resource_url": "https://data.zg.ch/store/1/resource/854",
+      "columns": [
+        "year",
+        "gemeinde",
+        "commune_bfs",
+        "quelle",
+        "betrag_chf"
+      ],
+      "keys": [
+        "commune_bfs",
+        "year"
+      ],
+      "rows": 286,
+      "edition": "2026-11-03",
+      "by_commune_bfs": {
+        "1701": 26,
+        "1702": 26,
+        "1703": 26,
+        "1704": 26,
+        "1705": 26,
+        "1706": 26,
+        "1707": 26,
+        "1708": 26,
+        "1709": 26,
+        "1710": 26,
+        "1711": 26
+      }
+    },
+    {
+      "id": "zg-taux-impot-communes",
+      "title": "Taux d'impôt des communes zougoises",
+      "publisher": "Canton de Zoug",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Zoug, via opendata.swiss",
+      "resource_url": "https://data.zg.ch/store/1/resource/849",
+      "columns": [
+        "year",
+        "gemeinde",
+        "commune_bfs",
+        "steuern",
+        "steuerfuss_prozent"
+      ],
+      "keys": [
+        "commune_bfs",
+        "year"
+      ],
+      "rows": 880,
+      "edition": "2026-11-03",
+      "by_commune_bfs": {
+        "1701": 80,
+        "1702": 80,
+        "1703": 80,
+        "1704": 80,
+        "1705": 80,
+        "1706": 80,
+        "1707": 80,
+        "1708": 80,
+        "1709": 80,
+        "1710": 80,
+        "1711": 80
+      }
+    },
+    {
       "id": "zg-zones-a-batir",
       "title": "Zones à bâtir bâties et non bâties des communes zougoises",
       "publisher": "Canton de Zoug",
@@ -6152,7 +6453,7 @@
         "year"
       ],
       "rows": 42560,
-      "edition": "2026-10-24",
+      "edition": "2026-11-03",
       "by_commune_bfs": {
         "1": 266,
         "2": 266,
@@ -6498,14 +6799,15 @@
         "schultraeger",
         "schultraegertyp",
         "erstsprache",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "keys": [
         "canton",
         "year"
       ],
       "rows": 10684,
-      "edition": "2026-10-28",
+      "edition": "2026-11-03",
       "by_canton": {
         "ZH": 10684
       }
@@ -6529,7 +6831,7 @@
         "year"
       ],
       "rows": 2988,
-      "edition": "2026-10-28",
+      "edition": "2026-11-03",
       "by_canton": {
         "ZH": 2988
       }
@@ -6546,14 +6848,15 @@
         "year",
         "schulgemeinde",
         "anforderungstyp",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "keys": [
         "canton",
         "year"
       ],
       "rows": 13902,
-      "edition": "2026-10-24",
+      "edition": "2026-11-03",
       "by_canton": {
         "ZH": 13902
       }

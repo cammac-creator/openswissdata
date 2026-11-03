@@ -2393,7 +2393,8 @@
         "jahr",
         "schulgemeinde",
         "anforderungstyp",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "keys": {
         "kanton": "canton",
@@ -2404,11 +2405,12 @@
         "jahr",
         "schulgemeinde",
         "anforderungstyp",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "approved_on": "2026-10-24",
       "checked_by": "intégrateur (lot G5)",
-      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (639814 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 13902 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG)."
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (639814 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 13902 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Depuis début novembre 2026, l'éditeur remplace « 1 bis 5 » par une valeur vide et ajoute la colonne obs_status (A = valeur publiée, Q = valeur masquée) ; contrôlé le 03.11.2026 (lot G6) : mêmes 2 589 cases masquées, minimum publié toujours 6, même nombre de lignes ; obs_status gardée pour qu'une case vide se lise comme masquée. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG)."
     },
     {
       "id": "zh-eleves-langue-premiere",
@@ -2426,7 +2428,8 @@
         "schultraeger",
         "schultraegertyp",
         "erstsprache",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "keys": {
         "kanton": "canton",
@@ -2439,11 +2442,12 @@
         "schultraeger",
         "schultraegertyp",
         "erstsprache",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "approved_on": "2026-10-24",
       "checked_by": "intégrateur (lot G5)",
-      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (942439 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 10684 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG). Le jeu de la même source par autorité scolaire et nationalité n'est pas retenu : ses totaux par année et autorité sont identiques à ceux de ce jeu, ce qui permettrait de recalculer une case masquée (relecture du 24.10.2026). Contrôlé : la somme de ce jeu ne permet pas de recalculer une case à partir du total cantonal (au moins 9 cases masquées par année dans ce jeu, le total cantonal n'en isole jamais une seule)."
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (942439 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 10684 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Depuis début novembre 2026, l'éditeur remplace « 1 bis 5 » par une valeur vide et ajoute la colonne obs_status (A = valeur publiée, Q = valeur masquée) ; contrôlé le 03.11.2026 (lot G6) : mêmes 481 cases masquées, minimum publié toujours 6, même nombre de lignes ; obs_status gardée pour qu'une case vide se lise comme masquée. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG). Le jeu de la même source par autorité scolaire et nationalité n'est pas retenu : ses totaux par année et autorité sont identiques à ceux de ce jeu, ce qui permettrait de recalculer une case masquée (relecture du 24.10.2026). Contrôlé : la somme de ce jeu ne permet pas de recalculer une case à partir du total cantonal (au moins 9 cases masquées par année dans ce jeu, le total cantonal n'en isole jamais une seule)."
     },
     {
       "id": "tg-eleves-langue-premiere",
@@ -3657,6 +3661,144 @@
       "approved_on": "2026-10-24",
       "checked_by": "intégrateur (lot G5)",
       "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation statistisches-amt-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. CSV direct entièrement téléchargé (457515 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 3312 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Indicateur du portrait des communes zurichois (mot-clé « nichtweitergefuehrt » : série que l'office ne prolonge plus ; données jusqu'en 2024). Source cantonale : statistique cantonale des transactions immobilières (ventes de gré à gré). Clé réelle : INDIKATOR_JAHR (années à quatre chiffres) seulement, comme le lot G4 : BFS_NR vaut 0 pour les totaux de districts, régions et canton, conservé sans clé. THEMA_NAME, SET_NAME, SUBSET_NAME, INDIKATOR_ID et INDIKATOR_NAME retirées (constantes, redondantes avec la fiche) ; colonne finale sans nom retirée (vide). Toutes les valeurs de GEBIET_NAME sont des communes, districts, régions ou le canton (contrôle complet)."
+    },
+    {
+      "id": "tg-comptes-communes-2022",
+      "title": "Gemeinderechnungen 2022",
+      "ckan_uuid": "25b465be-0795-41e8-81ef-6e0b7fc3690b",
+      "publisher": "Canton de Thurgovie",
+      "licence": "cc0",
+      "attribution": "",
+      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/dfs-fv-29/exports/csv?select=jahr,bfs_nr_gemeinde,typ,konto_nr,funktion_nr,funktion_bezeichnung,betrag&use_labels=false",
+      "expected_header": [
+        "jahr",
+        "bfs_nr_gemeinde",
+        "typ",
+        "konto_nr",
+        "funktion_nr",
+        "funktion_bezeichnung",
+        "betrag"
+      ],
+      "keys": {
+        "jahr": "year",
+        "bfs_nr_gemeinde": "commune_bfs"
+      },
+      "columns": [
+        "jahr",
+        "bfs_nr_gemeinde",
+        "typ",
+        "konto_nr",
+        "funktion_nr",
+        "funktion_bezeichnung",
+        "betrag"
+      ],
+      "approved_on": "2026-11-03",
+      "checked_by": "intégrateur (lot G6)",
+      "notes": "Vérifié le 03.11.2026 (lot G6) : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open. Année manquante de la série déjà servie (tg-comptes-communes-2020, 2021 et 2023) : même source (jeu ODS dfs-fv-29 du portail thurgovien), même structure, même URL réduite par select= que les autres années (le CSV complet dépasse 20 Mo à cause de konto_bezeichnung, texte libre retiré comme pour 2020). Fichier réduit entièrement téléchargé : 2 527 163 octets, séparateur point-virgule, 41 301 lignes, une seule année (2022). UTF-8 strict sans U+FFFD ; en-tête réel recopié exactement ; toutes les lignes analysées par programme (clés, valeurs distinctes, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. 80 numéros de commune (les 80 communes politiques thurgoviennes). typ : 4 valeurs (ERFOLGSRECHNUNG, BILANZ, INVESTITIONSRECHNUNG, vide sur 3 lignes) ; funktion_bezeichnung : 101 valeurs distinctes, 51 caractères au plus, toutes déjà présentes dans les trois années servies (vocabulaire fermé des fonctions MCH2) ; funktion_nr vide sur les lignes de bilan. Montants agrégés par commune, compte et fonction ; aucun masquage ni petite case."
+    },
+    {
+      "id": "zg-taux-impot-communes",
+      "title": "Taux d'impôt des communes zougoises",
+      "ckan_uuid": "39583bcb-8fcf-464d-b00b-63d2ec460d7e",
+      "publisher": "Canton de Zoug",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Zoug, via opendata.swiss",
+      "resource_url": "https://data.zg.ch/store/1/resource/849",
+      "expected_header": [
+        "jahr",
+        "gemeinde",
+        "bfscode",
+        "steuern",
+        "steuerfuss_prozent"
+      ],
+      "keys": {
+        "jahr": "year",
+        "bfscode": "commune_bfs"
+      },
+      "columns": [
+        "jahr",
+        "gemeinde",
+        "bfscode",
+        "steuern",
+        "steuerfuss_prozent"
+      ],
+      "approved_on": "2026-11-03",
+      "checked_by": "intégrateur (lot G6)",
+      "notes": "Vérifié le 03.11.2026 (lot G6) : package_show opendata.swiss relu le jour même, organisation kanton-zug ; rights = https://opendata.swiss/terms-of-use#terms_open, license = https://opendata.swiss/terms-of-use#terms_by. Licence retenue : terms_by (la plus exigeante des deux), attribution donnée. Source citée par la fiche : Canton de Zoug, Steuerverwaltung. CSV direct entièrement téléchargé (46 435 octets), séparateur virgule, 880 lignes. UTF-8 strict sans U+FFFD ; en-tête réel recopié exactement ; toutes les lignes analysées par programme (clés, valeurs distinctes, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Taux d'impôt en pour cent de l'impôt simple, 2007 à 2026, pour les 11 communes (numéros 1701 à 1711, un seul nom par numéro, tous dans le référentiel local) et 4 collectivités (Einwohnergemeinde, Bürgergemeinde, deux Kirchgemeinden) : 44 lignes par année, aucune valeur manquante. Le taux du canton est une autre ressource de la fiche, non reprise."
+    },
+    {
+      "id": "zg-recettes-fiscales-communes",
+      "title": "Recettes des impôts communaux des communes zougoises",
+      "ckan_uuid": "5d990373-6602-49de-bdc9-528d24b9e1cf",
+      "publisher": "Canton de Zoug",
+      "licence": "terms_by",
+      "attribution": "Source : Canton de Zoug, via opendata.swiss",
+      "resource_url": "https://data.zg.ch/store/1/resource/854",
+      "expected_header": [
+        "jahr",
+        "gemeinde",
+        "bfscode",
+        "quelle",
+        "betrag_chf"
+      ],
+      "keys": {
+        "jahr": "year",
+        "bfscode": "commune_bfs"
+      },
+      "columns": [
+        "jahr",
+        "gemeinde",
+        "bfscode",
+        "quelle",
+        "betrag_chf"
+      ],
+      "approved_on": "2026-11-03",
+      "checked_by": "intégrateur (lot G6)",
+      "notes": "Vérifié le 03.11.2026 (lot G6) : package_show opendata.swiss relu le jour même, organisation kanton-zug ; rights = https://opendata.swiss/terms-of-use#terms_by, license = https://opendata.swiss/terms-of-use#terms_by. Source citée par la fiche : Canton de Zoug, Steuerverwaltung (impôts communaux selon le rôle, sans impôt sur les gains immobiliers). Ressource « Fiskalerträge aus Gemeindesteuern » seule : les deux autres ressources de la fiche (parts cantonale et fédérale) sont des répartitions calculées à partir de celle-ci, non reprises. CSV direct entièrement téléchargé (15 170 octets), séparateur virgule, 286 lignes. UTF-8 strict sans U+FFFD ; en-tête réel recopié exactement ; toutes les lignes analysées par programme (clés, valeurs distinctes, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Montants en francs par commune (11 numéros, 1701 à 1711) et par catégorie de contribuables (quelle : « Natürliche Personen » ou « Juristische Personen », deux valeurs seulement), 2013 à 2025 ; totaux communaux, jamais un contribuable."
+    },
+    {
+      "id": "gr-zones-a-batir",
+      "title": "Zones à bâtir et état de la construction des communes grisonnes",
+      "ckan_uuid": "ef924e0f-0fc9-4a86-8ac8-a0941bf47686",
+      "publisher": "Canton des Grisons",
+      "licence": "terms_open",
+      "attribution": "",
+      "resource_url": "https://data.gr.ch/api/explore/v2.1/catalog/datasets/dvs_are_soci_20250224/exports/csv?use_labels=false",
+      "expected_header": [
+        "bfsnr",
+        "gemeinde",
+        "region",
+        "raumtyp",
+        "handlungsraum",
+        "gemeindetyp",
+        "ch_hauptnutzung_code",
+        "ch_hauptnutzung_name",
+        "ch_hauptnutzung_aggregiert4_name",
+        "standueberbauung",
+        "standueberbauung_aggregiert2",
+        "auswertung_datum",
+        "flaeche_m2",
+        "flaeche_ha"
+      ],
+      "keys": {
+        "bfsnr": "commune_bfs"
+      },
+      "columns": [
+        "bfsnr",
+        "gemeinde",
+        "region",
+        "ch_hauptnutzung_code",
+        "ch_hauptnutzung_name",
+        "ch_hauptnutzung_aggregiert4_name",
+        "standueberbauung",
+        "standueberbauung_aggregiert2",
+        "auswertung_datum",
+        "flaeche_m2",
+        "flaeche_ha"
+      ],
+      "approved_on": "2026-11-03",
+      "checked_by": "intégrateur (lot G6)",
+      "notes": "Vérifié le 03.11.2026 (lot G6) : package_show opendata.swiss relu le jour même, organisation kanton-graubuenden ; rights = https://opendata.swiss/terms-of-use#terms_open, license = https://opendata.swiss/terms-of-use#terms_open. Statistique cantonale (office du développement territorial) des zones à bâtir en vigueur des plans d'affectation communaux et de l'état de la construction (aperçu de l'état de la construction, de l'équipement et de la constructibilité). CSV de l'API du portail entièrement téléchargé (300 636 octets, marque d'ordre d'octets retirée par le collecteur), séparateur point-virgule, 1 467 lignes. UTF-8 strict sans U+FFFD ; en-tête réel recopié exactement ; toutes les lignes analysées par programme (clés, valeurs distinctes, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Surfaces en m² et en hectares par commune, type de zone fédéral harmonisé (9 codes) et état de la construction (4 valeurs), état au 01.10.2026 (auswertung_datum, une seule valeur) ; pas de colonne année. Les 100 numéros de commune correspondent au référentiel local (100 communes grisonnes). Colonnes retirées : gemeindetyp (typologie des communes de l'OFS), raumtyp et handlungsraum (catégories du plan directeur, sans utilité de filtre). Petites surfaces (1 m² au plus petit) conservées telles quelles (la fiche signale des écarts d'arrondi dus aux opérations géométriques)."
     }
   ]
 }
