@@ -76,7 +76,7 @@ modification plus tardive : si cela arrive, la collecte s'arrête.
 
 ## Arrêts de la collecte (rien n'est écrit, la version servie reste)
 Racine, `list-type`, genre d'entrée, genre d'objet, type de modification, type de nom ou programme inconnu ; balises
-déséquilibrées, DOCTYPE ; date de liste de plus de trois jours ; sous 2 000 organisations ou 400 bateaux ; plus de 5 %
+déséquilibrées, DOCTYPE, élément à l'intérieur d'un champ lu ; date de liste de plus de trois jours ; sous 2 000 organisations ou 400 bateaux ; plus de 5 %
 de bateaux sans IMO ; baisse de plus de 15 % sur une catégorie. Une baisse examinée s'adopte par l'entrée
 `accepter_baisse` du déclenchement manuel, qui est un passage réel lancé à la main (F6).
 

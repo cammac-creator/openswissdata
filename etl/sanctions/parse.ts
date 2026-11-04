@@ -102,7 +102,7 @@ interface RawTarget {
   modifications: RawModification[];
 }
 
-/** Ce que la lecture rend. `personNameKeys` ne sert qu'au contrôle en mémoire et n'est jamais écrit. */
+/** Ce que la lecture rend. `personIndex` ne sert qu'au contrôle en mémoire et n'est jamais écrit. */
 export interface ParsedSesam {
   listDate: string;
   entries: SanctionEntry[];
