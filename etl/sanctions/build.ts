@@ -5,15 +5,15 @@
  * document rendu par `buildSanctionsDocument`.
  *
  * Le contrôle relit le document FINI, pas l'intention du code : une clé hors de la liste blanche,
- * un genre inconnu ou le nom d'une personne sur une organisation arrêtent tout. La preuve publiée
- * vient de ce comptage.
+ * un genre inconnu ou un nom d'organisation pris par la règle des personnes arrêtent tout. La preuve
+ * publiée vient de ce comptage ; elle ne dit rien des noms que la règle ne voit pas (`SOURCES.md`).
  */
 import {
   SANCTIONS_SCHEMA,
   SANCTIONS_SOURCE_ID,
   type SanctionsDocument,
 } from "../../src/lib/sanctions.js";
-import { carriesPersonName, type ParsedSesam } from "./parse.js";
+import { organisationNameIsWithheld, type ParsedSesam } from "./parse.js";
 
 const ENTRY_KEYS = new Set(["id", "kind", "names", "programmes", "listed_on", "countries", "imo"]);
 const NAME_KEYS = new Set(["type", "value"]);
@@ -53,7 +53,7 @@ export function buildSanctionsDocument(
     for (const programme of entry.programmes) assertOnlyKeys(programme, PROGRAMME_KEYS, "un programme");
     if (entry.kind === "organisation") {
       organisations++;
-      organisationNamesCarryingPerson += entry.names.filter((n) => carriesPersonName(n.value, parsed.personNameKeys)).length;
+      organisationNamesCarryingPerson += entry.names.filter((n) => organisationNameIsWithheld(n.value, parsed.personIndex)).length;
     } else if (entry.kind === "vessel") {
       vessels++;
     } else {
@@ -76,12 +76,13 @@ export function buildSanctionsDocument(
       organisation_names_removed_carrying_person: parsed.organisationNamesRemovedCarryingPerson,
       vessels_name_equals_person_entry: parsed.vesselsNameEqualsPerson,
       organisation_names_honouring_a_person_kept: parsed.organisationNamesHonouringAPersonKept,
+      organisation_names_kept_after_review: parsed.organisationNamesKeptAfterReview,
       // Chaque entrée écrite est « organisation » ou « bateau », et aucune clé hors liste blanche
       // ne passe le contrôle ci-dessus : ces trois zéros sont mesurés, pas déclarés.
       natural_persons_served: parsed.entries.length - organisations - vessels,
       relations_served: parsed.entries.filter((e) => "relation" in e).length,
       free_text_fields_served: parsed.entries.filter((e) => "justification" in e || "other_information" in e).length,
-      organisation_names_carrying_person_served: organisationNamesCarryingPerson,
+      organisation_names_caught_by_person_rule_served: organisationNamesCarryingPerson,
     },
     entries: parsed.entries,
   };

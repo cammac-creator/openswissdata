@@ -48,7 +48,7 @@ describe("GET /api/v1/sanctions", () => {
     expect(body.list).toMatchObject({ date: "2026-11-04", sha256: "a".repeat(64) });
     expect(body.entries).toEqual({ organisations: 2, vessels: 1 });
     expect(body.exclusion_proof.natural_persons_served).toBe(0);
-    expect(body.exclusion_proof.excluded.natural_persons).toBe(1);
+    expect(body.exclusion_proof.excluded.natural_persons).toBe(2);
     expect(body.official_search_url).toBe(SANCTIONS_OFFICIAL_SEARCH_URL);
     expect(body.notice.coverage).toMatch(/Natural persons are not covered/);
     expect(body.sources[0].id).toBe("seco.sesam_sanctions");

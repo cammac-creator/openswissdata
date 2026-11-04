@@ -38,21 +38,48 @@ describe("liste des sanctions : aucune fuite vers le document écrit", () => {
       expect(Object.keys(entry).sort()).toEqual(["countries", "id", "imo", "kind", "listed_on", "names", "programmes"]);
     }
   });
-  it("la personne n'existe pas dans le rendu de la lecture, sauf la clé de contrôle jamais écrite", () => {
-    expect(written).not.toContain("personNameKeys");
+  it("l'index des personnes, gardé en mémoire pour le contrôle, n'est jamais écrit", () => {
+    expect(written).not.toContain("personIndex");
+  });
+  it("un élément vide ou mal placé ne fait pas entrer un texte qui n'est pas un nom", () => {
+    const base = (inner: string, id: string) =>
+      `<target ssid="${id}"><entity><identity ssid="9" main="true"><name ssid="8" name-type="primary-name"><name-part order="1" name-part-type="whole-name"><value>Org ${id}</value></name-part></name>${inner}</identity></entity><modification modification-type="listed"/><sanctions-set-id>4387</sanctions-set-id></target>`;
+    const doc = (body: string) => `<swiss-sanctions-list list-type="whole-list" date="2026-11-04"><sanctions-program ssid="20"><program-key lang="eng">Exampleland</program-key><sanctions-set ssid="4387" lang="eng">x</sanctions-set><origin>EU</origin></sanctions-program>${body}</swiss-sanctions-list>`;
+    const relation = `<relation ssid="7" relation-type="related-to" target-id="1"><name name-type="alias"><name-part order="1"><value>TEMOIN-FUITE</value></name-part></name></relation>`;
+    const cases = [
+      // Nom auto-fermé, puis `relation/name` dans la même entrée.
+      doc(base(`<name ssid="1" name-type="alias"/>${relation}`, "1")),
+      // Partie de nom auto-fermée, puis texte de relation.
+      doc(`<target ssid="1"><entity><identity ssid="9" main="true"><name ssid="8" name-type="primary-name"><name-part order="1" name-part-type="whole-name"><value>Org 1</value></name-part><name-part order="2"/><relation ssid="7" target-id="1"><value>TEMOIN-FUITE</value></relation></name></identity></entity><modification modification-type="listed"/><sanctions-set-id>4387</sanctions-set-id></target>`),
+      // Nom auto-fermé en première entrée, relation dans la suivante.
+      doc(base(`<name ssid="1" name-type="alias"/>`, "1") + base(relation, "2")),
+      // Un nom hors de `identity`.
+      doc(`<target ssid="1"><entity><identity ssid="9" main="true"><name ssid="8" name-type="primary-name"><name-part order="1"><value>Org 1</value></name-part></name></identity><other-information ssid="6"><name name-type="alias"><name-part order="1"><value>TEMOIN-FUITE</value></name-part></name></other-information></entity><modification modification-type="listed"/><sanctions-set-id>4387</sanctions-set-id></target>`),
+    ];
+    for (const body of cases) {
+      const out = JSON.stringify(parseSesamXml(body).entries);
+      expect(out).not.toContain("TEMOIN");
+      expect(out).toContain("Org 1");
+    }
+  });
+  it("un fragment du nom d'une personne, sans le nom entier, ne sort pas", () => {
+    const text = JSON.stringify(doc.entries.filter((e) => e.kind === "organisation"));
+    expect(xml).toContain("Pavlo Ivanovich Temoinchuk");
+    expect(text).not.toContain("Temoinchuk");
   });
   it("la preuve par comptage", () => {
     expect(doc.counts).toEqual({ organisations: 2, vessels: 1 });
     expect(doc.exclusion_proof).toEqual({
-      source_entries: { natural_persons: 1, organisations: 4, vessels: 2 },
-      excluded: { natural_persons: 1, delisted_organisations: 1, delisted_vessels: 1, organisations_primary_name_carries_person: 1 },
-      organisation_names_removed_carrying_person: 3,
+      source_entries: { natural_persons: 2, organisations: 4, vessels: 2 },
+      excluded: { natural_persons: 2, delisted_organisations: 1, delisted_vessels: 1, organisations_primary_name_carries_person: 1 },
+      organisation_names_removed_carrying_person: 4,
       vessels_name_equals_person_entry: 1,
       organisation_names_honouring_a_person_kept: 1,
+      organisation_names_kept_after_review: 0,
       natural_persons_served: 0,
       relations_served: 0,
       free_text_fields_served: 0,
-      organisation_names_carrying_person_served: 0,
+      organisation_names_caught_by_person_rule_served: 0,
     });
   });
 });

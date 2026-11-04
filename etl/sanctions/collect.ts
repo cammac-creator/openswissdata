@@ -2,9 +2,10 @@
  * Collecte de la liste des sanctions du SECO (SESAM) : organisations et bateaux seulement.
  *
  * Étage lu : source (fichier XML officiel, en mémoire : il contient des personnes physiques et
- * n'est écrit nulle part, ni bronze brut, ni artefact). Étage écrit : argent et or réduits dans le
- * bucket R2 PRIVÉ, avec la taille et l'empreinte du fichier entier (écart à la règle « bronze
- * d'abord », même motif que FOSC et que l'exception Kranli de `DONNEES-ETAGES.md`).
+ * n'est écrit nulle part, ni bronze brut, ni artefact). Étage écrit : or réduit dans le bucket R2
+ * PRIVÉ, réécrit à chaque passage, avec la taille et l'empreinte du fichier entier (écart à la règle
+ * « bronze d'abord », même motif que FOSC et que l'exception Kranli de `DONNEES-ETAGES.md`). Aucune
+ * copie datée : une organisation radiée disparaît à la version suivante.
  *
  * Usage :
  *   npm run sync:sanctions                    simulation : lit la source, n'écrit rien, affiche des nombres
@@ -28,8 +29,6 @@ import { SESAM_XML_URL } from "./sources.js";
 
 const FETCH_TIMEOUT_MS = 180_000;
 const USER_AGENT = "OpenSwissData-collecte-sanctions/1";
-
-export const datedR2Key = (listDate: string) => `sanctions/argent/${listDate}-v1.json.gz`;
 
 async function downloadSource(): Promise<Buffer> {
   const res = await fetch(SESAM_XML_URL, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
@@ -98,10 +97,8 @@ async function main(): Promise<void> {
     writeFileSync(join(args.out, "sanctions-v1.json"), JSON.stringify(doc));
   }
   if (args.writeR2) {
-    // L'argent daté d'abord : si la seconde écriture échoue, la version servie reste entière.
-    await putObjectBytes(datedR2Key(doc.list_date), gzipped, "application/gzip");
     await putObjectBytes(SANCTIONS_R2_KEY, gzipped, "application/gzip");
-    console.log("écrit dans R2 : sanctions/argent et sanctions/or");
+    console.log("écrit dans R2 : sanctions/or");
   }
 }
 

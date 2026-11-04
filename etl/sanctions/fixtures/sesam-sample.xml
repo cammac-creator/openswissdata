@@ -33,6 +33,11 @@
     <modification modification-type="listed" effective-date="2022-01-01" enactment-date="2022-01-01" publication-date="2022-01-01"/>
     <sanctions-set-id>4387</sanctions-set-id>
   </target>
+  <target ssid="110">
+    <individual sex="male"><identity ssid="1100" main="true"><name ssid="1101" name-type="primary-name" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Pavlo Ivanovich Temoinchuk</value></name-part></name></identity></individual>
+    <modification modification-type="listed"/>
+    <sanctions-set-id>4387</sanctions-set-id>
+  </target>
   <target ssid="200">
     <entity>
       <identity ssid="2000" main="true">
@@ -44,6 +49,7 @@
         <name ssid="2004" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Alias Personne Temoin</value></name-part></name>
         <name ssid="2005" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Pavel Temoinov Trading</value></name-part></name>
         <name ssid="2006" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Haji Temoinov Hawala</value></name-part></name>
+        <name ssid="2015" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Ivanovich Temoinchuk Hawala</value></name-part></name>
         <day-month-year ssid="2007" day="2" month="2" year="2002" calendar="gregorian" quality="good"/>
         <address ssid="2008" place-id="1" quality="good">
           <c-o>TEMOIN-CO-PERSONNE</c-o>

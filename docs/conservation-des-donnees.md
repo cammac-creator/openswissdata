@@ -55,7 +55,7 @@ Décision de Claude-Alain du 29.09.2026, complétée le 30.09.2026 pour l’ancr
 
 ## Hors base : collecte FOSC (22.10.2026)
 
-La liste des sanctions du SECO reprise par le service ne contient que des organisations et des bateaux, jamais de personne physique : elle vit dans le bucket R2 privé (`sanctions/`), le document courant réécrit à chaque passage et une copie datée par jour, et le fichier officiel n'est conservé nulle part. Règle : `etl/sanctions/SOURCES.md`.
+La liste des sanctions du SECO reprise par le service ne contient que des organisations et des bateaux, jamais de personne physique : elle vit dans le bucket R2 privé (`sanctions/`), un seul document réécrit à chaque passage, et le fichier officiel n'est conservé nulle part. Règle : `etl/sanctions/SOURCES.md`.
 
 Les événements des sociétés tirés des avis HR de la FOSC ne sont pas dans la base du service : ils vivent dans le bucket R2 privé (`fosc/argent/hr-state-v1.json`), réécrit à chaque passage de la collecte quotidienne. Une ligne n'y existe plus le 30e jour après la publication de l'avis (ni le jour de son échéance, s'il en a une) : elle est effacée au passage de la veille, ou au premier passage suivant si celui-ci manque. Elle part aussi dès que l'avis n'est plus publié, ou faute de revérification depuis 3 jours. Les entreprises individuelles n'y figurent jamais. Ce nettoyage est fait par la collecte elle-même, pas par `runCleanup`, et il est enregistré à chaque passage qui a pu relire l'état. Règle et sources : `etl/fosc/SOURCES.md`.
 

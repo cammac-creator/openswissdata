@@ -20,9 +20,9 @@
 
 ## Lecture du fichier
 - Le fichier entier reste **en mémoire** : ni bronze brut, ni artefact, ni commit, parce qu'il contient des personnes.
-  Écart voulu à la règle « bronze d'abord », même motif que FOSC. Sont écrits dans le bucket R2 privé le document
-  réduit (`sanctions/or/current-v1.json.gz`, réécrit) et sa copie datée (`sanctions/argent/AAAA-MM-JJ-v1.json.gz`).
-  Le dépôt public n'en reçoit jamais : son historique garderait à vie une organisation radiée ensuite.
+  Écart voulu à la règle « bronze d'abord », même motif que FOSC. Seul le document réduit est écrit, dans le bucket R2
+  privé (`sanctions/or/current-v1.json.gz`, réécrit à chaque passage), sans copie datée : une organisation radiée
+  disparaît à la version suivante. Le dépôt public n'en reçoit jamais : son historique la garderait à vie.
 - **Liste blanche** de ce qui sort d'une entrée : numéro SESAM, genre (`organisation` ou `vessel`), noms (principal,
   alias, ancien, variantes d'écriture d'un nom à une seule partie), programme (clé anglaise, origine), date
   d'inscription, code pays des adresses (organisations), numéro IMO à 7 chiffres (bateaux).
@@ -37,20 +37,31 @@ Le genre de l'entrée fait foi, jamais `name-part-type` : 65 organisations et 9 
 |---|---|---|
 | Personnes physiques | Élément `individual` : aucun champ gardé, leurs noms servent seulement au contrôle ci-dessous, en mémoire | 4 709 sur 4 709 |
 | Radiés | Une modification `de-listed`, quelle que soit sa position | 733 organisations, 23 bateaux |
-| Organisation dont le nom principal porte une personne | Voir ci-dessous : fiche entière écartée | 4 |
-| Autre nom d'une organisation qui porte une personne | Le nom seul est retiré | 5 |
+| Organisation dont le nom principal porte une personne | Voir ci-dessous : fiche entière écartée | 6 |
+| Autre nom d'une organisation qui porte une personne | Le nom seul est retiré | 9 |
 
-- Résultat du 04.11.2026 : **2 868 organisations et 708 bateaux**. `exclusion_proof`, servi par `/api/v1/sanctions`,
+- Résultat du 04.11.2026 : **2 866 organisations et 708 bateaux**. `exclusion_proof`, servi par `/api/v1/sanctions`,
   recompte sur le document écrit ; une valeur non nulle dans `*_served` arrête la collecte et fait refuser le document
   par le service.
 - **Un nom d'organisation peut porter une personne** : des bureaux de change portent le nom de leur propriétaire,
-  lui-même sur la liste. Sont retirés : nom entier identique au nom d'une personne de la liste, suite d'au moins deux
-  mots égale à un tel nom (8 caractères au moins, casse et ponctuation ignorées), titre personnel (`haji`, `mullah`,
-  `maulawi`, `sheikh`…). Même raison que les entreprises individuelles de la FOSC.
-- **Limites connues** : un nom de personne absente de la liste, sans titre, ne se détecte pas ; 116 noms d'institutions
-  « named after » un personnage restent (ce sont des organisations, comptés dans
-  `organisation_names_honouring_a_person_kept`). 37 bateaux portent un nom égal à celui d'une entrée « personne » :
-  gardés, le genre fait foi, comptés dans `vessels_name_equals_person_entry`.
+  lui-même sur la liste. Une correspondance de trop retire un nom. La règle (`carriesPersonName`) prend, casse et
+  ponctuation ignorées : un titre personnel (`haji`, `mullah`, `maulawi`, `sheikh`…) ; le nom entier d'une personne de
+  la liste, seul ou à l'intérieur ; deux mots voisins d'un même nom de personne, sans particule, 8 caractères au moins ;
+  un prénom suivi d'un nom de famille tous deux connus sur la liste. Même raison que les entreprises individuelles de la
+  FOSC.
+- **Relecture** (`reviewed.ts`, empreintes seulement, jamais un nom : le dépôt est public). Sur la liste du 04.11.2026,
+  la règle prend 39 noms ; 10 relus comme n'étant pas une personne restent (mots courants, sigle, groupe ou institution
+  portant le nom d'un défunt). 4 noms que la règle ne voit pas, relus comme portant une personne, sortent. Un nouveau nom
+  pris par la règle sort sans relecture.
+- **La preuve ne prouve pas tout.** `organisation_names_caught_by_person_rule_served` compte ce que la règle voit. Une
+  personne absente de la liste, un nom de famille seul, une translittération ou une forme fléchie (cyrillique) ne se
+  détectent pas : un nom de personne peut donc encore figurer dans un nom d'organisation, jamais une entrée de personne.
+  Restent aussi, comptés : les noms d'institutions qui honorent un personnage (`organisation_names_honouring_a_person_kept`,
+  « named after », « имени ») et les réseaux connus sous un nom de famille. 37 bateaux portent un nom égal à celui d'une
+  entrée « personne » : gardés, le genre fait foi (`vessels_name_equals_person_entry`) ; la source classe en « personne »
+  quelques entrées dont le texte décrit un navire.
+- **Écart au plan du 04.11.2026** : pas de canari, la collecte contrôle elle-même la forme à chaque passage (précédent
+  FOSC, swisstopo, OFEN).
 - **Couverture suisse** (mesure promise le 04.11.2026) : 0 organisation servie avec une adresse en Suisse, 0 nom
   identique à un nom du registre FINMA. Cette liste touche presque uniquement des entités étrangères.
 

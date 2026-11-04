@@ -21,15 +21,15 @@
  *
  * Écarter le genre « personne » ne suffit pas : des organisations portent le nom de leur
  * propriétaire, lui-même sur la liste (bureaux de change, relevé du 04.11.2026). Un nom
- * d'organisation qui contient le nom d'une personne de la liste, ou un titre personnel, est retiré ;
- * si c'est son nom principal, l'entrée entière est écartée et comptée (`carriesPersonName`). Même
- * raison que les entreprises individuelles de la FOSC. Une institution d'État « named after » un
- * personnage reste une organisation : comptée, gardée.
+ * d'organisation qui porte un nom de personne est retiré ; si c'est son nom principal, l'entrée
+ * entière est écartée et comptée (`carriesPersonName`, liste relue dans `reviewed.ts`). Même raison
+ * que les entreprises individuelles de la FOSC. Ce contrôle ne voit pas tout : `SOURCES.md`, limites.
  *
  * Les messages d'erreur ne citent jamais un extrait du fichier : les journaux GitHub d'un dépôt
  * public sont lisibles par tous.
  */
 import type { SanctionEntry, SanctionNameType } from "../../src/lib/sanctions.js";
+import { isReviewedAsPerson, isReviewedNotAPerson } from "./reviewed.js";
 
 export class SesamXmlError extends Error {
   constructor(reason: string) {
@@ -117,14 +117,25 @@ export interface ParsedSesam {
   vesselsNameEqualsPerson: number;
   organisationNamesHonouringAPersonKept: number;
   vesselsWithoutImo: number;
-  personNameKeys: ReadonlySet<string>;
+  organisationNamesKeptAfterReview: number;
+  personIndex: PersonNameIndex;
 }
+
+/** Index en mémoire des noms de personnes, jamais écrit. */
+export interface PersonNameIndex {
+  names: Set<string>;
+  pairs: Set<string>;
+  given: Set<string>;
+  family: Set<string>;
+}
+
+export const emptyPersonIndex = (): PersonNameIndex => ({ names: new Set(), pairs: new Set(), given: new Set(), family: new Set() });
 
 /** Nom complet : parties dans l'ordre de leur attribut `order`. */
 const wholeName = (parts: NamePart[]): string =>
   [...parts].sort((a, b) => a.order - b.order).map((p) => p.value).join(" ").replace(/\s+/gu, " ").trim();
 
-/** Mots d'un nom, sans casse ni ponctuation : « Khairullah-Haji » et « khairullah haji » se valent. */
+/** Mots d'un nom, sans casse ni ponctuation : « Exemple-Nom » et « exemple nom » se valent. */
 const personTokens = (value: string): string[] =>
   value.normalize("NFKC").toLocaleLowerCase("en").split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 
@@ -135,35 +146,74 @@ export const personCheckKey = (value: string): string => personTokens(value).joi
 const PERSONAL_TITLES = new Set(["haji", "hajji", "hadji", "alhaj", "maulawi", "mawlawi", "mawlavi", "maulavi", "mullah", "mulla", "sheikh", "shaykh"]);
 const MIN_INNER_NAME_CHARS = 8;
 const MAX_INNER_NAME_WORDS = 8;
-const HONOURS_A_PERSON = /\bnamed after\b/i;
+const HONOURS_A_PERSON = /(^|[^\p{L}])(named after|имени|им\.)/iu;
+// Mots qui ne désignent personne à eux seuls : un couple qui en contient un ne prouve rien
+// (« al islam », « mouvement du »). Mesure du 04.11.2026 : `SOURCES.md`.
+const PARTICLES = new Set(["al", "el", "ul", "ad", "ar", "as", "bin", "ibn", "abu", "abd", "de", "du", "da", "di", "la", "le", "van", "von", "ben", "the", "of", "and", "mr", "dr", "wa"]);
+const MIN_GIVEN_FAMILY_CHARS = 3;
 
 /**
- * Le nom contient-il un nom de personne ? Nom entier identique, suite d'au moins deux mots égale au
- * nom d'une personne de la liste (8 caractères au moins, pour ne pas écarter sur deux mots courts),
- * ou titre personnel. Jamais d'après `name-part-type`, qui étiquette à tort des organisations.
+ * Le nom porte-t-il un nom de personne ? Dans l'ordre :
+ *   - un titre personnel ;
+ *   - le nom entier d'une personne de la liste, ou une suite de mots qui l'égale ;
+ *   - deux mots voisins tirés d'un même nom de personne, sans particule, 8 caractères au moins ;
+ *   - un prénom suivi d'un nom de famille, l'un et l'autre connus sur la liste, même sans que cette
+ *     personne-là y figure (« Prénom Nom Foundation »).
+ * Une correspondance de trop retire un nom ; `reviewed.ts` garde ce qui a été relu.
+ * Jamais d'après `name-part-type`, qui étiquette à tort des organisations.
  */
-export function carriesPersonName(value: string, personNames: ReadonlySet<string>): boolean {
+export function carriesPersonName(value: string, persons: PersonNameIndex): boolean {
   const tokens = personTokens(value);
   if (tokens.some((t) => PERSONAL_TITLES.has(t))) return true;
-  if (personNames.has(tokens.join(" "))) return true;
+  if (persons.names.has(tokens.join(" "))) return true;
   for (let start = 0; start < tokens.length; start++) {
     for (let words = 2; words <= MAX_INNER_NAME_WORDS && start + words <= tokens.length; words++) {
       const inner = tokens.slice(start, start + words).join(" ");
-      if (inner.length >= MIN_INNER_NAME_CHARS && personNames.has(inner)) return true;
+      if (inner.length >= MIN_INNER_NAME_CHARS && persons.names.has(inner)) return true;
+    }
+    if (start + 1 < tokens.length) {
+      const pair = `${tokens[start]} ${tokens[start + 1]}`;
+      if (persons.pairs.has(pair)) return true;
+      if (persons.given.has(tokens[start]) && persons.family.has(tokens[start + 1])) return true;
     }
   }
   return false;
 }
 
-function personKeys(names: RawName[], into: Set<string>): void {
+/** Vrai pour une organisation dont ce nom doit sortir : la relecture l'emporte sur la règle. */
+export function organisationNameIsWithheld(value: string, persons: PersonNameIndex): boolean {
+  const key = personCheckKey(value);
+  if (isReviewedAsPerson(key)) return true;
+  if (isReviewedNotAPerson(key)) return false;
+  return carriesPersonName(value, persons);
+}
+
+function addPersonText(text: string, into: PersonNameIndex): void {
+  const tokens = personTokens(text);
+  if (tokens.length === 0) return;
+  into.names.add(tokens.join(" "));
+  for (let i = 0; i + 1 < tokens.length; i++) {
+    const pair = `${tokens[i]} ${tokens[i + 1]}`;
+    if (!PARTICLES.has(tokens[i]) && !PARTICLES.has(tokens[i + 1]) && pair.length >= MIN_INNER_NAME_CHARS) into.pairs.add(pair);
+  }
+}
+
+const usefulNameWords = (text: string): string[] =>
+  personTokens(text).filter((t) => t.length >= MIN_GIVEN_FAMILY_CHARS && !PARTICLES.has(t));
+
+function personKeys(names: RawName[], into: PersonNameIndex): void {
   for (const name of names) {
-    const whole = wholeName(name.parts);
-    if (whole) into.add(personCheckKey(whole));
+    addPersonText(wholeName(name.parts), into);
+    for (const part of name.parts) {
+      if (name.parts.length === 1) for (const variant of part.variants) addPersonText(variant, into);
+      if (part.type === "given-name" || part.type === "further-given-name") for (const w of usefulNameWords(part.value)) into.given.add(w);
+      if (part.type === "family-name" || part.type === "father-name") for (const w of usefulNameWords(part.value)) into.family.add(w);
+    }
     const family = name.parts.find((p) => p.type === "family-name")?.value;
     const given = name.parts.find((p) => p.type === "given-name")?.value;
     if (family && given) {
-      into.add(personCheckKey(`${given} ${family}`));
-      into.add(personCheckKey(`${family} ${given}`));
+      into.names.add(personCheckKey(`${given} ${family}`));
+      into.names.add(personCheckKey(`${family} ${given}`));
     }
   }
 }
@@ -206,6 +256,8 @@ export function parseSesamXml(xml: string): ParsedSesam {
   let target: RawTarget | null = null;
   let name: RawName | null = null;
   let part: NamePart | null = null;
+  let nameDepth = -1;
+  let partDepth = -1;
   let capture: { depth: number; text: string; onDone: (text: string) => void } | null = null;
 
   const n = xml.length;
@@ -248,9 +300,10 @@ export function parseSesamXml(xml: string): ParsedSesam {
         capture.onDone(decodeEntities(capture.text));
         capture = null;
       }
-      if (stack.length === 1) { programme = null; place = null; target = null; }
-      if (part && closing === "name-part") part = null;
-      if (name && closing === "name") name = null;
+      if (stack.length === 1) { programme = null; place = null; target = null; name = null; part = null; nameDepth = -1; partDepth = -1; }
+      // Fermeture par profondeur, jamais par nom : un élément homonyme ailleurs ne ferme rien.
+      if (part && stack.length === partDepth) { part = null; partDepth = -1; }
+      if (name && stack.length === nameDepth) { name = null; nameDepth = -1; }
       continue;
     }
 
@@ -315,23 +368,26 @@ export function parseSesamXml(xml: string): ParsedSesam {
     } else if (target && depth >= 3 && (stack[2] === "individual" || stack[2] === "entity" || stack[2] === "object")) {
       // Chemin complet sous la fiche, l'historique (`modification/…`) n'y passe jamais : `stack[2]`.
       const current = target;
-      const below = stack.slice(3);
+      // Chemin relatif comparé en entier : `relation/name` ou `identity/remark/name` ne sont pas des noms.
+      const below = stack.slice(3).join("/");
       if (depth === 3 && tag === "other-information" && stack[2] === "object") {
         wantText = (text) => { current.otherInformation.push(text); };
-      } else if (below.length === 1 && below[0] === "identity" && tag === "name") {
+      } else if (below === "identity" && tag === "name" && !selfClosing) {
         name = { type: attributes(attrText)["name-type"] ?? "", parts: [] };
+        nameDepth = depth;
         current.names.push(name);
-      } else if (below.length === 1 && below[0] === "identity" && tag === "address" && stack[2] === "entity") {
+      } else if (below === "identity" && tag === "address" && stack[2] === "entity") {
         const placeId = attributes(attrText)["place-id"];
         if (placeId) current.placeIds.push(placeId);
-      } else if (name && below.length === 2 && below[1] === "name" && tag === "name-part") {
+      } else if (name && below === "identity/name" && tag === "name-part" && !selfClosing) {
         const a = attributes(attrText);
         part = { order: Number.parseInt(a.order ?? "0", 10) || 0, type: a["name-part-type"] ?? "", value: "", variants: [] };
+        partDepth = depth;
         name.parts.push(part);
-      } else if (part && below.length === 3 && below[2] === "name-part" && tag === "value") {
+      } else if (part && below === "identity/name/name-part" && tag === "value") {
         const currentPart = part;
         wantText = (text) => { currentPart.value = text.replace(/\s+/gu, " ").trim(); };
-      } else if (part && below.length === 3 && below[2] === "name-part" && tag === "spelling-variant") {
+      } else if (part && below === "identity/name/name-part" && tag === "spelling-variant") {
         const currentPart = part;
         wantText = (text) => { currentPart.variants.push(text); };
       }
@@ -350,7 +406,7 @@ export function parseSesamXml(xml: string): ParsedSesam {
   if (!listDate || !ISO_DATE.test(listDate)) throw new SesamXmlError("date de liste illisible");
 
   // Les noms de TOUTES les personnes, radiées comprises, servent au contrôle ci-dessous.
-  const personNames = new Set<string>();
+  const persons = emptyPersonIndex();
   const sourceEntries = { natural_persons: 0, organisations: 0, vessels: 0 };
   const excluded = { natural_persons: 0, delisted_organisations: 0, delisted_vessels: 0, organisations_primary_name_carries_person: 0 };
   const candidates: RawTarget[] = [];
@@ -363,7 +419,7 @@ export function parseSesamXml(xml: string): ParsedSesam {
     if (kind === "individual") {
       sourceEntries.natural_persons++;
       excluded.natural_persons++;
-      personKeys(t.names, personNames);
+      personKeys(t.names, persons);
       continue;
     }
     if (kind === "object" && t.objectType !== "vessel") throw new SesamXmlError("genre d'objet inconnu");
@@ -384,6 +440,7 @@ export function parseSesamXml(xml: string): ParsedSesam {
   const entries: SanctionEntry[] = [];
   let namesRemoved = 0;
   let namesHonouring = 0;
+  let namesKeptAfterReview = 0;
   let vesselsNameEqualsPerson = 0;
   let vesselsWithoutImo = 0;
   for (const t of candidates) {
@@ -393,16 +450,17 @@ export function parseSesamXml(xml: string): ParsedSesam {
     if (isVessel) {
       // Le genre de l'entrée fait foi : un bateau peut porter le nom d'une personne, et ce nom est
       // son seul identifiant avec l'IMO. Compté, jamais écarté.
-      if (names.some((nm) => personNames.has(personCheckKey(nm.value)))) vesselsNameEqualsPerson++;
+      if (names.some((nm) => persons.names.has(personCheckKey(nm.value)))) vesselsNameEqualsPerson++;
     } else {
-      if (names.some((nm) => nm.type === "primary" && carriesPersonName(nm.value, personNames))) {
+      if (names.some((nm) => nm.type === "primary" && organisationNameIsWithheld(nm.value, persons))) {
         excluded.organisations_primary_name_carries_person++;
         continue;
       }
-      const kept = names.filter((nm) => !carriesPersonName(nm.value, personNames));
+      const kept = names.filter((nm) => !organisationNameIsWithheld(nm.value, persons));
       namesRemoved += names.length - kept.length;
       names = kept;
       namesHonouring += names.filter((nm) => HONOURS_A_PERSON.test(nm.value)).length;
+      namesKeptAfterReview += names.filter((nm) => isReviewedNotAPerson(personCheckKey(nm.value))).length;
     }
     const programmesOfEntry = new Map<string, { id: string; name: string; origin: string }>();
     for (const setId of t.setIds) {
@@ -437,6 +495,7 @@ export function parseSesamXml(xml: string): ParsedSesam {
     vesselsNameEqualsPerson,
     organisationNamesHonouringAPersonKept: namesHonouring,
     vesselsWithoutImo,
-    personNameKeys: personNames,
+    organisationNamesKeptAfterReview: namesKeptAfterReview,
+    personIndex: persons,
   };
 }

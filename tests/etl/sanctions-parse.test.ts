@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { buildSanctionsDocument, checkSanctionsDocument, SanctionsControlError } from "../../etl/sanctions/build.js";
-import { carriesPersonName, parseSesamXml, personCheckKey, SesamXmlError } from "../../etl/sanctions/parse.js";
+import { carriesPersonName, emptyPersonIndex, organisationNameIsWithheld, parseSesamXml, personCheckKey, SesamXmlError, type PersonNameIndex } from "../../etl/sanctions/parse.js";
+import { reviewHash } from "../../etl/sanctions/reviewed.js";
 
 const xml = readFileSync(new URL("../../etl/sanctions/fixtures/sesam-sample.xml", import.meta.url), "utf8");
 const source = { sha256: "a".repeat(64), bytes: xml.length, collectedAt: "2026-11-04T12:00:00.000Z" };
@@ -76,19 +77,46 @@ describe("lecture du fichier SESAM (fictif)", () => {
 });
 
 describe("nom qui porte une personne", () => {
-  const persons = new Set([personCheckKey("Pavel Temoinov"), personCheckKey("Ali Bo"), personCheckKey("Solo")]);
+  const persons: PersonNameIndex = {
+    ...emptyPersonIndex(),
+    names: new Set([personCheckKey("Pavel Temoinov"), personCheckKey("Ali Bo"), personCheckKey("Solo")]),
+    pairs: new Set(["ivanovich temoinchuk"]),
+    given: new Set(["maria"]),
+    family: new Set(["exemplova"]),
+  };
   it.each([
     ["Pavel Temoinov", true],
     ["PAVEL-TEMOINOV Trading", true],
     ["Network of Pavel Temoinov", true],
     ["Solo", true],
     ["Haji Exemple Hawala", true],
+    ["Ivanovich Temoinchuk Hawala", true], // fragment contigu d'un nom plus long
+    ["Maria Exemplova Foundation", true], // prénom et nom connus, même si ce couple n'est pas sur la liste
+    ["Exemplova Maria Foundation", false],
     ["Ali Bo Trading", false], // moins de huit caractères à l'intérieur d'un nom : trop court pour conclure
     ["Solo Trading", false],
     ["Temoinov Bank", false],
     ["Plant named after A. B. Exemplov", false],
   ])("%s → %s", (value, expected) => {
     expect(carriesPersonName(value, persons)).toBe(expected);
+  });
+  it("un couple qui contient une particule ne prouve rien : « al islam » n'entre pas dans l'index", () => {
+    const body = `<swiss-sanctions-list list-type="whole-list" date="2026-11-04"><sanctions-program ssid="20"><program-key lang="eng">E</program-key><sanctions-set ssid="1" lang="eng">x</sanctions-set><origin>EU</origin></sanctions-program><target ssid="1"><individual><identity ssid="2" main="true"><name ssid="3" name-type="primary-name"><name-part order="1" name-part-type="whole-name"><value>Saif Al Islam Exemple</value></name-part></name></identity></individual><modification modification-type="listed"/><sanctions-set-id>1</sanctions-set-id></target></swiss-sanctions-list>`;
+    const index = parseSesamXml(body).personIndex;
+    expect(index.pairs.has("al islam")).toBe(false);
+    expect(index.pairs.has("saif al")).toBe(false);
+    expect(index.pairs.has("islam exemple")).toBe(true);
+  });
+  it("la relecture l'emporte sur la règle, et un nom absent des listes suit la règle", () => {
+    expect(organisationNameIsWithheld("Pavel Temoinov Trading", persons)).toBe(true);
+    expect(organisationNameIsWithheld("Exemple Neutre Trading", persons)).toBe(false);
+  });
+  it("les listes relues ne contiennent que des empreintes, jamais un nom", () => {
+    const source = readFileSync(new URL("../../etl/sanctions/reviewed.ts", import.meta.url), "utf8");
+    const quoted = [...source.matchAll(/^\s*"([^"]+)",/gm)].map((m) => m[1]);
+    expect(quoted.length).toBeGreaterThan(0);
+    for (const value of quoted) expect(value).toMatch(/^[0-9a-f]{16}$/);
+    expect(reviewHash("exemple")).toMatch(/^[0-9a-f]{16}$/);
   });
 });
 
