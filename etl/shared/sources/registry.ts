@@ -17,6 +17,7 @@ import { SWISSTOPO_LOCALITIES_STAC_ITEMS_URL } from "../../localities/sources.js
 import { SWISSTOPO_STREETS_STAC_ITEMS_URL } from "../../streets/sources.js";
 import { BFE_PV_CSV_URL } from "../../bfe/sources.js";
 import { FOSC_PUBLICATIONS_URL } from "../../fosc/sources.js";
+import { SESAM_XML_URL } from "../../sanctions/sources.js";
 // Adresses BAZG : dérivées de la même déclaration que la collecte (etl/tares/sources.ts,
 // BAZG_SOURCES), jamais recopiées en dur ici (tâche osd.socle).
 import { BAZG_SOURCES } from "../../tares/sources.js";
@@ -94,6 +95,13 @@ const BFE_OPEN: SourceLicence = {
 // en particulier au point 3.3. Conditions acceptées pour le service sur décision de Claude-Alain
 // du 16.10.2026 (d3 = A, F8 accordé), à renouveler tous les 90 jours (CG 1.2 al. 1, contrôlé par
 // la collecte, `etl/fosc/sources.ts`). Détail : `etl/fosc/SOURCES.md`.
+const SECO_SESAM: SourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-SECO-SESAM-WRITTEN-REPLY",
+  authority: "State Secretariat for Economic Affairs SECO, sanctions sector, written reply of 04.11.2026 (reuse in a file for professionals and in a lookup service authorised, subject to applicable law)",
+  date: "2026-11-04",
+  jurisdiction: "Switzerland",
+};
+
 const SECO_FOSC: SourceLicence = {
   reference: "PUBLIC-OFFICIAL-SOURCE-SECO-FOSC-TERMS",
   authority: "State Secretariat for Economic Affairs SECO, Official Gazettes Portal terms of use of 07.06.2024 (point 3.3: source attribution, not an official publication, data protection, publication periods)",
@@ -161,6 +169,11 @@ export const SOURCES: readonly SourceDescriptor[] = [
   // ne pas l'ajouter à PRODUCT_SOURCES sans nouvelle décision (rien n'est publié à ce jour).
   { id: "seco.fosc_hr", institution: "SECO", url: FOSC_PUBLICATIONS_URL, licence: SECO_FOSC,
     description: "SECO — FOSC, avis du registre du commerce (rubrique HR) et, pour les sociétés seulement, faillites (KK), concordats (NA) et appels aux créanciers (LS, SR), API publique du Portail des feuilles officielles, collecte quotidienne." },
+  // Sans canari (lot sanctions, 04.11.2026) : la collecte (`etl/sanctions/collect.ts`) contrôle
+  // elle-même la forme à chaque passage, et le fichier change de date chaque jour. Hors de toute
+  // archive vendue : ne pas l'ajouter à PRODUCT_SOURCES sans nouvelle décision (F2).
+  { id: "seco.sesam_sanctions", institution: "SECO", url: SESAM_XML_URL, licence: SECO_SESAM,
+    description: "SECO — liste des sanctions (SESAM), fichier XML officiel ; organisations et bateaux seulement, personnes écartées avant toute écriture, collecte quotidienne." },
 ];
 
 const PAR_ID = new Map(SOURCES.map(s => [s.id, s]));

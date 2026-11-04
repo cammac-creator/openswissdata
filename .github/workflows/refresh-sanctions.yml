@@ -1,0 +1,74 @@
+name: Collecte de la liste des sanctions (SECO, SESAM)
+#
+# Décision de Claude-Alain du 04.11.2026 : organisations et bateaux seulement. Détail :
+# etl/sanctions/SOURCES.md.
+#
+# Ce workflow ne commite rien et ne crée aucun artefact : le fichier officiel contient des
+# personnes et reste en mémoire ; le document réduit vit dans le bucket R2 PRIVÉ. Un fichier
+# commité garderait à vie, dans l'historique public, chaque organisation radiée ensuite. Le
+# journal n'affiche que des nombres, des dates et l'empreinte du fichier.
+#
+# Le déclenchement manuel démarre en simulation (rien d'écrit, aucun secret R2 transmis).
+# `accepter_baisse` ne sert qu'à adopter une baisse de volume examinée.
+on:
+  schedule:
+    # Deux créneaux, minutes non rondes : GitHub omet ou retarde beaucoup de passages planifiés, et
+    # une radiation doit quitter le service sans attendre. La liste porte la date de sa génération.
+    - cron: "37 8,20 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Simulation : lire la source sans rien écrire dans R2"
+        type: boolean
+        default: true
+      accepter_baisse:
+        description: "Adopter une baisse de volume de plus de 15 %, après examen"
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: sanctions-production
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    # Secrets réservés à la branche principale (tâche osd.T17, 07.10.2026).
+    environment: collecte
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Vérifier avant de lire la source (dont le test de fuite)
+        run: |
+          npm run typecheck
+          npx vitest run tests/etl/sanctions-parse.test.ts tests/etl/sanctions-fuite.test.ts tests/etl/sources-registry-sanctions.test.ts tests/lib/sanctions.test.ts
+      - name: Simulation (déclenchement manuel)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: npm run sync:sanctions
+      - name: Collecter, contrôler et écrire le document réduit (R2 privé)
+        if: ${{ github.event_name == 'schedule' || !inputs.dry_run }}
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          ACCEPTER_BAISSE: ${{ github.event_name == 'workflow_dispatch' && inputs.accepter_baisse && '--accept-drop' || '' }}
+        run: npm run sync:sanctions -- --write-r2 $ACCEPTER_BAISSE
+      - name: Prévenir par mail d'un changement d'état
+        if: ${{ !cancelled() }}
+        env:
+          ALERT_CURRENT: ${{ job.status }}
+          ALERT_TASK: Collecte de la liste des sanctions
+          ALERT_WORKFLOW: refresh-sanctions.yml
+          ALERT_DETAIL: La collecte de la liste des sanctions du SECO n'a pas abouti (installation, contrôles, source, forme du fichier ou baisse de volume) ; le document servi reste le précédent et passe « périmé » au bout de trois jours.
+          GITHUB_TOKEN: ${{ github.token }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'contact@openswissdata.com' }}
+        run: node scripts/alert-email.mjs

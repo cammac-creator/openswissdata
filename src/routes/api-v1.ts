@@ -19,6 +19,7 @@ import { companyCheck } from "../mcp/company/check.js";
 import { COMPANY_SOURCES, type CompanySourceId } from "../mcp/company/sources.js";
 import { getPublicSource, PUBLIC_SOURCES, type PublicSourceEntry } from "../lib/public-sources.js";
 import { datasetCatalogueEntry, filterDatasetRows, licenceRequiresAttribution, paginateDatasetRows, parseDatasetFilters, parseDatasetPagination } from "../lib/dataset-query.js";
+import { exactSanctionKey, getSanctions, isSanctionsListCurrent, SANCTIONS_MAX_AGE_DAYS, SANCTIONS_OFFICIAL_SEARCH_URL, SANCTIONS_SOURCE_ID, type SanctionEntry, type SanctionNameType } from "../lib/sanctions.js";
 
 // Les cinq sources que `company_check` cite toujours (`src/mcp/company/sources.ts`), dans l'ordre
 // stable de déclaration de `COMPANY_SOURCES` — toujours les mêmes, que la fiche les ait ou non
@@ -199,6 +200,77 @@ apiV1Route.get("/datasets/:id", (c) => {
   });
 });
 
+// --- GET /api/v1/sanctions, /api/v1/sanctions/search ----------------------------------
+// Liste du SECO, organisations et bateaux seulement (décision de Claude-Alain du 04.11.2026).
+// Le nom cherché reste dans le paramètre : `trackApiRequest` ne mesure que le chemin, et la
+// réponse n'est jamais mise en cache ni ne recopie la demande. Aucun mot de conformité ici :
+// une promesse de contrôle est F4.
+const SANCTIONS_NOTICE = {
+  coverage: "Organisations and vessels on the SECO sanctions list only. Natural persons are not covered by this service, and neither are organisations whose name carries that of a person.",
+  no_match: "No exact match does not mean that a name is not sanctioned: matching is on the exact characters, including case and punctuation.",
+  not_official: "Not an official publication. The official list is the one published by SECO.",
+} as const;
+const MAX_SANCTION_NAME_CHARS = 300;
+
+function sanctionsUnavailable(c: Context) {
+  c.header("Cache-Control", "no-store");
+  return c.json({ error: "sanctions_unavailable", notice: SANCTIONS_NOTICE, official_search_url: SANCTIONS_OFFICIAL_SEARCH_URL }, 503);
+}
+
+function sanctionResult(entry: SanctionEntry, matchedOn: SanctionNameType | "imo") {
+  return { ...entry, matched_on: matchedOn };
+}
+
+apiV1Route.get("/sanctions", (c) => {
+  const limited = enforceRateLimit(c, DATA_LIMIT);
+  if (limited) return limited;
+  const loaded = getSanctions();
+  if (!loaded) return sanctionsUnavailable(c);
+  const { document: doc } = loaded;
+  c.header("Cache-Control", "public, max-age=300");
+  return c.json({
+    status: isSanctionsListCurrent(doc.list_date, Date.now()) ? "current" : "out_of_date",
+    max_age_days: SANCTIONS_MAX_AGE_DAYS,
+    list: { date: doc.list_date, sha256: doc.source_sha256, bytes: doc.source_bytes, collected_at: doc.collected_at },
+    entries: doc.counts,
+    exclusion_proof: doc.exclusion_proof,
+    notice: SANCTIONS_NOTICE,
+    official_search_url: SANCTIONS_OFFICIAL_SEARCH_URL,
+    sources: [sourceRef(SANCTIONS_SOURCE_ID)],
+  });
+});
+
+// Exactement un des deux paramètres. `name` : clé exacte, jamais de rapprochement approché.
+apiV1Route.get("/sanctions/search", (c) => {
+  const limited = enforceRateLimit(c, DATA_LIMIT);
+  if (limited) return limited;
+  c.header("Cache-Control", "no-store");
+  const name = c.req.query("name");
+  const imo = c.req.query("imo");
+  if ((name ? 1 : 0) + (imo ? 1 : 0) !== 1) return c.json({ error: "invalid_query" }, 400);
+  if (name && name.length > MAX_SANCTION_NAME_CHARS) return c.json({ error: "invalid_query" }, 400);
+  if (imo && !/^\d{7}$/.test(imo)) return c.json({ error: "invalid_query" }, 400);
+  const loaded = getSanctions();
+  if (!loaded) return sanctionsUnavailable(c);
+  const { document: doc } = loaded;
+  // Jamais une liste périmée présentée comme actuelle : ni résultat, ni absence de résultat.
+  if (!isSanctionsListCurrent(doc.list_date, Date.now())) {
+    return c.json({ error: "sanctions_list_out_of_date", list_date: doc.list_date, notice: SANCTIONS_NOTICE, official_search_url: SANCTIONS_OFFICIAL_SEARCH_URL }, 503);
+  }
+  const results = imo
+    ? (loaded.byImo.get(imo) ?? []).map((entry) => sanctionResult(entry, "imo"))
+    : (loaded.byName.get(exactSanctionKey(name ?? "")) ?? []).map((hit) => sanctionResult(hit.entry, hit.type));
+  return c.json({
+    match: "exact",
+    result_count: results.length,
+    results,
+    list: { date: doc.list_date, sha256: doc.source_sha256 },
+    notice: SANCTIONS_NOTICE,
+    official_search_url: SANCTIONS_OFFICIAL_SEARCH_URL,
+    sources: [sourceRef(SANCTIONS_SOURCE_ID)],
+  });
+});
+
 // --- GET /api/v1/sources -------------------------------------------------------------
 // Registre public des sources servies par l'API et le MCP (sans la référence de permission
 // TARES, qui porte le nom d'une personne : voir `src/lib/public-sources.ts`).
@@ -216,6 +288,7 @@ apiV1Route.get("/sources", (c) => {
       : s.id === "swisstopo.streets" ? (streetsLoaded?.edition ?? null)
       : s.id === "finma.uid_csv" ? finmaVersion
       : s.id === "bfe.pv_one_time_remuneration" ? (bfePvLoaded?.edition ?? null)
+      : s.id === SANCTIONS_SOURCE_ID ? (getSanctions()?.document.list_date ?? null)
       : null,
   }));
   // Champ SÉPARÉ (jamais fusionné dans `sources`, relecture adverse du 07.10.2026) : un jeu

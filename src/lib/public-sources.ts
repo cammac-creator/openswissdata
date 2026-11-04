@@ -92,6 +92,13 @@ const BFE_LICENCE: PublicSourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// Copie littérale de la licence `SECO_SESAM` du registre unique (lot sanctions, 04.11.2026).
+const SECO_SESAM_LICENCE: PublicSourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-SECO-SESAM-WRITTEN-REPLY",
+  authority: "State Secretariat for Economic Affairs SECO, sanctions sector, written reply of 04.11.2026 (reuse in a file for professionals and in a lookup service authorised, subject to applicable law)",
+  jurisdiction: "Switzerland",
+};
+
 function fromCompanySources(id: CompanySourceId, institution: string, description: string, licence: PublicSourceLicence): PublicSourceEntry {
   return { id, institution, url: COMPANY_SOURCES[id].url, licence, description };
 }
@@ -132,6 +139,7 @@ export const PUBLIC_SOURCES: readonly PublicSourceEntry[] = [
 
   // BFE (tâche B5) — copie littérale de `BFE_PV_CSV_URL` (`etl/bfe/sources.ts`), jamais
   // redupliquée via `COMPANY_SOURCES` : `company_check` ne cite pas cette source.
+  { id: "seco.sesam_sanctions", institution: "SECO", url: "https://www.sesam.search.admin.ch/sesam-search-web/pages/downloadXmlGesamtliste.xhtml?lang=fr&action=downloadXmlGesamtlisteAction", licence: SECO_SESAM_LICENCE, description: "SECO — sanctions list (SESAM), official XML file; organisations and vessels only, natural persons removed before any write, daily collection." },
   { id: "bfe.pv_one_time_remuneration", institution: "BFE", url: "https://www.uvek-gis.admin.ch/BFE/ogd/84/ogd84_einmalverguetung_fuer_photovoltaikanlagen.csv", licence: BFE_LICENCE, description: "BFE (Swiss Federal Office of Energy) — one-time remuneration for photovoltaic installations, by canton and year, annual collection" },
 ];
 
