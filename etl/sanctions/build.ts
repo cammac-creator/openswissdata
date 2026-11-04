@@ -5,8 +5,9 @@
  * document rendu par `buildSanctionsDocument`.
  *
  * Le contrôle relit le document FINI, pas l'intention du code : une clé hors de la liste blanche,
- * un genre inconnu ou un nom d'organisation pris par la règle des personnes arrêtent tout. La preuve
- * publiée vient de ce comptage ; elle ne dit rien des noms que la règle ne voit pas (`SOURCES.md`).
+ * un genre inconnu ou un nom d'organisation pris par la règle des personnes et non gardé après
+ * relecture arrêtent tout. Les noms gardés après relecture sont comptés à part. La preuve publiée
+ * vient de ce comptage ; elle ne dit rien des noms que la règle ne voit pas (`SOURCES.md`).
  */
 import {
   SANCTIONS_SCHEMA,
@@ -82,7 +83,7 @@ export function buildSanctionsDocument(
       natural_persons_served: parsed.entries.length - organisations - vessels,
       relations_served: parsed.entries.filter((e) => "relation" in e).length,
       free_text_fields_served: parsed.entries.filter((e) => "justification" in e || "other_information" in e).length,
-      organisation_names_caught_by_person_rule_served: organisationNamesCarryingPerson,
+      organisation_names_caught_and_not_reviewed_served: organisationNamesCarryingPerson,
     },
     entries: parsed.entries,
   };

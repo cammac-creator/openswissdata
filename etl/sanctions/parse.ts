@@ -307,6 +307,9 @@ export function parseSesamXml(xml: string): ParsedSesam {
       continue;
     }
 
+    // Un champ lu n'a jamais d'enfant (aucun dans le fichier du 04.11.2026) : son texte ne doit pas
+    // se mélanger à celui d'un élément inconnu.
+    if (capture) throw new SesamXmlError("élément inattendu dans un champ lu");
     const selfClosing = inner.endsWith("/");
     const body = selfClosing ? inner.slice(0, -1) : inner;
     const nameMatch = /^([A-Za-z_][\w.\-:]*)/.exec(body);
@@ -372,10 +375,14 @@ export function parseSesamXml(xml: string): ParsedSesam {
       const below = stack.slice(3).join("/");
       if (depth === 3 && tag === "other-information" && stack[2] === "object") {
         wantText = (text) => { current.otherInformation.push(text); };
-      } else if (below === "identity" && tag === "name" && !selfClosing) {
-        name = { type: attributes(attrText)["name-type"] ?? "", parts: [] };
-        nameDepth = depth;
-        current.names.push(name);
+      } else if (below === "identity" && tag === "name") {
+        const type = attributes(attrText)["name-type"] ?? "";
+        if (stack[2] !== "individual" && !NAME_TYPES[type]) throw new SesamXmlError("type de nom inconnu");
+        if (!selfClosing) {
+          name = { type, parts: [] };
+          nameDepth = depth;
+          current.names.push(name);
+        }
       } else if (below === "identity" && tag === "address" && stack[2] === "entity") {
         const placeId = attributes(attrText)["place-id"];
         if (placeId) current.placeIds.push(placeId);

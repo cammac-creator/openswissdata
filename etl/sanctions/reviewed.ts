@@ -23,10 +23,9 @@ const REVIEWED_NOT_A_PERSON: ReadonlySet<string> = new Set<string>([
 
 /** Portent un nom de personne que la règle ne voit pas. Retirés. */
 const REVIEWED_AS_PERSON: ReadonlySet<string> = new Set<string>([
-  "e174ff7209696763", // 80387 : autre nom, prénom et nom d'un propriétaire
+  "e174ff7209696763", // 80387 : autre nom, se lit comme un prénom et un nom
   "ec489507ac33e0f8", // 87380 : autre nom, porte une personne
   "ea58e2249ef26835", // 87380 : autre nom, porte une personne
-  "bf6eed696327019f", // 89298 : autre nom, nom de famille du fondateur
 ]);
 
 export const isReviewedNotAPerson = (key: string): boolean => REVIEWED_NOT_A_PERSON.has(reviewHash(key));

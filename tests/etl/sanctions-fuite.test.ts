@@ -79,7 +79,7 @@ describe("liste des sanctions : aucune fuite vers le document écrit", () => {
       natural_persons_served: 0,
       relations_served: 0,
       free_text_fields_served: 0,
-      organisation_names_caught_by_person_rule_served: 0,
+      organisation_names_caught_and_not_reviewed_served: 0,
     });
   });
 });

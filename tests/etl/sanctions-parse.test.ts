@@ -66,6 +66,14 @@ describe("lecture du fichier SESAM (fictif)", () => {
     expect(() => parseSesamXml(altered)).toThrow(SesamXmlError);
   });
 
+  it("un champ lu qui contient un élément arrête la lecture, au lieu d'en capter le texte", () => {
+    expect(() => parseSesamXml(xml.replace("<value>Old Acme</value>", "<value>Old <b>TEMOIN</b> Acme</value>"))).toThrow(SesamXmlError);
+  });
+
+  it("un nom vide de type inconnu sur une organisation arrête la lecture", () => {
+    expect(() => parseSesamXml(xml.replace('<name ssid="2003"', '<name ssid="2099" name-type="inconnu"/><name ssid="2003"'))).toThrow(SesamXmlError);
+  });
+
   it("un message d'erreur ne cite jamais un extrait du fichier", () => {
     try {
       parseSesamXml(xml.replace('object-type="vessel"', 'object-type="TEMOIN"'));
@@ -100,12 +108,12 @@ describe("nom qui porte une personne", () => {
   ])("%s → %s", (value, expected) => {
     expect(carriesPersonName(value, persons)).toBe(expected);
   });
-  it("un couple qui contient une particule ne prouve rien : « al islam » n'entre pas dans l'index", () => {
-    const body = `<swiss-sanctions-list list-type="whole-list" date="2026-11-04"><sanctions-program ssid="20"><program-key lang="eng">E</program-key><sanctions-set ssid="1" lang="eng">x</sanctions-set><origin>EU</origin></sanctions-program><target ssid="1"><individual><identity ssid="2" main="true"><name ssid="3" name-type="primary-name"><name-part order="1" name-part-type="whole-name"><value>Saif Al Islam Exemple</value></name-part></name></identity></individual><modification modification-type="listed"/><sanctions-set-id>1</sanctions-set-id></target></swiss-sanctions-list>`;
+  it("un couple qui contient une particule ne prouve rien : il n'entre pas dans l'index", () => {
+    const body = `<swiss-sanctions-list list-type="whole-list" date="2026-11-04"><sanctions-program ssid="20"><program-key lang="eng">E</program-key><sanctions-set ssid="1" lang="eng">x</sanctions-set><origin>EU</origin></sanctions-program><target ssid="1"><individual><identity ssid="2" main="true"><name ssid="3" name-type="primary-name"><name-part order="1" name-part-type="whole-name"><value>Zorko Al Brino Exemple</value></name-part></name></identity></individual><modification modification-type="listed"/><sanctions-set-id>1</sanctions-set-id></target></swiss-sanctions-list>`;
     const index = parseSesamXml(body).personIndex;
-    expect(index.pairs.has("al islam")).toBe(false);
-    expect(index.pairs.has("saif al")).toBe(false);
-    expect(index.pairs.has("islam exemple")).toBe(true);
+    expect(index.pairs.has("al brino")).toBe(false);
+    expect(index.pairs.has("zorko al")).toBe(false);
+    expect(index.pairs.has("brino exemple")).toBe(true);
   });
   it("la relecture l'emporte sur la règle, et un nom absent des listes suit la règle", () => {
     expect(organisationNameIsWithheld("Pavel Temoinov Trading", persons)).toBe(true);

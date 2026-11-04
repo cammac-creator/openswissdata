@@ -206,7 +206,7 @@ apiV1Route.get("/datasets/:id", (c) => {
 // réponse n'est jamais mise en cache ni ne recopie la demande. Aucun mot de conformité ici :
 // une promesse de contrôle est F4.
 const SANCTIONS_NOTICE = {
-  coverage: "Organisations and vessels on the SECO sanctions list only. Natural persons are not covered by this service. Names detected as carrying a person's name are withheld, so an organisation on the official list may not be found here.",
+  coverage: "Organisations and vessels on the SECO sanctions list only. Natural persons are not covered by this service. Organisation names detected as carrying a person's name are withheld, so an organisation on the official list may not be found here. Detection is incomplete and institutions named after someone are kept, so a name served here may still contain a person's name.",
   no_match: "No exact match does not mean that a name is not sanctioned: matching is on the exact characters, including case and punctuation.",
   not_official: "Not an official publication. The official list is the one published by SECO.",
 } as const;

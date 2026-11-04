@@ -55,7 +55,7 @@ export interface SanctionsExclusionProof {
   natural_persons_served: number;
   relations_served: number;
   free_text_fields_served: number;
-  organisation_names_caught_by_person_rule_served: number;
+  organisation_names_caught_and_not_reviewed_served: number;
 }
 
 export interface SanctionsDocument {
@@ -92,7 +92,7 @@ export function validateSanctionsDocument(value: unknown): SanctionsDocument {
   const proof = doc.exclusion_proof;
   if (!proof) return fail("preuve");
   if (proof.natural_persons_served !== 0 || proof.relations_served !== 0 || proof.free_text_fields_served !== 0
-    || proof.organisation_names_caught_by_person_rule_served !== 0) return fail("preuve");
+    || proof.organisation_names_caught_and_not_reviewed_served !== 0) return fail("preuve");
   if (!Array.isArray(doc.entries)) return fail("entrées");
   let organisations = 0;
   let vessels = 0;

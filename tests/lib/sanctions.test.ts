@@ -38,7 +38,7 @@ describe("document servi", () => {
   it.each<[string, (d: SanctionsDocument) => void]>([
     ["un genre inconnu", (d) => { (d.entries[0] as { kind: string }).kind = "individual"; }],
     ["une personne déclarée servie", (d) => { d.exclusion_proof.natural_persons_served = 1; }],
-    ["un nom de personne déclaré servi", (d) => { d.exclusion_proof.organisation_names_caught_by_person_rule_served = 1; }],
+    ["un nom de personne déclaré servi", (d) => { d.exclusion_proof.organisation_names_caught_and_not_reviewed_served = 1; }],
     ["des comptes faux", (d) => { d.counts.organisations = 99; }],
     ["une date illisible", (d) => { d.list_date = "hier"; }],
     ["un autre schéma", (d) => { (d as { schema: string }).schema = "v2"; }],

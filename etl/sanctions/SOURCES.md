@@ -38,7 +38,7 @@ Le genre de l'entrée fait foi, jamais `name-part-type` : 65 organisations et 9 
 | Personnes physiques | Élément `individual` : aucun champ gardé, leurs noms servent seulement au contrôle ci-dessous, en mémoire | 4 709 sur 4 709 |
 | Radiés | Une modification `de-listed`, quelle que soit sa position | 733 organisations, 23 bateaux |
 | Organisation dont le nom principal porte une personne | Voir ci-dessous : fiche entière écartée | 6 |
-| Autre nom d'une organisation qui porte une personne | Le nom seul est retiré | 9 |
+| Autre nom d'une organisation qui porte une personne | Le nom seul est retiré | 8 |
 
 - Résultat du 04.11.2026 : **2 866 organisations et 708 bateaux**. `exclusion_proof`, servi par `/api/v1/sanctions`,
   recompte sur le document écrit ; une valeur non nulle dans `*_served` arrête la collecte et fait refuser le document
@@ -51,11 +51,14 @@ Le genre de l'entrée fait foi, jamais `name-part-type` : 65 organisations et 9 
   FOSC.
 - **Relecture** (`reviewed.ts`, empreintes seulement, jamais un nom : le dépôt est public). Sur la liste du 04.11.2026,
   la règle prend 39 noms ; 10 relus comme n'étant pas une personne restent (mots courants, sigle, groupe ou institution
-  portant le nom d'un défunt). 4 noms que la règle ne voit pas, relus comme portant une personne, sortent. Un nouveau nom
-  pris par la règle sort sans relecture.
-- **La preuve ne prouve pas tout.** `organisation_names_caught_by_person_rule_served` compte ce que la règle voit. Une
-  personne absente de la liste, un nom de famille seul, une translittération ou une forme fléchie (cyrillique) ne se
-  détectent pas : un nom de personne peut donc encore figurer dans un nom d'organisation, jamais une entrée de personne.
+  portant le nom d'un défunt). 3 noms que la règle ne voit pas, relus comme portant le nom entier d'une personne, sortent. Un
+  nouveau nom pris par la règle sort sans relecture. Les qualificatifs de cette relecture (« défunt », « sigle ») sont
+  notre lecture, le fichier ne les prouve pas.
+- **La preuve ne prouve pas tout.** `organisation_names_caught_and_not_reviewed_served` compte les noms servis pris par
+  la règle et non gardés après relecture (0, sinon la collecte s'arrête) ; les 10 gardés sont dans
+  `organisation_names_kept_after_review`. Une personne absente de la liste, un nom de famille seul, une translittération
+  ou une forme fléchie (cyrillique) ne se détectent pas : un nom de personne peut donc encore figurer dans un nom
+  d'organisation, jamais une entrée de personne. La notice publique de l'API le dit.
   Restent aussi, comptés : les noms d'institutions qui honorent un personnage (`organisation_names_honouring_a_person_kept`,
   « named after », « имени ») et les réseaux connus sous un nom de famille. 37 bateaux portent un nom égal à celui d'une
   entrée « personne » : gardés, le genre fait foi (`vessels_name_equals_person_entry`) ; la source classe en « personne »
