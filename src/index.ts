@@ -27,6 +27,7 @@ import { mcpRoute } from "./routes/mcp/index.js";
 import { apiV1Route } from "./routes/api-v1.js";
 import { trackApiRequest, trackPageView } from "./lib/track.js";
 import { startMcpDataRefresh } from "./mcp/r2-refresh.js";
+import { startSanctionsRefresh } from "./lib/sanctions.js";
 import { loadEnv } from "./env.js";
 import { startOrderDeliveryWorker } from "./lib/order-delivery.js";
 import { startFinancialWorker } from "./lib/stripe-financial.js";
@@ -360,6 +361,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // 12 h safety timer). Fire-and-forget: the server is already listening and
   // serves the committed seed until the first refresh lands. Never blocks boot.
   startMcpDataRefresh();
+  // Liste des sanctions du SECO (R2 privé) : au démarrage puis chaque heure, sans bloquer le démarrage.
+  startSanctionsRefresh();
   const stopDeliveries = startOrderDeliveryWorker();
   const stopFinancial = startFinancialWorker();
   const stopCleanup = startCleanupWorker();

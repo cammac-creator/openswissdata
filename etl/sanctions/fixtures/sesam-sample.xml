@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Fichier FICTIF, même forme que le fichier SESAM. Tous les noms sont inventés ; « TEMOIN » marque ce qui ne doit jamais sortir. -->
+<swiss-sanctions-list list-type="whole-list" date="2026-11-04">
+  <sanctions-program ssid="20" version-date="2026-11-03" predecessor-version-date="2026-05-21">
+    <program-key lang="eng">Exampleland</program-key>
+    <program-key lang="fre">Exempleland</program-key>
+    <program-name lang="eng">TEMOIN-PROGRAMME-LONG Ordinance</program-name>
+    <sanctions-set ssid="4387" lang="eng">article 12 TEMOIN-ENSEMBLE</sanctions-set>
+    <sanctions-set ssid="4387" lang="fre">art. 12</sanctions-set>
+    <origin>EU</origin>
+  </sanctions-program>
+  <place ssid="1"><country iso-code="RU">TEMOIN-PAYS-LIBELLE</country></place>
+  <place ssid="2"><country iso-code="ch">Suisse</country></place>
+  <target ssid="100">
+    <foreign-identifier>TEMOIN-IDENTIFIANT-ETRANGER</foreign-identifier>
+    <individual sex="male">
+      <identity ssid="1000" main="true">
+        <name ssid="1001" name-type="primary-name" quality="good" lang="eng">
+          <name-part order="2" name-part-type="family-name"><value>Temoinov</value></name-part>
+          <name-part order="1" name-part-type="given-name"><value>Pavel</value><spelling-variant lang="rus" script="Cyrl">TEMOIN-VARIANTE-PERSONNE</spelling-variant></name-part>
+        </name>
+        <name ssid="1002" name-type="alias" quality="low" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Alias Personne Temoin</value></name-part></name>
+        <day-month-year ssid="1003" day="1" month="1" year="1960" calendar="gregorian" quality="good"/>
+        <place-of-birth ssid="1004" place-id="1" quality="good"/>
+        <nationality ssid="1005"><country iso-code="RU">TEMOIN-NATIONALITE</country></nationality>
+        <identification-document ssid="1006" document-type="passport"><number>TEMOIN-PASSEPORT-99</number><issuer code="RU">TEMOIN-EMETTEUR</issuer></identification-document>
+        <address ssid="1007" place-id="1" quality="good"><address-details>TEMOIN-ADRESSE-PERSONNE</address-details></address>
+      </identity>
+      <justification ssid="1008">TEMOIN-JUSTIFICATION-PERSONNE</justification>
+      <other-information ssid="1009">TEMOIN-INFO-PERSONNE</other-information>
+      <relation ssid="1010" relation-type="related-to" target-id="200">TEMOIN-RELATION-PERSONNE</relation>
+    </individual>
+    <modification modification-type="listed" effective-date="2022-01-01" enactment-date="2022-01-01" publication-date="2022-01-01"/>
+    <sanctions-set-id>4387</sanctions-set-id>
+  </target>
+  <target ssid="110">
+    <individual sex="male"><identity ssid="1100" main="true"><name ssid="1101" name-type="primary-name" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Pavlo Ivanovich Temoinchuk</value></name-part></name></identity></individual>
+    <modification modification-type="listed"/>
+    <sanctions-set-id>4387</sanctions-set-id>
+  </target>
+  <target ssid="200">
+    <entity>
+      <identity ssid="2000" main="true">
+        <name ssid="2001" name-type="primary-name" quality="good" lang="eng">
+          <name-part order="1" name-part-type="family-name"><value>Acme Foundry &amp; Forge LLC</value><spelling-variant lang="rus" script="Cyrl">Акме Литейная</spelling-variant></name-part>
+        </name>
+        <name ssid="2002" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>AFF</value></name-part></name>
+        <name ssid="2003" name-type="formerly-known-as" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Old Acme</value></name-part></name>
+        <name ssid="2004" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Alias Personne Temoin</value></name-part></name>
+        <name ssid="2005" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Pavel Temoinov Trading</value></name-part></name>
+        <name ssid="2006" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Haji Temoinov Hawala</value></name-part></name>
+        <name ssid="2015" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Ivanovich Temoinchuk Hawala</value></name-part></name>
+        <day-month-year ssid="2007" day="2" month="2" year="2002" calendar="gregorian" quality="good"/>
+        <address ssid="2008" place-id="1" quality="good">
+          <c-o>TEMOIN-CO-PERSONNE</c-o>
+          <address-details>TEMOIN-ADRESSE-ORGANISATION</address-details>
+          <zip-code>TEMOIN-NPA</zip-code>
+          <remark>TEMOIN-REMARQUE</remark>
+        </address>
+        <address ssid="2009" place-id="2" quality="good"/>
+      </identity>
+      <justification ssid="2010">TEMOIN-JUSTIFICATION-ORGANISATION</justification>
+      <other-information ssid="2011">IMO number: 1111111 TEMOIN-INFO-ORGANISATION</other-information>
+      <relation ssid="2012" relation-type="related-to" target-id="100">TEMOIN-RELATION-ORGANISATION</relation>
+    </entity>
+    <modification modification-type="amended" effective-date="2024-05-05" enactment-date="2024-05-05" publication-date="2024-05-05">
+      <added>
+        <identity ssid="2100" main="true"><name ssid="2101" name-type="alias" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>TEMOIN-HISTORIQUE-AJOUT</value></name-part></name></identity>
+        <target ssid="201"><individual sex="male"><identity ssid="2102" main="true"><name ssid="2103" name-type="primary-name" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>TEMOIN-HISTORIQUE-CIBLE</value></name-part></name></identity></individual><sanctions-set-id>4387</sanctions-set-id></target>
+      </added>
+      <removed><justification ssid="2104">TEMOIN-HISTORIQUE-RETRAIT</justification></removed>
+    </modification>
+    <modification modification-type="listed" effective-date="2022-03-04" enactment-date="2022-03-03" publication-date="2022-03-05"/>
+    <sanctions-set-id>4387</sanctions-set-id>
+  </target>
+  <target ssid="300">
+    <entity><identity ssid="3000" main="true"><name ssid="3001" name-type="primary-name" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>TEMOIN-ORGANISATION-RADIEE</value></name-part></name></identity></entity>
+    <modification modification-type="amended" effective-date="2025-06-03" enactment-date="2025-06-03" publication-date="2025-06-03"/>
+    <modification modification-type="de-listed" effective-date="2025-06-20" enactment-date="2025-06-20" publication-date="2025-06-20"/>
+    <modification modification-type="listed"/>
+    <sanctions-set-id>4387</sanctions-set-id>
+  </target>
+  <target ssid="350">
+    <entity><identity ssid="3500" main="true"><name ssid="3501" name-type="primary-name" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Network of Pavel Temoinov</value></name-part></name></identity></entity>
+    <modification modification-type="listed"/>
+    <sanctions-set-id>4387</sanctions-set-id>
+  </target>
+  <target ssid="360">
+    <entity><identity ssid="3600" main="true"><name ssid="3601" name-type="primary-name" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>Plant named after A. B. Exemplov</value></name-part></name></identity></entity>
+    <modification modification-type="listed"/>
+    <sanctions-set-id>4387</sanctions-set-id>
+  </target>
+  <target ssid="400">
+    <object object-type="vessel">
+      <identity ssid="4000" main="true"><name ssid="4001" name-type="primary-name" quality="good" lang="eng"><name-part order="1" name-part-type="family-name"><value>Alias Personne Temoin</value></name-part></name></identity>
+      <justification ssid="4002">TEMOIN-JUSTIFICATION-BATEAU</justification>
+      <other-information ssid="4003">IMO Number: 1234567</other-information>
+    </object>
+    <modification modification-type="listed" effective-date="2025-12-13" enactment-date="2025-12-12" publication-date="2025-12-12"/>
+    <sanctions-set-id>4387</sanctions-set-id>
+  </target>
+  <target ssid="500">
+    <object object-type="vessel">
+      <identity ssid="5000" main="true"><name ssid="5001" name-type="primary-name" quality="good" lang="eng"><name-part order="1" name-part-type="whole-name"><value>TEMOIN-BATEAU-RADIE</value></name-part></name></identity>
+      <other-information ssid="5002">IMO number: 7654321</other-information>
+    </object>
+    <modification modification-type="de-listed" effective-date="2026-05-22" enactment-date="2026-05-21" publication-date="2026-05-22"/>
+    <modification modification-type="listed" effective-date="2025-12-13" enactment-date="2025-12-12" publication-date="2025-12-12"/>
+    <sanctions-set-id>4387</sanctions-set-id>
+  </target>
+</swiss-sanctions-list>
