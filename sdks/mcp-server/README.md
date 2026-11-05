@@ -1,6 +1,6 @@
 # @openswissdata/mcp
 
-MCP server for Swiss federal reference data: the Swiss customs tariff (TARES), the FINMA register of supervised institutions and the FINMA warnings list, and NOGA / NACE / ISIC activity-code correspondences. Three tools work without any key or sign-up.
+MCP server for Swiss federal reference data: the Swiss customs tariff (TARES), the FINMA register of supervised institutions and the FINMA warnings list, and NOGA / NACE / ISIC activity-code correspondences. Four tools work without any key or sign-up.
 
 This package is a small STDIO bridge to the remote OpenSwissData MCP endpoint, for clients that only launch local processes. Clients that speak MCP over HTTP can connect directly to `https://mcp.openswissdata.com/jsonrpc` without it.
 
