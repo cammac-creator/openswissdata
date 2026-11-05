@@ -41,16 +41,17 @@ describe("Tarifs", () => {
       expect(mcp, lang).toContain("49 CHF");
       expect(mcp, lang).toContain("199 CHF");
     }
-    // Les seuls formulaires d’achat sont ceux des fichiers et du bundle.
+    // Le seul formulaire d’achat est celui des fichiers en vente, TARES et FINMA.
+    expect(pricing).toContain('const ORDER = ["tares", "finma"] as const;');
     const forms = [...pricing.matchAll(/<form\b[^>]*>([\s\S]*?)<\/form>/g)];
-    expect(forms).toHaveLength(2);
+    expect(forms).toHaveLength(1);
     for (const [form] of forms) {
       expect(form).toContain('action="/api/checkout/start"');
       expect(form).toContain('name="locale" value={lang}');
-      expect(form).toMatch(/name="dataset_ids" value=(\{id\}|"bundle")/);
+      expect(form).toMatch(/name="dataset_ids" value=\{id\}/);
     }
     expect(pricing).not.toMatch(/name="(plan|tier|mcp)/);
-    expect(pricing.match(/<CheckoutNotice \/>/g)).toHaveLength(2);
+    expect(pricing.match(/<CheckoutNotice \/>/g)).toHaveLength(1);
     expect(pricing).toContain("data-closed-banner");
   });
 
@@ -141,7 +142,7 @@ describe("Espace client", () => {
     expect(app).toContain("noindex={true}");
     expect(read("layouts/AtlasLayout.astro")).toContain("noindex?: boolean");
     expect(withoutComments(app)).not.toMatch(/\b(299|399|797|997)\b/);
-    expect(app).toContain("BUNDLE_OFFER.price");
+    expect(app).not.toContain("BUNDLE_OFFER");
     for (const id of ["banner", "loading-view", "login-view", "login-form", "login-email", "login-msg", "dashboard-view", "dashboard-email", "logout-btn", "datasets-list", "empty-state", "mcp-section", "mcp-meta", "mcp-portal-btn"]) {
       expect(app, id).toContain(`id="${id}"`);
     }

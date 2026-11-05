@@ -128,18 +128,6 @@ describe("POST /api/checkout/session", () => {
     expect(call.metadata.locale).toBe("fr");
   });
 
-  it("uses bundle price when dataset_ids=['bundle']", async () => {
-    const app = createApp();
-    const res = await app.request("/api/checkout/session", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ dataset_ids: ["bundle"], email: "carol@example.com" }),
-    });
-    expect(res.status).toBe(200);
-    const call = sessionCreateMock.mock.calls[0][0];
-    expect(call.line_items).toEqual([{ price: "price_test_bundle", quantity: 1 }]);
-  });
-
   it("rejects bundle combined with individual datasets", async () => {
     const app = createApp();
     const res = await app.request("/api/checkout/session", {
@@ -282,18 +270,6 @@ describe("POST /api/checkout/start (form-encoded → 303 redirect)", () => {
     expect(call.metadata.dataset_ids).toBe("tares");
   });
 
-  it("redirects for bundle", async () => {
-    const app = createApp();
-    const res = await app.request("/api/checkout/start", {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: "dataset_ids=bundle",
-    });
-    expect(res.status).toBe(303);
-    const call = sessionCreateMock.mock.calls[0][0];
-    expect(call.line_items).toEqual([{ price: "price_test_bundle", quantity: 1 }]);
-  });
-
   it("forwards optional email when provided via form", async () => {
     const app = createApp();
     const res = await app.request("/api/checkout/start", {
@@ -353,6 +329,90 @@ describe("POST /api/checkout/start (form-encoded → 303 redirect)", () => {
     expect(location).toContain("checkout=error");
     expect(location).not.toContain("stripe");
     expect(location).not.toContain("raised by");
+  });
+});
+
+// Classifications et le lot sont retirés de la vente (décision du 05.11.2026, points 4 et sa précision).
+// La base et le prix du lot sont bien présents : seul le retrait peut expliquer le refus.
+describe("POST /api/checkout — fichiers retirés de la vente", () => {
+  let tmp: string;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "osd-retrait-"));
+    process.env.DATABASE_PATH = join(tmp, "t.sqlite");
+    process.env.BASE_URL = "https://www.openswissdata.com";
+    process.env.STRIPE_PRICE_BUNDLE = "price_test_bundle";
+    process.env.NODE_ENV = "test";
+    const db = getDb();
+    const now = Date.now();
+    for (const [id, cents] of [["tares", 29900], ["classifications", 39900], ["finma", 29900]] as const) {
+      db.prepare("INSERT INTO datasets (id, name, slug, price_chf, stripe_price_id, created_at) VALUES (?, ?, ?, ?, ?, ?)")
+        .run(id, id, id, cents, `price_test_${id}`, now);
+    }
+    closeDb();
+    sessionCreateMock.mockResolvedValue({ id: "cs_test_retrait", url: "https://checkout.stripe.com/pay/cs_test_retrait" });
+  });
+
+  afterEach(() => {
+    closeDb();
+    rmSync(tmp, { recursive: true, force: true });
+    delete process.env.DATABASE_PATH;
+    delete process.env.STRIPE_PRICE_BUNDLE;
+    sessionCreateMock.mockReset();
+  });
+
+  const postJson = (dataset_ids: string[], locale?: string) => createApp().request("/api/checkout/session", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ dataset_ids, ...(locale ? { locale } : {}) }),
+  });
+  const postForm = (body: string) => createApp().request("/api/checkout/start", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body,
+  });
+
+  it.each([
+    [["classifications"]],
+    [["bundle"]],
+    [["tares", "classifications"]],
+    [["classifications", "finma"]],
+  ])("JSON : refuse %j avant tout appel à Stripe", async dataset_ids => {
+    const res = await postJson(dataset_ids);
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: "dataset_not_for_sale" });
+    expect(sessionCreateMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["dataset_ids=classifications", "https://www.openswissdata.com/datasets/classifications"],
+    ["dataset_ids=bundle", "https://www.openswissdata.com/bundle"],
+    ["dataset_ids=tares%2Cclassifications", "https://www.openswissdata.com/datasets/classifications"],
+    ["dataset_ids=classifications&locale=de", "https://www.openswissdata.com/de/datasets/classifications"],
+    ["dataset_ids=bundle&locale=en", "https://www.openswissdata.com/en/bundle"],
+  ])("formulaire : %s renvoie vers la page du fichier, sans passer par Stripe", async (body, location) => {
+    const res = await postForm(body);
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toBe(location);
+    expect(sessionCreateMock).not.toHaveBeenCalled();
+  });
+
+  it.each(["tares", "finma"])("%s reste en vente, en JSON et par formulaire", async id => {
+    const json = await postJson([id]);
+    expect(json.status).toBe(200);
+    const form = await postForm(`dataset_ids=${id}`);
+    expect(form.status).toBe(303);
+    expect(form.headers.get("location")).toBe("https://checkout.stripe.com/pay/cs_test_retrait");
+    expect(sessionCreateMock).toHaveBeenCalledTimes(2);
+    for (const [params] of sessionCreateMock.mock.calls) {
+      expect(params.line_items).toEqual([{ price: `price_test_${id}`, quantity: 1 }]);
+    }
+  });
+
+  it("le panier TARES et FINMA reste possible", async () => {
+    const res = await postJson(["tares", "finma"]);
+    expect(res.status).toBe(200);
+    expect(sessionCreateMock).toHaveBeenCalledTimes(1);
   });
 });
 

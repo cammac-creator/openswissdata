@@ -2,7 +2,7 @@
 .fiche-banner { margin-top:18px; padding:16px 20px; border-left:3px solid #c9953f; border-radius:0 8px 8px 0; background:#f6efe1; font-size:14px; line-height:1.65; color:var(--atlas-ink); }
 .fiche-banner.is-error { border-left-color:var(--atlas-red); background:#fbefeb; }
 .fiche-stack { position:relative; }
-.fiche-sheets { position:relative; z-index:1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; padding:0 22px; }
+.fiche-sheets { position:relative; z-index:1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; padding:0 22px; }
 .fiche-sheet { display:flex; flex-direction:column; gap:14px; min-width:0; padding:26px; border:1px solid var(--atlas-line); border-top:3px solid var(--sheet-tone); border-radius:10px; background:#fbfbf5; box-shadow:0 22px 44px #16382f17; }
 .fiche-sheet-tares { --sheet-tone:#2f6b53; }.fiche-sheet-classifications { --sheet-tone:#8fb09b; }.fiche-sheet-finma { --sheet-tone:var(--atlas-ink); }
 .fiche-sheet-head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 14px; }

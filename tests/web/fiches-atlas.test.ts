@@ -1,7 +1,8 @@
 /**
  * Fiches Atlas TARES, classifications et bundle : prix lus dans une seule source,
  * balisage schema.org complet dans les trois langues, données du catalogue contrôlées
- * avant affichage, aucune promesse retirée réintroduite dans les pages.
+ * avant affichage, aucune promesse retirée réintroduite dans les pages, et Classifications
+ * et le lot retirés de la vente (décision du 05.11.2026).
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
@@ -124,14 +125,43 @@ describe("Promesses retirées des fiches", () => {
       expect(source, `${file} ${pattern}`).not.toMatch(pattern);
     }
   });
-  it("chaque fiche garde un paiement unique, ses conditions et aucune clé MCP payante annoncée", () => {
-    for (const file of pages.slice(0, 3)) {
-      const source = read(file);
-      expect(source, file).toContain('action="/api/checkout/start"');
-      expect(source, file).toContain("<CheckoutNotice />");
-    }
-    expect(read("components/BundleProduct.astro")).toMatch(/aucune clé MCP payante n’est livrée/);
+  it("la fiche en vente garde un paiement unique et ses conditions", () => {
+    const source = read("components/TaresProduct.astro");
+    expect(source).toContain('action="/api/checkout/start"');
+    expect(source).toContain("<CheckoutNotice />");
     expect(read("components/ClassificationsProduct.astro")).toMatch(/Classifications Pro est temporairement indisponible/);
     expect(read("components/TaresProduct.astro")).toMatch(/Dies ist keine offizielle Veröffentlichung/);
+  });
+});
+
+describe("Classifications et le lot retirés de la vente", () => {
+  const retired = ["components/ClassificationsProduct.astro", "components/BundleProduct.astro"];
+  it.each(retired)("%s ne vend plus rien et n’affiche aucun prix du produit retiré", file => {
+    const source = read(file).replace(/\/\/.*$/gm, "");
+    for (const forbidden of ["/api/checkout/start", "CheckoutNotice", "productJsonLd(", "#acheter", "BUNDLE_OFFER", "BUNDLE_SAVING", "SEPARATE_TOTAL", "FILE_OFFERS.classifications", "renewal"]) {
+      expect(source, `${file} ${forbidden}`).not.toContain(forbidden);
+    }
+  });
+  it("les deux pages disent, dans les trois langues, que le fichier n’est pas en vente", () => {
+    for (const file of retired) {
+      const source = read(file);
+      for (const text of ["pas en vente pour l’instant", "nicht im Verkauf", "not on sale for now"]) expect(source, `${file} ${text}`).toContain(text);
+      expect(source, file).toContain('`${L("/mcp")}#install`');
+    }
+  });
+  it("le lot renvoie vers TARES et FINMA et reçoit toujours les retours de paiement", () => {
+    const source = read("components/BundleProduct.astro");
+    expect(source).toContain('L("/datasets/tares")');
+    expect(source).toContain('L("/datasets/finma")');
+    expect(source).toContain("data-checkout-banner");
+    expect(read("scripts/bundle-product.ts")).toContain("copy.cancelled");
+    expect(source).not.toMatch(/value="(classifications|bundle)"/);
+  });
+  it("aucune page ne propose l’achat ou le prix de ces deux produits", () => {
+    const files = ["components/HomePage.astro", "components/TaresProduct.astro", "components/FinmaProduct.astro", "components/PricingPage.astro", "components/AccountApp.astro", "components/NogaIndex.astro", "components/NogaCodePage.astro", "components/Footer.astro", "components/AtlasFooter.astro", "lib/noga-i18n.ts", "pages/404.astro", "pages/blog/[...slug].astro", "content/blog/swiss-classifications-multi-standard.md", "content/blog/integrate-tares-sap-gts.md", "content/blog/finma-permission-granted.md", "../public/llms.txt"];
+    for (const file of files) {
+      const source = read(file).replace(/\/\/.*$/gm, "");
+      expect(source, file).not.toMatch(/\b(399|797)\b|BUNDLE_OFFER|BUNDLE_SAVING|SEPARATE_TOTAL|FILE_OFFERS\.classifications|R\.classifications|L\(["']\/bundle["']\)|name="dataset_ids" value="(classifications|bundle)"/);
+    }
   });
 });

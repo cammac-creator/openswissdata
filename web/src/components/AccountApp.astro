@@ -19,13 +19,11 @@ import AtlasLayout from "../layouts/AtlasLayout.astro";
 import PurchaseJourney from "./PurchaseJourney.astro";
 import "../styles/atlas-service.css";
 import "../styles/atlas-compte.css";
-import { BUNDLE_OFFER } from "../lib/offers";
 import { HELP_TOPICS, SUPPORT_EMAIL, supportMailto } from "../lib/customer-care";
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const L = (path: string) => localizePath(path, lang);
-const chf = (value: number) => (lang === "fr" ? `${value} CHF` : `CHF ${value}`);
 
 const COPY = {
   fr: {
@@ -40,7 +38,7 @@ const COPY = {
     noscriptTitle: "Espace client", noscriptText: "L’espace client a besoin de JavaScript pour demander un lien de connexion et afficher vos fichiers. Les liens de téléchargement reçus par email, eux, fonctionnent sans JavaScript.", noscriptHelp: "Besoin d’aide ? Écrivez à",
     dashKicker: "Espace client", dashTitle: "Vos fichiers", dashIntro: "Téléchargez les versions comprises dans vos droits. Conservez une copie des fichiers reçus.", logout: "Se déconnecter", filesLabel: "Fichiers achetés",
     emptyKicker: "Aucun fichier sur ce compte", emptyTitle: "Votre espace est prêt, mais vide.", emptyText: "Un achat récent apparaît ici dès que le paiement est confirmé. Si vous avez déjà acheté un fichier, vérifiez que vous êtes connecté avec l’adresse saisie chez Stripe.",
-    emptyBundle: `Les trois fichiers ensemble · ${chf(BUNDLE_OFFER.price)}`, emptyHelp: "Un achat manque ?",
+    emptyBundle: "Voir les fichiers en vente", emptyHelp: "Un achat manque ?",
     receiptsKicker: "Reçus et conditions", receiptsTitle: "Vos achats", receiptsIntro: "Le reçu Stripe et les conditions acceptées de chaque achat. Pour une facture au nom de votre entreprise, envoyez-nous sa raison sociale et son adresse de facturation.", invoice: "Demander une facture",
     mcpKicker: "Abonnement MCP", mcpName: "Serveur MCP openswissdata", mcpStatus: "Abonnement", mcpPortal: "Gérer mon abonnement",
     helpKicker: "Besoin d’aide ?", helpTitle: "Les réponses aux situations courantes.", helpAll: "Tout le support", helpWrite: "Écrire au support",
@@ -57,7 +55,7 @@ const COPY = {
     noscriptTitle: "Kundenkonto", noscriptText: "Das Kundenkonto braucht JavaScript, um einen Anmeldelink anzufordern und Ihre Dateien anzuzeigen. Die per E-Mail erhaltenen Download-Links funktionieren auch ohne JavaScript.", noscriptHelp: "Brauchen Sie Hilfe? Schreiben Sie an",
     dashKicker: "Kundenkonto", dashTitle: "Ihre Dateien", dashIntro: "Laden Sie die von Ihren Rechten erfassten Versionen herunter. Bewahren Sie eine Kopie der erhaltenen Dateien auf.", logout: "Abmelden", filesLabel: "Gekaufte Dateien",
     emptyKicker: "Keine Dateien in diesem Konto", emptyTitle: "Ihr Konto ist bereit, aber leer.", emptyText: "Ein neuer Kauf erscheint hier, sobald die Zahlung bestätigt ist. Haben Sie bereits eine Datei gekauft, prüfen Sie, ob Sie mit der bei Stripe angegebenen Adresse angemeldet sind.",
-    emptyBundle: `Alle drei Dateien zusammen · ${chf(BUNDLE_OFFER.price)}`, emptyHelp: "Fehlt ein Kauf?",
+    emptyBundle: "Dateien im Verkauf ansehen", emptyHelp: "Fehlt ein Kauf?",
     receiptsKicker: "Belege und Bedingungen", receiptsTitle: "Ihre Käufe", receiptsIntro: "Der Stripe-Beleg und die akzeptierten Bedingungen jedes Kaufs. Für eine Rechnung auf Ihr Unternehmen senden Sie uns bitte Firmennamen und Rechnungsadresse.", invoice: "Rechnung anfordern",
     mcpKicker: "MCP-Abonnement", mcpName: "MCP-Server openswissdata", mcpStatus: "Abonnement", mcpPortal: "Abonnement verwalten",
     helpKicker: "Brauchen Sie Hilfe?", helpTitle: "Antworten auf häufige Situationen.", helpAll: "Zum Support", helpWrite: "Support kontaktieren",
@@ -74,7 +72,7 @@ const COPY = {
     noscriptTitle: "Your account", noscriptText: "Your account needs JavaScript to request a sign-in link and show your files. The download links you receive by email work without JavaScript.", noscriptHelp: "Need help? Write to",
     dashKicker: "Your account", dashTitle: "Your files", dashIntro: "Download the versions covered by your rights. Keep a copy of the files you receive.", logout: "Sign out", filesLabel: "Purchased files",
     emptyKicker: "No files in this account", emptyTitle: "Your account is ready, but empty.", emptyText: "A recent purchase appears here once the payment is confirmed. If you have already bought a file, check that you are signed in with the address entered at Stripe.",
-    emptyBundle: `All three files together · ${chf(BUNDLE_OFFER.price)}`, emptyHelp: "Is a purchase missing?",
+    emptyBundle: "See the files on sale", emptyHelp: "Is a purchase missing?",
     receiptsKicker: "Receipts and terms", receiptsTitle: "Your purchases", receiptsIntro: "The Stripe receipt and accepted terms for each purchase. For an invoice addressed to your company, send us its legal name and billing address.", invoice: "Request an invoice",
     mcpKicker: "MCP subscription", mcpName: "openswissdata MCP server", mcpStatus: "Subscription", mcpPortal: "Manage my subscription",
     helpKicker: "Need help?", helpTitle: "Answers to common situations.", helpAll: "All support", helpWrite: "Contact support",
@@ -233,7 +231,7 @@ const supportPath = L("/support");
     <p class="atlas-kicker">{c.emptyKicker}</p>
     <h2>{c.emptyTitle}</h2>
     <p>{c.emptyText}</p>
-    <div class="atlas-actions"><a class="atlas-btn" href={L("/bundle")}>{c.emptyBundle}<span aria-hidden="true">↗</span></a><a class="atlas-text-link" href={`${supportPath}#email-absent`}>{c.emptyHelp}<span aria-hidden="true">↗</span></a></div>
+    <div class="atlas-actions"><a class="atlas-btn" href={L("/pricing")}>{c.emptyBundle}<span aria-hidden="true">↗</span></a><a class="atlas-text-link" href={`${supportPath}#email-absent`}>{c.emptyHelp}<span aria-hidden="true">↗</span></a></div>
    </div>
   </div>
 

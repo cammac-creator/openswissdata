@@ -1,9 +1,9 @@
 import { readPublicCatalogue } from '../lib/public-catalogue';
 
-/** Page bundle : retour de paiement expliqué, versions servies et barres animées si le mouvement est permis. */
+/** Page du lot, retiré de la vente : retour de paiement expliqué et versions servies des fichiers en vente. */
 const root = document.querySelector<HTMLElement>('[data-bundle-product]');
 if (root) {
-  const copy: Record<'lang' | 'loading' | 'unavailable' | 'codes' | 'classCodes' | 'rows' | 'cancelled' | 'error', string> = JSON.parse(root.dataset.copy!);
+  const copy: Record<'lang' | 'loading' | 'unavailable' | 'codes' | 'rows' | 'cancelled' | 'error', string> = JSON.parse(root.dataset.copy!);
   const lang = copy.lang as 'fr' | 'de' | 'en';
   const number = new Intl.NumberFormat({ fr: 'fr-CH', de: 'de-CH', en: 'en-GB' }[lang]);
 
@@ -16,7 +16,7 @@ if (root) {
     banner.hidden = false;
   }
 
-  for (const id of ['tares', 'classifications', 'finma'] as const) {
+  for (const id of ['tares', 'finma'] as const) {
     const version = root.querySelector<HTMLElement>(`[data-live-version="${id}"]`)!;
     const count = root.querySelector<HTMLElement>(`[data-live-count="${id}"]`)!;
     readPublicCatalogue(id).then(data => {
@@ -24,24 +24,11 @@ if (root) {
       if (typeof data.version !== 'string' || !/^\d{4}\.\d{2}\.\d{2}/.test(data.version)) throw new Error('Version absente');
       if (typeof total !== 'number' || !Number.isSafeInteger(total) || total < 0) throw new Error('Volume absent');
       version.textContent = `v${data.version}`;
-      count.textContent = `${number.format(total)} ${id === 'finma' ? copy.rows : id === 'tares' ? copy.codes : copy.classCodes}`;
+      count.textContent = `${number.format(total)} ${id === 'finma' ? copy.rows : copy.codes}`;
     }).catch(() => {
       version.textContent = copy.unavailable;
       count.textContent = '';
     });
-  }
-
-  const bars = root.querySelector<HTMLElement>('[data-bundle-bars]');
-  if (bars && 'IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      observer.disconnect();
-      if (document.querySelector<HTMLElement>('.atlas-site')?.dataset.motion !== 'on') return;
-      bars.querySelectorAll<SVGElement>('.fiche-bar').forEach((bar, index) => {
-        bar.animate?.([{ transform: 'scaleX(.04)' }, { transform: 'scaleX(1)' }], { duration: 900, delay: index * 220, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' });
-      });
-    }, { threshold: 0.4 });
-    observer.observe(bars);
   }
 }
 

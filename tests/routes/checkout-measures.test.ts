@@ -12,6 +12,7 @@ const { create } = vi.hoisted(() => ({ create: vi.fn() }));
 vi.mock('../../src/lib/stripe.js', () => ({ stripe: () => ({ checkout: { sessions: { create } } }), resetStripeClient: vi.fn() }));
 import { createApp } from '../../src/index.js';
 import { checkoutRoute } from '../../src/routes/checkout.js';
+import { checkoutObservation } from '../../src/lib/checkout-measures.js';
 import { getDb, closeDb } from '../../src/lib/db.js';
 import * as tracking from '../../src/lib/track.js';
 import * as budget from '../../src/lib/event-budget.js';
@@ -41,8 +42,13 @@ describe('Créations Checkout observées, sans appeler Stripe', () => {
     expect(JSON.stringify(records)).not.toMatch(/@|cs_live_|https:|192\.0\.2|price_fictif|Mozilla/);
     expect(getDb().prepare('SELECT COUNT(*) n FROM orders').get()).toEqual({n:0});expect(getDb().prepare('SELECT COUNT(*) n FROM customers').get()).toEqual({n:0});
   });
-  it.each([['finma','finma'],['tares','tares'],['classifications','classifications'],['bundle','bundle'],['finma,tares','mixed'],['finma,finma','finma']])('classe le panier %s sans multiplier les créations',async(ids,basket)=>{
+  it.each([['finma','finma'],['tares','tares'],['finma,tares','mixed'],['finma,finma','finma']])('classe le panier %s sans multiplier les créations',async(ids,basket)=>{
     expect((await request(ids.split(','))).status).toBe(200);const records=await rows();expect(records).toHaveLength(1);expect(JSON.parse(records[0].meta_json as string).basket).toBe(basket);
+  });
+  // Ces deux paniers ne se créent plus à la caisse (retrait du 05.11.2026) ; la mesure sait toujours les classer.
+  it.each([['classifications'],['bundle']])('la mesure classe encore le panier historique %s',id=>{
+    const session={id:'cs_live_fictif',url:'https://checkout.stripe.com/fictif',livemode:true,mode:'payment'} as Stripe.Checkout.Session;
+    expect(checkoutObservation(session,[id],'fr')).toEqual({basket:id,locale:'fr'});
   });
   it('compte deux créations distinctes et déduit la langue française par défaut du parcours',async()=>{
     const app=createApp();for(let i=0;i<2;i++)expect((await app.request('/api/checkout/session',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({dataset_ids:['finma']})})).status).toBe(200);
@@ -60,7 +66,7 @@ describe('Créations Checkout observées, sans appeler Stripe', () => {
     expect(await rows()).toEqual([]);
   });
   it.each(['api','form'])('les refus du panier et abonnements fermés ne contactent pas Stripe (%s)',async entry=>{
-    for(const ids of [['inconnu'],['bundle','finma'],['mcp_standalone']]){
+    for(const ids of [['inconnu'],['bundle','finma'],['mcp_standalone'],['classifications'],['bundle']]){
       const r=await request(ids,entry);expect([400,503,303]).toContain(r.status);
     }
     expect(create).not.toHaveBeenCalled();expect(await rows()).toEqual([]);
