@@ -28,6 +28,7 @@ import { apiV1Route } from "./routes/api-v1.js";
 import { trackApiRequest, trackPageView } from "./lib/track.js";
 import { startMcpDataRefresh } from "./mcp/r2-refresh.js";
 import { startSanctionsRefresh } from "./lib/sanctions.js";
+import { startTariffHistoryRefresh } from "./lib/tariff-history.js";
 import { loadEnv } from "./env.js";
 import { startOrderDeliveryWorker } from "./lib/order-delivery.js";
 import { startFinancialWorker } from "./lib/stripe-financial.js";
@@ -363,6 +364,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   startMcpDataRefresh();
   // Liste des sanctions du SECO (R2 privé) : au démarrage puis chaque heure, sans bloquer le démarrage.
   startSanctionsRefresh();
+  // Archives TARES au format 2 (R2, lecture seule), pour /api/v1/tariff : après la version courante, sans bloquer le démarrage.
+  startTariffHistoryRefresh();
   const stopDeliveries = startOrderDeliveryWorker();
   const stopFinancial = startFinancialWorker();
   const stopCleanup = startCleanupWorker();

@@ -20,6 +20,7 @@ paths:
   - "src/lib/embedding-*.ts"
   - "src/lib/model-artifact.ts"
   - "src/lib/tares-archive.ts"
+  - "src/lib/tariff-history.ts"
   - ".github/workflows/refresh-*.yml"
   - ".github/workflows/release-classifications.yml"
   - ".github/workflows/monitor-sources.yml"
@@ -100,3 +101,9 @@ Sections déplacées mot pour mot depuis AGENTS.md le 02.10.2026 (charte osd.N01
 - Le fichier officiel reste en mémoire. Le document réduit vit dans le bucket R2 privé (`sanctions/or/`), un seul objet réécrit, JAMAIS dans le dépôt : un commit garderait à vie une organisation radiée ensuite.
 - Le genre de l'entrée fait foi, jamais `name-part-type`. Liste blanche de champs (`parse.ts`) : ne jamais y ajouter justification, relation, ligne d'adresse ni historique ; ils portent des noms de personnes. Un nom d'organisation qui porte un nom de personne est retiré (`carriesPersonName`, relecture dans `reviewed.ts`, empreintes seulement, jamais un nom dans ce dépôt) ; ne pas retirer ce contrôle au motif qu'il écarte une organisation (F7). Cette règle ne voit pas tout (`SOURCES.md`, « La preuve ne prouve pas tout ») : ne jamais écrire ni servir « aucun nom de personne ».
 - `tests/etl/sanctions-fuite.test.ts` tourne avant toute lecture de la source. Une entrée portant `de-listed` est radiée quelle que soit sa position ; une modification plus tardive arrête la collecte.
+
+## Tarif à une date et changements — 05.11.2026
+- `/api/v1/tariff/:code/at` et `/api/v1/tariff/changes`, décisions du 05.11.2026. Chargement `src/lib/tariff-history.ts`, 12 h et après publication, séparé de `refreshTaresFromR2` (`tests/mcp/tares-r2-refresh.test.ts` y fige un seul téléchargement) ; 503 tant qu'un premier passage n'est pas fini, jamais de réponse partielle. Rien sur le disque ni dans la base ; aucun téléchargement sur le chemin d'une requête.
+- **Seules les archives au format 2 sont servies, à partir de 2026.09.25.** Avant, l'assembleur prenait le premier taux et le plus bas par régime : 654 lignes portent un MFN choisi, les clés de préférences changent toutes, et comparer à travers cette coupure donnerait 7 511 faux changements. Une archive se contrôle entière (taille, empreinte, format, date de collecte égale au libellé, lignes, pourcentage jamais étiqueté CHF) ou n'est pas servie, et la réponse nomme la version écartée.
+- Ne pas passer par `readTaresArchive` : son plafond de 200 Mo vaut pour tout le jeu et bloquerait la version courante (incident du 07.10). Ne pas lire `tares_rates.csv` dans le service (environ 3 s et plusieurs Go par version) : les réponses portent sur le résumé et le disent. Le 05.11, 139 lignes au 28.09 et 23 au 01.11 changent dans le détail sans que le résumé bouge.
+- Une version est le jour de sa collecte, pas une date d'entrée en vigueur. `valid_from` date le numéro, pas le droit. Ne pas écrire que xtares ne sert que le présent : l'application accepte une date (non vérifié). `tariff_changelog` lit `dataset_snapshots`, remplie aussi avec les anciennes archives : elle montrerait de faux changements à cette coupure.

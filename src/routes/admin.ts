@@ -13,6 +13,7 @@ import { countCappedAnnouncements, countConfirmedAnnouncements, eraseAnnouncemen
 import { syncAnnouncementErasureMirror } from "../lib/announcement-erasures.js";
 import { internalEmails } from "../lib/crm-customers.js";
 import { refreshFinmaFromR2, refreshTaresFromR2, refreshClassificationsFromR2, getMcpFreshness, extractCsvFromZip } from "../mcp/r2-refresh.js";
+import { refreshTariffHistory } from "../lib/tariff-history.js";
 import { getObjectBuffer } from "../lib/r2.js";
 import { snapshotFromRows, getReleasedAt, type SnapshotDataset } from "../mcp/snapshots.js";
 import { parse as parseCsvSync } from "csv-parse/sync";
@@ -429,7 +430,7 @@ adminRoute.post("/release", async (c) => {
   if (parsed.dataset_id === "finma") {
     void refreshFinmaFromR2();
   }
-  if (parsed.dataset_id === "tares") void refreshTaresFromR2();
+  if (parsed.dataset_id === "tares") void refreshTaresFromR2().then(refreshTariffHistory);
   if (parsed.dataset_id === "classifications") void refreshClassificationsFromR2();
 
   return c.json({ ok: true, dataset_id: parsed.dataset_id, version: parsed.version });

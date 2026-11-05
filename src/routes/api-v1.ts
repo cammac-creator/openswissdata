@@ -19,6 +19,8 @@ import { companyCheck } from "../mcp/company/check.js";
 import { COMPANY_SOURCES, type CompanySourceId } from "../mcp/company/sources.js";
 import { getPublicSource, PUBLIC_SOURCES, type PublicSourceEntry } from "../lib/public-sources.js";
 import { datasetCatalogueEntry, filterDatasetRows, licenceRequiresAttribution, paginateDatasetRows, parseDatasetFilters, parseDatasetPagination } from "../lib/dataset-query.js";
+import { compareVersions, daysBetween, gapAfter, gapsBetween, getTariffHistory, isCalendarDate, lineAtVersion, lineChangedBetween, serveChangeSide, serveLine, versionIndexAt, versionRef, type ArchiveGap, type TariffHistory } from "../lib/tariff-history.js";
+import { DISCLAIMERS } from "../mcp/tools/tariff-lookup.js";
 import { exactSanctionKey, getSanctions, isSanctionsListCurrent, SANCTIONS_MAX_AGE_DAYS, SANCTIONS_OFFICIAL_SEARCH_URL, SANCTIONS_SOURCE_ID, type SanctionEntry, type SanctionNameType } from "../lib/sanctions.js";
 
 // Les cinq sources que `company_check` cite toujours (`src/mcp/company/sources.ts`), dans l'ordre
@@ -269,6 +271,120 @@ apiV1Route.get("/sanctions/search", (c) => {
     official_search_url: SANCTIONS_OFFICIAL_SEARCH_URL,
     sources: [sourceRef(SANCTIONS_SOURCE_ID)],
   });
+});
+
+// --- GET /api/v1/tariff/:code/at, /api/v1/tariff/changes ---------------------------------
+// Mémoire du tarif (décisions de Claude-Alain du 05.11.2026, spécialité « listes officielles ») :
+// ce qui était archivé à une date, jamais une valeur devinée. Aucune lecture R2 ni écriture sur
+// le chemin d'une requête : tout vient de la mémoire chargée par `src/lib/tariff-history.ts`.
+// Aucun prix ni mot de conformité ici : un texte public qui promet est F4.
+const TARES_SOURCE_IDS = PUBLIC_SOURCES.filter((s) => s.id.startsWith("tares.")).map((s) => s.id);
+const TARIFF_APPLICATION_URL = "https://xtares.admin.ch/tares/";
+const TARIFF_HISTORY_NOTICE = {
+  what_this_is: "The tariff line as OpenSwissData archived it in the version named here, which holds what the BAZG published as in force on its collection day. This is not a statement of the law in force on the requested date: a change that took effect between two versions shows only from the next version.",
+  summary: "Summary of the line. Conditional variants are left out, and no lowest value is picked among them. A duty_mfn with null values, or a regime absent from preferential_regimes, means the summary has no single value: it never means duty-free. Values keep their published unit. Check origin, quotas and conditions in the Tares application of the BAZG.",
+  fields: "valid_from is the start of validity of the tariff number, not of the duty. restrictions_codes is not filled in this format: an empty list says nothing about restrictions. unit_stat is a legacy alias for the duty unit.",
+  older_archives: "Archives older than coverage.first_archive are not served: they used an earlier format that picked one value among conditional variants.",
+} as const;
+const TARIFF_CHANGES_NOTICE = {
+  ...TARIFF_HISTORY_NOTICE,
+  comparison: "Two archived versions are compared on the summary of each line. Moves between them are not listed, and a conditional variant can change without the summary changing: no listed change does not mean that nothing changed.",
+} as const;
+const TARIFF_GAP_NOTE = "No archive, or no usable archive, for part of this period. The answer rests on the version named here; what changed in the meantime is not known.";
+
+function tariffCoverage(h: TariffHistory) {
+  const first = versionRef(h, 0);
+  const last = versionRef(h, h.versions.length - 1);
+  return { first_archive: first, last_archive: last, archives_served: h.versions.length };
+}
+
+function tariffGap<G extends ArchiveGap>(gap: G | null) {
+  return gap ? { ...gap, note: TARIFF_GAP_NOTE } : null;
+}
+
+/** Ce que toute réponse de ces deux routes porte : l'avis repris de `tariff_lookup`, sans recopie. */
+function tariffContext(h: TariffHistory, notice: typeof TARIFF_HISTORY_NOTICE | typeof TARIFF_CHANGES_NOTICE) {
+  return { disclaimer: DISCLAIMERS.en, notice, coverage: tariffCoverage(h), tariff_application_url: TARIFF_APPLICATION_URL, sources: TARES_SOURCE_IDS.map(sourceRef) };
+}
+
+function tariffHistoryUnavailable(c: Context) {
+  c.header("Cache-Control", "no-store");
+  return c.json({ error: "tariff_history_unavailable", disclaimer: DISCLAIMERS.en, tariff_application_url: TARIFF_APPLICATION_URL }, 503);
+}
+
+function noArchive(c: Context, h: TariffHistory, date: string, parameter: string) {
+  c.header("Cache-Control", "public, max-age=300");
+  // Une version qui existe sans pouvoir être servie est nommée : « pas d'archive servie », pas « aucune archive ».
+  const unavailable = h.unavailable.filter((v) => v.date <= date);
+  return c.json({ error: "no_archive_for_date", parameter, date, unavailable_versions: unavailable, ...tariffContext(h, TARIFF_HISTORY_NOTICE) }, 404);
+}
+
+apiV1Route.get("/tariff/changes", (c) => {
+  const limited = enforceRateLimit(c, DATA_LIMIT);
+  if (limited) return limited;
+  const from = c.req.query("from");
+  const to = c.req.query("to");
+  if (!isCalendarDate(from) || !isCalendarDate(to)) return c.json({ error: "invalid_date" }, 400);
+  if (from > to) return c.json({ error: "invalid_range" }, 400);
+  const pagination = parseDatasetPagination(c.req.query());
+  if (!pagination.ok) return c.json({ error: pagination.error }, 400);
+  const h = getTariffHistory();
+  if (!h) return tariffHistoryUnavailable(c);
+  const fromIndex = versionIndexAt(h, from);
+  if (fromIndex < 0) return noArchive(c, h, from, "from");
+  const toIndex = versionIndexAt(h, to);
+
+  const changes = compareVersions(h, fromIndex, toIndex);
+  const totals = { added: 0, removed: 0, rates_changed: 0, other_fields_changed: 0 };
+  for (const change of changes) totals[change.kind] += 1;
+  const page = changes.slice(pagination.offset, pagination.offset + pagination.limit);
+
+  c.header("Cache-Control", "public, max-age=3600");
+  return c.json({
+    from: { requested_date: from, ...versionRef(h, fromIndex) },
+    to: { requested_date: to, ...versionRef(h, toIndex) },
+    same_version: fromIndex === toIndex,
+    compared_on: "line_summary",
+    totals,
+    total: changes.length,
+    limit: pagination.limit,
+    offset: pagination.offset,
+    changes: page.map((change) => ({ hs8: change.hs8, kind: change.kind, changed_fields: change.changed_fields, before: serveChangeSide(change.before), after: serveChangeSide(change.after) })),
+    gaps: gapsBetween(h, fromIndex, toIndex, to).map((gap) => tariffGap(gap)),
+    ...tariffContext(h, TARIFF_CHANGES_NOTICE),
+  });
+});
+
+apiV1Route.get("/tariff/:code/at", (c) => {
+  const limited = enforceRateLimit(c, DATA_LIMIT);
+  if (limited) return limited;
+  const raw = c.req.param("code");
+  const hs8 = raw.length <= 20 ? raw.replace(/[\s.]/g, "") : "";
+  if (!/^\d{8}$/.test(hs8)) return c.json({ error: "invalid_tariff_number" }, 400);
+  const date = c.req.query("date");
+  if (!isCalendarDate(date)) return c.json({ error: "invalid_date" }, 400);
+  const h = getTariffHistory();
+  if (!h) return tariffHistoryUnavailable(c);
+  const index = versionIndexAt(h, date);
+  if (index < 0) return noArchive(c, h, date, "date");
+
+  const used = versionRef(h, index);
+  const next = h.versions[index + 1] ? versionRef(h, index + 1) : null;
+  const line = lineAtVersion(h, index, hs8);
+  const archive = {
+    ...used,
+    days_after_archive: daysBetween(used.date, date),
+    next_archive: next ? { ...next, line_changed: lineChangedBetween(h, index, index + 1, hs8) } : null,
+    later_changes: next ? null : "No later archive: later changes are unknown.",
+  };
+  const gap = tariffGap(gapAfter(h, index, date));
+  // Absente de la version utilisée : aucun repli sur une autre version.
+  if (!line) {
+    c.header("Cache-Control", "public, max-age=300");
+    return c.json({ error: "tariff_line_not_found", hs8, date, archive, gap, ...tariffContext(h, TARIFF_HISTORY_NOTICE) }, 404);
+  }
+  c.header("Cache-Control", "public, max-age=3600");
+  return c.json({ hs8, date, archive, gap, line: serveLine(hs8, line), ...tariffContext(h, TARIFF_HISTORY_NOTICE) });
 });
 
 // --- GET /api/v1/sources -------------------------------------------------------------
