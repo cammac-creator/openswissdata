@@ -91,8 +91,8 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
     name: path
       .replace(/^\/api\/(download|delivery)\/.*/, "/api/$1/:token")
       .replace(/^\/api\/v1\/company\/.*/, "/api/v1/company/:uid")
-      // Le type de route seulement : le numéro de tarif est un texte libre de l'appelant.
-      .replace(/^\/api\/v1\/tariff\/[^/]+\/at$/, "/api/v1/tariff/:code/at"),
+      // Le type de route seulement : tout ce qui suit est un texte libre de l'appelant, y compris sur un 404.
+      .replace(/^\/api\/v1\/tariff\/(?!changes$).*/, "/api/v1/tariff/:code"),
     status: c.res.status,
     duration_ms,
     customer_id,

@@ -284,7 +284,7 @@ const TARIFF_HISTORY_NOTICE = {
   what_this_is: "The tariff line as OpenSwissData archived it in the version named here, which holds what the BAZG published as in force on its collection day. This is not a statement of the law in force on the requested date: a change that took effect between two versions shows only from the next version.",
   summary: "Summary of the line. Conditional variants are left out, and no lowest value is picked among them. A duty_mfn with null values, or a regime absent from preferential_regimes, means the summary has no single value: it never means duty-free. Values keep their published unit. Check origin, quotas and conditions in the Tares application of the BAZG.",
   fields: "valid_from is the start of validity of the tariff number, not of the duty. restrictions_codes is not filled in this format: an empty list says nothing about restrictions. unit_stat is a legacy alias for the duty unit.",
-  older_archives: "Archives older than coverage.first_archive are not served: they used an earlier format that picked one value among conditional variants.",
+  older_archives: "Archives older than coverage.first_archive are not served: those before 2026-09-25 used an earlier format that picked one value among conditional variants, and only the most recent versions are kept.",
 } as const;
 const TARIFF_CHANGES_NOTICE = {
   ...TARIFF_HISTORY_NOTICE,

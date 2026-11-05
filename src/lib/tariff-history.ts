@@ -12,17 +12,19 @@
  *   déjà 118 Mo et chaque semaine en ajoute 13 ; le plafond atteint, c'est la lecture de la
  *   version courante qui échouerait (incident du 07.10.2026).
  * - Pas de `dataset_snapshots` : cinq champs par version seulement, ni préférences ni allègements.
- * - Pas de `tares_rates.csv` : environ 3 s d'analyse par version et plusieurs Go de mémoire.
+ * - Pas de `tares_rates.csv` : de 1,7 à 2,2 s d'analyse par version, un tas de 79 à 322 Mo et un
+ *   pic de 559 Mo de RSS (environ 2,2 Go seulement pour neuf versions gardées ensemble).
  *   Les réponses portent donc sur le résumé de chaque ligne, et elles le disent.
  *
  * Une archive se contrôle entière (taille, empreinte, format, lignes) ou n'est pas servie.
  * L'objet R2 de 2026.05.03 ne correspond pas à l'empreinte enregistrée : le cas existe.
  * Les archives sont immuables : une version chargée ne se retélécharge pas avant un redémarrage,
- * qui relit environ 13 Mo par version servie, l'une après l'autre.
+ * qui relit environ 13 Mo par version servie, l'une après l'autre. Sans borne, ce coût croîtrait
+ * chaque semaine : voir `TARIFF_HISTORY_MAX_VERSIONS`.
  */
 import { createHash } from "node:crypto";
 import { parse } from "csv-parse/sync";
-import { extractCsvFromZip } from "../mcp/r2-refresh.js";
+import { extractCsvFromZip, refreshTaresFromR2 } from "../mcp/r2-refresh.js";
 import { getDb } from "./db.js";
 import { getObjectBuffer } from "./r2.js";
 
@@ -30,6 +32,13 @@ import { getObjectBuffer } from "./r2.js";
 export const TARIFF_HISTORY_FIRST_VERSION = "2026.09.25";
 /** La collecte passe chaque semaine : au-delà de ce nombre de jours sans archive, c'est un trou. */
 export const TARIFF_HISTORY_MAX_INTERVAL_DAYS = 8;
+/**
+ * Versions gardées, les plus récentes : environ six mois à une version par semaine. Le démarrage
+ * relit chaque version gardée (mesure du 05.11.2026 : 9 versions en 28 s sur dory, 13 Mo chacune,
+ * 17 Mo de tas retenus) ; 26 versions bornent donc la lecture à environ 350 Mo et 80 s (estimation).
+ * Allonger cette fenêtre demanderait d'abord un cache dérivé qui évite de tout relire.
+ */
+export const TARIFF_HISTORY_MAX_VERSIONS = 26;
 
 const LINE_FIELDS = [
   "hs6", "chapter", "heading",
@@ -52,7 +61,6 @@ const DAY_MS = 86_400_000;
 const FETCH_TIMEOUT_MS = 60_000;
 const CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const REFRESH_INTERVAL_MS = 12 * 60 * 60 * 1000;
-const FIRST_PASS_DELAY_MS = 60_000;
 
 interface ArchivedVersion {
   version: string;
@@ -190,16 +198,45 @@ interface VersionRow {
   size_bytes: number;
 }
 
+/** Oublie les versions sorties de la fenêtre, et les lignes que plus aucune version ne porte. */
+function forgetVersionsOutside(kept: ReadonlySet<string>): void {
+  let forgotten = false;
+  for (const version of loaded.keys()) {
+    if (kept.has(version)) continue;
+    loaded.delete(version);
+    forgotten = true;
+  }
+  if (!forgotten) return;
+  // Mêmes objets conservés : la comparaison par référence reste juste entre les versions gardées.
+  distinctLines.clear();
+  for (const [hs8, position] of lineIndex) {
+    const lines = new Set<ArchivedLine>();
+    for (const version of loaded.values()) {
+      const line = version.lines[position];
+      if (line) lines.add(line);
+    }
+    if (lines.size > 0) distinctLines.set(hs8, [...lines]);
+  }
+}
+
 async function runPass(): Promise<void> {
   lastPassAt = Date.now();
   if (!process.env.R2_ACCOUNT_ID || !process.env.R2_BUCKET) return;
   const rows = getDb()
-    .prepare("SELECT version, r2_key, sha256, size_bytes FROM versions WHERE dataset_id='tares' ORDER BY released_at ASC")
+    .prepare("SELECT version, r2_key, sha256, size_bytes FROM versions WHERE dataset_id='tares'")
     .all() as VersionRow[];
+  // Les plus récentes d'abord. Une version non servie compte dans la fenêtre : elle reste nommée.
+  const window = rows
+    .flatMap((row) => {
+      const date = versionDate(row.version);
+      return date && row.version >= TARIFF_HISTORY_FIRST_VERSION ? [{ version: row.version, date, row }] : [];
+    })
+    .sort((a, b) => versionOrder(b, a))
+    .slice(0, TARIFF_HISTORY_MAX_VERSIONS);
+  forgetVersionsOutside(new Set(window.map((entry) => entry.version)));
   const unavailable: VersionRef[] = [];
-  for (const row of rows) {
-    const date = versionDate(row.version);
-    if (!date || row.version < TARIFF_HISTORY_FIRST_VERSION || loaded.has(row.version)) continue;
+  for (const { row, date } of window) {
+    if (loaded.has(row.version)) continue;
     if (refused.has(row.version)) {
       unavailable.push({ version: row.version, date });
       continue;
@@ -251,10 +288,14 @@ export function refreshTariffHistory(): Promise<void> {
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
-/** Premier passage après la version courante, puis toutes les 12 h ; toutes les 10 min tant que rien n'est servi. */
+/**
+ * Premier passage une fois la version courante chargée, jamais en même temps qu'elle ; puis toutes
+ * les 12 h, et toutes les 10 min tant que rien n'est servi. Si le chargement de la version courante
+ * est déjà en cours, cet appel s'y raccroche ; le passage de plus qu'il provoque s'arrête à sa version déjà lue.
+ */
 export function startTariffHistoryRefresh(): void {
   if (timer) return;
-  setTimeout(() => void refreshTariffHistory(), FIRST_PASS_DELAY_MS).unref?.();
+  void refreshTaresFromR2().then(refreshTariffHistory);
   timer = setInterval(() => {
     if (lastPassAt !== 0 && (!history || Date.now() - lastPassAt >= REFRESH_INTERVAL_MS)) void refreshTariffHistory();
   }, CHECK_INTERVAL_MS);

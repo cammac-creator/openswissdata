@@ -16,7 +16,9 @@ vi.mock("../../src/lib/r2.js", () => ({ getObjectBuffer: download }));
 import { createApp } from "../../src/index.js";
 import { _resetApiRateLimit } from "../../src/lib/api-rate-limit.js";
 import { closeDb, getDb } from "../../src/lib/db.js";
-import { _resetTariffHistoryForTest, refreshTariffHistory, startTariffHistoryRefresh } from "../../src/lib/tariff-history.js";
+import { _resetTariffHistoryForTest, getTariffHistory, refreshTariffHistory, startTariffHistoryRefresh, TARIFF_HISTORY_MAX_VERSIONS } from "../../src/lib/tariff-history.js";
+import { _resetDataLoaderCache } from "../../src/mcp/data-loader.js";
+import { _resetFreshnessForTest } from "../../src/mcp/r2-refresh.js";
 import { DISCLAIMERS } from "../../src/mcp/tools/tariff-lookup.js";
 
 const HEADER = "hs8,hs6,chapter,heading,designation_fr,designation_de,designation_it,designation_en,unit_stat,duty_mfn_value,duty_mfn_unit,duty_mfn_currency,preferential_regimes,restrictions_codes,customs_relief_codes,valid_from,duty_rates_count,source_url";
@@ -83,6 +85,8 @@ beforeEach(() => {
   getDb().prepare("INSERT INTO datasets(id,name,slug,price_chf,stripe_price_id,created_at) VALUES('tares','TARES','tares',0,'fictif',?)").run(1);
   _resetApiRateLimit();
   _resetTariffHistoryForTest();
+  _resetFreshnessForTest();
+  _resetDataLoaderCache();
   objects.clear();
   released = 0;
   download.mockReset();
@@ -96,6 +100,8 @@ beforeEach(() => {
 });
 afterEach(() => {
   _resetTariffHistoryForTest();
+  _resetFreshnessForTest();
+  _resetDataLoaderCache();
   vi.useRealTimers();
   closeDb();
   rmSync(tmp, { recursive: true, force: true });
@@ -276,7 +282,12 @@ describe("archives refusées : jamais servies", () => {
   it("une panne de lecture se retente au passage suivant, une version chargée ne se retélécharge pas", async () => {
     await publish("2026.09.28", [{ hs8: CODE, value: "4" }]);
     await publish("2026.10.05", [{ hs8: CODE, value: "5" }]);
-    download.mockImplementationOnce(async () => { throw new Error("secret-fournisseur"); });
+    const bytes = objects.get("tares/2026.09.28/tares.zip");
+    let failures = 1;
+    download.mockImplementation(async (key: string) => {
+      if (key === "tares/2026.09.28/tares.zip" && failures-- > 0) throw new Error("secret-fournisseur");
+      return key === "tares/2026.09.28/tares.zip" ? bytes : objects.get(key);
+    });
     const errors = vi.spyOn(console, "error").mockImplementation(() => {});
     await refreshTariffHistory();
     expect(errors.mock.calls.flat().join(" ")).not.toContain("secret-fournisseur");
@@ -417,13 +428,23 @@ describe("lecture seule et disponibilité", () => {
     expect(count()).toEqual(before);
   });
 
-  it("la mesure ne garde que le type de route, jamais le texte libre de l'appelant", async () => {
+  it("la mesure ne garde que le type de route, jamais le texte libre de l'appelant, même sur un 404", async () => {
     await threeVersions();
-    await get("/api/v1/tariff/texte-libre-appelant/at?date=2026-10-01");
-    await get(`/api/v1/tariff/${CODE}/at?date=2026-10-01`);
+    const paths = [
+      "/api/v1/tariff/texte-libre-appelant/at?date=2026-10-01",
+      `/api/v1/tariff/${CODE}/at?date=2026-10-01`,
+      `/api/v1/tariff/${CODE}/at/`,
+      `/api/v1/tariff/${CODE}`,
+      `/api/v1/tariff/${CODE}/`,
+      `/api/v1/tariff/${CODE}/texte-libre-appelant`,
+      "/api/v1/tariff/changes?from=2026-09-28&to=2026-10-19",
+    ];
+    for (const path of paths) await get(path);
     await new Promise((resolve) => setImmediate(resolve));
     const names = (getDb().prepare("SELECT name FROM events WHERE kind='api_request'").all() as { name: string }[]).map((row) => row.name);
-    expect(names).toContain("/api/v1/tariff/:code/at");
+    expect(names).toHaveLength(paths.length);
+    expect(names.filter((name) => name === "/api/v1/tariff/:code")).toHaveLength(paths.length - 1);
+    expect(names).toContain("/api/v1/tariff/changes");
     expect(names.join(" ")).not.toContain("texte-libre-appelant");
     expect(names.join(" ")).not.toContain(CODE);
   });
@@ -445,17 +466,68 @@ describe("lecture seule et disponibilité", () => {
     }
   });
 
-  it("le démarrage n'attend rien : premier passage différé, puis contrôle périodique", async () => {
+  it("le démarrage enchaîne après la version courante, jamais en même temps qu'elle", async () => {
     await publish("2026.09.28", [{ hs8: CODE }]);
+    getDb().prepare("UPDATE datasets SET current_version='2026.09.28' WHERE id='tares'").run();
     vi.useRealTimers();
-    vi.useFakeTimers({ toFake: ["setTimeout", "setInterval", "clearInterval", "Date"] });
+    const key = "tares/2026.09.28/tares.zip";
+    const bytes = objects.get(key);
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    download.mockImplementationOnce(async () => { await gate; return bytes; });
     startTariffHistoryRefresh();
     startTariffHistoryRefresh();
-    expect(download).not.toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(61_000);
-    vi.useRealTimers();
     await vi.waitFor(() => expect(download).toHaveBeenCalledOnce());
+    for (let i = 0; i < 5; i += 1) await new Promise((resolve) => setImmediate(resolve));
+    expect(download).toHaveBeenCalledOnce();
+    expect(getTariffHistory()).toBeNull();
+    release();
+    await vi.waitFor(() => expect(getTariffHistory()).not.toBeNull());
+    expect(download).toHaveBeenCalledTimes(2);
+    expect(download.mock.calls.map(([called]) => called)).toEqual([key, key]);
+  });
+});
+
+describe("fenêtre de versions gardées", () => {
+  const nthVersion = (n: number) => new Date(Date.UTC(2026, 9, 1 + n)).toISOString().slice(0, 10).replace(/-/g, ".");
+  const isoOf = (version: string) => version.replace(/\./g, "-");
+
+  it("garde les 26 plus récentes, ne télécharge pas les autres, et l'oublie au fil des publications", { timeout: 60_000 }, async () => {
+    expect(TARIFF_HISTORY_MAX_VERSIONS).toBe(26);
+    const total = TARIFF_HISTORY_MAX_VERSIONS + 2;
+    for (let n = 0; n < total; n += 1) await publish(nthVersion(n), [{ hs8: CODE, value: "4" }]);
     await refreshTariffHistory();
+
+    const keys = download.mock.calls.map(([key]) => key as string);
+    expect(keys).toHaveLength(TARIFF_HISTORY_MAX_VERSIONS);
+    expect(keys[0]).toBe(`tares/${nthVersion(total - 1)}/tares.zip`);
+    expect(keys).not.toContain(`tares/${nthVersion(0)}/tares.zip`);
+    expect(keys).not.toContain(`tares/${nthVersion(1)}/tares.zip`);
+    const body = await (await get(`/api/v1/tariff/${CODE}/at?date=${isoOf(nthVersion(2))}`)).json();
+    expect(body.archive.version).toBe(nthVersion(2));
+    expect(body.coverage).toMatchObject({ first_archive: { version: nthVersion(2) }, archives_served: TARIFF_HISTORY_MAX_VERSIONS });
+    expect(body.notice.older_archives).toContain("only the most recent versions are kept");
+    expect((await get(`/api/v1/tariff/${CODE}/at?date=${isoOf(nthVersion(1))}`)).status).toBe(404);
+
+    // Une publication de plus : un seul téléchargement, la plus ancienne sort, les lignes identiques restent identiques.
+    download.mockClear();
+    const next = nthVersion(total);
+    await publish(next, [{ hs8: CODE, value: "9" }]);
+    await refreshTariffHistory();
+    expect(download.mock.calls.map(([key]) => key)).toEqual([`tares/${next}/tares.zip`]);
+    expect((await get(`/api/v1/tariff/${CODE}/at?date=${isoOf(nthVersion(2))}`)).status).toBe(404);
+    const after = await (await get(`/api/v1/tariff/${CODE}/at?date=${isoOf(next)}`)).json();
+    expect(after.coverage).toMatchObject({ first_archive: { version: nthVersion(3) }, archives_served: TARIFF_HISTORY_MAX_VERSIONS });
+    const same = await (await get(`/api/v1/tariff/changes?from=${isoOf(nthVersion(3))}&to=${isoOf(nthVersion(total - 1))}`)).json();
+    expect(same.total).toBe(0);
+    const moved = await (await get(`/api/v1/tariff/changes?from=${isoOf(nthVersion(3))}&to=${isoOf(next)}`)).json();
+    expect(moved.total).toBe(1);
+    expect(moved.changes[0]).toMatchObject({ hs8: CODE, kind: "rates_changed", before: { duty_mfn: { value: 4 } }, after: { duty_mfn: { value: 9 } } });
+    // Après l'oubli, une ligne déjà vue réutilise toujours le même objet : pas de faux changement.
+    const last = nthVersion(total + 1);
+    await publish(last, [{ hs8: CODE, value: "9" }]);
+    await refreshTariffHistory();
+    expect((await (await get(`/api/v1/tariff/changes?from=${isoOf(next)}&to=${isoOf(last)}`)).json()).total).toBe(0);
   });
 });
 
