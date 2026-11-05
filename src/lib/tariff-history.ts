@@ -33,7 +33,7 @@ export const TARIFF_HISTORY_FIRST_VERSION = "2026.09.25";
 /** La collecte passe chaque semaine : au-delà de ce nombre de jours sans archive, c'est un trou. */
 export const TARIFF_HISTORY_MAX_INTERVAL_DAYS = 8;
 /**
- * Versions gardées, les plus récentes : environ six mois à une version par semaine. Le démarrage
+ * Versions gardées, les plus récentes : environ cinq mois au rythme des collectes (64 versions par an au plus). Le démarrage
  * relit chaque version gardée (mesure du 05.11.2026 : 9 versions en 28 s sur dory, 13 Mo chacune,
  * 17 Mo de tas retenus) ; 26 versions bornent donc la lecture à environ 350 Mo et 80 s (estimation).
  * Allonger cette fenêtre demanderait d'abord un cache dérivé qui évite de tout relire.
