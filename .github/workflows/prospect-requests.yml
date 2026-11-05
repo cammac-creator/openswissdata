@@ -16,10 +16,10 @@ name: Demandes de licence aux distributeurs officiels (opendata.swiss)
 #   3. Rapport public (SANS secret) : `docs/data-status/demandes.json` (UUID, éditeur, date, statut),
 #      vérifié puis committé (un push par GITHUB_TOKEN ne relance jamais ci.yml).
 # Un déclenchement manuel est une SIMULATION par défaut : étape 1 seulement, résumé sans adresse.
+#
+# Passage planifié retiré le 05.11.2026, décision de Claude-Alain : plus de nouvelle lettre de
+# permission. Reste un déclenchement manuel, en simulation par défaut.
 on:
-  schedule:
-    # Mardi 06:41 UTC, minute non ronde, le lendemain de la prospection du lundi (05:37 UTC).
-    - cron: "41 6 * * 2"
   workflow_dispatch:
     inputs:
       simulation:
