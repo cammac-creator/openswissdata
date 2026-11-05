@@ -31,11 +31,10 @@ describe("docs/data-status/demandes.json (public)", () => {
 describe(".github/workflows/prospect-requests.yml", () => {
   const yml = read(".github/workflows/prospect-requests.yml");
 
-  it("tourne dans l'environnement « collecte », chaque semaine à une minute non ronde", () => {
+  it("tourne dans l'environnement « collecte » ; plus aucun passage planifié (décision du 05.11.2026)", () => {
     expect(yml).toMatch(/environment: collecte/);
-    const cron = /cron: "(\d+) (\d+) \* \* (\d)"/.exec(yml);
-    expect(cron).not.toBeNull();
-    expect(Number(cron![1]) % 5).not.toBe(0);
+    expect(yml).not.toMatch(/^\s*schedule:/m);
+    expect(yml).not.toMatch(/^\s*- cron:/m);
   });
 
   it("un déclenchement manuel est une simulation par défaut", () => {
@@ -64,10 +63,10 @@ describe(".github/workflows/prospect-requests.yml", () => {
     expect(adds).toEqual(["docs/data-status/demandes.json"]);
   });
 
-  it("est suivie par la veille des tâches planifiées", () => {
+  it("n'est plus suivie par la veille : elle n'a plus de passage planifié", () => {
     const source = read("src/lib/workflow-watch.ts");
     const bloc = source.slice(source.indexOf("const SCHEDULED"), source.indexOf("] as const", source.indexOf("const SCHEDULED")));
-    expect(bloc).toContain("'prospect-requests.yml'");
+    expect(bloc).not.toContain("'prospect-requests.yml'");
     expect(existsSync(new URL(".github/workflows/prospect-requests.yml", root))).toBe(true);
   });
 });
