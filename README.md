@@ -13,6 +13,7 @@
 | --- | --- | --- |
 | `tariff_lookup` | Free, no key | Swiss customs tariff line for an 8-digit tariff number (MFN duty, preferential regimes, restrictions, relief codes), or the Swiss lines under a 2- to 7-digit HS prefix |
 | `kyc_check` | Free, no key | FINMA register of supervised institutions and FINMA warning list, searched by name, closest matches first |
+| `company_check` | Free, no key | Swiss company by UID (CHE-xxx.xxx.xxx): commercial register, FINMA and LEI records, each fact with its source |
 | `cross_walk` | Free, no key | Correspondence of an activity code between NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4, with the relation type and its source |
 | `tariff_semantic_search` | Free trial, no key (20 calls/day in total) | TARES lines from a description in French, German, Italian or English, using each line's official hierarchy |
 | `tariff_changelog` | Existing access grant | MFN duty history of a tariff number across archived releases |
@@ -20,7 +21,7 @@
 | `finma_search` | Free trial, no key (20 calls/day in total) | FINMA register search tolerant of accents, legal forms and typos, each match labelled with its type |
 | `entity_history` | Existing access grant | Change history of a FINMA-supervised entity by Swiss UID |
 
-New Pro subscriptions are closed; the three free tools and the search trial need no sign-up. The endpoint accepts browser calls (CORS, any origin, no cookies).
+New Pro subscriptions are closed; the four free tools and the search trial need no sign-up. The endpoint accepts browser calls (CORS, any origin, no cookies).
 
 ---
 

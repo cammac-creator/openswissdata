@@ -111,7 +111,10 @@ describe("Essai sans clé des outils de recherche", () => {
       expect(text).toContain(`retry after ${result.trial?.retry_after_seconds} seconds`);
       expect(text).toContain("kyc_check");
       expect(text).toContain("closed to new subscribers");
-      expect(JSON.stringify(body)).not.toMatch(/openswissdata|localhost|pricing|upgrade|checkout|signed files/i);
+      // Décision du 05.11.2026 : un seul lien, « être prévenu », jamais un lien d'achat ni un prix.
+      const NOTIFY_ME = "https://www.openswissdata.com/en/finma-movements";
+      expect(text).toContain(NOTIFY_ME);
+      expect(JSON.stringify(body).replaceAll(NOTIFY_ME, "")).not.toMatch(/openswissdata|localhost|pricing|upgrade|checkout|signed files|CHF/i);
       expect(result.trial).toMatchObject({ remaining: 0, used: 20, limit: 20 });
       expect(result.trial?.resets_at).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
 
