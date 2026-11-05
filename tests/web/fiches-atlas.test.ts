@@ -125,7 +125,7 @@ describe("Promesses retirées des fiches", () => {
       expect(source, `${file} ${pattern}`).not.toMatch(pattern);
     }
   });
-  it("la fiche en vente garde un paiement unique et ses conditions, sans clé MCP payante annoncée", () => {
+  it("la fiche en vente garde un paiement unique et ses conditions", () => {
     const source = read("components/TaresProduct.astro");
     expect(source).toContain('action="/api/checkout/start"');
     expect(source).toContain("<CheckoutNotice />");
