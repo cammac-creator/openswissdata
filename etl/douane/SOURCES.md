@@ -69,8 +69,8 @@ Mesure du 05.11.2026 sur les vrais fichiers, publiés le 20.10.2026, mis à jour
 
 **L'écart sur les droits est mesuré et non expliqué.** La statistique et la comptabilité de la Confédération ne couvrent pas
 forcément la même chose ; nous ne savons pas pourquoi elles diffèrent et l'écart monte à environ 13 % avant 2024
-(1 340 M contre 1 184 M en 2023, repère lu dans un extrait de recherche, non relu dans le compte). Le fichier est donc
-juste au franc près pour la valeur, et sa colonne de droits n'est recoupée qu'à quelques pour cent. Ne jamais présenter
+(1 340 M contre 1 184 M en 2023, repère lu dans un extrait de recherche, non relu dans le compte). La valeur est donc
+recoupée à 0,06 % du communiqué, et au franc près entre les deux fichiers ; la colonne des droits ne l'est qu'à quelques pour cent. Ne jamais présenter
 ces droits comme les recettes du compte de la Confédération.
 
 Le document retrouve aussi, aux mêmes chiffres, un exemple calculé à part sur le fichier source le 03.11.2026 : vin (2204) importé
