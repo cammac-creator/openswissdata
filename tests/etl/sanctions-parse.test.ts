@@ -138,11 +138,16 @@ describe("contrôles avant écriture", () => {
   it("sous le plancher : arrêt", () => {
     expect(() => checkSanctionsDocument(doc, { now: NOW, previous: null, acceptDrop: false })).toThrow(SanctionsControlError);
   });
-  it("liste trop ancienne : arrêt", () => {
-    expect(() => checkSanctionsDocument(big, { now: NOW + 5 * 86_400_000, previous: null, acceptDrop: false })).toThrow(SanctionsControlError);
+  it("une liste que le SECO ne change pas pendant des semaines reste acceptée", () => {
+    expect(() => checkSanctionsDocument(big, { now: NOW + 40 * 86_400_000, previous: null, acceptDrop: false })).not.toThrow();
+  });
+  it("date sans aucun sens, ou qui recule : arrêt", () => {
+    expect(() => checkSanctionsDocument(big, { now: NOW + 500 * 86_400_000, previous: null, acceptDrop: false })).toThrow(SanctionsControlError);
+    expect(() => checkSanctionsDocument(big, { now: NOW - 5 * 86_400_000, previous: null, acceptDrop: false })).toThrow(SanctionsControlError);
+    expect(() => checkSanctionsDocument(big, { now: NOW, previous: { organisations: 2872, vessels: 708, list_date: "2026-11-05" }, acceptDrop: false })).toThrow(/recule/);
   });
   it("baisse de plus de 15 % : arrêt, sauf adoption explicite", () => {
-    const previous = { organisations: 4000, vessels: 708 };
+    const previous = { organisations: 4000, vessels: 708, list_date: "2026-11-01" };
     expect(() => checkSanctionsDocument(big, { now: NOW, previous, acceptDrop: false })).toThrow(SanctionsControlError);
     expect(() => checkSanctionsDocument(big, { now: NOW, previous, acceptDrop: true })).not.toThrow();
   });

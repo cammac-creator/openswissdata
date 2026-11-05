@@ -24,26 +24,17 @@ import { gzipSync } from "node:zlib";
 import { getObjectBuffer, putObjectBytes } from "../../src/lib/r2.js";
 import { decodeSanctionsObject, SANCTIONS_R2_KEY, type SanctionsDocument } from "../../src/lib/sanctions.js";
 import { buildSanctionsDocument, checkSanctionsDocument } from "./build.js";
+import { downloadWithRetries, safeErrorCode } from "./download.js";
 import { MAX_XML_CHARS, parseSesamXml } from "./parse.js";
 import { SESAM_XML_URL } from "./sources.js";
 
-const FETCH_TIMEOUT_MS = 180_000;
 const USER_AGENT = "OpenSwissData-collecte-sanctions/1";
 
-async function downloadSource(): Promise<Buffer> {
-  const res = await fetch(SESAM_XML_URL, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
-  if (!res.ok) throw new Error(`Source SESAM : HTTP ${res.status}`);
-  const type = res.headers.get("content-type") ?? "";
-  if (!/xml/i.test(type)) throw new Error("Source SESAM : type de contenu inattendu");
-  const bytes = Buffer.from(await res.arrayBuffer());
-  if (bytes.length > MAX_XML_CHARS) throw new Error("Source SESAM : fichier trop volumineux");
-  return bytes;
-}
-
 /** `null` seulement quand l'objet n'existe pas encore : toute autre panne arrête le passage. */
-async function readPreviousCounts(): Promise<SanctionsDocument["counts"] | null> {
+async function readPrevious(): Promise<(SanctionsDocument["counts"] & { list_date: string }) | null> {
   try {
-    return decodeSanctionsObject(await getObjectBuffer(SANCTIONS_R2_KEY, { maxBytes: 30_000_000 })).counts;
+    const doc = decodeSanctionsObject(await getObjectBuffer(SANCTIONS_R2_KEY, { maxBytes: 30_000_000 }));
+    return { ...doc.counts, list_date: doc.list_date };
   } catch (err) {
     if (err instanceof Error && (err.name === "NoSuchKey" || err.name === "NotFound")) return null;
     throw new Error("Version précédente illisible : passage arrêté");
@@ -65,9 +56,15 @@ function parseArgs(argv: string[]): Args {
   return args;
 }
 
+let stage = "démarrage";
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
-  const bytes = args.fromFile ? readFileSync(args.fromFile) : await downloadSource();
+  stage = "téléchargement";
+  const bytes = args.fromFile
+    ? readFileSync(args.fromFile)
+    : await downloadWithRetries({ url: SESAM_XML_URL, userAgent: USER_AGENT, maxBytes: MAX_XML_CHARS });
+  stage = "lecture";
   const now = Date.now();
   const parsed = parseSesamXml(bytes.toString("utf8"));
   const doc = buildSanctionsDocument(parsed, {
@@ -75,7 +72,9 @@ async function main(): Promise<void> {
     bytes: bytes.length,
     collectedAt: new Date(now).toISOString(),
   });
-  const previous = args.writeR2 ? await readPreviousCounts() : null;
+  stage = "version précédente";
+  const previous = args.writeR2 ? await readPrevious() : null;
+  stage = "contrôles";
   checkSanctionsDocument(doc, { now, previous, acceptDrop: args.acceptDrop });
 
   const gzipped = gzipSync(Buffer.from(JSON.stringify(doc), "utf8"));
@@ -97,6 +96,7 @@ async function main(): Promise<void> {
     writeFileSync(join(args.out, "sanctions-v1.json"), JSON.stringify(doc));
   }
   if (args.writeR2) {
+    stage = "écriture R2";
     await putObjectBytes(SANCTIONS_R2_KEY, gzipped, "application/gzip");
     console.log("écrit dans R2 : sanctions/or");
   }
@@ -104,7 +104,8 @@ async function main(): Promise<void> {
 
 main().catch((err: unknown) => {
   // Nos erreurs ont un message fixe ; une autre pourrait citer un extrait du contenu.
-  const known = err instanceof Error && (err.name === "SesamXmlError" || err.name === "SanctionsControlError" || err.message.startsWith("Source SESAM") || err.message.startsWith("Version précédente") || err.message.startsWith("Argument") || err.message.startsWith("--write-r2"));
-  console.error(known ? (err as Error).message : `Échec de la collecte des sanctions (${err instanceof Error ? err.name : "Error"})`);
+  const known = err instanceof Error && (err.name === "SesamXmlError" || err.name === "SanctionsControlError" || err.name === "SesamDownloadError" || err.message.startsWith("Version précédente") || err.message.startsWith("Argument") || err.message.startsWith("--write-r2"));
+  const code = safeErrorCode(err);
+  console.error(known ? (err as Error).message : `Échec de la collecte des sanctions, étape ${stage} (${err instanceof Error ? err.name : "Error"}${code ? ` ${code}` : ""})`);
   process.exit(1);
 });

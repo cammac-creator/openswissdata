@@ -25,8 +25,12 @@ export const MIN_ORGANISATIONS = 2_000;
 export const MIN_VESSELS = 400;
 export const MAX_DROP_RATIO = 0.15;
 export const MAX_VESSELS_WITHOUT_IMO_RATIO = 0.05;
-/** Jamais une liste ancienne relue comme nouvelle : le fichier porte la date du jour de sa génération. */
-export const MAX_LIST_AGE_DAYS = 2;
+/**
+ * La date du fichier n'est pas celle du jour : relevé le 05.11.2026 après minuit, même empreinte et
+ * même date que la veille. Une liste qui ne change pas reste donc juste ; seule une date qui recule
+ * ou qui n'a aucun sens arrête. La fraîcheur se mesure sur le dernier relevé réussi (`collected_at`).
+ */
+export const MAX_LIST_AGE_DAYS = 400;
 
 export class SanctionsControlError extends Error {
   constructor(reason: string) {
@@ -92,10 +96,11 @@ export function buildSanctionsDocument(
 /** Contrôles avant toute écriture. `previous` : comptes de la version servie, `null` à la première collecte. */
 export function checkSanctionsDocument(
   doc: SanctionsDocument,
-  opts: { now: number; previous: { organisations: number; vessels: number } | null; acceptDrop: boolean },
+  opts: { now: number; previous: { organisations: number; vessels: number; list_date: string } | null; acceptDrop: boolean },
 ): void {
   const age = (opts.now - Date.parse(`${doc.list_date}T00:00:00Z`)) / 86_400_000;
-  if (age > MAX_LIST_AGE_DAYS + 1 || age < -1) throw new SanctionsControlError("date de la liste inattendue");
+  if (age > MAX_LIST_AGE_DAYS || age < -1) throw new SanctionsControlError("date de la liste inattendue");
+  if (opts.previous && doc.list_date < opts.previous.list_date) throw new SanctionsControlError("date de la liste qui recule");
   if (doc.counts.organisations < MIN_ORGANISATIONS) throw new SanctionsControlError("trop peu d'organisations");
   if (doc.counts.vessels < MIN_VESSELS) throw new SanctionsControlError("trop peu de bateaux");
   if (doc.vessels_without_imo > doc.counts.vessels * MAX_VESSELS_WITHOUT_IMO_RATIO) throw new SanctionsControlError("trop de bateaux sans numéro IMO");

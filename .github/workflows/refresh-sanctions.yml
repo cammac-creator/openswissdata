@@ -13,7 +13,7 @@ name: Collecte de la liste des sanctions (SECO, SESAM)
 on:
   schedule:
     # Deux créneaux, minutes non rondes : GitHub omet ou retarde beaucoup de passages planifiés, et
-    # une radiation doit quitter le service sans attendre. La liste porte la date de sa génération.
+    # une radiation doit quitter le service sans attendre.
     - cron: "37 8,20 * * *"
   workflow_dispatch:
     inputs:
@@ -47,7 +47,7 @@ jobs:
       - name: Vérifier avant de lire la source (dont le test de fuite)
         run: |
           npm run typecheck
-          npx vitest run tests/etl/sanctions-parse.test.ts tests/etl/sanctions-fuite.test.ts tests/etl/sources-registry-sanctions.test.ts tests/lib/sanctions.test.ts
+          npx vitest run tests/etl/sanctions-parse.test.ts tests/etl/sanctions-fuite.test.ts tests/etl/sanctions-download.test.ts tests/etl/sources-registry-sanctions.test.ts tests/lib/sanctions.test.ts
       - name: Simulation (déclenchement manuel)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         run: npm run sync:sanctions

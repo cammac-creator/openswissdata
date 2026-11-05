@@ -69,10 +69,21 @@ describe("rechargement depuis R2", () => {
   });
 });
 
-describe("fraîcheur", () => {
+describe("fraîcheur : le dernier relevé réussi, pas la date du fichier", () => {
+  const collected = "2026-11-04T12:00:00.000Z";
   const at = (date: string) => Date.parse(`${date}T12:00:00Z`);
-  it("trois jours : encore actuelle ; quatre : périmée", () => {
-    expect(isSanctionsListCurrent("2026-11-04", at("2026-11-07"))).toBe(true);
-    expect(isSanctionsListCurrent("2026-11-04", at("2026-11-08"))).toBe(false);
+  it("trois jours après le relevé : à jour ; quatre : périmée", () => {
+    expect(isSanctionsListCurrent(collected, at("2026-11-07"))).toBe(true);
+    expect(isSanctionsListCurrent(collected, at("2026-11-08"))).toBe(false);
+  });
+  it("une date illisible n'est jamais à jour", () => {
+    expect(isSanctionsListCurrent("hier", at("2026-11-05"))).toBe(false);
+  });
+  it("une liste ancienne, relue hier, reste servie", () => {
+    const old = { ...clone(), list_date: "2026-09-01", collected_at: collected };
+    expect(isSanctionsListCurrent(validateSanctionsDocument(old).collected_at, at("2026-11-05"))).toBe(true);
+  });
+  it("un document dont la date de relevé est illisible est refusé", () => {
+    expect(() => validateSanctionsDocument({ ...clone(), collected_at: "hier" })).toThrow();
   });
 });

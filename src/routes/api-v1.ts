@@ -229,7 +229,7 @@ apiV1Route.get("/sanctions", (c) => {
   const { document: doc } = loaded;
   c.header("Cache-Control", "public, max-age=300");
   return c.json({
-    status: isSanctionsListCurrent(doc.list_date, Date.now()) ? "current" : "out_of_date",
+    status: isSanctionsListCurrent(doc.collected_at, Date.now()) ? "current" : "out_of_date",
     max_age_days: SANCTIONS_MAX_AGE_DAYS,
     list: { date: doc.list_date, sha256: doc.source_sha256, bytes: doc.source_bytes, collected_at: doc.collected_at },
     entries: doc.counts,
@@ -254,8 +254,8 @@ apiV1Route.get("/sanctions/search", (c) => {
   if (!loaded) return sanctionsUnavailable(c);
   const { document: doc } = loaded;
   // Jamais une liste périmée présentée comme actuelle : ni résultat, ni absence de résultat.
-  if (!isSanctionsListCurrent(doc.list_date, Date.now())) {
-    return c.json({ error: "sanctions_list_out_of_date", list_date: doc.list_date, notice: SANCTIONS_NOTICE, official_search_url: SANCTIONS_OFFICIAL_SEARCH_URL }, 503);
+  if (!isSanctionsListCurrent(doc.collected_at, Date.now())) {
+    return c.json({ error: "sanctions_list_out_of_date", list_date: doc.list_date, collected_at: doc.collected_at, notice: SANCTIONS_NOTICE, official_search_url: SANCTIONS_OFFICIAL_SEARCH_URL }, 503);
   }
   const results = imo
     ? (loaded.byImo.get(imo) ?? []).map((entry) => sanctionResult(entry, "imo"))
@@ -264,7 +264,7 @@ apiV1Route.get("/sanctions/search", (c) => {
     match: "exact",
     result_count: results.length,
     results,
-    list: { date: doc.list_date, sha256: doc.source_sha256 },
+    list: { date: doc.list_date, sha256: doc.source_sha256, collected_at: doc.collected_at },
     notice: SANCTIONS_NOTICE,
     official_search_url: SANCTIONS_OFFICIAL_SEARCH_URL,
     sources: [sourceRef(SANCTIONS_SOURCE_ID)],

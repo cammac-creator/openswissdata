@@ -18,7 +18,7 @@ export const SANCTIONS_SCHEMA = "osd-sanctions-v1";
 export const SANCTIONS_R2_KEY = "sanctions/or/current-v1.json.gz";
 export const SANCTIONS_SOURCE_ID = "seco.sesam_sanctions";
 export const SANCTIONS_OFFICIAL_SEARCH_URL = "https://www.sesam.search.admin.ch/sesam-search-web/pages/search.xhtml?lang=en";
-/** Au-delà, la liste est dite périmée. Les passages de GitHub peuvent être omis ou retardés d'un jour. */
+/** Sans relevé réussi depuis ce délai, la liste est dite périmée. Les passages de GitHub peuvent être omis ou retardés. */
 export const SANCTIONS_MAX_AGE_DAYS = 3;
 
 const MAX_GZIP_BYTES = 30_000_000;
@@ -87,7 +87,7 @@ export function validateSanctionsDocument(value: unknown): SanctionsDocument {
   if (doc.schema !== SANCTIONS_SCHEMA || doc.source_id !== SANCTIONS_SOURCE_ID) return fail("schéma");
   if (!isIsoDate(doc.list_date)) return fail("date");
   if (typeof doc.source_sha256 !== "string" || !/^[0-9a-f]{64}$/.test(doc.source_sha256)) return fail("empreinte");
-  if (!isCount(doc.source_bytes) || typeof doc.collected_at !== "string") return fail("relevé");
+  if (!isCount(doc.source_bytes) || typeof doc.collected_at !== "string" || !Number.isFinite(Date.parse(doc.collected_at))) return fail("relevé");
   if (!doc.counts || !isCount(doc.counts.organisations) || !isCount(doc.counts.vessels)) return fail("comptes");
   const proof = doc.exclusion_proof;
   if (!proof) return fail("preuve");
@@ -152,13 +152,13 @@ export function getSanctionsLastError(): string | null {
   return lastError;
 }
 
-/** Âge en jours pleins depuis minuit UTC de la date de la liste. */
-export function sanctionsListAgeDays(listDate: string, now: number): number {
-  return Math.floor((now - Date.parse(`${listDate}T00:00:00Z`)) / DAY_MS);
-}
-
-export function isSanctionsListCurrent(listDate: string, now: number): boolean {
-  return sanctionsListAgeDays(listDate, now) <= SANCTIONS_MAX_AGE_DAYS;
+/**
+ * La date du fichier reste la même tant que le SECO ne change pas sa liste : seule la date du dernier
+ * relevé réussi dit si ce qu'on sert est encore à jour. Une date illisible n'est jamais « à jour ».
+ */
+export function isSanctionsListCurrent(collectedAt: string, now: number): boolean {
+  const at = Date.parse(collectedAt);
+  return Number.isFinite(at) && now - at <= SANCTIONS_MAX_AGE_DAYS * DAY_MS;
 }
 
 export function decodeSanctionsObject(gzipped: Buffer): SanctionsDocument {

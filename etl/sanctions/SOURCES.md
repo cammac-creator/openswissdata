@@ -14,9 +14,9 @@
 
 | Point signalé par le SECO | Dans le code |
 |---|---|
-| Mise à jour à la charge de l'utilisateur | Deux créneaux par jour ; au-delà de trois jours, la recherche répond 503 au lieu de répondre |
+| Mise à jour à la charge de l'utilisateur | Deux créneaux par jour ; sans relevé réussi depuis trois jours, la recherche répond 503 au lieu de répondre |
 | Format structuré officiel | Le fichier XML, jamais un relevé de page |
-| Référence à la version utilisée | Date de la liste et empreinte SHA-256 du fichier entier dans chaque réponse |
+| Référence à la version utilisée | Date de la liste, empreinte SHA-256 du fichier entier et date du dernier relevé dans chaque réponse |
 
 ## Lecture du fichier
 - Le fichier entier reste **en mémoire** : ni bronze brut, ni artefact, ni commit, parce qu'il contient des personnes.
@@ -75,10 +75,17 @@ page de résultats (le nom y figure toujours, la page recopie la saisie) : 11 en
 modification plus tardive : si cela arrive, la collecte s'arrête.
 
 ## Arrêts de la collecte (rien n'est écrit, la version servie reste)
+Téléchargement repris deux fois (30 s, puis 2 min) sur une panne réseau, un 429 ou un 5xx ; le journal donne l'étape et le
+code technique, jamais un contenu.
 Racine, `list-type`, genre d'entrée, genre d'objet, type de modification, type de nom ou programme inconnu ; balises
-déséquilibrées, DOCTYPE, élément à l'intérieur d'un champ lu ; date de liste de plus de trois jours ; sous 2 000 organisations ou 400 bateaux ; plus de 5 %
+déséquilibrées, DOCTYPE, élément à l'intérieur d'un champ lu ; date de liste qui recule, dans le futur ou de plus de 400
+jours ; sous 2 000 organisations ou 400 bateaux ; plus de 5 %
 de bateaux sans IMO ; baisse de plus de 15 % sur une catégorie. Une baisse examinée s'adopte par l'entrée
 `accepter_baisse` du déclenchement manuel, qui est un passage réel lancé à la main (F6).
+
+## Date du fichier
+Elle ne suit pas le calendrier : le 05.11.2026 après minuit, même empreinte et même date que la veille. Une liste qui ne
+change pas reste juste, donc l'âge se compte depuis le dernier relevé réussi (`collected_at`), jamais depuis cette date.
 
 ## Recherche
 Rapprochement exact seulement (règle du projet) : NFC et espaces, casse et ponctuation conservées. Une réponse vide ne
