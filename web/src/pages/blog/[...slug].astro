@@ -15,9 +15,9 @@ const { Content } = await render(post);
 
 const datasetLabels: Record<string, string> = {
   tares: "TARES — 299 CHF",
-  classifications: "Classifications — 399 CHF",
+  classifications: "Classifications : pas en vente pour l’instant",
   finma: "FINMA Registry — 299 CHF",
-  all: "Bundle complet — 797 CHF",
+  all: "TARES et FINMA",
 };
 const datasetOgImages: Record<string, string> = {
   tares: "/og-tares.png",
@@ -31,10 +31,11 @@ const datasetTags: Record<string, string> = {
   finma: "FINMA",
   all: "Bundle",
 };
-const ctaTarget = post.data.dataset === "all" ? "/bundle" : post.data.dataset ? `/datasets/${post.data.dataset}` : "/bundle";
+const ctaTarget = post.data.dataset === "all" ? "/pricing" : post.data.dataset ? `/datasets/${post.data.dataset}` : "/pricing";
+const notOnSale = post.data.dataset === "classifications";
 const ctaLabel = post.data.dataset && datasetLabels[post.data.dataset]
   ? datasetLabels[post.data.dataset]
-  : "Voir le bundle complet — 797 CHF";
+  : "Voir les fichiers en vente";
 const ogImage = post.data.dataset && datasetOgImages[post.data.dataset]
   ? datasetOgImages[post.data.dataset]
   : "/og-default.png";
@@ -127,10 +128,10 @@ const articleJsonLd = {
       <div class="blog-cta">
         <div class="blog-cta-label">Le dataset complet</div>
         <h3>{ctaLabel}</h3>
-        <p>Téléchargement immédiat · ZIP signé Ed25519 + manifest RFC-3161 · 360 jours de mises à jour incluses · refund 14 jours sans condition.</p>
+        <p>{notOnSale ? "Les correspondances restent gratuites par le serveur MCP." : "Téléchargement immédiat · ZIP signé Ed25519 + manifest RFC-3161 · 360 jours de mises à jour incluses · refund 14 jours sans condition."}</p>
         <div class="blog-cta-row">
           <a href={ctaTarget} class="v4-btn v4-btn-primary">Voir le dataset <span class="arrow">→</span></a>
-          <a href="/bundle" class="v4-btn v4-btn-secondary">Bundle 3-en-1 — 797 CHF (économie 200 CHF)</a>
+          <a href={notOnSale ? "/mcp#install" : "/pricing"} class="v4-btn v4-btn-secondary">{notOnSale ? "Essayer les correspondances gratuites" : "Voir les tarifs"}</a>
         </div>
       </div>
 

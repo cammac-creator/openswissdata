@@ -26,6 +26,7 @@
 .fiche-mcp p:not(.atlas-kicker) { font-size:13px; line-height:1.8; color:#c5d4c9; }
 .fiche-mcp .atlas-text-link { color:#f4f3ed; font-size:13px; padding-bottom:0; }
 
+.fiche-notice { margin-top:18px; padding:16px 20px; border-left:3px solid #c9953f; border-radius:0 8px 8px 0; background:#f6efe1; font-size:14px; line-height:1.65; color:var(--atlas-ink); }
 .fiche-bundle-line { margin-top:22px; font-size:14px; line-height:1.7; color:var(--atlas-muted); }
 .fiche-bundle-line a { color:var(--atlas-ink); font-weight:550; text-underline-offset:4px; white-space:nowrap; }
 

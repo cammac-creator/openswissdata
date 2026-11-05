@@ -31,8 +31,8 @@ One-off payments in CHF, no automatic renewal, 360 days of updates included. Eac
 
 - [TARES Swiss customs tariff](https://www.openswissdata.com/en/datasets/tares): about 7,500 tariff lines, 299 CHF.
 - [FINMA register and warnings list](https://www.openswissdata.com/en/datasets/finma): 299 CHF.
-- [NOGA / NACE / ISIC classifications](https://www.openswissdata.com/en/datasets/classifications): five classifications with sourced correspondences, 399 CHF.
-- [Bundle of the three datasets](https://www.openswissdata.com/en/bundle): 797 CHF.
+
+The [NOGA / NACE / ISIC classifications file](https://www.openswissdata.com/en/datasets/classifications) and the [bundle of the three datasets](https://www.openswissdata.com/en/bundle) are not on sale for now. The correspondences remain free through the MCP server.
 
 ## Samples and current versions
 

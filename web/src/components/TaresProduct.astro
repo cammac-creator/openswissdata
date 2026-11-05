@@ -5,7 +5,7 @@ import AtlasArtwork from "./AtlasArtwork.astro";
 import "../styles/atlas-fiches.css";
 import "../styles/atlas-fiche-tares.css";
 import { getLangFromPath, localizePath } from "../i18n/utils";
-import { BUNDLE_OFFER, BUNDLE_SAVING, FILE_OFFERS } from "../lib/offers";
+import { FILE_OFFERS } from "../lib/offers";
 import { datasetJsonLd, productJsonLd } from "../lib/structured-data";
 const lang = getLangFromPath(Astro.url.pathname);
 const L = (path: string) => localizePath(path, lang);
@@ -59,7 +59,7 @@ const copy = {
   terms: "Conditions de vente",
   purchaseKicker: "Votre prochaine base de travail", delivery: "Vos fichiers. Votre rythme.", serviceText: "Après paiement, votre archive est accessible par email et depuis votre espace client. Le reçu Stripe y est également disponible. Pour une facture au nom de votre entreprise, envoyez-nous sa raison sociale et son adresse de facturation.",
   contact: "Écrire au support", account: "Espace client", price: "Paiement unique", updates: `360 jours de mises à jour inclus. Prolongation facultative : ${offer.renewal} CHF/an.`,
-  bundle: `Les trois fichiers ensemble : ${BUNDLE_OFFER.price} CHF, soit ${BUNDLE_SAVING} CHF de moins que les achats séparés.`, bundleLink: "Voir le bundle", independent: "Service privé indépendant, sans affiliation à l’OFDF.",
+  independent: "Service privé indépendant, sans affiliation à l’OFDF.",
  },
  de: {
   title: "TARES: der Schweizer Zolltarif als strukturierte Dateien",
@@ -106,7 +106,7 @@ const copy = {
   terms: "Verkaufsbedingungen",
   purchaseKicker: "Ihre nächste Datengrundlage", delivery: "Ihre Dateien. Ihr Tempo.", serviceText: "Nach der Zahlung erhalten Sie das Archiv per E-Mail und in Ihrem Kundenkonto. Dort finden Sie auch den Stripe-Zahlungsbeleg. Für eine Rechnung an Ihr Unternehmen senden Sie uns bitte den Firmennamen und die Rechnungsadresse.",
   contact: "Support kontaktieren", account: "Kundenkonto", price: "Einmalige Zahlung", updates: `360 Tage Aktualisierungen inklusive. Freiwillige Verlängerung: CHF ${offer.renewal}/Jahr.`,
-  bundle: `Alle drei Dateien zusammen: CHF ${BUNDLE_OFFER.price}, also CHF ${BUNDLE_SAVING} weniger als Einzelkäufe.`, bundleLink: "Bundle ansehen", independent: "Unabhängiger privater Dienst ohne Verbindung zum BAZG.",
+  independent: "Unabhängiger privater Dienst ohne Verbindung zum BAZG.",
  },
  en: {
   title: "TARES: the Swiss customs tariff as structured files",
@@ -153,7 +153,7 @@ const copy = {
   terms: "Sales terms",
   purchaseKicker: "Your next data foundation", delivery: "Your files. Your workflow.", serviceText: "After payment, download your archive from the delivery email or your account. Your Stripe receipt is also available there. For an invoice addressed to your company, send us its legal name and billing address.",
   contact: "Contact support", account: "Your account", price: "One-time payment", updates: `360 days of updates included. Optional extension: CHF ${offer.renewal}/year.`,
-  bundle: `All three files together: CHF ${BUNDLE_OFFER.price}, or CHF ${BUNDLE_SAVING} less than separate purchases.`, bundleLink: "View the bundle", independent: "Independent private service, not affiliated with the FOCBS.",
+  independent: "Independent private service, not affiliated with the FOCBS.",
  },
 }[lang];
 const digits = example.hs8.split("");
@@ -246,7 +246,7 @@ const live = { lang, waiting: copy.waiting, unavailable: copy.unavailable, check
 
  <section class="atlas-section atlas-faq"><div class="atlas-shell atlas-faq-grid"><div data-atlas-enter><p class="atlas-kicker">{copy.faqKicker}</p><h2 class="atlas-section-title">{copy.faqTitle}</h2><a href={L("/legal/cgv")} class="atlas-text-link">{copy.terms} ↗</a></div><div>{copy.faq.map(([question, answer]) => <details><summary>{question}</summary><p>{answer}</p></details>)}</div></div></section>
 
- <section class="atlas-shell" id="acheter"><div class="atlas-purchase" data-atlas-enter><div><p class="atlas-kicker">{copy.purchaseKicker}</p><h2>{copy.delivery}</h2><p>{copy.serviceText}</p><div class="atlas-actions"><a href="mailto:contact@openswissdata.com" class="atlas-text-link">{copy.contact} ↗</a><a href={L("/account")} class="atlas-text-link">{copy.account} ↗</a></div></div><div class="atlas-purchase-box"><p>TARES · {copy.price}</p><div class="atlas-purchase-price"><strong>{offer.price}</strong><span>CHF</span></div><p>{copy.updates}</p><form method="POST" action="/api/checkout/start"><input type="hidden" name="locale" value={lang}/><input type="hidden" name="dataset_ids" value="tares"/><button class="atlas-btn" type="submit">{copy.buyTares}<span aria-hidden="true">↗</span></button></form><CheckoutNotice /></div></div><p class="fiche-bundle-line">{copy.bundle} <a href={L("/bundle")}>{copy.bundleLink} ↗</a></p><p class="atlas-live-note">{copy.independent}</p></section>
+ <section class="atlas-shell" id="acheter"><div class="atlas-purchase" data-atlas-enter><div><p class="atlas-kicker">{copy.purchaseKicker}</p><h2>{copy.delivery}</h2><p>{copy.serviceText}</p><div class="atlas-actions"><a href="mailto:contact@openswissdata.com" class="atlas-text-link">{copy.contact} ↗</a><a href={L("/account")} class="atlas-text-link">{copy.account} ↗</a></div></div><div class="atlas-purchase-box"><p>TARES · {copy.price}</p><div class="atlas-purchase-price"><strong>{offer.price}</strong><span>CHF</span></div><p>{copy.updates}</p><form method="POST" action="/api/checkout/start"><input type="hidden" name="locale" value={lang}/><input type="hidden" name="dataset_ids" value="tares"/><button class="atlas-btn" type="submit">{copy.buyTares}<span aria-hidden="true">↗</span></button></form><CheckoutNotice /></div></div><p class="atlas-live-note">{copy.independent}</p></section>
 </div>
 <script>
  import '../scripts/tares-product';

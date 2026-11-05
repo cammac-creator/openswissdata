@@ -30,7 +30,9 @@
 .tarifs-ledger-foot b { font-weight:560; color:var(--atlas-ink); font-variant-numeric:tabular-nums; }
 
 /* Fichiers. */
-.tarifs-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; }
+.tarifs-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
+.tarifs-retired { margin-top:22px; padding:20px 24px; border:1px solid var(--atlas-line); border-radius:10px; font-size:14px; line-height:1.8; color:var(--atlas-muted); }
+.tarifs-retired .atlas-text-link { font-size:14px; }
 .tarifs-card { position:relative; display:flex; flex-direction:column; min-width:0; padding:30px 28px 22px; background:#fbfbf5; border:1px solid var(--atlas-line); border-radius:10px; transition:box-shadow .25s, transform .25s; }
 .tarifs-card:hover { box-shadow:0 16px 40px #16382f10; transform:translateY(-3px); }
 .tarifs-card-head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 14px; }

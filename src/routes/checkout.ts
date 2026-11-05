@@ -41,6 +41,14 @@ for (const path of ['/session', '/start']) {
 const DATASET_IDS = ["tares", "classifications", "finma", "bundle", "mcp_standalone", "mcp_business"] as const;
 type DatasetId = (typeof DATASET_IDS)[number];
 
+// Retirés de la vente sur décision de Claude-Alain (05.11.2026), jusqu'à un accord écrit de l'OFS
+// et de l'ONU. Les identifiants restent dans le schéma pour que le refus reste lisible. Les achats
+// déjà faits ne passent pas par ici : droits, livraisons et webhook continuent de les traiter.
+const RETIRED_FROM_SALE: Readonly<Partial<Record<DatasetId, string>>> = {
+  classifications: "/datasets/classifications",
+  bundle: "/bundle",
+};
+
 // Buyer-facing language. Carried from the localized page (fr/de/en) so the
 // Stripe Checkout UI renders in the buyer's language and the webhook can send
 // transactional emails in the same language (stored on the customer row).
@@ -99,6 +107,11 @@ async function buildSession(
   const individualIds = dataset_ids.filter((id) => id !== "bundle" && !(id in SUBSCRIPTION_PRICE_ENV));
   if (hasBundle && individualIds.length > 0) {
     return { ok: false, status: 400, error: "bundle_cannot_be_combined_with_individual_datasets" };
+  }
+
+  // Refus avant toute lecture de prix : un panier qui contient un fichier retiré ne part jamais chez Stripe.
+  if (dataset_ids.some((id) => id in RETIRED_FROM_SALE)) {
+    return { ok: false, status: 503, error: "dataset_not_for_sale" };
   }
 
   const line_items: Array<{ price: string; quantity: number }> = [];
@@ -197,7 +210,7 @@ checkoutRoute.post("/session", async (c) => {
     if (result.error === "mcp_standalone_price_not_configured") {
       return c.json({ error: result.error }, 500);
     }
-    if (result.error === "subscriptions_temporarily_closed") {
+    if (result.error === "subscriptions_temporarily_closed" || result.error === "dataset_not_for_sale") {
       return c.json({ error: result.error }, 503);
     }
     if (result.error === "checkout_failed" || result.error.startsWith("stripe_error:")) {
@@ -251,6 +264,11 @@ checkoutRoute.post("/start", async (c) => {
     // Subscription checkout temporarily closed → back to /pricing with a notice.
     if (result.error === "subscriptions_temporarily_closed") {
       return c.redirect(`${base}/pricing?checkout=closed`, 303);
+    }
+    // Fichier retiré de la vente → sa propre page, qui le dit, dans la langue de l'acheteur.
+    if (result.error === "dataset_not_for_sale") {
+      const retired = dataset_ids.find((id) => id in RETIRED_FROM_SALE)!;
+      return c.redirect(`${base}${locale && locale !== "fr" ? `/${locale}` : ""}${RETIRED_FROM_SALE[retired]}`, 303);
     }
     // H4: redirect to error page instead of leaking internal error strings
     if (result.status >= 500 || result.error === "checkout_failed" || result.error.startsWith("stripe_error:")) {

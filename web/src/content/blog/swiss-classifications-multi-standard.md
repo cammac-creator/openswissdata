@@ -4,7 +4,7 @@ description: "Why the cross-walk between Swiss NOGA and international NACE/ISIC 
 publishedAt: 2026-04-22
 keywords: ["NOGA 2025", "NACE 2.1", "ISIC 4", "Swiss classifications", "cross-walk"]
 dataset: "classifications"
-tldr: "Vous opérez en Suisse, votre maison-mère reporte en NACE 2.1 / ISIC 4 ESG. Maintenir un cross-walk NOGA 2025 → NACE 2.1 → ISIC 4 manuellement = ~3 j/an minimum, jamais à jour. Notre dataset Classifications (399 CHF) livre les 5 nomenclatures + cross-walks 5-way en CSV/JSON/Parquet/SQL, signés Ed25519. Bundle 797 CHF avec TARES + FINMA."
+tldr: "Vous opérez en Suisse, votre maison-mère reporte en NACE 2.1 / ISIC 4 ESG. Maintenir un cross-walk NOGA 2025 → NACE 2.1 → ISIC 4 manuellement = ~3 j/an minimum, jamais à jour. Le fichier Classifications n’est pas en vente pour l’instant ; les correspondances restent gratuites par le serveur MCP."
 ---
 
 You work in finance at a Swiss subsidiary of a German parent. Head office asks you to produce a quarterly sector report. Your customer master is classified under NOGA 2025 (the fresh Swiss economic activities nomenclature released January 2025). Head office reports in NACE Rev 2.1 and needs its own ISIC 4 view for the group's ESG disclosures.
@@ -46,7 +46,7 @@ The first time, that's a 40-80 hour engineering effort. Every 6-12 months when a
 
 ## The openswissdata Classifications Bundle
 
-[openswissdata.com/datasets/classifications](/datasets/classifications) ships all of the above in a single ZIP, CHF 399.
+[openswissdata.com/datasets/classifications](/datasets/classifications) describes a single ZIP with all of the above. That file is not on sale for now; the mappings remain free through the [MCP server](/mcp#install).
 
 Inside:
 
@@ -161,9 +161,7 @@ We refresh the bundle when any upstream standard is revised:
 
 Between major revisions, we also refresh for label corrections (sometimes BFS publishes an erratum) and for clarifications in the cross-walks. In practice: 1-2 refreshes per year, plus whatever happens the year a major revision drops.
 
-The 360-day updates included with each purchase cover this cadence comfortably. Renewal is CHF 160/year.
-
-## Sample before you buy
+## Look at a sample
 
 A 50-row cross-section is at [/samples/classifications-sample.csv](/samples/classifications-sample.csv). Try joining it against your own customer master — you'll know within 10 minutes whether the data shape fits your BI tool.
 
@@ -173,6 +171,6 @@ We don't offer fuzzy classification (entity name → NOGA code). That's a separa
 
 If you need help deciding which NOGA 2025 code to assign to a specific activity, the BFS explanatory notes (available free of charge on bfs.admin.ch) are the authoritative guidance. Our bundle adds structured access and the cross-walk; it doesn't replace domain judgement on classification decisions.
 
-## Buy the bundle
+## Try the mappings for free
 
-[/datasets/classifications](/datasets/classifications) — CHF 399 one-off, 360 days of updates included. Or grab the [full 3-dataset bundle](/bundle) at CHF 797 for Classifications + TARES + FINMA.
+The `cross_walk` tool of the [MCP server](/mcp#install) answers without an account. The [Classifications page](/datasets/classifications) also lets you check a mapping. The file itself is not on sale for now.

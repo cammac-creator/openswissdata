@@ -22,7 +22,6 @@ for (const row of all) {
 
 const codeHref = (c: string) => localizePath(`/codes/noga/${c}`, lang);
 const classificationsHref = localizePath("/datasets/classifications", lang);
-const bundleHref = localizePath("/bundle", lang);
 const mcpHref = localizePath("/mcp#install", lang);
 const homeHref = localizePath("/", lang);
 const codesHref = localizePath("/codes/", lang);
@@ -39,37 +38,37 @@ type S = {
 const STR: Record<Lang, S> = {
   fr: {
     bcCurrent: "codes NOGA", eyebrowRight: "OFS / BFS", h1a: "Tous les codes", h1b: "NOGA 2025.",
-    lede: `Nomenclature générale des activités économiques suisse, version 2025. <strong>${totalSeoCodes} codes</strong> indexés (sections, divisions, groupes, classes), avec leurs équivalents NACE 2.1 et ISIC Rev 4. Le dataset complet est inclus avec <a href="${classificationsHref}">Classifications (399 CHF)</a>.`,
+    lede: `Nomenclature générale des activités économiques suisse, version 2025. <strong>${totalSeoCodes} codes</strong> indexés (sections, divisions, groupes, classes), avec leurs équivalents NACE 2.1 et ISIC Rev 4. Les correspondances se consultent gratuitement sur la <a href="${classificationsHref}">fiche Classifications</a>.`,
     pbLabel: "Codes indexés", pbRenew: "version officielle BFS 2025",
     searchEyebrow: "Recherche", searchTitle: "Recherche", searchTitleEm: "rapide.", searchIntro: "Tapez un code (ex. 62.01), une activité (ex. « banque ») ou un mot-clé.", searchPlaceholder: "Code, mot-clé, désignation...",
     hierEyebrow: "Hiérarchie", hierTitle: "Hiérarchie", hierTitleEm: "complète.", hierIntro: `NOGA 2025 est organisée en ${sections.length} sections (lettres A à V), subdivisées en divisions, groupes et classes.`,
     division: (n) => `${n} division${n > 1 ? "s" : ""}`, group: (n) => `${n} groupe${n > 1 ? "s" : ""}`,
-    dsEyebrow: "Dataset complet", dsTitle: "Le", dsTitleEm: "dataset complet.", dsIntro: "Besoin de tous les codes (1 845 incluant les sous-classes), 5 nomenclatures alignées et cross-walks 5-way, en CSV / JSON / Parquet / SQL ?",
-    ctaMcp: "Tester l'API NOGA — gratuit", ctaPrimary: "Voir Classifications — 399 CHF", ctaSecondary: "Bundle 3-en-1 — 797 CHF",
+    dsEyebrow: "Correspondances", dsTitle: "Les", dsTitleEm: "correspondances gratuites.", dsIntro: "Les correspondances entre les 5 nomenclatures restent gratuites par le serveur MCP. Le fichier complet n’est pas en vente pour l’instant.",
+    ctaMcp: "Tester l'API NOGA — gratuit", ctaPrimary: "Voir la fiche Classifications",
     footer: "Index généré à partir de la nomenclature NOGA 2025 publiée par l'Office fédéral de la statistique. openswissdata.com n'est pas affilié à l'OFS.",
     loading: "Chargement de l'index…", noResult: "Aucun code ne correspond.", resultsN: (n) => `${n} résultat${n > 1 ? "s" : ""}`, resultsMore: (n) => `${n} résultats (50 affichés)`,
   },
   de: {
     bcCurrent: "NOGA-Codes", eyebrowRight: "BFS", h1a: "Alle Codes", h1b: "NOGA 2025.",
-    lede: `Allgemeine Systematik der Wirtschaftszweige der Schweiz, Version 2025. <strong>${totalSeoCodes} Codes</strong> indexiert (Abschnitte, Abteilungen, Gruppen, Klassen), mit ihren Entsprechungen NACE 2.1 und ISIC Rev 4. Der vollständige Datensatz ist in <a href="${classificationsHref}">Klassifikationen (399 CHF)</a> enthalten.`,
+    lede: `Allgemeine Systematik der Wirtschaftszweige der Schweiz, Version 2025. <strong>${totalSeoCodes} Codes</strong> indexiert (Abschnitte, Abteilungen, Gruppen, Klassen), mit ihren Entsprechungen NACE 2.1 und ISIC Rev 4. Die Zuordnungen lassen sich auf der <a href="${classificationsHref}">Seite Klassifikationen</a> kostenlos abfragen.`,
     pbLabel: "Indexierte Codes", pbRenew: "offizielle Fassung BFS 2025",
     searchEyebrow: "Suche", searchTitle: "Schnelle", searchTitleEm: "Suche.", searchIntro: `Geben Sie einen Code (z. B. 62.01), eine Tätigkeit (z. B. „Bank") oder ein Stichwort ein.`, searchPlaceholder: "Code, Stichwort, Bezeichnung...",
     hierEyebrow: "Hierarchie", hierTitle: "Vollständige", hierTitleEm: "Hierarchie.", hierIntro: `NOGA 2025 ist in ${sections.length} Abschnitte (Buchstaben A bis V) gegliedert, unterteilt in Abteilungen, Gruppen und Klassen.`,
     division: (n) => `${n} Abteilung${n > 1 ? "en" : ""}`, group: (n) => `${n} Gruppe${n > 1 ? "n" : ""}`,
-    dsEyebrow: "Vollständiger Datensatz", dsTitle: "Der", dsTitleEm: "vollständige Datensatz.", dsIntro: "Benötigen Sie alle Codes (1 845 inkl. Unterklassen), 5 abgeglichene Systematiken und 5-Wege-Cross-Walks in CSV / JSON / Parquet / SQL?",
-    ctaMcp: "NOGA-API testen — gratis", ctaPrimary: "Klassifikationen ansehen — 399 CHF", ctaSecondary: "3-in-1-Bundle — 797 CHF",
+    dsEyebrow: "Zuordnungen", dsTitle: "Die", dsTitleEm: "kostenlosen Zuordnungen.", dsIntro: "Die Zuordnungen zwischen den 5 Systematiken bleiben über den MCP-Server kostenlos. Die vollständige Datei ist derzeit nicht im Verkauf.",
+    ctaMcp: "NOGA-API testen — gratis", ctaPrimary: "Seite Klassifikationen ansehen",
     footer: "Index generiert aus der vom Bundesamt für Statistik herausgegebenen NOGA 2025. openswissdata.com ist nicht mit dem BFS verbunden.",
     loading: "Index wird geladen…", noResult: "Kein Code passt.", resultsN: (n) => `${n} Ergebnis${n > 1 ? "se" : ""}`, resultsMore: (n) => `${n} Ergebnisse (50 angezeigt)`,
   },
   en: {
     bcCurrent: "NOGA codes", eyebrowRight: "FSO / BFS", h1a: "All NOGA 2025", h1b: "codes.",
-    lede: `Swiss General Classification of Economic Activities, 2025 version. <strong>${totalSeoCodes} codes</strong> indexed (sections, divisions, groups, classes), with their NACE 2.1 and ISIC Rev 4 equivalents. The full dataset is included with <a href="${classificationsHref}">Classifications (399 CHF)</a>.`,
+    lede: `Swiss General Classification of Economic Activities, 2025 version. <strong>${totalSeoCodes} codes</strong> indexed (sections, divisions, groups, classes), with their NACE 2.1 and ISIC Rev 4 equivalents. Mappings can be checked free of charge on the <a href="${classificationsHref}">Classifications page</a>.`,
     pbLabel: "Indexed codes", pbRenew: "official BFS 2025 version",
     searchEyebrow: "Search", searchTitle: "Quick", searchTitleEm: "search.", searchIntro: "Type a code (e.g. 62.01), an activity (e.g. \"bank\") or a keyword.", searchPlaceholder: "Code, keyword, designation...",
     hierEyebrow: "Hierarchy", hierTitle: "Full", hierTitleEm: "hierarchy.", hierIntro: `NOGA 2025 is organised into ${sections.length} sections (letters A to V), subdivided into divisions, groups and classes.`,
     division: (n) => `${n} division${n > 1 ? "s" : ""}`, group: (n) => `${n} group${n > 1 ? "s" : ""}`,
-    dsEyebrow: "Full dataset", dsTitle: "The", dsTitleEm: "complete dataset.", dsIntro: "Need all codes (1,845 including subclasses), 5 aligned classifications and 5-way cross-walks, in CSV / JSON / Parquet / SQL?",
-    ctaMcp: "Try the NOGA API — free", ctaPrimary: "See Classifications — 399 CHF", ctaSecondary: "3-in-1 bundle — 797 CHF",
+    dsEyebrow: "Mappings", dsTitle: "The", dsTitleEm: "free mappings.", dsIntro: "Mappings between the 5 classifications remain free through the MCP server. The complete file is not on sale for now.",
+    ctaMcp: "Try the NOGA API — free", ctaPrimary: "See the Classifications page",
     footer: "Index generated from the NOGA 2025 classification published by the Federal Statistical Office. openswissdata.com is not affiliated with the FSO.",
     loading: "Loading index…", noResult: "No matching code.", resultsN: (n) => `${n} result${n > 1 ? "s" : ""}`, resultsMore: (n) => `${n} results (50 shown)`,
   },
@@ -187,7 +186,6 @@ const indexJsonLd = {
       <div class="v4-cta-row">
         <a href={mcpHref} class="v4-btn v4-btn-primary">{T.ctaMcp} <span class="arrow">→</span></a>
         <a href={classificationsHref} class="v4-btn v4-btn-secondary">{T.ctaPrimary}</a>
-        <a href={bundleHref} class="v4-btn v4-btn-secondary">{T.ctaSecondary}</a>
       </div>
     </section>
 
