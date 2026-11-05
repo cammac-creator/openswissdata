@@ -1,6 +1,6 @@
 {
   "name": "@openswissdata/mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "mcpName": "io.github.cammac-creator/openswissdata",
   "description": "Standalone MCP server (STDIO) that proxies to the openswissdata.com remote MCP endpoint. Plug-and-play for Claude Desktop, Cursor, Cline and other MCP clients.",
   "type": "module",
