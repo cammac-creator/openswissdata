@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.cammac-creator/openswissdata",
   "title": "OpenSwissData",
-  "description": "Swiss customs tariff (TARES), FINMA register, NOGA/NACE/ISIC codes. 3 free tools + search trial.",
-  "version": "0.3.1",
+  "description": "Swiss customs tariff (TARES), FINMA register, NOGA/NACE/ISIC codes. 4 free tools + search trial.",
+  "version": "0.3.2",
   "websiteUrl": "https://www.openswissdata.com",
   "repository": {
     "url": "https://github.com/cammac-creator/openswissdata",
@@ -21,7 +21,7 @@
       "environmentVariables": [
         {
           "name": "OPENSWISSDATA_API_KEY",
-          "description": "Optional existing OAuth token for Pro tools (closed to new subscribers). Without it: 3 free tools (100 calls/hour/IP) plus a trial of the 3 search tools (20 calls/day/IP in total).",
+          "description": "Optional existing OAuth token for Pro tools (closed to new subscribers). Without it: 4 free tools (100 calls/hour/IP) plus a trial of the 3 search tools (20 calls/day/IP in total).",
           "isRequired": false,
           "isSecret": true,
           "format": "string"

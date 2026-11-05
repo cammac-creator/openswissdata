@@ -49,11 +49,12 @@ export function negotiateProtocolVersion(requested: unknown): string {
 const SERVER_INFO = {
   name: "openswissdata-mcp",
   title: "OpenSwissData",
-  version: "0.3.1",
+  version: "0.3.2",
 } as const;
 
 const PUBLIC_SITE = (process.env.BASE_URL ?? "https://www.openswissdata.com").replace(/\/$/, "");
 const ANONYMOUS_LIMIT_TEXT = `${ANONYMOUS_RATE_LIMIT.calls} calls per ${ANONYMOUS_RATE_LIMIT.window} per IP address`;
+const NOTIFY_ME_URL = "https://www.openswissdata.com/en/finma-movements";
 const TRIAL_LIMIT_TEXT = `${ANONYMOUS_TRIAL_LIMIT.calls} calls per ${ANONYMOUS_TRIAL_LIMIT.window} per IP address`;
 const TRIAL_TOOLS_TEXT = `${ANONYMOUS_TRIAL_TOOL_NAMES.slice(0, -1).join(", ")} and ${ANONYMOUS_TRIAL_TOOL_NAMES[ANONYMOUS_TRIAL_TOOL_NAMES.length - 1]}`;
 const TRIAL_WINDOW_HOURS = ANONYMOUS_TRIAL_LIMIT.windowMs / 3_600_000;
@@ -316,7 +317,10 @@ function withTrialNotice(name: string, result: ToolResult, outcome: TrialResult)
   return { ...result, content, trial: trialInfo(name, outcome) };
 }
 
-/** Essai épuisé : résultat lisible, délai de reprise, piste gratuite ; aucun lien d'achat (offre Pro fermée). */
+/**
+ * Essai épuisé : résultat lisible, délai de reprise, piste gratuite. Aucun lien d'achat (offre Pro
+ * fermée) ; un lien « être prévenu » depuis la décision de Claude-Alain du 05.11.2026, sans prix.
+ */
 function trialExhausted(name: string, outcome: TrialResult): ToolResult {
   const retryAfter = Math.max(1, Math.ceil((outcome.resetAt - Date.now()) / 1000));
   const text = [
@@ -324,6 +328,7 @@ function trialExhausted(name: string, outcome: TrialResult): ToolResult {
     FREE_ALTERNATIVE.get(name) ?? "",
     `Free tools without a key remain available: ${ANONYMOUS_TOOL_NAMES.join(", ")} (${ANONYMOUS_LIMIT_TEXT}).`,
     "The Pro plan is closed to new subscribers at the moment, so no access token can be obtained today.",
+    `To be told when the detailed FINMA history is available, leave an address: ${NOTIFY_ME_URL}`,
   ].filter(Boolean).join("\n");
   return {
     content: [{ type: "text", text }],
