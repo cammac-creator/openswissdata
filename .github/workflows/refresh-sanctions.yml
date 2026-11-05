@@ -47,7 +47,7 @@ jobs:
       - name: Vérifier avant de lire la source (dont le test de fuite)
         run: |
           npm run typecheck
-          npx vitest run tests/etl/sanctions-parse.test.ts tests/etl/sanctions-fuite.test.ts tests/etl/sources-registry-sanctions.test.ts tests/lib/sanctions.test.ts
+          npx vitest run tests/etl/sanctions-parse.test.ts tests/etl/sanctions-fuite.test.ts tests/etl/sanctions-download.test.ts tests/etl/sources-registry-sanctions.test.ts tests/lib/sanctions.test.ts
       - name: Simulation (déclenchement manuel)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         run: npm run sync:sanctions
