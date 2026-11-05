@@ -66,6 +66,30 @@ describe("GET /api/v1/sanctions", () => {
   });
 });
 
+describe("la fraîcheur se lit sur le dernier relevé, jamais sur la date du fichier", () => {
+  // Fichier du SECO inchangé depuis trente jours, relevé la veille.
+  const unchanged = { ...doc, list_date: "2026-10-06", collected_at: "2026-11-04T20:40:00.000Z" };
+  // Fichier daté de la veille, mais plus aucun relevé réussi depuis dix jours.
+  const noRecentRead = { ...doc, list_date: "2026-11-04", collected_at: "2026-10-26T08:40:00.000Z" };
+
+  it("fichier ancien, relevé récent : à jour, et les deux dates sont servies", async () => {
+    _setSanctionsForTest(unchanged);
+    const meta = await (await get("/api/v1/sanctions")).json();
+    expect(meta.status).toBe("current");
+    expect(meta.list).toMatchObject({ date: "2026-10-06", collected_at: "2026-11-04T20:40:00.000Z" });
+    const res = await search({ name: "Old Acme" });
+    expect(res.status).toBe(200);
+    expect((await res.json()).list).toMatchObject({ date: "2026-10-06", collected_at: "2026-11-04T20:40:00.000Z" });
+  });
+  it("fichier récent, aucun relevé depuis dix jours : périmée, et la recherche ne répond pas", async () => {
+    _setSanctionsForTest(noRecentRead);
+    expect((await (await get("/api/v1/sanctions")).json()).status).toBe("out_of_date");
+    const res = await search({ name: "Old Acme" });
+    expect(res.status).toBe(503);
+    expect((await res.json()).collected_at).toBe("2026-10-26T08:40:00.000Z");
+  });
+});
+
 describe("GET /api/v1/sanctions/search", () => {
   it.each([[{}], [{ name: "A", imo: "1234567" }], [{ imo: "12" }], [{ name: "x".repeat(301) }]])("demande invalide %j : 400", async (params) => {
     expect((await search(params as Record<string, string>)).status).toBe(400);

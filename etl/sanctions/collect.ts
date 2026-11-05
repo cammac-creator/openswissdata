@@ -12,7 +12,7 @@
  *   npm run sync:sanctions -- --out <dossier> simulation, écrit le document réduit dans ce dossier
  *   npm run sync:sanctions -- --from-file <x> simulation sur un fichier déjà téléchargé
  *   npm run sync:sanctions -- --write-r2      passage réel (workflow `refresh-sanctions.yml`)
- *   … --accept-drop                           adopte une baisse de volume après examen
+ *   … --accept-anomaly                        adopte, après examen, une baisse de volume, une date qui recule ou un fichier inchangé depuis plus de 60 jours
  *
  * Le journal n'affiche que des nombres, des dates et l'empreinte : jamais un nom.
  * Code de sortie 1 : arrêt sur un contrôle ou une panne ; rien n'est écrit, la version servie reste.
@@ -31,22 +31,23 @@ import { SESAM_XML_URL } from "./sources.js";
 const USER_AGENT = "OpenSwissData-collecte-sanctions/1";
 
 /** `null` seulement quand l'objet n'existe pas encore : toute autre panne arrête le passage. */
-async function readPreviousCounts(): Promise<SanctionsDocument["counts"] | null> {
+async function readPrevious(): Promise<(SanctionsDocument["counts"] & { list_date: string }) | null> {
   try {
-    return decodeSanctionsObject(await getObjectBuffer(SANCTIONS_R2_KEY, { maxBytes: 30_000_000 })).counts;
+    const doc = decodeSanctionsObject(await getObjectBuffer(SANCTIONS_R2_KEY, { maxBytes: 30_000_000 }));
+    return { ...doc.counts, list_date: doc.list_date };
   } catch (err) {
     if (err instanceof Error && (err.name === "NoSuchKey" || err.name === "NotFound")) return null;
     throw new Error("Version précédente illisible : passage arrêté");
   }
 }
 
-interface Args { writeR2: boolean; out: string | null; fromFile: string | null; acceptDrop: boolean }
+interface Args { writeR2: boolean; out: string | null; fromFile: string | null; acceptAnomaly: boolean }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { writeR2: false, out: null, fromFile: null, acceptDrop: false };
+  const args: Args = { writeR2: false, out: null, fromFile: null, acceptAnomaly: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--write-r2") args.writeR2 = true;
-    else if (argv[i] === "--accept-drop") args.acceptDrop = true;
+    else if (argv[i] === "--accept-anomaly") args.acceptAnomaly = true;
     else if (argv[i] === "--out") args.out = argv[++i] ?? null;
     else if (argv[i] === "--from-file") args.fromFile = argv[++i] ?? null;
     else throw new Error("Argument inconnu");
@@ -72,9 +73,9 @@ async function main(): Promise<void> {
     collectedAt: new Date(now).toISOString(),
   });
   stage = "version précédente";
-  const previous = args.writeR2 ? await readPreviousCounts() : null;
+  const previous = args.writeR2 ? await readPrevious() : null;
   stage = "contrôles";
-  checkSanctionsDocument(doc, { now, previous, acceptDrop: args.acceptDrop });
+  checkSanctionsDocument(doc, { now, previous, acceptAnomaly: args.acceptAnomaly });
 
   const gzipped = gzipSync(Buffer.from(JSON.stringify(doc), "utf8"));
   // Nombres, dates et empreinte seulement.
