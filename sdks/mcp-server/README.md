@@ -14,7 +14,7 @@ Limit: 100 calls per hour per IP address.
 | `kyc_check` | Searches the FINMA register and the FINMA warnings list by entity name. |
 | `cross_walk` | Maps an activity code between NOGA 2008, NOGA 2025, NACE 2.0, NACE 2.1 and ISIC 4, with the relation type and its source. |
 
-The other tools (`tariff_semantic_search`, `classify_text`, `finma_search`, `tariff_changelog`, `entity_history`) need existing access rights; new paid subscriptions are closed at the moment. Buying a dataset file does not create an API key. `statent_lookup` has been withdrawn.
+`tariff_semantic_search`, `classify_text` and `finma_search` are free to try without a key: 20 calls per day in total per IP address. `tariff_changelog` and `entity_history` need existing access rights; new subscriptions are closed.
 
 ## Setup
 

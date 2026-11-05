@@ -3,7 +3,7 @@
   "name": "io.github.cammac-creator/openswissdata",
   "title": "OpenSwissData",
   "description": "Swiss customs tariff (TARES), FINMA register, NOGA/NACE/ISIC codes. 4 free tools + search trial.",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "websiteUrl": "https://www.openswissdata.com",
   "repository": {
     "url": "https://github.com/cammac-creator/openswissdata",
@@ -14,7 +14,7 @@
     {
       "registryType": "npm",
       "identifier": "@openswissdata/mcp",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "transport": {
         "type": "stdio"
       },

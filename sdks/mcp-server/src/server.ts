@@ -23,7 +23,7 @@ import {
 import { RemoteProxy, type ProxyOptions } from "./proxy.js";
 
 const SERVER_NAME = "openswissdata-mcp";
-const SERVER_VERSION = "0.1.2";
+const SERVER_VERSION = "0.1.3";
 
 export interface BuildServerOptions extends ProxyOptions {
   /** Inject a pre-built proxy (test injection). */

@@ -10,7 +10,7 @@
  */
 
 const DEFAULT_BASE_URL = "https://mcp.openswissdata.com";
-const PKG_VERSION = "0.1.2";
+const PKG_VERSION = "0.1.3";
 
 export interface ProxyOptions {
   baseUrl?: string;
