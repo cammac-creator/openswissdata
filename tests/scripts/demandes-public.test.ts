@@ -63,10 +63,10 @@ describe(".github/workflows/prospect-requests.yml", () => {
     expect(adds).toEqual(["docs/data-status/demandes.json"]);
   });
 
-  it("n'est plus suivie par la veille : elle n'a plus de passage planifié", () => {
+  it("est suivie par la veille des tâches planifiées", () => {
     const source = read("src/lib/workflow-watch.ts");
     const bloc = source.slice(source.indexOf("const SCHEDULED"), source.indexOf("] as const", source.indexOf("const SCHEDULED")));
-    expect(bloc).not.toContain("'prospect-requests.yml'");
+    expect(bloc).toContain("'prospect-requests.yml'");
     expect(existsSync(new URL(".github/workflows/prospect-requests.yml", root))).toBe(true);
   });
 });
