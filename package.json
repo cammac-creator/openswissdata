@@ -30,6 +30,7 @@
     "sync:datasets": "tsx scripts/sync-datasets.ts",
     "sync:fosc": "tsx etl/fosc/collect.ts",
     "sync:sanctions": "tsx etl/sanctions/collect.ts",
+    "sync:douane": "tsx etl/douane/collect.ts",
     "prospect:sources": "tsx scripts/prospect-sources.ts",
     "prospect:requests": "tsx scripts/prospect-requests.ts",
     "web:dev": "cd web && npx astro dev",

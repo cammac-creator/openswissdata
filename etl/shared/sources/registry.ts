@@ -18,6 +18,7 @@ import { SWISSTOPO_STREETS_STAC_ITEMS_URL } from "../../streets/sources.js";
 import { BFE_PV_CSV_URL } from "../../bfe/sources.js";
 import { FOSC_PUBLICATIONS_URL } from "../../fosc/sources.js";
 import { SESAM_XML_URL } from "../../sanctions/sources.js";
+import { DOUANE_CONCORDANCE_SOURCE, DOUANE_ZIP_SOURCES } from "../../douane/sources.js";
 // Adresses BAZG : dérivées de la même déclaration que la collecte (etl/tares/sources.ts,
 // BAZG_SOURCES), jamais recopiées en dur ici (tâche osd.socle).
 import { BAZG_SOURCES } from "../../tares/sources.js";
@@ -102,6 +103,15 @@ const SECO_SESAM: SourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// Commerce extérieur de l'OFDF (05.11.2026). JAMAIS la constante `BAZG` ci-dessus : elle porte
+// l'autorisation écrite du 21.04.2026, qui vise TARES et pas ces fichiers. Ici, aucune autorisation
+// demandée ni obtenue ; la fiche affiche `terms_by_ask`. Détail : `etl/douane/SOURCES.md`.
+const BAZG_BY_ASK: SourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-BAZG-TERMS-BY-ASK",
+  authority: "Federal Office for Customs and Border Security FOCBS, opendata.swiss terms_by_ask (open use with attribution, commercial use only with the publisher's permission). No permission requested or held: free service, nothing sold, removal within 48 hours on request.",
+  jurisdiction: "Switzerland",
+};
+
 const SECO_FOSC: SourceLicence = {
   reference: "PUBLIC-OFFICIAL-SOURCE-SECO-FOSC-TERMS",
   authority: "State Secretariat for Economic Affairs SECO, Official Gazettes Portal terms of use of 07.06.2024 (point 3.3: source attribution, not an official publication, data protection, publication periods)",
@@ -174,6 +184,17 @@ export const SOURCES: readonly SourceDescriptor[] = [
   // archive vendue : ne pas l'ajouter à PRODUCT_SOURCES sans nouvelle décision (F2).
   { id: "seco.sesam_sanctions", institution: "SECO", url: SESAM_XML_URL, licence: SECO_SESAM,
     description: "SECO — liste des sanctions (SESAM), fichier XML officiel ; organisations et bateaux seulement, personnes écartées avant toute écriture, collecte quotidienne." },
+  // Sans canari (lot douane, 05.11.2026) : la collecte (`etl/douane/collect.ts`) contrôle elle-même la
+  // forme, le volume et les totaux. Hors de toute archive vendue et hors de `PUBLIC_SOURCES` : rien
+  // n'est servi à ce jour ; ne pas les ajouter à PRODUCT_SOURCES sans nouvelle décision (F2).
+  { id: DOUANE_ZIP_SOURCES.duties.id, institution: "BAZG", url: DOUANE_ZIP_SOURCES.duties.url, licence: BAZG_BY_ASK,
+    description: "OFDF — commerce extérieur, importations et recettes douanières par numéro de tarif et pays, depuis 2000, collecte mensuelle privée." },
+  { id: DOUANE_ZIP_SOURCES.imports.id, institution: "BAZG", url: DOUANE_ZIP_SOURCES.imports.url, licence: BAZG_BY_ASK,
+    description: "OFDF — commerce extérieur, importations par numéro de tarif et pays, depuis 1988, collecte mensuelle privée." },
+  { id: DOUANE_ZIP_SOURCES.exports.id, institution: "BAZG", url: DOUANE_ZIP_SOURCES.exports.url, licence: BAZG_BY_ASK,
+    description: "OFDF — commerce extérieur, exportations par numéro de tarif et pays, depuis 1988, collecte mensuelle privée." },
+  { id: DOUANE_CONCORDANCE_SOURCE.id, institution: "BAZG", url: DOUANE_CONCORDANCE_SOURCE.url, licence: BAZG_BY_ASK,
+    description: "OFDF — liste de concordance CPA à 6 chiffres et numéro de tarif à 8 chiffres, collecte mensuelle privée." },
 ];
 
 const PAR_ID = new Map(SOURCES.map(s => [s.id, s]));
