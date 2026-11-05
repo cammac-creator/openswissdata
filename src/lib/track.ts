@@ -90,7 +90,9 @@ export const trackApiRequest: MiddlewareHandler = async (c, next) => {
     // `src/mcp/company/check.ts`) : jamais l'IDE brut dans une mesure.
     name: path
       .replace(/^\/api\/(download|delivery)\/.*/, "/api/$1/:token")
-      .replace(/^\/api\/v1\/company\/.*/, "/api/v1/company/:uid"),
+      .replace(/^\/api\/v1\/company\/.*/, "/api/v1/company/:uid")
+      // Le type de route seulement : tout ce qui suit est un texte libre de l'appelant, y compris sur un 404.
+      .replace(/^\/api\/v1\/tariff\/(?!changes$).*/, "/api/v1/tariff/:code"),
     status: c.res.status,
     duration_ms,
     customer_id,

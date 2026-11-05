@@ -32,7 +32,7 @@ const InputZ = z.object({
 const PREFIX_LIST_LIMIT = 40;
 const SUGGESTION_LIMIT = 10;
 
-const DISCLAIMERS = {
+export const DISCLAIMERS = {
   fr: "AVIS NON-OFFICIEL : ces données sont une copie OpenSwissData de la TARES (BAZG/OFDF) et ne remplacent pas la consultation officielle sur xtares.admin.ch. OpenSwissData ne garantit ni l'exactitude ni l'actualité, et n'est pas responsable des décisions douanières prises sur cette base.",
   de: "INOFFIZIELLER HINWEIS: Diese Daten sind eine OpenSwissData-Kopie der TARES (BAZG/OFDF) und ersetzen nicht die offizielle Konsultation auf xtares.admin.ch. OpenSwissData garantiert weder Genauigkeit noch Aktualität und haftet nicht für daraus abgeleitete Zollentscheidungen.",
   it: "AVVISO NON UFFICIALE: questi dati sono una copia OpenSwissData del TARES (BAZG/OFDF) e non sostituiscono la consultazione ufficiale su xtares.admin.ch. OpenSwissData non garantisce né l'esattezza né l'attualità e non è responsabile delle decisioni doganali prese su questa base.",
