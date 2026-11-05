@@ -4,7 +4,7 @@
  * LE PIÈGE (mesuré le 05.11.2026) : le libellé du tarif contient des points-virgules, protégés par des
  * guillemets, et des guillemets internes échappés par `\"`, ce qu'un lecteur CSV standard ne comprend
  * pas. 898 609 lignes des recettes débordent ainsi. Lues par position depuis la gauche, elles donnent
- * 7,08 milliards de droits en 2025 au lieu de 0,83.
+ * des droits environ neuf fois trop hauts.
  *
  * Donc on ne lit JAMAIS le libellé : les colonnes à gauche de lui et celles à droite sont fixes, on
  * compte depuis chaque bout et on jette le milieu. Chaque champ gardé passe un contrôle strict : un

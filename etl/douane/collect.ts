@@ -24,6 +24,7 @@ import { DouaneAggregator, readZipInto, type FileLedger } from "./aggregate.js";
 import {
   buildMeta,
   checkDocument,
+  journalSummary,
   MAX_DOCUMENT_GZIP_BYTES,
   parseConcordance,
   readMetaFromGzip,
@@ -32,8 +33,8 @@ import {
   type DouaneMeta,
   type DouaneSourceProof,
 } from "./build.js";
-import { downloadToFile, type DownloadedFile } from "./download.js";
-import { DOUANE_CONCORDANCE_SOURCE, DOUANE_R2_KEY, DOUANE_USER_AGENT, DOUANE_ZIP_SOURCES, type DouaneFileKind, type DouaneSource } from "./sources.js";
+import { CONCORDANCE_ATTEMPT_MS, downloadToFile, ZIP_ATTEMPT_MS, type DownloadedFile } from "./download.js";
+import { DOUANE_CONCORDANCE_SOURCE, DOUANE_PREVIOUS_READ_MS, DOUANE_R2_KEY, DOUANE_RUN_DEADLINE_MS, DOUANE_USER_AGENT, DOUANE_ZIP_SOURCES, type DouaneFileKind, type DouaneSource } from "./sources.js";
 
 const MAX_ZIP_BYTES = 2_000_000_000;
 const MAX_CONCORDANCE_BYTES = 20_000_000;
@@ -60,19 +61,19 @@ async function hashFile(path: string): Promise<string> {
   return hash.digest("hex");
 }
 
-async function fetchSource(source: DouaneSource, args: Args, workDir: string, maxBytes: number): Promise<DownloadedFile> {
+async function fetchSource(source: DouaneSource, args: Args, workDir: string, maxBytes: number, timeoutMs: number): Promise<DownloadedFile> {
   if (args.fromDir) {
     const path = join(args.fromDir, source.fileName);
     return { path, sha256: await hashFile(path), bytes: statSync(path).size, etag: null, lastModified: null };
   }
-  return downloadToFile({ url: source.url, path: join(workDir, source.fileName), userAgent: DOUANE_USER_AGENT, maxBytes });
+  return downloadToFile({ url: source.url, path: join(workDir, source.fileName), userAgent: DOUANE_USER_AGENT, maxBytes, timeoutMs });
 }
 
 /** `null` seulement quand l'objet n'existe pas encore : toute autre panne arrête le passage. */
 async function readPrevious(): Promise<DouaneMeta | null> {
   let bytes: Buffer;
   try {
-    bytes = await getObjectBuffer(DOUANE_R2_KEY, { maxBytes: MAX_DOCUMENT_GZIP_BYTES, timeoutMs: 600_000 });
+    bytes = await getObjectBuffer(DOUANE_R2_KEY, { maxBytes: MAX_DOCUMENT_GZIP_BYTES, timeoutMs: DOUANE_PREVIOUS_READ_MS });
   } catch (err) {
     if (err instanceof Error && (err.name === "NoSuchKey" || err.name === "NotFound")) return null;
     throw new Error("Version précédente illisible : passage arrêté");
@@ -112,6 +113,12 @@ async function main(): Promise<void> {
   };
 
   const workDir = mkdtempSync(join(tmpdir(), "osd-douane-"));
+  // Un échec, pas une annulation : c'est ce qui fait partir l'alerte du workflow.
+  const deadline = setTimeout(() => {
+    console.error(`Collecte de la douane arrêtée (délai dépassé, étape ${stage})`);
+    rmSync(workDir, { recursive: true, force: true });
+    process.exit(1);
+  }, DOUANE_RUN_DEADLINE_MS);
   try {
     // La version précédente d'abord : inutile de lire 30 Go si elle est illisible.
     const previous = args.writeR2 ? await step("version précédente", readPrevious) : null;
@@ -121,14 +128,14 @@ async function main(): Promise<void> {
     const proofs: DouaneSourceProof[] = [];
     for (const kind of KINDS) {
       const source = DOUANE_ZIP_SOURCES[kind];
-      const file = await step(`téléchargement ${kind}`, () => fetchSource(source, args, workDir, MAX_ZIP_BYTES));
+      const file = await step(`téléchargement ${kind}`, () => fetchSource(source, args, workDir, MAX_ZIP_BYTES, ZIP_ATTEMPT_MS));
       ledgers[kind] = await step(`lecture ${kind}`, () => readZipInto(kind, file.path, aggregator));
       proofs.push(proof(source, kind, file, ledgers[kind].updated_at[0] ?? ""));
       // Le disque d'un exécuteur n'a pas à garder les trois en même temps.
       if (!args.fromDir) rmSync(file.path, { force: true });
     }
 
-    const concordanceFile = await step("téléchargement concordance", () => fetchSource(DOUANE_CONCORDANCE_SOURCE, args, workDir, MAX_CONCORDANCE_BYTES));
+    const concordanceFile = await step("téléchargement concordance", () => fetchSource(DOUANE_CONCORDANCE_SOURCE, args, workDir, MAX_CONCORDANCE_BYTES, CONCORDANCE_ATTEMPT_MS));
     const concordance = parseConcordance(readFileSync(concordanceFile.path, "utf8"));
     proofs.push(proof(DOUANE_CONCORDANCE_SOURCE, "concordance", concordanceFile, concordance.updatedAt));
 
@@ -142,25 +149,14 @@ async function main(): Promise<void> {
     if (sizes.gzip_bytes > MAX_DOCUMENT_GZIP_BYTES) throw new Error("Document trop volumineux : passage arrêté");
     await step("relecture du document", () => verifyDocument(documentPath, meta));
 
-    const yearly = (kind: DouaneFileKind) => Object.entries(meta.ledgers[kind].by_year).map(([year, y]) => ({ year, ...y }));
-    // Nombres, dates et empreintes seulement.
-    console.log(JSON.stringify({
+    // Le journal est public : `journalSummary` n'y laisse aucun montant lu dans la source.
+    console.log(JSON.stringify(journalSummary(meta, {
       mode: args.writeR2 ? "réel" : "simulation",
-      sources: proofs.map(({ id, sha256, bytes, last_modified, updated_at }) => ({ id, sha256, bytes, last_modified, updated_at })),
-      lines: Object.fromEntries(KINDS.map((kind) => [kind, meta.ledgers[kind].lines])),
-      lines_label_overflow: Object.fromEntries(KINDS.map((kind) => [kind, meta.ledgers[kind].lines_label_overflow])),
-      lines_blank_value: Object.fromEntries(KINDS.map((kind) => [kind, meta.ledgers[kind].lines_blank_value])),
-      lines_blank_kg: Object.fromEntries(KINDS.map((kind) => [kind, meta.ledgers[kind].lines_blank_kg])),
-      last_years: Object.fromEntries(KINDS.map((kind) => [kind, yearly(kind).slice(-3)])),
-      row_count: meta.row_count,
-      non_conjunctural_tariffs: { imports: Object.keys(meta.non_conjunctural.imports).length, exports: Object.keys(meta.non_conjunctural.exports).length },
-      concordance_rows: meta.concordance_cpa6.length,
-      document_raw_bytes: sizes.raw_bytes,
-      document_gzip_bytes: sizes.gzip_bytes,
-      seconds_by_step: timings,
-      seconds_total: Math.round((Date.now() - started) / 1000),
-      max_rss_mb: Math.round(process.resourceUsage().maxRSS / 1024),
-    }, null, 1));
+      document: sizes,
+      secondsByStep: timings,
+      secondsTotal: Math.round((Date.now() - started) / 1000),
+      maxRssMb: Math.round(process.resourceUsage().maxRSS / 1024),
+    }), null, 1));
 
     if (args.out) {
       mkdirSync(args.out, { recursive: true });
@@ -172,6 +168,7 @@ async function main(): Promise<void> {
       console.log("écrit dans R2 : douane/or");
     }
   } finally {
+    clearTimeout(deadline);
     rmSync(workDir, { recursive: true, force: true });
   }
 }

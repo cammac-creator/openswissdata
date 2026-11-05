@@ -30,19 +30,22 @@ describe("téléchargement des fichiers de l'OFDF", () => {
     expect(file.sha256).toBe(createHash("sha256").update("contenu").digest("hex"));
     expect(file.lastModified).toBe("Tue, 20 Oct 2026 06:08:55 GMT");
   });
-  it("reprend après une panne réseau et un 503", async () => {
-    const fetchImpl = vi.fn().mockRejectedValueOnce(networkError()).mockResolvedValueOnce(new Response("", { status: 503 })).mockResolvedValueOnce(zipResponse());
+  it("reprend une fois après une panne réseau ou un 503", async () => {
+    const after503 = vi.fn().mockResolvedValueOnce(new Response("", { status: 503 })).mockResolvedValueOnce(zipResponse());
+    await run(after503).result;
+    expect(after503).toHaveBeenCalledTimes(2);
+    const fetchImpl = vi.fn().mockRejectedValueOnce(networkError()).mockResolvedValueOnce(zipResponse());
     const { result, sleep, log } = run(fetchImpl);
     await result;
-    expect(fetchImpl).toHaveBeenCalledTimes(3);
-    expect(sleep).toHaveBeenCalledTimes(2);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledTimes(1);
     expect(log.mock.calls[0][0]).toContain("TypeError ECONNRESET");
     expect(log.mock.calls[0][0]).not.toContain("TEMOIN");
   });
   it("un fichier tronqué se reprend, puis arrête", async () => {
     const truncated = () => zipResponse("court", { "content-length": "50" });
     const { result } = run(vi.fn(async () => truncated()));
-    await expect(result).rejects.toThrow("Source OFDF : échec après 3 essais (fichier tronqué)");
+    await expect(result).rejects.toThrow("Source OFDF : échec après 2 essais (fichier tronqué)");
   });
   it.each([
     ["404", () => new Response("", { status: 404 })],

@@ -18,6 +18,19 @@ export class DouaneDownloadError extends Error {
   }
 }
 
+/**
+ * Plafonds. Le plus lent mesuré sur un Mac le 05.11.2026 : 140 s pour un ZIP. La somme au pire doit tenir
+ * dans `DOUANE_RUN_DEADLINE_MS` (`tests/etl/sources-registry-douane.test.ts` le vérifie).
+ */
+export const ZIP_ATTEMPT_MS = 600_000;
+export const CONCORDANCE_ATTEMPT_MS = 120_000;
+export const RETRY_DELAYS_MS: readonly number[] = [60_000];
+
+/** Temps maximal d'un téléchargement, reprises comprises. */
+export function worstCaseMs(attemptMs: number, retryDelaysMs: readonly number[] = RETRY_DELAYS_MS): number {
+  return attemptMs * (retryDelaysMs.length + 1) + retryDelaysMs.reduce((sum, delay) => sum + delay, 0);
+}
+
 /** Une réponse qui ne changera pas en réessayant s'arrête tout de suite. */
 class Permanent extends DouaneDownloadError {}
 
@@ -48,7 +61,7 @@ const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(r
 async function attempt(options: DownloadOptions): Promise<DownloadedFile> {
   const res = await (options.fetchImpl ?? fetch)(options.url, {
     headers: { "User-Agent": options.userAgent },
-    signal: AbortSignal.timeout(options.timeoutMs ?? 1_800_000),
+    signal: AbortSignal.timeout(options.timeoutMs ?? ZIP_ATTEMPT_MS),
   });
   if (!res.ok) {
     const reason = `HTTP ${res.status}`;
@@ -86,7 +99,7 @@ async function attempt(options: DownloadOptions): Promise<DownloadedFile> {
 }
 
 export async function downloadToFile(options: DownloadOptions): Promise<DownloadedFile> {
-  const delays = options.retryDelaysMs ?? [60_000, 300_000];
+  const delays = options.retryDelaysMs ?? RETRY_DELAYS_MS;
   const sleep = options.sleep ?? defaultSleep;
   const log = options.log ?? ((message: string) => console.log(message));
   let last = "aucun essai";

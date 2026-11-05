@@ -46,4 +46,10 @@ export const DOUANE_CONCORDANCE_SOURCE: DouaneSource = {
 /** Un seul objet dans le bucket PRIVÉ, réécrit à chaque passage : jamais de copie datée, jamais dans le dépôt. */
 export const DOUANE_R2_KEY = "douane/or/current-v1.txt.gz";
 export const DOUANE_SCHEMA = "douane-or-v1";
+/**
+ * Limite du passage entier, posée par le programme : au-delà, il s'arrête en échec et le workflow alerte.
+ * La documentation de GitHub ne dit pas quel état laisse une étape tuée par son délai : cette limite ne dépend pas d'elle.
+ */
+export const DOUANE_RUN_DEADLINE_MS = 95 * 60_000;
+export const DOUANE_PREVIOUS_READ_MS = 5 * 60_000;
 export const DOUANE_USER_AGENT = "OpenSwissData-collecte-douane/1 (+https://openswissdata.com)";

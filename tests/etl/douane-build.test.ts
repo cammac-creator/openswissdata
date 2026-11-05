@@ -6,11 +6,13 @@ import { gunzipSync, gzipSync } from "node:zlib";
 import { afterAll, describe, expect, it } from "vitest";
 import { DouaneAggregator, readZipInto, type FileLedger, type YearLedger } from "../../etl/douane/aggregate.js";
 import {
+  benchmarkGaps,
   buildMeta,
   checkDocument,
   CONJUNCTURAL_BENCHMARKS,
   DUTY_BENCHMARKS,
   DUTY_RATIO_MAX,
+  journalSummary,
   parseConcordance,
   readMetaFromGzip,
   verifyDocument,
@@ -180,6 +182,50 @@ describe("contrôles avant écriture", () => {
       const older = previous((all) => { all.imports.by_year["2010"] = year(1, 1); });
       expect(() => checkDocument(metaFrom(), dates(), options({ previous: older }))).toThrow(/année disparue/);
     });
+  });
+});
+
+describe("le journal public", () => {
+  const run = { mode: "simulation", document: { raw_bytes: 1, gzip_bytes: 1 }, secondsByStep: { lecture: 1 }, secondsTotal: 1, maxRssMb: 1 };
+  /** Des montants reconnaissables, dans chaque colonne de chaque fichier et de chaque année. */
+  function witnesses(): DouaneMeta {
+    const all = ledgers();
+    let next = 7_100_000_001;
+    for (const kind of ["duties", "imports", "exports"] as const) {
+      for (const entry of Object.values(all[kind].by_year)) {
+        entry.value_chf = next++;
+        entry.kg = next++;
+        if (kind === "duties") entry.duties_chf = next++;
+        else entry.conjunctural_value_chf = next++;
+      }
+    }
+    return metaFrom(all);
+  }
+  it("aucune valeur, aucun poids, aucuns droits, sur aucune année ni aucun fichier", () => {
+    const text = JSON.stringify(journalSummary(witnesses(), run));
+    expect(text).not.toMatch(/71000000\d\d/);
+    expect(text).not.toMatch(/value_chf|duties_chf|"kg"/);
+  });
+  it("les années ne portent que les lignes, les mois et l'état", () => {
+    const summary = journalSummary(metaFrom(), run) as { last_years: Record<string, Record<string, unknown>[]> };
+    expect(summary.last_years.duties).toHaveLength(3);
+    for (const rows of Object.values(summary.last_years)) {
+      for (const row of rows) expect(Object.keys(row).sort()).toEqual(["lines", "months", "provisional", "year"]);
+    }
+  });
+  it("les totaux n'y sont que des écarts au repère, en pour cent", () => {
+    const all = ledgers();
+    all.imports.by_year["2025"].conjunctural_value_chf = Math.round(232_700_000_000 * 1.0006);
+    all.exports.by_year["2025"].conjunctural_value_chf = Math.round(287_000_000_000 * 0.9994);
+    all.duties.by_year["2025"].duties_chf = Math.round(778_000_000 * 1.0607);
+    all.duties.by_year["2024"].duties_chf = 738_000_000;
+    expect(benchmarkGaps(metaFrom(all))).toEqual({ imports_2025: 0.06, exports_2025: -0.06, duties_2024: 0, duties_2025: 6.07 });
+  });
+  it("le recoupement entre les deux fichiers aussi", () => {
+    const all = ledgers();
+    all.duties.by_year["2024"].value_chf = 1010;
+    const summary = journalSummary(metaFrom(all), run) as { cross_file_max_gap_percent: number };
+    expect(summary.cross_file_max_gap_percent).toBeCloseTo(1, 5);
   });
 });
 

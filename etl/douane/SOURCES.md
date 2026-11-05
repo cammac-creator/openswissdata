@@ -36,7 +36,7 @@ cellule ; une petite cellule peut en pratique correspondre à une seule entrepri
 Le libellé du tarif contient des points-virgules, entre guillemets, et des guillemets internes échappés par `\"`, ce qu'un lecteur
 CSV standard ne comprend pas. Lignes concernées le 05.11.2026 : 898 609 dans les recettes, 893 528 dans les importations,
 1 296 596 dans les exportations. Lu par position depuis la gauche, le fichier des recettes donne pour 2025 des
-droits de 7,08 milliards au lieu de 0,83 (la lecture du 03.11.2026 donnait 6,41, méthode non relue).
+droits environ neuf fois trop hauts.
 
 `parse.ts` ne lit donc jamais le libellé : colonnes fixes à gauche de lui, colonnes fixes à droite, le milieu est jeté. Chaque champ
 gardé passe un contrôle strict ; un point-virgule ailleurs décale la lecture et arrête la collecte, au lieu de fausser un total.
@@ -54,27 +54,27 @@ année × tarif × pays, triée par tarif, pays, année :
   avec l'année : `CS` y a voulu dire Tchécoslovaquie, puis Serbie-et-Monténégro.
 - 2026 est une année provisoire (`provisional`, 9 mois au 05.11.2026) : ne jamais la comparer à une année close sans le dire.
 - Les totaux officiels du commerce sont « conjoncturels », sans or ni assimilés : `non_conjunctural` liste, par sens, les 81
-  tarifs concernés et leurs années. En 2025, ils pèsent 190 milliards d'importations sur 423.
+  tarifs concernés et leurs années. Leur poids en valeur est grand et varie fortement d'une année à l'autre.
 
 ## Le total, et ce qu'il prouve
-Mesure du 05.11.2026 sur les vrais fichiers, publiés le 20.10.2026, mis à jour le 13.10.2026 :
+Mesure du 05.11.2026 sur les vrais fichiers, publiés le 20.10.2026, mis à jour le 13.10.2026. Ce dépôt est public : il garde les
+repères, publiés ailleurs, et les écarts, jamais un montant lu dans la source. Le journal de la collecte suit la même règle.
 
-| Contrôle | Attendu | Lu | Écart |
-|---|---|---|---|
-| Importations 2025, total conjoncturel | 232,7 milliards (communiqué de l'OFDF du 29.01.2026) | 232,85 | +0,06 % |
-| Exportations 2025, total conjoncturel | 287,0 milliards (même communiqué) | 286,84 | -0,06 % |
-| Valeur importée, recettes contre commerce, 27 années | Égalité, deux fichiers de l'OFDF | Égalité au franc près | 0 |
-| Droits 2025 | 778 M (Compte d'État 2025, tome 1A) | 825,3 M | **+6,1 %** |
-| Droits 2024 | 738 M (même tome) | 766,4 M | **+3,8 %** |
+| Contrôle | Repère | Écart du fichier au repère |
+|---|---|---|
+| Importations 2025, total conjoncturel | 232,7 milliards (communiqué de l'OFDF du 29.01.2026) | +0,06 % |
+| Exportations 2025, total conjoncturel | 287,0 milliards (même communiqué) | -0,06 % |
+| Valeur importée, recettes contre commerce, 27 années | Égalité, deux fichiers de l'OFDF | 0 |
+| Droits 2025 | 778 M (Compte d'État 2025, tome 1A) | **+6,1 %** |
+| Droits 2024 | 738 M (même tome) | **+3,8 %** |
 
 **L'écart sur les droits est mesuré et non expliqué.** La statistique et la comptabilité de la Confédération ne couvrent pas
-forcément la même chose ; nous ne savons pas pourquoi elles diffèrent et l'écart monte à environ 13 % avant 2024
-(1 340 M contre 1 184 M en 2023, repère lu dans un extrait de recherche, non relu dans le compte). La valeur est donc
+forcément la même chose ; nous ne savons pas pourquoi elles diffèrent et l'écart monte à environ 13 % en 2023 (repère lu dans
+un extrait de recherche, non relu dans le compte). La valeur est donc
 recoupée à 0,06 % du communiqué, et au franc près entre les deux fichiers ; la colonne des droits ne l'est qu'à quelques pour cent. Ne jamais présenter
 ces droits comme les recettes du compte de la Confédération.
 
-Le document retrouve aussi, aux mêmes chiffres, un exemple calculé à part sur le fichier source le 03.11.2026 : vin (2204) importé
-en 2025, Italie 390,3 M et 66,18 M de droits (17,0 %), France 462,5 M et 31,83 M (6,9 %).
+Le document a aussi été recoupé à part sur le fichier source, sur un exemple calculé le 03.11.2026 : mêmes chiffres.
 
 ## Arrêts de la collecte (rien n'est envoyé, le document précédent reste)
 - **Forme** : archive qui n'a pas exactement un membre CSV, nom de membre refusé, colonnes qui changent, ligne vide ou trop
@@ -90,6 +90,11 @@ en 2025, Italie 390,3 M et 66,18 M de droits (17,0 %), France 462,5 M et 31,83 M
 - **Version précédente** : année close qui bouge de plus de 1 %, année disparue.
 - **Relecture du document fini** : même nombre de lignes et mêmes totaux au franc près que pendant la lecture, y compris les
   totaux conjoncturels, chaque ligne de la forme attendue, tri strict. Une ligne qui ne passe pas arrête tout.
+
+Le passage entier est borné à 95 minutes par le programme lui-même : au-delà, il s'arrête en échec et le mail d'alerte part. Le
+workflow ajoute un `timeout-minutes` à chaque étape, dont la somme reste sous celui du travail, parce qu'un travail annulé par son
+délai n'alerte pas (`!cancelled()`, et `alert-email.mjs` n'agit que sur `failure`). Téléchargement : 10 minutes par essai, deux
+essais, soit 21 minutes par ZIP au pire.
 
 Une anomalie examinée s'adopte par l'entrée `accepter_anomalie` du déclenchement manuel, un passage réel lancé à la main (F6) ;
 seuls une baisse, une année close qui bouge et une source figée ou qui recule s'adoptent. Un nouveau chiffre officiel annuel
@@ -116,4 +121,4 @@ fichiers téléchargés par le programme sont celles d'un téléchargement sépa
 **Non mesuré sur un exécuteur GitHub, ni l'envoi vers R2** : un `workflow_dispatch` n'existe qu'une fois le workflow sur la branche
 principale, et aucun passage réel n'a été lancé. Un exécuteur standard a 16 Go de mémoire et environ 14 Go de disque, soit
 largement de quoi faire, mais il est plus lent qu'un Mac. Le passage journalise sa durée par étape et sa mémoire maximale : la
-première simulation manuelle après fusion en donne la preuve. Temps maximal du travail : 120 minutes.
+première simulation manuelle après fusion en donne la preuve. Les chiffres du journal restent des lignes, des mois, des états et des écarts en pour cent. Temps maximal du travail : 120 minutes.

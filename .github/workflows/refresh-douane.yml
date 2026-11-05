@@ -34,28 +34,35 @@ jobs:
     runs-on: ubuntu-latest
     # Secrets réservés à la branche principale (tâche osd.T17, 07.10.2026).
     environment: collecte
-    # Mesure sur un Mac le 05.11.2026 : voir SOURCES.md. Marge large : un exécuteur est plus lent, et les
-    # reprises du téléchargement attendent jusqu'à 6 minutes par fichier.
+    # Un travail tué par CE délai est annulé : `!cancelled()` saute l'alerte, et alert-email.mjs n'agit que
+    # sur `failure`. Il ne doit donc jamais se déclencher : la somme des délais d'étape ci-dessous reste
+    # en dessous (test : sources-registry-douane), et le programme s'arrête en échec à 95 minutes.
     timeout-minutes: 120
     env:
       # Le passage tient avec 2 Go de tas (2,4 Go en tout, SOURCES.md) ; un exécuteur standard a 16 Go.
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        timeout-minutes: 3
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        timeout-minutes: 3
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+        timeout-minutes: 5
       - name: Vérifier avant de lire la source (dont le piège des libellés)
+        timeout-minutes: 5
         run: |
           npm run typecheck
           npx vitest run tests/etl/douane-parse.test.ts tests/etl/douane-build.test.ts tests/etl/douane-fuite.test.ts tests/etl/douane-download.test.ts tests/etl/sources-registry-douane.test.ts
       - name: Simulation (déclenchement manuel)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        timeout-minutes: 97
         run: npm run sync:douane
       - name: Collecter, contrôler et écrire le document réduit (R2 privé)
         if: ${{ github.event_name == 'schedule' || !inputs.dry_run }}
+        timeout-minutes: 97
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -65,6 +72,7 @@ jobs:
         run: npm run sync:douane -- --write-r2 $ACCEPTER_ANOMALIE
       - name: Prévenir par mail d'un changement d'état
         if: ${{ !cancelled() }}
+        timeout-minutes: 3
         env:
           ALERT_CURRENT: ${{ job.status }}
           ALERT_TASK: Collecte du commerce extérieur

@@ -48,7 +48,7 @@ export const DUTY_BENCHMARKS: Readonly<Record<string, number>> = {
 };
 export const DUTY_RATIO_MIN = 0.95;
 export const DUTY_RATIO_MAX = 1.2;
-/** Garde-fou sans repère, pour les années à venir. Mesure du 05.11.2026 : de 0,77 à 1,41 milliard par année close. */
+/** Garde-fou sans repère, pour les années à venir. Toutes les années closes y tiennent (mesure du 05.11.2026). */
 export const DUTY_YEAR_MIN = 400_000_000;
 export const DUTY_YEAR_MAX = 2_000_000_000;
 
@@ -290,6 +290,55 @@ export async function readMetaFromGzip(bytes: Buffer): Promise<DouaneMeta | null
     return null;
   }
   return null;
+}
+
+/** Écart en pour cent du fichier à chaque repère officiel. C'est tout ce que le journal public dit des totaux. */
+export function benchmarkGaps(meta: DouaneMeta): Record<string, number> {
+  const percent = (read: number | undefined, wanted: number): number | null =>
+    read === undefined ? null : Math.round((read / wanted - 1) * 10_000) / 100;
+  const gaps: Record<string, number> = {};
+  const put = (name: string, gap: number | null): void => {
+    if (gap !== null) gaps[name] = gap;
+  };
+  for (const [year, wanted] of Object.entries(CONJUNCTURAL_BENCHMARKS)) {
+    put(`imports_${year}`, percent(meta.ledgers.imports.by_year[year]?.conjunctural_value_chf, wanted.imports));
+    put(`exports_${year}`, percent(meta.ledgers.exports.by_year[year]?.conjunctural_value_chf, wanted.exports));
+  }
+  for (const [year, wanted] of Object.entries(DUTY_BENCHMARKS)) {
+    put(`duties_${year}`, percent(meta.ledgers.duties.by_year[year]?.duties_chf, wanted));
+  }
+  return gaps;
+}
+
+/**
+ * Ce que le passage écrit dans le journal, qui est PUBLIC : lignes, mois, état, écarts en pour cent,
+ * empreintes et tailles. Jamais une valeur, un poids ni des droits lus dans la source.
+ */
+export function journalSummary(meta: DouaneMeta, run: { mode: string; document: { raw_bytes: number; gzip_bytes: number }; secondsByStep: Record<string, number>; secondsTotal: number; maxRssMb: number }): object {
+  const kinds: DouaneFileKind[] = ["duties", "imports", "exports"];
+  const crossFile = Object.entries(meta.ledgers.duties.by_year).map(([year, duties]) => {
+    const imports = meta.ledgers.imports.by_year[year]?.value_chf ?? 0;
+    return imports > 0 ? Math.abs(duties.value_chf / imports - 1) * 100 : 100;
+  });
+  return {
+    mode: run.mode,
+    sources: meta.sources.map(({ id, sha256, bytes, last_modified, updated_at }) => ({ id, sha256, bytes, last_modified, updated_at })),
+    lines: Object.fromEntries(kinds.map((kind) => [kind, meta.ledgers[kind].lines])),
+    lines_label_overflow: Object.fromEntries(kinds.map((kind) => [kind, meta.ledgers[kind].lines_label_overflow])),
+    lines_blank_value: Object.fromEntries(kinds.map((kind) => [kind, meta.ledgers[kind].lines_blank_value])),
+    lines_blank_kg: Object.fromEntries(kinds.map((kind) => [kind, meta.ledgers[kind].lines_blank_kg])),
+    last_years: Object.fromEntries(kinds.map((kind) => [kind, Object.entries(meta.ledgers[kind].by_year).slice(-3).map(([year, y]) => ({ year, lines: y.lines, months: y.months, provisional: y.provisional }))])),
+    benchmark_gap_percent: benchmarkGaps(meta),
+    cross_file_max_gap_percent: Math.max(0, ...crossFile),
+    row_count: meta.row_count,
+    non_conjunctural_tariffs: { imports: Object.keys(meta.non_conjunctural.imports).length, exports: Object.keys(meta.non_conjunctural.exports).length },
+    concordance_rows: meta.concordance_cpa6.length,
+    document_raw_bytes: run.document.raw_bytes,
+    document_gzip_bytes: run.document.gzip_bytes,
+    seconds_by_step: run.secondsByStep,
+    seconds_total: run.secondsTotal,
+    max_rss_mb: run.maxRssMb,
+  };
 }
 
 function closedYears(ledger: Pick<FileLedger, "by_year">): [string, YearLedger][] {

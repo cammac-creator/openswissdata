@@ -38,7 +38,7 @@ describe("le piège : un point-virgule dans le libellé du tarif", () => {
 
   it("le total retombe sur le repère ; la lecture naïve, par position, en est très loin", async () => {
     // Une ligne droite à 100 francs de droits, puis des lignes dont le libellé pousse une grande valeur
-    // sur la colonne des droits, comme le vrai fichier (6,41 milliards au lieu de 0,83).
+    // sur la colonne des droits, comme le vrai fichier (environ neuf fois le bon total).
     const lines = [
       dutiesLine({ duties: "100.0", value: "1000.0", tariff: "9901.0001", country: "XA" }),
       dutiesLine({ duties: "20.0", value: "90000.0", tariff: "9901.0002", country: "XA", label: '"Fictif; autre"' }),
