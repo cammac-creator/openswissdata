@@ -40,7 +40,7 @@ print(len(banks), "banks in the registry")
 ## Buying datasets
 
 The SDK is free and open-source. The datasets themselves are sold at https://openswissdata.com.
-- TARES: CHF 299 · Classifications Bundle: CHF 399 · FINMA Registry: CHF 299 · Full Bundle: CHF 799.
+- TARES: CHF 299 · FINMA Registry: CHF 299.
 
 ## License
 
