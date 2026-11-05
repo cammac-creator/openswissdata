@@ -128,6 +128,15 @@ describe("contrôles avant écriture", () => {
     stops((all) => { all.imports.by_year["2024"].provisional = true; }, /encore provisoire/);
     stops((all) => { all.exports.by_year["2027"] = year(1, 1); delete all.exports.by_year["2026"]; }, /futur/);
   });
+  it("l'avant-dernière année peut rester provisoire après janvier, mais doit être complète", () => {
+    const all = ledgers();
+    all.duties.by_year["2025"].provisional = true;
+    all.imports.by_year["2025"].provisional = true;
+    all.exports.by_year["2025"].provisional = true;
+    expect(() => checkDocument(metaFrom(all), dates(), options())).not.toThrow();
+    all.imports.by_year["2025"].months = 11;
+    expect(() => checkDocument(metaFrom(all), dates(), options())).toThrow(/année close incomplète/);
+  });
   it("une dernière année trop ancienne", () => {
     expect(() => checkDocument(metaFrom(), dates(), options({ now: Date.parse("2028-11-05T12:00:00Z") }))).toThrow(/dernière année trop ancienne/);
   });

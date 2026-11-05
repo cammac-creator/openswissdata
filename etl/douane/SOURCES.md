@@ -36,7 +36,7 @@ cellule ; une petite cellule peut en pratique correspondre à une seule entrepri
 Le libellé du tarif contient des points-virgules, entre guillemets, et des guillemets internes échappés par `\"`, ce qu'un lecteur
 CSV standard ne comprend pas. Lignes concernées le 05.11.2026 : 898 609 dans les recettes, 893 528 dans les importations,
 1 296 596 dans les exportations. Lu par position depuis la gauche, le fichier des recettes donne pour 2025 des
-droits de 6,41 à 7,08 milliards, selon ce que le lecteur fait des champs illisibles, au lieu de 0,83.
+droits de 7,08 milliards au lieu de 0,83 (la lecture du 03.11.2026 donnait 6,41, méthode non relue).
 
 `parse.ts` ne lit donc jamais le libellé : colonnes fixes à gauche de lui, colonnes fixes à droite, le milieu est jeté. Chaque champ
 gardé passe un contrôle strict ; un point-virgule ailleurs décale la lecture et arrête la collecte, au lieu de fausser un total.
@@ -81,7 +81,8 @@ en 2025, Italie 390,3 M et 66,18 M de droits (17,0 %), France 462,5 M et 31,83 M
   courte, champ gardé illisible, montant négatif ou non entier.
 - **Volume** : moins de 25, 25 et 28 millions de lignes (mesuré : 29,8, 29,2 et 34,1) ; plus de 15 millions d'agrégats (mesuré :
   8,7) ; plus de 0,1 % de valeurs vides ; concordance de moins de 10 000 lignes (mesuré : 13 194) ; baisse de plus de 3 %.
-- **Couverture** : année manquante, année ancienne provisoire ou incomplète, année future, dernière année trop vieille.
+- **Couverture** : année manquante, année provisoire avant l'avant-dernière, année incomplète avant la dernière, année future,
+  dernière année trop vieille.
 - **Totaux** : bandes du tableau ci-dessus (1 % pour le commerce, 0,01 % entre les deux fichiers, de 0,95 à 1,2 fois le compte
   pour les droits), droits d'une année close hors de 0,4 à 2 milliards.
 - **Date de la source** : plus d'une valeur de `Date_actualisation` dans un fichier, date future, date de plus de 75 jours, date qui

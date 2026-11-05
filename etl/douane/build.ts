@@ -328,7 +328,8 @@ export function checkDocument(meta: DouaneMeta, updatedAt: Record<DouaneFileKind
     if (last - years[0] + 1 !== years.length) throw new DouaneControlError(`année manquante (${kind})`);
     for (const year of years) {
       const entry = ledger.by_year[String(year)];
-      if (year !== last && entry.provisional) throw new DouaneControlError(`année ancienne encore provisoire (${kind})`);
+      // Les deux dernières : on ne sait pas quand l'OFDF rend définitive une année après janvier.
+      if (year < last - 1 && entry.provisional) throw new DouaneControlError(`année ancienne encore provisoire (${kind})`);
       if (year !== last && entry.months !== 12) throw new DouaneControlError(`année close incomplète (${kind})`);
     }
   }
