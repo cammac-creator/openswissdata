@@ -311,6 +311,10 @@ function tariffContext(h: TariffHistory, notice: typeof TARIFF_HISTORY_NOTICE | 
   return { disclaimer: DISCLAIMERS.en, source_notice_de: BAZG_MANDATORY_NOTICE_DE, notice, coverage: tariffCoverage(h), tariff_application_url: TARIFF_APPLICATION_URL, sources: TARES_SOURCE_IDS.map(sourceRef) };
 }
 
+function tariffQueryRefused(c: Context, error: string) {
+  return c.json({ error, source_notice_de: BAZG_MANDATORY_NOTICE_DE }, 400);
+}
+
 function tariffHistoryUnavailable(c: Context) {
   c.header("Cache-Control", "no-store");
   return c.json({ error: "tariff_history_unavailable", disclaimer: DISCLAIMERS.en, source_notice_de: BAZG_MANDATORY_NOTICE_DE, tariff_application_url: TARIFF_APPLICATION_URL }, 503);
@@ -328,10 +332,10 @@ apiV1Route.get("/tariff/changes", (c) => {
   if (limited) return limited;
   const from = c.req.query("from");
   const to = c.req.query("to");
-  if (!isCalendarDate(from) || !isCalendarDate(to)) return c.json({ error: "invalid_date" }, 400);
-  if (from > to) return c.json({ error: "invalid_range" }, 400);
+  if (!isCalendarDate(from) || !isCalendarDate(to)) return tariffQueryRefused(c, "invalid_date");
+  if (from > to) return tariffQueryRefused(c, "invalid_range");
   const pagination = parseDatasetPagination(c.req.query());
-  if (!pagination.ok) return c.json({ error: pagination.error }, 400);
+  if (!pagination.ok) return tariffQueryRefused(c, pagination.error);
   const h = getTariffHistory();
   if (!h) return tariffHistoryUnavailable(c);
   const fromIndex = versionIndexAt(h, from);
@@ -364,9 +368,9 @@ apiV1Route.get("/tariff/:code/at", (c) => {
   if (limited) return limited;
   const raw = c.req.param("code");
   const hs8 = raw.length <= 20 ? raw.replace(/[\s.]/g, "") : "";
-  if (!/^\d{8}$/.test(hs8)) return c.json({ error: "invalid_tariff_number" }, 400);
+  if (!/^\d{8}$/.test(hs8)) return tariffQueryRefused(c, "invalid_tariff_number");
   const date = c.req.query("date");
-  if (!isCalendarDate(date)) return c.json({ error: "invalid_date" }, 400);
+  if (!isCalendarDate(date)) return tariffQueryRefused(c, "invalid_date");
   const h = getTariffHistory();
   if (!h) return tariffHistoryUnavailable(c);
   const index = versionIndexAt(h, date);

@@ -154,6 +154,7 @@ describe("GET /api/v1/tariff/:code/at", () => {
     expect(res.status).toBe(404);
     const body = await res.json();
     expect(body.error).toBe("no_archive_for_date");
+    expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
     expect(body.date).toBe("2026-09-27");
     expect(body.coverage.first_archive).toEqual({ version: "2026.09.28", date: "2026-09-28" });
     expect(body.line).toBeUndefined();
@@ -190,6 +191,7 @@ describe("GET /api/v1/tariff/:code/at", () => {
     expect(absent.status).toBe(404);
     const body = await absent.json();
     expect(body.error).toBe("tariff_line_not_found");
+    expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
     expect(body.archive.version).toBe("2026.09.28");
     expect(body.line).toBeUndefined();
     expect((await get("/api/v1/tariff/12345678/at?date=2026-10-05")).status).toBe(200);
@@ -211,7 +213,9 @@ describe("GET /api/v1/tariff/:code/at", () => {
     ] as const) {
       const res = await get(path);
       expect(res.status, path).toBe(400);
-      expect((await res.json()).error, path).toBe(error);
+      const body = await res.json();
+      expect(body.error, path).toBe(error);
+      expect(body.source_notice_de, path).toContain("keine offizielle");
     }
     expect(download.mock.calls.length).toBe(calls);
   });
@@ -409,7 +413,7 @@ describe("lecture seule et disponibilité", () => {
       const body = await res.json();
       expect(body.error).toBe("tariff_history_unavailable");
       expect(body.disclaimer).toBe(DISCLAIMERS.en);
-    expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
+      expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
     }
     expect(download).not.toHaveBeenCalled();
   });
