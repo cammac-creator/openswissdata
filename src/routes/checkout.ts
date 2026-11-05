@@ -41,9 +41,9 @@ for (const path of ['/session', '/start']) {
 const DATASET_IDS = ["tares", "classifications", "finma", "bundle", "mcp_standalone", "mcp_business"] as const;
 type DatasetId = (typeof DATASET_IDS)[number];
 
-// Retirés de la vente sur décision de Claude-Alain (05.11.2026), jusqu'à un accord écrit de l'OFS
-// et de l'ONU. Les identifiants restent dans le schéma pour que le refus reste lisible. Les achats
-// déjà faits ne passent pas par ici : droits, livraisons et webhook continuent de les traiter.
+// Retirés de la vente sur décision de Claude-Alain (05.11.2026). Les identifiants restent dans le
+// schéma pour que le refus reste lisible. Les achats déjà faits ne passent pas par ici : droits,
+// livraisons et webhook continuent de les traiter.
 const RETIRED_FROM_SALE: Readonly<Partial<Record<DatasetId, string>>> = {
   classifications: "/datasets/classifications",
   bundle: "/bundle",
