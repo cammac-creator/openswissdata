@@ -1,7 +1,7 @@
 /**
  * Téléchargement du fichier SESAM, avec reprises. Étage lu : source ; étage écrit : rien (octets en
- * mémoire). Le premier passage planifié (05.11.2026, 01:03 UTC) a échoué sur une erreur réseau qu'un
- * essai du même fichier, trois minutes plus tard, n'a pas reproduite.
+ * mémoire). Le premier passage planifié (05.11.2026, 01:03 UTC) a échoué avant son résumé, cause non
+ * prouvée, panne réseau la plus probable : un essai du même fichier, peu après, ne l'a pas reproduite.
  *
  * Les messages ne citent que le code HTTP ou le code d'erreur technique, jamais un contenu.
  */
