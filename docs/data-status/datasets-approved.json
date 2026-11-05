@@ -349,40 +349,6 @@
       "notes": "Statistique agrégée au niveau cantonal (aucune personne nommée)."
     },
     {
-      "id": "tg-elections-nationales-partis-commune",
-      "title": "Nationalratswahlen Kanton Thurgau: Parteistärken nach Gemeinden",
-      "ckan_uuid": "44e62fc0-c876-495d-a2b6-2daabb1eaa9b",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc0",
-      "attribution": "",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-123/exports/csv?use_labels=true",
-      "expected_header": [
-        "jahr",
-        "bezirk",
-        "gemeinde",
-        "bfs_nr_gemeinde",
-        "partei",
-        "parteistaerke_percent",
-        "parteistimmen"
-      ],
-      "keys": {
-        "bfs_nr_gemeinde": "commune_bfs",
-        "jahr": "year"
-      },
-      "columns": [
-        "jahr",
-        "bezirk",
-        "gemeinde",
-        "bfs_nr_gemeinde",
-        "partei",
-        "parteistaerke_percent",
-        "parteistimmen"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
-    },
-    {
       "id": "zg-abris-protection-civile",
       "title": "Schutzräume und Schutzplätze",
       "ckan_uuid": "d7566447-e9b5-4e48-b3f3-bd5474211c6f",
@@ -462,54 +428,6 @@
         "EINWOHNER_EVANG",
         "EINWOHNER_KATH",
         "EINWOHNER_UEBRIGE"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
-    },
-    {
-      "id": "tg-elections-nationales-participation-commune",
-      "title": "Nationalratswahlen Kanton Thurgau: Wahlberechtigte und Wahlbeteiligung nach Gemeinden",
-      "ckan_uuid": "7c7e62d0-2020-438c-a6ca-2847e82e7d48",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc0",
-      "attribution": "",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-120/exports/csv?use_labels=true",
-      "expected_header": [
-        "jahr",
-        "bezirk",
-        "gemeinde",
-        "bfs_nr_gemeinde",
-        "wahlberechtigte",
-        "eingelegte_wz",
-        "wahlbeteiligung_percent",
-        "leere_wz",
-        "ungueltige_wz",
-        "gueltige_wz",
-        "wz_liste",
-        "wz_ohne_listenbezeichnung",
-        "wz_unveraendert",
-        "wz_veraendert"
-      ],
-      "keys": {
-        "bfs_nr_gemeinde": "commune_bfs",
-        "jahr": "year"
-      },
-      "columns": [
-        "jahr",
-        "bezirk",
-        "gemeinde",
-        "bfs_nr_gemeinde",
-        "wahlberechtigte",
-        "eingelegte_wz",
-        "wahlbeteiligung_percent",
-        "leere_wz",
-        "ungueltige_wz",
-        "gueltige_wz",
-        "wz_liste",
-        "wz_ohne_listenbezeichnung",
-        "wz_unveraendert",
-        "wz_veraendert"
       ],
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
@@ -630,44 +548,6 @@
       "notes": "Vérifié le 07.10.2026 : code (station de comptage) et spur_code (voie) remis dans columns pour distinguer les lignes par point et sens de comptage ; name/adresse/strasse/reg_bus/koordinaten restent hors de columns."
     },
     {
-      "id": "tg-logements-categorie-batiment-commune",
-      "title": "Wohnungen nach Gebäudekategorie und Politischer Gemeinde (Bestand)",
-      "ckan_uuid": "a72a37a5-d228-48ab-bab2-337d56de4c93",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc0",
-      "attribution": "",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-89/exports/csv?use_labels=true",
-      "expected_header": [
-        "BFS_NR_GEMEINDE",
-        "GEMEINDE_NAME",
-        "BEZIRK_NR",
-        "BEZIRK_NAME",
-        "Jahr",
-        "WHG_EINF",
-        "WHG_MFH",
-        "WHG_WMN",
-        "WHG_TWN"
-      ],
-      "keys": {
-        "BFS_NR_GEMEINDE": "commune_bfs",
-        "Jahr": "year"
-      },
-      "columns": [
-        "BFS_NR_GEMEINDE",
-        "GEMEINDE_NAME",
-        "BEZIRK_NR",
-        "BEZIRK_NAME",
-        "Jahr",
-        "WHG_EINF",
-        "WHG_MFH",
-        "WHG_WMN",
-        "WHG_TWN"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
-    },
-    {
       "id": "tg-taux-impot-paroisses-evangeliques",
       "title": "Steuerfüsse Evangelische Kirchgemeinden Thurgau",
       "ckan_uuid": "ba941e91-b2b5-4353-92a1-68514f3ca24f",
@@ -693,44 +573,6 @@
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
       "notes": "Vérifié le 07.10.2026 : pas de numéro OFS pour la paroisse (unité ecclésiale, pas une commune politique) ; clé réelle = année."
-    },
-    {
-      "id": "tg-batiments-usage-habitation-commune",
-      "title": "Gebäude mit Wohnnutzung nach Gebäudekategorie und Politischer Gemeinde (Bestand)",
-      "ckan_uuid": "d05cee47-157e-4b67-afd8-e7fe03a8eca5",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc0",
-      "attribution": "",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-88/exports/csv?use_labels=true",
-      "expected_header": [
-        "BFS_NR_GEMEINDE",
-        "GEMEINDE_NAME",
-        "BEZIRK_NR",
-        "BEZIRK_NAME",
-        "Jahr",
-        "GEBK_EINF",
-        "GEBK_MFH",
-        "GEBK_WMN",
-        "GEBK_TWN"
-      ],
-      "keys": {
-        "BFS_NR_GEMEINDE": "commune_bfs",
-        "Jahr": "year"
-      },
-      "columns": [
-        "BFS_NR_GEMEINDE",
-        "GEMEINDE_NAME",
-        "BEZIRK_NR",
-        "BEZIRK_NAME",
-        "Jahr",
-        "GEBK_EINF",
-        "GEBK_MFH",
-        "GEBK_WMN",
-        "GEBK_TWN"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
     },
     {
       "id": "tg-finances-communes-scolaires",
@@ -846,44 +688,6 @@
       "notes": "Vérifié le 07.10.2026 : sg_id identifie une commune scolaire (unité administrative, pas une commune politique OFS) ; clé réelle = année. Depuis le 03.11.2026 (règle « jamais un total et un montant par habitant de la même grandeur ») : schuelerproew et steuerkraftproew sont retirées de columns et restent dans expected_header, contrôle de l'en-tête source. Leur quotient avec schueler et steuerkraft redonnait einwohner (609 lignes sur 609 à 1 % près). Les colonnes _psgvsg sont un découpage en communes scolaires, pas un ratio par habitant ; les autres quotients servis ont un autre dénominateur."
     },
     {
-      "id": "tg-nouveaux-batiments-habitation-commune",
-      "title": "Neu erstellte Wohngebäude nach Gebäudekategorie nach Politischer Gemeinde",
-      "ckan_uuid": "ec0c7a47-99b5-45f3-b606-1425533fd0b8",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc0",
-      "attribution": "",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-91/exports/csv?use_labels=true",
-      "expected_header": [
-        "BFS_NR_GEMEINDE",
-        "GEMEINDE_NAME",
-        "BEZIRK_NR",
-        "BEZIRK_NAME",
-        "Jahr",
-        "GEBK_EINF",
-        "GEBK_MFH",
-        "GEBK_WMN",
-        "GEBK_TWN"
-      ],
-      "keys": {
-        "BFS_NR_GEMEINDE": "commune_bfs",
-        "Jahr": "year"
-      },
-      "columns": [
-        "BFS_NR_GEMEINDE",
-        "GEMEINDE_NAME",
-        "BEZIRK_NR",
-        "BEZIRK_NAME",
-        "Jahr",
-        "GEBK_EINF",
-        "GEBK_MFH",
-        "GEBK_WMN",
-        "GEBK_TWN"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
-    },
-    {
       "id": "tg-vehicules-routiers-mise-circulation-commune",
       "title": "Strassenfahrzeuge nach Politischer Gemeinde, Fahrzeuggruppe, Fahrzeugart und erster Inverkehrssetzung",
       "ckan_uuid": "0374a1ce-2bbe-497d-b0a5-7ccd78f01718",
@@ -922,39 +726,6 @@
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
       "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
-    },
-    {
-      "id": "tg-elections-nationales-mandats-genre-canton",
-      "title": "Nationalratswahlen Kanton Thurgau: Mandatsverteilung nach Geschlecht auf Ebene Kanton",
-      "ckan_uuid": "691948b3-46ea-4421-9993-651713ff896e",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc0",
-      "attribution": "",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-122/exports/csv?use_labels=true",
-      "expected_header": [
-        "jahr",
-        "kanton",
-        "partei",
-        "geschlecht",
-        "kandidaturen",
-        "gewahlte",
-        "nicht_gewahlte"
-      ],
-      "keys": {
-        "jahr": "year"
-      },
-      "columns": [
-        "jahr",
-        "kanton",
-        "partei",
-        "geschlecht",
-        "kandidaturen",
-        "gewahlte",
-        "nicht_gewahlte"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "kandidaturen/gewahlte/nicht_gewahlte = effectifs agrégés par parti et genre, aucun nom de candidat."
     },
     {
       "id": "tg-votations-federales-communes",
@@ -1327,41 +1098,6 @@
         "noga_code",
         "noga_bezeichnung",
         "anzahl"
-      ],
-      "approved_on": "2026-10-07",
-      "checked_by": "intégrateur",
-      "notes": "Vérifié le 07.10.2026 (en-tête et licence CKAN relus par l'agent de vérification, premier lot G3)."
-    },
-    {
-      "id": "tg-fusions-communes-1990-2000",
-      "title": "Mutation Gemeinden Thurgau 1990-2000",
-      "ckan_uuid": "fc7cc1cd-dc47-4075-8d4b-8ec402f5fd1f",
-      "publisher": "Canton de Thurgovie",
-      "licence": "cc0",
-      "attribution": "",
-      "resource_url": "https://data.tg.ch/api/v2/catalog/datasets/sk-stat-78/exports/csv?use_labels=true",
-      "expected_header": [
-        "Bezirksnummer_alt",
-        "BFS_Gemeindenummer_alt",
-        "Gemeindename_alt",
-        "BFS_Bezirksnummer_bis_2010",
-        "Bezirk_bis_2010",
-        "BFS_Gemeindenummer",
-        "Gemeindename",
-        "Gueltig_ab"
-      ],
-      "keys": {
-        "BFS_Gemeindenummer": "commune_bfs"
-      },
-      "columns": [
-        "Bezirksnummer_alt",
-        "BFS_Gemeindenummer_alt",
-        "Gemeindename_alt",
-        "BFS_Bezirksnummer_bis_2010",
-        "Bezirk_bis_2010",
-        "BFS_Gemeindenummer",
-        "Gemeindename",
-        "Gueltig_ab"
       ],
       "approved_on": "2026-10-07",
       "checked_by": "intégrateur",
