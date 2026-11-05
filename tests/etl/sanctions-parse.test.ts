@@ -133,20 +133,30 @@ describe("contrôles avant écriture", () => {
   const big = { ...doc, counts: { organisations: 2872, vessels: 708 } };
 
   it("volumes attendus : accepté", () => {
-    expect(() => checkSanctionsDocument(big, { now: NOW, previous: null, acceptDrop: false })).not.toThrow();
+    expect(() => checkSanctionsDocument(big, { now: NOW, previous: null, acceptAnomaly: false })).not.toThrow();
   });
   it("sous le plancher : arrêt", () => {
-    expect(() => checkSanctionsDocument(doc, { now: NOW, previous: null, acceptDrop: false })).toThrow(SanctionsControlError);
+    expect(() => checkSanctionsDocument(doc, { now: NOW, previous: null, acceptAnomaly: false })).toThrow(SanctionsControlError);
   });
-  it("liste trop ancienne : arrêt", () => {
-    expect(() => checkSanctionsDocument(big, { now: NOW + 5 * 86_400_000, previous: null, acceptDrop: false })).toThrow(SanctionsControlError);
+  it("le SECO ne change pas sa liste pendant le record mesuré (36 jours) : accepté", () => {
+    expect(() => checkSanctionsDocument(big, { now: NOW + 36 * 86_400_000, previous: null, acceptAnomaly: false })).not.toThrow();
+  });
+  it("fichier inchangé depuis plus de 60 jours : arrêt, sauf adoption explicite", () => {
+    const later = NOW + 62 * 86_400_000;
+    expect(() => checkSanctionsDocument(big, { now: later, previous: null, acceptAnomaly: false })).toThrow(/trop longtemps/);
+    expect(() => checkSanctionsDocument(big, { now: later, previous: null, acceptAnomaly: true })).not.toThrow();
+  });
+  it("date future, ou qui recule : arrêt", () => {
+    expect(() => checkSanctionsDocument(big, { now: NOW - 5 * 86_400_000, previous: null, acceptAnomaly: false })).toThrow(/futur/);
+    const previous = { organisations: 2872, vessels: 708, list_date: "2026-11-05" };
+    expect(() => checkSanctionsDocument(big, { now: NOW, previous, acceptAnomaly: false })).toThrow(/recule/);
   });
   it("baisse de plus de 15 % : arrêt, sauf adoption explicite", () => {
-    const previous = { organisations: 4000, vessels: 708 };
-    expect(() => checkSanctionsDocument(big, { now: NOW, previous, acceptDrop: false })).toThrow(SanctionsControlError);
-    expect(() => checkSanctionsDocument(big, { now: NOW, previous, acceptDrop: true })).not.toThrow();
+    const previous = { organisations: 4000, vessels: 708, list_date: "2026-11-01" };
+    expect(() => checkSanctionsDocument(big, { now: NOW, previous, acceptAnomaly: false })).toThrow(SanctionsControlError);
+    expect(() => checkSanctionsDocument(big, { now: NOW, previous, acceptAnomaly: true })).not.toThrow();
   });
   it("trop de bateaux sans IMO : arrêt", () => {
-    expect(() => checkSanctionsDocument({ ...big, vessels_without_imo: 100 }, { now: NOW, previous: null, acceptDrop: false })).toThrow(SanctionsControlError);
+    expect(() => checkSanctionsDocument({ ...big, vessels_without_imo: 100 }, { now: NOW, previous: null, acceptAnomaly: false })).toThrow(SanctionsControlError);
   });
 });

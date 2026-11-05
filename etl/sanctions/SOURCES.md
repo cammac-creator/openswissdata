@@ -14,9 +14,9 @@
 
 | Point signalé par le SECO | Dans le code |
 |---|---|
-| Mise à jour à la charge de l'utilisateur | Deux créneaux par jour ; au-delà de trois jours, la recherche répond 503 au lieu de répondre |
+| Mise à jour à la charge de l'utilisateur | Deux créneaux par jour ; sans relevé réussi depuis trois jours, la recherche répond 503 au lieu de répondre |
 | Format structuré officiel | Le fichier XML, jamais un relevé de page |
-| Référence à la version utilisée | Date de la liste et empreinte SHA-256 du fichier entier dans chaque réponse |
+| Référence à la version utilisée | Date de la liste, empreinte SHA-256 du fichier entier et date du dernier relevé dans chaque réponse |
 
 ## Lecture du fichier
 - Le fichier entier reste **en mémoire** : ni bronze brut, ni artefact, ni commit, parce qu'il contient des personnes.
@@ -78,9 +78,17 @@ modification plus tardive : si cela arrive, la collecte s'arrête.
 Téléchargement repris deux fois (30 s, puis 2 min) sur une panne réseau, un 429 ou un 5xx ; le journal donne l'étape et le
 code technique, jamais un contenu.
 Racine, `list-type`, genre d'entrée, genre d'objet, type de modification, type de nom ou programme inconnu ; balises
-déséquilibrées, DOCTYPE, élément à l'intérieur d'un champ lu ; date de liste de plus de trois jours ; sous 2 000 organisations ou 400 bateaux ; plus de 5 %
+déséquilibrées, DOCTYPE, élément à l'intérieur d'un champ lu ; date de liste future, qui recule ou de plus de 60 jours ; sous 2 000 organisations ou 400 bateaux ; plus de 5 %
 de bateaux sans IMO ; baisse de plus de 15 % sur une catégorie. Une baisse examinée s'adopte par l'entrée
-`accepter_baisse` du déclenchement manuel, qui est un passage réel lancé à la main (F6).
+`accepter_anomalie` du déclenchement manuel, qui est un passage réel lancé à la main (F6).
+
+## Date du fichier et fraîcheur
+La date du fichier suit les changements du SECO, pas le calendrier : même empreinte et même date du 04.11.2026 à 18 h 32
+au 05.11.2026 à 10 h 05, en pleine journée, et cette date égale la dernière date de publication du fichier. Depuis 2022 : 190 dates de changement,
+écart médian 7 jours, record 36 jours. Décision de Claude-Alain du 05.11.2026 : l'âge servi se compte depuis le dernier
+relevé réussi (`collected_at`, 3 jours). Au-delà de 60 jours sans changement, on suppose un fichier figé : la collecte
+s'arrête et alerte, et la recherche passe en 503 trois jours plus tard sauf adoption après examen. **Limite acceptée** : un
+fichier figé côté SECO reste servi comme à jour jusqu'à ces 60 jours.
 
 ## Recherche
 Rapprochement exact seulement (règle du projet) : NFC et espaces, casse et ponctuation conservées. Une réponse vide ne

@@ -9,11 +9,12 @@ name: Collecte de la liste des sanctions (SECO, SESAM)
 # journal n'affiche que des nombres, des dates et l'empreinte du fichier.
 #
 # Le déclenchement manuel démarre en simulation (rien d'écrit, aucun secret R2 transmis).
-# `accepter_baisse` ne sert qu'à adopter une baisse de volume examinée.
+# `accepter_anomalie` ne sert qu'à adopter, après examen, une baisse de volume, une date qui recule ou
+# un fichier du SECO inchangé depuis plus de 60 jours. C'est un passage réel lancé à la main (F6).
 on:
   schedule:
     # Deux créneaux, minutes non rondes : GitHub omet ou retarde beaucoup de passages planifiés, et
-    # une radiation doit quitter le service sans attendre. La liste porte la date de sa génération.
+    # une radiation doit quitter le service sans attendre.
     - cron: "37 8,20 * * *"
   workflow_dispatch:
     inputs:
@@ -21,8 +22,8 @@ on:
         description: "Simulation : lire la source sans rien écrire dans R2"
         type: boolean
         default: true
-      accepter_baisse:
-        description: "Adopter une baisse de volume de plus de 15 %, après examen"
+      accepter_anomalie:
+        description: "Adopter, après examen : baisse de plus de 15 %, date qui recule, fichier de plus de 60 jours"
         type: boolean
         default: false
 permissions:
@@ -58,15 +59,15 @@ jobs:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
-          ACCEPTER_BAISSE: ${{ github.event_name == 'workflow_dispatch' && inputs.accepter_baisse && '--accept-drop' || '' }}
-        run: npm run sync:sanctions -- --write-r2 $ACCEPTER_BAISSE
+          ACCEPTER_ANOMALIE: ${{ github.event_name == 'workflow_dispatch' && inputs.accepter_anomalie && '--accept-anomaly' || '' }}
+        run: npm run sync:sanctions -- --write-r2 $ACCEPTER_ANOMALIE
       - name: Prévenir par mail d'un changement d'état
         if: ${{ !cancelled() }}
         env:
           ALERT_CURRENT: ${{ job.status }}
           ALERT_TASK: Collecte de la liste des sanctions
           ALERT_WORKFLOW: refresh-sanctions.yml
-          ALERT_DETAIL: La collecte de la liste des sanctions du SECO n'a pas abouti (installation, contrôles, source, forme du fichier ou baisse de volume) ; le document servi reste le précédent et passe « périmé » au bout de trois jours.
+          ALERT_DETAIL: La collecte de la liste des sanctions du SECO n'a pas abouti (installation, contrôles, source, forme du fichier, baisse de volume ou fichier inchangé depuis plus de 60 jours) ; le document servi reste le précédent et passe « périmé » sans relevé réussi depuis trois jours.
           GITHUB_TOKEN: ${{ github.token }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
