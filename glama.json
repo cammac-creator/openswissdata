@@ -4,7 +4,7 @@
     "cammac-creator"
   ],
   "name": "OpenSwissData",
-  "description": "Swiss federal reference data for AI agents: Swiss customs tariff lines (TARES, 8-digit tariff numbers) with MFN duty and preferential regimes, the FINMA register of supervised institutions and the FINMA warnings list, Swiss company data by UID (commercial register, FINMA, LEI), and NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4 correspondences. Four tools work without a key or sign-up (100 calls per hour per IP address); five more need an existing access grant, and new subscriptions are closed. Unofficial copy of public sources; full datasets are sold as signed files.",
+  "description": "Swiss federal reference data for AI agents: Swiss customs tariff lines (TARES, 8-digit tariff numbers) with MFN duty and preferential regimes, the FINMA register of supervised institutions and the FINMA warnings list, Swiss company data by UID (commercial register, FINMA, LEI), and NOGA 2008/2025, NACE 2.0/2.1 and ISIC 4 correspondences. Four tools work without a key or sign-up (100 calls per hour per IP address); three more are free to try (20 calls per day in total, no key); two history tools need an existing access grant, and new subscriptions are closed. Unofficial copy of public sources; full datasets are sold as signed files.",
   "homepage": "https://www.openswissdata.com/en/mcp",
   "repository": "https://github.com/cammac-creator/openswissdata",
   "documentation": "https://www.openswissdata.com/llms.txt",
@@ -48,7 +48,7 @@
     },
     {
       "name": "tariff_semantic_search",
-      "description": "Find 8-digit TARES lines from a description in French, German, Italian or English, using each line's official hierarchy (existing access grant required)"
+      "description": "Find 8-digit TARES lines from a description in French, German, Italian or English, using each line's official hierarchy (free trial, 20 calls per day in total, no key)"
     },
     {
       "name": "tariff_changelog",
@@ -56,11 +56,11 @@
     },
     {
       "name": "classify_text",
-      "description": "Suggest NOGA 2025 subclasses for an activity description in French, German, Italian or English (existing access grant required)"
+      "description": "Suggest NOGA 2025 subclasses for an activity description in French, German, Italian or English (free trial, 20 calls per day in total, no key)"
     },
     {
       "name": "finma_search",
-      "description": "FINMA register search tolerant of accents, legal forms and typos, each match labelled with its type (existing access grant required)"
+      "description": "FINMA register search tolerant of accents, legal forms and typos, each match labelled with its type (free trial, 20 calls per day in total, no key)"
     },
     {
       "name": "entity_history",

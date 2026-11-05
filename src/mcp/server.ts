@@ -49,7 +49,7 @@ export function negotiateProtocolVersion(requested: unknown): string {
 const SERVER_INFO = {
   name: "openswissdata-mcp",
   title: "OpenSwissData",
-  version: "0.3.0",
+  version: "0.3.1",
 } as const;
 
 const PUBLIC_SITE = (process.env.BASE_URL ?? "https://www.openswissdata.com").replace(/\/$/, "");
