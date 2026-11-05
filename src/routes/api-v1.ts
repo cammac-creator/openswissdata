@@ -21,6 +21,10 @@ import { getPublicSource, PUBLIC_SOURCES, type PublicSourceEntry } from "../lib/
 import { datasetCatalogueEntry, filterDatasetRows, licenceRequiresAttribution, paginateDatasetRows, parseDatasetFilters, parseDatasetPagination } from "../lib/dataset-query.js";
 import { compareVersions, daysBetween, gapAfter, gapsBetween, getTariffHistory, isCalendarDate, lineAtVersion, lineChangedBetween, serveChangeSide, serveLine, versionIndexAt, versionRef, type ArchiveGap, type TariffHistory } from "../lib/tariff-history.js";
 import { DISCLAIMERS } from "../mcp/tools/tariff-lookup.js";
+
+// Mention exigée par l'autorisation écrite de la BAZG du 21.04.2026 (`docs/legal-correspondence.md`),
+// mot pour mot, dans chaque réponse des routes d'historique du tarif.
+const BAZG_MANDATORY_NOTICE_DE = "Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.";
 import { exactSanctionKey, getSanctions, isSanctionsListCurrent, SANCTIONS_MAX_AGE_DAYS, SANCTIONS_OFFICIAL_SEARCH_URL, SANCTIONS_SOURCE_ID, type SanctionEntry, type SanctionNameType } from "../lib/sanctions.js";
 
 // Les cinq sources que `company_check` cite toujours (`src/mcp/company/sources.ts`), dans l'ordre
@@ -304,12 +308,16 @@ function tariffGap<G extends ArchiveGap>(gap: G | null) {
 
 /** Ce que toute réponse de ces deux routes porte : l'avis repris de `tariff_lookup`, sans recopie. */
 function tariffContext(h: TariffHistory, notice: typeof TARIFF_HISTORY_NOTICE | typeof TARIFF_CHANGES_NOTICE) {
-  return { disclaimer: DISCLAIMERS.en, notice, coverage: tariffCoverage(h), tariff_application_url: TARIFF_APPLICATION_URL, sources: TARES_SOURCE_IDS.map(sourceRef) };
+  return { disclaimer: DISCLAIMERS.en, source_notice_de: BAZG_MANDATORY_NOTICE_DE, notice, coverage: tariffCoverage(h), tariff_application_url: TARIFF_APPLICATION_URL, sources: TARES_SOURCE_IDS.map(sourceRef) };
+}
+
+function tariffQueryRefused(c: Context, error: string) {
+  return c.json({ error, source_notice_de: BAZG_MANDATORY_NOTICE_DE }, 400);
 }
 
 function tariffHistoryUnavailable(c: Context) {
   c.header("Cache-Control", "no-store");
-  return c.json({ error: "tariff_history_unavailable", disclaimer: DISCLAIMERS.en, tariff_application_url: TARIFF_APPLICATION_URL }, 503);
+  return c.json({ error: "tariff_history_unavailable", disclaimer: DISCLAIMERS.en, source_notice_de: BAZG_MANDATORY_NOTICE_DE, tariff_application_url: TARIFF_APPLICATION_URL }, 503);
 }
 
 function noArchive(c: Context, h: TariffHistory, date: string, parameter: string) {
@@ -324,10 +332,10 @@ apiV1Route.get("/tariff/changes", (c) => {
   if (limited) return limited;
   const from = c.req.query("from");
   const to = c.req.query("to");
-  if (!isCalendarDate(from) || !isCalendarDate(to)) return c.json({ error: "invalid_date" }, 400);
-  if (from > to) return c.json({ error: "invalid_range" }, 400);
+  if (!isCalendarDate(from) || !isCalendarDate(to)) return tariffQueryRefused(c, "invalid_date");
+  if (from > to) return tariffQueryRefused(c, "invalid_range");
   const pagination = parseDatasetPagination(c.req.query());
-  if (!pagination.ok) return c.json({ error: pagination.error }, 400);
+  if (!pagination.ok) return tariffQueryRefused(c, pagination.error);
   const h = getTariffHistory();
   if (!h) return tariffHistoryUnavailable(c);
   const fromIndex = versionIndexAt(h, from);
@@ -360,9 +368,9 @@ apiV1Route.get("/tariff/:code/at", (c) => {
   if (limited) return limited;
   const raw = c.req.param("code");
   const hs8 = raw.length <= 20 ? raw.replace(/[\s.]/g, "") : "";
-  if (!/^\d{8}$/.test(hs8)) return c.json({ error: "invalid_tariff_number" }, 400);
+  if (!/^\d{8}$/.test(hs8)) return tariffQueryRefused(c, "invalid_tariff_number");
   const date = c.req.query("date");
-  if (!isCalendarDate(date)) return c.json({ error: "invalid_date" }, 400);
+  if (!isCalendarDate(date)) return tariffQueryRefused(c, "invalid_date");
   const h = getTariffHistory();
   if (!h) return tariffHistoryUnavailable(c);
   const index = versionIndexAt(h, date);

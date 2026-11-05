@@ -132,6 +132,7 @@ describe("GET /api/v1/tariff/:code/at", () => {
     expect(body.line.preferential_regimes).toEqual({ eu: 3, ldg_100006: "free" });
     expect(body.line.designations.en).toBe("Fictitious goods");
     expect(body.disclaimer).toBe(DISCLAIMERS.en);
+    expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
     expect(body.coverage).toMatchObject({ first_archive: { version: "2026.09.28" }, last_archive: { version: "2026.10.19" }, archives_served: 3 });
     expect(body.sources.map((s: { id: string }) => s.id)).toContain("tares.tariff_8_digit");
     expect(body.sources.length).toBeGreaterThanOrEqual(7);
@@ -153,11 +154,13 @@ describe("GET /api/v1/tariff/:code/at", () => {
     expect(res.status).toBe(404);
     const body = await res.json();
     expect(body.error).toBe("no_archive_for_date");
+    expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
     expect(body.date).toBe("2026-09-27");
     expect(body.coverage.first_archive).toEqual({ version: "2026.09.28", date: "2026-09-28" });
     expect(body.line).toBeUndefined();
     expect(JSON.stringify(body)).not.toContain("par 100 kg");
     expect(body.disclaimer).toBe(DISCLAIMERS.en);
+    expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
   });
 
   it("un trou entre deux versions est dit, et la réponse donne la version utilisée", async () => {
@@ -188,6 +191,7 @@ describe("GET /api/v1/tariff/:code/at", () => {
     expect(absent.status).toBe(404);
     const body = await absent.json();
     expect(body.error).toBe("tariff_line_not_found");
+    expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
     expect(body.archive.version).toBe("2026.09.28");
     expect(body.line).toBeUndefined();
     expect((await get("/api/v1/tariff/12345678/at?date=2026-10-05")).status).toBe(200);
@@ -209,7 +213,9 @@ describe("GET /api/v1/tariff/:code/at", () => {
     ] as const) {
       const res = await get(path);
       expect(res.status, path).toBe(400);
-      expect((await res.json()).error, path).toBe(error);
+      const body = await res.json();
+      expect(body.error, path).toBe(error);
+      expect(body.source_notice_de, path).toContain("keine offizielle");
     }
     expect(download.mock.calls.length).toBe(calls);
   });
@@ -345,6 +351,7 @@ describe("GET /api/v1/tariff/changes", () => {
     expect(other).toMatchObject({ kind: "other_fields_changed", changed_fields: ["duty_rates_count"], before: { duty_rates_count: 3 }, after: { duty_rates_count: 4 } });
     expect(added).toMatchObject({ kind: "added", before: null, after: { duty_mfn: { value: 3 } } });
     expect(body.disclaimer).toBe(DISCLAIMERS.en);
+    expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
     expect(body.notice.comparison).toContain("no listed change does not mean that nothing changed");
     expect(body.sources.length).toBeGreaterThanOrEqual(7);
     expect(body.gaps).toEqual([]);
@@ -406,6 +413,7 @@ describe("lecture seule et disponibilité", () => {
       const body = await res.json();
       expect(body.error).toBe("tariff_history_unavailable");
       expect(body.disclaimer).toBe(DISCLAIMERS.en);
+      expect(body.source_notice_de).toBe("Dies ist keine offizielle Veröffentlichung. Massgebend sind allein die Veröffentlichungen durch die Bundeskanzlei und das Bundesamt für Zoll- und Grenzsicherheit BAZG.");
     }
     expect(download).not.toHaveBeenCalled();
   });
