@@ -156,6 +156,15 @@ describe("contrôles avant écriture", () => {
     expect(() => checkSanctionsDocument(big, { now: NOW, previous, acceptAnomaly: false })).toThrow(SanctionsControlError);
     expect(() => checkSanctionsDocument(big, { now: NOW, previous, acceptAnomaly: true })).not.toThrow();
   });
+  it("l'adoption n'efface que ses trois anomalies : ni la date future, ni les planchers, ni les personnes", () => {
+    const adopt = { previous: null, acceptAnomaly: true };
+    expect(() => checkSanctionsDocument(big, { ...adopt, now: NOW - 5 * 86_400_000 })).toThrow(/futur/);
+    expect(() => checkSanctionsDocument(doc, { ...adopt, now: NOW })).toThrow(/trop peu/);
+    const proof = { ...big.exclusion_proof };
+    expect(() => checkSanctionsDocument({ ...big, exclusion_proof: { ...proof, natural_persons_served: 1 } }, { ...adopt, now: NOW })).toThrow(/personne servie/);
+    const excluded = { ...proof.excluded, natural_persons: proof.excluded.natural_persons - 1 };
+    expect(() => checkSanctionsDocument({ ...big, exclusion_proof: { ...proof, excluded } }, { ...adopt, now: NOW })).toThrow(/non écartées/);
+  });
   it("trop de bateaux sans IMO : arrêt", () => {
     expect(() => checkSanctionsDocument({ ...big, vessels_without_imo: 100 }, { now: NOW, previous: null, acceptAnomaly: false })).toThrow(SanctionsControlError);
   });

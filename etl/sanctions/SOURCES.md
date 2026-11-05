@@ -87,7 +87,8 @@ La date du fichier suit les changements du SECO, pas le calendrier : même empre
 au 05.11.2026 à 10 h 05, en pleine journée, et cette date égale la dernière date de publication du fichier. Depuis 2022 : 190 dates de changement,
 écart médian 7 jours, record 36 jours. Décision de Claude-Alain du 05.11.2026 : l'âge servi se compte depuis le dernier
 relevé réussi (`collected_at`, 3 jours). Au-delà de 60 jours sans changement, on suppose un fichier figé : la collecte
-s'arrête et alerte, et la recherche passe en 503 trois jours plus tard sauf adoption après examen. **Limite acceptée** : un
+s'arrête et alerte, et la recherche passe en 503 trois jours plus tard sauf adoption après examen. Une adoption vaut pour ce passage : le suivant s'arrête de nouveau tant que le
+fichier n'a pas changé. Le même drapeau adopte aussi une baisse de volume et une date qui recule. **Limite acceptée** : un
 fichier figé côté SECO reste servi comme à jour jusqu'à ces 60 jours.
 
 ## Recherche
