@@ -53,4 +53,12 @@ describe("finma buildBundle", () => {
     }, "2026.04.17", workDir);
     expect(result.changeCount).toBe(1);
   });
+
+  it("le README cite la réponse de la FINMA du 6 mai 2026 sans la présenter comme une autorisation", async () => {
+    const banks = ingestOneSource(join(fixtureDir, "finma-banks-sample.xlsx"), FINMA_SOURCES.find(s => s.entity_type === "bank")!);
+    const result = await buildBundle({ entities: banks }, "2026.04.17", workDir);
+    const readme = execSync(`unzip -p "${result.zipPath}" README.md`, { encoding: "utf8" });
+    expect(readme).toContain("Réponse de la FINMA du 6 mai 2026 : aucune objection à l'utilisation de ses données publiques comme source de données pour notre produit");
+    expect(readme).not.toMatch(/autorisation FINMA de redistribution/i);
+  });
 });

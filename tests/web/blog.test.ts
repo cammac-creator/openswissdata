@@ -26,6 +26,12 @@ describe("blog content", () => {
     }
   });
 
+  it("présente la réponse de la FINMA du 6 mai 2026 comme une absence d'objection, pas comme une autorisation", () => {
+    const content = readFileSync(join(blogDir, "finma-permission-granted.md"), "utf8");
+    expect(content).toContain("aucune objection juridique à l'utilisation de ses données publiques comme source de données pour notre produit");
+    expect(content).not.toMatch(/accorde formellement|texte intégral de l'autorisation|autorisation explicite|Permission écrite acquise \| \*\*2026-05-06|FINMA-PERMISSION-2026-05-06/);
+  });
+
   it("replaces the outdated FINMA article with a permanent redirect to the guide", async () => {
     expect(existsSync(join(blogDir, "finma-registry-compliance.md"))).toBe(false);
     const { createApp } = await import("../../src/index.js");
