@@ -5,7 +5,7 @@
 | Destinataire | Sujet | Envoyé le | Réponse | Statut |
 |--------------|-------|-----------|---------|--------|
 | info@bfs.admin.ch | NOGA 2025 + cross-walks | 2026-04-17 | — | en attente (relance 2026-04-24) |
-| info@finma.ch | FINMA Registry compilation | 2026-04-17 | 2026-05-06 | **✅ GO sans condition particulière** (sous réserve droits d'auteur + intégrité documents) |
+| info@finma.ch | FINMA Registry compilation | 2026-04-17 | 2026-05-06 | **Aucune objection pour « votre produit »**, sous réserve des droits d'auteur de la FINMA et de l'intégrité des documents sources ; renvoi à ses conditions d'utilisation (voir plus bas) |
 | info@bazg.admin.ch | TARES dérivé normalisé | 2026-04-17 | 2026-04-21 | **✅ GO avec conditions** |
 
 ## Réponse BAZG (TARES) — 2026-04-21
@@ -40,7 +40,7 @@ Répondu par Michael Beer, Chef Tarifgrundlagen, BAZG Zolltarif und Tarifgrundla
 
 Répondu par Nadine Bucher, Communication, Eidgenössische Finanzmarktaufsicht FINMA, Laupenstrasse 27, CH-3003 Bern (info@finma.ch).
 
-**Texte intégral de l'autorisation :**
+**Texte intégral de la réponse :**
 
 > Monsieur,
 >
@@ -54,9 +54,11 @@ Répondu par Nadine Bucher, Communication, Eidgenössische Finanzmarktaufsicht F
 >
 > Nadine Bucher · Communication · FINMA
 
-**Conditions implicites à respecter :**
+**Portée de cette réponse (relue le 06.11.2026) :** elle ne dit pas plus que son texte. Elle vise « votre produit », réserve les droits d'auteur et l'intégrité des documents sources, et renvoie aux conditions du site, qui demandent une autorisation écrite préalable pour toute reproduction. Ce n'est ni un accord sans condition, ni une permission pour tout usage.
 
-1. **Respect des droits d'auteur FINMA** — copyright revendiqué sur les contenus éditoriaux du site FINMA. La LDA art. 5 exclut toutefois les actes officiels (décisions, listes d'autorisation publiques) de la protection. Les listes du registre des entités sous surveillance entrent dans cette catégorie.
+**Conditions à respecter, selon notre lecture (pas un avis juridique) :**
+
+1. **Respect des droits d'auteur FINMA** — la FINMA revendique ses droits sur les contenus de son site. Notre lecture, non validée par un juriste ni par la FINMA : la LDA art. 5 exclut les actes officiels de la protection, et les listes du registre des entités sous surveillance entreraient dans cette catégorie.
 2. **Intégrité des documents sources** — ne pas altérer le contenu des données (noms d'entités, statuts d'autorisation, dates, références FINMA). La normalisation de forme (schéma unifié sur 10 listes, enrichissement UID/LEI) est compatible avec l'intégrité par enregistrement.
 3. **Logo FINMA strictement interdit** (cf. CGU FINMA : « Using and reproducing the FINMA logo is not permitted »). Texte « FINMA » seul autorisé.
 4. **Disclaimer FINMA répercuté** : aucune garantie d'exactitude / fiabilité / exhaustivité ; aucune affiliation FINMA. Disclaimer déjà dans `LICENSE.txt` du bundle FINMA et dans `web/src/pages/compliance.astro` section 5.

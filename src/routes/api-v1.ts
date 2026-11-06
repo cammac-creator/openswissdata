@@ -12,7 +12,8 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import { abuseIp, trustedRequestIp } from "../lib/request-ip.js";
 import { checkApiRateLimit, type ApiRateLimitResult } from "../lib/api-rate-limit.js";
-import { getBfePv, getDataset, getDatasetsIndex, getLocalities, getStreets, getFinmaVersion } from "../mcp/data-loader.js";
+import { getBfePv, getDataset, getDatasetsIndex, getFinmaRegistry, getLocalities, getStreets, getFinmaVersion } from "../mcp/data-loader.js";
+import { finmaCollectedOn, finmaLicenceRows } from "../lib/finma-licences.js";
 import { communeProfile } from "../lib/commune-profile.js";
 import { cantonProfile, SWISS_CANTON_ABBREVIATIONS } from "../lib/canton-profile.js";
 import { companyCheck } from "../mcp/company/check.js";
@@ -274,6 +275,40 @@ apiV1Route.get("/sanctions/search", (c) => {
     notice: SANCTIONS_NOTICE,
     official_search_url: SANCTIONS_OFFICIAL_SEARCH_URL,
     sources: [sourceRef(SANCTIONS_SOURCE_ID)],
+  });
+});
+
+// --- GET /api/v1/finma/licences ----------------------------------------------------------
+// Flux lu par IBANforge une fois par semaine (décisions de Claude-Alain du 05.11 et du 06.11.2026).
+// Public, avec le plafond réseau des routes de données : `uid.csv` est déjà public, sans jeton à
+// créer (F3), et le fichier vendu garde les noms, adresses, LEI, l'historique et les autres
+// catégories. Tant que la copie embarquée est servie, sa date n'est pas connue : 503, jamais une
+// date devinée. Version et lignes se lisent sans `await` entre les deux (`data-loader.ts`).
+const FINMA_REGISTER_PAGE_URL = "https://www.finma.ch/en/finma-public/authorised-institutions-individuals-and-products/";
+const FINMA_LICENCES_NOTICE = {
+  coverage: "Banks, fintech licences and securities firms with a Swiss UID only. Register rows without a UID are left out: absence here does not mean that an institution is not authorised.",
+  collected_on: "Date of the copy served here, not the date of this request.",
+  not_official: "Not an official publication. OpenSwissData has no affiliation with FINMA, and no warranty is given as to accuracy, up-to-dateness or completeness. The register published by FINMA is the reference.",
+} as const;
+
+apiV1Route.get("/finma/licences", (c) => {
+  const limited = enforceRateLimit(c, DATA_LIMIT);
+  if (limited) return limited;
+  const version = getFinmaVersion();
+  const collectedOn = version ? finmaCollectedOn(version) : null;
+  if (!version || !collectedOn) {
+    c.header("Cache-Control", "no-store");
+    return c.json({ error: "finma_licences_unavailable", source_url: FINMA_REGISTER_PAGE_URL }, 503);
+  }
+  const rows = finmaLicenceRows(getFinmaRegistry());
+  c.header("Cache-Control", "public, max-age=3600");
+  return c.json({
+    version,
+    collected_on: collectedOn,
+    source_url: FINMA_REGISTER_PAGE_URL,
+    rows,
+    notice: FINMA_LICENCES_NOTICE,
+    sources: [sourceRef("finma.uid_csv")],
   });
 });
 
