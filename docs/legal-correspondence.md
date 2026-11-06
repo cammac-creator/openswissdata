@@ -54,9 +54,7 @@ Répondu par Nadine Bucher, Communication, Eidgenössische Finanzmarktaufsicht F
 >
 > Nadine Bucher · Communication · FINMA
 
-**Portée de cette réponse (relue le 06.11.2026) :** elle ne dit pas plus que son texte. Elle vise « votre produit », réserve les droits d'auteur et l'intégrité des documents sources, et renvoie aux conditions du site. Ces conditions demandent une autorisation écrite préalable pour toute reproduction (« Toute reproduction est subordonnée à l'autorisation écrite préalable du détenteur des droits ») ; la réponse ne dit pas expressément qu'elle en tient lieu. Elle ne mentionne pas d'autre produit : le flux lu par IBANforge (`/api/v1/finma/licences`) repose sur la décision de Claude-Alain du 06.11.2026, sa règle du 28.10.2026 (source citée, retrait sous 48 heures sur demande), pas sur cette réponse.
-
-**Point ouvert :** la relecture du 05.11.2026 indique que notre demande du 17.04.2026 annonçait, pour chaque entité, un lien vers sa fiche FINMA. Le texte de cette demande n'est pas dans ce dépôt. Aujourd'hui, `source_url` donne la liste générale, sur chaque ligne comme en tête du flux : `uid.csv` ne porte aucun lien par entité.
+**Portée de cette réponse (relue le 06.11.2026) :** elle ne dit pas plus que son texte. Elle vise « votre produit », réserve les droits d'auteur et l'intégrité des documents sources, et renvoie aux conditions du site, qui demandent une autorisation écrite préalable pour toute reproduction. Ce n'est ni un accord sans condition, ni une permission pour tout usage.
 
 **Conditions à respecter, selon notre lecture (pas un avis juridique) :**
 
