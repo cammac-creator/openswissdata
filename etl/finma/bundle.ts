@@ -761,7 +761,7 @@ ${entityTypes.filter(t => countByType[t] > 0).map(t => `- ${t} : ${countByType[t
 - Avertissements : https://www.finma.ch/en/finma-public/warnungen/warning-list/
 - GLEIF : https://www.gleif.org/en/lei-data/gleif-api ; rapprochement par UID suisse exact.
 
-Autorisation FINMA de redistribution reçue le 6 mai 2026, sous réserve de ses conditions et de l'intégrité des documents sources.
+Réponse de la FINMA du 6 mai 2026 : aucune objection à l'utilisation de ses données publiques comme source de données pour notre produit, sous réserve de ses droits d'auteur, de l'intégrité des documents sources et de ses conditions d'utilisation.
 OpenSwissData est un service indépendant, non affilié à la FINMA.
 ${zefixSection}
 `;
