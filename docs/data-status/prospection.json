@@ -1,17 +1,17 @@
 {
-  "generated_on": "2026-11-02",
+  "generated_on": "2026-11-09",
   "source": "https://ckan.opendata.swiss/api/3/action/package_search",
   "run": {
-    "pages_read": 55,
+    "pages_read": 0,
     "page_size": 100,
     "max_pages": 55,
-    "start_page": 45,
+    "start_page": 100,
     "total_pages": 162,
-    "datasets_read": 5500,
-    "datasets_total_catalog": 16193,
-    "coverage_ratio": 0.9536836904835423,
-    "partial": false,
-    "stopped_reason": "ok"
+    "datasets_read": 0,
+    "datasets_total_catalog": 16196,
+    "coverage_ratio": 0.9535070387750062,
+    "partial": true,
+    "stopped_reason": "page_failed"
   },
   "totals": {
     "candidates": 13433,

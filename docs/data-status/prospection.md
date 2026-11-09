@@ -1,13 +1,13 @@
 # Prospection de nouvelles sources publiques (opendata.swiss)
 
-Généré le 2026-11-02 · tâche osd.prospection. Catalogue interrogé par l'API CKAN officielle d'opendata.swiss (`package_search`), jamais de données servies modifiées par ce rapport.
+Généré le 2026-11-09 · tâche osd.prospection. Catalogue interrogé par l'API CKAN officielle d'opendata.swiss (`package_search`), jamais de données servies modifiées par ce rapport.
 
-- Ce passage : 55 / 55 pages lues (à partir de la page 45 sur 162 au total), 5500 jeux lus (100 jeux par page).
-- Couverture cumulée : 95.4 % du catalogue (16193 jeux)
+- Ce passage : 0 / 55 pages lues (à partir de la page 100 sur 162 au total), 0 jeux lus (100 jeux par page).
+- Couverture cumulée : 95.4 % du catalogue (16196 jeux)
 - Candidats cumulés (licence ouverte, aucun marqueur de personnes détecté dans le texte, aucune colonne de personne dans les en-têtes LUS — un en-tête jamais lu n'est jamais affirmé propre) : 13433 — 300 passent le filtre public (éditeur fédéral ou cantonal, au moins une clé de jointure, et au moins un en-tête CSV inspecté avec succès — décision de l'intégrateur du 07.10.2026) et sont conservés en détail dans `prospection.json` (plafond 300), 30 de chaque groupe (non-OFS, OFS) montrés dans les tableaux plus bas.
 - Jeux écartés (cumulé) : 2010
 - Jeux déjà au registre des sources (cumulé) : 4
-- Passage mené jusqu'au bout de la fenêtre visée, sans échec.
+- ⚠️ **Passage PARTIEL** (motif : page_failed) : arrêté avant la fin de la fenêtre visée.
 
 ## Écarts par motif
 
