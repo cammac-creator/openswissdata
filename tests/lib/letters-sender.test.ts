@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getDb, closeDb } from "../../src/lib/db.js";
+import { guichetOui } from "../helpers/guichet.js";
 import { runLettersSender, readLettersSenderStatus, startLettersSender, readLettersPause, writeLettersPause } from "../../src/lib/letters-sender.js";
 import { scheduleSlot, toZurichParts } from "../../src/lib/letters.js";
 import type { EmailSendResult, PreparedEmail } from "../../src/lib/email.js";
@@ -124,7 +125,7 @@ function run(overrides: Overrides = {}) {
     rng: () => 0,
     send: async () => ({ sent: true }),
     fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch,
-    hasApiKey: () => true,
+    hasApiKey: () => true, guichet: guichetOui(),
     ...overrides,
   });
 }
@@ -733,7 +734,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
           throw new Error("timeout");
         })
         .mockResolvedValue({ sent: true } satisfies EmailSendResult);
-      await runLettersSender({ now: () => clock, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => clock, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(getLetter("A").status).toBe("failed");
       const aAttemptedAt = getLetter("A").attempted_at as number;
 
@@ -741,7 +742,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       // envoyée : issue incertaine) que depuis moins de douze minutes réelles : B attend.
       clock = bAt + 20_000;
       expect((clock - aAttemptedAt) / 60_000).toBeLessThan(12); // l'écart réel, pas celui de `scheduled_at`
-      await runLettersSender({ now: () => clock, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => clock, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(send).toHaveBeenCalledTimes(1); // toujours un seul appel réel (celui, incertain, de A)
       expect(getLetter("B").status).toBe("queued");
     });
@@ -751,10 +752,10 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       insertLetter({ id: "B", scheduled_at: zurichSummer(10, 16) }); // écart artificiel de 5 min
       const send = vi.fn().mockRejectedValueOnce(new Error("timeout")).mockResolvedValue({ sent: true } satisfies EmailSendResult);
 
-      await runLettersSender({ now: () => zurichSummer(10, 12), rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => zurichSummer(10, 12), rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(getLetter("A").status).toBe("failed");
 
-      await runLettersSender({ now: () => zurichSummer(10, 16) + 10_000, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => zurichSummer(10, 16) + 10_000, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(send).toHaveBeenCalledTimes(1); // B n'a pas été tentée : moins de 12 min depuis A (≈4,4 min)
       expect(getLetter("B").status).toBe("queued");
     });
@@ -837,7 +838,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
         rng: () => 0,
         send,
         fetch: telegramOk(),
-        hasApiKey: () => true,
+        hasApiKey: () => true, guichet: guichetOui(),
       });
       expect(status.status).toBe("not_configured");
       expect(status.code).toBe("telegram_not_configured");
@@ -852,7 +853,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       process.env.OSD_VEILLE_TELEGRAM_CHAT = "424242";
       const send = vi.fn();
       try {
-        const status = await runLettersSender({ now: () => NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+        const status = await runLettersSender({ now: () => NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
         expect(status.status).toBe("not_configured");
         expect(status.code).toBe("telegram_config_invalid");
         expect(send).not.toHaveBeenCalled();
@@ -870,7 +871,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       expect(readLettersPause(getDb())).toMatchObject({ paused: true });
 
       const send = vi.fn();
-      const status = await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      const status = await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(status.status).toBe("paused");
       expect(send).not.toHaveBeenCalled();
       expect(getLetter(queuedId).status).toBe("queued");
@@ -878,20 +879,20 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
 
       writeLettersPause(false, DUE_NOW);
       expect(readLettersPause(getDb())).toMatchObject({ paused: false });
-      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(countReminders(dueForReminder)).toBe(1); // la pause levée, le passage suivant crée bien la relance.
     });
 
     it("sans témoin `mail_watch` du tout, une relance n'est ni créée ni réclamée (elle attend)", async () => {
       const dueForReminder = insertLetter({ status: "sent", sent_at: SENT_AT });
-      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(countReminders(dueForReminder)).toBe(0); // aucun témoin mail_watch : la relance attend.
     });
 
     it("une LETTRE D'ORIGINE part sans jamais dépendre de la veille courrier (aucun témoin posé)", async () => {
       const originalId = insertLetter({ scheduled_at: NOW - 1_000 }); // lettre `letter`, jamais une relance
       const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
-      await runLettersSender({ now: () => NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(send).toHaveBeenCalledTimes(1);
       expect(getLetter(originalId).status).toBe("sent");
     });
@@ -899,7 +900,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
     it("une relance créée alors que la veille était fraîche attend si la veille est redevenue périmée au moment de sa réclamation", async () => {
       const parentId = insertLetter({ status: "sent", sent_at: SENT_AT });
       seedFreshMailWatch(DUE_NOW);
-      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       const reminder = getDb()
         .prepare("SELECT id, scheduled_at FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
         .get(parentId) as { id: string; scheduled_at: number };
@@ -911,7 +912,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       const claimAt = DUE_NOW + 43 * 60_000;
       getDb().prepare("UPDATE institutional_letters SET scheduled_at=? WHERE id=?").run(claimAt - 5 * 60_000, reminder.id);
       const send = vi.fn();
-      await runLettersSender({ now: () => claimAt, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => claimAt, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(send).not.toHaveBeenCalled();
       expect(getLetter(reminder.id).status).toBe("queued"); // elle attend, jamais annulée ni perdue pour autant.
     });
@@ -919,7 +920,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
     it("une relance non réclamable (veille périmée) ne bloque jamais une AUTRE lettre due derrière elle dans la file", async () => {
       const parentId = insertLetter({ id: "parent-stale", status: "sent", sent_at: SENT_AT });
       seedFreshMailWatch(DUE_NOW);
-      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       const reminder = getDb()
         .prepare("SELECT id FROM institutional_letters WHERE parent_id=? AND kind='reminder'")
         .get(parentId) as { id: string };
@@ -930,7 +931,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       // correction, la relance bloquée (veille périmée) aurait empêché cette lettre de partir.
       const laterOriginalId = insertLetter({ scheduled_at: claimAt - 2 * 60_000 });
       const send = vi.fn(async (): Promise<EmailSendResult> => ({ sent: true }));
-      await runLettersSender({ now: () => claimAt, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      await runLettersSender({ now: () => claimAt, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(send).toHaveBeenCalledTimes(1);
       expect(getLetter(laterOriginalId).status).toBe("sent");
     });
@@ -949,7 +950,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       const status = await runLettersSender({
         now: () => T5,
         rng: () => 0,
-        hasApiKey: () => true,
+        hasApiKey: () => true, guichet: guichetOui(),
         fetch: (async () => { writeLettersPause(true, T5, getDb()); return Response.json({ ok: true }); }) as unknown as typeof fetch,
         send: async (p: { subject: string }) => { sends.push(p.subject); return { sent: true, providerId: "r" }; },
       });
@@ -964,7 +965,7 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
       const id = insertLetter({ scheduled_at: NOW - 1_000 });
       writeLettersPause(true, NOW - 1, getDb());
       const send = vi.fn();
-      const status = await runLettersSender({ now: () => NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true });
+      const status = await runLettersSender({ now: () => NOW, rng: () => 0, send, fetch: telegramOk(), hasApiKey: () => true, guichet: guichetOui() });
       expect(status.status).toBe("paused");
       expect(send).not.toHaveBeenCalled();
       expect(getLetter(id).status).toBe("queued");

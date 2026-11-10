@@ -36,6 +36,7 @@ import { startDeliveryIncidentWorker } from './lib/delivery-incident-worker.js';
 import { startCleanupWorker } from "./lib/cleanup-worker.js";
 import { startMailWatch } from "./lib/mail-watch.js";
 import { startLettersSender } from "./lib/letters-sender.js";
+import { startRobotSante } from "./lib/robot-sante.js";
 import { startWorkflowWatch } from "./lib/workflow-watch.js";
 import { checkAdminEmailsAtStartup } from "./lib/controle-demarrage.js";
 import { getDb } from "./lib/db.js";
@@ -374,6 +375,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const stopMailWatch = startMailWatch();
   // Expéditeur périodique des lettres institutionnelles (Resend) et relance automatique unique ; inactif sans clé Resend.
   const stopLettersSender = startLettersSender();
+  // Santé du programme au bureau de Claude-Alain (guichet, boîte générale) : file des lettres et veille des
+  // réponses, toutes les 5 minutes, une santé au changement ou une fois par heure ; inactive sans GUICHET_JETON ni GUICHET_URL.
+  const stopRobotSante = startRobotSante();
   // Veille des tâches planifiées GitHub et de la page FINMA des membres OAR (lecture seule, alerte Telegram).
   const stopWorkflowWatch = startWorkflowWatch();
   // ADMIN_EMAILS vide en production = plus de compte autorisé pour le bureau (tâche osd.T08). Après serve() :
@@ -391,6 +395,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     // Asynchrone (correction I4e, 06.10) : attend la fin d'un envoi en cours (au plus 10 s) plutôt
     // que de laisser SIGTERM l'interrompre entre la requête à Resend et l'écriture de `sent_at`.
     await stopLettersSender();
+    stopRobotSante();
     // Mails de confirmation « être prévenu » encore en route : quelques secondes au plus.
     await Promise.race([settleAnnouncementDeliveries(), new Promise(resolve => setTimeout(resolve, 5000))]);
     stopWorkflowWatch();

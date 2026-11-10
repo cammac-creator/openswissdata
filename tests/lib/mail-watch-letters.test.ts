@@ -69,6 +69,7 @@ import {
   runMailWatch, attachReply, splitAuthClauses, extractAuthservId, parseAuthenticationResults, signingDomainAligned,
 } from '../../src/lib/mail-watch.js';
 import { runLettersSender } from '../../src/lib/letters-sender.js';
+import { guichetOui } from '../helpers/guichet.js';
 
 const HOUR = 3_600_000;
 const DAY = 86_400_000;
@@ -423,7 +424,7 @@ describe('Rattachement des réponses aux lettres institutionnelles (corrections 
     // La relance ne doit alors JAMAIS être créée (unverified arrête la relance comme human) : plus de
     // 15 jours ouvrés séparent SENT_AT de `now`, elle le serait sans cette correction.
     await runLettersSender({
-      now: () => now + 10_000 + 2 * 600_000 + 60_000, rng: () => 0, hasApiKey: () => true,
+      now: () => now + 10_000 + 2 * 600_000 + 60_000, rng: () => 0, hasApiKey: () => true, guichet: guichetOui(),
       fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch, send: async () => ({ sent: true, providerId: 'r' }),
     });
     expect(getDb().prepare("SELECT 1 FROM institutional_letters WHERE parent_id=?").get(id)).toBeUndefined();
@@ -503,7 +504,7 @@ describe('Rattachement des réponses aux lettres institutionnelles (corrections 
     getDb().prepare("INSERT INTO operation_checks(name,checked_at,details_json) VALUES('mail_watch',?,?)")
       .run(DUE_NOW, JSON.stringify({ version: 1, checked_at: DUE_NOW, status: 'ok', code: null, http_status: null, last_success_at: DUE_NOW, last_alert_at: null, matched: 0, alerted: 0, pending: 0, total_alerted: 0, domains: 0, total_attached: 0, seen: [], headerFailures: {} }));
 
-    await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch, hasApiKey: () => true });
+    await runLettersSender({ now: () => DUE_NOW, rng: () => 0, send: vi.fn(), fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch, hasApiKey: () => true, guichet: guichetOui() });
     const reminder = getDb().prepare("SELECT id, scheduled_at FROM institutional_letters WHERE parent_id=? AND kind='reminder'").get(parentId) as { id: string; scheduled_at: number };
     expect(reminder).toBeDefined();
     expect(getLetter(reminder.id).status).toBe('queued');
@@ -515,7 +516,7 @@ describe('Rattachement des réponses aux lettres institutionnelles (corrections 
     expect(getLetter(reminder.id).status).toBe('queued');
 
     const send = vi.fn();
-    await runLettersSender({ now: () => reminder.scheduled_at + 30_000, rng: () => 0, send, fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch, hasApiKey: () => true });
+    await runLettersSender({ now: () => reminder.scheduled_at + 30_000, rng: () => 0, send, fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch, hasApiKey: () => true, guichet: guichetOui() });
     expect(send).not.toHaveBeenCalled();
     expect(getLetter(reminder.id).status).toBe('cancelled');
   });
