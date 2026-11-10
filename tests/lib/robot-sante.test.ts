@@ -138,16 +138,32 @@ describe("Santé d'OpenSwissData au bureau", () => {
     expect(diagnose(getDb(), NOW)).toMatchObject({ etat: "panne", code: "autre" });
   });
 
-  it("guichet muet ou en erreur pendant qu'une lettre attend : `service_injoignable` ; jeton refusé : `cle_refusee`", () => {
+  it("guichet muet ou en erreur deux fois de suite pendant qu'une lettre attend : `service_injoignable` ; jeton refusé : `cle_refusee`", () => {
     letters(NOW, "ok");
     mailWatch(NOW, "ok");
-    setCheck("letters_guichet", NOW, { code: "http_500", last_at: NOW });
+    setCheck("letters_guichet", NOW, { code: "http_500", last_at: NOW, consecutive: 2 });
     expect(diagnose(getDb(), NOW)).toEqual({ etat: "ok" }); // aucune lettre n'attend : rien à dire
     insertLetter("queued");
     expect(diagnose(getDb(), NOW)).toEqual({ etat: "panne", code: "service_injoignable", n: 1 });
-    setCheck("letters_guichet", NOW, { code: "http_401", last_at: NOW });
+    setCheck("letters_guichet", NOW, { code: "http_401", last_at: NOW, consecutive: 2 });
     expect(diagnose(getDb(), NOW)).toEqual({ etat: "panne", code: "cle_refusee", n: 1 });
-    setCheck("letters_guichet", NOW, { code: null, last_at: NOW });
+    setCheck("letters_guichet", NOW, { code: null, last_at: NOW, consecutive: 0 });
+    expect(diagnose(getDb(), NOW)).toEqual({ etat: "ok" });
+  });
+
+  it("un raté isolé (un vendredi soir) n'est pas une panne", () => {
+    letters(NOW, "ok");
+    mailWatch(NOW, "ok");
+    insertLetter("queued");
+    setCheck("letters_guichet", NOW, { code: "timeout", last_at: NOW, consecutive: 1 });
+    expect(diagnose(getDb(), NOW)).toEqual({ etat: "ok" });
+  });
+
+  it("un raté plus ancien que la lettre qui attend ne la concerne pas", () => {
+    letters(NOW, "ok");
+    mailWatch(NOW, "ok");
+    insertLetter("queued"); // déposée à NOW
+    setCheck("letters_guichet", NOW - 3 * DAY, { code: "http_500", last_at: NOW - 3 * DAY, consecutive: 5 });
     expect(diagnose(getDb(), NOW)).toEqual({ etat: "ok" });
   });
 

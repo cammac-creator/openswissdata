@@ -382,16 +382,18 @@ describe("Lettres institutionnelles : permission du guichet avant chaque envoi",
   });
 
   describe("témoin du transport (lu par la santé : le guichet ne garde aucune trace de ces cas)", () => {
-    it("un 500 est gardé, puis remis à zéro par le « oui » suivant", async () => {
+    it("un 500 est gardé et compté de suite, puis remis à zéro par le « oui » suivant", async () => {
       handler = (_req, res) => json(res, 500, { detail: "panne" });
       const id = insertLetter();
       await run(client()).status;
-      expect(readGuichetTransport()?.code).toBe("http_500");
+      expect(readGuichetTransport()).toMatchObject({ code: "http_500", consecutive: 1 });
+      await run(client(), { now: () => (getLetter(id).scheduled_at as number) + 1_000 }).status;
+      expect(readGuichetTransport()).toMatchObject({ code: "http_500", consecutive: 2 });
       handler = accorde;
       const { status, send } = run(client(), { now: () => (getLetter(id).scheduled_at as number) + 1_000 });
       await status;
       expect(send).toHaveBeenCalledTimes(1);
-      expect(readGuichetTransport()?.code).toBeNull();
+      expect(readGuichetTransport()).toMatchObject({ code: null, consecutive: 0 });
     });
 
     it("un « non » explicite (arrêt) n'est pas une panne de transport : le bureau le voit dans son journal", async () => {
@@ -406,7 +408,7 @@ describe("Lettres institutionnelles : permission du guichet avant chaque envoi",
       insertLetter();
       await run(client()).status;
       const row = getDb().prepare("SELECT details_json FROM operation_checks WHERE name='letters_guichet'").get() as { details_json: string };
-      expect(JSON.parse(row.details_json)).toEqual({ code: "timeout", last_at: NOW });
+      expect(JSON.parse(row.details_json)).toEqual({ code: "timeout", last_at: NOW, consecutive: 1 });
     });
   });
 

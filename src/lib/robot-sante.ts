@@ -4,7 +4,7 @@
 //   1. la file des lettres (`letters-sender.ts`) : témoin en erreur, envoi impossible avec des lettres en
 //      file, ou témoin muet ;
 //   2. le transport vers le guichet (témoin `letters_guichet`) : délai, réseau, statut HTTP autre que 200,
-//      réponse illisible, tant qu'une lettre attend (le guichet n'en garde aucune trace) ;
+//      réponse illisible, deux fois de suite, tant qu'une lettre attend (le guichet n'en garde aucune trace) ;
 //   3. la veille des réponses (`mail-watch.ts`) : en panne, inactive ou muette, mais seulement quand une
 //      réponse est attendue (lettre en file, ou envoyée depuis moins de 120 jours sans réponse).
 // La pause des lettres et le « Tout arrêter » du bureau ne sont pas des pannes. Les refus, échecs et
@@ -46,6 +46,13 @@ function waitingLetters(db: Database.Database): number {
   return (db.prepare("SELECT COUNT(*) AS n FROM institutional_letters WHERE status IN ('queued','sending')").get() as { n: number }).n;
 }
 
+function oldestWaitingCreatedAt(db: Database.Database): number {
+  const row = db.prepare("SELECT MIN(created_at) AS t FROM institutional_letters WHERE status IN ('queued','sending')").get() as {
+    t: number | null;
+  };
+  return row.t ?? Number.MAX_SAFE_INTEGER;
+}
+
 function lettersAwaitingReply(db: Database.Database, now: number): number {
   return (
     db
@@ -81,9 +88,11 @@ export function diagnose(db: Database.Database, now: number): Diagnostic {
   }
 
   // 2. Le transport vers le guichet : un guichet muet ou en erreur n'inscrit rien à son journal ; tant
-  //    qu'une lettre attend, c'est une panne (`cle_refusee` si le jeton est refusé).
+  //    qu'une lettre attend, c'est une panne (`cle_refusee` si le jeton est refusé). Deux ratés de suite
+  //    au moins (un raté isolé un vendredi soir ne fait pas une carte rouge tout le week-end), et pas un
+  //    raté plus ancien que la plus ancienne lettre qui attend (il ne la concerne pas).
   const transport = readGuichetTransport(db);
-  if (transport?.code && waiting > 0) {
+  if (transport?.code && transport.consecutive >= 2 && waiting > 0 && transport.last_at >= oldestWaitingCreatedAt(db)) {
     const refused = transport.code === "http_401" || transport.code === "http_403";
     return { etat: "panne", code: refused ? "cle_refusee" : "service_injoignable", n: clampN(waiting) };
   }
