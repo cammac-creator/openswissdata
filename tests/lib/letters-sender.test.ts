@@ -228,7 +228,10 @@ describe("Expéditeur périodique des lettres institutionnelles", () => {
     // passage, lancé juste après, s'exécute déjà après que le premier a marqué la lettre `sending`.
     const p1 = run({ send, fetch: fetcher });
     const p2 = run({ send, fetch: fetcher });
-    expect(send).toHaveBeenCalledTimes(1); // le second passage n'a rien trouvé à réclamer
+    // Réclamée par le premier passage avant tout `await` : le second n'a rien trouvé à réclamer.
+    expect(getLetter(id).status).toBe("sending");
+    // L'envoi peut venir après une attente (demande au guichet du bureau, PR #134) : on l'attend.
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
     resolveSend?.({ sent: true });
     await Promise.all([p1, p2]);
 
