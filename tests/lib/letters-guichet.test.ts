@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { getDb, closeDb } from "../../src/lib/db.js";
-import { runLettersSender, readLettersPause, writeLettersPause } from "../../src/lib/letters-sender.js";
+import { runLettersSender, readGuichetTransport, readLettersPause, writeLettersPause } from "../../src/lib/letters-sender.js";
 import { createGuichetClient, guichetToken, guichetUrl, recipientDomain, refusalCode, type GuichetClient } from "../../src/lib/guichet.js";
 import type { EmailSendResult, PreparedEmail } from "../../src/lib/email.js";
 import { guichetEnregistre } from "../helpers/guichet.js";
@@ -378,6 +378,35 @@ describe("Lettres institutionnelles : permission du guichet avant chaque envoi",
       expect(send).toHaveBeenCalledTimes(1);
       expect(guichet.record.demandes.length).toBe(3); // 1 refusée + 2 (À et copie cachée)
       expect(getLetter(id).status).toBe("sent");
+    });
+  });
+
+  describe("témoin du transport (lu par la santé : le guichet ne garde aucune trace de ces cas)", () => {
+    it("un 500 est gardé, puis remis à zéro par le « oui » suivant", async () => {
+      handler = (_req, res) => json(res, 500, { detail: "panne" });
+      const id = insertLetter();
+      await run(client()).status;
+      expect(readGuichetTransport()?.code).toBe("http_500");
+      handler = accorde;
+      const { status, send } = run(client(), { now: () => (getLetter(id).scheduled_at as number) + 1_000 });
+      await status;
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(readGuichetTransport()?.code).toBeNull();
+    });
+
+    it("un « non » explicite (arrêt) n'est pas une panne de transport : le bureau le voit dans son journal", async () => {
+      handler = (_req, res) => json(res, 200, { autorise: false, id: "g-1", raison: "arrêt : Claude-Alain a tout arrêté depuis son bureau" });
+      insertLetter();
+      await run(client()).status;
+      expect(readGuichetTransport()?.code).toBeNull();
+    });
+
+    it("délai dépassé : gardé, sans adresse", async () => {
+      handler = () => undefined;
+      insertLetter();
+      await run(client()).status;
+      const row = getDb().prepare("SELECT details_json FROM operation_checks WHERE name='letters_guichet'").get() as { details_json: string };
+      expect(JSON.parse(row.details_json)).toEqual({ code: "timeout", last_at: NOW });
     });
   });
 

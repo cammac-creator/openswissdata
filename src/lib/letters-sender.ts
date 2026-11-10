@@ -551,6 +551,47 @@ async function askGuichet(deps: Dependencies, prepared: PreparedEmail): Promise<
   return { ok: true, ids, startedAt };
 }
 
+// --- Témoin du transport vers le guichet (lu par `robot-sante.ts`) -------------
+// Un guichet qui ne répond pas proprement (délai, réseau, statut HTTP autre que 200, réponse illisible)
+// n'écrit rien dans son journal : le bureau ne verrait pas ces lettres retenues. Le dernier état du
+// transport est donc gardé ici (code fermé et heure, jamais une adresse) ; la santé le traduit en panne
+// tant qu'une lettre attend. Un « oui » ou un « non » explicite du guichet le remet à zéro.
+const TRANSPORT_CHECK = "letters_guichet";
+const TRANSPORT_FAILURES: ReadonlySet<string> = new Set(["timeout", "unreachable", "not_json", "malformed", "exception"]);
+
+export type GuichetTransport = { code: string | null; last_at: number };
+
+function isTransportFailure(code: string): boolean {
+  return TRANSPORT_FAILURES.has(code) || /^http_\d{3}$/.test(code);
+}
+
+/** Dernier état du transport vers le guichet, ou `null` si aucune demande n'a encore été faite. */
+export function readGuichetTransport(db: Database.Database = getDb()): GuichetTransport | null {
+  const row = db.prepare("SELECT details_json FROM operation_checks WHERE name=?").get(TRANSPORT_CHECK) as
+    | { details_json: string }
+    | undefined;
+  if (!row) return null;
+  try {
+    const raw = JSON.parse(row.details_json) as { code?: unknown; last_at?: unknown };
+    const code = typeof raw.code === "string" && /^[a-z0-9_]{1,40}$/.test(raw.code) ? raw.code : null;
+    return { code, last_at: Number.isSafeInteger(raw.last_at) ? (raw.last_at as number) : 0 };
+  } catch {
+    return null;
+  }
+}
+
+function noteGuichetTransport(db: Database.Database, gate: GuichetGate, now: number): void {
+  let code: string | null;
+  if (gate.ok) code = null;
+  else if (isTransportFailure(gate.code)) code = gate.code;
+  else if (gate.code === "from_mismatch" || gate.code === "recipient_unreadable" || gate.code === "not_configured") return;
+  else code = null; // « non » explicite du guichet : il a répondu, son journal le montre
+  db.prepare(
+    "INSERT INTO operation_checks(name,checked_at,details_json) VALUES(?,?,?) " +
+      "ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json",
+  ).run(TRANSPORT_CHECK, now, JSON.stringify({ code, last_at: now }));
+}
+
 /** Issue de chaque permission accordée, au mieux (jamais bloquant, jamais rejoué). */
 async function tellGuichet(deps: Dependencies, ids: readonly string[], issue: GuichetIssue): Promise<void> {
   for (const id of ids) {
@@ -735,6 +776,7 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
         // destinataire (contrat, règles 1 à 4). Aucun Telegram pour un refus : le bureau le tire de son
         // propre journal.
         const gate = await askGuichet(deps, prepared);
+        noteGuichetTransport(db, gate, deps.now());
         if (!gate.ok) {
           await tellGuichet(deps, gate.ids, "annule");
           deferForGuichet(db, letter.id, claim.previousAttemptedAt, deps.now(), deps.rng);

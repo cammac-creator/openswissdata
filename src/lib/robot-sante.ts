@@ -3,7 +3,9 @@
 // pannes »). Une seule source au bureau pour deux robots du serveur, combinés dans cet ordre :
 //   1. la file des lettres (`letters-sender.ts`) : témoin en erreur, envoi impossible avec des lettres en
 //      file, ou témoin muet ;
-//   2. la veille des réponses (`mail-watch.ts`) : en panne, inactive ou muette, mais seulement quand une
+//   2. le transport vers le guichet (témoin `letters_guichet`) : délai, réseau, statut HTTP autre que 200,
+//      réponse illisible, tant qu'une lettre attend (le guichet n'en garde aucune trace) ;
+//   3. la veille des réponses (`mail-watch.ts`) : en panne, inactive ou muette, mais seulement quand une
 //      réponse est attendue (lettre en file, ou envoyée depuis moins de 120 jours sans réponse).
 // La pause des lettres et le « Tout arrêter » du bureau ne sont pas des pannes. Les refus, échecs et
 // permissions sans issue, le bureau les tire seul du journal du guichet : jamais redits ici.
@@ -15,7 +17,7 @@
 import type Database from "better-sqlite3";
 import { getDb } from "./db.js";
 import { toZurichParts } from "./letters.js";
-import { readLettersSenderStatus } from "./letters-sender.js";
+import { readGuichetTransport, readLettersSenderStatus } from "./letters-sender.js";
 import { readMailWatchStatus } from "./mail-watch.js";
 import { createGuichetClient, type GuichetClient, type PanneCode, type SanteBody } from "./guichet.js";
 
@@ -78,7 +80,15 @@ export function diagnose(db: Database.Database, now: number): Diagnostic {
     }
   }
 
-  // 2. La veille des réponses, seulement quand une réponse est attendue.
+  // 2. Le transport vers le guichet : un guichet muet ou en erreur n'inscrit rien à son journal ; tant
+  //    qu'une lettre attend, c'est une panne (`cle_refusee` si le jeton est refusé).
+  const transport = readGuichetTransport(db);
+  if (transport?.code && waiting > 0) {
+    const refused = transport.code === "http_401" || transport.code === "http_403";
+    return { etat: "panne", code: refused ? "cle_refusee" : "service_injoignable", n: clampN(waiting) };
+  }
+
+  // 3. La veille des réponses, seulement quand une réponse est attendue.
   const expected = waiting + lettersAwaitingReply(db, now);
   if (expected > 0) {
     const watch = readMailWatchStatus(db);

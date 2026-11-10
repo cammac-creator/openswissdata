@@ -138,6 +138,19 @@ describe("Santé d'OpenSwissData au bureau", () => {
     expect(diagnose(getDb(), NOW)).toMatchObject({ etat: "panne", code: "autre" });
   });
 
+  it("guichet muet ou en erreur pendant qu'une lettre attend : `service_injoignable` ; jeton refusé : `cle_refusee`", () => {
+    letters(NOW, "ok");
+    mailWatch(NOW, "ok");
+    setCheck("letters_guichet", NOW, { code: "http_500", last_at: NOW });
+    expect(diagnose(getDb(), NOW)).toEqual({ etat: "ok" }); // aucune lettre n'attend : rien à dire
+    insertLetter("queued");
+    expect(diagnose(getDb(), NOW)).toEqual({ etat: "panne", code: "service_injoignable", n: 1 });
+    setCheck("letters_guichet", NOW, { code: "http_401", last_at: NOW });
+    expect(diagnose(getDb(), NOW)).toEqual({ etat: "panne", code: "cle_refusee", n: 1 });
+    setCheck("letters_guichet", NOW, { code: null, last_at: NOW });
+    expect(diagnose(getDb(), NOW)).toEqual({ etat: "ok" });
+  });
+
   it("veille des réponses : panne seulement quand une réponse est attendue", () => {
     letters(NOW, "ok");
     mailWatch(NOW, "inactive", "not_configured");
