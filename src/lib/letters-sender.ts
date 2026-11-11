@@ -11,6 +11,15 @@
 // défense en profondeur si Resend retente une requête identique).
 //
 // Témoin `operation_checks/letters` : compteurs et code fermé, jamais une adresse ni un objet.
+//
+// Guichet du bureau (boîte générale, étape 1, décision de Claude-Alain du 10.11.2026 ; contrat
+// `~/bureau/docs/guichet-contrat.md`) : juste avant l'envoi, après les blocages propres à ce programme
+// (domaines autorisés, pause), UNE demande par destinataire (À, Cc, et la copie cachée vers contact@),
+// la boîte annoncée étant l'en-tête From réellement envoyé. Tout ce qui n'est pas un « oui » net retient
+// la lettre sans pénalité, replacée au moins 30 minutes plus tard (une nouvelle demande à ce moment-là).
+// Puis l'issue de chaque permission : `parti`, `echec` (refus net de Resend), `annule` (rien n'est parti).
+// Une issue incertaine (réseau, 502/504) n'est pas dite : le bureau l'affiche « sans nouvelle », ce qui est
+// exact. Sans jeton ni adresse du guichet, rien ne part (`not_configured`, `guichet_not_configured`).
 import { randomUUID } from "node:crypto";
 import type Database from "better-sqlite3";
 import { getDb } from "./db.js";
@@ -31,8 +40,16 @@ import {
 import * as emailLib from "./email.js";
 import type { PreparedEmail, EmailSendResult } from "./email.js";
 import { telegramConfig, sendTelegram, readMailWatchStatus } from "./mail-watch.js";
+import { bareAddress, createGuichetClient, recipientDomain, type GuichetClient, type GuichetIssue } from "./guichet.js";
 
 const CHECK = "letters";
+// Une permission du guichet vaut 30 s depuis son accord, et l'issue « parti » doit lui arriver dans ce
+// délai : Resend peut prendre jusqu'à 15 s (un essai, `email.ts`). Au-delà de 12 s écoulées entre le début
+// de la première demande et l'appel à Resend, rien ne part (issue « annule »).
+const GUICHET_SEND_DEADLINE_MS = 12_000;
+// Lettre retenue par le guichet : nouvelle demande au plus tôt 30 minutes plus tard, jamais à chaque
+// passage (un « Tout arrêter » d'une journée ferait sinon plus de 200 demandes).
+const GUICHET_RETRY_DELAY_MS = 30 * 60_000;
 const PAUSE_CHECK = "letters_pause";
 // Correction finale du 06.10.2026 (relecture Opus, item 1) : une relance ne peut être CRÉÉE ni
 // RÉCLAMÉE (envoyée) que si la veille courrier (mail_watch) est fraîche — sinon elle pourrait partir
@@ -91,6 +108,7 @@ type Dependencies = {
   send: SendFn;
   fetch: typeof fetch;
   hasApiKey: () => boolean;
+  guichet: GuichetClient;
 };
 
 const defaults: Dependencies = {
@@ -101,6 +119,8 @@ const defaults: Dependencies = {
   send: (payload, idempotencyKey, options) => emailLib.sendPreparedEmail(payload, idempotencyKey, options),
   fetch: (input, init) => fetch(input, init),
   hasApiKey: () => emailLib.hasResendApiKey(),
+  // `GUICHET_JETON` et `GUICHET_URL` relus à chaque appel (jamais figés au chargement du module).
+  guichet: createGuichetClient(),
 };
 
 // --- Témoin operation_checks -------------------------------------------------
@@ -263,12 +283,6 @@ function escapeHtmlBody(text: string): string {
   return escaped.split(/\r\n|\r|\n/).join("<br>");
 }
 
-/** Adresse nue (sans `Nom <...>`), en minuscules, pour une comparaison exacte. */
-function bareAddress(value: string): string {
-  const match = /<([^>]+)>\s*$/.exec(value);
-  return (match ? match[1] : value).trim().toLowerCase();
-}
-
 /**
  * `from` des autres envois s'il désigne exactement `contact@openswissdata.com` ; sinon la forme
  * fixée par le plan. Comparaison EXACTE (corrigé le 06.10, relecture Opus) : un simple `includes`
@@ -347,7 +361,7 @@ type ClaimResult =
   | { action: "none" }
   | { action: "rescheduled" }
   | { action: "cancelled" }
-  | { action: "claimed"; letter: InstitutionalLetter };
+  | { action: "claimed"; letter: InstitutionalLetter; previousAttemptedAt: number | null };
 
 /**
  * Un essai réel sur une AUTRE lettre (quel que soit son statut ensuite — `sent`, `failed`, ou
@@ -466,7 +480,11 @@ function claimOrReschedule(db: Database.Database, now: number, rng: () => number
         )
         .run(leaseUntil, now, candidate.id);
       if (result.changes !== 1) return { action: "none" }; // concurrence : déjà réclamée ailleurs
-      return { action: "claimed", letter: { ...candidate, status: "sending", lease_until: leaseUntil, attempted_at: now } };
+      return {
+        action: "claimed",
+        letter: { ...candidate, status: "sending", lease_until: leaseUntil, attempted_at: now },
+        previousAttemptedAt: candidate.attempted_at,
+      };
     }
     return { action: "none" };
   });
@@ -477,6 +495,116 @@ function revertClaim(db: Database.Database, id: string): void {
   // Remet en file sans pénalité : cas défensif où la clé Resend aurait disparu entre le contrôle du
   // début de passage et l'envoi (course très improbable, jamais observée en pratique).
   db.prepare("UPDATE institutional_letters SET status='queued', lease_until=NULL WHERE id=? AND status='sending'").run(id);
+}
+
+/**
+ * Lettre retenue par le guichet (aucune permission nette, ou délai dépassé) : rien n'est parti, donc
+ * remise en file SANS pénalité (`attempts` inchangé, `attempted_at` rendu à sa valeur d'avant : ce n'était
+ * pas un essai réel), à un nouveau créneau tiré au moins `GUICHET_RETRY_DELAY_MS` plus tard. Le passage qui
+ * la reprendra redemandera la permission.
+ */
+function deferForGuichet(
+  db: Database.Database,
+  id: string,
+  previousAttemptedAt: number | null,
+  now: number,
+  rng: () => number,
+): void {
+  const txn = db.transaction(() => {
+    const scheduledAt = scheduleSlot(now + GUICHET_RETRY_DELAY_MS, occupiedSlots(db, id), rng);
+    db.prepare(
+      "UPDATE institutional_letters SET status='queued', lease_until=NULL, scheduled_at=?, attempted_at=? " +
+        "WHERE id=? AND status='sending'",
+    ).run(scheduledAt, previousAttemptedAt, id);
+  });
+  txn.immediate();
+}
+
+// --- Guichet : une permission par destinataire --------------------------------
+
+type GuichetGate = { ok: true; ids: string[]; startedAt: number } | { ok: false; code: string; ids: string[] };
+
+/**
+ * Destinataires réels de l'enveloppe : À, Cc et Cci (copie cachée vers contact@ comprise), un par un.
+ * La boîte annoncée est l'en-tête From réellement envoyé : s'il n'est pas `contact@`, ce programme refuse
+ * lui-même (règle 4 du contrat), sans rien demander.
+ */
+async function askGuichet(deps: Dependencies, prepared: PreparedEmail): Promise<GuichetGate> {
+  const boite = bareAddress(prepared.from);
+  if (boite !== CONTACT_ADDRESS) return { ok: false, code: "from_mismatch", ids: [] };
+  const recipients = [...prepared.to, ...(prepared.cc ?? []), ...(prepared.bcc ?? [])];
+  const domains = recipients.map(recipientDomain);
+  if (recipients.length === 0 || domains.some((d) => d === null)) return { ok: false, code: "recipient_unreadable", ids: [] };
+  // Pris AVANT la première demande : la durée des demandes compte dans l'échéance.
+  const startedAt = deps.now();
+  const ids: string[] = [];
+  for (const domaine of domains as string[]) {
+    let answer: Awaited<ReturnType<GuichetClient["demande"]>>;
+    try {
+      answer = await deps.guichet.demande(boite, domaine);
+    } catch {
+      answer = { ok: false, code: "exception" };
+    }
+    if (!answer.ok) return { ok: false, code: answer.code, ids };
+    ids.push(answer.id);
+  }
+  return { ok: true, ids, startedAt };
+}
+
+// --- Témoin du transport vers le guichet (lu par `robot-sante.ts`) -------------
+// Un guichet qui ne répond pas proprement (délai, réseau, statut HTTP autre que 200, réponse illisible)
+// n'écrit rien dans son journal : le bureau ne verrait pas ces lettres retenues. Le dernier état du
+// transport est donc gardé ici (code fermé, heure et ratés de suite, jamais une adresse) ; la santé le
+// traduit en panne à partir de deux ratés de suite, tant qu'une lettre attend. Un « oui » ou un « non »
+// explicite du guichet le remet à zéro.
+const TRANSPORT_CHECK = "letters_guichet";
+const TRANSPORT_FAILURES: ReadonlySet<string> = new Set(["timeout", "unreachable", "not_json", "malformed", "exception"]);
+
+export type GuichetTransport = { code: string | null; last_at: number; consecutive: number };
+
+function isTransportFailure(code: string): boolean {
+  return TRANSPORT_FAILURES.has(code) || /^http_\d{3}$/.test(code);
+}
+
+/** Dernier état du transport vers le guichet, ou `null` si aucune demande n'a encore été faite. */
+export function readGuichetTransport(db: Database.Database = getDb()): GuichetTransport | null {
+  const row = db.prepare("SELECT details_json FROM operation_checks WHERE name=?").get(TRANSPORT_CHECK) as
+    | { details_json: string }
+    | undefined;
+  if (!row) return null;
+  try {
+    const raw = JSON.parse(row.details_json) as { code?: unknown; last_at?: unknown; consecutive?: unknown };
+    const code = typeof raw.code === "string" && /^[a-z0-9_]{1,40}$/.test(raw.code) ? raw.code : null;
+    const consecutive = Number.isSafeInteger(raw.consecutive) && (raw.consecutive as number) > 0 ? (raw.consecutive as number) : 0;
+    return { code, last_at: Number.isSafeInteger(raw.last_at) ? (raw.last_at as number) : 0, consecutive: code ? consecutive : 0 };
+  } catch {
+    return null;
+  }
+}
+
+function noteGuichetTransport(db: Database.Database, gate: GuichetGate, now: number): void {
+  let code: string | null;
+  if (gate.ok) code = null;
+  else if (isTransportFailure(gate.code)) code = gate.code;
+  else if (gate.code === "from_mismatch" || gate.code === "recipient_unreadable" || gate.code === "not_configured") return;
+  else code = null; // « non » explicite du guichet : il a répondu, son journal le montre
+  const previous = code ? readGuichetTransport(db) : null;
+  const consecutive = code ? Math.min(9999, (previous?.code ? previous.consecutive : 0) + 1) : 0;
+  db.prepare(
+    "INSERT INTO operation_checks(name,checked_at,details_json) VALUES(?,?,?) " +
+      "ON CONFLICT(name) DO UPDATE SET checked_at=excluded.checked_at,details_json=excluded.details_json",
+  ).run(TRANSPORT_CHECK, now, JSON.stringify({ code, last_at: now, consecutive }));
+}
+
+/** Issue de chaque permission accordée, au mieux (jamais bloquant, jamais rejoué). */
+async function tellGuichet(deps: Dependencies, ids: readonly string[], issue: GuichetIssue): Promise<void> {
+  for (const id of ids) {
+    try {
+      await deps.guichet.issue(id, issue);
+    } catch {
+      // Une issue perdue n'autorise rien de plus ; le bureau montre alors la permission « sans nouvelle ».
+    }
+  }
 }
 
 function markSent(db: Database.Database, id: string, now: number, resendId: string | null): void {
@@ -600,6 +728,13 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
     return finish("not_configured", "telegram_config_invalid", previous?.last_run_at ?? null);
   }
 
+  // Sans jeton ou adresse du guichet du bureau, aucune lettre ne peut demander sa permission : rien ne part, ni
+  // lettre ni relance, avant la moindre écriture (comme une clé Resend absente). Jamais d'envoi « en
+  // attendant » le jeton.
+  if (!deps.guichet.configured()) {
+    return finish("not_configured", "guichet_not_configured", previous?.last_run_at ?? null);
+  }
+
   // Pause manuelle (`POST /api/admin/letters/pause`) : rien n'est réclamé ni créé, comme les deux
   // gardes ci-dessus, avant la moindre écriture.
   if (readLettersPause(db).paused) {
@@ -612,6 +747,8 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
     //    même passage. Les alertes Telegram, elles, sont bien `await`ées ici — c'est précisément
     //    pourquoi la réclamation ci-dessous relit l'horloge au lieu de réutiliser `passStartedAt`
     //    (correction I2a : ce `await` peut faire avancer le temps réel de plusieurs secondes).
+    // Code fermé du passage (lettre retenue par le guichet), `null` sinon.
+    let passCode: string | null = null;
     const recovered = recoverExpiredLeases(db, deps.now());
     for (const r of recovered) await notifyTelegram(uncertainText(r), deps.fetch);
 
@@ -639,51 +776,82 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
         return finish("paused", "paused", previous?.last_run_at ?? null);
       } else {
         const prepared = buildPreparedEmail(letter);
-        // `null` seulement si l'envoi a jeté une exception : déjà entièrement traité dans le
-        // `catch` (I4a), rien de plus à faire pour cette lettre ce passage-ci.
-        let result: EmailSendResult | null;
-        try {
-          // Un seul essai réel ici (correction I/A, 06.10) : l'expéditeur décide lui-même,
-          // d'un passage à l'autre et dans le créneau d'envoi, s'il retente — jamais `sendPreparedEmail`
-          // en interne, qui pourrait prendre jusqu'à ~49 s (trois essais, délais d'attente compris).
-          result = await deps.send(prepared, `letter-${letter.id}`, { attempts: 1 });
-        } catch {
-          // Toute exception pendant l'envoi (I4a) : on ne sait pas si Resend a reçu la requête —
-          // jamais de retentative automatique.
-          markFailed(db, letter.id, letter.attempts + 1);
-          await notifyTelegram(uncertainText(letter), deps.fetch);
-          result = null;
-        }
-        if (result?.sent) {
-          // Lu APRÈS la réponse de Resend (I2d), jamais avant l'envoi : un passage qui prend du
-          // temps (jusqu'au délai maximal de l'unique tentative) ne doit pas enregistrer
-          // une heure d'envoi antérieure à l'acceptation réelle. Écrit avant toute notification
-          // Telegram : un échec Telegram ne doit jamais faire rejouer un envoi déjà accepté.
-          const sentAt = deps.now();
-          markSent(db, letter.id, sentAt, result.providerId ?? null);
-          await notifyTelegram(sentText(letter), deps.fetch);
-        } else if (result?.reason === "no_api_key") {
-          // Course très improbable (clé retirée entre le contrôle du début de passage et l'envoi) :
-          // remise en file sans pénalité, rien d'autre ce passage-ci.
+        // Guichet du bureau, APRÈS nos propres blocages et juste avant l'envoi : une permission par
+        // destinataire (contrat, règles 1 à 4). Aucun Telegram pour un refus : le bureau le tire de son
+        // propre journal.
+        const gate = await askGuichet(deps, prepared);
+        noteGuichetTransport(db, gate, deps.now());
+        if (!gate.ok) {
+          await tellGuichet(deps, gate.ids, "annule");
+          deferForGuichet(db, letter.id, claim.previousAttemptedAt, deps.now(), deps.rng);
+          passCode = `guichet_${gate.code}`;
+          // Code fermé seulement : ni adresse, ni objet, ni texte du guichet.
+          console.info(`[lettres] lettre retenue par le guichet (${gate.code}) ; nouvelle demande dans 30 minutes au moins`);
+        } else if (readLettersPause(db).paused) {
+          // Pause posée pendant les demandes au guichet : rien n'est parti, permissions rendues.
+          await tellGuichet(deps, gate.ids, "annule");
           revertClaim(db, letter.id);
-          return finish("not_configured", "no_api_key", previous?.last_run_at ?? null);
-        } else if (result !== null) {
-          // Résultat d'échec normal renvoyé par `sendPreparedEmail` (pas l'exception déjà traitée
-          // ci-dessus) : classer pour décider retentative ou échec définitif.
-          const category = classifySendFailure(result);
-          if (category === "unknown") {
+          return finish("paused", "paused", previous?.last_run_at ?? null);
+        } else if (deps.now() - gate.startedAt > GUICHET_SEND_DEADLINE_MS) {
+          // Les permissions ne vaudraient plus à l'arrivée de l'issue « parti » : rien ne part.
+          await tellGuichet(deps, gate.ids, "annule");
+          deferForGuichet(db, letter.id, claim.previousAttemptedAt, deps.now(), deps.rng);
+          passCode = "guichet_delai";
+          console.info("[lettres] permissions du guichet trop anciennes ; rien n'est parti, nouvelle demande dans 30 minutes au moins");
+        } else {
+          // `null` seulement si l'envoi a jeté une exception : déjà entièrement traité dans le
+          // `catch` (I4a), rien de plus à faire pour cette lettre ce passage-ci.
+          let result: EmailSendResult | null;
+          try {
+            // Un seul essai réel ici (correction I/A, 06.10) : l'expéditeur décide lui-même,
+            // d'un passage à l'autre et dans le créneau d'envoi, s'il retente — jamais `sendPreparedEmail`
+            // en interne, qui pourrait prendre jusqu'à ~49 s (trois essais, délais d'attente compris).
+            result = await deps.send(prepared, `letter-${letter.id}`, { attempts: 1 });
+          } catch {
+            // Toute exception pendant l'envoi (I4a) : on ne sait pas si Resend a reçu la requête —
+            // jamais de retentative automatique. Aucune issue au guichet : « sans nouvelle » est exact.
             markFailed(db, letter.id, letter.attempts + 1);
             await notifyTelegram(uncertainText(letter), deps.fetch);
-          } else if (category === "definite") {
-            markFailed(db, letter.id, letter.attempts + 1);
-            await notifyTelegram(failedText(letter, result.details ?? result.reason ?? "échec d'envoi"), deps.fetch);
-          } else {
-            const attempts = letter.attempts + 1;
-            if (attempts >= MAX_ATTEMPTS) {
-              markFailed(db, letter.id, attempts);
+            result = null;
+          }
+          if (result?.sent) {
+            // Lu APRÈS la réponse de Resend (I2d), jamais avant l'envoi : un passage qui prend du
+            // temps (jusqu'au délai maximal de l'unique tentative) ne doit pas enregistrer
+            // une heure d'envoi antérieure à l'acceptation réelle. Écrit avant toute notification
+            // Telegram : un échec Telegram ne doit jamais faire rejouer un envoi déjà accepté.
+            const sentAt = deps.now();
+            markSent(db, letter.id, sentAt, result.providerId ?? null);
+            // Issue « parti » avant Telegram : elle doit arriver dans les 30 s de la permission.
+            await tellGuichet(deps, gate.ids, "parti");
+            await notifyTelegram(sentText(letter), deps.fetch);
+          } else if (result?.reason === "no_api_key") {
+            // Course très improbable (clé retirée entre le contrôle du début de passage et l'envoi) :
+            // remise en file sans pénalité, rien d'autre ce passage-ci.
+            revertClaim(db, letter.id);
+            await tellGuichet(deps, gate.ids, "annule");
+            return finish("not_configured", "no_api_key", previous?.last_run_at ?? null);
+          } else if (result !== null) {
+            // Résultat d'échec normal renvoyé par `sendPreparedEmail` (pas l'exception déjà traitée
+            // ci-dessus) : classer pour décider retentative ou échec définitif.
+            const category = classifySendFailure(result);
+            if (category === "unknown") {
+              // Resend a pu accepter derrière une passerelle : aucune issue (« sans nouvelle »).
+              markFailed(db, letter.id, letter.attempts + 1);
+              await notifyTelegram(uncertainText(letter), deps.fetch);
+            } else if (category === "definite") {
+              markFailed(db, letter.id, letter.attempts + 1);
+              await tellGuichet(deps, gate.ids, "echec");
               await notifyTelegram(failedText(letter, result.details ?? result.reason ?? "échec d'envoi"), deps.fetch);
             } else {
-              markRetryQueued(db, letter.id, attempts);
+              // Refus net et retentable (5xx, 429) : cet essai a échoué ; le suivant redemandera.
+              await tellGuichet(deps, gate.ids, "echec");
+              const attempts = letter.attempts + 1;
+              if (attempts >= MAX_ATTEMPTS) {
+                markFailed(db, letter.id, attempts);
+                await notifyTelegram(failedText(letter, result.details ?? result.reason ?? "échec d'envoi"), deps.fetch);
+              } else {
+                markRetryQueued(db, letter.id, attempts);
+              }
             }
           }
         }
@@ -701,7 +869,7 @@ export async function runLettersSender(overrides: Partial<Dependencies> = {}): P
       }
     }
 
-    return finish("ok", null, passStartedAt);
+    return finish("ok", passCode, passStartedAt);
   } catch (error) {
     console.error("[lettres] passage interrompu :", error instanceof Error ? error.message : "erreur inconnue");
     return finish("error", "unexpected_error", previous?.last_run_at ?? null);

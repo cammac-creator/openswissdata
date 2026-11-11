@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getDb, closeDb } from "../../src/lib/db.js";
+import { guichetOui } from "../helpers/guichet.js";
 import { runLettersSender } from "../../src/lib/letters-sender.js";
 
 // Demandes de licence aux distributeurs officiels (relecture de sécurité du 08.10.2026) : aucune
@@ -68,7 +69,7 @@ describe("Expéditeur : aucune relance pour une demande de licence", () => {
       rng: () => 0,
       send: async () => ({ sent: true }),
       fetch: (async () => Response.json({ ok: true })) as unknown as typeof fetch,
-      hasApiKey: () => true,
+      hasApiKey: () => true, guichet: guichetOui(),
     });
     expect(reminders(licence)).toBe(0);
     expect(reminders(majuscules)).toBe(0);
