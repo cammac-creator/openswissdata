@@ -8,6 +8,10 @@ export default defineConfig({
   test: {
     env: {
       NODE_ENV: "test",
+      // Lecture du registre IDE de l'OFS coupée par défaut dans la suite (15.11.2026) : aucun test
+      // ne part vers ce chemin, ni n'attend son écart réel de 7 s entre deux requêtes, sans le
+      // demander. `tests/mcp/company-uid-register.test.ts` la rouvre pour ses propres cas.
+      OSD_UID_REGISTER: "off",
     },
     // sdks/mcp-server is a standalone sub-package with its own node_modules
     // (@modelcontextprotocol/sdk is not installed at the repo root). Its tests

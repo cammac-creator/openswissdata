@@ -16,7 +16,7 @@
  * à l'identique sans risque de divergence silencieuse.
  *
  * `finma.uid_csv`, `swisstopo.localities`, `swisstopo.streets`, `ofrc.zefix_lindas`,
- * `ofrc.zefix_rest` et `gleif.lei_api` ne sont PAS redupliqués ici : ce sont les six entrées déjà tenues à jour dans
+ * `ofrc.zefix_rest`, `bfs.uid_register` et `gleif.lei_api` ne sont PAS redupliqués ici : ce sont les sept entrées déjà tenues à jour dans
  * `src/mcp/company/sources.ts` (`COMPANY_SOURCES`), elles-mêmes vérifiées contre le registre par
  * `tests/mcp/company-sources-registry.test.ts`. Ce fichier les réutilise directement.
  *
@@ -78,6 +78,14 @@ const OFRC_REST_LICENCE: PublicSourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// Copie littérale de la licence `BFS_UID_OPEN_BY` du registre unique (15.11.2026) : registre IDE
+// de l'OFS, lu une entité à la fois.
+const BFS_UID_LICENCE: PublicSourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-BFS-UID-OPEN-BY",
+  authority: "Federal Statistical Office FSO, UID register public web service: OPEN-BY (free use, source attribution mandatory); UID Act (SR 431.03) art. 11: individual queries on one entity only, no bulk requests; written reply of 13.11.2026 (at most 20 requests per minute)",
+  jurisdiction: "Switzerland",
+};
+
 const SWISSTOPO_LICENCE: PublicSourceLicence = {
   reference: "PUBLIC-OFFICIAL-SOURCE-SWISSTOPO-OPEN-USE",
   authority: "Federal Office of Topography swisstopo, opendata.swiss open use (terms_open)",
@@ -134,6 +142,7 @@ export const PUBLIC_SOURCES: readonly PublicSourceEntry[] = [
   fromCompanySources("gleif.lei_api", "GLEIF", "GLEIF LEI registry (public API), used to attach a LEI to FINMA entities by UID", GLEIF_LICENCE),
   fromCompanySources("ofrc.zefix_lindas", "OFRC", "Commercial register as linked data (LINDAS, Zefix graph), public SPARQL endpoint", OFRC_LICENCE),
   fromCompanySources("ofrc.zefix_rest", "OFRC", "Commercial register, Zefix public REST API: registry status read live, one company at a time, when available", OFRC_REST_LICENCE),
+  fromCompanySources("bfs.uid_register", "BFS", "FSO — UID register, public web service: VAT register entry read live, one entity at a time (source: OFS, registre IDE, https://www.uid.admin.ch)", BFS_UID_LICENCE),
   fromCompanySources("swisstopo.localities", "swisstopo", "swisstopo — official directory of localities (postal code, municipality, canton), STAC catalogue, monthly collection", SWISSTOPO_LICENCE),
   fromCompanySources("swisstopo.streets", "swisstopo", "swisstopo — official directory of streets (street name, postal code, municipality, canton), STAC catalogue, monthly collection", SWISSTOPO_LICENCE),
 

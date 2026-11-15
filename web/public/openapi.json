@@ -17,7 +17,7 @@
     "/api/v1/company/{uid}": {
       "get": {
         "summary": "Swiss company fiche by UID",
-        "description": "Same fiche as the MCP tool `company_check`: commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources and checks of the registered address against the official localities and streets directories. A `sources` array (id, publishing institution, licence, URL) is added next to the fiche. No score, no verdict. Does not say whether the company is still registered, and does not cover FOSC publications, SECO sanctions or officers.",
+        "description": "Same fiche as the MCP tool `company_check`: commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources and checks of the registered address against the official localities and streets directories. When available and for legal entities only, a `vat_register` block gives the VAT register entry (registered or not, entry status, dates, VAT number) read from the UID register (source: OFS, registre IDE, https://www.uid.admin.ch). A `sources` array (id, publishing institution, licence, URL) is added next to the fiche. No score, no verdict. Does not say whether the company is still registered, and does not cover FOSC publications, SECO sanctions or officers.",
         "parameters": [
           {
             "name": "uid",
