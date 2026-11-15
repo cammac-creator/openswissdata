@@ -564,9 +564,12 @@ describe("lookupUidRegister : cache, sérialisation, cadence, plafond quotidien"
   });
 
   it("réglages par défaut : sous les 20 requêtes par minute indiquées par l'OFS, 500 par jour au plus", () => {
-    expect(60_000 / MIN_INTERVAL_MS).toBeLessThan(20);
-    // Deux processus vivants en même temps (redéploiement) restent ensemble sous la limite.
-    expect((2 * 60_000) / MIN_INTERVAL_MS).toBeLessThan(20);
+    // Pire cas, pas une moyenne : nombre d'envois possibles dans une fenêtre de 60 s (le premier à
+    // l'instant 0, puis un par écart). Deux processus vivants en même temps (redéploiement) doivent
+    // rester ensemble SOUS la limite, pas l'atteindre.
+    const parFenetre = Math.ceil(60_000 / MIN_INTERVAL_MS);
+    expect(parFenetre).toBe(9);
+    expect(2 * parFenetre).toBeLessThan(20);
     expect(DEFAULT_DAILY_LIMIT).toBe(500);
   });
 });
