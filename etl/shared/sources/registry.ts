@@ -71,6 +71,19 @@ const OFRC_REST: SourceLicence = {
   jurisdiction: "Switzerland",
 };
 
+// Registre IDE de l'OFS, service web public (« Public Services », 15.11.2026). Réponse écrite de
+// l'OFS du 13.11.2026 : accès ouvert à tous aux conditions de la LIDE (RS 431.03, art. 11 :
+// requêtes individuelles sur une entité déterminée, jamais par lots) ; les conditions de l'objet
+// publié sont déterminantes (fiche des spécifications du service : badge OPEN-BY, usage libre,
+// source obligatoire) ; 20 requêtes par minute ; mention « OFS, registre IDE,
+// https://www.uid.admin.ch ». Détail : `docs/droits-des-sources.md`.
+const BFS_UID_OPEN_BY: SourceLicence = {
+  reference: "PUBLIC-OFFICIAL-SOURCE-BFS-UID-OPEN-BY",
+  authority: "Federal Statistical Office FSO, UID register public web service: OPEN-BY (free use, source attribution mandatory); UID Act (SR 431.03) art. 11: individual queries on one entity only, no bulk requests; written reply of 13.11.2026 (at most 20 requests per minute)",
+  date: "2026-11-13",
+  jurisdiction: "Switzerland",
+};
+
 // Répertoire officiel des localités (NPA, commune, canton). Preuve de licence : catalogue
 // opendata.swiss « amtliches-ortschaftenverzeichnis-mit-postleitzahl-und-perimeter »,
 // ressources `rights = terms_open`, éditeur swisstopo, relu le 06.10.2026 (osd.localites).
@@ -160,6 +173,11 @@ export const SOURCES: readonly SourceDescriptor[] = [
   // il interrogerait régulièrement un point authentifié, ce que les conditions de l'API excluent.
   { id: "ofrc.zefix_rest", institution: "OFRC", url: "https://www.zefix.admin.ch/ZefixPublicREST/api/v1/company/uid", licence: OFRC_REST,
     description: "Registre du commerce, API REST publique Zefix : statut d'inscription lu en direct, une société à la fois." },
+  // Hors de toute archive vendue : lu en direct par la fiche société, une entité à la fois
+  // (15.11.2026), pour la seule inscription au registre TVA. JAMAIS de canari ni de collecte : la
+  // LIDE limite la consultation aux requêtes individuelles, et le service à 20 requêtes par minute.
+  { id: "bfs.uid_register", institution: "BFS", url: "https://www.uid-wse.admin.ch/V5.0/PublicServices.svc", licence: BFS_UID_OPEN_BY,
+    description: "OFS — registre IDE, service web public : inscription au registre TVA lue en direct, une entité à la fois." },
   // Sans canari (osd.localites) : la collecte mensuelle (`scripts/sync-localities.ts`)
   // contrôle elle-même la forme du fichier officiel et échoue visiblement si elle change,
   // au lieu d'un canari séparé qui referait le même constat.

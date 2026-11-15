@@ -35,7 +35,10 @@ import { exactSanctionKey, getSanctions, isSanctionsListCurrent, SANCTIONS_MAX_A
 // lorsque la fiche porte `commercial_register_status`, c'est-à-dire quand l'API REST Zefix est
 // configurée sur ce service ; sans identifiants, ce service ne la lit jamais.
 const ZEFIX_REST_SOURCE_ID: CompanySourceId = "ofrc.zefix_rest";
-const COMPANY_SOURCE_IDS = (Object.keys(COMPANY_SOURCES) as CompanySourceId[]).filter((id) => id !== ZEFIX_REST_SOURCE_ID);
+// Même règle depuis le 15.11.2026 pour le registre IDE de l'OFS : `bfs.uid_register` n'est citée
+// que lorsque la fiche porte `vat_register`, c'est-à-dire quand une lecture a été tentée.
+const UID_REGISTER_SOURCE_ID: CompanySourceId = "bfs.uid_register";
+const COMPANY_SOURCE_IDS = (Object.keys(COMPANY_SOURCES) as CompanySourceId[]).filter((id) => id !== ZEFIX_REST_SOURCE_ID && id !== UID_REGISTER_SOURCE_ID);
 
 export const apiV1Route = new Hono();
 
@@ -87,9 +90,13 @@ apiV1Route.get("/company/:uid", async (c) => {
   if (limited) return limited;
   c.header("Cache-Control", "no-store");
   const uid = c.req.param("uid");
-  const result = await companyCheck(uid, { fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args), now: () => Date.now() });
+  const result = await companyCheck(uid, { fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args), now: () => Date.now(), uidRegister: true });
   if (!result.ok) return c.json({ error: "invalid_uid" }, 400);
-  const sourceIds = result.fiche.commercial_register_status ? [...COMPANY_SOURCE_IDS, ZEFIX_REST_SOURCE_ID] : COMPANY_SOURCE_IDS;
+  const sourceIds = [
+    ...COMPANY_SOURCE_IDS,
+    ...(result.fiche.commercial_register_status ? [ZEFIX_REST_SOURCE_ID] : []),
+    ...(result.fiche.vat_register ? [UID_REGISTER_SOURCE_ID] : []),
+  ];
   return c.json({ ...result.fiche, sources: sourceIds.map(sourceRef) });
 });
 

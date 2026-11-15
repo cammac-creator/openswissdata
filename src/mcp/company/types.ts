@@ -1,6 +1,7 @@
 /**
- * Types communs aux clients en direct de la fiche société (LINDAS, GLEIF et, depuis le
- * 11.10.2026, l'API REST Zefix pour le seul statut d'inscription).
+ * Types communs aux clients en direct de la fiche société (LINDAS, GLEIF, depuis le
+ * 11.10.2026 l'API REST Zefix pour le seul statut d'inscription et, depuis le 15.11.2026, le
+ * registre IDE de l'OFS pour la seule inscription au registre TVA).
  *
  * Importés par `lindas.ts`, `gleif.ts`, `zefix-rest.ts`, `cache.ts` et par la tâche 4 (assemblage de la fiche).
  * Aucune logique ici : seulement les formes de données (tâche osd.fiche, tâche 3).
@@ -73,3 +74,33 @@ export interface ZefixRestStatusRecord {
   status: ZefixRestStatus;
   deletion_date: string | null;
 }
+
+/**
+ * Inscription au registre TVA telle que lue dans le registre IDE de l'OFS (service web IDE,
+ * 15.11.2026), normalisée depuis `vatStatus` : `2` → `registered`, `3` → `not_registered`.
+ * `not_stated` : la réponse ne porte aucun bloc TVA pour cette entité (dit tel quel, jamais
+ * traduit en « non inscrite »). `unknown` : toute autre valeur, jamais un statut deviné.
+ */
+export type VatRegistration = "registered" | "not_registered" | "not_stated" | "unknown";
+
+/** Statut de l'inscription au registre TVA, depuis `vatEntryStatus` : `1` → `active`, `2` → `deleted`. */
+export type VatEntryStatus = "active" | "deleted";
+
+/**
+ * Seuls champs gardés d'une réponse du registre IDE (minimisation, cache compris). Le nom,
+ * l'adresse et le reste de la réponse ne sont jamais conservés. `published: false` : la forme
+ * juridique de l'entité n'est pas dans la liste blanche des personnes morales (ou n'est pas
+ * lisible) ; rien de la TVA n'est alors gardé, pas même en mémoire.
+ * `vat_uid` : numéro TVA sous la forme `CHE-xxx.xxx.xxx` ; il diffère de l'IDE demandé pour un
+ * membre d'un groupe TVA ou un siège secondaire.
+ */
+export type UidRegisterRecord =
+  | { published: false }
+  | {
+      published: true;
+      vat_registration: VatRegistration;
+      vat_entry_status: VatEntryStatus | null;
+      vat_start_date: string | null;
+      vat_end_date: string | null;
+      vat_uid: string | null;
+    };

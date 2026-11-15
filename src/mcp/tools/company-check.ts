@@ -39,7 +39,7 @@ const InputZ = z
   })
   .strict();
 
-export type CompanyCheckDeps = LiveDeps & { finma?: () => readonly FinmaRegistryRow[] };
+export type CompanyCheckDeps = LiveDeps & { finma?: () => readonly FinmaRegistryRow[]; uidRegister?: boolean };
 
 /** Lit `globalThis.fetch` À L'APPEL (jamais une référence prise au chargement du module). */
 function defaultFetch(...args: Parameters<typeof fetch>): ReturnType<typeof fetch> {
@@ -94,6 +94,23 @@ function renderRegistryStatus(fiche: CompanyFiche): string[] {
   const time = groupTime(s.facts, fiche.generated_at);
   const deletion = s.deletion_date ? `, deletion date ${s.deletion_date}` : "";
   return [`Registry status (Zefix, OFRC, read ${time}): ${s.status}${deletion}.`, ""];
+}
+
+/**
+ * Inscription au registre TVA lue dans le registre IDE de l'OFS (15.11.2026). Une seule ligne,
+ * rendue SEULEMENT quand la fiche porte une inscription publiée pour cette entité ; sinon rien
+ * ici (`structured` garde le motif et la note). La mention demandée par l'OFS y figure mot pour mot.
+ */
+function renderVatRegister(fiche: CompanyFiche): string[] {
+  const v = fiche.vat_register;
+  if (!v || !v.available || !v.found || !v.published || v.vat_registration === null) return [];
+  const time = groupTime(v.facts, fiche.generated_at);
+  const parts: string[] = [v.vat_registration];
+  if (v.vat_entry_status) parts.push(`entry ${v.vat_entry_status}`);
+  if (v.vat_start_date) parts.push(`since ${v.vat_start_date}`);
+  if (v.vat_end_date) parts.push(`until ${v.vat_end_date}`);
+  if (v.vat_uid) parts.push(`VAT number ${v.vat_uid}`);
+  return [`VAT register (${v.provenance}, read ${time}): ${parts.join(", ")}.`, ""];
 }
 
 /**
@@ -222,6 +239,7 @@ function renderSummary(fiche: CompanyFiche): string {
   lines.push(...renderCommercialRegister(fiche));
   lines.push("");
   lines.push(...renderRegistryStatus(fiche));
+  lines.push(...renderVatRegister(fiche));
   lines.push(...renderFinma(fiche));
   lines.push("");
   lines.push(...renderLei(fiche));
@@ -239,7 +257,9 @@ function renderSummary(fiche: CompanyFiche): string {
 
 export async function companyCheckHandler(
   args: unknown,
-  deps: CompanyCheckDeps = { fetch: defaultFetch, now: () => Date.now() },
+  // `uidRegister: true` par défaut seulement : un appelant qui injecte ses `deps` (tests) ne
+  // déclenche jamais de lecture du registre IDE sans le demander.
+  deps: CompanyCheckDeps = { fetch: defaultFetch, now: () => Date.now(), uidRegister: true },
 ): Promise<{
   content: { type: "text"; text: string }[];
   isError?: boolean;
@@ -270,7 +290,7 @@ export async function companyCheckHandler(
 export const companyCheckTool = {
   name: "company_check",
   description:
-    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources and checks of the registered address against the official localities and streets directories (swisstopo, when published). No score. When available, the commercial register status (active, in liquidation or deleted, with the deletion date) is read from Zefix (OFRC). FOSC publications, SECO sanctions and officers are not covered.",
+    "Look up a Swiss company by its UID (CHE-xxx.xxx.xxx): commercial register data (LINDAS), FINMA register entries and LEI records (GLEIF), each fact with its source and, when known, the date it was read, plus exact cross-checks between sources and checks of the registered address against the official localities and streets directories (swisstopo, when published). No score. When available, the commercial register status (active, in liquidation or deleted, with the deletion date) is read from Zefix (OFRC). When available and for legal entities only, the VAT register entry (registered or not, entry status, dates and VAT number) is read from the UID register (source: OFS, registre IDE, https://www.uid.admin.ch). FOSC publications, SECO sanctions and officers are not covered.",
   inputSchema: companyCheckSchema,
   handler: companyCheckHandler,
 } as const;

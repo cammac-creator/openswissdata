@@ -18,6 +18,8 @@ import { parseUid } from "./uid.js";
 import { lookupLindas } from "./lindas.js";
 import { lookupGleif } from "./gleif.js";
 import { lookupZefixRest, ZEFIX_REST_NOT_CONFIGURED } from "./zefix-rest.js";
+import { lookupUidRegister, UID_REGISTER_MENTION, UID_REGISTER_NOT_ENABLED } from "./uid-register.js";
+import { ADDRESS_AND_PURPOSE_FORM_CODES } from "./legal-forms.js";
 import { COMPANY_SOURCES } from "./sources.js";
 import {
   getFinmaRegistry,
@@ -28,7 +30,7 @@ import {
   type FinmaRegistryRow,
   type LocalityRow,
 } from "../data-loader.js";
-import type { GleifRecord, LindasCompany, LiveDeps, Part, ZefixRestStatus, ZefixRestStatusRecord } from "./types.js";
+import type { GleifRecord, LindasCompany, LiveDeps, Part, UidRegisterRecord, VatEntryStatus, VatRegistration, ZefixRestStatus, ZefixRestStatusRecord } from "./types.js";
 
 export interface Fact {
   field: string;
@@ -67,6 +69,28 @@ export interface CommercialRegisterStatus {
   facts: Fact[];
 }
 
+/**
+ * Inscription au registre TVA lue dans le registre IDE de l'OFS (15.11.2026, `uid-register.ts`).
+ * `published: false` : l'entité existe au registre mais sa forme juridique n'est pas dans la liste
+ * blanche des personnes morales (`ADDRESS_AND_PURPOSE_FORM_CODES`) ; rien de la TVA n'est alors
+ * rendu ni gardé. `provenance` porte, mot pour mot, la mention demandée par l'OFS dans sa réponse
+ * du 13.11.2026 ; `data_note` dit la normalisation et renvoie au registre officiel.
+ */
+export interface VatRegister {
+  available: boolean;
+  found: boolean;
+  published: boolean;
+  reason?: string;
+  vat_registration: VatRegistration | null;
+  vat_entry_status: VatEntryStatus | null;
+  vat_start_date: string | null;
+  vat_end_date: string | null;
+  vat_uid: string | null;
+  provenance: typeof UID_REGISTER_MENTION;
+  data_note: string;
+  facts: Fact[];
+}
+
 export interface CompanyFiche {
   uid: string;
   generated_at: string;
@@ -75,6 +99,11 @@ export interface CompanyFiche {
   // (variables `ZEFIX_REST_USERNAME`/`ZEFIX_REST_PASSWORD`, 11.10.2026) : la fiche reste alors
   // strictement celle d'avant. Présente dès qu'une lecture a été tentée, réussie ou non.
   commercial_register_status?: CommercialRegisterStatus;
+  // Clé ABSENTE (jamais `null`) quand l'appelant n'a pas demandé la lecture du registre IDE
+  // (`uidRegister` de `companyCheck`) ou qu'elle est coupée par `OSD_UID_REGISTER=off`
+  // (15.11.2026) : la fiche reste alors strictement celle d'avant. Présente dès qu'une lecture a
+  // été tentée, réussie ou non. N'entre jamais dans `not_covered`, qui reste une liste fermée.
+  vat_register?: VatRegister;
   // `available` (correction 1 du 06.10.2026) : `false` quand le registre FINMA en mémoire
   // n'a pas pu être lu (`deps.finma` qui lève) — `found`/`facts` restent alors vides, sans
   // jamais faire échouer toute la fiche. `data_note` (tâche osd.fiche, tâche 4) : les faits
@@ -135,33 +164,11 @@ const NOT_COVERED = ["commercial_register_status", "fosc_publications", "seco_sa
 const NOTICE =
   "Unofficial copy assembled from public sources. Check the official registers before any decision: zefix.admin.ch, finma.ch, search.gleif.org.";
 
-// Liste BLANCHE des formes juridiques eCH-0097 de personnes morales, relevée le 06.10.2026
-// dans le vocabulaire officiel de LINDAS (relecture finale, tâche osd.fiche). SEULES ces
-// formes ouvrent l'adresse postale (rue, NPA, localité) ET le but (`purpose`) : une raison
-// sociale de personne morale ne porte normalement pas le nom d'une personne physique,
-// contrairement à une entreprise individuelle ("0101"), une société en nom collectif
-// ("0103"), une société en commandite ("0104") ou une société en commandite par actions
-// ("0105"), dont la raison sociale PEUT légalement contenir un nom de famille. Tout autre
-// code (dont "0111", "0113", "0118", "0119", "0151", "0571") ou code absent/inconnu ferme
-// aussi l'adresse et le but : une forme non reconnue n'écarte jamais la possibilité d'une
-// entreprise individuelle ou assimilée.
-// Exportée (tâche osd.donnees, tâche B4) : `scripts/sync-finma-seats.ts` réutilise cette MÊME
-// liste blanche pour ne garder, dans `finma_seats.csv`, que les sièges de personnes morales —
-// jamais une copie, pour ne jamais diverger de la porte appliquée ici.
-export const ADDRESS_AND_PURPOSE_FORM_CODES = new Set<string>([
-  "0106", // société anonyme (SA)
-  "0107", // société à responsabilité limitée (Sàrl)
-  "0108", // société coopérative
-  "0109", // association
-  "0110", // fondation
-  "0114", // société en commandite de placements collectifs
-  "0115", // société d'investissement à capital variable (SICAV)
-  "0116", // société d'investissement à capital fixe (SICAF)
-  "0117", // institut de droit public
-  "0220", "0221", "0222", "0223", "0224", // administrations publiques
-  "0230", "0231", "0232", "0233", "0234", // entreprises publiques
-  "0329", // organisation internationale
-]);
+// Liste blanche des formes juridiques de personnes morales : déplacée telle quelle dans
+// `legal-forms.ts` le 15.11.2026, pour que la lecture du registre IDE (`uid-register.ts`) applique
+// la MÊME porte sans import circulaire. Réexportée ici : `scripts/sync-finma-seats.ts` et les
+// tests continuent de l'importer depuis ce fichier.
+export { ADDRESS_AND_PURPOSE_FORM_CODES };
 
 /** NFC, espaces consécutifs réduits à un, bords rognés ; casse et ponctuation conservées. */
 function normalizeName(value: string): string {
@@ -491,6 +498,38 @@ function zefixStatusBlock(part: Part<ZefixRestStatusRecord>): CommercialRegister
   return { available: true, found: true, status: part.data.status, deletion_date: part.data.deletion_date, ...base, facts };
 }
 
+// Origine citée et normalisation signalée (réponse de l'OFS du 13.11.2026 : source obligatoire).
+// Aucun mot de verdict : une inscription lue, jamais une appréciation de la société.
+const UID_REGISTER_DATA_NOTE =
+  "VAT register entry read from the UID register of the Swiss Federal Statistical Office (FSO), public web service, one entity per request, and normalised by this service (vatStatus 2: registered, 3: not_registered, no VAT block in the reply: not_stated, any other value: unknown; vatEntryStatus 1: active, 2: deleted). vat_uid is the VAT number; it differs from the UID for a member of a VAT group. Legal entities only: for a legal form that may carry a person's name, nothing is given. Not an official extract: check www.uid.admin.ch before any decision.";
+
+/** Bloc `vat_register` à partir de la lecture du registre IDE : cinq faits au plus, même forme
+ *  que les autres groupes ; aucun fait quand rien n'est publié pour cette forme juridique. */
+function uidRegisterBlock(part: Part<UidRegisterRecord>): VatRegister {
+  const base = { provenance: UID_REGISTER_MENTION, data_note: UID_REGISTER_DATA_NOTE };
+  const empty = { vat_registration: null, vat_entry_status: null, vat_start_date: null, vat_end_date: null, vat_uid: null };
+  if (!part.available) {
+    return { available: false, found: false, published: false, reason: part.reason, ...empty, ...base, facts: [] };
+  }
+  if (!part.found || !part.data) {
+    return { available: true, found: false, published: false, ...empty, ...base, facts: [] };
+  }
+  if (!part.data.published) {
+    return { available: true, found: true, published: false, reason: "not given by this service for this legal form (legal entities only)", ...empty, ...base, facts: [] };
+  }
+  const { vat_registration, vat_entry_status, vat_start_date, vat_end_date, vat_uid } = part.data;
+  const sourceId = "bfs.uid_register";
+  const sourceUrl = COMPANY_SOURCES[sourceId].url;
+  const facts: Fact[] = [];
+  const add = (field: string, value: string | null) => pushIfPresent(facts, field, value, sourceId, sourceUrl, part.retrieved_at);
+  add("vat_registration", vat_registration);
+  add("vat_entry_status", vat_entry_status);
+  add("vat_start_date", vat_start_date);
+  add("vat_end_date", vat_end_date);
+  add("vat_uid", vat_uid);
+  return { available: true, found: true, published: true, vat_registration, vat_entry_status, vat_start_date, vat_end_date, vat_uid, ...base, facts };
+}
+
 /** `licence_type`, `status`, `licence_date` pour chaque ligne FINMA dont l'IDE est exactement
  *  celui demandé (plusieurs lignes possibles, une par autorisation). `source_url` vient de la
  *  ligne elle-même, jamais de la table locale.
@@ -557,6 +596,9 @@ export function buildCompanyFiche(
     /** Optionnel (11.10.2026) : lecture de l'API REST Zefix. Absent = API non configurée, fiche
      *  strictement identique à avant (aucune clé `commercial_register_status`). */
     zefix?: Part<ZefixRestStatusRecord>;
+    /** Optionnel (15.11.2026) : lecture du registre IDE de l'OFS. Absent = lecture non demandée
+     *  ou coupée, fiche strictement identique à avant (aucune clé `vat_register`). */
+    uidRegister?: Part<UidRegisterRecord>;
     now: () => number;
   },
 ): CompanyFiche {
@@ -687,11 +729,16 @@ export function buildCompanyFiche(
     not_covered.push("official_street_directory_checks");
   }
 
+  // Inscription au registre TVA : bloc présent seulement quand une lecture du registre IDE a été
+  // tentée. `not_covered` n'en dépend pas (liste fermée, voir `NOT_COVERED`).
+  const vat_register = parts.uidRegister ? uidRegisterBlock(parts.uidRegister) : undefined;
+
   return {
     uid,
     generated_at: generatedAt,
     commercial_register,
     ...(commercial_register_status ? { commercial_register_status } : {}),
+    ...(vat_register ? { vat_register } : {}),
     finma,
     lei,
     cross_checks,
@@ -706,16 +753,28 @@ export function buildCompanyFiche(
 
 export async function companyCheck(
   rawUid: string,
-  deps: LiveDeps & { finma?: () => readonly FinmaRegistryRow[] },
+  deps: LiveDeps & {
+    finma?: () => readonly FinmaRegistryRow[];
+    /** `true` : lire aussi l'inscription au registre TVA dans le registre IDE de l'OFS
+     *  (15.11.2026). Demandé par les deux appelants de production (outil MCP et
+     *  `/api/v1/company`) ; absent, aucune requête ne part vers ce service. */
+    uidRegister?: boolean;
+  },
 ): Promise<{ ok: true; fiche: CompanyFiche } | { ok: false; reason: string }> {
   const parsed = parseUid(rawUid);
   if (!parsed.ok) return { ok: false, reason: parsed.reason };
 
-  const [lindas, gleif, zefixRest] = await Promise.all([
+  const [lindas, gleif, zefixRest, uidRegisterPart] = await Promise.all([
     lookupLindas(parsed.compact, deps),
     lookupGleif(parsed.uid, deps),
     lookupZefixRest(parsed.compact, deps),
+    // Personnes morales seulement : `uid-register.ts` applique la liste blanche de `legal-forms.ts`.
+    deps.uidRegister === true ? lookupUidRegister(parsed.compact, deps) : Promise.resolve(undefined),
   ]);
+  // Lecture coupée (`OSD_UID_REGISTER=off`, aucune requête partie) : rien n'est transmis, comme
+  // pour Zefix non configuré. Tout autre résultat, échec compris, entre dans la fiche.
+  const uidRegister =
+    uidRegisterPart && !uidRegisterPart.available && uidRegisterPart.reason === UID_REGISTER_NOT_ENABLED ? undefined : uidRegisterPart;
   // API REST Zefix non configurée (aucune requête partie) : rien n'est transmis, la fiche reste
   // strictement celle d'avant. Tout autre résultat, échec compris, entre dans la fiche.
   const zefix = !zefixRest.available && zefixRest.reason === ZEFIX_REST_NOT_CONFIGURED ? undefined : zefixRest;
@@ -752,6 +811,6 @@ export async function companyCheck(
   const streets: StreetsAccess = streetsLoaded
     ? { available: true, byMunicipality: streetsLoaded.byMunicipality, edition: streetsLoaded.edition }
     : { available: false };
-  const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, localities, streets, zefix, now: deps.now });
+  const fiche = buildCompanyFiche(parsed.uid, { lindas, gleif, finma, finmaVersion, localities, streets, zefix, uidRegister, now: deps.now });
   return { ok: true, fiche };
 }

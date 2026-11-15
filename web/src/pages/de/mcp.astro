@@ -52,7 +52,7 @@ const tools = [
   {
     pack: "FINMA",
     name: "company_check",
-    desc: "Auskunft zu einer Schweizer Gesellschaft nach UID: Handelsregister (LINDAS), FINMA-Bewilligungen und LEI (GLEIF), jede Tatsache mit ihrer Quelle. Nennt, wenn verfügbar, auch den Handelsregisterstatus aus Zefix (EHRA): aktiv, in Liquidation oder gelöscht.",
+    desc: "Auskunft zu einer Schweizer Gesellschaft nach UID: Handelsregister (LINDAS), FINMA-Bewilligungen und LEI (GLEIF), jede Tatsache mit ihrer Quelle. Nennt, wenn verfügbar, auch den Handelsregisterstatus aus Zefix (EHRA): aktiv, in Liquidation oder gelöscht. Für juristische Personen und wenn verfügbar wird der Eintrag im MWST-Register aus dem UID-Register gelesen (Quelle: OFS, registre IDE, https://www.uid.admin.ch).",
     args: { uid: "CHE-103.137.179" },
     scope: "finma:read",
   },
