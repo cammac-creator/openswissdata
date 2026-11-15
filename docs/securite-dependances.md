@@ -10,6 +10,13 @@ Le contrôle npm porte sur les graphes verrouillés de l’application, du site,
 - Un seul moteur Transformers.js 3.8.1 pour recherche et traduction. L’ancien Xenova 2 et son ancien protobufjs sont retirés. Les requêtes sont traitées localement. Les index existants restent distincts des collectes de fichiers. Les caches de reprise exigent la révision du modèle et le moteur de calcul courants ; les anciens caches sont recalculés.
 - Deux contraintes transitives explicites : sharp 0.35.5 depuis le 21.10.2026 (0.35.4 auparavant ; correctifs des décodeurs d’images) et esbuild 0.28.2 (serveur de développement). Pas d’entrée image dans nos parcours IA ; build, traduction et recherche doivent être revalidés lors de leur évolution. Retirer ces contraintes lorsque les paquets parents adoptent des versions corrigées compatibles.
 
+## Mise à jour du 15.11.2026
+
+Avis apparus entre le 11 et le 15.11.2026 (CI des intégrations rouge sur une PR de documentation) :
+- `sdks/mcp-server` : Hono 4.13.13 → 4.13.18 (cinq avis moyens sur les versions ≤ 4.13.15, dont GHSA-h7mg-cq63-vhpq et GHSA-4m76-xfj5-7975) et `@hono/node-server` 2.1.5 → 2.1.8 (GHSA-qv5m-9pm6-hqp3, GHSA-jpvv-r467-5p4w), par `npm audit fix` dans le lockfile seulement ; aucune nouvelle version du paquet publié.
+- Application : Hono 4.13.13 → 4.13.18 (mêmes cinq avis ; version exacte dans `package.json`). L'adaptateur `@hono/node-server` 1.19.17 de l'application reste dans les avis ouverts du 01.11 (correction en 2.x, version majeure).
+- Preuves : sous Node 22.23.3, paquet MCP : `npm ci`, typage, 12 tests, construction verts et `npm audit --audit-level=low` à 0 avis ; application : `npm ci`, typage 0, suite complète 259 fichiers (3 956 tests).
+
 ## Mise à jour du 01.11.2026
 
 Avis GHSA-rmxm-3fg6-px4f (moyen, `serveStatic` de `@hono/node-server` 1.19.10 à 2.1.2 décode le chemin deux fois), apparu dans la CI des intégrations du 01.11 (paquet MCP) :
