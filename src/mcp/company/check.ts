@@ -501,7 +501,7 @@ function zefixStatusBlock(part: Part<ZefixRestStatusRecord>): CommercialRegister
 // Origine citée et normalisation signalée (réponse de l'OFS du 13.11.2026 : source obligatoire).
 // Aucun mot de verdict : une inscription lue, jamais une appréciation de la société.
 const UID_REGISTER_DATA_NOTE =
-  "VAT register entry read from the UID register of the Swiss Federal Statistical Office (FSO), public web service, one entity per request, and normalised by this service (vatStatus 2: registered, 3: not_registered, no VAT block in the reply: not_stated, any other value: unknown; vatEntryStatus 1: active, 2: deleted). vat_uid is the VAT number; it differs from the UID for a member of a VAT group. Legal entities only: for a legal form that may carry a person's name, nothing is given. Not an official extract: check www.uid.admin.ch before any decision.";
+  "VAT register entry read from the UID register of the Swiss Federal Statistical Office (FSO), public web service, one entity per request, and normalised by this service (vatStatus 2: registered, 3: not_registered, no VAT status in the reply: not_stated, any other value: unknown; vatEntryStatus 1: active, 2: deleted). vat_uid is the VAT number; it differs from the UID for a member of a VAT group. Legal entities only: for a legal form that may carry a person's name, nothing is given. Not an official extract: check www.uid.admin.ch before any decision.";
 
 /** Bloc `vat_register` à partir de la lecture du registre IDE : cinq faits au plus, même forme
  *  que les autres groupes ; aucun fait quand rien n'est publié pour cette forme juridique. */

@@ -381,7 +381,7 @@ describe("lookupUidRegister : non trouvé, échecs, formes inattendues", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it.each([500, 503, 429])("HTTP %i : pause immédiate (dépassement de limite possible), corps jamais lu, rien en cache", async (status) => {
+  it.each([500, 503, 429, 401, 403])("HTTP %i : pause immédiate (dépassement de limite ou refus possible), corps jamais lu, rien en cache", async (status) => {
     const cancel = vi.fn(async () => undefined);
     const fetchMock = vi.fn(async () => {
       const res = xmlResponse("<s:Fault>Request_limit_exceeded</s:Fault>", status);
@@ -399,6 +399,19 @@ describe("lookupUidRegister : non trouvé, échecs, formes inattendues", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("le disjoncteur se referme après une réponse valide : une erreur isolée suivante ne met plus en pause", async () => {
+    let mode: "html" | "ok" = "html";
+    const fetchMock = vi.fn(async () => (mode === "html" ? xmlResponse("<html/>") : xmlResponse(registeredAlone(UID_A))));
+    await lookupUidRegister(UID_A, deps(fetchMock)); // premier échec, pas encore de pause
+    mode = "ok";
+    expect(await lookupUidRegister(UID_A, deps(fetchMock))).toMatchObject({ found: true });
+    mode = "html";
+    // Compteur remis à zéro par la réponse valide : cet échec est de nouveau « isolé ».
+    await lookupUidRegister(UID_B, deps(fetchMock));
+    expect((await lookupUidRegister(UID_B, deps(fetchMock))).available).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
   it("429 avec Retry-After : la pause dure au moins ce délai", async () => {
     const fetchMock = vi.fn(async () => xmlResponse("", 429, { "retry-after": "300" }));
     await lookupUidRegister(UID_A, deps(fetchMock));
@@ -407,7 +420,7 @@ describe("lookupUidRegister : non trouvé, échecs, formes inattendues", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("HTTP 404 ou 400 : motif court, pas de pause, rien en cache", async () => {
+  it("HTTP 404 : motif court, pas de pause, rien en cache", async () => {
     const fetchMock = vi.fn(async () => xmlResponse("", 404));
     expect(await lookupUidRegister(UID_A, deps(fetchMock))).toEqual({ available: false, reason: "UID register responded with HTTP 404" });
     await lookupUidRegister(UID_A, deps(fetchMock));
@@ -464,8 +477,10 @@ describe("lecture XML stricte (unitaire)", () => {
     expect(parseXmlStrict(`<a>${"<b/>".repeat(4001)}</a>`)).toBeNull();
   });
 
-  it("parseGetByUidResponse : résultat absent → non trouvé ; racine autre qu'une enveloppe → inattendu", () => {
-    expect(parseGetByUidResponse(envelope(""), digitsOf(UID_A))).toEqual({ kind: "not_found" });
+  it("parseGetByUidResponse : résultat vide → non trouvé ; résultat absent ou racine autre qu'une enveloppe → inattendu", () => {
+    expect(parseGetByUidResponse(resultXml(), digitsOf(UID_A))).toEqual({ kind: "not_found" });
+    // Réponse sans élément de résultat : anormale, jamais un faux « non trouvé ».
+    expect(parseGetByUidResponse(envelope(""), digitsOf(UID_A))).toEqual({ kind: "unexpected" });
     expect(parseGetByUidResponse("<autre/>", digitsOf(UID_A))).toEqual({ kind: "unexpected" });
   });
 });
@@ -550,7 +565,8 @@ describe("lookupUidRegister : cache, sérialisation, cadence, plafond quotidien"
 
   it("réglages par défaut : sous les 20 requêtes par minute indiquées par l'OFS, 500 par jour au plus", () => {
     expect(60_000 / MIN_INTERVAL_MS).toBeLessThan(20);
-    expect(MIN_INTERVAL_MS).toBeGreaterThanOrEqual(4000);
+    // Deux processus vivants en même temps (redéploiement) restent ensemble sous la limite.
+    expect((2 * 60_000) / MIN_INTERVAL_MS).toBeLessThan(20);
     expect(DEFAULT_DAILY_LIMIT).toBe(500);
   });
 });
@@ -641,6 +657,20 @@ describe("fiche société avec le registre IDE", () => {
     const out = await companyCheckHandler({ uid: AXA_UID }, { fetch: fetchMock, now, finma: () => [] });
     expect(out.content[0].text).not.toMatch(/VAT register/);
     expect(fetchMock.mock.calls.some(([url]) => String(url).startsWith(UID_REGISTER_PUBLIC_SERVICES_URL))).toBe(false);
+  });
+
+  it("appel de production (dépendances par défaut de l'outil) : la lecture du registre IDE est demandée", async () => {
+    const appels: string[] = [];
+    vi.stubGlobal("fetch", async (url: string | URL) => {
+      const href = String(url);
+      appels.push(href);
+      if (href.startsWith(UID_REGISTER_PUBLIC_SERVICES_URL)) return xmlResponse(registeredAlone(AXA_COMPACT));
+      return href.startsWith(LINDAS_ENDPOINT) ? jsonResponse(LINDAS_AXA) : jsonResponse(GLEIF_AXA);
+    });
+    const out = await companyCheckHandler({ uid: AXA_UID });
+    expect(appels.filter((href) => href.startsWith(UID_REGISTER_PUBLIC_SERVICES_URL))).toHaveLength(1);
+    expect(out.structured?.vat_register).toMatchObject({ available: true, found: true, published: true, vat_registration: "registered" });
+    expect(out.content[0].text).toMatch(/VAT register \(OFS, registre IDE, https:\/\/www\.uid\.admin\.ch, read /);
   });
 
   it("description de l'outil : cite la source demandée et la limite aux personnes morales", () => {

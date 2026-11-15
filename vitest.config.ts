@@ -9,7 +9,7 @@ export default defineConfig({
     env: {
       NODE_ENV: "test",
       // Lecture du registre IDE de l'OFS coupée par défaut dans la suite (15.11.2026) : aucun test
-      // ne part vers ce chemin, ni n'attend son écart réel de 4 s entre deux requêtes, sans le
+      // ne part vers ce chemin, ni n'attend son écart réel de 6,5 s entre deux requêtes, sans le
       // demander. `tests/mcp/company-uid-register.test.ts` la rouvre pour ses propres cas.
       OSD_UID_REGISTER: "off",
     },

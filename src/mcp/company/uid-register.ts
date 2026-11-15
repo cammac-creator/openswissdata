@@ -10,10 +10,11 @@
  *    seule opération, `GetByUID`, seulement à la demande d'un appel de `company_check` ; jamais
  *    `Search`, jamais de lot, de préchargement, de tâche planifiée ni de canari ;
  *  - 20 requêtes par minute au plus : ici au plus une requête par `MIN_INTERVAL_MS` de temps réel
- *    (15 par minute), une seule en vol tous IDE confondus (`SerialGate`, file bornée), un plafond
+ *    (9 par minute : deux processus qui se chevauchent pendant un redéploiement restent sous 20),
+ *    une seule en vol tous IDE confondus (`SerialGate`, file bornée), un plafond
  *    de `DEFAULT_DAILY_LIMIT` requêtes réellement envoyées par jour UTC, et le disjoncteur commun,
- *    ouvert DÈS le premier 5xx ou 429 (le service signale un dépassement de limite par une faute
- *    SOAP, donc un 500) ;
+ *    ouvert DÈS le premier 5xx, 429, 401 ou 403 (le service signale un dépassement de limite par
+ *    une faute SOAP, donc un 500 ; un refus peut venir d'un pare-feu placé devant lui) ;
  *  - la source est citée avec la mention demandée par l'OFS (`UID_REGISTER_MENTION`).
  *
  * Requête : POST SOAP 1.1 sur `UID_REGISTER_PUBLIC_SERVICES_URL`, action `GetByUID`, corps formé
@@ -65,8 +66,9 @@ const NOT_FOUND_CACHE_TTL_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Plafond quotidien de requêtes réellement envoyées au service (jour UTC), succès et échecs compris. */
 export const DEFAULT_DAILY_LIMIT = 500;
-/** Écart minimal, en temps réel, entre deux requêtes envoyées : 15 par minute au plus, sous les 20 indiquées par l'OFS. */
-export const MIN_INTERVAL_MS = 4000;
+/** Écart minimal, en temps réel, entre deux requêtes envoyées : 9 par minute au plus par processus, pour que deux
+ *  processus vivants en même temps (redéploiement) restent ensemble sous les 20 indiquées par l'OFS. */
+export const MIN_INTERVAL_MS = 6500;
 /** Au plus une requête en cours et ce nombre en attente ; au-delà, motif « busy » sans requête. */
 const MAX_WAITING = 1;
 /** Taille maximale d'une réponse lue (une réponse réelle fait environ 3 Ko). */
@@ -317,9 +319,10 @@ export function parseGetByUidResponse(xml: string, requestedDigits: string): Par
   const response = onlyChild(body, "GetByUIDResponse");
   if (!response) return { kind: "unexpected" }; // dont une faute SOAP rendue en 200
   const result = onlyChild(response, "GetByUIDResult");
-  if (result === null) return { kind: "unexpected" };
-  // Résultat absent ou vide : IDE inconnu du registre public (relevé le 15.11.2026 : `<GetByUIDResult/>`).
-  if (result === undefined || result.children.length === 0) return { kind: "not_found" };
+  // Résultat absent ou en double : forme anormale, jamais un faux « non trouvé » gardé en cache.
+  if (!result) return { kind: "unexpected" };
+  // Résultat vide : IDE inconnu du registre public (relevé le 15.11.2026 : `<GetByUIDResult/>`).
+  if (result.children.length === 0) return { kind: "not_found" };
   const items = childrenNamed(result, "organisationType");
   if (items.length !== result.children.length) return { kind: "unexpected" };
 
@@ -474,9 +477,10 @@ async function fetchUidRegister(compactUid: string, digits: string, deps: LiveDe
     } catch {
       // volontairement muet : l'annulation du corps peut échouer sans conséquence.
     }
-    // 429 ou 5xx : pause immédiate. Le service signale le dépassement de sa limite par une faute
-    // SOAP (500) ; ne jamais insister, même une seule fois de plus.
-    if (res.status === 429 || res.status >= 500) breaker.recordFailure(retryAfterMs(res), true);
+    // 429, 5xx, 401 ou 403 : pause immédiate. Le service signale le dépassement de sa limite par
+    // une faute SOAP (500), et un refus peut venir d'un pare-feu placé devant lui ; ne jamais
+    // insister, même une seule fois de plus.
+    if (res.status === 429 || res.status >= 500 || res.status === 401 || res.status === 403) breaker.recordFailure(retryAfterMs(res), true);
     return { available: false, reason: `UID register responded with HTTP ${res.status}` };
   }
 
