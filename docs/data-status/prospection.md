@@ -1,24 +1,24 @@
 # Prospection de nouvelles sources publiques (opendata.swiss)
 
-Généré le 2026-11-16 · tâche osd.prospection. Catalogue interrogé par l'API CKAN officielle d'opendata.swiss (`package_search`), jamais de données servies modifiées par ce rapport.
+Généré le 2026-11-19 · tâche osd.prospection. Catalogue interrogé par l'API CKAN officielle d'opendata.swiss (`package_search`), jamais de données servies modifiées par ce rapport.
 
-- Ce passage : 0 / 55 pages lues (à partir de la page 140 sur 163 au total), 0 jeux lus (100 jeux par page).
-- Couverture cumulée : 95.3 % du catalogue (16201 jeux)
-- Candidats cumulés (licence ouverte, aucun marqueur de personnes détecté dans le texte, aucune colonne de personne dans les en-têtes LUS — un en-tête jamais lu n'est jamais affirmé propre) : 13433 — 300 passent le filtre public (éditeur fédéral ou cantonal, au moins une clé de jointure, et au moins un en-tête CSV inspecté avec succès — décision de l'intégrateur du 07.10.2026) et sont conservés en détail dans `prospection.json` (plafond 300), 30 de chaque groupe (non-OFS, OFS) montrés dans les tableaux plus bas.
-- Jeux écartés (cumulé) : 2010
-- Jeux déjà au registre des sources (cumulé) : 4
+- Ce passage : 41 / 55 pages lues (à partir de la page 140 sur 163 au total), 4010 jeux lus (100 jeux par page).
+- Couverture cumulée : 100.0 % du catalogue (16210 jeux)
+- Candidats cumulés (licence ouverte, aucun marqueur de personnes détecté dans le texte, aucune colonne de personne dans les en-têtes LUS — un en-tête jamais lu n'est jamais affirmé propre) : 14164 — 300 passent le filtre public (éditeur fédéral ou cantonal, au moins une clé de jointure, et au moins un en-tête CSV inspecté avec succès — décision de l'intégrateur du 07.10.2026) et sont conservés en détail dans `prospection.json` (plafond 300), 30 de chaque groupe (non-OFS, OFS) montrés dans les tableaux plus bas.
+- Jeux écartés (cumulé) : 2130
+- Jeux déjà au registre des sources (cumulé) : 8
 - ⚠️ **Passage PARTIEL** (motif : page_failed) : arrêté avant la fin de la fenêtre visée.
 
 ## Écarts par motif
 
 | Motif | Jeux écartés |
 |---|---|
-| colonne_personne | 294 |
+| colonne_personne | 318 |
 | colonne_personne_probable | 6 |
-| licence_absente | 49 |
-| licence_cc_by_sa | 497 |
-| licence_non_ouverte | 336 |
-| personnes_detectees | 828 |
+| licence_absente | 51 |
+| licence_cc_by_sa | 504 |
+| licence_non_ouverte | 344 |
+| personnes_detectees | 907 |
 
 ## Meilleurs candidats
 
