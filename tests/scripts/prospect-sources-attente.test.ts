@@ -98,3 +98,50 @@ describe("page du catalogue refusée pour trop d'appels", () => {
     expect(e.message).toContain("HTTP 429");
   });
 });
+
+// Délai dépassé (19.11.2026) : deux passages de suite se sont arrêtés, après une demi-heure de
+// lecture, sur une page ordinaire qui a dépassé deux fois son délai de 20 s (rangs 1 800 puis
+// 2 800), alors qu'elle répond en moins d'une seconde quelques minutes plus tard. Un catalogue
+// qui ne répond plus est une surcharge : mêmes attentes croissantes que pour un 429 ou un 503.
+describe("page du catalogue qui dépasse son délai", () => {
+  const delaiDepasse = () => new DOMException("The operation was aborted due to timeout", "TimeoutError");
+
+  function catalogueLent(reponses: Array<"lent" | "ok">) {
+    let appels = 0;
+    const fetchImpl = (async () => {
+      const r = reponses[Math.min(appels, reponses.length - 1)];
+      appels++;
+      if (r === "lent") throw delaiDepasse();
+      return new Response(PAGE_OK, { status: 200, headers: { "content-type": "application/json" } });
+    }) as unknown as typeof fetch;
+    return { fetchImpl, nombre: () => appels };
+  }
+
+  it("attend de plus en plus longtemps, puis rend la page", async () => {
+    const { fetchImpl, nombre } = catalogueLent(["lent", "lent", "ok"]);
+    const { attentes, sleepImpl } = sommeil();
+    expect(await fetchCkanPageWithRetry(fetchImpl, "essai", 1800, 100, 1000, 500, sleepImpl)).toEqual({ count: 1, results: [] });
+    expect(nombre()).toBe(3);
+    expect(attentes).toEqual([30_000, 60_000]);
+  });
+
+  it("abandonne la page après le nombre maximal d'essais", async () => {
+    const { fetchImpl, nombre } = catalogueLent(["lent"]);
+    const { attentes, sleepImpl } = sommeil();
+    expect(await fetchCkanPageWithRetry(fetchImpl, "essai", 1800, 100, 1000, 500, sleepImpl)).toBeNull();
+    expect(nombre()).toBe(RATE_LIMIT_MAX_ATTEMPTS);
+    expect(attentes).toEqual([30_000, 60_000, 120_000, 240_000]);
+  });
+
+  it("compte ensemble les refus et les délais dépassés d'une même page", async () => {
+    let appels = 0;
+    const fetchImpl = (async () => {
+      appels++;
+      if (appels % 2 === 1) throw delaiDepasse();
+      return new Response("refus", { status: 429 });
+    }) as unknown as typeof fetch;
+    const { sleepImpl } = sommeil();
+    expect(await fetchCkanPageWithRetry(fetchImpl, "essai", 0, 100, 1000, 500, sleepImpl)).toBeNull();
+    expect(appels).toBe(RATE_LIMIT_MAX_ATTEMPTS);
+  });
+});
