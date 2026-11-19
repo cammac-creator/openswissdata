@@ -22,6 +22,9 @@ export const ISIC_CSV_BY_LANG: Record<"en" | "fr" | "es", string> = {
 // Adresse directe du document cellar : le gestionnaire de téléchargement op.europa.eu
 // répond 403 (pare-feu Azure) aux scripts depuis le 28.09.2026. Même document, mêmes
 // octets (SHA-256 d98047ce…ef20, 10 315 081 octets, le 25.09 et le 28.09.2026).
+// Republié par Eurostat le 18.11.2026 (SHA-256 91fb76d9…e936, 12 712 721 octets) : mêmes 1 047
+// codes et même hiérarchie, trois libellés anglais retouchés, correspondances vers NACE Rév. 2
+// modifiées pour 23 codes. Les données servies datent encore de la version du 25.09.2026.
 export const NACE_2_1_RDF_URL =
   "https://publications.europa.eu/resource/cellar/beb2efec-da9a-11ed-a05c-01aa75ed71a1.0001.02/DOC_1";
 

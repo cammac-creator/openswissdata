@@ -65,9 +65,9 @@
     "size": 3601023
   },
   "eurostat.nace21_rdf": {
-    "hash": "d98047ce74d345c12a8a0970fa14df232a1245891c8581b036994776505fef20",
-    "checked_at": "2026-09-28T18:52:10.950Z",
-    "size": 10315081
+    "hash": "91fb76d9c63feaf250c29d3e1d722b0d3b295602ba1d732c6634bf564c50e936",
+    "checked_at": "2026-11-19T08:42:34.672Z",
+    "size": 12712721
   },
   "eurostat.nace2_sparql": {
     "hash": "b9358b65fb974d80a278deaafe580091a27662217fa38176d367810e8416596e",
