@@ -29,7 +29,7 @@ Jeux de données publics suisses normalisés : FINMA, TARES et classifications. 
 
 ## Préparer une copie de travail
 
-Node **22.12 ou ultérieur** ; la CI et Railway utilisent Node 22. Utiliser une copie isolée et lire `AGENTS.md` avant de commencer. Depuis la racine de cette copie :
+Node **22.12 ou ultérieur** pour l'application, **22.23.4 ou ultérieur** pour construire le site (Astro) ; la CI et Railway utilisent la dernière version de Node 22. Utiliser une copie isolée et lire `AGENTS.md` avant de commencer. Depuis la racine de cette copie :
 
 ```sh
 npm ci

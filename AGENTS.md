@@ -88,7 +88,7 @@ Les cas « ça dépend » sont ceux de la ligne BOUTON. Hors de cette ligne, l'a
 - `statent_lookup` et son CSV ont été retirés du service le 25.09.2026 faute de preuve de droits de redistribution dans le dossier. Les scopes historiques restent lisibles pour compatibilité, mais ne donnent accès à aucun outil STATENT. Ne pas remettre la source au seul motif qu'un client possède ce scope. Voir `docs/droits-des-sources.md` pour les preuves et vérifications restantes.
 
 ## Environnement et tests isolés — 26.09.2026
-- Node >=22.12 ; CI/Railway sur Node 22. `README.md` décrit les commandes actuelles et les frontières entre application, ETL, données distribuées et fiches publiques.
+- Node >=22.12 (>=22.23.4 pour construire le site, exigé par Astro depuis le 19.11.2026) ; CI/Railway sur Node 22. `README.md` décrit les commandes actuelles et les frontières entre application, ETL, données distribuées et fiches publiques.
 - Les clés de test sont éphémères et passées explicitement à la signature. Aucun remplacement, même temporaire, de `packages/schemas/openswissdata.pubkey.ed25519`. Ne pas injecter une clé de test dans l’environnement global d’une collecte.
 - `db:migrate` appelle le schéma et les migrations idempotentes de `getDb` ; l’ancienne migration Business manuelle n’est pas incluse. Base fictive et chemin distinct obligatoires pour les essais.
 - Ne pas lancer les tests racine en même temps que `npm run build` : le build réinstalle les dépendances Astro et peut faire disparaître temporairement son tsconfig. Terminer les tests avant le build, ou utiliser deux copies distinctes.
