@@ -2,19 +2,19 @@
   "generated_on": "2026-11-19",
   "source": "https://ckan.opendata.swiss/api/3/action/package_search",
   "run": {
-    "pages_read": 51,
+    "pages_read": 55,
     "page_size": 100,
     "max_pages": 55,
     "start_page": 140,
     "total_pages": 163,
-    "datasets_read": 5010,
-    "datasets_total_catalog": 16210,
+    "datasets_read": 5414,
+    "datasets_total_catalog": 16214,
     "coverage_ratio": 1,
-    "partial": true,
-    "stopped_reason": "page_failed"
+    "partial": false,
+    "stopped_reason": "ok"
   },
   "totals": {
-    "candidates": 14163,
+    "candidates": 14167,
     "excluded": 2131,
     "excluded_by_motif": {
       "colonne_personne": 318,
@@ -1598,7 +1598,7 @@
         "ZIP"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
-      "modified": "2021-07-16T00:00:00+00:00",
+      "modified": "2026-11-13T00:00:00+00:00",
       "join_keys": [
         "canton",
         "npa"
@@ -3209,106 +3209,6 @@
       "csv_inspected": true
     },
     {
-      "id": "07dadddd-f9c7-42ff-9441-e8cb4ce41338",
-      "title": "Postleitzahl",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/07dadddd-f9c7-42ff-9441-e8cb4ce41338",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "npa (titre)"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "121eb563-40b8-4a25-8d80-138420aa416d",
-      "title": "Kantonsgrenze",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/121eb563-40b8-4a25-8d80-138420aa416d",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "1bb701f7-75ee-4e35-901c-6c8dd76a73d7",
-      "title": "Landesgrenze",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/1bb701f7-75ee-4e35-901c-6c8dd76a73d7",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "254d270e-d0d3-48d9-a43e-7ffd1bb542d5",
-      "title": "Amtliche Vermessung Parzellen und andere rechtliche Abgrenzungen",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/254d270e-d0d3-48d9-a43e-7ffd1bb542d5",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
       "id": "28ca06e1-b6c7-4d6d-b42e-ca34cfccb03a",
       "title": "Servitutpunkt: laufende Änderung",
       "publisher": "Canton de Bâle-Ville",
@@ -3334,86 +3234,11 @@
       "csv_inspected": true
     },
     {
-      "id": "2b901524-81c4-46ca-921f-7e0bef8cc262",
-      "title": "Servitut Linienelement",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/2b901524-81c4-46ca-921f-7e0bef8cc262",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
       "id": "2ecc868c-9056-4512-b74f-cac885ca6071",
       "title": "Gemeinde",
       "publisher": "Canton de Bâle-Ville",
       "editor_level": "canton",
       "url": "https://opendata.swiss/dataset/2ecc868c-9056-4512-b74f-cac885ca6071",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "3bf52371-3ad2-491e-b0ec-e91b04088c7c",
-      "title": "Liegenschaft: laufende Änderung",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/3bf52371-3ad2-491e-b0ec-e91b04088c7c",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "40a12791-a624-4ce1-8e50-ba66c92859f4",
-      "title": "Liegenschaftsgrenzpunkt",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/40a12791-a624-4ce1-8e50-ba66c92859f4",
       "licence": "terms_by",
       "formats": [
         "CSV",
@@ -3546,56 +3371,6 @@
       "csv_inspected": true
     },
     {
-      "id": "5bf0b312-a365-41f5-b12a-6b624cb3db59",
-      "title": "Selbstrecht: laufende Änderung",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/5bf0b312-a365-41f5-b12a-6b624cb3db59",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "655724a4-36b3-4465-9592-d9b99b05fdbe",
-      "title": "Servitut Linienelement: laufende Änderung",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/655724a4-36b3-4465-9592-d9b99b05fdbe",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
       "id": "66e08522-428c-41ea-a9bf-282b975275c2",
       "title": "Kantonales Gebäude- und Wohnungsregister (kGWR): Wohnungen",
       "publisher": "Canton de Bâle-Campagne",
@@ -3614,31 +3389,6 @@
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
       "modified": "2026-11-17T02:04:04.218000+00:00",
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "6eb6c8d3-8f8f-4310-aa89-8ddfc8a59c11",
-      "title": "Servitutkennzeichen: laufende Änderung",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/6eb6c8d3-8f8f-4310-aa89-8ddfc8a59c11",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
       "join_keys": [
         "commune"
       ],
@@ -3695,31 +3445,6 @@
       "csv_inspected": true
     },
     {
-      "id": "7c38ed48-7b69-41b4-83a2-c4895b27f0f5",
-      "title": "Parzellen und andere rechtliche Abgrenzungen Text/Symbol",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/7c38ed48-7b69-41b4-83a2-c4895b27f0f5",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
       "id": "7ccfdffe-ce78-4cbc-967a-3c7af41ab0ff",
       "title": "Sprayereien",
       "publisher": "Canton de Bâle-Ville",
@@ -3745,31 +3470,6 @@
       "modified": "2026-10-30T14:01:28.994000+00:00",
       "join_keys": [
         "npa"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "8e444c77-d45d-42a1-8507-5156727eb205",
-      "title": "Sektion",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/8e444c77-d45d-42a1-8507-5156727eb205",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
       ],
       "a_verifier_ofs": false,
       "a_verifier_personnes": "a_verifier",
@@ -3816,56 +3516,6 @@
       "publisher": "Canton de Bâle-Ville",
       "editor_level": "canton",
       "url": "https://opendata.swiss/dataset/985a7d60-e18a-4aac-82d7-05c5f0bbb835",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "9e93073e-2f50-44c2-a951-f2747c271a22",
-      "title": "Liegenschaft",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/9e93073e-2f50-44c2-a951-f2747c271a22",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "9f32900f-433c-454c-98ab-73e7a30a4943",
-      "title": "Selbstrecht",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/9f32900f-433c-454c-98ab-73e7a30a4943",
       "licence": "terms_by",
       "formats": [
         "CSV",
@@ -3947,81 +3597,6 @@
       "csv_inspected": true
     },
     {
-      "id": "dd1ff360-d111-43e4-9064-51258d366fc1",
-      "title": "Gemeindegrenze",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/dd1ff360-d111-43e4-9064-51258d366fc1",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "f05a15ba-f1dc-4315-9360-adcd104c4d16",
-      "title": "Servitutkennzeichen",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/f05a15ba-f1dc-4315-9360-adcd104c4d16",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "fe45a2b5-8742-40d3-8ba4-e4844155c2d8",
-      "title": "Servitut Flächenelement",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/fe45a2b5-8742-40d3-8ba4-e4844155c2d8",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
       "id": "ff5adc12-ad94-47ca-835d-0930459d1365",
       "title": "Firmenmutationen nach Rechtsform und Gemeinde (seit Februar 2016)",
       "publisher": "Canton de Bâle-Campagne",
@@ -4072,7 +3647,7 @@
         "ZIP"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/WEEKLY",
-      "modified": "2026-10-11T00:00:00+00:00",
+      "modified": "2026-11-17T00:00:00+00:00",
       "join_keys": [
         "npa"
       ],
@@ -4574,7 +4149,7 @@
         "XLS"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": "2026-09-16T22:01:07.755000+00:00",
+      "modified": "2026-11-16T23:01:39.721000+00:00",
       "join_keys": [
         "canton"
       ],
@@ -5022,7 +4597,7 @@
         "XLS"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": "2026-09-17T14:38:42.749000+00:00",
+      "modified": "2026-11-17T07:21:05.758000+00:00",
       "join_keys": [
         "canton"
       ],
@@ -5358,7 +4933,7 @@
         "XLS"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": "2026-09-16T22:01:03.333000+00:00",
+      "modified": "2026-11-16T23:01:40.548000+00:00",
       "join_keys": [
         "canton"
       ],
@@ -5559,7 +5134,7 @@
         "ZIP"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "modified": "2026-10-09T00:00:00+00:00",
+      "modified": "2026-11-17T00:00:00+00:00",
       "join_keys": [
         "commune"
       ],
@@ -5796,7 +5371,7 @@
         "ZIP"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
-      "modified": "2026-10-11T00:00:00+00:00",
+      "modified": "2026-11-18T00:00:00+00:00",
       "join_keys": [
         "npa"
       ],
@@ -5871,31 +5446,6 @@
         "CSV"
       ],
       "frequency": "http://publications.europa.eu/resource/authority/frequency/IRREG",
-      "modified": null,
-      "join_keys": [
-        "commune"
-      ],
-      "a_verifier_ofs": false,
-      "a_verifier_personnes": "a_verifier",
-      "deja_collecte": false,
-      "status_note": null,
-      "csv_inspected": true
-    },
-    {
-      "id": "35d832a4-f3c7-4ff8-8e3c-1148828af5db",
-      "title": "Signatur",
-      "publisher": "Canton de Bâle-Ville",
-      "editor_level": "canton",
-      "url": "https://opendata.swiss/dataset/35d832a4-f3c7-4ff8-8e3c-1148828af5db",
-      "licence": "terms_by",
-      "formats": [
-        "CSV",
-        "GEOJSON",
-        "GPKG",
-        "HTML",
-        "OCTET"
-      ],
-      "frequency": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN",
       "modified": null,
       "join_keys": [
         "commune"
@@ -7829,6 +7379,391 @@
       ],
       "frequency": null,
       "modified": "2026-03-18T00:00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5dc503a5-7c3b-4add-a45c-8c8484343985",
+      "title": "Anteil EFH am Wohnungsbestand [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5dc503a5-7c3b-4add-a45c-8c8484343985",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:05.168213+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5dce1758-1378-4c84-870a-dd1f69f7e96a",
+      "title": "Lernende der Mittelschulen im Kanton Zürich ab 2000",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5dce1758-1378-4c84-870a-dd1f69f7e96a",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2025-10-03T00:00:00+02:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5ee8ac34-750f-49eb-9a02-0fc56974415b",
+      "title": "Geburtenrate (5-J.-mittel) [pro 1000 Einw.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5ee8ac34-750f-49eb-9a02-0fc56974415b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:47:38.721363+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5eecc739-3d2c-4d8f-949a-30059ba475d9",
+      "title": "Bevölkerung: Anteil 0-14-Jährige [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5eecc739-3d2c-4d8f-949a-30059ba475d9",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-28T01:32:48.912230+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "5fc2f6e6-9bce-4bfb-919b-d77f2c212061",
+      "title": "Schafe [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/5fc2f6e6-9bce-4bfb-919b-d77f2c212061",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:00.418378+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6190be55-a9f5-4cd8-9a46-aba15bad1a0b",
+      "title": "Geb.Vol. Dienstleistungen: Zunahme [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6190be55-a9f5-4cd8-9a46-aba15bad1a0b",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:51:47.005476+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "668a6b5b-d927-43e4-b76c-dd282f6ad1a2",
+      "title": "Wohnungsbestand [Whg.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/668a6b5b-d927-43e4-b76c-dd282f6ad1a2",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:45.854502+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "671a61e1-6480-481f-a954-b2890415db9c",
+      "title": "Landwirtschaftsbetriebe [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/671a61e1-6480-481f-a954-b2890415db9c",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:02.490759+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "67744344-9598-468c-b210-e680c62402a8",
+      "title": "Bevölkerung [Pers.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/67744344-9598-468c-b210-e680c62402a8",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:55.513669+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "68ef42d2-22ba-4711-a625-cbd3e9d08f15",
+      "title": "Steuerertrag Grundsteuern [Mio.Fr.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/68ef42d2-22ba-4711-a625-cbd3e9d08f15",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:42:09.448953+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "690d777c-af4f-43d9-80b8-6c801076ecfc",
+      "title": "Landwirtschaftliche Nutzfläche [ha]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/690d777c-af4f-43d9-80b8-6c801076ecfc",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:54:06.798931+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "69eb857a-c0cf-4d7a-809c-de82d4f4c556",
+      "title": "3-Personenhaushalte [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/69eb857a-c0cf-4d7a-809c-de82d4f4c556",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:13:36.271063+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6a1cd0b0-5c1d-4044-b351-bf8d5f91bda8",
+      "title": "Privathaushalte Total [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6a1cd0b0-5c1d-4044-b351-bf8d5f91bda8",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:41:18.228235+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6a3210cb-40bf-46d9-a509-9af43e1e2c80",
+      "title": "Nur an der Quelle besteuerte Quellensteuerpfl. [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6a3210cb-40bf-46d9-a509-9af43e1e2c80",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:42:22.002941+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6b463625-364e-4c95-903c-b47cff52e1ef",
+      "title": "Anteil 2 Zi.-Wohnungen [%]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6b463625-364e-4c95-903c-b47cff52e1ef",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T13:50:52.205233+01:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6bb05375-5392-442d-972c-d98a0bef8bed",
+      "title": "Politische Gemeinden nach Bezirken Kanton Thurgau",
+      "publisher": "Canton de Thurgovie",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6bb05375-5392-442d-972c-d98a0bef8bed",
+      "licence": "public_domain",
+      "formats": [
+        "CSV",
+        "JSON",
+        "JSON-LD",
+        "N3",
+        "PARQUET",
+        "RDF TURTLE",
+        "RDF XML",
+        "XLS"
+      ],
+      "frequency": null,
+      "modified": "2026-04-23T13:05:42.153000+00:00",
+      "join_keys": [
+        "commune"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6cdbba31-ba45-4ab0-ab5d-6cf973869268",
+      "title": "Lernende der Regelschule im Kanton Zürich nach Erstsprache (Deutsch/nicht Deutsch) ab 2000",
+      "publisher": "Bildungsstatistik Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6cdbba31-ba45-4ab0-ab5d-6cf973869268",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2025-10-03T00:00:00+02:00",
+      "join_keys": [
+        "canton"
+      ],
+      "a_verifier_ofs": false,
+      "a_verifier_personnes": "a_verifier",
+      "deja_collecte": false,
+      "status_note": null,
+      "csv_inspected": true
+    },
+    {
+      "id": "6da03903-c8f1-4504-88a9-80ae78e10289",
+      "title": "Verkäufe EFH [Anz.]",
+      "publisher": "Amt für Statistik und Daten Kanton Zürich",
+      "editor_level": "canton",
+      "url": "https://opendata.swiss/dataset/6da03903-c8f1-4504-88a9-80ae78e10289",
+      "licence": "terms_by",
+      "formats": [
+        "CSV"
+      ],
+      "frequency": null,
+      "modified": "2026-03-27T14:17:17.660742+01:00",
       "join_keys": [
         "commune"
       ],
