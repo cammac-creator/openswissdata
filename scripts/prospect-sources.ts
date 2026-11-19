@@ -133,6 +133,9 @@ export interface CkanPackage {
   modified?: string | null;
   url?: string | null;
   resources?: CkanResource[];
+  // Date de création de la fiche au catalogue (clé du tri). Lue seulement pour borner une
+  // tranche de dates au-delà de la limite de pagination (`resolveCkanWindow`), jamais publiée.
+  metadata_created?: string | null;
 }
 
 export interface CkanSearchResult {
@@ -855,6 +858,7 @@ async function inspectCsvHeaders(
 
 // ---------------------------------------------------------------------------------------
 // Appel d'une page `package_search` : UNE retentative sur échec, sauf refus pour trop d'appels (429, 503) : attentes croissantes, voir plus bas.
+// Un refus dû à la limite de pagination (`start >= 10000`) ne se rattrape pas en attendant : voir `resolveCkanWindow`.
 // ---------------------------------------------------------------------------------------
 // Tri EXPLICITE, jamais le tri par défaut de CKAN (`score desc, metadata_modified desc` en
 // l'absence de requête texte) : relevé en direct le 06.10.2026, ce tri par défaut renvoie
@@ -884,8 +888,10 @@ async function fetchCkanPage(
   start: number,
   rows: number,
   timeoutMs: number,
+  fq: string | null = null,
 ): Promise<CkanSearchResult> {
-  const url = `${CKAN_SEARCH_URL}?rows=${rows}&start=${start}&sort=${encodeURIComponent(CKAN_SORT)}`;
+  const filter = fq === null ? "" : `&fq=${encodeURIComponent(fq)}`;
+  const url = `${CKAN_SEARCH_URL}?rows=${rows}&start=${start}&sort=${encodeURIComponent(CKAN_SORT)}${filter}`;
   const res = await fetchImpl(url, {
     headers: { "User-Agent": userAgent },
     signal: AbortSignal.timeout(timeoutMs),
@@ -942,12 +948,13 @@ export async function fetchCkanPageWithRetry(
   timeoutMs: number,
   delayMs: number,
   sleepImpl: (ms: number) => Promise<void>,
+  fq: string | null = null,
 ): Promise<CkanSearchResult | null> {
   let otherFailures = 0;
   let rateLimited = 0;
   for (;;) {
     try {
-      return await fetchCkanPage(fetchImpl, userAgent, start, rows, timeoutMs);
+      return await fetchCkanPage(fetchImpl, userAgent, start, rows, timeoutMs, fq);
     } catch (err) {
       if (isRateLimited(err)) {
         rateLimited++;
@@ -968,6 +975,60 @@ export async function fetchCkanPageWithRetry(
       await sleepImpl(delayMs);
     }
   }
+}
+
+// ---------------------------------------------------------------------------------------
+// Limite de pagination du catalogue (19.11.2026). Relevé en direct : opendata.swiss refuse toute
+// page dont `start` atteint 10 000, par un HTTP 429 « Pagination limit exceeded to protect
+// cluster memory », quel que soit le rythme des appels (`start=9999` passe, `start=10000` non).
+// Attendre n'y change rien : les passages du 19.10, 26.10, 09.11 et 16.11, dont la fenêtre
+// tournante commençait au-delà, sont restés à zéro page lue. Le catalogue compte plus de
+// 16 000 jeux : la fin se lit donc par TRANCHE DE DATES. On relève la date de création du jeu de
+// rang 9 999, puis on interroge `fq=metadata_created:[cette date TO *]` : le même tri, et un
+// rang relatif qui repart de zéro. Le décalage entre rang absolu et rang relatif est le nombre
+// de jeux laissés avant la borne, lu dans les compteurs du catalogue (jamais supposé : plusieurs
+// jeux partagent la même seconde, et la borne est arrondie à la seconde inférieure). Un catalogue
+// au-delà de deux fois la limite enchaîne plusieurs tranches.
+// ---------------------------------------------------------------------------------------
+export const CKAN_MAX_START = 10_000;
+
+/** Tranche du catalogue : `fq` à joindre à l'appel (null = catalogue entier) et nombre de jeux
+ *  qui la précèdent dans le tri (rang absolu = rang relatif + `offset`). */
+export interface CkanWindow {
+  fq: string | null;
+  offset: number;
+}
+
+export const CKAN_WHOLE_CATALOGUE: CkanWindow = { fq: null, offset: 0 };
+
+/** Borne de date au format du moteur de recherche (seconde inférieure, UTC) ; null si illisible. */
+export function solrDateFloor(metadataCreated: string | null | undefined): string | null {
+  const m = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/.exec(metadataCreated ?? "");
+  return m ? `${m[1]}Z` : null;
+}
+
+/** Tranche qui permet de lire le rang absolu `start` sans dépasser la limite de pagination, en
+ *  partant de la tranche `from` (qui doit commencer à ce rang ou avant). Rend `from` telle quelle
+ *  si elle convient déjà ; null si une lecture échoue ou si la borne n'avance pas. */
+export async function resolveCkanWindow(
+  fetchPage: (start: number, rows: number, fq: string | null) => Promise<CkanSearchResult | null>,
+  from: CkanWindow,
+  start: number,
+): Promise<CkanWindow | null> {
+  let window = from;
+  while (start - window.offset >= CKAN_MAX_START) {
+    const anchor = await fetchPage(CKAN_MAX_START - 1, 1, window.fq);
+    const bound = solrDateFloor(anchor?.results?.[0]?.metadata_created);
+    if (!anchor || bound === null) return null;
+    const fq = `metadata_created:[${bound} TO *]`;
+    const inside = await fetchPage(0, 0, fq);
+    if (!inside) return null;
+    const skipped = anchor.count - inside.count; // jeux de la tranche courante avant la nouvelle borne
+    if (!Number.isInteger(skipped) || skipped <= 0 || skipped >= CKAN_MAX_START) return null;
+    window = { fq, offset: window.offset + skipped };
+    console.error(`[prospect:sources] au-delà du rang ${CKAN_MAX_START} : lecture par tranche de dates (${fq}, ${window.offset} jeux avant)`);
+  }
+  return window;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -1566,6 +1627,11 @@ export async function prospectSources(opts: ProspectSourcesOptions = {}): Promis
     const week = isoWeekNumber(new Date(startedAt));
     startPage = computeStartPage(week, totalPages, maxPages);
     const pageSequence = rotatingPageSequence(startPage, totalPages, maxPages);
+    let deepWindow: CkanWindow | null = null;
+    const fetchWindowPage = async (start: number, rows: number, fq: string | null): Promise<CkanSearchResult | null> => {
+      await sleepImpl(delayMs); // même délai avant chaque appel sortant que pour une page
+      return fetchCkanPageWithRetry(fetchImpl, userAgent, start, rows, timeoutMs, delayMs, sleepImpl, fq);
+    };
 
     for (const pageIndex of pageSequence) {
       if (nowFn() - startedAt >= timeLimitMs) {
@@ -1574,8 +1640,22 @@ export async function prospectSources(opts: ProspectSourcesOptions = {}): Promis
         break;
       }
       const start = pageIndex * pageSize;
+      // Au-delà de la limite de pagination : tranche de dates (voir `resolveCkanWindow`). Une
+      // page sous la limite (y compris après un bouclage de la rotation) lit le catalogue entier.
+      let window = CKAN_WHOLE_CATALOGUE;
+      if (start >= CKAN_MAX_START) {
+        const from = deepWindow !== null && start >= deepWindow.offset ? deepWindow : CKAN_WHOLE_CATALOGUE;
+        const resolved = await resolveCkanWindow(fetchWindowPage, from, start);
+        if (resolved === null) {
+          partial = true;
+          stoppedReason = "page_failed";
+          break;
+        }
+        deepWindow = resolved;
+        window = resolved;
+      }
       await sleepImpl(delayMs); // avant CHAQUE appel sortant, y compris après la sonde
-      const result = await fetchCkanPageWithRetry(fetchImpl, userAgent, start, pageSize, timeoutMs, delayMs, sleepImpl);
+      const result = await fetchCkanPageWithRetry(fetchImpl, userAgent, start - window.offset, pageSize, timeoutMs, delayMs, sleepImpl, window.fq);
       if (result === null) {
         partial = true;
         stoppedReason = "page_failed";
