@@ -909,6 +909,12 @@ async function fetchCkanPage(
 // (30 s, 60 s, 120 s, 240 s), ou le délai demandé par le serveur (`Retry-After`) s'il est plus
 // long, plafonné à 300 s, et la page n'est abandonnée qu'après 5 essais. Toute autre erreur
 // garde le comportement d'avant : un essai et une seule retentative.
+//
+// Délai dépassé (19.11.2026) : deux passages de suite se sont arrêtés, après une demi-heure de
+// lecture, sur une page ordinaire restée sans réponse pendant deux délais de 20 s (rangs 1 800
+// puis 2 800), alors qu'elle répondait en moins d'une seconde quelques minutes plus tard. Un
+// catalogue qui ne répond plus est une surcharge, pas une panne : mêmes attentes croissantes,
+// même compteur que les refus.
 // ---------------------------------------------------------------------------------------
 export class CkanHttpError extends Error {
   constructor(readonly status: number, readonly retryAfterMs: number | null) {
@@ -940,6 +946,10 @@ export function rateLimitWaitMs(attempt: number, retryAfterMs: number | null): n
 const isRateLimited = (err: unknown): err is CkanHttpError =>
   err instanceof CkanHttpError && (err.status === 429 || err.status === 503);
 
+/** Délai de l'appel dépassé (`AbortSignal.timeout`) : le catalogue n'a pas répondu à temps. */
+const isTimedOut = (err: unknown): boolean =>
+  err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError");
+
 export async function fetchCkanPageWithRetry(
   fetchImpl: typeof fetch,
   userAgent: string,
@@ -956,14 +966,16 @@ export async function fetchCkanPageWithRetry(
     try {
       return await fetchCkanPage(fetchImpl, userAgent, start, rows, timeoutMs, fq);
     } catch (err) {
-      if (isRateLimited(err)) {
+      const refused = isRateLimited(err);
+      if (refused || isTimedOut(err)) {
+        const reason = refused ? err.message : "délai dépassé";
         rateLimited++;
         if (rateLimited >= RATE_LIMIT_MAX_ATTEMPTS) {
-          console.error(`[prospect:sources] page start=${start} : abandon après ${rateLimited} refus pour trop d'appels (${err.message})`);
+          console.error(`[prospect:sources] page start=${start} : abandon après ${rateLimited} refus pour trop d'appels ou délais dépassés (${reason})`);
           return null;
         }
-        const wait = rateLimitWaitMs(rateLimited, err.retryAfterMs);
-        console.error(`[prospect:sources] page start=${start} : ${err.message}, nouvel essai dans ${Math.round(wait / 1000)} s`);
+        const wait = rateLimitWaitMs(rateLimited, refused ? err.retryAfterMs : null);
+        console.error(`[prospect:sources] page start=${start} : ${reason}, nouvel essai dans ${Math.round(wait / 1000)} s`);
         await sleepImpl(wait);
         continue;
       }
