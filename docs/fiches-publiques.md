@@ -2,6 +2,8 @@
 
 Les URLs existantes restent stables. Les fiches NOGA utilisent les mêmes correspondances sourcées que le MCP, depuis `classification_links.csv` et `classification_sources.csv`. Les identités documentées et les approximations sont distinguées ; deux approximations ne sont pas chaînées. Exemple : NOGA 18.11 → NACE 2.1 exact ; → NACE 2 approché ; aucun résultat ISIC déduit de deux approximations.
 
+Depuis le 20 novembre 2026, ces deux fichiers et `crosswalks.csv` sont ceux de l’archive signée 2026.11.20, octet pour octet : Eurostat a republié NACE Rév. 2.1 le 18 novembre 2026 et modifié les correspondances vers NACE Rév. 2 de 23 codes (17 paires ajoutées, 9 retirées). Les libellés NOGA n’ont pas changé.
+
 Les 1 845 lignes NOGA et leurs huit champs utilisés dans les pages ont été comparés à l’archive signée 2026.09.25 : zéro différence. Les anciennes tables de correspondance et les anciens libellés NACE ne sont plus lus par ces pages. Les exemples d’activités auparavant déduits de mots-clés sont retirés. L’accès anonyme à `cross_walk` ne donne pas accès aux outils de classification protégés.
 
 Les fiches FINMA restent issues du fichier historique `web/src/data/finma.json`. Une publication quotidienne du produit téléchargeable ne les reconstruit pas avec de nouvelles lignes. Les pages et leurs métadonnées l’indiquent explicitement et renvoient à la FINMA pour vérifier le statut actuel. Ne pas interpréter la présence dans cette copie comme une autorisation actuelle. L’automatisation de la mise à jour de cet annuaire reste un chantier distinct, avec gestion des changements d’URL et des sorties de registre.

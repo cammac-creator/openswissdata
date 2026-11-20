@@ -15,11 +15,22 @@ describe("Données intégrées aux pages publiques", () => {
     let helpers;
     try { helpers = await import("../web/src/lib/noga-helpers"); } finally { cwd.mockRestore(); }
     expect(helpers.loadNoga2025()).toHaveLength(1845);
-    expect(helpers.getClassificationReferenceVersion()).toBe("2026.09.25");
+    expect(helpers.getClassificationReferenceVersion()).toBe("2026.11.20");
     const rows = helpers.getCrosswalksFor("1811");
     expect(rows).toContainEqual(expect.objectContaining({ standard: "NACE 2.1", code: "1811", relation: "exactMatch", requires_review: false }));
     expect(rows).toContainEqual(expect.objectContaining({ standard: "NACE 2.0", code: "1811", relation: "closeMatch", requires_review: true }));
     expect(rows.some(r => r.standard === "ISIC 4")).toBe(false);
-    expect(rows.every(r => r.sources.length > 0 && r.sources.every(s => s.version === "2026.09.25"))).toBe(true);
+    expect(rows.every(r => r.sources.length > 0 && r.sources.every(s => s.version === "2026.11.20"))).toBe(true);
+  });
+
+  it("montre les correspondances NACE Rév. 2 republiées par Eurostat le 18.11.2026", async () => {
+    const cwd = vi.spyOn(process, "cwd").mockReturnValue(resolve("web"));
+    let helpers;
+    try { helpers = await import("../web/src/lib/noga-helpers"); } finally { cwd.mockRestore(); }
+    const nace2 = (code: string) => helpers.getCrosswalksFor(code).filter(r => r.standard === "NACE 2.0").map(r => r.code).sort();
+    // Un remplacement, un ajout et un retrait parmi les 23 codes touchés.
+    expect(nace2("6422")).toEqual(["6492", "6499"]);
+    expect(nace2("2790")).toEqual(["2712", "2790", "2849"]);
+    expect(nace2("8425")).toEqual(["8425"]);
   });
 });
