@@ -1,4 +1,4 @@
-# Fiches publiques — référence du 25 septembre 2026
+# Fiches publiques — référence du 20 novembre 2026
 
 Les URLs existantes restent stables. Les fiches NOGA utilisent les mêmes correspondances sourcées que le MCP, depuis `classification_links.csv` et `classification_sources.csv`. Les identités documentées et les approximations sont distinguées ; deux approximations ne sont pas chaînées. Exemple : NOGA 18.11 → NACE 2.1 exact ; → NACE 2 approché ; aucun résultat ISIC déduit de deux approximations.
 
