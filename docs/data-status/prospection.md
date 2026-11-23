@@ -1,24 +1,24 @@
 # Prospection de nouvelles sources publiques (opendata.swiss)
 
-Généré le 2026-11-19 · tâche osd.prospection. Catalogue interrogé par l'API CKAN officielle d'opendata.swiss (`package_search`), jamais de données servies modifiées par ce rapport.
+Généré le 2026-11-23 · tâche osd.prospection. Catalogue interrogé par l'API CKAN officielle d'opendata.swiss (`package_search`), jamais de données servies modifiées par ce rapport.
 
-- Ce passage : 55 / 55 pages lues (à partir de la page 140 sur 163 au total), 5414 jeux lus (100 jeux par page).
-- Couverture cumulée : 100.0 % du catalogue (16214 jeux)
-- Candidats cumulés (licence ouverte, aucun marqueur de personnes détecté dans le texte, aucune colonne de personne dans les en-têtes LUS — un en-tête jamais lu n'est jamais affirmé propre) : 14167 — 300 passent le filtre public (éditeur fédéral ou cantonal, au moins une clé de jointure, et au moins un en-tête CSV inspecté avec succès — décision de l'intégrateur du 07.10.2026) et sont conservés en détail dans `prospection.json` (plafond 300), 30 de chaque groupe (non-OFS, OFS) montrés dans les tableaux plus bas.
-- Jeux écartés (cumulé) : 2131
-- Jeux déjà au registre des sources (cumulé) : 8
+- Ce passage : 55 / 55 pages lues (à partir de la page 32 sur 163 au total), 5500 jeux lus (100 jeux par page).
+- Couverture cumulée : 100.0 % du catalogue (16226 jeux)
+- Candidats cumulés (licence ouverte, aucun marqueur de personnes détecté dans le texte, aucune colonne de personne dans les en-têtes LUS — un en-tête jamais lu n'est jamais affirmé propre) : 14922 — 300 passent le filtre public (éditeur fédéral ou cantonal, au moins une clé de jointure, et au moins un en-tête CSV inspecté avec succès — décision de l'intégrateur du 07.10.2026) et sont conservés en détail dans `prospection.json` (plafond 300), 30 de chaque groupe (non-OFS, OFS) montrés dans les tableaux plus bas.
+- Jeux écartés (cumulé) : 2247
+- Jeux déjà au registre des sources (cumulé) : 10
 - Passage mené jusqu'au bout de la fenêtre visée, sans échec.
 
 ## Écarts par motif
 
 | Motif | Jeux écartés |
 |---|---|
-| colonne_personne | 318 |
+| colonne_personne | 340 |
 | colonne_personne_probable | 6 |
 | licence_absente | 52 |
 | licence_cc_by_sa | 504 |
-| licence_non_ouverte | 344 |
-| personnes_detectees | 907 |
+| licence_non_ouverte | 373 |
+| personnes_detectees | 972 |
 
 ## Meilleurs candidats
 
