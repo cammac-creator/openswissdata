@@ -5,6 +5,7 @@ Généré le 2026-11-23 · tâche osd.prospection. Catalogue interrogé par l'AP
 - Ce passage : 55 / 55 pages lues (à partir de la page 32 sur 163 au total), 5500 jeux lus (100 jeux par page).
 - Couverture cumulée : 100.0 % du catalogue (16226 jeux)
 - Candidats cumulés (licence ouverte, aucun marqueur de personnes détecté dans le texte, aucune colonne de personne dans les en-têtes LUS — un en-tête jamais lu n'est jamais affirmé propre) : 14922 — 300 passent le filtre public (éditeur fédéral ou cantonal, au moins une clé de jointure, et au moins un en-tête CSV inspecté avec succès — décision de l'intégrateur du 07.10.2026) et sont conservés en détail dans `prospection.json` (plafond 300), 30 de chaque groupe (non-OFS, OFS) montrés dans les tableaux plus bas.
+- Hors spécialité parmi les 300 candidats gardés : 76 (statistique d'un éditeur cantonal ou communal ventilée par commune ou par numéro postal, sans autre clé de jointure ni mot d'une liste officielle, de la douane ou du commerce extérieur dans le titre). Ces jeux restent dans `prospection.json`, avec leur motif (`hors_specialite`), mais ne sont plus proposés à l'examen ; la colonne « Statut » reprend ce motif quand un tel jeu figure dans un tableau ci-dessous.
 - Jeux écartés (cumulé) : 2247
 - Jeux déjà au registre des sources (cumulé) : 10
 - Passage mené jusqu'au bout de la fenêtre visée, sans échec.

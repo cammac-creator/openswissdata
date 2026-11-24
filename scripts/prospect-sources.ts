@@ -76,6 +76,7 @@ import { basename, dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { randomUUID } from "node:crypto";
 import { SOURCES } from "../etl/shared/sources/registry.js";
+import { outOfSpecialtyReason, type OutOfSpecialtyReason } from "./prospect-specialty.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_OUT_JSON = join(__dirname, "..", "docs", "data-status", "prospection.json");
@@ -571,6 +572,17 @@ export interface ProspectionCandidate {
   // CSV a été lu AVEC SUCCÈS pour ce jeu (`headersRead > 0`, jamais déduit d'une clé de titre
   // seule). Condition du filtre public, en plus de l'éditeur et de la clé de jointure.
   csv_inspected: boolean;
+  // Ajouté le 24.11.2026 (décision du 05.11.2026 : plus de jeu communal hors de la spécialité) :
+  // motif pour lequel le veilleur des jeux ne propose plus ce candidat à l'examen, ou `null` s'il
+  // reste proposé. Toujours RECALCULÉ à l'assemblage du rapport (`markOutOfSpecialty`), jamais
+  // repris d'un ancien enregistrement ; absent des rapports d'avant cette date (optionnel).
+  hors_specialite?: OutOfSpecialtyReason | null;
+}
+
+/** Pose `hors_specialite` sur chaque candidat du rapport public, d'après la règle pure de
+ *  `prospect-specialty.ts`. Ne retire aucun candidat, ne change ni l'ordre ni le plafond. */
+export function markOutOfSpecialty(candidates: ProspectionCandidate[]): ProspectionCandidate[] {
+  return candidates.map((c) => ({ ...c, hors_specialite: outOfSpecialtyReason(c) }));
 }
 
 export function compareCandidates(a: ProspectionCandidate, b: ProspectionCandidate): number {
@@ -1317,7 +1329,7 @@ export function reclassifyOffline(
   }
 
   const publishable = survivors.filter(isPublishableCandidate);
-  const candidatesKept = orderForPublicDisplay(publishable).slice(0, MAX_CANDIDATES_KEPT);
+  const candidatesKept = markOutOfSpecialty(orderForPublicDisplay(publishable).slice(0, MAX_CANDIDATES_KEPT));
 
   return {
     ...previousReport,
@@ -1449,7 +1461,7 @@ export function finalizeReport(input: FinalizeReportInput): ProspectionReport {
   // candidats fédéraux/cantonaux avec au moins une clé de jointure et un en-tête CSV inspecté
   // avec succès ; les jeux de l'OFS parmi eux restent montrés, mais toujours APRÈS les autres.
   const publishable = [...candidatesPool.values()].filter(isPublishableCandidate);
-  const candidates = orderForPublicDisplay(publishable).slice(0, MAX_CANDIDATES_KEPT);
+  const candidates = markOutOfSpecialty(orderForPublicDisplay(publishable).slice(0, MAX_CANDIDATES_KEPT));
 
   // --- Totaux CUMULÉS, calculés sur l'état complet (jamais seulement ce passage) ---
   let cumulativeCandidates = 0;
@@ -1487,8 +1499,15 @@ function escapeMarkdownCell(value: string): string {
   return value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
 }
 
+/** Colonne « Statut » : la note sur les droits (OFS) et, depuis le 24.11.2026, le motif « hors
+ *  spécialité » quand le candidat n'est plus proposé à l'examen. */
+function markdownStatusCell(c: ProspectionCandidate): string {
+  const notes = [c.status_note, c.hors_specialite ? `hors spécialité (${c.hors_specialite})` : null];
+  return notes.filter((n): n is string => typeof n === "string").join(" ; ") || "—";
+}
+
 function markdownCandidateRow(c: ProspectionCandidate): string {
-  return `| ${escapeMarkdownCell(c.title)} | ${escapeMarkdownCell(c.publisher)} | ${c.editor_level || "?"} | ${c.licence} | ${c.join_keys.join(", ") || "—"} | ${escapeMarkdownCell(c.frequency ?? "—")} | ${c.deja_collecte ? "oui" : "non"} | ${c.status_note ?? "—"} | [lien](${c.url}) |`;
+  return `| ${escapeMarkdownCell(c.title)} | ${escapeMarkdownCell(c.publisher)} | ${c.editor_level || "?"} | ${c.licence} | ${c.join_keys.join(", ") || "—"} | ${escapeMarkdownCell(c.frequency ?? "—")} | ${c.deja_collecte ? "oui" : "non"} | ${markdownStatusCell(c)} | [lien](${c.url}) |`;
 }
 
 const CANDIDATE_TABLE_HEADER = [
@@ -1516,6 +1535,7 @@ export function buildMarkdownReport(report: ProspectionReport): string {
     `- Couverture cumulée : ${(report.run.coverage_ratio * 100).toFixed(1)} %` +
       (report.run.datasets_total_catalog !== null ? ` du catalogue (${report.run.datasets_total_catalog} jeux)` : ""),
     `- Candidats cumulés (licence ouverte, aucun marqueur de personnes détecté dans le texte, aucune colonne de personne dans les en-têtes LUS — un en-tête jamais lu n'est jamais affirmé propre) : ${report.totals.candidates} — ${report.candidates.length} passent le filtre public (éditeur fédéral ou cantonal, au moins une clé de jointure, et au moins un en-tête CSV inspecté avec succès — décision de l'intégrateur du 07.10.2026) et sont conservés en détail dans \`prospection.json\` (plafond ${MAX_CANDIDATES_KEPT}), 30 de chaque groupe (non-OFS, OFS) montrés dans les tableaux plus bas.`,
+    `- Hors spécialité parmi les ${report.candidates.length} candidats gardés : ${report.candidates.filter((c) => c.hors_specialite).length} (statistique d'un éditeur cantonal ou communal ventilée par commune ou par numéro postal, sans autre clé de jointure ni mot d'une liste officielle, de la douane ou du commerce extérieur dans le titre). Ces jeux restent dans \`prospection.json\`, avec leur motif (\`hors_specialite\`), mais ne sont plus proposés à l'examen ; la colonne « Statut » reprend ce motif quand un tel jeu figure dans un tableau ci-dessous.`,
     `- Jeux écartés (cumulé) : ${report.totals.excluded}`,
     `- Jeux déjà au registre des sources (cumulé) : ${report.already_collected.length}`,
     report.run.partial
