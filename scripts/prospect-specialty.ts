@@ -53,8 +53,10 @@ function fold(text: string): string {
 // membre de phrase (ni deux-points, ni point-virgule, ni parenthèse, ni crochet), le nom de l'unité
 // locale en mot entier. Couvre l'énumération allemande « nach Kategorie, Gemeinde und Jahr » et
 // « nach Politischer Gemeinde ». « Nach Standort » (une ligne par établissement) n'en fait pas partie.
+// Une unité précédée d'un article (« der Gemeinde Riehen », « par la commune », « del comune ») désigne
+// UNE commune, pas une ventilation : elle ne compte pas (remarque de la relecture du 24.11.2026).
 const LOCAL_BREAKDOWN_PATTERN =
-  /(?<![a-z])(nach|pro|je|par|per|by|selon)(?![a-z])[^:;(\[]*?(?<![a-z])(gemeinden?|communes?|comun[ei]|municipalit(y|ies)|postleitzahl(en)?|plz|npa|codes? posta(l|ux))(?![a-z])/;
+  /(?<![a-z])(nach|pro|je|par|per|by|selon)(?![a-z])[^:;(\[]*?(?<![a-z])(?<!(?<![a-z])(der|die|den|dem|des|einer|eine|la|le|les|l'|du|del|della|dello|dei|delle|il|i|the|this|each|every) ?)(gemeinden?|communes?|comun[ei]|municipalit(y|ies)|postleitzahl(en)?|plz|npa|codes? posta(l|ux))(?![a-z])/;
 
 export function hasLocalBreakdownTitle(title: string): boolean {
   return LOCAL_BREAKDOWN_PATTERN.test(fold(title));
@@ -65,14 +67,14 @@ export function hasLocalBreakdownTitle(title: string): boolean {
 // trop large coûte seulement un candidat proposé de plus, jamais un bon jeu perdu.
 const SPECIALTY_WORDS = [
   // douane et commerce extérieur
-  "douan", "zoll", "dogan", "customs",
+  "douan", "zoll", "dogan", "customs", "grenz", "frontier", "confine", "valich",
   "commerce exterieur", "aussenhandel", "außenhandel", "commercio estero", "foreign trade",
-  "import", "export", "einfuhr", "ausfuhr", "esportazion",
+  "import", "export", "einfuhr", "ausfuhr", "esportazion", "ausland", "freihandel", "libre-echange", "libre echange",
   "tarif", "tares",
   // sanctions
   "sanktion", "sanction", "sanzion", "embargo",
   // listes officielles : répertoires, registres, inventaires, cadastres
-  "verzeichnis", "regist", "repertoire", "elenco", "albo", // « regist » : Register, registre, registro, registry, registriert
+  "verzeichnis", "regist", "repertoire", "elenc", "listing", "albo", // « regist » : Register, registre, registro, registry, registriert
   "inventar", "inventaire", "kataster", "cadastr", "catast",
   // autorisations, permis, patentes, licences, concessions, agréments, reconnaissances
   "bewillig", "zulass", "zugelassen", "genehmig", "autoris", "autorizz", "permis", "patent",

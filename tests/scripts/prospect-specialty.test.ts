@@ -110,6 +110,11 @@ describe("outOfSpecialtyReason : une clé locale seule ne suffit pas, le titre d
     ["Résultats de la votation populaire du 25 septembre 2022 à Genève", ["commune"]],
     // la tournure doit rester dans le même membre de phrase que l'unité locale
     ["Wahlen nach Partei: Gemeinde Riehen", ["commune"]],
+    // une unité précédée d'un article désigne UNE commune, pas une ventilation
+    ["Pro Natura Schutzgebiete der Gemeinde Riehen", ["commune"]],
+    ["Servizi per le famiglie del comune", ["commune"]],
+    ["Plan d'affectation adopté par la commune", ["commune"]],
+    ["Abfallmengen nach Kategorie in der Gemeinde Riehen", ["commune"]],
   ];
   for (const [title, join_keys] of kept) {
     it(`reste proposé : « ${title} »`, () => {
@@ -148,6 +153,15 @@ describe("outOfSpecialtyReason : un mot d'une liste officielle ou de la spécial
     "Kataster der belasteten Standorte nach Gemeinde",
     "Inventaire des monuments par commune",
     "Nationalratswahlen 2023: Unveränderte und veränderte Wahlzettel nach Liste und Gemeinde", // « Liste » entier : dans le doute
+    // remarques de la seconde relecture du 24.11.2026
+    "Elenchi delle farmacie per comune",
+    "Listing of pharmacies by municipality",
+    "Grenzübergänge nach Gemeinde",
+    "Passages de frontière par commune",
+    "Valichi di confine per comune",
+    "Warenverkehr mit dem Ausland nach Gemeinde",
+    "Freihandelszonen nach Gemeinde",
+    "Zones de libre-échange par commune",
   ];
   for (const title of kept) {
     it(`reste proposé : « ${title} »`, () => {
