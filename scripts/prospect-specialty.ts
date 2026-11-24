@@ -4,21 +4,29 @@
  * Décision de Claude-Alain du 05.11.2026 : la spécialité est « la mémoire des listes officielles »,
  * avec la douane et le commerce extérieur ; on n'ajoute plus de jeux communaux hors de ce thème.
  * Les deux lots examinés ensuite (19.11 et 24.11.2026, 61 candidats) ont été écartés en entier.
- * Le motif le plus net et le plus fréquent : un jeu d'un canton ou d'une commune qui ne se
- * raccorde que par une clé locale (numéro de commune, numéro postal). Un tel jeu est marqué
- * `hors_specialite` dans `prospection.json` ; le veilleur des jeux ne le propose plus à l'examen.
+ * Le motif le plus net et le plus fréquent : une statistique d'un canton ou d'une commune,
+ * ventilée par commune (ou par numéro postal), qui ne se raccorde que par cette clé locale. Un tel
+ * jeu est marqué `hors_specialite` dans `prospection.json` ; le veilleur des jeux ne le propose
+ * plus à l'examen.
  *
  * Règle, volontairement étroite (dans le doute, le candidat reste proposé : mieux vaut un lot de
- * trop qu'un bon jeu perdu) :
+ * trop qu'un bon jeu perdu). Les QUATRE conditions sont exigées :
  *   1. éditeur de niveau « canton » ou « commune » EXACTEMENT : un éditeur fédéral ou de niveau
  *      inconnu n'est jamais marqué (la douane, le commerce extérieur et les listes officielles
  *      d'autorisation sont fédéraux) ;
  *   2. au moins une clé de jointure, et TOUTES sont locales (`commune`, `npa`, confirmées par un
  *      en-tête ou déduites du titre) : une clé cantonale, IDE, NOGA ou tarifaire à côté, ou une clé
  *      que cette liste ne connaît pas, garde le candidat ;
- *   3. aucun mot de la spécialité dans le titre (`SPECIALTY_TITLE_PATTERN`) : liste, répertoire,
- *      registre, autorisation, agrément, concession, sanction, douane, importation, exportation,
- *      tarif. Le mot suffit, sans chercher à savoir s'il désigne une statistique.
+ *   3. le titre dit lui-même que le jeu est VENTILÉ par commune ou par numéro postal (« nach
+ *      Gemeinde », « nach …, Gemeinde und Jahr », « pro Gemeinde », « par commune », « per comune »,
+ *      « by municipality », « nach Postleitzahl »). Sans cette tournure, une clé communale seule ne
+ *      distingue pas une statistique d'une liste d'établissements avec leur adresse (première
+ *      version refusée en relecture le 24.11.2026 : elle marquait la liste cantonale des cafés et
+ *      restaurants autorisés, « nach Betriebsart und Standort », jumelle d'une liste gardée) ;
+ *   4. aucun mot d'une liste officielle ni de la spécialité dans le titre (`hasSpecialtyWord`) :
+ *      liste, répertoire, registre, inventaire, cadastre, autorisation, permis, patente, agrément,
+ *      reconnaissance, concession, « officiel », sanction, douane, importation, exportation, tarif.
+ *      Le mot suffit, sans chercher à savoir s'il désigne une statistique.
  *
  * Pure, sans E/S : ne lit que trois champs déjà publiés du candidat. Ne retire rien du rapport,
  * ne change ni le tri ni le plafond ; ne dit rien de la licence ni des données personnelles.
@@ -38,7 +46,18 @@ const POSTAL_KEYS = new Set(["npa", "npa (titre)"]);
 
 /** Comparaison en minuscules, sans diacritiques (« Répertoire », « agréés », « extérieur »). */
 function fold(text: string): string {
-  return text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// Tournure de ventilation, sur le titre replié par `fold` : une préposition, puis, sans quitter le
+// membre de phrase (ni deux-points, ni point-virgule, ni parenthèse, ni crochet), le nom de l'unité
+// locale en mot entier. Couvre l'énumération allemande « nach Kategorie, Gemeinde und Jahr » et
+// « nach Politischer Gemeinde ». « Nach Standort » (une ligne par établissement) n'en fait pas partie.
+const LOCAL_BREAKDOWN_PATTERN =
+  /(?<![a-z])(nach|pro|je|par|per|by|selon)(?![a-z])[^:;(\[]*?(?<![a-z])(gemeinden?|communes?|comun[ei]|municipalit(y|ies)|postleitzahl(en)?|plz|npa|codes? posta(l|ux))(?![a-z])/;
+
+export function hasLocalBreakdownTitle(title: string): boolean {
+  return LOCAL_BREAKDOWN_PATTERN.test(fold(title));
 }
 
 // Sous-chaînes (les mots composés allemands collent le mot du thème à la fin : « Verkaufsbewilligung »,
@@ -52,17 +71,22 @@ const SPECIALTY_WORDS = [
   "tarif", "tares",
   // sanctions
   "sanktion", "sanction", "sanzion", "embargo",
-  // listes officielles : répertoires, registres, autorisations, agréments, concessions
-  "verzeichnis", "register", "registre", "registro", "repertoire", "elenco",
-  "bewillig", "zulass", "zugelassen", "autoris", "autorizz",
-  "konzession", "concession", "agree", "agrement",
+  // listes officielles : répertoires, registres, inventaires, cadastres
+  "verzeichnis", "regist", "repertoire", "elenco", "albo", // « regist » : Register, registre, registro, registry, registriert
+  "inventar", "inventaire", "kataster", "cadastr", "catast",
+  // autorisations, permis, patentes, licences, concessions, agréments, reconnaissances
+  "bewillig", "zulass", "zugelassen", "genehmig", "autoris", "autorizz", "permis", "patent",
+  "lizenz", "licen", "konzession", "concession", "agree", "agrement",
+  "anerkannt", "reconnu", "riconosciut", "akkredit", "accredit", "zertifi", "certifi", "homolog",
+  // « officiel »
+  "offiziell", "amtlich", "officiel", "ufficial", "official",
 ];
 
-// « Liste » à part : le mot nu désigne aussi une liste électorale (« nach Liste und Gemeinde »,
-// « Listenergebnisse », « Listenstimmen », trois jeux du lot du 19.11). Il ne compte que collé à
-// la fin d'un mot composé (« Sanktionsliste », « Positivlisten ») ou suivi de son complément
-// (« Liste der… », « Liste des… », « list of… »).
-const LIST_PATTERN = /[a-z]liste(n)?(?![a-z])|(?<![a-z])list[ea]?s?\s+(de|des|du|der|von|dei|delle|degli|of)(?![a-z])/;
+// « Liste » : le mot entier, dans toutes ses formes (« Liste », « Listen », « liste officielle des… »,
+// « Lista ufficiale », « list of », « Liste: … »), ou collé à la fin d'un mot composé
+// (« Sanktionsliste », « Positivlisten »). Seul le mot composé qui COMMENCE par lui n'en est pas un
+// (« Listenergebnisse », « Listenstimmen » : résultats d'un scrutin).
+const LIST_PATTERN = /(?<![a-z])list[ea]?[ns]?(?![a-z])|[a-z]liste(n)?(?![a-z])/;
 
 export function hasSpecialtyWord(title: string): boolean {
   const folded = fold(title);
@@ -75,6 +99,7 @@ export function outOfSpecialtyReason(candidate: SpecialtyInput): OutOfSpecialtyR
   const keys = candidate.join_keys;
   if (keys.length === 0) return null;
   if (!keys.every((key) => COMMUNE_KEYS.has(key) || POSTAL_KEYS.has(key))) return null;
+  if (!hasLocalBreakdownTitle(candidate.title)) return null;
   if (hasSpecialtyWord(candidate.title)) return null;
   return keys.every((key) => COMMUNE_KEYS.has(key)) ? "clé communale seule" : "clé locale seule";
 }
