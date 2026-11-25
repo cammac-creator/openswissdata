@@ -137,8 +137,8 @@
       "keys": [
         "postal_code"
       ],
-      "rows": 8,
-      "edition": "2026-10-24"
+      "rows": 13,
+      "edition": "2026-11-25"
     },
     {
       "id": "bs-places-stationnement",
@@ -212,8 +212,8 @@
       "keys": [
         "postal_code"
       ],
-      "rows": 65,
-      "edition": "2026-10-24"
+      "rows": 64,
+      "edition": "2026-11-25"
     },
     {
       "id": "bs-revenus-menages-commune",
@@ -3180,7 +3180,7 @@
         "year"
       ],
       "rows": 73920,
-      "edition": "2026-11-03"
+      "edition": "2026-11-25"
     },
     {
       "id": "tg-comptage-trafic-routier-classes-vehicules",
@@ -3215,8 +3215,8 @@
       "keys": [
         "year"
       ],
-      "rows": 41328,
-      "edition": "2026-11-11"
+      "rows": 42960,
+      "edition": "2026-11-25"
     },
     {
       "id": "tg-comptes-communes-2020",
