@@ -6,6 +6,8 @@ import { BackupInspectionError, type BackupInspection } from "../lib/backup-insp
 import { writeBackupAttempt } from "../lib/backup-state.js";
 import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
+import { memoryReport } from "../lib/memory-report.js";
+import { searchModelRunning } from "../mcp/embedder.js";
 import { realCustomerSql } from "./crm.js";
 import { runFullCleanup } from "../lib/cleanup.js";
 import { bodyLimit } from "hono/body-limit";
@@ -42,6 +44,30 @@ adminRoute.get("/operations", (c) => {
   if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) return c.json({ error: "unauthorized" }, 401);
   const checks = getDb().prepare("SELECT name,checked_at,details_json FROM operation_checks").all() as Array<{name: string; checked_at: number; details_json: string}>;
   return c.json({ checks: checks.map(({ details_json, ...row }) => ({ ...row, details: JSON.parse(details_json) })) });
+});
+
+/**
+ * GET /api/admin/memoire — relevé de la mémoire du service (26.11.2026), nombres seulement : mémoire du
+ * processus, compteurs du conteneur (ce que l'hébergeur facture, cache des fichiers compris), taille de la
+ * base. `?tables=1` ajoute la taille des douze plus grosses tables (noms du schéma, jamais une ligne) ;
+ * cette option relit toute la base : le noyau la garde ensuite en cache, et la mémoire comptée monte pour
+ * tous les relevés suivants. Faire le relevé simple d'abord ; les nombres d'une même réponse restent justes,
+ * ils sont pris avant la lecture des tables.
+ */
+adminRoute.get("/memoire", (c) => {
+  const secret = c.req.header("x-admin-secret");
+  if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) return c.json({ error: "unauthorized" }, 401);
+  const report = memoryReport({ databasePath: currentDatabasePath(), searchModelRunning: searchModelRunning() });
+  if (c.req.query("tables") !== "1") return c.json(report);
+  let tables: Array<{ name: string; bytes: number }> | null = null;
+  try {
+    tables = getDb().prepare("SELECT name, SUM(pgsize) AS bytes FROM dbstat GROUP BY name ORDER BY bytes DESC LIMIT 12").all() as Array<{ name: string; bytes: number }>;
+  } catch (error) {
+    // Seule l'absence de la table virtuelle dbstat (construction de SQLite sans elle) laisse le relevé
+    // sans tailles ; une base occupée ou abîmée doit rester visible.
+    if (!(error instanceof Error) || !/no such table: dbstat/i.test(error.message)) throw error;
+  }
+  return c.json({ ...report, tables });
 });
 
 // Métadonnées publiques du produit uniquement ; aucune donnée client.

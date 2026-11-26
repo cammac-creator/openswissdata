@@ -111,6 +111,11 @@ export function _configureEmbedderForTests(options: Partial<typeof settings>): v
   Object.assign(settings, options);
 }
 
+/** Vrai tant que le processus du modèle de recherche tourne (relevé de mémoire du bureau). */
+export function searchModelRunning(): boolean {
+  return worker !== null;
+}
+
 /** Test helper: pid of the running model process, or null. */
 export function _embedderWorkerPid(): number | null {
   return worker?.proc.pid ?? null;
