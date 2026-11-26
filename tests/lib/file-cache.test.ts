@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { _resetFileCacheRelease, largeFilesUnder, lastFileCacheRelease, releaseFileCacheOnce } from "../../src/lib/file-cache.js";
+import { _resetFileCacheRelease, dropWithDd, largeFilesUnder, lastFileCacheRelease, releaseFileCacheOnce, startFileCacheRelease } from "../../src/lib/file-cache.js";
 
 // Cache des gros fichiers (26.11.2026) : le noyau le garde, l'hébergeur le facture ; on le rend au-delà d'un seuil.
 const MO = 1024 * 1024;
@@ -53,6 +53,72 @@ describe("releaseFileCacheOnce", () => {
     const outcome = await releaseFileCacheOnce({ cachedFileBytes: () => 500 * MO, thresholdBytes: 128 * MO, files: () => ["a", "b", "c"], drop: async (p) => (p === "b" ? "failed" : "ok") });
     expect(outcome).toBe("released");
     expect(lastFileCacheRelease()).toMatchObject({ files: 2, error: "dd_failed" });
+  });
+});
+
+describe("releaseFileCacheOnce : dd qui échoue partout", () => {
+  beforeEach(() => _resetFileCacheRelease());
+
+  it("tous les fichiers en échec (dd autre que GNU) : la minuterie s'arrête", async () => {
+    const outcome = await releaseFileCacheOnce({ cachedFileBytes: () => 500 * MO, thresholdBytes: 128 * MO, files: () => ["a", "b"], drop: async () => "failed" });
+    expect(outcome).toBe("stop");
+    expect(lastFileCacheRelease()).toMatchObject({ files: 0, error: "dd_failed" });
+  });
+});
+
+describe("startFileCacheRelease : la minuterie", () => {
+  beforeEach(() => { _resetFileCacheRelease(); vi.useFakeTimers(); });
+  afterEach(() => vi.useRealTimers());
+
+  it("premier contrôle après deux minutes, puis toutes les cinq ; plus rien après l'arrêt", async () => {
+    let checks = 0;
+    const stop = startFileCacheRelease({ cachedFileBytes: () => { checks++; return 10 * MO; }, files: () => [], drop: async () => "ok" });
+    await vi.advanceTimersByTimeAsync(119_000);
+    expect(checks).toBe(0);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(checks).toBe(1);
+    await vi.advanceTimersByTimeAsync(5 * 60_000);
+    expect(checks).toBe(2);
+    stop();
+    await vi.advanceTimersByTimeAsync(30 * 60_000);
+    expect(checks).toBe(2);
+  });
+
+  it("sans compteurs de conteneur : un seul contrôle, jamais replanifié", async () => {
+    let checks = 0;
+    const stop = startFileCacheRelease({ cachedFileBytes: () => { checks++; return null; } });
+    await vi.advanceTimersByTimeAsync(60 * 60_000);
+    expect(checks).toBe(1);
+    stop();
+  });
+
+  it("une exception pendant un passage : nouvel essai cinq minutes plus tard", async () => {
+    let checks = 0;
+    const stop = startFileCacheRelease({ cachedFileBytes: () => { checks++; if (checks === 1) throw new Error("lecture impossible"); return 10 * MO; } });
+    await vi.advanceTimersByTimeAsync(2 * 60_000);
+    await vi.advanceTimersByTimeAsync(5 * 60_000);
+    expect(checks).toBe(2);
+    stop();
+  });
+});
+
+// Le vrai `dd` de GNU, sous Linux seulement (la CI) : le fichier doit rester identique, octet pour octet.
+describe.skipIf(process.platform !== "linux")("dropWithDd : le vrai dd ne touche pas au fichier", () => {
+  it("contenu, taille et date de modification inchangés", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "osd-dd-"));
+    try {
+      const path = join(dir, "base=avec un espace.sqlite");
+      const content = Buffer.alloc(3 * MO, 7);
+      writeFileSync(path, content);
+      const before = statSync(path);
+      expect(await dropWithDd(path)).toBe("ok");
+      const after = statSync(path);
+      expect(after.size).toBe(before.size);
+      expect(after.mtimeMs).toBe(before.mtimeMs);
+      expect(readFileSync(path).equals(content)).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 

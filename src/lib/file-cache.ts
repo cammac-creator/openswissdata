@@ -66,7 +66,7 @@ export function largeFilesUnder(dir: string, minBytes = MIN_FILE_BYTES): string[
 type DropResult = "ok" | "unavailable" | "failed";
 
 /** Demande au noyau d'oublier le cache d'UN fichier. Aucune lecture, aucune écriture. */
-function dropWithDd(path: string): Promise<DropResult> {
+export function dropWithDd(path: string): Promise<DropResult> {
   return new Promise((resolve) => {
     execFile("dd", [`if=${path}`, "iflag=nocache", "count=0", "status=none"], { timeout: 30_000 }, (error) => {
       if (!error) resolve("ok");
@@ -90,7 +90,7 @@ function defaultFiles(): string[] {
 
 /**
  * Un passage : `"idle"` sous le seuil, `"released"` après avoir agi, `"stop"` quand rien ne pourra jamais
- * agir ici (pas de compteurs de conteneur, ou pas de `dd`).
+ * agir ici (pas de compteurs de conteneur, pas de `dd`, ou un `dd` qui échoue sur tous les fichiers).
  */
 export async function releaseFileCacheOnce(overrides: Partial<Dependencies> = {}): Promise<"idle" | "released" | "stop"> {
   const deps: Dependencies = {
@@ -116,7 +116,8 @@ export async function releaseFileCacheOnce(overrides: Partial<Dependencies> = {}
     else files++;
   }
   last = { at: deps.now().toISOString(), files, before_file_bytes: before, after_file_bytes: deps.cachedFileBytes(), error };
-  return error === "dd_unavailable" ? "stop" : "released";
+  // Un `dd` présent mais qui refuse l'option (autre que GNU) échoue sur tous les fichiers : inutile d'y revenir.
+  return error === "dd_unavailable" || (error === "dd_failed" && files === 0) ? "stop" : "released";
 }
 
 /** Minuterie du service : premier contrôle après deux minutes, puis toutes les cinq minutes. Jamais bloquante. */
