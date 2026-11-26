@@ -169,8 +169,8 @@
       "keys": [
         "postal_code"
       ],
-      "rows": 7822,
-      "edition": "2026-11-03"
+      "rows": 7824,
+      "edition": "2026-11-26"
     },
     {
       "id": "bs-points-noirs-accidents",
@@ -3782,16 +3782,17 @@
         "schultraeger",
         "schultraegertyp",
         "erstsprache",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "keys": [
         "canton",
         "year"
       ],
-      "rows": 3210,
-      "edition": "2026-10-24",
+      "rows": 3382,
+      "edition": "2026-11-26",
       "by_canton": {
-        "TG": 3210
+        "TG": 3382
       }
     },
     {
@@ -6372,7 +6373,7 @@
         "year"
       ],
       "rows": 10684,
-      "edition": "2026-11-04",
+      "edition": "2026-11-26",
       "by_canton": {
         "ZH": 10684
       }
@@ -6389,14 +6390,15 @@
         "year",
         "staatsangehoerigkeit",
         "staatsangehoerigkeit_iso2_code",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "keys": [
         "canton",
         "year"
       ],
       "rows": 2988,
-      "edition": "2026-11-03",
+      "edition": "2026-11-26",
       "by_canton": {
         "ZH": 2988
       }
@@ -6420,10 +6422,10 @@
         "canton",
         "year"
       ],
-      "rows": 13902,
-      "edition": "2026-11-03",
+      "rows": 13998,
+      "edition": "2026-11-26",
       "by_canton": {
-        "ZH": 13902
+        "ZH": 13998
       }
     },
     {
