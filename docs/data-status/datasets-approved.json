@@ -1501,15 +1501,15 @@
         "bfs_nr_gemeinde",
         "gemeinde_name",
         "jahr",
-        "selbstfinanzierungsgrad_in",
-        "selbstfinanzierungsanteil_in",
-        "zinsbelastungsanteil_in_%",
-        "kapitaldienstanteil_in",
-        "investitionsanteil_in",
-        "bruttoverschuldungsanteil_in",
-        "nettoschuld_nettovermogen_pro_einwohner_in_chf",
-        "nettoverschuldungsquotient_in",
-        "bilanzuberschussquotient_in"
+        "selbstfinanzierungsgrad_in_%",
+        "selbstfinanzierungsanteil_in_%",
+        "Zinsbelastungsanteil_in_%",
+        "kapitaldienstanteil_in_%",
+        "investitionsanteil_in_%",
+        "bruttoverschuldungsanteil_in_%",
+        "nettoschuld_nettovermogen_pro_einwohner_in_Schweizer_Franken",
+        "nettoverschuldungsquotient_in_%",
+        "bilanzuberschussquotient_in_%"
       ],
       "keys": {
         "bfs_nr_gemeinde": "commune_bfs",
@@ -1519,18 +1519,18 @@
         "bfs_nr_gemeinde",
         "gemeinde_name",
         "jahr",
-        "selbstfinanzierungsgrad_in",
-        "selbstfinanzierungsanteil_in",
-        "zinsbelastungsanteil_in_%",
-        "kapitaldienstanteil_in",
-        "investitionsanteil_in",
-        "bruttoverschuldungsanteil_in",
-        "nettoverschuldungsquotient_in",
-        "bilanzuberschussquotient_in"
+        "selbstfinanzierungsgrad_in_%",
+        "selbstfinanzierungsanteil_in_%",
+        "Zinsbelastungsanteil_in_%",
+        "kapitaldienstanteil_in_%",
+        "investitionsanteil_in_%",
+        "bruttoverschuldungsanteil_in_%",
+        "nettoverschuldungsquotient_in_%",
+        "bilanzuberschussquotient_in_%"
       ],
       "approved_on": "2026-10-23",
       "checked_by": "codex (lot G4), à relire par l'intégrateur",
-      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (45274 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 480 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : jahr et bfs_nr_gemeinde ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes étaient conservées jusqu'au 03.11.2026 ; nettoschuld_nettovermogen_pro_einwohner_in_chf est retirée depuis (règle « jamais un total et un montant par habitant de la même grandeur ») et reste dans expected_header, contrôle de l'en-tête source. Le bilan de tg-comptes-communes-2020 à 2023 (comptes 20 moins comptes 10) en redonne le total : le quotient retrouvait à 1 % près la population publiée par le canton dans 164 couples commune-année sur 320. Ratios financiers et montants bruts, sans note qualitative ni rang."
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (45274 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 480 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : jahr et bfs_nr_gemeinde ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes étaient conservées jusqu'au 03.11.2026 ; nettoschuld_nettovermogen_pro_einwohner_in_chf est retirée depuis (règle « jamais un total et un montant par habitant de la même grandeur ») et reste dans expected_header, contrôle de l'en-tête source. Le bilan de tg-comptes-communes-2020 à 2023 (comptes 20 moins comptes 10) en redonne le total : le quotient retrouvait à 1 % près la population publiée par le canton dans 164 couples commune-année sur 320. Ratios financiers et montants bruts, sans note qualitative ni rang. 26.11.2026 : le canton a renommé dix colonnes (unité écrite en entier : « _in_% », « _in_Schweizer_Franken », « Zinsbelastungsanteil » avec majuscule) ; mêmes douze colonnes dans le même ordre, relues sur le fichier du jour (560 lignes, année 2025 ajoutée) ; en-tête attendu et colonnes servies recopiés du fichier réel, le montant par habitant reste retiré sous son nouveau nom."
     },
     {
       "id": "zh-dechets-communes",

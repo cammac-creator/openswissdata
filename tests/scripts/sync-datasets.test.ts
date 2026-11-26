@@ -695,4 +695,45 @@ describe("syncDatasets : téléchargement réel (fetchImpl injecté)", () => {
     expect(result.anyFailed).toBe(true);
     expect(result.failed[0].error).toMatch(/503/);
   });
+
+  it("HTTP non ok : jamais redemandé (une réponse est arrivée)", async () => {
+    const regDir = tmpDir();
+    const outDir = tmpDir();
+    writeRegistry(regDir, [baseEntry()]);
+    let calls = 0;
+    const fetchImpl = (async () => { calls++; return fakeResponse("", { ok: false, status: 503 }); }) as unknown as typeof fetch;
+
+    await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fetchImpl, now: () => 0, downloadRetryDelayMs: 0 });
+    expect(calls).toBe(1);
+  });
+
+  it("délai dépassé au premier appel, réponse au second : jeu publié (26.11.2026)", async () => {
+    const regDir = tmpDir();
+    const outDir = tmpDir();
+    writeRegistry(regDir, [baseEntry()]);
+    let calls = 0;
+    const fetchImpl = (async () => {
+      calls++;
+      if (calls === 1) throw new Error("The operation was aborted due to timeout");
+      return fakeResponse(csvRows(5));
+    }) as unknown as typeof fetch;
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fetchImpl, now: () => 0, downloadRetryDelayMs: 0 });
+    expect(calls).toBe(2);
+    expect(result.succeeded).toEqual(["demo-jeu"]);
+    expect(result.anyFailed).toBe(false);
+  });
+
+  it("sans réponse deux fois de suite : échec explicite, pas de troisième appel", async () => {
+    const regDir = tmpDir();
+    const outDir = tmpDir();
+    writeRegistry(regDir, [baseEntry()]);
+    let calls = 0;
+    const fetchImpl = (async () => { calls++; throw new Error("The operation was aborted due to timeout"); }) as unknown as typeof fetch;
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fetchImpl, now: () => 0, downloadRetryDelayMs: 0 });
+    expect(calls).toBe(2);
+    expect(result.anyFailed).toBe(true);
+    expect(result.failed[0].error).toMatch(/délai dépassé \(2 essais\)/);
+  });
 });

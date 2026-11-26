@@ -57,6 +57,13 @@ const DEFAULT_REGISTRY_PATH = join(__dirname, "..", "docs", "data-status", "data
 const DEFAULT_OUT_DIR = join(__dirname, "..", "src", "mcp", "data", "datasets");
 const DEFAULT_MAX_BYTES_PER_RESOURCE = 20_000_000; // 20 Mo, décision du 07.10.2026
 const DEFAULT_DOWNLOAD_TIMEOUT_MS = 60_000;
+// Second essai (26.11.2026) : un export que le portail prépare à la demande peut dépasser le délai au
+// premier appel, puis répondre aussitôt (Bâle-Ville, trois mercredis de suite en échec depuis GitHub
+// alors que le même fichier arrivait en moins d'une seconde ensuite). Un seul essai de plus, et
+// seulement quand AUCUNE réponse n'est arrivée (délai, coupure réseau) : une réponse HTTP en erreur,
+// un fichier trop gros ou un contenu refusé ne sont jamais redemandés.
+const DEFAULT_DOWNLOAD_ATTEMPTS = 2;
+const DEFAULT_DOWNLOAD_RETRY_DELAY_MS = 5_000;
 const DEFAULT_MAX_DATASETS_PER_RUN = 50;
 const DEFAULT_MAX_DROP_RATIO = 0.2; // 20 %, plus large que les 2 % des collectes spécialisées : jeux hétérogènes
 const USER_AGENT = "OpenSwissData sync-datasets";
@@ -289,12 +296,17 @@ function previousRowCount(csv: string | null): number {
 /** Téléchargement BORNÉ en flux (jamais `arrayBuffer()` d'abord) : un serveur qui ignore le
  *  `Range`/répond intégralement reste quand même borné, le flux est annulé dès que `maxBytes`
  *  est dépassé — même piège que `readCsvHeaderPartial` de `scripts/prospect-sources.ts`. */
-async function downloadBounded(fetchImpl: typeof fetch, url: string, maxBytes: number, timeoutMs: number): Promise<Buffer> {
-  let res: Response;
-  try {
-    res = await fetchImpl(url, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(timeoutMs) });
-  } catch (err) {
-    throw new Error(`Téléchargement impossible ou délai dépassé : ${err instanceof Error ? err.message : String(err)}`);
+async function downloadBounded(fetchImpl: typeof fetch, url: string, maxBytes: number, timeoutMs: number, retryDelayMs: number): Promise<Buffer> {
+  let res: Response | undefined;
+  for (let attempt = 1; res === undefined; attempt++) {
+    try {
+      res = await fetchImpl(url, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(timeoutMs) });
+    } catch (err) {
+      if (attempt >= DEFAULT_DOWNLOAD_ATTEMPTS) {
+        throw new Error(`Téléchargement impossible ou délai dépassé (${attempt} essais) : ${err instanceof Error ? err.message : String(err)}`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+    }
   }
   if (!res.ok) throw new Error(`Téléchargement impossible : HTTP ${res.status}`);
   const declared = res.headers.get("content-length");
@@ -337,6 +349,8 @@ export interface SyncDatasetsOptions {
   now?: () => number;
   maxBytesPerResource?: number;
   downloadTimeoutMs?: number;
+  /** Pause avant le second essai d'un téléchargement resté sans réponse. Défaut : 5 s (0 dans les tests). */
+  downloadRetryDelayMs?: number;
   maxDatasetsPerRun?: number;
   maxDropRatio?: number;
 }
@@ -415,7 +429,7 @@ function loadIndex(outDir: string): Map<string, IndexEntry> {
 async function syncOneDataset(
   entry: DatasetApprovalEntry,
   index: Map<string, IndexEntry>,
-  opts: { outDir: string; fixtureDir?: string; fetchImpl: typeof fetch; now: () => number; maxBytes: number; timeoutMs: number; maxDropRatio: number },
+  opts: { outDir: string; fixtureDir?: string; fetchImpl: typeof fetch; now: () => number; maxBytes: number; timeoutMs: number; retryDelayMs: number; maxDropRatio: number },
 ): Promise<{ rows: number; edition: string; changed: boolean }> {
   let buf: Buffer;
   if (opts.fixtureDir) {
@@ -423,7 +437,7 @@ async function syncOneDataset(
     if (!existsSync(fixturePath)) throw new Error(`Mode fixture sans fichier pour ce jeu : "${fixturePath}" absent`);
     buf = readFileSync(fixturePath);
   } else {
-    buf = await downloadBounded(opts.fetchImpl, entry.resource_url, opts.maxBytes, opts.timeoutMs);
+    buf = await downloadBounded(opts.fetchImpl, entry.resource_url, opts.maxBytes, opts.timeoutMs, opts.retryDelayMs);
   }
 
   const text = buf.toString("utf8");
@@ -515,6 +529,7 @@ export async function syncDatasets(opts: SyncDatasetsOptions = {}): Promise<Sync
   const now = opts.now ?? (() => Date.now());
   const maxBytes = opts.maxBytesPerResource ?? DEFAULT_MAX_BYTES_PER_RESOURCE;
   const timeoutMs = opts.downloadTimeoutMs ?? DEFAULT_DOWNLOAD_TIMEOUT_MS;
+  const retryDelayMs = opts.downloadRetryDelayMs ?? DEFAULT_DOWNLOAD_RETRY_DELAY_MS;
   const maxDatasets = opts.maxDatasetsPerRun ?? DEFAULT_MAX_DATASETS_PER_RUN;
   const maxDropRatio = opts.maxDropRatio ?? DEFAULT_MAX_DROP_RATIO;
 
@@ -547,7 +562,7 @@ export async function syncDatasets(opts: SyncDatasetsOptions = {}): Promise<Sync
     }
 
     try {
-      const result = await syncOneDataset(entry, index, { outDir, fixtureDir: opts.fixtureDir, fetchImpl, now, maxBytes, timeoutMs, maxDropRatio });
+      const result = await syncOneDataset(entry, index, { outDir, fixtureDir: opts.fixtureDir, fetchImpl, now, maxBytes, timeoutMs, retryDelayMs, maxDropRatio });
       if (result.changed) {
         succeeded.push(id);
         console.log(`[sync:datasets] "${id}" : ${result.rows} lignes, édition ${result.edition} (changé)`);
