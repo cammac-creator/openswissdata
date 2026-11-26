@@ -18,6 +18,11 @@ on:
     # (localités le 3, rues le 4, siège exact FINMA le 5, rétribution OFEN le 6 — toutes mensuelles).
     - cron: "23 6 * * 3"
   workflow_dispatch:
+    inputs:
+      tous:
+        description: "Reprendre tout le registre, sans la rotation hebdomadaire (après une réparation)"
+        type: boolean
+        default: false
 permissions:
   contents: write
   actions: read
@@ -37,9 +42,11 @@ jobs:
       - run: npm ci
       - name: Collecter les jeux ouverts approuvés (un jeu en échec n'empêche pas les autres)
         id: sync
+        env:
+          TOUS: ${{ inputs.tous }}
         run: |
           set +e
-          npm run sync:datasets
+          if [ "$TOUS" = "true" ]; then npm run sync:datasets -- --all; else npm run sync:datasets; fi
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
           exit 0
       - name: Vérifier avant de publier (jamais de commit sans ces contrôles verts)
