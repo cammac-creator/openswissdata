@@ -1528,9 +1528,10 @@
         "nettoverschuldungsquotient_in_%",
         "bilanzuberschussquotient_in_%"
       ],
+      "repair_hex_escapes": "latin1",
       "approved_on": "2026-10-23",
       "checked_by": "codex (lot G4), à relire par l'intégrateur",
-      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (45274 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 480 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : jahr et bfs_nr_gemeinde ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes étaient conservées jusqu'au 03.11.2026 ; nettoschuld_nettovermogen_pro_einwohner_in_chf est retirée depuis (règle « jamais un total et un montant par habitant de la même grandeur ») et reste dans expected_header, contrôle de l'en-tête source. Le bilan de tg-comptes-communes-2020 à 2023 (comptes 20 moins comptes 10) en redonne le total : le quotient retrouvait à 1 % près la population publiée par le canton dans 164 couples commune-année sur 320. Ratios financiers et montants bruts, sans note qualitative ni rang. 26.11.2026 : le canton a renommé dix colonnes (unité écrite en entier : « _in_% », « _in_Schweizer_Franken », « Zinsbelastungsanteil » avec majuscule) ; mêmes douze colonnes dans le même ordre, relues sur le fichier du jour (560 lignes, année 2025 ajoutée) ; en-tête attendu et colonnes servies recopiés du fichier réel, le montant par habitant reste retiré sous son nouveau nom."
+      "notes": "Vérifié le 23.10.2026 : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open (deux champs ouverts). CSV direct entièrement téléchargé (45274 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 480 lignes analysées et 40 lignes réparties dans le fichier relues. detectPersonColumns et detectIndividualRowColumns ne détectent rien. Aucune personne nommée ni ligne individuelle dans cet examen ; aucune note ni classement conservé. Clés réelles : jahr et bfs_nr_gemeinde ; les 80 codes de communes existent dans le référentiel local de localités (4401 = Arbon, 4566 = Frauenfeld, 4946 = Weinfelden). Toutes les colonnes étaient conservées jusqu'au 03.11.2026 ; nettoschuld_nettovermogen_pro_einwohner_in_chf est retirée depuis (règle « jamais un total et un montant par habitant de la même grandeur ») et reste dans expected_header, contrôle de l'en-tête source. Le bilan de tg-comptes-communes-2020 à 2023 (comptes 20 moins comptes 10) en redonne le total : le quotient retrouvait à 1 % près la population publiée par le canton dans 164 couples commune-année sur 320. Ratios financiers et montants bruts, sans note qualitative ni rang. 26.11.2026 : le canton a renommé neuf colonnes (unité écrite en entier : « _in_% », « _in_Schweizer_Franken », « Zinsbelastungsanteil » avec majuscule) ; mêmes douze colonnes dans le même ordre, 560 lignes (année 2025 ajoutée) ; en-tête attendu et colonnes servies recopiés du fichier réel, le montant par habitant reste retiré sous son nouveau nom. Le même fichier porte 56 noms de communes abîmés (14 communes, 2019 à 2022, octet écrit entre chevrons : « Kradolf-Sch<f6>nenberg ») : repair_hex_escapes les rétablit en Latin-1 ; les 56 noms rétablis sont identiques à ceux du fichier publié le 03.11.2026 pour la même commune et la même année, et les valeurs des 480 couples déjà publiés sont inchangées."
     },
     {
       "id": "zh-dechets-communes",
@@ -2069,7 +2070,8 @@
         "jahr",
         "staatsangehoerigkeit",
         "staatsangehoerigkeit_iso2_code",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "keys": {
         "kanton": "canton",
@@ -2080,11 +2082,12 @@
         "jahr",
         "staatsangehoerigkeit",
         "staatsangehoerigkeit_iso2_code",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "approved_on": "2026-10-24",
       "checked_by": "intégrateur (lot G5)",
-      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_open, license = https://opendata.swiss/terms-of-use#terms_open. CSV direct entièrement téléchargé (107496 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 2988 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG)."
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation bildungsstatistik-kanton-zuerich ; rights = https://opendata.swiss/terms-of-use#terms_open, license = https://opendata.swiss/terms-of-use#terms_open. CSV direct entièrement téléchargé (107496 octets), UTF-8 strict sans U+FFFD, séparateur virgule ; en-tête réel recopié exactement, 2988 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG). 26.11.2026 : la source a ajouté la colonne obs_status en fin de fichier et ne note plus les petites valeurs « 1 bis 5 » : la case anzahl est vide et obs_status vaut « Q » (« A » pour une valeur publiée). Relu sur le fichier du jour : toutes les lignes « Q » ont anzahl vide, aucune valeur de 1 à 5 n'apparaît, le masquage tient. obs_status est servie, sans elle une case vide ne se lirait pas."
     },
     {
       "id": "zh-apprentis-formation-professionnelle",
@@ -2203,7 +2206,8 @@
         "schultraeger",
         "schultraegertyp",
         "erstsprache",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "keys": {
         "kanton": "canton",
@@ -2216,11 +2220,12 @@
         "schultraeger",
         "schultraegertyp",
         "erstsprache",
-        "anzahl"
+        "anzahl",
+        "obs_status"
       ],
       "approved_on": "2026-10-24",
       "checked_by": "intégrateur (lot G5)",
-      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open. CSV direct entièrement téléchargé (270180 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 3210 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG). Le jeu de la même source par autorité scolaire et nationalité n'est pas retenu : ses totaux par année et autorité sont identiques à ceux de ce jeu, ce qui permettrait de recalculer une case masquée (relecture du 24.10.2026). Contrôlé : la somme de ce jeu ne permet pas de recalculer une case à partir du total cantonal (cases masquées des deux côtés chaque année)."
+      "notes": "Vérifié le 24.10.2026 (lot G5) : package_show opendata.swiss relu le jour même, organisation kanton-thurgau ; rights = http://www.opendefinition.org/licenses/cc-zero, license = https://opendata.swiss/terms-of-use#terms_open. CSV direct entièrement téléchargé (270180 octets), UTF-8 strict sans U+FFFD, séparateur point-virgule ; en-tête réel recopié exactement, 3210 lignes analysées par programme (clés, zones, petites valeurs) et un échantillon de lignes réparties relu. detectPersonColumns et detectIndividualRowColumns ne détectent rien ; aucune personne nommée ni ligne individuelle ; aucune note ni classement conservé. Effectifs d'élèves publiés par l'éditeur cantonal avec masquage des petites cases : toute valeur de 1 à 5 est remplacée par le texte « 1 bis 5 » (minimum exact relevé : 6) ; anzahl reste donc du texte. Colonne stand retirée (date d'extraction, changerait l'édition à chaque passage sans changement de données). kanton en minuscules normalisé en abréviation (ZH ou TG). Le jeu de la même source par autorité scolaire et nationalité n'est pas retenu : ses totaux par année et autorité sont identiques à ceux de ce jeu, ce qui permettrait de recalculer une case masquée (relecture du 24.10.2026). Contrôlé : la somme de ce jeu ne permet pas de recalculer une case à partir du total cantonal (cases masquées des deux côtés chaque année). 26.11.2026 : la source a ajouté la colonne obs_status en fin de fichier et ne note plus les petites valeurs « 1 bis 5 » : la case anzahl est vide et obs_status vaut « Q » (« A » pour une valeur publiée). Relu sur le fichier du jour : toutes les lignes « Q » ont anzahl vide, aucune valeur de 1 à 5 n'apparaît, le masquage tient. obs_status est servie, sans elle une case vide ne se lirait pas."
     },
     {
       "id": "tg-eleves-nationalite",

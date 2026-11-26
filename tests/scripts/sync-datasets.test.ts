@@ -470,6 +470,52 @@ describe("syncDatasets : encodage inattendu (U+FFFD)", () => {
   });
 });
 
+describe("syncDatasets : octets écrits entre chevrons (26.11.2026)", () => {
+  const abime = csvRows(5, { 2: "2024,1002,Kradolf-Sch<f6>nenberg,20", 3: "2024,1003,W<e4>ngi,30" });
+
+  it("refuse un fichier qui porte « Sch<f6>nenberg » : rien n'est publié", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry();
+    writeRegistry(regDir, [entry]);
+    writeFixture(fixDir, entry.id, abime);
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+
+    expect(result.anyFailed).toBe(true);
+    expect(result.failed[0].error).toMatch(/Encodage abîmé à la source : 2 octet/);
+    expect(existsSync(join(outDir, `${entry.id}.csv.gz`))).toBe(false);
+  });
+
+  it("réparation déclarée au registre : les noms sortent en clair, sans chevron", async () => {
+    const regDir = tmpDir();
+    const fixDir = tmpDir();
+    const outDir = tmpDir();
+    const entry = baseEntry({ repair_hex_escapes: "latin1" });
+    writeRegistry(regDir, [entry]);
+    writeFixture(fixDir, entry.id, abime);
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, fixtureDir: fixDir, now: () => 0 });
+
+    expect(result.succeeded).toEqual([entry.id]);
+    const csv = gunzipSync(readFileSync(join(outDir, `${entry.id}.csv.gz`))).toString("utf8");
+    expect(csv).toContain("Kradolf-Schönenberg");
+    expect(csv).toContain("Wängi");
+    expect(csv).not.toMatch(/[<>]/);
+  });
+
+  it("valeur inconnue pour repair_hex_escapes : entrée refusée", async () => {
+    const regDir = tmpDir();
+    const outDir = tmpDir();
+    writeRegistry(regDir, [baseEntry({ repair_hex_escapes: "utf8" as unknown as "latin1" })]);
+
+    const result = await syncDatasets({ registryPath: join(regDir, "datasets-approved.json"), outDir, now: () => 0 });
+
+    expect(result.failed[0].error).toMatch(/repair_hex_escapes invalide/);
+  });
+});
+
 describe("syncDatasets : fichier sans ligne de données", () => {
   it("refuse un export réduit à l'en-tête : rien n'est publié (relecture du 07.10.2026)", async () => {
     const regDir = tmpDir();

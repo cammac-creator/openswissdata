@@ -57,9 +57,9 @@ const DEFAULT_REGISTRY_PATH = join(__dirname, "..", "docs", "data-status", "data
 const DEFAULT_OUT_DIR = join(__dirname, "..", "src", "mcp", "data", "datasets");
 const DEFAULT_MAX_BYTES_PER_RESOURCE = 20_000_000; // 20 Mo, décision du 07.10.2026
 const DEFAULT_DOWNLOAD_TIMEOUT_MS = 60_000;
-// Second essai (26.11.2026) : un export que le portail prépare à la demande peut dépasser le délai au
-// premier appel, puis répondre aussitôt (Bâle-Ville, trois mercredis de suite en échec depuis GitHub
-// alors que le même fichier arrivait en moins d'une seconde ensuite). Un seul essai de plus, et
+// Second essai (26.11.2026) : un portail peut laisser un appel sans réponse puis répondre aussitôt
+// (délai dépassé sur un jeu thurgovien le 11.11.2026, sur un jeu bâlois le 25.11.2026, alors que ce
+// dernier fichier arrivait en moins d'une seconde le lendemain). Un seul essai de plus, et
 // seulement quand AUCUNE réponse n'est arrivée (délai, coupure réseau) : une réponse HTTP en erreur,
 // un fichier trop gros ou un contenu refusé ne sont jamais redemandés.
 const DEFAULT_DOWNLOAD_ATTEMPTS = 2;
@@ -67,6 +67,8 @@ const DEFAULT_DOWNLOAD_RETRY_DELAY_MS = 5_000;
 const DEFAULT_MAX_DATASETS_PER_RUN = 50;
 const DEFAULT_MAX_DROP_RATIO = 0.2; // 20 %, plus large que les 2 % des collectes spécialisées : jeux hétérogènes
 const USER_AGENT = "OpenSwissData sync-datasets";
+/** Un octet Latin-1 hors ASCII écrit en clair : `<a0>` à `<ff>` (jamais `<br>`, `<5>` ni `<20>`). */
+const HEX_ESCAPE_RE = /<([a-fA-F][0-9a-fA-F])>/g;
 
 const DATASET_ID_RE = /^[a-z][a-z0-9-]{2,63}$/;
 const VALID_LICENCES = new Set(["terms_open", "terms_by", "cc0", "cc-by"]);
@@ -91,6 +93,11 @@ export interface DatasetApprovalEntry {
   /** Facultatif. Colonne source (de `expected_header`, servie ou non) → valeurs EXACTES dont les
    *  lignes sont écartées avant l'écriture (voir l'en-tête du fichier). */
   exclude_rows?: Record<string, string[]>;
+  /** Facultatif. Seule valeur admise : "latin1". Sans ce champ, une source qui contient un octet
+   *  écrit en clair entre chevrons (« Sch<f6>nenberg » pour « Schönenberg ») fait échouer le jeu.
+   *  Avec lui, chaque `<hh>` est remplacé par le caractère Latin-1 de cet octet, après relecture
+   *  du fichier réel par l'intégrateur (voir `HEX_ESCAPE_RE`). */
+  repair_hex_escapes?: "latin1";
   approved_on: string;
   checked_by: string;
   notes: string;
@@ -109,6 +116,9 @@ interface DatasetsRegistryFile {
 export function validateRegistryEntry(entry: DatasetApprovalEntry): string[] {
   const errors: string[] = [];
   if (!entry || typeof entry !== "object") return ["entrée invalide (pas un objet)"];
+  if (entry.repair_hex_escapes !== undefined && entry.repair_hex_escapes !== "latin1") {
+    errors.push(`repair_hex_escapes invalide (seule valeur admise : "latin1") : "${String(entry.repair_hex_escapes)}"`);
+  }
   if (!DATASET_ID_RE.test(entry.id ?? "")) errors.push(`id invalide (gabarit attendu ^[a-z][a-z0-9-]{2,63}$) : "${entry.id}"`);
   if (!Array.isArray(entry.expected_header) || entry.expected_header.length === 0) errors.push("expected_header manquant ou vide");
   if (!Array.isArray(entry.columns) || entry.columns.length === 0) errors.push("columns manquant ou vide");
@@ -444,7 +454,15 @@ async function syncOneDataset(
   if (text.includes("�")) {
     throw new Error("Encodage inattendu : caractère de remplacement U+FFFD détecté (UTF-8 attendu)");
   }
-  const stripped = stripBom(text);
+  // Octets écrits en clair entre chevrons (26.11.2026) : l'export thurgovien du jour portait
+  // « Kradolf-Sch<f6>nenberg » sur 56 lignes, en UTF-8 valide, donc invisible pour le contrôle
+  // U+FFFD ci-dessus. Jamais publié tel quel : échec, sauf réparation déclarée au registre.
+  const escapes = text.match(HEX_ESCAPE_RE);
+  if (escapes && entry.repair_hex_escapes !== "latin1") {
+    throw new Error(`Encodage abîmé à la source : ${escapes.length} octet(s) écrit(s) entre chevrons (par exemple "${escapes[0]}"), jeu non publié`);
+  }
+  const repaired = escapes ? text.replace(HEX_ESCAPE_RE, (_, hex: string) => String.fromCharCode(Number.parseInt(hex, 16))) : text;
+  const stripped = stripBom(repaired);
   const firstBreak = stripped.indexOf("\n");
   const headerLine = (firstBreak === -1 ? stripped : stripped.slice(0, firstBreak)).replace(/\r$/, "");
   const delimiter = detectDelimiter(headerLine);
