@@ -14,6 +14,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   buildOutputRow,
+  parseArgs,
   selectEntriesForRun,
   syncDatasets,
   validateRegistryEntry,
@@ -781,5 +782,16 @@ describe("syncDatasets : téléchargement réel (fetchImpl injecté)", () => {
     expect(calls).toBe(2);
     expect(result.anyFailed).toBe(true);
     expect(result.failed[0].error).toMatch(/délai dépassé \(2 essais\)/);
+  });
+});
+
+describe("parseArgs : option --all (26.11.2026)", () => {
+  it("absente par défaut : la rotation hebdomadaire s'applique", () => {
+    expect(parseArgs([]).all).toBe(false);
+    expect(parseArgs(["--registry", "r.json", "--out-dir", "o"])).toEqual({ all: false, registryPath: "r.json", outDir: "o" });
+  });
+
+  it("présente : tout le registre en un passage", () => {
+    expect(parseArgs(["--all"]).all).toBe(true);
   });
 });

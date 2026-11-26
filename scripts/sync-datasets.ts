@@ -38,6 +38,7 @@
  * Usage :
  *   tsx scripts/sync-datasets.ts
  *   tsx scripts/sync-datasets.ts --registry <chemin> --out-dir <dossier>
+ *   tsx scripts/sync-datasets.ts --all        (tout le registre, sans la rotation hebdomadaire)
  *
  * Tests (aucun réseau) : options `fetchImpl` (maquette) ou `fixtureDir` (un `<id>.csv` par jeu,
  * lu au lieu du réseau — jamais de mélange fixture/réseau au sein d'un même jeu).
@@ -623,8 +624,11 @@ export async function syncDatasets(opts: SyncDatasetsOptions = {}): Promise<Sync
   };
 }
 
-function parseArgs(argv: string[]): { registryPath?: string; outDir?: string } {
-  const out: { registryPath?: string; outDir?: string } = {};
+/** `--all` (26.11.2026) : tout le registre en un passage, sans la rotation hebdomadaire. Pour un
+ *  passage lancé à la main après une réparation : la rotation ne reprend un jeu qu'une semaine sur
+ *  deux, et la moitié traitée dépend du jour. Mêmes contrôles par jeu, rien d'assoupli. */
+export function parseArgs(argv: string[]): { registryPath?: string; outDir?: string; all: boolean } {
+  const out: { registryPath?: string; outDir?: string; all: boolean } = { all: argv.includes("--all") };
   const regIdx = argv.indexOf("--registry");
   if (regIdx !== -1) out.registryPath = argv[regIdx + 1];
   const outIdx = argv.indexOf("--out-dir");
@@ -633,8 +637,8 @@ function parseArgs(argv: string[]): { registryPath?: string; outDir?: string } {
 }
 
 async function main(): Promise<void> {
-  const { registryPath, outDir } = parseArgs(process.argv.slice(2));
-  const result = await syncDatasets({ registryPath, outDir });
+  const { registryPath, outDir, all } = parseArgs(process.argv.slice(2));
+  const result = await syncDatasets({ registryPath, outDir, ...(all ? { maxDatasetsPerRun: Number.MAX_SAFE_INTEGER } : {}) });
   console.log(`[sync:datasets] terminé : ${JSON.stringify(result)}`);
   if (result.anyFailed) process.exitCode = 1;
 }
