@@ -47,16 +47,20 @@ describe("GET /api/admin/memoire", () => {
 
   it("?tables=1 : tailles par table du schéma, noms de tables seulement", async () => {
     const res = await createApp().request("/api/admin/memoire?tables=1", { headers: { "x-admin-secret": SECRET } });
-    const body = await res.json() as { tables: Array<{ name: string; bytes: number }> | null };
+    const text = await res.text();
+    const body = JSON.parse(text) as { tables: Array<{ name: string; bytes: number }> | null };
     expect(res.status).toBe(200);
-    if (body.tables !== null) {
-      expect(body.tables.length).toBeGreaterThan(0);
-      expect(body.tables.length).toBeLessThanOrEqual(12);
-      for (const table of body.tables) {
-        expect(table.name).toMatch(/^[A-Za-z0-9_]+$/);
-        expect(table.bytes).toBeGreaterThan(0);
-      }
+    // Le better-sqlite3 livré contient dbstat : son absence serait une régression de ce relevé.
+    expect(body.tables).not.toBeNull();
+    expect(body.tables!.length).toBeGreaterThan(0);
+    expect(body.tables!.length).toBeLessThanOrEqual(12);
+    for (const table of body.tables!) {
+      expect(table.name).toMatch(/^[A-Za-z0-9_]+$/);
+      expect(table.bytes).toBeGreaterThan(0);
     }
+    expect(text).not.toContain(tmp);
+    expect(text).not.toContain(SECRET);
+    expect(text).not.toMatch(/\/sys\/|\/tmp|\/var\//);
   });
 });
 
