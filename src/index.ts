@@ -38,6 +38,7 @@ import { startMailWatch } from "./lib/mail-watch.js";
 import { startLettersSender } from "./lib/letters-sender.js";
 import { startRobotSante } from "./lib/robot-sante.js";
 import { startWorkflowWatch } from "./lib/workflow-watch.js";
+import { startFileCacheRelease } from "./lib/file-cache.js";
 import { checkAdminEmailsAtStartup } from "./lib/controle-demarrage.js";
 import { getDb } from "./lib/db.js";
 import { reapplyErasures } from "./lib/erasure-registry.js";
@@ -380,6 +381,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const stopRobotSante = startRobotSante();
   // Veille des tâches planifiées GitHub et de la page FINMA des membres OAR (lecture seule, alerte Telegram).
   const stopWorkflowWatch = startWorkflowWatch();
+  // Rend au noyau le cache des gros fichiers lus (base, modèles) quand il dépasse 128 Mo : il compte dans la
+  // mémoire facturée par l'hébergeur. Sans effet hors de Linux ; aucune donnée touchée.
+  const stopFileCacheRelease = startFileCacheRelease();
   // ADMIN_EMAILS vide en production = plus de compte autorisé pour le bureau (tâche osd.T08). Après serve() :
   // ne retarde jamais l'ouverture du service ni /api/health/ready. Jamais bloquant, aucune exception ne remonte.
   void checkAdminEmailsAtStartup();
@@ -399,6 +403,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     // Mails de confirmation « être prévenu » encore en route : quelques secondes au plus.
     await Promise.race([settleAnnouncementDeliveries(), new Promise(resolve => setTimeout(resolve, 5000))]);
     stopWorkflowWatch();
+    stopFileCacheRelease();
     console.log(`[shutdown] received ${sig}, flushing Sentry…`);
     await flushSentry(2000);
     process.exit(0);
