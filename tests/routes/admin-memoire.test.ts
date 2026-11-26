@@ -39,6 +39,7 @@ describe("GET /api/admin/memoire", () => {
     expect(body.process.heap_used_bytes).toBeGreaterThan(0);
     expect(body.database.file_bytes).toBeGreaterThan(0);
     expect(body.search_model_running).toBe(false);
+    expect(body.file_cache_release).toBeNull();
     expect(body.tables).toBeUndefined();
     expect(text).not.toContain(tmp);
     expect(text).not.toContain(SECRET);

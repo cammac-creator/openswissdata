@@ -7,6 +7,7 @@ import { writeBackupAttempt } from "../lib/backup-state.js";
 import { seedDatasets } from "../db/seed.js";
 import { constantTimeEqual } from "../lib/tokens.js";
 import { memoryReport } from "../lib/memory-report.js";
+import { lastFileCacheRelease } from "../lib/file-cache.js";
 import { searchModelRunning } from "../mcp/embedder.js";
 import { realCustomerSql } from "./crm.js";
 import { runFullCleanup } from "../lib/cleanup.js";
@@ -57,7 +58,8 @@ adminRoute.get("/operations", (c) => {
 adminRoute.get("/memoire", (c) => {
   const secret = c.req.header("x-admin-secret");
   if (!secret || !constantTimeEqual(secret, process.env.ADMIN_SECRET ?? "")) return c.json({ error: "unauthorized" }, 401);
-  const report = memoryReport({ databasePath: currentDatabasePath(), searchModelRunning: searchModelRunning() });
+  // `file_cache_release` : dernier passage de la minuterie qui rend le cache des fichiers (null avant le premier).
+  const report = { ...memoryReport({ databasePath: currentDatabasePath(), searchModelRunning: searchModelRunning() }), file_cache_release: lastFileCacheRelease() };
   if (c.req.query("tables") !== "1") return c.json(report);
   let tables: Array<{ name: string; bytes: number }> | null = null;
   try {
